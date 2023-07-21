@@ -19,6 +19,9 @@
 #include "system.h"
 #include "screen4_helper.h"
 #include "widgets.h"
+#include "widgets_automobile.h"
+#include "widgets_adsb.h"
+
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
@@ -39,35 +42,11 @@ class SCREEN4
 {
   private:
 
-  // Some Colors HSV H
-  const float H_RED = 0;
-  const float H_YELLOW = .254;
-  const float H_GREEN = .333;
-  const float H_CYAN = .5;
-  const float H_BLUE = .667;
-  const float H_PURPLE = .768;
+  COLOR_COMBOS COLOR_SELECT;
 
-  ImVec2 SIZE_BUTTON_TAB = ImVec2(100, 43);
-  ImVec2 SIZE_BUTTON = ImVec2(75, 75);
-  ImVec2 SIZE_BUTTON_SMALL = ImVec2(43, 43);
+  WIDGET_DEFAULTS DEFAULTS;
 
   bool use_work_area = true;
-
-  ImGuiWindowFlags flags =        ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | 
-                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
-  ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
-  //ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-  //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | 
-  //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
-  ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
-  //ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-  //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | 
-  //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
-  ImGuiWindowFlags flags_w_pop =  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 
-                                    ImGuiWindowFlags_NoScrollbar;
 
   bool show_another_window = true;
   bool show_test_window = false;
@@ -94,13 +73,22 @@ class SCREEN4
   bool RESET_KEYBOARD_FOCUS = true;
 
   bool CONSOLE_SCROLL_TO_BOTTOM = false;
+  
   // ---
+  // Screen Vars
 
   string COMMAND_TEXT_TEMP = "";
   string COMMAND_TEXT = "";
   string CONSOLE_TEXT = "";
 
   // ---
+  // Widgets
+  TEXT_CONSOLE CONSOLE;
+  AUTOMOBILE_SCREEN AUTOMOBILE;
+  ADSB_SCREEN ADSB;
+  TEXT_CONSOLE DAEMON_LOG;
+
+  // --- 
 
   public:
   CONSOLE_COMMUNICATION SCREEN_COMMS;
@@ -120,6 +108,10 @@ class SCREEN4
   // Proper close of imgui
 
   // ----
+  // Data Update Paths
+  void update_daemon_log(string Text);
+
+  void update_automobile_gadgets(unsigned long &tmeCurrentMillis, system_data &sdSysData);
 
 };
 

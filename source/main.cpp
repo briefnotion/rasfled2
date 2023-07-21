@@ -1715,12 +1715,11 @@ int loop_2()
       sdSystem.read_hardware_status(1000);
 
       // Read System log files
-      /*
       while (watcher_daemon_log.line_avail() == true)
       {
-        cons.Screen.Log_Screen_TEXT_BOX.add_line(tmeCurrentMillis, watcher_daemon_log.get_next_line());
+        //cons.Screen.Log_Screen_TEXT_BOX.add_line(tmeCurrentMillis, watcher_daemon_log.get_next_line());
+        cons_2.update_daemon_log(watcher_daemon_log.get_next_line());
       }
-      */
 
       // Read ADS-B Aircraft JSON
       if (watcher_aircraft_json.changed() == true)
@@ -1765,7 +1764,7 @@ int loop_2()
 
         // Automobile - Update all automobile Reference Data
         sdSystem.CAR_INFO.translate(tmeCurrentMillis);
-        //cons.update_automobile_gadgets(tmeCurrentMillis, sdSystem);
+        cons_2.update_automobile_gadgets(tmeCurrentMillis, sdSystem);
 
         // Update Switches to Alert system.
         /*

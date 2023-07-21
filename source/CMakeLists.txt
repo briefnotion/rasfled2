@@ -73,6 +73,8 @@ add_executable(
   aircraft_coordinator.cpp
   screen3.cpp
   widgets.cpp
+  widgets_automobile.cpp
+  widgets_adsb.cpp
   screen4_helper.cpp
   screen4.cpp
   system.cpp

@@ -35,7 +35,11 @@ struct InputTextCallback_UserData
 
 int SCREEN4::create()
 {
+  // Set colors
+  COLOR_SELECT.init();
+
   // Init and prepare DISPLAY_SCREEN
+  
   clear_color = ImVec4(0.00f, 0.55f, 0.00f, 0.00f);
 
   glfwSetErrorCallback(glfw_error_callback);
@@ -83,6 +87,10 @@ int SCREEN4::create()
 
   io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
 
+  // Widgets
+
+
+
   return 0;
 }
 
@@ -90,23 +98,15 @@ int SCREEN4::create()
 
 void SCREEN4::draw(system_data &sdSysData)
 {
-
-
   // sdSysData.tmeCURRENT_FRAME_TIME
-
 
   // Handle Console Iputs
   if (SCREEN_COMMS.printw_q_avail() == true)
   {
-    CONSOLE_TEXT = CONSOLE_TEXT + SCREEN_COMMS.printw_q_get();
-    CONSOLE_SCROLL_TO_BOTTOM = true;
+    CONSOLE.add_line(SCREEN_COMMS.printw_q_get());
   }
 
-  // Simple Check Size
-  if (CONSOLE_TEXT.size() > 1024 * 5)
-  {
-    CONSOLE_TEXT.erase(0, CONSOLE_TEXT.find_first_of("\n", 512 ) +1 );
-  }
+  ADSB.set_adsb_active(sdSysData.AIRCRAFT_COORD.is_active());
   
   /*
   Does not work yet.
@@ -140,21 +140,21 @@ void SCREEN4::draw(system_data &sdSysData)
   ImGui::SetNextWindowPos(use_work_area ? viewport->WorkPos : viewport->Pos);
   ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
 
-  if (ImGui::Begin("Window", &show_test_window, flags)) // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+  if (ImGui::Begin("Window", &show_test_window, DEFAULTS.flags)) // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
   {
-    ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 100, ImGui::GetContentRegionAvail().y), false, flags_c);
+    ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 80, ImGui::GetContentRegionAvail().y), false, DEFAULTS.flags_c);
     {
       // ---------------------------------------------------------------------------------------
       // Status Sub Window
 
-      ImGui::BeginChild("Status", ImVec2(ImGui::GetContentRegionAvail().x, 60), true, flags_c);
+      ImGui::BeginChild("Status", ImVec2(ImGui::GetContentRegionAvail().x, 60), true, DEFAULTS.flags_c);
       {
 
         float region_div_4 = ImGui::GetContentRegionAvail().x / 4;
 
         // Divide sub window into 4
         // Left
-        ImGui::BeginChild("Status Left", ImVec2(region_div_4, ImGui::GetContentRegionAvail().y), false, flags_c);
+        ImGui::BeginChild("Status Left", ImVec2(region_div_4, ImGui::GetContentRegionAvail().y), false, DEFAULTS.flags_c);
         {
           
           if (RESET_KEYBOARD_FOCUS == true)
@@ -186,7 +186,7 @@ void SCREEN4::draw(system_data &sdSysData)
         // Mid
         ImGui::SameLine();
 
-        ImGui::BeginChild("Status Mid", ImVec2(region_div_4 * 2, ImGui::GetContentRegionAvail().y), false, flags_c);
+        ImGui::BeginChild("Status Mid", ImVec2(region_div_4 * 2, ImGui::GetContentRegionAvail().y), false, DEFAULTS.flags_c);
         {
           // Display Lights Off mode toggle.
           ImGui::BeginGroup();
@@ -261,7 +261,7 @@ void SCREEN4::draw(system_data &sdSysData)
         // Mid Right
         ImGui::SameLine();
 
-        ImGui::BeginChild("Status Right", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, flags_c);
+        ImGui::BeginChild("Status Right", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, DEFAULTS.flags_c);
         {
           ImGui::Text("Version:");
           ImGui::SameLine();
@@ -284,35 +284,30 @@ void SCREEN4::draw(system_data &sdSysData)
       // ---------------------------------------------------------------------------------------
       // Console Sub Window
 
-      ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - 48), false, flags_c);
+      ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - 48), false, DEFAULTS.flags_c);
       {
-        // ImGui::Text("Hello from another window!");
-
+        
         ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
         ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
 
         if (DISPLAY_SCREEN == 0)
         {
-          ImGui::Begin("Console", NULL, flags_w);
-          {
-            //static ImGuiWindowFlags flags_console = ImGuiInputTextFlags_ReadOnly | ImGuiInputTextFlags_NoUndoRedo |
-            //                                        ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
-            //static ImGuiWindowFlags flags_console = ImGuiInputTextFlags_None;
-            
-            //CONSOLE_TEXT = CONSOLE_TEXT + to_string(ImGui::GetScrollMaxY()) + "\n";
-            ImGui::TextUnformatted(CONSOLE_TEXT.c_str());
-            if (CONSOLE_SCROLL_TO_BOTTOM == true && ImGui::GetScrollMaxY() > 0)
-            {
-              ImGui::SetScrollHereY(1.0f);
-              CONSOLE_SCROLL_TO_BOTTOM = false;
-            }
-          }
-          ImGui::End();
+          CONSOLE.display("Console", NULL, DEFAULTS.flags_w);
+        }
+
+        else if (DISPLAY_SCREEN == 1)
+        {
+          AUTOMOBILE.display(sdSysData.tmeCURRENT_FRAME_TIME, SCREEN_COMMS, "Automobile", NULL, DEFAULTS.flags_w);
+        }
+
+        else if (DISPLAY_SCREEN == 2)
+        {
+          ADSB.display(sdSysData.tmeCURRENT_FRAME_TIME, SCREEN_COMMS, COLOR_SELECT, "ADSB", NULL, DEFAULTS.flags_w);
         }
 
         else if (DISPLAY_SCREEN == 3) // Create a window called "Hello, world!" and append into it.
         {
-          ImGui::Begin("Hello, world!", NULL, flags_w);
+          ImGui::Begin("Hello, world!", NULL, DEFAULTS.flags_w);
           {
             static float f = 0.0f;
             static int counter = 0;
@@ -343,9 +338,15 @@ void SCREEN4::draw(system_data &sdSysData)
           }
           ImGui::End();
         }
+
+        else if (DISPLAY_SCREEN == 4)
+        {
+          DAEMON_LOG.display("System Logs", NULL, DEFAULTS.flags_w);
+        }
+
         else
         {
-          ImGui::Begin(" ", NULL, flags_w);
+          ImGui::Begin(" ", NULL, DEFAULTS.flags_w);
           {
             // Show Nothing
           }
@@ -357,38 +358,38 @@ void SCREEN4::draw(system_data &sdSysData)
       // ---------------------------------------------------------------------------------------
       // Tabs Sub Window
 
-      ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, flags_c);
+      ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, DEFAULTS.flags_c);
       {
 
-        if (button_simple_toggle_color("Console", "Console", DISPLAY_SCREEN == 0, -1, SIZE_BUTTON_TAB))
+        if (button_simple_toggle_color("Console", "Console", DISPLAY_SCREEN == 0, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_TAB))
         {
           DISPLAY_SCREEN = 0;
         }
 
         ImGui::SameLine();
 
-        if (button_simple_toggle_color("Automobile", "Automobile", DISPLAY_SCREEN == 1, -1, SIZE_BUTTON_TAB))
+        if (button_simple_toggle_color("Automobile", "Automobile", DISPLAY_SCREEN == 1, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_TAB))
         {
           DISPLAY_SCREEN = 1;
         }
 
         ImGui::SameLine();
 
-        if (button_simple_toggle_color("ADSB", "ADSB", DISPLAY_SCREEN == 2, -1, SIZE_BUTTON_TAB))
+        if (button_simple_toggle_color("ADSB", "ADSB", DISPLAY_SCREEN == 2, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_TAB))
         {
           DISPLAY_SCREEN = 2;
         }
 
         ImGui::SameLine();
 
-        if (button_simple_toggle_color("Hello\nWorld", "Hello\nWorld", DISPLAY_SCREEN == 3, -1, SIZE_BUTTON_TAB))
+        if (button_simple_toggle_color("Hello\nWorld", "Hello\nWorld", DISPLAY_SCREEN == 3, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_TAB))
         {
           DISPLAY_SCREEN = 3;
         }
 
         ImGui::SameLine();
 
-        if (button_simple_toggle_color("LOGS", "LOGS", DISPLAY_SCREEN == 4, -1, SIZE_BUTTON_TAB))
+        if (button_simple_toggle_color("LOGS", "LOGS", DISPLAY_SCREEN == 4, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_TAB))
         {
           DISPLAY_SCREEN = 4;
         }
@@ -431,12 +432,12 @@ void SCREEN4::draw(system_data &sdSysData)
     // ---------------------------------------------------------------------------------------
     // Menus Sub Window
 
-    ImGui::BeginChild("System Menu", ImVec2(0, ImGui::GetContentRegionAvail().y), false, flags_c);
+    ImGui::BeginChild("System Menu", ImVec2(0, ImGui::GetContentRegionAvail().y), false, DEFAULTS.flags_c);
     {
       // Main Menu
       if (DISPLAY_MENU == 0)
       {
-        if (button_simple_toggle_color("Stop\nTimer", "Start\nTimer", sdSysData.cdTIMER.is_active(), H_GREEN, SIZE_BUTTON))
+        if (button_simple_toggle_color("Stop\nTimer", "Start\nTimer", sdSysData.cdTIMER.is_active(), COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_GREEN, DEFAULTS.SIZE_BUTTON))
         {
           if (sdSysData.cdTIMER.is_active() == false)
           {
@@ -448,9 +449,9 @@ void SCREEN4::draw(system_data &sdSysData)
           }
         }
 
-        button_simple_enabled(" ", false, SIZE_BUTTON);
+        button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON);
 
-        if (button_simple_toggle_color("Over\nHead\nLights", "Over\nHead\nLights", sdSysData.booOverheadRunning, H_RED, SIZE_BUTTON))
+        if (button_simple_toggle_color("Over\nHead\nLights", "Over\nHead\nLights", sdSysData.booOverheadRunning, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
         {
           if (sdSysData.booOverheadRunning == true)
           {
@@ -462,14 +463,14 @@ void SCREEN4::draw(system_data &sdSysData)
           }
         }
 
-        if (button_simple_color("Flash", H_GREEN, SIZE_BUTTON))
+        if (button_simple_color("Flash", COLOR_SELECT.COLOR_COMB_GREEN, DEFAULTS.SIZE_BUTTON))
         {
           SCREEN_COMMS.command_text_set("ff");
         }
 
-        button_simple_enabled(" ", false, SIZE_BUTTON);
+        button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON);
 
-        if (button_simple_toggle_color("Lights\n(On)", "Lights\n(Off)", sdSysData.Lights_On.value(), -1, SIZE_BUTTON))
+        if (button_simple_toggle_color("Lights\n(On)", "Lights\n(Off)", sdSysData.Lights_On.value(), COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON))
         {
           if (sdSysData.Lights_On.value() == true)
           {
@@ -481,14 +482,14 @@ void SCREEN4::draw(system_data &sdSysData)
           }
         }
 
-        if (button_simple_color("...", H_BLUE, SIZE_BUTTON))
+        if (button_simple_color("...", COLOR_SELECT.COLOR_COMB_BLUE, DEFAULTS.SIZE_BUTTON))
         {
           DISPLAY_MENU = 1;
         } 
       }
       else if (DISPLAY_MENU == 1)
       {
-        if (button_simple_toggle_color("HAZARD\n(On)", "HAZARD\n(Off)", sdSysData.booHazardRunning, H_RED, SIZE_BUTTON))
+        if (button_simple_toggle_color("HAZARD\n(On)", "HAZARD\n(Off)", sdSysData.booHazardRunning, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
         {
           if (sdSysData.booHazardRunning == true)
           {
@@ -500,54 +501,54 @@ void SCREEN4::draw(system_data &sdSysData)
           }
         }
 
-        button_simple_enabled(" ", false, SIZE_BUTTON);
+        button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON);
 
-        button_simple_enabled(" ", false, SIZE_BUTTON);
+        button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON);
 
-        button_simple_enabled(" ", false, SIZE_BUTTON);
+        button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON);
 
-        if (button_simple_color("Clear\nAnims", H_RED, SIZE_BUTTON))
+        if (button_simple_color("Clear\nAnims", COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
         {
           SCREEN_COMMS.command_text_set("``");
         }
 
-        if (button_simple_color("System", H_BLUE, SIZE_BUTTON))
+        if (button_simple_color("System", COLOR_SELECT.COLOR_COMB_BLUE, DEFAULTS.SIZE_BUTTON))
         {
           DISPLAY_MENU = 2;
         }
 
-        if (button_simple_color("<-", H_BLUE, SIZE_BUTTON))
+        if (button_simple_color("<-", COLOR_SELECT.COLOR_COMB_BLUE, DEFAULTS.SIZE_BUTTON))
         {
           DISPLAY_MENU = 0;
         }
       }
       else if (DISPLAY_MENU == 2)
       {
-        if (button_simple_color("Exit", H_RED, SIZE_BUTTON))
+        if (button_simple_color("Exit", COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
         {
           WINDOW_CLOSE = true;
         }
 
-        button_simple_enabled(" ", false, SIZE_BUTTON);
+        button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON);
 
-        if (button_simple_color("SYSTEM\nSHUT\nDOWN", H_RED, SIZE_BUTTON))
+        if (button_simple_color("SYSTEM\nSHUT\nDOWN", COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
         {
           SCREEN_COMMS.command_text_set(" comshutd");
         }
 
-        if (button_simple_color("SYSTEM\nREBOOT", H_RED, SIZE_BUTTON))
+        if (button_simple_color("SYSTEM\nREBOOT", COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
         {
           SCREEN_COMMS.command_text_set(" reboot");
         }
 
-        button_simple_enabled(" ", false, SIZE_BUTTON);
+        button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON);
 
-        if (button_simple_color("DEBUG", H_YELLOW, SIZE_BUTTON))
+        if (button_simple_color("DEBUG", COLOR_SELECT.COLOR_COMB_YELLOW, DEFAULTS.SIZE_BUTTON))
         {
           DISPLAY_DEBUG = !DISPLAY_DEBUG;
         }
 
-        if (button_simple_color("<-", H_BLUE, SIZE_BUTTON))
+        if (button_simple_color("<-", COLOR_SELECT.COLOR_COMB_BLUE, DEFAULTS.SIZE_BUTTON))
         {
           DISPLAY_MENU = 0;
         }
@@ -567,7 +568,7 @@ void SCREEN4::draw(system_data &sdSysData)
   if (DISPLAY_DEBUG == true)
   {
     ImGui::SetNextWindowSize(ImVec2(270, 152));
-    if (ImGui::Begin("Debug", &DISPLAY_DEBUG, flags_w_pop)) 
+    if (ImGui::Begin("Debug", &DISPLAY_DEBUG, DEFAULTS.flags_w_pop)) 
     {
       ImGui::Text("%.3f ms/frame  %.1f FPS", 1000.0f / io.Framerate, io.Framerate);
       //ImGui::Text("%.1f FPS", io.Framerate);
@@ -575,7 +576,7 @@ void SCREEN4::draw(system_data &sdSysData)
       // Debug On Off
       ImGui::BeginGroup();
       {
-        if (button_simple_toggle_color("Dug", "Dbug", SCREEN_COMMS.DEBUG_STATUS.DEBUG, H_RED, SIZE_BUTTON_SMALL))
+        if (button_simple_toggle_color("Dug", "Dbug", SCREEN_COMMS.DEBUG_STATUS.DEBUG, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON_SMALL))
         {
           SCREEN_COMMS.DEBUG_STATUS.DEBUG = ! SCREEN_COMMS.DEBUG_STATUS.DEBUG;
         }
@@ -593,14 +594,14 @@ void SCREEN4::draw(system_data &sdSysData)
         ImGui::SetNextItemWidth(43);
         ImGui::Text("%d", sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(1));
         ImGui::SameLine();
-        if (button_simple_toggle_color("2", "2", SCREEN_COMMS.DEBUG_STATUS.DOOR[1], -1, SIZE_BUTTON_SMALL))
+        if (button_simple_toggle_color("2", "2", SCREEN_COMMS.DEBUG_STATUS.DOOR[1], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
         {
           SCREEN_COMMS.DEBUG_STATUS.DOOR[1] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
         }
         ImGui::SameLine();
         
         // Door 4 (3)
-        if (button_simple_toggle_color("4", "4", SCREEN_COMMS.DEBUG_STATUS.DOOR[3], -1, SIZE_BUTTON_SMALL))
+        if (button_simple_toggle_color("4", "4", SCREEN_COMMS.DEBUG_STATUS.DOOR[3], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
         {
           SCREEN_COMMS.DEBUG_STATUS.DOOR[3] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[3];
         }
@@ -612,14 +613,14 @@ void SCREEN4::draw(system_data &sdSysData)
         ImGui::SetNextItemWidth(43);
         ImGui::Text("%d", sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(0));
         ImGui::SameLine();
-        if (button_simple_toggle_color("1", "1", SCREEN_COMMS.DEBUG_STATUS.DOOR[0], -1, SIZE_BUTTON_SMALL))
+        if (button_simple_toggle_color("1", "1", SCREEN_COMMS.DEBUG_STATUS.DOOR[0], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
         {
           SCREEN_COMMS.DEBUG_STATUS.DOOR[0] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
         }
         ImGui::SameLine();
         
         // Door 3 (2)
-        if (button_simple_toggle_color("3", "3", SCREEN_COMMS.DEBUG_STATUS.DOOR[2], -1, SIZE_BUTTON_SMALL))
+        if (button_simple_toggle_color("3", "3", SCREEN_COMMS.DEBUG_STATUS.DOOR[2], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
         {
           SCREEN_COMMS.DEBUG_STATUS.DOOR[2] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[2];
         }
@@ -634,9 +635,9 @@ void SCREEN4::draw(system_data &sdSysData)
       // Close
       ImGui::BeginGroup();
       {
-        button_simple_enabled(" ", false, SIZE_BUTTON_SMALL);
+        button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON_SMALL);
          
-        if (ImGui::Button("X", SIZE_BUTTON_SMALL))
+        if (ImGui::Button("X", DEFAULTS.SIZE_BUTTON_SMALL))
         {
           DISPLAY_DEBUG = false;
         }
@@ -650,7 +651,7 @@ void SCREEN4::draw(system_data &sdSysData)
   if (DISPLAY_TIMER == true)
   {
     ImGui::SetNextWindowSize(ImVec2(80, 60));
-    if (ImGui::Begin("Timer", &DISPLAY_TIMER, flags_w_pop)) 
+    if (ImGui::Begin("Timer", &DISPLAY_TIMER, DEFAULTS.flags_w_pop)) 
     {
 
       long elaped_time = 0;
@@ -713,6 +714,21 @@ void SCREEN4::shutdown()
 
   glfwDestroyWindow(window);
   glfwTerminate();
+}
+
+void SCREEN4::update_daemon_log(string Text)
+{
+  DAEMON_LOG.add_line(Text);
+}
+
+void SCREEN4::update_automobile_gadgets(unsigned long &tmeCurrentMillis, system_data &sdSysData)
+{
+  if(sdSysData.CAR_INFO.CHANGED == true)
+  {  
+    //Screen.AUTOMOBILE_OVERVIEW_PANEL.update(sdSysData, tmeCurrentMillis);
+    AUTOMOBILE.update(sdSysData, tmeCurrentMillis);
+    //sdSysData.CAR_INFO.CHANGED = false;
+  }
 }
 
 // ---------------------------------------------------------------------------------------

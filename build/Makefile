@@ -1222,6 +1222,60 @@ widgets.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets.cpp.s
 .PHONY : widgets.cpp.s
 
+widgets_adsb.o: widgets_adsb.cpp.o
+
+.PHONY : widgets_adsb.o
+
+# target to build an object file
+widgets_adsb.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets_adsb.cpp.o
+.PHONY : widgets_adsb.cpp.o
+
+widgets_adsb.i: widgets_adsb.cpp.i
+
+.PHONY : widgets_adsb.i
+
+# target to preprocess a source file
+widgets_adsb.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets_adsb.cpp.i
+.PHONY : widgets_adsb.cpp.i
+
+widgets_adsb.s: widgets_adsb.cpp.s
+
+.PHONY : widgets_adsb.s
+
+# target to generate assembly for a file
+widgets_adsb.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets_adsb.cpp.s
+.PHONY : widgets_adsb.cpp.s
+
+widgets_automobile.o: widgets_automobile.cpp.o
+
+.PHONY : widgets_automobile.o
+
+# target to build an object file
+widgets_automobile.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets_automobile.cpp.o
+.PHONY : widgets_automobile.cpp.o
+
+widgets_automobile.i: widgets_automobile.cpp.i
+
+.PHONY : widgets_automobile.i
+
+# target to preprocess a source file
+widgets_automobile.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets_automobile.cpp.i
+.PHONY : widgets_automobile.cpp.i
+
+widgets_automobile.s: widgets_automobile.cpp.s
+
+.PHONY : widgets_automobile.s
+
+# target to generate assembly for a file
+widgets_automobile.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets_automobile.cpp.s
+.PHONY : widgets_automobile.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -1351,6 +1405,12 @@ help:
 	@echo "... widgets.o"
 	@echo "... widgets.i"
 	@echo "... widgets.s"
+	@echo "... widgets_adsb.o"
+	@echo "... widgets_adsb.i"
+	@echo "... widgets_adsb.s"
+	@echo "... widgets_automobile.o"
+	@echo "... widgets_automobile.i"
+	@echo "... widgets_automobile.s"
 .PHONY : help
 
 

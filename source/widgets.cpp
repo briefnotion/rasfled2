@@ -16,6 +16,55 @@
 
 // ---------------------------------------------------------------------------------------
 
+void COLOR_COMBO::set(float H, float S, float V)
+{
+STANDARD = (ImVec4)ImColor::HSV(H, S, V);
+HOVERED = (ImVec4)ImColor::HSV(H, S + .1, V + .1);
+ACTIVE = (ImVec4)ImColor::HSV(H, S + .2, V + .2);
+DEFAULT = false;
+}
+
+void COLOR_COMBOS::init()
+{
+  COLOR_COMB_BLACK.set(0.0, 0.0f, 0.0f);
+  COLOR_COMB_WHITE.set(0.0, 0.0f, .6f);
+  COLOR_COMB_RED.set(0.0, 0.6f, 0.6f);
+  COLOR_COMB_YELLOW.set(0.254f, 0.6f, 0.6f);
+  COLOR_COMB_GREEN.set(0.333f, 0.6f, 0.6f);
+  COLOR_COMB_CYAN.set(0.5f, 0.6f, 0.6f);
+  COLOR_COMB_BLUE.set(0.667f, 0.6f, 0.6f);
+  COLOR_COMB_PURPLE.set(0.768f, 0.6f, 0.6f);
+}
+
+// ---------------------------------------------------------------------------------------
+
+void TEXT_CONSOLE::add_line(string Text)
+{
+  CONSOLE_TEXT = CONSOLE_TEXT + "\n" + Text;
+  CONSOLE_SCROLL_TO_BOTTOM = true;
+
+  if (CONSOLE_TEXT.size() > 1024 * 10)
+  {
+    CONSOLE_TEXT.erase(0, CONSOLE_TEXT.find_first_of("\n", 512 ) + 1);
+  } 
+}
+
+void TEXT_CONSOLE::display(const char *name, bool *p_open, ImGuiWindowFlags flags)
+{ 
+  ImGui::Begin(name, p_open, flags);
+  {
+    ImGui::TextUnformatted(CONSOLE_TEXT.c_str());
+    if (CONSOLE_SCROLL_TO_BOTTOM == true && ImGui::GetScrollMaxY() > 0)
+    {
+      ImGui::SetScrollHereY(1.0f);
+      CONSOLE_SCROLL_TO_BOTTOM = false;
+    }
+  }
+  ImGui::End();
+}
+
+// ---------------------------------------------------------------------------------------
+
 void text_simple_bool(string Text, bool Indication)
 {
   if (Indication == false)
@@ -52,15 +101,15 @@ bool button_simple_enabled(string Text, bool Enabled, ImVec2 ImVec2_Size)
   return ret_value;
 }
 
-bool button_simple_color(string Text, float H_Color, ImVec2 ImVec2_Size)
+bool button_simple_color(string Text, COLOR_COMBO Color, ImVec2 ImVec2_Size)
 {
   bool ret_value = false;
 
-  if (H_Color >= 0)
+  if (Color.DEFAULT == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(H_Color, 0.6f, 0.6f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(H_Color, 0.7f, 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(H_Color, 0.8f, 0.8f));
+    ImGui::PushStyleColor(ImGuiCol_Button, Color.STANDARD);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Color.HOVERED);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Color.ACTIVE);
     if (ImGui::Button(Text.c_str(), ImVec2_Size))
     {
       ret_value = true;
@@ -78,45 +127,35 @@ bool button_simple_color(string Text, float H_Color, ImVec2 ImVec2_Size)
   return ret_value;
 }
 
-bool button_simple_toggle_color(string True_Value_Text, string False_Value_Text, bool Toggle, float H_Color, ImVec2 ImVec2_Size)
+bool button_simple_toggle_color(string True_Value_Text, string False_Value_Text, bool Toggle, 
+                                COLOR_COMBO True_Color, COLOR_COMBO False_Color, ImVec2 ImVec2_Size)
 {
   // Does not control toggle, just shows value.
   bool ret_value = false;
 
-  if (H_Color >= 0 && Toggle == false)
+  if (False_Color.DEFAULT == false && Toggle == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(H_Color, 0.6f, 0.6f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(H_Color, 0.7f, 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(H_Color, 0.8f, 0.8f));
+    ImGui::PushStyleColor(ImGuiCol_Button, False_Color.STANDARD);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, False_Color.HOVERED);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, False_Color.ACTIVE);
     if (ImGui::Button(False_Value_Text.c_str(), ImVec2_Size))
     {
       ret_value = true;
     }
     ImGui::PopStyleColor(3);
   }
-  else if (H_Color < 0 && Toggle == false)
+  else if (False_Color.DEFAULT == true && Toggle == false)
   {
     if (ImGui::Button(False_Value_Text.c_str(), ImVec2_Size))
     {
       ret_value = true;
     }
   }
-  else if (H_Color >= 0 && Toggle == true)
+  else
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(H_Color, 0.0, 0.6f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(H_Color, 0.0f, 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(H_Color, 0.0f, 0.8f));
-    if (ImGui::Button(True_Value_Text.c_str(), ImVec2_Size))
-    {
-      ret_value = true;
-    }
-    ImGui::PopStyleColor(3);
-  }  
-  else if (H_Color < 0 && Toggle == true)
-  {
-    ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(0, 0.00, 0.6f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(0, 0.0f, 0.7f));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(0, 0.0f, 0.8f));
+    ImGui::PushStyleColor(ImGuiCol_Button, True_Color.STANDARD);
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, True_Color.HOVERED);
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, True_Color.ACTIVE);
     if (ImGui::Button(True_Value_Text.c_str(), ImVec2_Size))
     {
       ret_value = true;
