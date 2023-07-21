@@ -39,6 +39,7 @@ void CONSOLE_COMMUNICATION::command_text_set(string Text)
   if (COMMAND_TEXT != Text)
   {
     COMMAND_TEXT = Text;
+    COMMAND_TEXT_CLEAR = false;
     CHANGED = true;
   }
 }
@@ -63,20 +64,9 @@ string CONSOLE_COMMUNICATION::command_text_get()
 
 void CONSOLE_COMMUNICATION::command_text_clear()
 {
+  COMMAND_TEXT = "";
+  CHANGED = false;
   COMMAND_TEXT_CLEAR = true;
-}
-
-bool CONSOLE_COMMUNICATION::command_text_clear_get()
-{
-  if (COMMAND_TEXT_CLEAR == true)
-  {
-    COMMAND_TEXT_CLEAR = false;
-    return true;
-  }
-  else
-  {
-    return false;
-  }
 }
 
 bool CONSOLE_COMMUNICATION::printw_q_avail()

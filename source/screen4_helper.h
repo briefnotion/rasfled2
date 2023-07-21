@@ -14,10 +14,23 @@
 
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 using namespace std;
 
 // ---------------------------------------------------------------------------------------
+
+class DEBUG
+{
+  public:
+  
+  //Debug On Off
+  bool DEBUG = false;
+  
+  // Doors
+  vector<bool> DOOR;
+};
+
 
 class CONSOLE_COMMUNICATION
 // A smaller variable to facilitate communication to the console.
@@ -34,6 +47,8 @@ class CONSOLE_COMMUNICATION
   bool PRINT_Q_AVAIL = false;
 
   public:
+
+  DEBUG DEBUG_STATUS;
 
   bool WINDOW_CLOSE = false;
 

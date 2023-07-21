@@ -20,7 +20,7 @@ using namespace std;
 // -------------------------------------------------------------------------------------
 
 // Load Configuration
-bool load_json_configuration(Console &cons, system_data &sdSysData, string Directory, string Filename)
+bool load_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename)
 {
   JSON_INTERFACE configuration_json;
 
@@ -117,7 +117,7 @@ bool load_json_configuration(Console &cons, system_data &sdSysData, string Direc
 
 // -------------------------------------------------------------------------------------
 // Save Configuration
-bool save_json_configuration(Console &cons, system_data &sdSysData, string Directory, string Filename)
+bool save_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename)
 {
   bool ret_success = false;
 
@@ -279,7 +279,7 @@ bool save_json_configuration(Console &cons, system_data &sdSysData, string Direc
 //  Running State
 
 // Load Saved State
-bool load_saved_running_state_json(Console &cons, system_data &sdSysData, string strFilename)
+bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename)
 {
   JSON_INTERFACE state_json;
 
@@ -303,7 +303,7 @@ bool load_saved_running_state_json(Console &cons, system_data &sdSysData, string
 
     if (ret_success == true)
     {
-      cons.printi("  " + strFilename + " read success");
+      cons.printw("  " + strFilename + " read success");
     
       // Parse the settings
       red = state_json.ROOT.value_from_list("red");
@@ -316,7 +316,7 @@ bool load_saved_running_state_json(Console &cons, system_data &sdSysData, string
 
       color_desc = state_json.ROOT.value_from_list("description");
 
-      cons.printi("  Setting running color to CRGB(" + color.CRGBtoString() + 
+      cons.printw("  Setting running color to CRGB(" + color.CRGBtoString() + 
                                                   "), " + color_desc);                                          
 
       sdSysData.set_running_color(color , color_desc);
@@ -325,8 +325,8 @@ bool load_saved_running_state_json(Console &cons, system_data &sdSysData, string
 
   if (ret_success == false)
   {
-    cons.printi("  " + strFilename + " read error");
-    cons.printi("  Setting running color to CRGB(32,32,32), White");
+    cons.printw("  " + strFilename + " read error");
+    cons.printw("  Setting running color to CRGB(32,32,32), White");
     color = CRGB(32,32,32);
     color_desc = "White";
     sdSysData.set_running_color(color , color_desc);
@@ -337,7 +337,7 @@ bool load_saved_running_state_json(Console &cons, system_data &sdSysData, string
 
 
 // Save Saved State
-bool save_running_state_json(Console &cons, system_data &sdSysData, string strFilename)
+bool save_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename)
 {
   JSON_INTERFACE state_json;
   deque<string> state_dq_string;
@@ -359,7 +359,8 @@ bool save_running_state_json(Console &cons, system_data &sdSysData, string strFi
 
 // -------------------------------------------------------------------------------------
 // Load Playlist
-bool load_playlist_json(Console &cons, system_data &sdSysData, string strFilename)
+/*
+bool load_playlist_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename)
 {
   JSON_INTERFACE movies_json;
 
@@ -373,7 +374,7 @@ bool load_playlist_json(Console &cons, system_data &sdSysData, string strFilenam
 
     if (ret_success == true)
     {
-      cons.printi("  " + strFilename + " read success");
+      cons.printw("  " + strFilename + " read success");
 
       for (int list = 0; list < movies_json.ROOT.DATA.size(); list++)
       {
@@ -384,13 +385,13 @@ bool load_playlist_json(Console &cons, system_data &sdSysData, string strFilenam
 
   if (ret_success == false)
   {
-    cons.printi("  " + strFilename + " read error");
-    cons.printi("  Playlist not loaded.");
+    cons.printw("  " + strFilename + " read error");
+    cons.printw("  Playlist not loaded.");
   }
 
   return ret_success;
 }
-
+*/
 
 
 #endif

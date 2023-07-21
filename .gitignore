@@ -61,3 +61,4 @@ build/imgui.ini
 .vscode/c_cpp_properties.json
 source/rpi_ws281x-master/cmake_install.cmake
 source/rpi_ws281x-master/CMakeCache.txt
+.vscode/settings.json

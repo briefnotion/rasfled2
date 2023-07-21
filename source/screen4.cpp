@@ -115,7 +115,9 @@ void SCREEN4::draw(system_data &sdSysData)
     //COMMAND_TEXT = "";
   }
   */
-  
+
+  DISPLAY_TIMER = sdSysData.cdTIMER.is_active();
+
   if (SCREEN_COMMS.WINDOW_CLOSE == true)
   {
     WINDOW_CLOSE = true;
@@ -183,12 +185,17 @@ void SCREEN4::draw(system_data &sdSysData)
 
         // Mid
         ImGui::SameLine();
+
         ImGui::BeginChild("Status Mid", ImVec2(region_div_4 * 2, ImGui::GetContentRegionAvail().y), false, flags_c);
         {
           // Display Lights Off mode toggle.
           ImGui::BeginGroup();
           {
             text_simple_bool("LIGHTS", sdSysData.Lights_On.value());
+            if (SCREEN_COMMS.DEBUG_STATUS.DEBUG == true)
+            {
+              ImGui::Text("DEBUG");
+            }
           }
           ImGui::EndGroup();
           
@@ -253,6 +260,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
         // Mid Right
         ImGui::SameLine();
+
         ImGui::BeginChild("Status Right", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, flags_c);
         {
           ImGui::Text("Version:");
@@ -276,7 +284,7 @@ void SCREEN4::draw(system_data &sdSysData)
       // ---------------------------------------------------------------------------------------
       // Console Sub Window
 
-      ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - 28), false, flags_c);
+      ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - 48), false, flags_c);
       {
         // ImGui::Text("Hello from another window!");
 
@@ -351,6 +359,41 @@ void SCREEN4::draw(system_data &sdSysData)
 
       ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, flags_c);
       {
+
+        if (button_simple_toggle_color("Console", "Console", DISPLAY_SCREEN == 0, -1, SIZE_BUTTON_TAB))
+        {
+          DISPLAY_SCREEN = 0;
+        }
+
+        ImGui::SameLine();
+
+        if (button_simple_toggle_color("Automobile", "Automobile", DISPLAY_SCREEN == 1, -1, SIZE_BUTTON_TAB))
+        {
+          DISPLAY_SCREEN = 1;
+        }
+
+        ImGui::SameLine();
+
+        if (button_simple_toggle_color("ADSB", "ADSB", DISPLAY_SCREEN == 2, -1, SIZE_BUTTON_TAB))
+        {
+          DISPLAY_SCREEN = 2;
+        }
+
+        ImGui::SameLine();
+
+        if (button_simple_toggle_color("Hello\nWorld", "Hello\nWorld", DISPLAY_SCREEN == 3, -1, SIZE_BUTTON_TAB))
+        {
+          DISPLAY_SCREEN = 3;
+        }
+
+        ImGui::SameLine();
+
+        if (button_simple_toggle_color("LOGS", "LOGS", DISPLAY_SCREEN == 4, -1, SIZE_BUTTON_TAB))
+        {
+          DISPLAY_SCREEN = 4;
+        }
+
+        /*
         ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
         if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
         {
@@ -376,6 +419,8 @@ void SCREEN4::draw(system_data &sdSysData)
           }
           ImGui::EndTabBar();
         }
+        */
+
       }
       ImGui::EndChild();
     }
@@ -391,9 +436,16 @@ void SCREEN4::draw(system_data &sdSysData)
       // Main Menu
       if (DISPLAY_MENU == 0)
       {
-        if (button_simple_color("Start\nTimer", H_GREEN, SIZE_BUTTON))
+        if (button_simple_toggle_color("Stop\nTimer", "Start\nTimer", sdSysData.cdTIMER.is_active(), H_GREEN, SIZE_BUTTON))
         {
-          SCREEN_COMMS.command_text_set("  ");
+          if (sdSysData.cdTIMER.is_active() == false)
+          {
+            SCREEN_COMMS.command_text_set("  ");
+          }
+          else
+          {
+            SCREEN_COMMS.command_text_set(" `");
+          }
         }
 
         button_simple_enabled(" ", false, SIZE_BUTTON);
@@ -481,20 +533,18 @@ void SCREEN4::draw(system_data &sdSysData)
         if (button_simple_color("SYSTEM\nSHUT\nDOWN", H_RED, SIZE_BUTTON))
         {
           SCREEN_COMMS.command_text_set(" comshutd");
-          WINDOW_CLOSE = true;
         }
 
         if (button_simple_color("SYSTEM\nREBOOT", H_RED, SIZE_BUTTON))
         {
           SCREEN_COMMS.command_text_set(" reboot");
-          WINDOW_CLOSE = true;
         }
 
         button_simple_enabled(" ", false, SIZE_BUTTON);
 
         if (button_simple_color("DEBUG", H_YELLOW, SIZE_BUTTON))
         {
-          SCREEN_COMMS.command_text_set("/");
+          DISPLAY_DEBUG = !DISPLAY_DEBUG;
         }
 
         if (button_simple_color("<-", H_BLUE, SIZE_BUTTON))
@@ -511,6 +561,129 @@ void SCREEN4::draw(system_data &sdSysData)
 
   }
   ImGui::End();
+
+  // Debug Window
+  
+  if (DISPLAY_DEBUG == true)
+  {
+    ImGui::SetNextWindowSize(ImVec2(270, 152));
+    if (ImGui::Begin("Debug", &DISPLAY_DEBUG, flags_w_pop)) 
+    {
+      ImGui::Text("%.3f ms/frame  %.1f FPS", 1000.0f / io.Framerate, io.Framerate);
+      //ImGui::Text("%.1f FPS", io.Framerate);
+
+      // Debug On Off
+      ImGui::BeginGroup();
+      {
+        if (button_simple_toggle_color("Dug", "Dbug", SCREEN_COMMS.DEBUG_STATUS.DEBUG, H_RED, SIZE_BUTTON_SMALL))
+        {
+          SCREEN_COMMS.DEBUG_STATUS.DEBUG = ! SCREEN_COMMS.DEBUG_STATUS.DEBUG;
+        }
+      }
+      ImGui::EndGroup();
+
+      ImGui::SameLine();
+
+      // Doors
+      ImGui::BeginGroup();
+      {
+        // Needs Better Spacing Alignment.
+
+        // Door 2 (1)
+        ImGui::SetNextItemWidth(43);
+        ImGui::Text("%d", sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(1));
+        ImGui::SameLine();
+        if (button_simple_toggle_color("2", "2", SCREEN_COMMS.DEBUG_STATUS.DOOR[1], -1, SIZE_BUTTON_SMALL))
+        {
+          SCREEN_COMMS.DEBUG_STATUS.DOOR[1] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
+        }
+        ImGui::SameLine();
+        
+        // Door 4 (3)
+        if (button_simple_toggle_color("4", "4", SCREEN_COMMS.DEBUG_STATUS.DOOR[3], -1, SIZE_BUTTON_SMALL))
+        {
+          SCREEN_COMMS.DEBUG_STATUS.DOOR[3] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[3];
+        }
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(43);
+        ImGui::Text("%d", sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(3));
+        
+        // Door 1 (0)
+        ImGui::SetNextItemWidth(43);
+        ImGui::Text("%d", sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(0));
+        ImGui::SameLine();
+        if (button_simple_toggle_color("1", "1", SCREEN_COMMS.DEBUG_STATUS.DOOR[0], -1, SIZE_BUTTON_SMALL))
+        {
+          SCREEN_COMMS.DEBUG_STATUS.DOOR[0] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
+        }
+        ImGui::SameLine();
+        
+        // Door 3 (2)
+        if (button_simple_toggle_color("3", "3", SCREEN_COMMS.DEBUG_STATUS.DOOR[2], -1, SIZE_BUTTON_SMALL))
+        {
+          SCREEN_COMMS.DEBUG_STATUS.DOOR[2] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[2];
+        }
+        ImGui::SameLine();
+        ImGui::SetNextItemWidth(43);
+        ImGui::Text("%d", sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(2));
+      }
+      ImGui::EndGroup();
+      
+      ImGui::SameLine();
+      
+      // Close
+      ImGui::BeginGroup();
+      {
+        button_simple_enabled(" ", false, SIZE_BUTTON_SMALL);
+         
+        if (ImGui::Button("X", SIZE_BUTTON_SMALL))
+        {
+          DISPLAY_DEBUG = false;
+        }
+      }
+      ImGui::EndGroup();
+
+    }
+    ImGui::End();
+  }
+
+  if (DISPLAY_TIMER == true)
+  {
+    ImGui::SetNextWindowSize(ImVec2(80, 60));
+    if (ImGui::Begin("Timer", &DISPLAY_TIMER, flags_w_pop)) 
+    {
+
+      long elaped_time = 0;
+      unsigned long duration_time = 0;
+      long remaining_time = 0;
+
+      // Calculate
+      duration_time = sdSysData.cdTIMER.duration();
+      elaped_time = sdSysData.cdTIMER.elapsed_time(sdSysData.tmeCURRENT_FRAME_TIME);
+      remaining_time = duration_time - elaped_time;
+
+      // Display Timer
+
+      //string mins = linemerge_right_justify(2, "00", to_string(millis_to_time_minutes(remaining_time)));
+      //string secs = linemerge_right_justify(2, "00", to_string(millis_to_time_seconds(remaining_time)));
+
+      ImGui::Text("%.2i:%.2i", millis_to_time_minutes(remaining_time), millis_to_time_seconds(remaining_time));
+
+      /*
+      Countdown_Timer.PROP.LABEL = "Timer: " + mins + ":" + secs + " ";
+      Countdown_Timer.PROP.MAX_VALUE = duration_time;
+      Countdown_Timer.PROP.POSY = 1;
+      Countdown_Timer.PROP.POSX = 2;
+      Countdown_Timer.update(duration_time - elaped_time, sdSysData.tmeCURRENT_FRAME_TIME);
+
+      Countdown_Timer.draw(TIMER_PANEL, ScrStat.Needs_Refresh);
+      TIMER_PANEL.draw(ScrStat.Needs_Refresh);
+      tiTimer.draw(ScrStat.Needs_Refresh);
+      */
+
+    }
+    ImGui::End();
+  }
 
   // Rendering
   ImGui::Render();

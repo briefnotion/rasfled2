@@ -17,7 +17,7 @@
 #include <deque>
 
 // RASFled related header files
-#include "consoleanddata.h"
+#include "screen4_helper.h"
 #include "animations_handler.h"
 
 // ***************************************************************************************
@@ -29,7 +29,7 @@
 // FUNCTION AND PROCEDURES
 // ***************************************************************************************
 
-void v_DoorMonitorAndAnimationControlModule2(Console &cons, system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
+void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
 
 
 

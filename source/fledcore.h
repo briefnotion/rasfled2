@@ -17,8 +17,9 @@
 // Standard Header Files
 #include <deque>
 
+#include "system.h"
 #include "LEDstuff.h"
-#include "consoleanddata.h"
+#include "screen4_helper.h"
 
 
 // ***************************************************************************************
@@ -133,7 +134,7 @@ class timed_event
   void process_led_light(int &led, timed_event_data &teDATA, system_data &sdSysData, stupid_random &sRND, unsigned long &tmeCurrentTime, 
                           bigCRGB bigcrgbNewColor[], bool &booEventComplete, bool &booPixelColorChanged); // return
 
-  bool execute2(Console &cons, system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime);
+  bool execute2(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime);
 };
 
 

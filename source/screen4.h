@@ -47,17 +47,27 @@ class SCREEN4
   const float H_BLUE = .667;
   const float H_PURPLE = .768;
 
+  ImVec2 SIZE_BUTTON_TAB = ImVec2(100, 43);
   ImVec2 SIZE_BUTTON = ImVec2(75, 75);
+  ImVec2 SIZE_BUTTON_SMALL = ImVec2(43, 43);
 
   bool use_work_area = true;
 
-  ImGuiWindowFlags flags =     ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | 
-                                      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                      ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
-  ImGuiWindowFlags flags_c =   ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                      ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
-  ImGuiWindowFlags flags_w =   ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                      ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
+  ImGuiWindowFlags flags =        ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | 
+                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
+  ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
+  //ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+  //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | 
+  //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
+  ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
+  //ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+  //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | 
+  //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
+  ImGuiWindowFlags flags_w_pop =  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 
+                                    ImGuiWindowFlags_NoScrollbar;
 
   bool show_another_window = true;
   bool show_test_window = false;
@@ -72,7 +82,12 @@ class SCREEN4
   int width = 1280;
   int height = 720;
 
-  // Screen Variables
+  // Windows Screen Variables
+
+  //bool DISPLAY_MAIN = true;
+  bool DISPLAY_DEBUG = false;
+  bool DISPLAY_TIMER = true;
+
   int DISPLAY_MENU = 0;
   int DISPLAY_SCREEN = 0;
 

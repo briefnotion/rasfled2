@@ -437,7 +437,7 @@ void timed_event::process_led_light(int &led, timed_event_data &teDATA, system_d
   } // End if tmeCurrentTime >= tmeStartAnim
 }
 
-bool timed_event::execute2(Console &cons, system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime)
+bool timed_event::execute2(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime)
 //  Sets all requested light paths, start to end position, to begin their animation
 //    at a future time.
 

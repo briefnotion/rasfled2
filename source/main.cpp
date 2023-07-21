@@ -88,7 +88,7 @@ static void glfw_error_callback(int error, const char* description)
 // Display Materix Prepare.
 
 //  Copy the Prepared Matrix to the Display Matrix.
-void MatrixPrepare(Console &cons, system_data &sdSysData, CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount)
+void MatrixPrepare(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount)
 {
   for (int lcount = 0; lcount < intLEDCOUNT; lcount++)
   {
@@ -250,7 +250,8 @@ int loop()
 // This was once the main() program.  Ever since we abandoned global variable, the setup 
 //  portion of this program has become convoluted.  It could use a good reorganize and 
 //  maybe a way to get some of this stuff out, subroutine, much of these routines. 
-{
+{ 
+  /*
   using namespace std;
   
   // ---------------------------------------------------------------------------------------
@@ -1068,6 +1069,10 @@ int loop()
     return_code = 9999;
   }
 
+  */
+
+  int return_code = 0;
+
   return return_code;
 }
 
@@ -1111,8 +1116,7 @@ int loop_2()
 
   // Define System Data and Console
   int return_code = 0;
-  Console cons;                 // REMOVE
-  
+  //  REMOVE  Console cons;
   SCREEN4 cons_2;
   system_data sdSystem;
 
@@ -1129,7 +1133,7 @@ int loop_2()
   display.set(SCREENUPDATEDELAY);
 
   // Console sub timer. Just a little faster to prevent blips.
-  cons.Console_Display.set(SCREENUPDATEDELAY-1);
+  //  REMOVE  cons.Console_Display.set(SCREENUPDATEDELAY-1);
 
   // System LogFile Variables
   FILE_WATCH watcher_daemon_log;
@@ -1170,10 +1174,11 @@ int loop_2()
   // ---------------------------------------------------------------------------------------
   // Initialize the console
   cons_2.create();    // Prepare console.
+  cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR.resize(4);
 
-  initscr();                                // REMOVE
-  cons.Screen.init();
-  cons.set_screen(sdSystem);                                // REMOVE
+  //  REMOVE  initscr();                                // REMOVE
+  //  REMOVE  cons.Screen.init();
+  //  REMOVE  cons.set_screen(sdSystem);                                // REMOVE
   
   // Print Start Info
   cons_2.SCREEN_COMMS.printw("Console Initialized ...  OK");
@@ -1183,6 +1188,7 @@ int loop_2()
   cons_2.SCREEN_COMMS.printw("  'help' - Command List)");
   cons_2.SCREEN_COMMS.printw("");
   
+  /*
   // Console Key Watch
   cons.keywatch.set((int)KEYEXIT,2);  // Exit the program.
 
@@ -1196,6 +1202,7 @@ int loop_2()
 
   // Console resize key (automatic detection)
   cons.keywatch.set(KEYRESIZE,2);
+  */
 
   // ---------------------------------------------------------------------------------------
   // System Init
@@ -1240,7 +1247,7 @@ int loop_2()
   // Loading Configuration from files
   // yes, it resaves the file.  as is for now.
 
-  if (load_json_configuration(cons, sdSystem, Working_Directory, Configuration_Files_JSON) == true)
+  if (load_json_configuration(cons_2.SCREEN_COMMS, sdSystem, Working_Directory, Configuration_Files_JSON) == true)
   {
     cons_2.SCREEN_COMMS.printw("  Configuration file loaded.");
   }
@@ -1249,7 +1256,7 @@ int loop_2()
     cons_2.SCREEN_COMMS.printw("  Configuration file not loaded.  Generating Working Configuration File.");
     sdSystem.ALERTS.add_generic_alert("Configuration file not loaded.  Generating Working Configuration File.");
 
-    if (save_json_configuration(cons, sdSystem, Working_Directory, Configuration_Files_JSON) == true)
+    if (save_json_configuration(cons_2.SCREEN_COMMS, sdSystem, Working_Directory, Configuration_Files_JSON) == true)
     {
       cons_2.SCREEN_COMMS.printw("    Configuration file created.");
       sdSystem.ALERTS.add_generic_alert("Configuration file created.");
@@ -1264,7 +1271,7 @@ int loop_2()
   // Loading Running State
   cons_2.SCREEN_COMMS.printw("  Loading running state ...");
   // yes, it resaves the file.  as is for now.
-  if (load_saved_running_state_json(cons, sdSystem, Running_State_Filename) != true)
+  if (load_saved_running_state_json(cons_2.SCREEN_COMMS, sdSystem, Running_State_Filename) != true)
   {
     cons_2.SCREEN_COMMS.printw("    Running state file not loaded.");
     sdSystem.ALERTS.add_generic_alert("Running state file not loaded.");
@@ -1322,6 +1329,7 @@ int loop_2()
 
   // ---------------------------------------------------------------------------------------
   // The Player
+  /*
   fstream fsPlayer;
   bool sucess = false;
 
@@ -1341,6 +1349,7 @@ int loop_2()
       sdSystem.ALERTS.add_generic_alert("FAILED - (Initializing Player)");
     }
   }
+  */
 
   // ---------------------------------------------------------------------------------------
   // Define the Supid Random Numbers
@@ -1371,7 +1380,7 @@ int loop_2()
   // -------------------------------------------------------------------------------------
   // Aditional DEBUG line that could only be set after the channels were created.
 
-  cons.keywatch.set((int)KEYLEDDRCYCL,sdSystem.CONFIG.iNUM_CHANNELS + 1);  // Test Doors
+  //cons.keywatch.set((int)KEYLEDDRCYCL,sdSystem.CONFIG.iNUM_CHANNELS + 1);  // Test Doors
 
   // ---------------------------------------------------------------------------------------
 
@@ -1414,7 +1423,7 @@ int loop_2()
   // **************************************************************************************
 
   // MAIN LOOP START
-  while( cons.keywatch.get(KEYEXIT) == 0 && cons_2.WINDOW_CLOSE == false)
+  while(cons_2.WINDOW_CLOSE == false)
   {
     // ---------------------------------------------------------------------------------------
     // Thread Management
@@ -1500,13 +1509,14 @@ int loop_2()
       }
 
       // Override the digital pins if in debugging mode.
-      if(cons.keywatch.getnoreset(KEYDEBUG) == 1)
+      //if(cons.keywatch.getnoreset(KEYDEBUG) == 1)
+      if(cons_2.SCREEN_COMMS.DEBUG_STATUS.DEBUG == true)
       {
         // Toggle on and off the door sensors with keyboard.
-        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(0).value = cons.keywatch.getTF('1');
-        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(1).value = cons.keywatch.getTF('2');
-        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(2).value = cons.keywatch.getTF('3');
-        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(3).value = cons.keywatch.getTF('4');        
+        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(0).value = cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
+        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(1).value = cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
+        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(2).value = cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR[2];
+        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(3).value = cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR[3];        
         
         TRUTH_CATCH ret_changed;
         for(int x=0; x<sdSystem.CONFIG.iNUM_SWITCHES; x++)
@@ -1522,7 +1532,7 @@ int loop_2()
       }
 
       // Check the doors and start or end all animations
-      v_DoorMonitorAndAnimationControlModule2(cons, sdSystem, animations, tmeCurrentMillis);
+      v_DoorMonitorAndAnimationControlModule2(cons_2.SCREEN_COMMS, sdSystem, animations, tmeCurrentMillis);
     }
 
     // Read light switchs and set day on or day off modes.
@@ -1549,7 +1559,7 @@ int loop_2()
           int channel = sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].intCHANNEL;
 
           sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].booARRAY_UPDATED 
-            = animations.EVENTS[channel].execute2(cons, sdSystem, sRND, 
+            = animations.EVENTS[channel].execute2(cons_2.SCREEN_COMMS, sdSystem, sRND, 
                 sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].crgbARRAY, 
                 tmeCurrentMillis);
         }
@@ -1577,6 +1587,7 @@ int loop_2()
           }
         }
 
+        /*
         // If debug mode Display all lights static color are selectted, replace all generated led colors
         // with a static color
         if ((cons.keywatch.getnoreset(KEYDEBUG) != 0) && (cons.keywatch.get(KEYLEDTEST) !=0))
@@ -1593,6 +1604,7 @@ int loop_2()
 
           booUpdate = true;
         }
+        */
       }
       else // lights are off, blank values if neccessary.
       {
@@ -1622,19 +1634,20 @@ int loop_2()
       {
         int mcount = 0;
         // Copy the prepared Matrixes to the display matrix
-        if((cons.keywatch.getnoreset(KEYDEBUG) == 0) || (cons.keywatch.get(KEYLEDDRCYCL) == 0))
+        //if((cons.keywatch.getnoreset(KEYDEBUG) == 0) || (cons.keywatch.get(KEYLEDDRCYCL) == 0))
         {
           for(int group=0; group < sdSystem.CONFIG.LED_MAIN.at(0).g_size(); group++)
           {
             for(int strip=0; strip < sdSystem.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
             {
-              MatrixPrepare(cons, sdSystem, 
+              MatrixPrepare(cons_2.SCREEN_COMMS, sdSystem, 
                     sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY, 
                     sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(), 
                     matrix, mcount);
             }
           }
         }
+        /*
         else
         {
           // Build TEST array to display
@@ -1665,6 +1678,7 @@ int loop_2()
                             sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(g).vLED_STRIPS.at(s).led_count(), 
                             matrix, mcount);
         }
+        */
 
         //  Are the lights enable to display.       
         //    Lights off will not turn the lights off and clear their values.  
@@ -1701,10 +1715,12 @@ int loop_2()
       sdSystem.read_hardware_status(1000);
 
       // Read System log files
+      /*
       while (watcher_daemon_log.line_avail() == true)
       {
         cons.Screen.Log_Screen_TEXT_BOX.add_line(tmeCurrentMillis, watcher_daemon_log.get_next_line());
       }
+      */
 
       // Read ADS-B Aircraft JSON
       if (watcher_aircraft_json.changed() == true)
@@ -1712,6 +1728,7 @@ int loop_2()
         sdSystem.AIRCRAFT_COORD.process(file_to_string(FILES_AIRCRAFT_JSON));
       }
 
+      /*
       // --- Grabbing Data From Keyboard and update whatever is associated to the key pressed.
       cons.readkeyboardinput2();
 
@@ -1719,6 +1736,7 @@ int loop_2()
       // This will handle special redraw events such as screen resize.
       cons.processkeyboadinput(sdSystem);
       cons.processmouseinput(sdSystem);
+      */
 
       processcommandlineinput(cons_2.SCREEN_COMMS, sdSystem, tmeCurrentMillis, animations);
       extraanimationdoorcheck2(cons_2.SCREEN_COMMS, sdSystem, tmeCurrentMillis, animations);
@@ -1743,20 +1761,26 @@ int loop_2()
         store_event_counts(sdSystem, animations);
 
         // ADS-B - Update all ADS-B gadgets with new data.
-        cons.update_ADS_B_gadgets(tmeCurrentMillis, sdSystem);
+        //cons.update_ADS_B_gadgets(tmeCurrentMillis, sdSystem);
 
-        // Automobile - Update all automobile gadgets
-        cons.update_automobile_gadgets(tmeCurrentMillis, sdSystem);
+        // Automobile - Update all automobile Reference Data
+        sdSystem.CAR_INFO.translate(tmeCurrentMillis);
+        //cons.update_automobile_gadgets(tmeCurrentMillis, sdSystem);
 
         // Update Switches to Alert system.
+        /*
         for (int door=0; door < sdSystem.CONFIG.vhwDOORS.size(); door++)
         {
           sdSystem.ALERTS.update_switch(door, sdSystem.CONFIG.vhwDOORS.at(door).booVALUE);
         }
+        */
+        
         
         // Redraw the console screen with what the screen determines needs to be displayed.
-        cons.display(fsPlayer, sdSystem, tmeCurrentMillis);
+        //cons.display(fsPlayer, sdSystem, tmeCurrentMillis);
+        cons_2.draw(sdSystem);
 
+        /*
         if (cons.the_player.get_next_frame_draw_time() > 0)
         {
           display.set_earliest_ready_time(cons.the_player.get_next_frame_draw_time());
@@ -1773,12 +1797,13 @@ int loop_2()
           thread_output_running = true;
           cons.Screen.buffer_active = false;     
         }
+        */
       }
       
       // Also delayed, File maintenance.
       if (sdSystem.booRunning_State_File_Dirty == true)
       {
-        save_running_state_json(cons, sdSystem, Running_State_Filename);
+        save_running_state_json(cons_2.SCREEN_COMMS, sdSystem, Running_State_Filename);
 
         // set false even if there was a save error to avoid repeats.
         sdSystem.booRunning_State_File_Dirty = false;
@@ -1786,13 +1811,14 @@ int loop_2()
     } // Is display to console ready -----------------
 
 
+    /*
     //****************************
     // Temporary Graphics Render Location
 
     cons_2.draw(sdSystem);
 
     //****************************
-
+    */
 
     // ________________________
     
@@ -1820,10 +1846,12 @@ int loop_2()
 
     // Consider aborts on errors.
     // Check every cycle.
+    /*
     if (return_code != 0)
     {
       cons.keywatch.in(KEYEXIT);
     }
+    */
 
     // ---------------------------------------------------------------------------------------
     // Now that the complete cycle is over, we need figure out how much time is remaining in 

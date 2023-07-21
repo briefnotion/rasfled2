@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.0.0)
 
 add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
 
-set(BUILD_RELEASE OFF)
+set(BUILD_RELEASE ON)
 
 if(BUILD_RELEASE)
       set(CMAKE_BUILD_TYPE Release)

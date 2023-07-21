@@ -67,6 +67,7 @@
 #include <unistd.h>
 #include <termio.h>
 #include <iostream>
+#include <vector>
 
 // Graphics
 #include "../../imgui/imgui.h"
@@ -126,7 +127,7 @@
 // Display Materix Prepare.
 
 //  Copy the Prepared Matrix to the Display Matrix.
-void MatrixPrepare(Console &cons, system_data &sdSysData, CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount);
+void MatrixPrepare(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount);
 
 void MatxixFill(CRGB crgbPreparedMatix[], int intLEDCOUNT, CRGB crgbColor);
 
