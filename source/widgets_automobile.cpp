@@ -31,10 +31,34 @@ void BLANK::display(const char *name, bool *p_open, ImGuiWindowFlags flags)
 
 void AUTOMOBILE_SCREEN::update(system_data &sdSysData, unsigned long tmeFrame_Time)
 {
-  DATA.MESSAGES = sdSysData.CAR_INFO.message_count;
-  DATA.SPEED = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph();
-  DATA.SUPER_TEMP = sdSysData.CAR_INFO.CALCULATED.s_temp();
-  DATA.VOLTAGE = sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v();
+  SDATA.MESSAGES = sdSysData.CAR_INFO.message_count;
+  SDATA.SPEED = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph();
+  SDATA.VOLTAGE = sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v();
+
+  SDATA.LATEST_UNKNOWN_MESSAGE = sdSysData.CAR_INFO.DATA.AD_UNKNOWN.ORIG;
+
+  //SDATA.CRUISE_CONTROL_SET = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control();
+  SDATA.CRUISE_CONTROL_SET_SPEED = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control_speed();
+
+  SDATA.ACCELERATION = sdSysData.CAR_INFO.CALCULATED.acceleration();
+
+  SDATA.RPM = sdSysData.CAR_INFO.STATUS.RPM.rpm();
+  SDATA.TORQUE = sdSysData.CAR_INFO.STATUS.POWER.load();
+
+  SDATA.STEERING_WHEEL_ANGLE = sdSysData.CAR_INFO.STATUS.STEERING.steering_wheel_angle();
+  SDATA.STEERING_WHEEL_LEFT_OF_CENTER = sdSysData.CAR_INFO.STATUS.STEERING.left_of_center();
+  SDATA.STEERING_WHEEL_TURNING_DIRECTION = sdSysData.CAR_INFO.STATUS.STEERING.turning_direction();
+
+  SDATA.TEMP_AMBIANT = sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.c();
+  SDATA.TEMP_INTAKE = sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.c();
+  SDATA.TEMP_COOLANT = sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.c();
+  SDATA.TEMP_CATALYST = sdSysData.CAR_INFO.STATUS.TEMPS.CATALYST_3C.c();
+  SDATA.TEMP_SUPER_TEMP = sdSysData.CAR_INFO.CALCULATED.s_temp();
+
+  SDATA.FUEL_RAIL_PRESSURE = sdSysData.CAR_INFO.STATUS.FUEL.FUEL_RAIL_PRESSURE.kPa();
+  SDATA.EVAP_SYSTEM_VAP_PRESSURE = sdSysData.CAR_INFO.STATUS.FUEL.EVAP_SYSTEM_VAP_PRESSURE.Pa();
+
+  SDATA.BAROMETER = sdSysData.CAR_INFO.STATUS.TEMPS.BARO_33.inHg();
 
   /*
   //--
@@ -262,10 +286,25 @@ void AUTOMOBILE_SCREEN::display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATI
 { 
   ImGui::Begin(name, p_open, flags);
   {
-    ImGui::Text("Messages: %d", DATA.MESSAGES);
-    ImGui::Text("Speed: %.2f", DATA.SPEED);
-    ImGui::Text("S-Temp: %.2f", DATA.SUPER_TEMP);
-    ImGui::Text("Voltage: %s", DATA.VOLTAGE.c_str());
+    ImGui::Text("Messages: %d", SDATA.MESSAGES);
+    ImGui::Text("Speed: %s", SDATA.SPEED.c_str());
+    ImGui::Text("Voltage: %s", SDATA.VOLTAGE.c_str());
+    ImGui::Text("Unknown: %s", SDATA.LATEST_UNKNOWN_MESSAGE.c_str());
+    ImGui::Text("Cruise Speed: %f", SDATA.CRUISE_CONTROL_SET_SPEED);
+    ImGui::Text("Acceleration: %f", SDATA.ACCELERATION);
+    ImGui::Text("Tach: %s", SDATA.RPM.c_str());
+    ImGui::Text("Torque: %s", SDATA.TORQUE.c_str());
+    ImGui::Text("Steering Angle : %s", SDATA.STEERING_WHEEL_ANGLE.c_str());
+    ImGui::Text("Steering LOC: %s", SDATA.STEERING_WHEEL_LEFT_OF_CENTER.c_str());
+    ImGui::Text("Steering Dir: %s", SDATA.STEERING_WHEEL_TURNING_DIRECTION.c_str());
+    ImGui::Text("Temp Ambiant: %s", SDATA.TEMP_AMBIANT.c_str());
+    ImGui::Text("Temp Intake: %s", SDATA.TEMP_INTAKE.c_str());
+    ImGui::Text("Temp Coolant: %s", SDATA.TEMP_COOLANT.c_str());
+    ImGui::Text("Temp Catalyst: %s", SDATA.TEMP_CATALYST.c_str());
+    ImGui::Text("Temp Super: %f", SDATA.TEMP_SUPER_TEMP);
+    ImGui::Text("Pressure Rail: %s", SDATA.FUEL_RAIL_PRESSURE.c_str());
+    ImGui::Text("Pressure Vap: %s", SDATA.EVAP_SYSTEM_VAP_PRESSURE.c_str());
+    ImGui::Text("Baro: %s", SDATA.BAROMETER.c_str());
   }
   ImGui::End();
 }

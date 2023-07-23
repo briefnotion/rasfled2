@@ -1760,7 +1760,7 @@ int loop_2()
         store_event_counts(sdSystem, animations);
 
         // ADS-B - Update all ADS-B gadgets with new data.
-        //cons.update_ADS_B_gadgets(tmeCurrentMillis, sdSystem);
+        cons_2.update_ADS_B_gadgets(tmeCurrentMillis, sdSystem);
 
         // Automobile - Update all automobile Reference Data
         sdSystem.CAR_INFO.translate(tmeCurrentMillis);

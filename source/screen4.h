@@ -113,6 +113,8 @@ class SCREEN4
 
   void update_automobile_gadgets(unsigned long &tmeCurrentMillis, system_data &sdSysData);
 
+  void update_ADS_B_gadgets(unsigned long &tmeCurrentMillis, system_data &sdSysData);
+
 };
 
 // ---------------------------------------------------------------------------------------

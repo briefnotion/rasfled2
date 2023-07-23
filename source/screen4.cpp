@@ -105,8 +105,6 @@ void SCREEN4::draw(system_data &sdSysData)
   {
     CONSOLE.add_line(SCREEN_COMMS.printw_q_get());
   }
-
-  ADSB.set_adsb_active(sdSysData.AIRCRAFT_COORD.is_active());
   
   /*
   Does not work yet.
@@ -724,10 +722,16 @@ void SCREEN4::update_daemon_log(string Text)
 void SCREEN4::update_automobile_gadgets(unsigned long &tmeCurrentMillis, system_data &sdSysData)
 {
   if(sdSysData.CAR_INFO.CHANGED == true)
-  {  
-    //Screen.AUTOMOBILE_OVERVIEW_PANEL.update(sdSysData, tmeCurrentMillis);
+  {
     AUTOMOBILE.update(sdSysData, tmeCurrentMillis);
-    //sdSysData.CAR_INFO.CHANGED = false;
+  }
+}
+
+void SCREEN4::update_ADS_B_gadgets(unsigned long &tmeCurrentMillis, system_data &sdSysData)
+{
+  if(sdSysData.AIRCRAFT_COORD.DATA.CHANGED == true)
+  {
+    ADSB.update(sdSysData, tmeCurrentMillis);
   }
 }
 
