@@ -33,18 +33,27 @@ class WIDGET_DEFAULTS
   ImGuiWindowFlags flags =        ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | 
                                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
+
   ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
   //ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
   //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | 
   //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
+
   ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
   //ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
   //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | 
   //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
+
   ImGuiWindowFlags flags_w_pop =  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 
                                     ImGuiWindowFlags_NoScrollbar;
+
+  ImGuiWindowFlags flags_t = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | 
+                              ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_BordersInnerH |
+                              ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterV | ImGuiTableFlags_BordersInnerV | 
+                              ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersInner |
+                              ImGuiTableFlags_SizingFixedFit;
 };
 
 class COLOR_COMBO
@@ -74,6 +83,60 @@ class COLOR_COMBOS
   COLOR_COMBO COLOR_COMB_BLUE;
 
   void init();
+};
+
+// ---------------------------------------------------------------------------------------
+
+class W_TEXT_PROPERTIES
+{
+  public:
+
+  COLOR_COMBO COLOR;
+};
+
+class W_TEXT
+{
+  private:
+
+  string TEXT = "";
+
+  public:
+
+  W_TEXT_PROPERTIES PROPS;
+
+  void update_text(unsigned long tmeCurrentMillis, string Text);
+
+  void draw(unsigned long tmeCurrentMillis);
+
+};
+
+// ---------------------------------------------------------------------------------------
+
+class W_TEXT_TF_PROPERTIES
+{
+  public:
+
+  COLOR_COMBO COLOR_TRUE;
+  COLOR_COMBO COLOR_FALSE;
+};
+
+class W_TEXT_TF
+{
+  private:
+
+  string TEXT_TRUE = "";
+  string TEXT_FALSE = "";
+  bool TRUE_FALSE = false;
+  
+  public:
+
+  W_TEXT_TF_PROPERTIES PROPS;
+
+  void update_text(unsigned long tmeCurrentMillis, string True_Text, string False_Text);
+  void update_tf(unsigned long tmeCurrentMillis, bool True_False);
+
+  void draw(unsigned long &tmeCurrentMillis);
+
 };
 
 // ---------------------------------------------------------------------------------------

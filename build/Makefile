@@ -898,6 +898,60 @@ home/pi/source/imgui/misc/cpp/imgui_stdlib.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/home/pi/source/imgui/misc/cpp/imgui_stdlib.cpp.s
 .PHONY : home/pi/source/imgui/misc/cpp/imgui_stdlib.cpp.s
 
+home/pi/source/implot/implot.o: home/pi/source/implot/implot.cpp.o
+
+.PHONY : home/pi/source/implot/implot.o
+
+# target to build an object file
+home/pi/source/implot/implot.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/home/pi/source/implot/implot.cpp.o
+.PHONY : home/pi/source/implot/implot.cpp.o
+
+home/pi/source/implot/implot.i: home/pi/source/implot/implot.cpp.i
+
+.PHONY : home/pi/source/implot/implot.i
+
+# target to preprocess a source file
+home/pi/source/implot/implot.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/home/pi/source/implot/implot.cpp.i
+.PHONY : home/pi/source/implot/implot.cpp.i
+
+home/pi/source/implot/implot.s: home/pi/source/implot/implot.cpp.s
+
+.PHONY : home/pi/source/implot/implot.s
+
+# target to generate assembly for a file
+home/pi/source/implot/implot.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/home/pi/source/implot/implot.cpp.s
+.PHONY : home/pi/source/implot/implot.cpp.s
+
+home/pi/source/implot/implot_items.o: home/pi/source/implot/implot_items.cpp.o
+
+.PHONY : home/pi/source/implot/implot_items.o
+
+# target to build an object file
+home/pi/source/implot/implot_items.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/home/pi/source/implot/implot_items.cpp.o
+.PHONY : home/pi/source/implot/implot_items.cpp.o
+
+home/pi/source/implot/implot_items.i: home/pi/source/implot/implot_items.cpp.i
+
+.PHONY : home/pi/source/implot/implot_items.i
+
+# target to preprocess a source file
+home/pi/source/implot/implot_items.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/home/pi/source/implot/implot_items.cpp.i
+.PHONY : home/pi/source/implot/implot_items.cpp.i
+
+home/pi/source/implot/implot_items.s: home/pi/source/implot/implot_items.cpp.s
+
+.PHONY : home/pi/source/implot/implot_items.s
+
+# target to generate assembly for a file
+home/pi/source/implot/implot_items.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/home/pi/source/implot/implot_items.cpp.s
+.PHONY : home/pi/source/implot/implot_items.cpp.s
+
 interface.o: interface.cpp.o
 
 .PHONY : interface.o
@@ -1369,6 +1423,12 @@ help:
 	@echo "... home/pi/source/imgui/misc/cpp/imgui_stdlib.o"
 	@echo "... home/pi/source/imgui/misc/cpp/imgui_stdlib.i"
 	@echo "... home/pi/source/imgui/misc/cpp/imgui_stdlib.s"
+	@echo "... home/pi/source/implot/implot.o"
+	@echo "... home/pi/source/implot/implot.i"
+	@echo "... home/pi/source/implot/implot.s"
+	@echo "... home/pi/source/implot/implot_items.o"
+	@echo "... home/pi/source/implot/implot_items.i"
+	@echo "... home/pi/source/implot/implot_items.s"
 	@echo "... interface.o"
 	@echo "... interface.i"
 	@echo "... interface.s"

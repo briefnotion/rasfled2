@@ -33,12 +33,29 @@ using namespace std;
 
 /*
 class BLANK
+// ---------------------------------------------------------------------------------------
+
+class W_TEXT_PROPERTIES
+{
+  public:
+
+  COLOR_COMBO COLOR;
+};
+
+class W_TEXT
 {
   private:
 
+  string TEXT = "";
+
   public:
 
-  void display(const char *name, bool *p_open, ImGuiWindowFlags flags);
+  W_TEXT_PROPERTIES PROPS;
+
+  void update_text(unsigned long tmeCurrentMillis, string Text);
+
+  void draw(unsigned long tmeCurrentMillis);
+
 };
 */
 
@@ -80,6 +97,8 @@ class ADSB_WIDGET
   
   private:
 
+  WIDGET_DEFAULTS DEFAULTS;
+  
   // Gadget window
   //PANEL ADSB_PANEL;
 

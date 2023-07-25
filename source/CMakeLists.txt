@@ -20,6 +20,8 @@ include_directories(../../imgui)
 include_directories(../../imgui/backends)
 include_directories(../../imgui/misc/cpp)
 
+include_directories(../../implot)
+
 find_package(Curses REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
@@ -45,6 +47,9 @@ add_executable(
   ../../imgui/misc/cpp/imgui_stdlib.cpp
   ../../imgui/backends/imgui_impl_glfw.cpp
   ../../imgui/backends/imgui_impl_opengl2.cpp
+
+  ../../implot/implot.cpp
+  ../../implot/implot_items.cpp
 
   alert_system.cpp
   LEDstuff.cpp

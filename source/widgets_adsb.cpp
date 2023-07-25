@@ -758,31 +758,62 @@ void ADSB_SCREEN::display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATION &Sc
     
     ImGui::BeginGroup();
     {
-      //ImGui::Text("Messages: %d", SDATA.MESSAGES);
-      //ImGui::Text("Speed: %.2f", SDATA.SPEED);
-      //ImGui::Text("S-Temp: %.2f", SDATA.SUPER_TEMP);
-      //ImGui::Text("Voltage: %s", SDATA.VOLTAGE.c_str());
-
       ImGui::Text("Time: %s  Count: %s  Pos: %s", 
                     SDATA.TIME_OF_SIGNAL.c_str(), 
                     SDATA.POSITIONED_COUNT.c_str(), 
                     SDATA.POSITIONED_AIRCRAFT.c_str());
-
-      if (SDATA.AIRCRAFT_LIST.AIRCRAFTS.size() > 0 && SDATA.ADSB_ACTIVE == true)
+      
+      //      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+      //                              ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
+  
+      if (ImGui::BeginTable("Aircraft Data", 11, DEFAULTS.flags_t))
       {
-        for (int pos = 0; pos < SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos ++)
         {
-          ImGui::Text("%s\t%s\t%s\t%s\t%s",
-              SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].FLIGHT.get_str_value().c_str(), 
-              SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].SPEED.get_str_value().c_str(), 
-              SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].ALTITUDE.get_str_value().c_str(), 
-              SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].D_VERTICAL_RATE.get_str_value().c_str(), 
-              SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].POSITION.LATITUDE.get_str_value().c_str(), 
-              SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].POSITION.LONGITUDE.get_str_value().c_str());
+          ImGui::TableSetupColumn("FLIGHT");
+          ImGui::TableSetupColumn("SQWK");
+          ImGui::TableSetupColumn("G SPD");
+          ImGui::TableSetupColumn("V RTE");
+          ImGui::TableSetupColumn("ALTITUDE    ");
+          ImGui::TableSetupColumn("ALTITUDE NAV");
+          ImGui::TableSetupColumn("HDG");
+          ImGui::TableSetupColumn("HDG NAV");
+          ImGui::TableSetupColumn("SEEN P");
+          ImGui::TableSetupColumn("SEEN");
+          ImGui::TableSetupColumn("RSSI");
+          ImGui::TableHeadersRow();
         }
+        for (int pos = 0; pos < SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos++)
+        {
+          ImGui::TableNextRow();
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].FLIGHT.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].SQUAWK.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].SPEED.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].VERT_RATE.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].ALTITUDE.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].NAV_ALTITUDE_MCP.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].TRACK.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].NAV_HEADING.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].SEEN_POS.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].SEEN.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].RSSI.get_str_value().c_str());
+        }
+        ImGui::EndTable();
       }
     }
     ImGui::EndGroup();
+
+
 
   }
   ImGui::End();

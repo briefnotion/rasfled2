@@ -71,6 +71,8 @@ int SCREEN4::create()
   // Setup Dear ImGui context
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();
+  ImPlot::CreateContext();
+
   ImGuiIO &io = ImGui::GetIO();
   (void)io;
 
@@ -80,6 +82,11 @@ int SCREEN4::create()
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
   // ImGui::StyleColorsLight();
+  // Adjust Styles
+  ImGuiStyle& style = ImGui::GetStyle();
+  style.WindowRounding = 8;
+  style.FrameRounding = 8;
+  style.ChildRounding = 8;
 
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(window, true);
@@ -87,9 +94,63 @@ int SCREEN4::create()
 
   io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
 
-  // Widgets
+  // Prepare Screens
+  AUTOMOBILE.create(COLOR_SELECT);
 
+  // Prepare Current Screen Widgets
+  LIGHTS.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  LIGHTS.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  LIGHTS.update_text(0, "LIGHTS", "LIGHTS");
 
+  DEBUG.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_RED;
+  DEBUG.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  DEBUG.update_text(0, "DEBUG", "     ");
+
+  OVERHEAD.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  OVERHEAD.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  OVERHEAD.update_text(0, " OVERHEAD ", " OVERHEAD ");
+
+  HAZARD.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_RED;
+  HAZARD.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  HAZARD.update_text(0, "  HAZARD  ", "  HAZARD  ");
+
+  DAY_NIGHT.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  DAY_NIGHT.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  DAY_NIGHT.update_text(0, "  DAY  ", " NIGHT ");
+
+  TIMER.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  TIMER.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  TIMER.update_text(0, " TIMER ", " TIMER ");
+
+  DOOR1.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  DOOR1.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  DOOR1.update_text(0, " DOOR1", " DOOR1");
+
+  DOOR2.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  DOOR2.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  DOOR2.update_text(0, " DOOR2", " DOOR2");
+
+  DOOR3.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  DOOR3.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  DOOR3.update_text(0, "DOOR3 ", "DOOR3 ");
+
+  DOOR4.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  DOOR4.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  DOOR4.update_text(0, "DOOR4 ", "DOOR4 ");
+
+  AUTO.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  AUTO.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  AUTO.update_text(0, " AUTO  ", " AUTO  ");
+
+  ADSB_IND.PROPS.COLOR_TRUE = COLOR_SELECT.COLOR_COMB_DEFAULT;
+  ADSB_IND.PROPS.COLOR_FALSE = COLOR_SELECT.COLOR_COMB_BLUE;
+  ADSB_IND.update_text(0, " ADS-B ", " ADS-B ");
+
+  string version = "v: ";
+  version = version + Revision;
+  VERSION.update_text(0, version);
+
+  TEMP.update_text(0, "Temp: NA");
 
   return 0;
 }
@@ -140,7 +201,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
   if (ImGui::Begin("Window", &show_test_window, DEFAULTS.flags)) // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
   {
-    ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 80, ImGui::GetContentRegionAvail().y), false, DEFAULTS.flags_c);
+    ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 85, ImGui::GetContentRegionAvail().y), false, DEFAULTS.flags_c);
     {
       // ---------------------------------------------------------------------------------------
       // Status Sub Window
@@ -189,11 +250,11 @@ void SCREEN4::draw(system_data &sdSysData)
           // Display Lights Off mode toggle.
           ImGui::BeginGroup();
           {
-            text_simple_bool("LIGHTS", sdSysData.Lights_On.value());
-            if (SCREEN_COMMS.DEBUG_STATUS.DEBUG == true)
-            {
-              ImGui::Text("DEBUG");
-            }
+            LIGHTS.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.Lights_On.value());
+            LIGHTS.draw(sdSysData.tmeCURRENT_FRAME_TIME);
+
+            DEBUG.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, SCREEN_COMMS.DEBUG_STATUS.DEBUG);
+            DEBUG.draw(sdSysData.tmeCURRENT_FRAME_TIME);
           }
           ImGui::EndGroup();
           
@@ -202,8 +263,11 @@ void SCREEN4::draw(system_data &sdSysData)
           // Status Group
           ImGui::BeginGroup();
           {
-            text_simple_bool(" OVERHEAD ", sdSysData.booOverheadRunning);
-            text_simple_bool("  HAZARD  ", sdSysData.booHazardRunning);
+            OVERHEAD.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.booOverheadRunning);
+            OVERHEAD.draw(sdSysData.tmeCURRENT_FRAME_TIME);
+
+            HAZARD.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.booHazardRunning);
+            HAZARD.draw(sdSysData.tmeCURRENT_FRAME_TIME);
           }
           ImGui::EndGroup();
 
@@ -213,17 +277,12 @@ void SCREEN4::draw(system_data &sdSysData)
           ImGui::BeginGroup();
           {
             // Lights
-            if(sdSysData.Day_On_With_Override.value() == true)
-            {
-              text_simple_bool("  DAY  ", true);
-            }
-            else
-            {
-              text_simple_bool(" NIGHT ", false);
-            }
+            DAY_NIGHT.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.Day_On_With_Override.value());
+            DAY_NIGHT.draw(sdSysData.tmeCURRENT_FRAME_TIME);
 
             // Timer
-            text_simple_bool(" TIMER ", sdSysData.cdTIMER.is_active());
+            TIMER.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.cdTIMER.is_active());
+            TIMER.draw(sdSysData.tmeCURRENT_FRAME_TIME);
           }
           ImGui::EndGroup();
 
@@ -232,14 +291,22 @@ void SCREEN4::draw(system_data &sdSysData)
           // Door Group
           ImGui::BeginGroup();
           {
-            text_simple_bool(" DOOR2", sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value);
+            DOOR2.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value);
+            DOOR2.draw(sdSysData.tmeCURRENT_FRAME_TIME);
+            
             ImGui::SameLine();
-            text_simple_bool("DOOR4 ", sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value);
+            
+            DOOR4.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value);
+            DOOR4.draw(sdSysData.tmeCURRENT_FRAME_TIME);
 
-            text_simple_bool(" DOOR1", sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value);
+
+            DOOR1.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value);
+            DOOR1.draw(sdSysData.tmeCURRENT_FRAME_TIME);
+            
             ImGui::SameLine();
-            text_simple_bool("DOOR3 ", sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value);
-
+            
+            DOOR3.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value);
+            DOOR3.draw(sdSysData.tmeCURRENT_FRAME_TIME);
           }
           ImGui::EndGroup();
 
@@ -248,8 +315,11 @@ void SCREEN4::draw(system_data &sdSysData)
           // Auto ADSB
           ImGui::BeginGroup();
           {
-            text_simple_bool(" AUTO  ", sdSysData.CAR_INFO.active());
-            text_simple_bool(" ADS-B ", sdSysData.AIRCRAFT_COORD.is_active());
+            AUTO.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.CAR_INFO.active());
+            AUTO.draw(sdSysData.tmeCURRENT_FRAME_TIME);
+
+            ADSB_IND.update_tf(sdSysData.tmeCURRENT_FRAME_TIME, sdSysData.AIRCRAFT_COORD.is_active());
+            ADSB_IND.draw(sdSysData.tmeCURRENT_FRAME_TIME);
           }
           ImGui::EndGroup();
           
@@ -261,17 +331,12 @@ void SCREEN4::draw(system_data &sdSysData)
 
         ImGui::BeginChild("Status Right", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, DEFAULTS.flags_c);
         {
-          ImGui::Text("Version:");
-          ImGui::SameLine();
-          ImGui::Text(Revision);
+          VERSION.draw(sdSysData.tmeCURRENT_FRAME_TIME);
 
           if (sdSysData.hsHardware_Status.enabled() == true)
           {
-            ImGui::Text(("Temp: " + to_string((int)sdSysData.hsHardware_Status.get_temperature()) + "c").c_str());
-          }
-          else
-          {
-            ImGui::Text("Temp: NA");
+            TEMP.update_text(sdSysData.tmeCURRENT_FRAME_TIME, ("Temp: " + to_string((int)sdSysData.hsHardware_Status.get_temperature()) + "c").c_str());
+            TEMP.draw(sdSysData.tmeCURRENT_FRAME_TIME);
           }
         }
         ImGui::EndChild();
@@ -301,40 +366,6 @@ void SCREEN4::draw(system_data &sdSysData)
         else if (DISPLAY_SCREEN == 2)
         {
           ADSB.display(sdSysData.tmeCURRENT_FRAME_TIME, SCREEN_COMMS, COLOR_SELECT, "ADSB", NULL, DEFAULTS.flags_w);
-        }
-
-        else if (DISPLAY_SCREEN == 3) // Create a window called "Hello, world!" and append into it.
-        {
-          ImGui::Begin("Hello, world!", NULL, DEFAULTS.flags_w);
-          {
-            static float f = 0.0f;
-            static int counter = 0;
-
-            ImGui::BeginGroup();
-
-            ImGui::Text("This is some useful text.");          // Display some text (you can use a format strings too)
-            //ImGui::Checkbox("Demo Window", &show_demo_window); // Edit bools storing our window open/close state
-            ImGui::Checkbox("Another Window", &show_another_window);
-
-            ImGui::SliderFloat("float", &f, 0.0f, 1.0f);             // Edit 1 float using a slider from 0.0f to 1.0f
-            ImGui::ColorEdit3("clear color", (float *)&clear_color); // Edit 3 floats representing a color
-
-            if (ImGui::Button("Button")) // Buttons return true when clicked (most widgets return true when edited/activated)
-              counter++;
-            ImGui::SameLine();
-            ImGui::Text("counter = %d", counter);
-
-            ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / io.Framerate, io.Framerate);
-
-            ImGui::EndGroup();
-
-            ImGui::SameLine();
-            if (ImGui::Button("Exit", ImVec2(50, 50)))
-            {
-              WINDOW_CLOSE = true;
-            }
-          }
-          ImGui::End();
         }
 
         else if (DISPLAY_SCREEN == 4)
@@ -380,46 +411,19 @@ void SCREEN4::draw(system_data &sdSysData)
 
         ImGui::SameLine();
 
+        /*
         if (button_simple_toggle_color("Hello\nWorld", "Hello\nWorld", DISPLAY_SCREEN == 3, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_TAB))
         {
           DISPLAY_SCREEN = 3;
         }
-
+        
         ImGui::SameLine();
+        */
 
         if (button_simple_toggle_color("LOGS", "LOGS", DISPLAY_SCREEN == 4, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_TAB))
         {
           DISPLAY_SCREEN = 4;
         }
-
-        /*
-        ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
-        if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
-        {
-          if (ImGui::BeginTabItem("Console"))
-          {
-            DISPLAY_SCREEN = 0;
-            ImGui::EndTabItem();
-          }
-          if (ImGui::BeginTabItem("Automobile"))
-          {
-            DISPLAY_SCREEN = 1;
-            ImGui::EndTabItem();
-          }
-          if (ImGui::BeginTabItem("ADSB"))
-          {
-            DISPLAY_SCREEN = 2;
-            ImGui::EndTabItem();
-          }
-          if (ImGui::BeginTabItem("Hello World"))
-          {
-            DISPLAY_SCREEN = 3;
-            ImGui::EndTabItem();
-          }
-          ImGui::EndTabBar();
-        }
-        */
-
       }
       ImGui::EndChild();
     }
@@ -561,6 +565,7 @@ void SCREEN4::draw(system_data &sdSysData)
   }
   ImGui::End();
 
+  // ---------------------------------------------------------------------------------------
   // Debug Window
   
   if (DISPLAY_DEBUG == true)
@@ -571,87 +576,72 @@ void SCREEN4::draw(system_data &sdSysData)
       ImGui::Text("%.3f ms/frame  %.1f FPS", 1000.0f / io.Framerate, io.Framerate);
       //ImGui::Text("%.1f FPS", io.Framerate);
 
-      // Debug On Off
-      ImGui::BeginGroup();
+      if (button_simple_toggle_color("Dug", "Dbug", SCREEN_COMMS.DEBUG_STATUS.DEBUG, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON_SMALL))
       {
-        if (button_simple_toggle_color("Dug", "Dbug", SCREEN_COMMS.DEBUG_STATUS.DEBUG, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON_SMALL))
-        {
-          SCREEN_COMMS.DEBUG_STATUS.DEBUG = ! SCREEN_COMMS.DEBUG_STATUS.DEBUG;
-        }
+        SCREEN_COMMS.DEBUG_STATUS.DEBUG = ! SCREEN_COMMS.DEBUG_STATUS.DEBUG;
       }
-      ImGui::EndGroup();
 
       ImGui::SameLine();
 
-      // Doors
-      ImGui::BeginGroup();
-      {
-        // Needs Better Spacing Alignment.
+      button_simple_enabled(to_string(sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(1)).c_str(), false, DEFAULTS.SIZE_BUTTON_SMALL);
 
-        // Door 2 (1)
-        ImGui::SetNextItemWidth(43);
-        ImGui::Text("%d", sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(1));
-        ImGui::SameLine();
-        if (button_simple_toggle_color("2", "2", SCREEN_COMMS.DEBUG_STATUS.DOOR[1], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
-        {
-          SCREEN_COMMS.DEBUG_STATUS.DOOR[1] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
-        }
-        ImGui::SameLine();
-        
-        // Door 4 (3)
-        if (button_simple_toggle_color("4", "4", SCREEN_COMMS.DEBUG_STATUS.DOOR[3], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
-        {
-          SCREEN_COMMS.DEBUG_STATUS.DOOR[3] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[3];
-        }
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(43);
-        ImGui::Text("%d", sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(3));
-        
-        // Door 1 (0)
-        ImGui::SetNextItemWidth(43);
-        ImGui::Text("%d", sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(0));
-        ImGui::SameLine();
-        if (button_simple_toggle_color("1", "1", SCREEN_COMMS.DEBUG_STATUS.DOOR[0], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
-        {
-          SCREEN_COMMS.DEBUG_STATUS.DOOR[0] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
-        }
-        ImGui::SameLine();
-        
-        // Door 3 (2)
+      ImGui::SameLine();
+
+      if (button_simple_toggle_color("2", "2", SCREEN_COMMS.DEBUG_STATUS.DOOR[1], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
+      {
+        SCREEN_COMMS.DEBUG_STATUS.DOOR[1] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
+      }
+
+      ImGui::SameLine();
+
+      if (button_simple_toggle_color("4", "4", SCREEN_COMMS.DEBUG_STATUS.DOOR[3], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
+      {
+        SCREEN_COMMS.DEBUG_STATUS.DOOR[3] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[3];
+      }
+
+      ImGui::SameLine();
+
+      button_simple_enabled(to_string(sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(3)).c_str(), false, DEFAULTS.SIZE_BUTTON_SMALL);
+
+      //-
+
+      if (ImGui::Button("X", DEFAULTS.SIZE_BUTTON_SMALL))
+      {
+        DISPLAY_DEBUG = false;
+      }
+
+      ImGui::SameLine();
+
+      button_simple_enabled(to_string(sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(0)).c_str(), false, DEFAULTS.SIZE_BUTTON_SMALL);
+
+      ImGui::SameLine();
+
+      if (button_simple_toggle_color("1", "1", SCREEN_COMMS.DEBUG_STATUS.DOOR[0], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
+      {
+        SCREEN_COMMS.DEBUG_STATUS.DOOR[0] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
+      }
+
+      ImGui::SameLine();
+
+        ImGui::TableNextColumn();
         if (button_simple_toggle_color("3", "3", SCREEN_COMMS.DEBUG_STATUS.DOOR[2], COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_SMALL))
         {
           SCREEN_COMMS.DEBUG_STATUS.DOOR[2] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[2];
         }
-        ImGui::SameLine();
-        ImGui::SetNextItemWidth(43);
-        ImGui::Text("%d", sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(2));
-      }
-      ImGui::EndGroup();
-      
-      ImGui::SameLine();
-      
-      // Close
-      ImGui::BeginGroup();
-      {
-        button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON_SMALL);
-         
-        if (ImGui::Button("X", DEFAULTS.SIZE_BUTTON_SMALL))
-        {
-          DISPLAY_DEBUG = false;
-        }
-      }
-      ImGui::EndGroup();
 
+      ImGui::SameLine();
+
+      button_simple_enabled(to_string(sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(2)).c_str(), false, DEFAULTS.SIZE_BUTTON_SMALL);
     }
     ImGui::End();
   }
 
   if (DISPLAY_TIMER == true)
   {
-    ImGui::SetNextWindowSize(ImVec2(80, 60));
+    //ImGui::SetNextWindowSize(ImVec2(80, 60));
+    ImGui::SetNextWindowSize(ImVec2(200, 60));
     if (ImGui::Begin("Timer", &DISPLAY_TIMER, DEFAULTS.flags_w_pop)) 
     {
-
       long elaped_time = 0;
       unsigned long duration_time = 0;
       long remaining_time = 0;
@@ -661,25 +651,18 @@ void SCREEN4::draw(system_data &sdSysData)
       elaped_time = sdSysData.cdTIMER.elapsed_time(sdSysData.tmeCURRENT_FRAME_TIME);
       remaining_time = duration_time - elaped_time;
 
+
+      string timer_dsp =  linemerge_right_justify(2, "00", to_string(millis_to_time_minutes(remaining_time))) + ":" + 
+                          linemerge_right_justify(2, "00", to_string(millis_to_time_seconds(remaining_time)));
+
       // Display Timer
+
+      ImGui::ProgressBar((((float)remaining_time) / (float)duration_time), ImVec2(-1.0f,0.0f), timer_dsp.c_str());
 
       //string mins = linemerge_right_justify(2, "00", to_string(millis_to_time_minutes(remaining_time)));
       //string secs = linemerge_right_justify(2, "00", to_string(millis_to_time_seconds(remaining_time)));
 
-      ImGui::Text("%.2i:%.2i", millis_to_time_minutes(remaining_time), millis_to_time_seconds(remaining_time));
-
-      /*
-      Countdown_Timer.PROP.LABEL = "Timer: " + mins + ":" + secs + " ";
-      Countdown_Timer.PROP.MAX_VALUE = duration_time;
-      Countdown_Timer.PROP.POSY = 1;
-      Countdown_Timer.PROP.POSX = 2;
-      Countdown_Timer.update(duration_time - elaped_time, sdSysData.tmeCURRENT_FRAME_TIME);
-
-      Countdown_Timer.draw(TIMER_PANEL, ScrStat.Needs_Refresh);
-      TIMER_PANEL.draw(ScrStat.Needs_Refresh);
-      tiTimer.draw(ScrStat.Needs_Refresh);
-      */
-
+      //ImGui::Text("%.2i:%.2i", millis_to_time_minutes(remaining_time), millis_to_time_seconds(remaining_time));
     }
     ImGui::End();
   }
@@ -708,6 +691,8 @@ void SCREEN4::shutdown()
 {
   ImGui_ImplOpenGL2_Shutdown();
   ImGui_ImplGlfw_Shutdown();
+
+  ImPlot::DestroyContext();
   ImGui::DestroyContext();
 
   glfwDestroyWindow(window);

@@ -27,38 +27,154 @@ void BLANK::display(const char *name, bool *p_open, ImGuiWindowFlags flags)
 }
 */
 
+// -------------------------------------------------------------------------------------
+void W_GUAGE_PLOT::create()
+{
+ 
+}
+
+void W_GUAGE_PLOT::update_value(unsigned long tmeCurrentMillis, float Value)
+{
+  VALUE = Value;
+    
+  IO_TIME += ImGui::GetIO().DeltaTime;
+
+  DATA.AddPoint(IO_TIME, Value);
+}
+
+void W_GUAGE_PLOT::draw(unsigned long tmeCurrentMillis)
+{
+  // Got this working as a concept, but barely.  Needs to be reintegrated.
+
+  ImPlotFlags plot_flags = ImPlotFlags_CanvasOnly;
+  ImPlotLineFlags axis_flags = ImPlotAxisFlags_NoDecorations ;
+
+  ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
+
+  if (ImPlot::BeginPlot("Speed Over Time", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), plot_flags)) 
+  {
+    ImPlot::SetupAxes(nullptr, nullptr, flags, flags);
+    ImPlot::SetupAxisLimits(ImAxis_X1, IO_TIME - 60, IO_TIME, ImGuiCond_Always);
+    ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 100);
+    ImPlot::PlotLine("Mouse Y", &DATA.Data[0].x, &DATA.Data[0].y, DATA.Data.size(), 0, DATA.Offset, 2*sizeof(float));
+    ImPlot::EndPlot();
+  }
+}
+
+// -------------------------------------------------------------------------------------
+
+void W_GUAGE::create()
+{
+  MIN_MAX.PROP.TIME_SPAN = PROPS.MIN_MAX_TIME_SPAN;
+  MIN_MAX.PROP.SLICES = PROPS.MIN_MAX_TIME_SLICES;
+}
+
+void W_GUAGE::update_value(unsigned long tmeCurrentMillis, float Value)
+{
+  VALUE = Value;
+  MIN_MAX.put_value(Value, tmeCurrentMillis);
+}
+
+void W_GUAGE::draw(unsigned long tmeCurrentMillis)
+{
+  DSP_VALUE.update_text(tmeCurrentMillis, to_string_round_to_nth(VALUE, 1));
+  DSP_MIN.update_text(tmeCurrentMillis, "Min: " + to_string_round_to_nth(MIN_MAX.min(), 1));
+  DSP_MAX.update_text(tmeCurrentMillis, "Max: " + to_string_round_to_nth(MIN_MAX.max(), 1));
+
+  ImGui::Text(PROPS.LABEL.c_str());
+  ImGui::SameLine();
+  DSP_VALUE.draw(tmeCurrentMillis);
+  ImGui::SameLine();
+  DSP_MIN.draw(tmeCurrentMillis);    
+  ImGui::SameLine();
+  DSP_MAX.draw(tmeCurrentMillis);
+
+  ImGui::ProgressBar((abs)(VALUE / PROPS.VALUE_MAX), ImVec2(-1.0f,0.0f), (to_string_round_to_nth(VALUE, 1)).c_str());
+}
+
 // ---------------------------------------------------------------------------------------
+void AUTOMOBILE_SCREEN::create(COLOR_COMBOS &Color_Select)
+{
+  SDATA.G_SPEED.PROPS.LABEL = "Speed:";
+  SDATA.G_SPEED.PROPS.VALUE_MAX = 75;
+  SDATA.G_SPEED.create();
+
+  SDATA.G_ACCELERATION.PROPS.LABEL = "Acceleration:";
+  SDATA.G_ACCELERATION.PROPS.VALUE_MAX = 10;
+  SDATA.G_ACCELERATION.create();
+
+  SDATA.G_RPM.PROPS.LABEL = "Tachometer:";
+  SDATA.G_RPM.PROPS.VALUE_MAX = 6000;
+  SDATA.G_RPM.create();
+
+  SDATA.T_CRUISE_CONTROL.PROPS.COLOR_TRUE = Color_Select.COLOR_COMB_DEFAULT;
+  SDATA.T_CRUISE_CONTROL.PROPS.COLOR_FALSE = Color_Select.COLOR_COMB_BLUE;
+  SDATA.T_CRUISE_CONTROL.update_text(0, "Cruise Control", "Cruise Control");
+
+  SDATA.G_TORQUE.PROPS.LABEL = "Torque:";
+  SDATA.G_TORQUE.PROPS.VALUE_MAX = 255;
+  SDATA.G_TORQUE.create();
+
+  SDATA.TEMP_AMBIANT.PROPS.LABEL = "Ambiant:";
+  SDATA.TEMP_AMBIANT.PROPS.VALUE_MAX = 40;
+  SDATA.TEMP_AMBIANT.create();
+
+  SDATA.TEMP_INTAKE.PROPS.LABEL = "Intake:";
+  SDATA.TEMP_INTAKE.PROPS.VALUE_MAX = 60;
+  SDATA.TEMP_INTAKE.create();
+
+  SDATA.TEMP_COOLANT.PROPS.LABEL = "Coolant:";
+  SDATA.TEMP_COOLANT.PROPS.VALUE_MIN = 40;
+  SDATA.TEMP_COOLANT.PROPS.VALUE_MAX = 120;
+  SDATA.TEMP_COOLANT.create();
+
+  SDATA.TEMP_CATALYST.PROPS.LABEL = "Catalyst:";
+  SDATA.TEMP_CATALYST.PROPS.VALUE_MAX = 1000;
+  SDATA.TEMP_CATALYST.create();
+
+  SDATA.TEMP_SUPER_TEMP.PROPS.LABEL = "Torque:";
+  SDATA.TEMP_SUPER_TEMP.PROPS.VALUE_MAX = 70;
+  SDATA.TEMP_SUPER_TEMP.create();
+
+  SDATA.P_SPEED.create();
+}
 
 void AUTOMOBILE_SCREEN::update(system_data &sdSysData, unsigned long tmeFrame_Time)
 {
   SDATA.MESSAGES = sdSysData.CAR_INFO.message_count;
-  SDATA.SPEED = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph();
-  SDATA.VOLTAGE = sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v();
-
   SDATA.LATEST_UNKNOWN_MESSAGE = sdSysData.CAR_INFO.DATA.AD_UNKNOWN.ORIG;
 
-  //SDATA.CRUISE_CONTROL_SET = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control();
-  SDATA.CRUISE_CONTROL_SET_SPEED = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control_speed();
+  SDATA.CRUISE_CONTROL_SET = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control();
+  SDATA.CRUISE_CONTROL_SPEED = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control_speed();
+  
+  SDATA.T_CRUISE_CONTROL.update_text(tmeFrame_Time, "Cruise Control: " + to_string((int)SDATA.CRUISE_CONTROL_SPEED), 
+                                            "Cruise Control: " + to_string((int)SDATA.CRUISE_CONTROL_SPEED));
+  SDATA.T_CRUISE_CONTROL.update_tf(tmeFrame_Time, SDATA.CRUISE_CONTROL_SET);
 
-  SDATA.ACCELERATION = sdSysData.CAR_INFO.CALCULATED.acceleration();
+  SDATA.G_SPEED.update_value(tmeFrame_Time, sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph());
 
-  SDATA.RPM = sdSysData.CAR_INFO.STATUS.RPM.rpm();
-  SDATA.TORQUE = sdSysData.CAR_INFO.STATUS.POWER.load();
+  SDATA.G_ACCELERATION.update_value(tmeFrame_Time, sdSysData.CAR_INFO.CALCULATED.acceleration());
+  SDATA.G_RPM.update_value(tmeFrame_Time, sdSysData.CAR_INFO.STATUS.RPM.val_rpm());
+  SDATA.G_TORQUE.update_value(tmeFrame_Time, (float)sdSysData.CAR_INFO.STATUS.POWER.val_load());
 
   SDATA.STEERING_WHEEL_ANGLE = sdSysData.CAR_INFO.STATUS.STEERING.steering_wheel_angle();
   SDATA.STEERING_WHEEL_LEFT_OF_CENTER = sdSysData.CAR_INFO.STATUS.STEERING.left_of_center();
   SDATA.STEERING_WHEEL_TURNING_DIRECTION = sdSysData.CAR_INFO.STATUS.STEERING.turning_direction();
 
-  SDATA.TEMP_AMBIANT = sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.c();
-  SDATA.TEMP_INTAKE = sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.c();
-  SDATA.TEMP_COOLANT = sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.c();
-  SDATA.TEMP_CATALYST = sdSysData.CAR_INFO.STATUS.TEMPS.CATALYST_3C.c();
-  SDATA.TEMP_SUPER_TEMP = sdSysData.CAR_INFO.CALCULATED.s_temp();
+  SDATA.VOLTAGE = sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v();
+
+  SDATA.TEMP_AMBIANT.update_value(tmeFrame_Time, sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c());
+  SDATA.TEMP_INTAKE.update_value(tmeFrame_Time, sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c());
+  SDATA.TEMP_COOLANT.update_value(tmeFrame_Time, sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c());
+  SDATA.TEMP_CATALYST.update_value(tmeFrame_Time, sdSysData.CAR_INFO.STATUS.TEMPS.CATALYST_3C.val_c());
+  SDATA.TEMP_SUPER_TEMP.update_value(tmeFrame_Time, sdSysData.CAR_INFO.CALCULATED.s_temp());
 
   SDATA.FUEL_RAIL_PRESSURE = sdSysData.CAR_INFO.STATUS.FUEL.FUEL_RAIL_PRESSURE.kPa();
   SDATA.EVAP_SYSTEM_VAP_PRESSURE = sdSysData.CAR_INFO.STATUS.FUEL.EVAP_SYSTEM_VAP_PRESSURE.Pa();
 
   SDATA.BAROMETER = sdSysData.CAR_INFO.STATUS.TEMPS.BARO_33.inHg();
+
+  SDATA.P_SPEED.update_value(tmeFrame_Time, sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph());
 
   /*
   //--
@@ -286,25 +402,65 @@ void AUTOMOBILE_SCREEN::display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATI
 { 
   ImGui::Begin(name, p_open, flags);
   {
-    ImGui::Text("Messages: %d", SDATA.MESSAGES);
-    ImGui::Text("Speed: %s", SDATA.SPEED.c_str());
-    ImGui::Text("Voltage: %s", SDATA.VOLTAGE.c_str());
+    ImGui::Text("Messages: %d", SDATA.MESSAGES); 
+    ImGui::SameLine();
     ImGui::Text("Unknown: %s", SDATA.LATEST_UNKNOWN_MESSAGE.c_str());
-    ImGui::Text("Cruise Speed: %f", SDATA.CRUISE_CONTROL_SET_SPEED);
-    ImGui::Text("Acceleration: %f", SDATA.ACCELERATION);
-    ImGui::Text("Tach: %s", SDATA.RPM.c_str());
-    ImGui::Text("Torque: %s", SDATA.TORQUE.c_str());
-    ImGui::Text("Steering Angle : %s", SDATA.STEERING_WHEEL_ANGLE.c_str());
-    ImGui::Text("Steering LOC: %s", SDATA.STEERING_WHEEL_LEFT_OF_CENTER.c_str());
-    ImGui::Text("Steering Dir: %s", SDATA.STEERING_WHEEL_TURNING_DIRECTION.c_str());
-    ImGui::Text("Temp Ambiant: %s", SDATA.TEMP_AMBIANT.c_str());
-    ImGui::Text("Temp Intake: %s", SDATA.TEMP_INTAKE.c_str());
-    ImGui::Text("Temp Coolant: %s", SDATA.TEMP_COOLANT.c_str());
-    ImGui::Text("Temp Catalyst: %s", SDATA.TEMP_CATALYST.c_str());
-    ImGui::Text("Temp Super: %f", SDATA.TEMP_SUPER_TEMP);
-    ImGui::Text("Pressure Rail: %s", SDATA.FUEL_RAIL_PRESSURE.c_str());
-    ImGui::Text("Pressure Vap: %s", SDATA.EVAP_SYSTEM_VAP_PRESSURE.c_str());
-    ImGui::Text("Baro: %s", SDATA.BAROMETER.c_str());
+
+    //ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+    ImGui::BeginChild("Speed and Velocity", ImVec2(ImGui::GetContentRegionAvail().x / 2, 260), true, DEFAULTS.flags_c);
+    {
+      SDATA.T_CRUISE_CONTROL.draw(tmeFrame_Time);
+
+      SDATA.G_SPEED.draw(tmeFrame_Time);
+
+      SDATA.G_ACCELERATION.draw(tmeFrame_Time);
+      SDATA.G_RPM.draw(tmeFrame_Time);
+      SDATA.G_TORQUE.draw(tmeFrame_Time);
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("Temperature", ImVec2(ImGui::GetContentRegionAvail().x, 260), true, DEFAULTS.flags_c);
+    {
+      SDATA.TEMP_AMBIANT.draw(tmeFrame_Time);
+      SDATA.TEMP_INTAKE.draw(tmeFrame_Time);
+      SDATA.TEMP_COOLANT.draw(tmeFrame_Time);
+      SDATA.TEMP_CATALYST.draw(tmeFrame_Time);
+      SDATA.TEMP_SUPER_TEMP.draw(tmeFrame_Time);
+    }
+    ImGui::EndChild();
+
+    ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x / 3, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
+    {  
+      ImGui::Text("Voltage: %s", SDATA.VOLTAGE.c_str());
+      //ImGui::Text("Cruise Speed: %f", SDATA.CRUISE_CONTROL_SET_SPEED);
+      //ImGui::Text("Acceleration: %f", SDATA.ACCELERATION);
+      //ImGui::Text("Tach: %s", SDATA.RPM.c_str());
+      //ImGui::Text("Torque: %s", SDATA.TORQUE.c_str());
+      ImGui::Text("Steering Angle : %s", SDATA.STEERING_WHEEL_ANGLE.c_str());
+      ImGui::Text("Steering LOC: %s", SDATA.STEERING_WHEEL_LEFT_OF_CENTER.c_str());
+      ImGui::Text("Steering Dir: %s", SDATA.STEERING_WHEEL_TURNING_DIRECTION.c_str());
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("Data 2", ImVec2(ImGui::GetContentRegionAvail().x / 2, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
+    {  
+      ImGui::Text("Pressure Rail: %s", SDATA.FUEL_RAIL_PRESSURE.c_str());
+      ImGui::Text("Pressure Vap: %s", SDATA.EVAP_SYSTEM_VAP_PRESSURE.c_str());
+      ImGui::Text("Baro: %s", SDATA.BAROMETER.c_str());
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("Data 3", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
+    {  
+      SDATA.P_SPEED.draw(tmeFrame_Time);
+    }
+    ImGui::EndChild();
   }
   ImGui::End();
 }

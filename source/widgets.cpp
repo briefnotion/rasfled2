@@ -16,11 +16,69 @@
 
 // ---------------------------------------------------------------------------------------
 
+void W_TEXT::update_text(unsigned long tmeCurrentMillis, string Text)
+{
+  TEXT = Text;
+}
+
+void W_TEXT::draw(unsigned long tmeCurrentMillis)
+{
+  if (PROPS.COLOR.DEFAULT == false)
+  {
+    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR.ACTIVE);
+    ImGui::Text(TEXT.c_str());
+    ImGui::PopStyleColor();
+  }
+  else
+  {
+    ImGui::Text(TEXT.c_str());
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
+void W_TEXT_TF::update_text(unsigned long tmeCurrentMillis, string True_Text, string False_Text)
+{
+  TEXT_TRUE = True_Text;
+  TEXT_FALSE = False_Text;
+}
+
+void W_TEXT_TF::update_tf(unsigned long tmeCurrentMillis, bool True_False)
+{
+  TRUE_FALSE = True_False;
+}
+
+void W_TEXT_TF::draw(unsigned long &tmeCurrentMillis)
+{
+  if (TRUE_FALSE == true && PROPS.COLOR_TRUE.DEFAULT == false)
+  {
+    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR_TRUE.ACTIVE);
+    ImGui::Text(TEXT_TRUE.c_str());
+    ImGui::PopStyleColor();
+  }
+  else if (TRUE_FALSE == true && PROPS.COLOR_TRUE.DEFAULT == true)
+  {
+    ImGui::Text(TEXT_TRUE.c_str());
+  }
+  else if (TRUE_FALSE == false && PROPS.COLOR_FALSE.DEFAULT == false)
+  {
+    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR_FALSE.ACTIVE);
+    ImGui::Text(TEXT_FALSE.c_str());
+    ImGui::PopStyleColor();
+  }
+  else // if (TRUE_FALSE == false && PROPS.COLOR_FALSE.DEFAULT == true)
+  {
+    ImGui::Text(TEXT_FALSE.c_str());
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
 void COLOR_COMBO::set(float H, float S, float V)
 {
-STANDARD = (ImVec4)ImColor::HSV(H, S, V);
-HOVERED = (ImVec4)ImColor::HSV(H, S + .1, V + .1);
-ACTIVE = (ImVec4)ImColor::HSV(H, S + .2, V + .2);
+STANDARD = ImColor::HSV(H, S, V);
+HOVERED = ImColor::HSV(H, S + .1, V + .1);
+ACTIVE = ImColor::HSV(H, S + .2, V + .2);
 DEFAULT = false;
 }
 
@@ -78,7 +136,6 @@ void text_simple_bool(string Text, bool Indication)
     ImGui::Text(Text.c_str());
   }
 }
-
 
 bool button_simple_enabled(string Text, bool Enabled, ImVec2 ImVec2_Size)
 {
