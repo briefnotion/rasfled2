@@ -93,6 +93,8 @@ int SCREEN4::create()
   ImGui_ImplOpenGL2_Init();
 
   io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
+  ImFont* large_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 48.0f);
+  // Will track as "io.Fonts->Fonts.Data[1]" manually, for now.
 
   // Prepare Screens
   AUTOMOBILE.create(COLOR_SELECT);
@@ -222,7 +224,9 @@ void SCREEN4::draw(system_data &sdSysData)
             RESET_KEYBOARD_FOCUS = false;
           }
 
-          ImGui::Text("CMD : ");
+          ImGui::PushFont(io.Fonts->Fonts.Data[1]);
+          ImGui::Text("CMD:");
+          ImGui::PopFont();
 
           ImGui::SameLine();
           // Command Line
@@ -439,7 +443,7 @@ void SCREEN4::draw(system_data &sdSysData)
       // Main Menu
       if (DISPLAY_MENU == 0)
       {
-        if (button_simple_toggle_color("Stop\nTimer", "Start\nTimer", sdSysData.cdTIMER.is_active(), COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_GREEN, DEFAULTS.SIZE_BUTTON))
+        if (button_simple_toggle_color("STOP\nTIMER", "START\nTIMER", sdSysData.cdTIMER.is_active(), COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_GREEN, DEFAULTS.SIZE_BUTTON))
         {
           if (sdSysData.cdTIMER.is_active() == false)
           {
@@ -453,7 +457,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
         button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON);
 
-        if (button_simple_toggle_color("Over\nHead\nLights", "Over\nHead\nLights", sdSysData.booOverheadRunning, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
+        if (button_simple_toggle_color("OVER\nHEAD\nLIGHTS", "OVER\nHEAD\nLIGHTS", sdSysData.booOverheadRunning, COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
         {
           if (sdSysData.booOverheadRunning == true)
           {
@@ -461,18 +465,26 @@ void SCREEN4::draw(system_data &sdSysData)
           }
           else
           {
-            SCREEN_COMMS.command_text_set("oo");
+            if (DISPLAY_OVERHEAD_COLOR == true)
+            {
+              SCREEN_COMMS.command_text_set("oo");
+              DISPLAY_OVERHEAD_COLOR = false;
+            }
+            else
+            {
+              DISPLAY_OVERHEAD_COLOR = true;
+            }
           }
         }
 
-        if (button_simple_color("Flash", COLOR_SELECT.COLOR_COMB_GREEN, DEFAULTS.SIZE_BUTTON))
+        if (button_simple_color("FLASH", COLOR_SELECT.COLOR_COMB_GREEN, DEFAULTS.SIZE_BUTTON))
         {
           SCREEN_COMMS.command_text_set("ff");
         }
 
         button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON);
 
-        if (button_simple_toggle_color("Lights\n(On)", "Lights\n(Off)", sdSysData.Lights_On.value(), COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON))
+        if (button_simple_toggle_color("LIGHTS\n(On)", "LIGHTS\n(Off)", sdSysData.Lights_On.value(), COLOR_SELECT.COLOR_COMB_WHITE, COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON))
         {
           if (sdSysData.Lights_On.value() == true)
           {
@@ -509,12 +521,12 @@ void SCREEN4::draw(system_data &sdSysData)
 
         button_simple_enabled(" ", false, DEFAULTS.SIZE_BUTTON);
 
-        if (button_simple_color("Clear\nAnims", COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
+        if (button_simple_color("CLEAR\nANIMS", COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
         {
           SCREEN_COMMS.command_text_set("``");
         }
 
-        if (button_simple_color("System", COLOR_SELECT.COLOR_COMB_BLUE, DEFAULTS.SIZE_BUTTON))
+        if (button_simple_color("SYSTEM", COLOR_SELECT.COLOR_COMB_BLUE, DEFAULTS.SIZE_BUTTON))
         {
           DISPLAY_MENU = 2;
         }
@@ -526,7 +538,7 @@ void SCREEN4::draw(system_data &sdSysData)
       }
       else if (DISPLAY_MENU == 2)
       {
-        if (button_simple_color("Exit", COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
+        if (button_simple_color("EXIT", COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON))
         {
           WINDOW_CLOSE = true;
         }
@@ -636,9 +648,11 @@ void SCREEN4::draw(system_data &sdSysData)
     ImGui::End();
   }
 
+  // ---------------------------------------------------------------------------------------
+  // Timer Window
+
   if (DISPLAY_TIMER == true)
   {
-    //ImGui::SetNextWindowSize(ImVec2(80, 60));
     ImGui::SetNextWindowSize(ImVec2(200, 60));
     if (ImGui::Begin("Timer", &DISPLAY_TIMER, DEFAULTS.flags_w_pop)) 
     {
@@ -658,11 +672,73 @@ void SCREEN4::draw(system_data &sdSysData)
       // Display Timer
 
       ImGui::ProgressBar((((float)remaining_time) / (float)duration_time), ImVec2(-1.0f,0.0f), timer_dsp.c_str());
+    }
+    ImGui::End();
+  }
 
-      //string mins = linemerge_right_justify(2, "00", to_string(millis_to_time_minutes(remaining_time)));
-      //string secs = linemerge_right_justify(2, "00", to_string(millis_to_time_seconds(remaining_time)));
+  // ---------------------------------------------------------------------------------------
+  // Overhead Color Window
+  
+  if (DISPLAY_OVERHEAD_COLOR == true)
+  {
+    ImGui::SetNextWindowSize(ImVec2(143, 290));
+    if (ImGui::Begin("Overhead Color", &DISPLAY_DEBUG, DEFAULTS.flags_w_pop)) 
+    {
+      if (button_simple_color("Red", COLOR_SELECT.COLOR_COMB_RED, DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        SCREEN_COMMS.command_text_set("or");
+        DISPLAY_OVERHEAD_COLOR = false;
+      }
 
-      //ImGui::Text("%.2i:%.2i", millis_to_time_minutes(remaining_time), millis_to_time_seconds(remaining_time));
+      ImGui::SameLine();
+
+      if (button_simple_color("Green", COLOR_SELECT.COLOR_COMB_GREEN, DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        SCREEN_COMMS.command_text_set("og");
+        DISPLAY_OVERHEAD_COLOR = false;
+      }
+
+      if (button_simple_color("Blue", COLOR_SELECT.COLOR_COMB_BLUE, DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        SCREEN_COMMS.command_text_set("ob");
+        DISPLAY_OVERHEAD_COLOR = false;
+      }
+
+      ImGui::SameLine();
+
+      if (button_simple_color("Purple", COLOR_SELECT.COLOR_COMB_PURPLE, DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        SCREEN_COMMS.command_text_set("ou");
+        DISPLAY_OVERHEAD_COLOR = false;
+      }
+      
+      if (button_simple_color("Yellow", COLOR_SELECT.COLOR_COMB_YELLOW, DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        SCREEN_COMMS.command_text_set("oy");
+        DISPLAY_OVERHEAD_COLOR = false;
+      }
+
+      ImGui::SameLine();
+
+      if (button_simple_color("Cyan", COLOR_SELECT.COLOR_COMB_CYAN, DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        SCREEN_COMMS.command_text_set("oc");
+        DISPLAY_OVERHEAD_COLOR = false;
+      }
+      
+      if (button_simple_color("Orange", COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        SCREEN_COMMS.command_text_set("on");
+        DISPLAY_OVERHEAD_COLOR = false;
+      }
+
+      ImGui::SameLine();
+
+      if (button_simple_color("White", COLOR_SELECT.COLOR_COMB_WHITE, DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        SCREEN_COMMS.command_text_set("ow");
+        DISPLAY_OVERHEAD_COLOR = false;
+      }
     }
     ImGui::End();
   }

@@ -65,7 +65,8 @@ class SCREEN4
 
   //bool DISPLAY_MAIN = true;
   bool DISPLAY_DEBUG = false;
-  bool DISPLAY_TIMER = true;
+  bool DISPLAY_TIMER = false;
+  bool DISPLAY_OVERHEAD_COLOR = false;
 
   int DISPLAY_MENU = 0;
   int DISPLAY_SCREEN = 0;

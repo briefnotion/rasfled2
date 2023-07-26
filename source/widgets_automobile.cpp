@@ -77,10 +77,27 @@ void W_GUAGE::update_value(unsigned long tmeCurrentMillis, float Value)
 
 void W_GUAGE::draw(unsigned long tmeCurrentMillis)
 {
-  DSP_VALUE.update_text(tmeCurrentMillis, to_string_round_to_nth(VALUE, 1));
-  DSP_MIN.update_text(tmeCurrentMillis, "Min: " + to_string_round_to_nth(MIN_MAX.min(), 1));
-  DSP_MAX.update_text(tmeCurrentMillis, "Max: " + to_string_round_to_nth(MIN_MAX.max(), 1));
+  DSP_VALUE.update_text(tmeCurrentMillis, "val: " + to_string_round_to_nth(VALUE, 1));
+  DSP_MIN.update_text(tmeCurrentMillis, "min: " + to_string_round_to_nth(MIN_MAX.min(), 1));
+  DSP_MAX.update_text(tmeCurrentMillis, "max: " + to_string_round_to_nth(MIN_MAX.max(), 1));
 
+  if (ImGui::BeginTable("Aircraft Data", 4, 0))
+  {
+    {
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      ImGui::Text(PROPS.LABEL.c_str());
+      ImGui::TableNextColumn();
+      DSP_VALUE.draw(tmeCurrentMillis);
+      ImGui::TableNextColumn();
+      DSP_MIN.draw(tmeCurrentMillis);
+      ImGui::TableNextColumn();
+      DSP_MAX.draw(tmeCurrentMillis);
+    }
+    ImGui::EndTable();
+  }
+
+  /*
   ImGui::Text(PROPS.LABEL.c_str());
   ImGui::SameLine();
   DSP_VALUE.draw(tmeCurrentMillis);
@@ -88,8 +105,9 @@ void W_GUAGE::draw(unsigned long tmeCurrentMillis)
   DSP_MIN.draw(tmeCurrentMillis);    
   ImGui::SameLine();
   DSP_MAX.draw(tmeCurrentMillis);
+  */
 
-  ImGui::ProgressBar((abs)(VALUE / PROPS.VALUE_MAX), ImVec2(-1.0f,0.0f), (to_string_round_to_nth(VALUE, 1)).c_str());
+  ImGui::ProgressBar((abs)(VALUE / PROPS.VALUE_MAX), ImVec2(-1.0f,18.0f), (to_string_round_to_nth(VALUE, 1)).c_str());
 }
 
 // ---------------------------------------------------------------------------------------
@@ -132,7 +150,7 @@ void AUTOMOBILE_SCREEN::create(COLOR_COMBOS &Color_Select)
   SDATA.TEMP_CATALYST.PROPS.VALUE_MAX = 1000;
   SDATA.TEMP_CATALYST.create();
 
-  SDATA.TEMP_SUPER_TEMP.PROPS.LABEL = "Torque:";
+  SDATA.TEMP_SUPER_TEMP.PROPS.LABEL = "S-Temp:";
   SDATA.TEMP_SUPER_TEMP.PROPS.VALUE_MAX = 70;
   SDATA.TEMP_SUPER_TEMP.create();
 
@@ -402,12 +420,11 @@ void AUTOMOBILE_SCREEN::display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATI
 { 
   ImGui::Begin(name, p_open, flags);
   {
-    ImGui::Text("Messages: %d", SDATA.MESSAGES); 
-    ImGui::SameLine();
-    ImGui::Text("Unknown: %s", SDATA.LATEST_UNKNOWN_MESSAGE.c_str());
+    //ImGui::Text("Messages: %d", SDATA.MESSAGES); 
+    //ImGui::SameLine();
+    //ImGui::Text("Unknown: %s", SDATA.LATEST_UNKNOWN_MESSAGE.c_str());
 
-    //ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-    ImGui::BeginChild("Speed and Velocity", ImVec2(ImGui::GetContentRegionAvail().x / 2, 260), true, DEFAULTS.flags_c);
+    ImGui::BeginChild("Speed and Velocity", ImVec2(ImGui::GetContentRegionAvail().x / 2, 248), true, DEFAULTS.flags_c);
     {
       SDATA.T_CRUISE_CONTROL.draw(tmeFrame_Time);
 
@@ -421,7 +438,7 @@ void AUTOMOBILE_SCREEN::display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATI
 
     ImGui::SameLine();
 
-    ImGui::BeginChild("Temperature", ImVec2(ImGui::GetContentRegionAvail().x, 260), true, DEFAULTS.flags_c);
+    ImGui::BeginChild("Temperature", ImVec2(ImGui::GetContentRegionAvail().x, 248), true, DEFAULTS.flags_c);
     {
       SDATA.TEMP_AMBIANT.draw(tmeFrame_Time);
       SDATA.TEMP_INTAKE.draw(tmeFrame_Time);
@@ -432,15 +449,46 @@ void AUTOMOBILE_SCREEN::display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATI
     ImGui::EndChild();
 
     ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x / 3, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
-    {  
-      ImGui::Text("Voltage: %s", SDATA.VOLTAGE.c_str());
-      //ImGui::Text("Cruise Speed: %f", SDATA.CRUISE_CONTROL_SET_SPEED);
-      //ImGui::Text("Acceleration: %f", SDATA.ACCELERATION);
-      //ImGui::Text("Tach: %s", SDATA.RPM.c_str());
-      //ImGui::Text("Torque: %s", SDATA.TORQUE.c_str());
-      ImGui::Text("Steering Angle : %s", SDATA.STEERING_WHEEL_ANGLE.c_str());
-      ImGui::Text("Steering LOC: %s", SDATA.STEERING_WHEEL_LEFT_OF_CENTER.c_str());
-      ImGui::Text("Steering Dir: %s", SDATA.STEERING_WHEEL_TURNING_DIRECTION.c_str());
+    {
+      if (ImGui::BeginTable("Aircraft Data", 2, 0))
+      {
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Messages");
+        ImGui::TableNextColumn();
+        ImGui::Text("%d", SDATA.MESSAGES); 
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Voltage");
+        ImGui::TableNextColumn();
+        ImGui::Text("%s", SDATA.VOLTAGE.c_str());
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Steering Angle");
+        ImGui::TableNextColumn();
+        ImGui::Text("%s %s %s", SDATA.STEERING_WHEEL_ANGLE.c_str(), 
+                                SDATA.STEERING_WHEEL_LEFT_OF_CENTER.c_str(), 
+                                SDATA.STEERING_WHEEL_TURNING_DIRECTION.c_str());
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Pressure Rail");
+        ImGui::TableNextColumn();
+        ImGui::Text(" %s", SDATA.FUEL_RAIL_PRESSURE.c_str());
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        ImGui::Text("Pressure Vap");
+        ImGui::TableNextColumn();
+        ImGui::Text("%s", SDATA.EVAP_SYSTEM_VAP_PRESSURE.c_str());
+        ImGui::TableNextRow();
+        ImGui::TableNextColumn();
+        //ImGui::PushFont(large_font);
+        ImGui::Text("Baro");
+        //ImGui::PopFont();
+        ImGui::TableNextColumn();
+        ImGui::Text("%s", SDATA.BAROMETER.c_str());
+        
+        ImGui::EndTable();
+      }
     }
     ImGui::EndChild();
 
@@ -448,9 +496,7 @@ void AUTOMOBILE_SCREEN::display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATI
 
     ImGui::BeginChild("Data 2", ImVec2(ImGui::GetContentRegionAvail().x / 2, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
     {  
-      ImGui::Text("Pressure Rail: %s", SDATA.FUEL_RAIL_PRESSURE.c_str());
-      ImGui::Text("Pressure Vap: %s", SDATA.EVAP_SYSTEM_VAP_PRESSURE.c_str());
-      ImGui::Text("Baro: %s", SDATA.BAROMETER.c_str());
+
     }
     ImGui::EndChild();
 

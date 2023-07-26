@@ -28,6 +28,7 @@ class WIDGET_DEFAULTS
 
   ImVec2 SIZE_BUTTON_TAB = ImVec2(100, 43);
   ImVec2 SIZE_BUTTON = ImVec2(75, 75);
+  ImVec2 SIZE_BUTTON_MEDIUM = ImVec2(60, 60);
   ImVec2 SIZE_BUTTON_SMALL = ImVec2(43, 43);
   
   ImGuiWindowFlags flags =        ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | 
@@ -54,6 +55,8 @@ class WIDGET_DEFAULTS
                               ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterV | ImGuiTableFlags_BordersInnerV | 
                               ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersInner |
                               ImGuiTableFlags_SizingFixedFit;
+
+  ImGuiWindowFlags flags_t_no_lines = ImGuiTableFlags_SizingFixedFit;
 };
 
 class COLOR_COMBO
