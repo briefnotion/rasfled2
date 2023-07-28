@@ -224,10 +224,9 @@ class ADSB_SCREEN
   
   public:
   
-  void update(system_data &sdSysData, unsigned long tmeFrame_Time);
+  void update(system_data &sdSysData);
 
-  void display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATION &Screen_Comms, 
-                COLOR_COMBOS &Color_Select, 
+  void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
                 const char *name, bool *p_open, ImGuiWindowFlags flags);
 };
 

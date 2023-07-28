@@ -16,6 +16,31 @@
 
 // ---------------------------------------------------------------------------------------
 
+void COLOR_COMBO::set(float H, float S, float V)
+{
+STANDARD = ImColor::HSV(H, S, V);
+HOVERED = ImColor::HSV(H, S + .1, V + .1);
+ACTIVE = ImColor::HSV(H, S + .2, V + .2);
+DEFAULT = false;
+}
+
+void COLOR_COMBOS::init()
+{
+  COLOR_COMB_BLACK.set(0.0, 0.0f, 0.0f);
+  COLOR_COMB_WHITE.set(0.0, 0.0f, .6f);
+  COLOR_COMB_GREY.set(0.0, 0.0f, .3f);
+  COLOR_COMB_RED.set(0.0, 0.8f, 0.6f);
+  COLOR_COMB_ORANGE.set(0.074f, 0.8f, 0.6f);
+  COLOR_COMB_YELLOW.set(0.162, 0.8f, 0.6f);
+  COLOR_COMB_GREEN.set(0.333f, 0.8f, 0.6f);
+  COLOR_COMB_CYAN.set(0.5f, 0.8f, 0.6f);
+  COLOR_COMB_BLUE.set(0.667f, 0.8f, 0.6f);
+  COLOR_COMB_PURPLE.set(0.768f, 0.8f, 0.6f);
+  COLOR_COMB_PINK.set(0.838f, 0.8f, 0.6f);
+}
+
+// ---------------------------------------------------------------------------------------
+
 void CONSOLE_COMMUNICATION::carrage_return_set()
 {
   CARRAGE_RETURN = true;

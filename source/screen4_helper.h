@@ -16,7 +16,84 @@
 #include <string>
 #include <vector>
 
+// IMGui Includes
+#include "../../imgui/imgui.h"
+#include "../../imgui/misc/cpp/imgui_stdlib.h"
+
 using namespace std;
+
+// ---------------------------------------------------------------------------------------
+
+class WIDGET_DEFAULTS
+{
+  public:
+
+  ImVec2 SIZE_BUTTON_TAB = ImVec2(100, 43);
+  ImVec2 SIZE_BUTTON = ImVec2(75, 75);
+  ImVec2 SIZE_BUTTON_MEDIUM = ImVec2(60, 60);
+  ImVec2 SIZE_BUTTON_SMALL = ImVec2(43, 43);
+  
+  ImGuiWindowFlags flags =        ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | 
+                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+  ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
+  //ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+  //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | 
+  //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+  ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
+  //ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+  //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | 
+  //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+  ImGuiWindowFlags flags_w_pop =  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 
+                                    ImGuiWindowFlags_NoScrollbar;
+
+  ImGuiWindowFlags flags_t = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | 
+                              ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_BordersInnerH |
+                              ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterV | ImGuiTableFlags_BordersInnerV | 
+                              ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersInner |
+                              ImGuiTableFlags_SizingFixedFit;
+
+  ImGuiWindowFlags flags_t_no_lines = ImGuiTableFlags_SizingFixedFit;
+};
+
+// ---------------------------------------------------------------------------------------
+
+class COLOR_COMBO
+{
+  public:
+
+  bool DEFAULT = true;
+
+  ImVec4 STANDARD;
+  ImVec4 HOVERED;
+  ImVec4 ACTIVE;
+
+  void set(float H, float S, float V);
+};
+
+class COLOR_COMBOS
+{
+  public: 
+  COLOR_COMBO COLOR_COMB_DEFAULT;
+  COLOR_COMBO COLOR_COMB_BLACK;
+  COLOR_COMBO COLOR_COMB_WHITE;
+  COLOR_COMBO COLOR_COMB_GREY;
+  COLOR_COMBO COLOR_COMB_RED;
+  COLOR_COMBO COLOR_COMB_ORANGE;
+  COLOR_COMBO COLOR_COMB_YELLOW;
+  COLOR_COMBO COLOR_COMB_GREEN;
+  COLOR_COMBO COLOR_COMB_CYAN;
+  COLOR_COMBO COLOR_COMB_BLUE;
+  COLOR_COMBO COLOR_COMB_PURPLE;
+  COLOR_COMBO COLOR_COMB_PINK;
+
+  void init();
+};
 
 // ---------------------------------------------------------------------------------------
 

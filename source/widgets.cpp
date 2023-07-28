@@ -16,12 +16,12 @@
 
 // ---------------------------------------------------------------------------------------
 
-void W_TEXT::update_text(unsigned long tmeCurrentMillis, string Text)
+void W_TEXT::update_text(system_data &sdSysData, string Text)
 {
   TEXT = Text;
 }
 
-void W_TEXT::draw(unsigned long tmeCurrentMillis)
+void W_TEXT::draw(system_data &sdSysData)
 {
   if (PROPS.COLOR.DEFAULT == false)
   {
@@ -37,18 +37,18 @@ void W_TEXT::draw(unsigned long tmeCurrentMillis)
 
 // ---------------------------------------------------------------------------------------
 
-void W_TEXT_TF::update_text(unsigned long tmeCurrentMillis, string True_Text, string False_Text)
+void W_TEXT_TF::update_text(system_data &sdSysData, string True_Text, string False_Text)
 {
   TEXT_TRUE = True_Text;
   TEXT_FALSE = False_Text;
 }
 
-void W_TEXT_TF::update_tf(unsigned long tmeCurrentMillis, bool True_False)
+void W_TEXT_TF::update_tf(system_data &sdSysData, bool True_False)
 {
   TRUE_FALSE = True_False;
 }
 
-void W_TEXT_TF::draw(unsigned long &tmeCurrentMillis)
+void W_TEXT_TF::draw(system_data &sdSysData)
 {
   if (TRUE_FALSE == true && PROPS.COLOR_TRUE.DEFAULT == false)
   {
@@ -70,28 +70,6 @@ void W_TEXT_TF::draw(unsigned long &tmeCurrentMillis)
   {
     ImGui::Text(TEXT_FALSE.c_str());
   }
-}
-
-// ---------------------------------------------------------------------------------------
-
-void COLOR_COMBO::set(float H, float S, float V)
-{
-STANDARD = ImColor::HSV(H, S, V);
-HOVERED = ImColor::HSV(H, S + .1, V + .1);
-ACTIVE = ImColor::HSV(H, S + .2, V + .2);
-DEFAULT = false;
-}
-
-void COLOR_COMBOS::init()
-{
-  COLOR_COMB_BLACK.set(0.0, 0.0f, 0.0f);
-  COLOR_COMB_WHITE.set(0.0, 0.0f, .6f);
-  COLOR_COMB_RED.set(0.0, 0.6f, 0.6f);
-  COLOR_COMB_YELLOW.set(0.254f, 0.6f, 0.6f);
-  COLOR_COMB_GREEN.set(0.333f, 0.6f, 0.6f);
-  COLOR_COMB_CYAN.set(0.5f, 0.6f, 0.6f);
-  COLOR_COMB_BLUE.set(0.667f, 0.6f, 0.6f);
-  COLOR_COMB_PURPLE.set(0.768f, 0.6f, 0.6f);
 }
 
 // ---------------------------------------------------------------------------------------

@@ -27,6 +27,8 @@
 #include "comport.h"
 #include "auto.h"
 
+#include "screen4_helper.h"
+
 using namespace std;
 
 // ***************************************************************************************
@@ -141,6 +143,10 @@ class system_data
   // Communications Port
   COMPORT COMMS;
   AUTOMOBILE CAR_INFO;
+
+  // Screen Settings
+  COLOR_COMBOS COLOR_SELECT;
+  WIDGET_DEFAULTS SCREEN_DEFAULTS;
 
   // -------------------------------------------------------------------------------------
 

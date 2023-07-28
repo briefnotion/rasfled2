@@ -1173,7 +1173,7 @@ int loop_2()
 
   // ---------------------------------------------------------------------------------------
   // Initialize the console
-  cons_2.create();    // Prepare console.
+  cons_2.create(sdSystem);    // Prepare console.
   cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR.resize(4);
 
   //  REMOVE  initscr();                                // REMOVE

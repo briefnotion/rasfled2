@@ -658,7 +658,7 @@ int ADSB_SCREEN::find_expired()
   return return_int;
 }
 
-void ADSB_SCREEN::update(system_data &sdSysData, unsigned long tmeFrame_Time)
+void ADSB_SCREEN::update(system_data &sdSysData)
 {
 
   int pos_found = 0;
@@ -693,17 +693,17 @@ void ADSB_SCREEN::update(system_data &sdSysData, unsigned long tmeFrame_Time)
         else
         {
           ADSB_WIDGET_q[pos_expired_avail].clear();
-          ADSB_WIDGET_q[pos_expired_avail].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], tmeFrame_Time);
+          ADSB_WIDGET_q[pos_expired_avail].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.tmeCURRENT_FRAME_TIME);
         }
       }
       else // slot found and pos avail.
       {
-        ADSB_WIDGET_q[pos_avail].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], tmeFrame_Time);
+        ADSB_WIDGET_q[pos_avail].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.tmeCURRENT_FRAME_TIME);
       }
     }
     else // put in found pos.
     {
-      ADSB_WIDGET_q[pos_found].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], tmeFrame_Time);
+      ADSB_WIDGET_q[pos_found].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.tmeCURRENT_FRAME_TIME);
     }
   }
 
@@ -727,15 +727,12 @@ void ADSB_SCREEN::update(system_data &sdSysData, unsigned long tmeFrame_Time)
   sdSysData.AIRCRAFT_COORD.DATA.CHANGED = false;
 }
 
-void ADSB_SCREEN::display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATION &Screen_Comms, 
-                          COLOR_COMBOS &Color_Select, 
+void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
                           const char *name, bool *p_open, ImGuiWindowFlags flags)
 { 
-  ImGui::Begin(name, p_open, flags);
-  {
+    ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
     {
-      ImGui::BeginGroup();
-      if (button_simple_toggle_color("ADSB", "ADSB", SDATA.ADSB_ACTIVE, Color_Select.COLOR_COMB_WHITE, Color_Select.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON))
+      if (button_simple_toggle_color("ADSB", "ADSB", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, DEFAULTS.SIZE_BUTTON))
       {
         if (SDATA.ADSB_ACTIVE == true)
         {
@@ -747,16 +744,16 @@ void ADSB_SCREEN::display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATION &Sc
         }
       }
 
-      if (button_simple_enabled("ADSB\nSnapshot", SDATA.ADSB_ACTIVE, DEFAULTS.SIZE_BUTTON))
+      if (button_simple_enabled("ADSB\nSNAP\nSHOT", SDATA.ADSB_ACTIVE, DEFAULTS.SIZE_BUTTON))
       {
         Screen_Comms.command_text_set(" adsbsnap");
       }
     }
-    ImGui::EndGroup();
+    ImGui::EndChild();
 
     ImGui::SameLine();
     
-    ImGui::BeginGroup();
+    ImGui::BeginChild("ADSB Display", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
     {
       ImGui::Text("Time: %s  Count: %s  Pos: %s", 
                     SDATA.TIME_OF_SIGNAL.c_str(), 
@@ -811,12 +808,10 @@ void ADSB_SCREEN::display(unsigned long tmeFrame_Time, CONSOLE_COMMUNICATION &Sc
         ImGui::EndTable();
       }
     }
-    ImGui::EndGroup();
+    ImGui::EndChild();
 
-
-
-  }
-  ImGui::End();
+  //}
+  //ImGui::End();
 }
 
 // ---------------------------------------------------------------------------------------

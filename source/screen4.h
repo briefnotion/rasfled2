@@ -42,10 +42,6 @@ class SCREEN4
 {
   private:
 
-  COLOR_COMBOS COLOR_SELECT;
-
-  WIDGET_DEFAULTS DEFAULTS;
-
   bool use_work_area = true;
 
   bool show_another_window = true;
@@ -67,6 +63,7 @@ class SCREEN4
   bool DISPLAY_DEBUG = false;
   bool DISPLAY_TIMER = false;
   bool DISPLAY_OVERHEAD_COLOR = false;
+  bool DISPLAY_RUNNING_COLOR = false;
 
   int DISPLAY_MENU = 0;
   int DISPLAY_SCREEN = 0;
@@ -113,7 +110,7 @@ class SCREEN4
   // Screen Return Variables
   bool WINDOW_CLOSE = false;
 
-  int create();
+  int create(system_data &sdSysData);
   // Create Screen and set variables
   // Return 0 OK
   // Return 2 error

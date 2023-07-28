@@ -19,74 +19,10 @@
 #include "../../imgui/imgui.h"
 #include "../../imgui/misc/cpp/imgui_stdlib.h"
 
+#include "system.h"
+#include "screen4_helper.h"
+
 using namespace std;
-
-// ---------------------------------------------------------------------------------------
-class WIDGET_DEFAULTS
-{
-  public:
-
-  ImVec2 SIZE_BUTTON_TAB = ImVec2(100, 43);
-  ImVec2 SIZE_BUTTON = ImVec2(75, 75);
-  ImVec2 SIZE_BUTTON_MEDIUM = ImVec2(60, 60);
-  ImVec2 SIZE_BUTTON_SMALL = ImVec2(43, 43);
-  
-  ImGuiWindowFlags flags =        ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | 
-                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
-
-  ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
-  //ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-  //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | 
-  //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
-
-  ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
-  //ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-  //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | 
-  //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
-
-  ImGuiWindowFlags flags_w_pop =  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 
-                                    ImGuiWindowFlags_NoScrollbar;
-
-  ImGuiWindowFlags flags_t = ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders | 
-                              ImGuiTableFlags_BordersH | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_BordersInnerH |
-                              ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterV | ImGuiTableFlags_BordersInnerV | 
-                              ImGuiTableFlags_BordersOuter | ImGuiTableFlags_BordersInner |
-                              ImGuiTableFlags_SizingFixedFit;
-
-  ImGuiWindowFlags flags_t_no_lines = ImGuiTableFlags_SizingFixedFit;
-};
-
-class COLOR_COMBO
-{
-  public:
-
-  bool DEFAULT = true;
-
-  ImVec4 STANDARD;
-  ImVec4 HOVERED;
-  ImVec4 ACTIVE;
-
-  void set(float H, float S, float V);
-};
-
-class COLOR_COMBOS
-{
-  public: 
-  COLOR_COMBO COLOR_COMB_DEFAULT;
-  COLOR_COMBO COLOR_COMB_BLACK;
-  COLOR_COMBO COLOR_COMB_WHITE;
-  COLOR_COMBO COLOR_COMB_RED;
-  COLOR_COMBO COLOR_COMB_YELLOW;
-  COLOR_COMBO COLOR_COMB_GREEN;
-  COLOR_COMBO COLOR_COMB_CYAN;
-  COLOR_COMBO COLOR_COMB_PURPLE;
-  COLOR_COMBO COLOR_COMB_BLUE;
-
-  void init();
-};
 
 // ---------------------------------------------------------------------------------------
 
@@ -98,6 +34,7 @@ class W_TEXT_PROPERTIES
 };
 
 class W_TEXT
+// Simple Text Widget with Properties
 {
   private:
 
@@ -107,9 +44,9 @@ class W_TEXT
 
   W_TEXT_PROPERTIES PROPS;
 
-  void update_text(unsigned long tmeCurrentMillis, string Text);
+  void update_text(system_data &sdSysData, string Text);
 
-  void draw(unsigned long tmeCurrentMillis);
+  void draw(system_data &sdSysData);
 
 };
 
@@ -124,6 +61,7 @@ class W_TEXT_TF_PROPERTIES
 };
 
 class W_TEXT_TF
+// Text Widget for displaying True and False Indicators
 {
   private:
 
@@ -135,16 +73,17 @@ class W_TEXT_TF
 
   W_TEXT_TF_PROPERTIES PROPS;
 
-  void update_text(unsigned long tmeCurrentMillis, string True_Text, string False_Text);
-  void update_tf(unsigned long tmeCurrentMillis, bool True_False);
+  void update_text(system_data &sdSysData, string True_Text, string False_Text);
+  void update_tf(system_data &sdSysData, bool True_False);
 
-  void draw(unsigned long &tmeCurrentMillis);
+  void draw(system_data &sdSysData);
 
 };
 
 // ---------------------------------------------------------------------------------------
 
 class TEXT_CONSOLE
+// Simple Console
 {
   private:
 
