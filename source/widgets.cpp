@@ -16,6 +16,50 @@
 
 // ---------------------------------------------------------------------------------------
 
+bool NEW_COLOR_SCALE::active()
+{
+  if (COLOR_SCALE.size() > 0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO Return_Color)
+{
+  COLOR_VALUE_PAIR temp_color_pair;
+
+  temp_color_pair.LT_or_EQ = Value_Is_LT_or_EQ;
+  temp_color_pair.COLOR = Return_Color;
+
+  COLOR_SCALE.push_back(temp_color_pair);
+}
+
+COLOR_COMBO NEW_COLOR_SCALE::get_color(float Value)
+{
+  COLOR_COMBO ret_color_combo;
+  bool found = false;
+  
+  if (COLOR_SCALE.size() > 0)
+  {
+    for (int pos = 0; pos < COLOR_SCALE.size() && found == false; pos++)
+    {
+      if (Value <= COLOR_SCALE[pos].LT_or_EQ)
+      {
+        ret_color_combo = COLOR_SCALE[pos].COLOR;
+        found = true;
+      }
+    }
+  }
+  
+  return (COLOR_COMBO) ret_color_combo;
+}
+
+// ---------------------------------------------------------------------------------------
+
 void W_TEXT::update_text(system_data &sdSysData, string Text)
 {
   TEXT = Text;

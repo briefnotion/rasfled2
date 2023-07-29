@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <vector>
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
@@ -23,6 +24,31 @@
 #include "screen4_helper.h"
 
 using namespace std;
+
+// ---------------------------------------------------------------------------------------
+
+class COLOR_VALUE_PAIR
+{
+  public:
+
+  float LT_or_EQ = 0;
+  COLOR_COMBO COLOR;
+};
+
+class NEW_COLOR_SCALE
+{
+  private:
+
+  vector<COLOR_VALUE_PAIR> COLOR_SCALE;
+
+  public:
+
+  bool active();
+
+  void add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO Return_Color);
+
+  COLOR_COMBO get_color(float Value);
+};
 
 // ---------------------------------------------------------------------------------------
 

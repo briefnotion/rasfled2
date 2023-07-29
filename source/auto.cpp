@@ -1359,9 +1359,11 @@ void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsi
     float ACCELERATION = 1000 * (   (current_velocity - PREVIOUS_VELOCITY_FOR_ACC)  ) / 
                         (Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent() - PREVIOUS_TIME_FOR_ACC);
 
-    ACCELERATION_QUICK_MEAN_HISTORY.put_value(ACCELERATION, tmeFrame_Time);
-
-    ACCELERATION_MIN_MAX_HISTORY.put_value(ACCELERATION_QUICK_MEAN_HISTORY.mean_float(), tmeFrame_Time);
+    if (ACCELERATION < 10)
+    {
+      ACCELERATION_QUICK_MEAN_HISTORY.put_value(ACCELERATION, tmeFrame_Time);
+      ACCELERATION_MIN_MAX_HISTORY.put_value(ACCELERATION_QUICK_MEAN_HISTORY.mean_float(), tmeFrame_Time);
+    }
 
     PREVIOUS_VELOCITY_FOR_ACC = current_velocity;
     PREVIOUS_TIME_FOR_ACC = Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent();

@@ -28,7 +28,7 @@ void COLOR_COMBOS::init()
 {
   COLOR_COMB_BLACK.set(0.0, 0.0f, 0.0f);
   COLOR_COMB_WHITE.set(0.0, 0.0f, .6f);
-  COLOR_COMB_GREY.set(0.0, 0.0f, .3f);
+  COLOR_COMB_GREY.set(0.0, 0.0f, .4f);
   COLOR_COMB_RED.set(0.0, 0.8f, 0.6f);
   COLOR_COMB_ORANGE.set(0.074f, 0.8f, 0.6f);
   COLOR_COMB_YELLOW.set(0.162, 0.8f, 0.6f);

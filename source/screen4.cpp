@@ -849,7 +849,7 @@ void SCREEN4::update_automobile_gadgets(unsigned long &tmeCurrentMillis, system_
 {
   if(sdSysData.CAR_INFO.CHANGED == true)
   {
-    AUTOMOBILE.update(sdSysData, tmeCurrentMillis);
+    AUTOMOBILE.update(sdSysData);
   }
 }
 

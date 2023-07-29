@@ -110,9 +110,9 @@ class W_GUAGE_PLOT
 {
   private:
 
-  float VALUE = 0;
-
-  ScrollingBuffer DATA;
+  ScrollingBuffer DATA1;
+  ScrollingBuffer DATA2;
+  ScrollingBuffer DATA3;
 
   float IO_TIME = 0;
 
@@ -124,7 +124,7 @@ class W_GUAGE_PLOT
 
   void create();
 
-  void update_value(system_data &sdSysData, float value);
+  void update_value(system_data &sdSysData, float Value1, float Value2, float Value3);
 
   void draw(system_data &sdSysData);
 };
@@ -215,6 +215,46 @@ class W_GUAGE
 
 // ---------------------------------------------------------------------------------------
 
+class T_DATA_DISPLAY_PROPERTIES
+{
+  public:
+
+  //COLOR_COMBO COLOR;
+  string LABEL = "";
+
+  int DATA_OFFSET = 90;
+
+  NEW_COLOR_SCALE COLOR_SCALE;
+};
+
+class T_DATA_DISPLAY
+// Setup a color scale based on value
+// Colors will not update on sys data color map update.
+{
+  private:
+
+  WIDGET_DEFAULTS DEFAULTS;
+
+  W_TEXT LABEL;
+  W_TEXT DATA;
+  
+  string VALUE_STRING = "";
+  float VALUE_FLOAT = 0;
+
+  public:
+
+  T_DATA_DISPLAY_PROPERTIES PROPS;
+
+  void create(system_data &sdSysData);
+
+  void update_value(system_data &sdSysData, string String_Value, float Float_Value);
+  void update_value(system_data &sdSysData, string String_Value);
+
+  void draw(system_data &sdSysData);
+};
+
+// ---------------------------------------------------------------------------------------
+
 class DISPLAY_DATA_AUTOMOBILE
 {
   public:
@@ -237,20 +277,40 @@ class DISPLAY_DATA_AUTOMOBILE
   int RPM = 0;
   int TORQUE_DEMANDED = 0;
 
+  // Pressure
+
   string FUEL_RAIL_PRESSURE = "X";
+  float FUEL_RAIL_PRESSURE_VAL = 0;
   string EVAP_SYSTEM_VAP_PRESSURE = "X";
+  float EVAP_SYSTEM_VAP_PRESSURE_VAL = 0;
 
   string VOLTAGE = "X";
+  float VOLTAGE_VAL = 0;
+
   string BAROMETER = "X";
+  float BAROMETER_VAL = 0;
+
+  // Steering
 
   string STEERING_WHEEL_ANGLE = "X";
   string STEERING_WHEEL_LEFT_OF_CENTER = "X";
   string STEERING_WHEEL_TURNING_DIRECTION = "X";
 
+  // Temp
+
+  string TEMP_AMBIANT_STRING = "";
   float TEMP_AMBIANT = 0;
+  
+  string TEMP_AIR_INTAKE_STRING = "";
   float TEMP_AIR_INTAKE = 0;
+  
+  string TEMP_COOLANT_STRING = "";
   float TEMP_COOLANT = 0;
+
+  string TEMP_CATALYST_STRING = "";
   float TEMP_CATALYST = 0;
+
+  string TEMP_S_TEMP_STRING = "";
   float TEMP_S_TEMP = 0;
 
   // Large Indicators
@@ -259,6 +319,19 @@ class DISPLAY_DATA_AUTOMOBILE
   T_LARGE_NUMBER_DISPLAY L_ACCELERATION;
   T_LARGE_NUMBER_DISPLAY L_GEAR;
   T_LARGE_NUMBER_DISPLAY L_TACH;
+
+  // Display Data
+
+  T_DATA_DISPLAY D_FUEL_RAIL_PRESSURE;
+  T_DATA_DISPLAY D_EVAP_SYSTEM_VAP_PRESSURE;
+  T_DATA_DISPLAY D_VOLTAGE;
+  T_DATA_DISPLAY D_BAROMETER;
+
+  T_DATA_DISPLAY D_TEMP_AMBIANT;
+  T_DATA_DISPLAY D_TEMP_INTAKE;
+  T_DATA_DISPLAY D_TEMP_COOLANT;
+  T_DATA_DISPLAY D_TEMP_CATALYST;
+  T_DATA_DISPLAY D_TEMP_SUPER_TEMP;
 
   // Guages
 
@@ -291,7 +364,7 @@ class AUTOMOBILE_SCREEN
   
   void create(system_data &sdSysData);
 
-  void update(system_data &sdSysData, unsigned long tmeFrame_Time);
+  void update(system_data &sdSysData);
 
   void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
                                 const char *name, bool *p_open, ImGuiWindowFlags flags);

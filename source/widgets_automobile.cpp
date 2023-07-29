@@ -33,15 +33,15 @@ void W_GUAGE_PLOT::create()
  
 }
 
-void W_GUAGE_PLOT::update_value(system_data &sdSysData, float Value)
+void W_GUAGE_PLOT::update_value(system_data &sdSysData, float Value1, float Value2, float Value3)
 {
   if (UPDATE_DATA.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
   {
-    VALUE = Value;
-
     IO_TIME += ImGui::GetIO().DeltaTime;
 
-    DATA.AddPoint(IO_TIME, Value);
+    DATA1.AddPoint(IO_TIME, Value1);
+    DATA2.AddPoint(IO_TIME, Value2);
+    DATA3.AddPoint(IO_TIME, Value3);
 
     UPDATE_DATA.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, 500);
   }
@@ -61,7 +61,10 @@ void W_GUAGE_PLOT::draw(system_data &sdSysData)
     ImPlot::SetupAxes(nullptr, nullptr, flags, flags);
     ImPlot::SetupAxisLimits(ImAxis_X1, IO_TIME - 60, IO_TIME, ImGuiCond_Always);
     ImPlot::SetupAxisLimits(ImAxis_Y1, 0, PROPS.VALUE_MAX);
-    ImPlot::PlotLine("SPEED", &DATA.Data[0].x, &DATA.Data[0].y, DATA.Data.size(), 0, DATA.Offset, 2*sizeof(float));
+
+    ImPlot::PlotLine("SPEED", &DATA1.Data[0].x, &DATA1.Data[0].y, DATA1.Data.size(), 0, DATA1.Offset, 2*sizeof(float));
+    ImPlot::PlotLine("S-TEMP", &DATA2.Data[0].x, &DATA2.Data[0].y, DATA2.Data.size(), 0, DATA2.Offset, 2*sizeof(float));
+    ImPlot::PlotLine("TACH", &DATA3.Data[0].x, &DATA3.Data[0].y, DATA3.Data.size(), 0, DATA3.Offset, 2*sizeof(float));
     ImPlot::EndPlot();
   }
 }
@@ -235,6 +238,51 @@ void W_GUAGE::draw(system_data &sdSysData)
 }
 
 // ---------------------------------------------------------------------------------------
+
+void T_DATA_DISPLAY::create(system_data &sdSysData)
+{
+  LABEL.update_text(sdSysData, PROPS.LABEL);
+}
+
+void T_DATA_DISPLAY::update_value(system_data &sdSysData, string String_Value, float Float_Value)
+{
+  VALUE_STRING = String_Value;
+  VALUE_FLOAT = Float_Value;
+
+  //---
+
+  DATA.update_text(sdSysData, VALUE_STRING);
+}
+
+void T_DATA_DISPLAY::update_value(system_data &sdSysData, string String_Value)
+{
+  update_value(sdSysData, String_Value, 0);
+}
+
+void T_DATA_DISPLAY::draw(system_data &sdSysData)
+{
+  ImVec2 pos = ImGui::GetCursorScreenPos();
+
+  LABEL.draw(sdSysData);
+  ImGui::SameLine();
+
+  pos.x = pos.x + PROPS.DATA_OFFSET;
+  ImGui::SetCursorScreenPos(pos);
+
+  if (PROPS.COLOR_SCALE.active())
+  {
+    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR_SCALE.get_color(VALUE_FLOAT).ACTIVE);
+    DATA.draw(sdSysData);
+    ImGui::PopStyleColor();
+  }
+  else
+  {
+    DATA.draw(sdSysData);
+  }
+    
+}
+
+// ---------------------------------------------------------------------------------------
 void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
 {
   SDATA.L_SPEED.PROPS.LABEL = "V\nE\nL";
@@ -255,6 +303,58 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_TACH.PROPS.LABEL_ON_LEFT = false;
   SDATA.L_TACH.PROPS.DISPLAY_MIN_MAX = true;
   SDATA.L_TACH.create();
+
+  SDATA.D_FUEL_RAIL_PRESSURE.PROPS.LABEL = right_justify(9, "F Rail P:");
+  SDATA.D_FUEL_RAIL_PRESSURE.create(sdSysData);
+
+  SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.PROPS.LABEL = right_justify(9, "Sys Vp P:");
+  SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.create(sdSysData);
+
+  SDATA.D_VOLTAGE.PROPS.LABEL = right_justify(9, "Voltage:");
+  SDATA.D_VOLTAGE.create(sdSysData);
+
+  SDATA.D_BAROMETER.PROPS.LABEL = right_justify(9, "Baro:");
+  SDATA.D_BAROMETER.create(sdSysData);
+
+  SDATA.D_TEMP_AMBIANT.PROPS.LABEL = right_justify(9, "Ambiant:");
+  SDATA.D_TEMP_AMBIANT.PROPS.COLOR_SCALE.add_color_value_pair(0, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
+  SDATA.D_TEMP_AMBIANT.PROPS.COLOR_SCALE.add_color_value_pair(30, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_TEMP_AMBIANT.PROPS.COLOR_SCALE.add_color_value_pair(38, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_TEMP_AMBIANT.PROPS.COLOR_SCALE.add_color_value_pair(43, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_TEMP_AMBIANT.PROPS.COLOR_SCALE.add_color_value_pair(100, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.D_TEMP_AMBIANT.create(sdSysData);
+
+  SDATA.D_TEMP_INTAKE.PROPS.LABEL = right_justify(9, "Intake:");
+  SDATA.D_TEMP_INTAKE.PROPS.COLOR_SCALE.add_color_value_pair(10, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
+  SDATA.D_TEMP_INTAKE.PROPS.COLOR_SCALE.add_color_value_pair(40, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_TEMP_INTAKE.PROPS.COLOR_SCALE.add_color_value_pair(48, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_TEMP_INTAKE.PROPS.COLOR_SCALE.add_color_value_pair(53, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_TEMP_INTAKE.PROPS.COLOR_SCALE.add_color_value_pair(100, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.D_TEMP_INTAKE.create(sdSysData);
+
+  SDATA.D_TEMP_COOLANT.PROPS.LABEL = right_justify(9, "Coolant:");
+  SDATA.D_TEMP_COOLANT.PROPS.COLOR_SCALE.add_color_value_pair(60, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
+  SDATA.D_TEMP_COOLANT.PROPS.COLOR_SCALE.add_color_value_pair(90, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_TEMP_COOLANT.PROPS.COLOR_SCALE.add_color_value_pair(100, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_TEMP_COOLANT.PROPS.COLOR_SCALE.add_color_value_pair(110, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_TEMP_COOLANT.PROPS.COLOR_SCALE.add_color_value_pair(200, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.D_TEMP_COOLANT.create(sdSysData);
+
+  SDATA.D_TEMP_CATALYST.PROPS.LABEL = right_justify(9, "Catalyst:");
+  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(150, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
+  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(600, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(800, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(1200, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(2000, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.D_TEMP_CATALYST.create(sdSysData);
+
+  SDATA.D_TEMP_SUPER_TEMP.PROPS.LABEL = right_justify(9, "S-Temp:");
+  SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(40, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
+  SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(50, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(60, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(70, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(100, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.D_TEMP_SUPER_TEMP.create(sdSysData);
 
   SDATA.G_SPEED.PROPS.LABEL = "Speed";
   SDATA.G_SPEED.PROPS.VALUE_MAX = 75;
@@ -296,7 +396,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.P_SPEED.create();
 }
 
-void AUTOMOBILE_SCREEN::update(system_data &sdSysData, unsigned long tmeFrame_Time)
+void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 {
   // Gather Data
 
@@ -323,23 +423,44 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData, unsigned long tmeFrame_Ti
   SDATA.RPM = sdSysData.CAR_INFO.STATUS.RPM.val_rpm();
   SDATA.TORQUE_DEMANDED = sdSysData.CAR_INFO.STATUS.POWER.val_load();
 
+  // Pressure
+
   SDATA.FUEL_RAIL_PRESSURE = sdSysData.CAR_INFO.STATUS.FUEL.FUEL_RAIL_PRESSURE.kPa();
+  SDATA.FUEL_RAIL_PRESSURE_VAL = sdSysData.CAR_INFO.STATUS.FUEL.FUEL_RAIL_PRESSURE.val_kPa();
+
   SDATA.EVAP_SYSTEM_VAP_PRESSURE = sdSysData.CAR_INFO.STATUS.FUEL.EVAP_SYSTEM_VAP_PRESSURE.Pa();
+  SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL = sdSysData.CAR_INFO.STATUS.FUEL.EVAP_SYSTEM_VAP_PRESSURE.val_Pa();
 
   SDATA.VOLTAGE = sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v();
+  SDATA.VOLTAGE_VAL = sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v();
+
   SDATA.BAROMETER = sdSysData.CAR_INFO.STATUS.TEMPS.BARO_33.inHg();
+  SDATA.BAROMETER_VAL = sdSysData.CAR_INFO.STATUS.TEMPS.BARO_33.val_inHg();
+
+  // Steering
 
   SDATA.STEERING_WHEEL_ANGLE = sdSysData.CAR_INFO.STATUS.STEERING.steering_wheel_angle();
   SDATA.STEERING_WHEEL_LEFT_OF_CENTER = sdSysData.CAR_INFO.STATUS.STEERING.left_of_center();
   SDATA.STEERING_WHEEL_TURNING_DIRECTION = sdSysData.CAR_INFO.STATUS.STEERING.turning_direction();
 
+  // Temp
+
+  SDATA.TEMP_AMBIANT_STRING = sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.c();
   SDATA.TEMP_AMBIANT = sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c();
+
+  SDATA.TEMP_AIR_INTAKE_STRING = sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.c();
   SDATA.TEMP_AIR_INTAKE = sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c();
+
+  SDATA.TEMP_COOLANT_STRING = sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.c();
   SDATA.TEMP_COOLANT = sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c();
+
+  SDATA.TEMP_CATALYST_STRING = sdSysData.CAR_INFO.STATUS.TEMPS.CATALYST_3C.c();
   SDATA.TEMP_CATALYST = sdSysData.CAR_INFO.STATUS.TEMPS.CATALYST_3C.val_c();
+
+  SDATA.TEMP_S_TEMP_STRING = to_string((int)sdSysData.CAR_INFO.CALCULATED.s_temp());
   SDATA.TEMP_S_TEMP = sdSysData.CAR_INFO.CALCULATED.s_temp();
 
-  // Update Widgets
+  // Update Widgets ------
 
   // Large Indicators
 
@@ -348,6 +469,19 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData, unsigned long tmeFrame_Ti
 
   SDATA.L_GEAR.update_value(sdSysData, (SDATA.GEAR_SELECTION.c_str() + SDATA.GEAR));
   SDATA.L_TACH.update_value(sdSysData, SDATA.RPM / 100);
+
+  // Display
+  
+  SDATA.D_FUEL_RAIL_PRESSURE.update_value(sdSysData, SDATA.FUEL_RAIL_PRESSURE, SDATA.FUEL_RAIL_PRESSURE_VAL);
+  SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.update_value(sdSysData, SDATA.EVAP_SYSTEM_VAP_PRESSURE, SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL);
+  SDATA.D_VOLTAGE.update_value(sdSysData, SDATA.VOLTAGE, SDATA.VOLTAGE_VAL);
+  SDATA.D_BAROMETER.update_value(sdSysData, SDATA.BAROMETER, SDATA.BAROMETER_VAL);
+
+  SDATA.D_TEMP_AMBIANT.update_value(sdSysData, SDATA.TEMP_AMBIANT_STRING, SDATA.TEMP_AMBIANT);
+  SDATA.D_TEMP_INTAKE.update_value(sdSysData, SDATA.TEMP_AIR_INTAKE_STRING, SDATA.TEMP_AIR_INTAKE);
+  SDATA.D_TEMP_COOLANT.update_value(sdSysData, SDATA.TEMP_COOLANT_STRING, SDATA.TEMP_COOLANT);
+  SDATA.D_TEMP_CATALYST.update_value(sdSysData, SDATA.TEMP_CATALYST_STRING, SDATA.TEMP_CATALYST);
+  SDATA.D_TEMP_SUPER_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP_STRING, SDATA.TEMP_S_TEMP);
 
   // Guages
   
@@ -365,7 +499,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData, unsigned long tmeFrame_Ti
 
   // Plot
 
-  SDATA.P_SPEED.update_value(sdSysData, SDATA.SPEED);
+  SDATA.P_SPEED.update_value(sdSysData, SDATA.SPEED, SDATA.TEMP_S_TEMP, SDATA.RPM/50);
 
   /*
   //--
@@ -614,6 +748,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
     ImGui::BeginChild("Auto Data 1", ImVec2(((ImGui::GetContentRegionAvail().x - disp_x) / 2) - 10, disp_y), true, DEFAULTS.flags_c);
     {
+      /*
       if (ImGui::BeginTable("Automobile Data", 2, 0))
       {
         ImGui::TableNextRow();
@@ -632,6 +767,13 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
         
         ImGui::EndTable();
       }
+      */
+
+      SDATA.D_FUEL_RAIL_PRESSURE.draw(sdSysData);
+      SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(sdSysData);
+      SDATA.D_VOLTAGE.draw(sdSysData);
+      SDATA.D_BAROMETER.draw(sdSysData);
+
     }
     ImGui::EndChild();
 
@@ -639,45 +781,12 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
     ImGui::BeginChild("Auto Data 2", ImVec2((ImGui::GetContentRegionAvail().x - disp_x) - 10, disp_y), true, DEFAULTS.flags_c);
     {
-      if (ImGui::BeginTable("Automobile Data", 2, 0))
-      {
-        
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::Text("Voltage");
-        ImGui::TableNextColumn();
-        ImGui::Text("%s", SDATA.VOLTAGE.c_str());
 
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::Text("Pressure Rail");
-        ImGui::TableNextColumn();
-        ImGui::Text(" %s", SDATA.FUEL_RAIL_PRESSURE.c_str());
-
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::Text("Pressure Vap");
-        ImGui::TableNextColumn();
-        ImGui::Text("%s", SDATA.EVAP_SYSTEM_VAP_PRESSURE.c_str());
-
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::TableNextColumn();
-        
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        //ImGui::PushFont(large_font);
-        ImGui::Text("Baro");
-        //ImGui::PopFont();
-        ImGui::TableNextColumn();
-        ImGui::Text("%s", SDATA.BAROMETER.c_str());
-
-        ImGui::EndTable();
-      }
+      SDATA.D_TEMP_AMBIANT.draw(sdSysData);
+      SDATA.D_TEMP_INTAKE.draw(sdSysData);
+      SDATA.D_TEMP_COOLANT.draw(sdSysData);
+      SDATA.D_TEMP_CATALYST.draw(sdSysData);
+      SDATA.D_TEMP_SUPER_TEMP.draw(sdSysData);
 
     }
     ImGui::EndChild();
