@@ -18,6 +18,7 @@
 
 void COLOR_COMBO::set(float H, float S, float V)
 {
+BACKGROUND = ImColor::HSV(H, S - .3, V - .3);
 STANDARD = ImColor::HSV(H, S, V);
 HOVERED = ImColor::HSV(H, S + .1, V + .1);
 ACTIVE = ImColor::HSV(H, S + .2, V + .2);

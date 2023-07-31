@@ -225,15 +225,15 @@ void SCREEN4::draw(system_data &sdSysData)
             RESET_KEYBOARD_FOCUS = false;
           }
 
-          ImGui::PushFont(io.Fonts->Fonts.Data[1]);
+          //ImGui::PushFont(io.Fonts->Fonts.Data[1]);
           ImGui::Text("CMD:");
-          ImGui::PopFont();
+          //ImGui::PopFont();
 
           ImGui::SameLine();
           // Command Line
           {
             static ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-            ImGui::PushItemWidth(100);
+            ImGui::PushItemWidth(150);
             if (ImGui::InputText(" ", &COMMAND_TEXT_TEMP, flags))
             {
               COMMAND_TEXT = COMMAND_TEXT_TEMP;

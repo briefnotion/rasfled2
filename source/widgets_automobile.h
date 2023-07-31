@@ -61,32 +61,32 @@ class BLANK
 
 };
 */
+
 // ---------------------------------------------------------------------------------------
 
 // utility structure for realtime plot
-struct ScrollingBuffer {
-    int MaxSize;
-    int Offset;
-    ImVector<ImVec2> Data;
-    ScrollingBuffer(int max_size = 1200) {
-        MaxSize = max_size;
-        Offset  = 0;
-        Data.reserve(MaxSize);
-    }
-    void AddPoint(float x, float y) {
-        if (Data.size() < MaxSize)
-            Data.push_back(ImVec2(x,y));
-        else {
-            Data[Offset] = ImVec2(x,y);
-            Offset =  (Offset + 1) % MaxSize;
-        }
-    }
-    void Erase() {
-        if (Data.size() > 0) {
-            Data.shrink(0);
-            Offset  = 0;
-        }
-    }
+class PLOT_POINT_BUFFER
+{
+  private:
+
+  int MAX_SIZE = 1500;
+
+  void transform();
+
+  int t1_pos = 0;
+
+  public:
+
+  int OFFSET;
+  ImVector<ImVec2> DATA;
+
+  PLOT_POINT_BUFFER();
+  
+  void add_point(float x, float y);
+  
+  void erase();
+
+  int size();
 };
 
 // ---------------------------------------------------------------------------------------
@@ -99,7 +99,9 @@ class W_GUAGE_PLOT_PROPERTIES
   string LABEL = " ";
 
   float VALUE_MIN = 0;
-  float VALUE_MAX = 70;
+  float VALUE_MAX = 100;
+
+  int BUFFER_SIZE = 1200;
 
   //int MIN_MAX_TIME_SPAN = 60000;
   //int MIN_MAX_TIME_SLICES = 20;
@@ -110,11 +112,15 @@ class W_GUAGE_PLOT
 {
   private:
 
-  ScrollingBuffer DATA1;
-  ScrollingBuffer DATA2;
-  ScrollingBuffer DATA3;
+  PLOT_POINT_BUFFER DATA1;
+  PLOT_POINT_BUFFER DATA2;
+  PLOT_POINT_BUFFER DATA3;
 
-  float IO_TIME = 0;
+  float VALUE1 = 0;
+  float VALUE2 = 0;
+  float VALUE3 = 0;
+
+  double DATA_INPUT_POS = 0;
 
   TIMED_PING UPDATE_DATA;
 
@@ -313,6 +319,17 @@ class DISPLAY_DATA_AUTOMOBILE
   string TEMP_S_TEMP_STRING = "";
   float TEMP_S_TEMP = 0;
 
+  // TIRE TTL 
+
+  string LF_TTL = "";
+  float LF_TTL_VAL = 0;
+  string RF_TTL = "";
+  float RF_TTL_VAL = 0;
+  string LB_TTL = "";
+  float LB_TTL_VAL = 0;
+  string RB_TTL = "";
+  float RB_TTL_VAL = 0;
+
   // Large Indicators
 
   T_LARGE_NUMBER_DISPLAY L_SPEED;
@@ -333,6 +350,11 @@ class DISPLAY_DATA_AUTOMOBILE
   T_DATA_DISPLAY D_TEMP_CATALYST;
   T_DATA_DISPLAY D_TEMP_SUPER_TEMP;
 
+  T_DATA_DISPLAY D_LF_TTL;
+  T_DATA_DISPLAY D_RF_TTL;
+  T_DATA_DISPLAY D_LB_TTL;
+  T_DATA_DISPLAY D_RB_TTL;
+
   // Guages
 
   W_GUAGE G_SPEED;
@@ -341,11 +363,13 @@ class DISPLAY_DATA_AUTOMOBILE
   W_GUAGE G_RPM;
   W_GUAGE G_TORQUE;
 
+  /*
   W_GUAGE G_TEMP_AMBIANT;
   W_GUAGE G_TEMP_INTAKE;
   W_GUAGE G_TEMP_COOLANT;
   W_GUAGE G_TEMP_CATALYST;
   W_GUAGE G_TEMP_SUPER_TEMP;
+  */
 
   // Plot
 

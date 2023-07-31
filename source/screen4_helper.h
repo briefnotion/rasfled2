@@ -59,6 +59,8 @@ class WIDGET_DEFAULTS
                               ImGuiTableFlags_SizingFixedFit;
 
   ImGuiWindowFlags flags_t_no_lines = ImGuiTableFlags_SizingFixedFit;
+
+  ImGuiWindowFlags flags_vs = ImGuiSliderFlags_NoInput;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -69,6 +71,7 @@ class COLOR_COMBO
 
   bool DEFAULT = true;
 
+  ImVec4 BACKGROUND;
   ImVec4 STANDARD;
   ImVec4 HOVERED;
   ImVec4 ACTIVE;

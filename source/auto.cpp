@@ -1299,7 +1299,7 @@ float TIRE_TTL::val_instant_differance_percentage()
 
 string TIRE_TTL::instant_differance_percentage()
 {
-  return to_string_round_to_nth(100 - (DIFFERANCE_PERCENTAGE *100), 2) + "%";
+  return to_string_round_to_nth(100 - (DIFFERANCE_PERCENTAGE *100), 2) + "%%";
 }
 
 float TIRE_TTL::val_life_percentage_mean()
@@ -1309,7 +1309,7 @@ float TIRE_TTL::val_life_percentage_mean()
 
 string TIRE_TTL::life_percentage_mean()
 {
-  return to_string((int)(WHEEL_SPEED_PECENTAGE_DIFF_MEAN.mean_float() * 100)) + "%";
+  return to_string((int)(WHEEL_SPEED_PECENTAGE_DIFF_MEAN.mean_float() * 100)) + "%%";
 }
 
 VELOCITY TIRE_TTL::wheel_speed_offset()
@@ -1359,7 +1359,7 @@ void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsi
     float ACCELERATION = 1000 * (   (current_velocity - PREVIOUS_VELOCITY_FOR_ACC)  ) / 
                         (Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent() - PREVIOUS_TIME_FOR_ACC);
 
-    if (ACCELERATION < 10)
+    if (abs(ACCELERATION) < 10)
     {
       ACCELERATION_QUICK_MEAN_HISTORY.put_value(ACCELERATION, tmeFrame_Time);
       ACCELERATION_MIN_MAX_HISTORY.put_value(ACCELERATION_QUICK_MEAN_HISTORY.mean_float(), tmeFrame_Time);

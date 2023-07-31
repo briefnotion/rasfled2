@@ -27,6 +27,82 @@ void BLANK::display(const char *name, bool *p_open, ImGuiWindowFlags flags)
 }
 */
 
+// ---------------------------------------------------------------------------------------
+
+// utility structure for realtime plot
+
+PLOT_POINT_BUFFER::PLOT_POINT_BUFFER() 
+{
+    OFFSET  = 0;
+    DATA.reserve(MAX_SIZE);
+}
+
+void PLOT_POINT_BUFFER::transform() 
+{
+  // transform 1
+
+  int t1_watch_pos = 30;
+  int t1_average_size = 4;
+
+  //if (DATA.size() >= t1_watch_pos)
+  //{
+    /*
+    if (t1_pos > 4)
+    {
+      //float average_point = (DATA[t1_watch_pos +0 ].x + DATA[t1_watch_pos +1 ].x + DATA[t1_watch_pos +2 ].x + DATA[t1_watch_pos +3 ].x) / 4;
+
+      //DATA[t1_watch_pos].x = average_point;
+
+      DATA.erase(DATA.begin() + t1_watch_pos + 1);
+      DATA.erase(DATA.begin() +  t1_watch_pos + 1);
+      DATA.erase(DATA.begin() +  t1_watch_pos + 1);
+
+      //DATA.erase(DATA.begin() + 61, DATA.begin() + 63);
+
+      t1_pos = 0;
+    }
+    else
+    {
+      t1_pos = t1_pos + 1;
+    }
+    */
+  //}
+
+  if (DATA.size() > 100 && DATA.size() % 4 == 0)
+  {
+    DATA.erase(DATA.begin() + 100 - 1);
+  }
+}
+
+void PLOT_POINT_BUFFER::add_point(float x, float y) 
+{
+  if (DATA.size() < MAX_SIZE)
+  {
+      DATA.push_back(ImVec2(x,y));
+  }
+  else 
+  {
+      DATA[OFFSET] = ImVec2(x,y);
+      OFFSET =  (OFFSET + 1) % MAX_SIZE;
+  }
+
+  //transform();
+}
+
+void PLOT_POINT_BUFFER::erase() 
+{
+  if (DATA.size() > 0) 
+  {
+      DATA.shrink(0);
+      OFFSET  = 0;
+  }
+}
+
+int PLOT_POINT_BUFFER::size()
+{
+  return DATA.size();
+}
+
 // -------------------------------------------------------------------------------------
 void W_GUAGE_PLOT::create()
 {
@@ -35,13 +111,20 @@ void W_GUAGE_PLOT::create()
 
 void W_GUAGE_PLOT::update_value(system_data &sdSysData, float Value1, float Value2, float Value3)
 {
+
+  VALUE1 = Value1;
+  VALUE2 = Value2;
+  VALUE3 = Value3;
+
   if (UPDATE_DATA.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
   {
-    IO_TIME += ImGui::GetIO().DeltaTime;
+    //DATA_INPUT_POS = DATA1.size();
 
-    DATA1.AddPoint(IO_TIME, Value1);
-    DATA2.AddPoint(IO_TIME, Value2);
-    DATA3.AddPoint(IO_TIME, Value3);
+    DATA1.add_point(DATA_INPUT_POS, Value1);
+    DATA2.add_point(DATA_INPUT_POS, Value2);
+    DATA3.add_point(DATA_INPUT_POS, Value3);
+    
+    DATA_INPUT_POS = DATA_INPUT_POS + 1;
 
     UPDATE_DATA.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, 500);
   }
@@ -56,16 +139,52 @@ void W_GUAGE_PLOT::draw(system_data &sdSysData)
 
   ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
 
-  if (ImPlot::BeginPlot("Speed Over Time", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), plot_flags)) 
+  if (ImPlot::BeginPlot("Speed Over Time", ImVec2((ImGui::GetContentRegionAvail().x) - 57, ImGui::GetContentRegionAvail().y), plot_flags)) 
   {
     ImPlot::SetupAxes(nullptr, nullptr, flags, flags);
-    ImPlot::SetupAxisLimits(ImAxis_X1, IO_TIME - 60, IO_TIME, ImGuiCond_Always);
+
+    ImPlot::SetupAxisLimits(ImAxis_X1, DATA_INPUT_POS - PROPS.BUFFER_SIZE, DATA_INPUT_POS, ImGuiCond_Always);
     ImPlot::SetupAxisLimits(ImAxis_Y1, 0, PROPS.VALUE_MAX);
 
-    ImPlot::PlotLine("SPEED", &DATA1.Data[0].x, &DATA1.Data[0].y, DATA1.Data.size(), 0, DATA1.Offset, 2*sizeof(float));
-    ImPlot::PlotLine("S-TEMP", &DATA2.Data[0].x, &DATA2.Data[0].y, DATA2.Data.size(), 0, DATA2.Offset, 2*sizeof(float));
-    ImPlot::PlotLine("TACH", &DATA3.Data[0].x, &DATA3.Data[0].y, DATA3.Data.size(), 0, DATA3.Offset, 2*sizeof(float));
+    ImPlot::PlotLine("SPEED", &DATA1.DATA[0].x, &DATA1.DATA[0].y, DATA1.DATA.size(), 0, DATA1.OFFSET, 2*sizeof(float));
+    ImPlot::PlotLine("S-TEMP", &DATA2.DATA[0].x, &DATA2.DATA[0].y, DATA2.DATA.size(), 0, DATA2.OFFSET, 2*sizeof(float));
+    ImPlot::PlotLine("TACH", &DATA3.DATA[0].x, &DATA3.DATA[0].y, DATA3.DATA.size(), 0, DATA3.OFFSET, 2*sizeof(float));
     ImPlot::EndPlot();
+  }
+
+  {
+    ImGui::SameLine();
+    
+    const ImVec2 small_slider_size(10, ImGui::GetContentRegionAvail().y);
+
+    float slider_pos_1 = VALUE1/ (float)PROPS.VALUE_MAX;
+    float slider_pos_2 = VALUE2/ (float)PROPS.VALUE_MAX;
+    float slider_pos_3 = VALUE3/ (float)PROPS.VALUE_MAX;
+
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.BACKGROUND);
+    //ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.STANDARD);
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.ACTIVE);
+    ImGui::VSliderFloat("##v", small_slider_size, &slider_pos_1, 0.0f, 1.0f, "", sdSysData.SCREEN_DEFAULTS.flags_vs);
+    ImGui::PopStyleColor(3);
+
+    ImGui::SameLine();
+
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.BACKGROUND);
+    //ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD);
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE);
+    ImGui::VSliderFloat("##v", small_slider_size, &slider_pos_2, 0.0f, 1.0f, "", sdSysData.SCREEN_DEFAULTS.flags_vs);
+    ImGui::PopStyleColor(3);
+
+    ImGui::SameLine();
+
+    ImGui::PushStyleColor(ImGuiCol_FrameBg, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.BACKGROUND);
+    //ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+    ImGui::PushStyleColor(ImGuiCol_FrameBgActive, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.STANDARD);
+    ImGui::PushStyleColor(ImGuiCol_SliderGrab, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.ACTIVE);
+    ImGui::VSliderFloat("##v", small_slider_size, &slider_pos_3, 0.0f, 1.0f, "", sdSysData.SCREEN_DEFAULTS.flags_vs);
+    ImGui::PopStyleColor(3);
   }
 }
 
@@ -311,6 +430,11 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.create(sdSysData);
 
   SDATA.D_VOLTAGE.PROPS.LABEL = right_justify(9, "Voltage:");
+  SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(8, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(11, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(13, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(16, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(100, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_VOLTAGE.create(sdSysData);
 
   SDATA.D_BAROMETER.PROPS.LABEL = right_justify(9, "Baro:");
@@ -342,9 +466,9 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
 
   SDATA.D_TEMP_CATALYST.PROPS.LABEL = right_justify(9, "Catalyst:");
   SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(150, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
-  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(600, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
-  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(800, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
-  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(1200, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(750, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(850, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(950, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(2000, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
   SDATA.D_TEMP_CATALYST.create(sdSysData);
 
@@ -355,6 +479,30 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(70, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(100, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
   SDATA.D_TEMP_SUPER_TEMP.create(sdSysData);
+
+  SDATA.D_LF_TTL.PROPS.LABEL = right_justify(9, "TTL LF:");
+  SDATA.D_LF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(25, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_LF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(50, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_LF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(200, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_LF_TTL.create(sdSysData);
+
+  SDATA.D_RF_TTL.PROPS.LABEL = right_justify(9, "TTL RF:");
+  SDATA.D_RF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(25, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_RF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(50, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_RF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(200, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_RF_TTL.create(sdSysData);
+
+  SDATA.D_LB_TTL.PROPS.LABEL = right_justify(9, "TTL LB:");
+  SDATA.D_LB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(25, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_LB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(50, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_LB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(200, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_LB_TTL.create(sdSysData);
+
+  SDATA.D_RB_TTL.PROPS.LABEL = right_justify(9, "TTL RB:");
+  SDATA.D_RB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(25, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_RB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(50, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_RB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(200, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_RB_TTL.create(sdSysData);
 
   SDATA.G_SPEED.PROPS.LABEL = "Speed";
   SDATA.G_SPEED.PROPS.VALUE_MAX = 75;
@@ -372,6 +520,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.G_TORQUE.PROPS.VALUE_MAX = 255;
   SDATA.G_TORQUE.create();
 
+  /*
   SDATA.G_TEMP_AMBIANT.PROPS.LABEL = "Ambi";
   SDATA.G_TEMP_AMBIANT.PROPS.VALUE_MAX = 40;
   SDATA.G_TEMP_AMBIANT.create();
@@ -392,6 +541,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.G_TEMP_SUPER_TEMP.PROPS.LABEL = "S-Temp";
   SDATA.G_TEMP_SUPER_TEMP.PROPS.VALUE_MAX = 70;
   SDATA.G_TEMP_SUPER_TEMP.create();
+  */
 
   SDATA.P_SPEED.create();
 }
@@ -460,6 +610,21 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.TEMP_S_TEMP_STRING = to_string((int)sdSysData.CAR_INFO.CALCULATED.s_temp());
   SDATA.TEMP_S_TEMP = sdSysData.CAR_INFO.CALCULATED.s_temp();
 
+  // Tire TTL
+
+  SDATA.LF_TTL = sdSysData.CAR_INFO.CALCULATED.LF_TTL.life_percentage_mean();
+  SDATA.LF_TTL_VAL = sdSysData.CAR_INFO.CALCULATED.LF_TTL.val_life_percentage_mean();
+
+  SDATA.RF_TTL = sdSysData.CAR_INFO.CALCULATED.RF_TTL.life_percentage_mean();
+  SDATA.RF_TTL_VAL = sdSysData.CAR_INFO.CALCULATED.RF_TTL.val_life_percentage_mean();
+
+  SDATA.LB_TTL = sdSysData.CAR_INFO.CALCULATED.LB_TTL.life_percentage_mean();
+  SDATA.LB_TTL_VAL = sdSysData.CAR_INFO.CALCULATED.LB_TTL.val_life_percentage_mean();
+
+  SDATA.RB_TTL = sdSysData.CAR_INFO.CALCULATED.RB_TTL.life_percentage_mean();
+  SDATA.RB_TTL_VAL = sdSysData.CAR_INFO.CALCULATED.RB_TTL.val_life_percentage_mean();
+
+  
   // Update Widgets ------
 
   // Large Indicators
@@ -483,6 +648,11 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.D_TEMP_CATALYST.update_value(sdSysData, SDATA.TEMP_CATALYST_STRING, SDATA.TEMP_CATALYST);
   SDATA.D_TEMP_SUPER_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP_STRING, SDATA.TEMP_S_TEMP);
 
+  SDATA.D_LF_TTL.update_value(sdSysData, SDATA.LF_TTL, (int)SDATA.LF_TTL_VAL);
+  SDATA.D_RF_TTL.update_value(sdSysData, SDATA.RF_TTL, (int)SDATA.RF_TTL_VAL);
+  SDATA.D_LB_TTL.update_value(sdSysData, SDATA.LB_TTL, (int)SDATA.LB_TTL_VAL);
+  SDATA.D_RB_TTL.update_value(sdSysData, SDATA.RB_TTL, (int)SDATA.RB_TTL_VAL);
+
   // Guages
   
   SDATA.G_SPEED.update_value(sdSysData, SDATA.SPEED);
@@ -491,11 +661,13 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.G_RPM.update_value(sdSysData, SDATA.RPM);
   SDATA.G_TORQUE.update_value(sdSysData, (float)SDATA.TORQUE_DEMANDED);
 
+  /*
   SDATA.G_TEMP_AMBIANT.update_value(sdSysData,  SDATA.TEMP_AMBIANT);
   SDATA.G_TEMP_INTAKE.update_value(sdSysData, SDATA.TEMP_AIR_INTAKE);
   SDATA.G_TEMP_COOLANT.update_value(sdSysData, SDATA.TEMP_COOLANT);
   SDATA.G_TEMP_CATALYST.update_value(sdSysData, SDATA.TEMP_CATALYST);
   SDATA.G_TEMP_SUPER_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);
+  */
 
   // Plot
 
@@ -736,7 +908,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
     const int disp_x = 94;
     const int disp_y = 147;
 
-    ImGui::BeginChild("Speed Display", ImVec2(disp_x, disp_y), true, DEFAULTS.flags_c);
+    ImGui::BeginChild("Speed Display", ImVec2(disp_x, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
       SDATA.L_SPEED.draw(sdSysData);
 
@@ -746,7 +918,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
     ImGui::SameLine();
 
-    ImGui::BeginChild("Auto Data 1", ImVec2(((ImGui::GetContentRegionAvail().x - disp_x) / 2) - 10, disp_y), true, DEFAULTS.flags_c);
+    ImGui::BeginChild("Auto Data 1", ImVec2(200, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
       /*
       if (ImGui::BeginTable("Automobile Data", 2, 0))
@@ -779,7 +951,18 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
     ImGui::SameLine();
 
-    ImGui::BeginChild("Auto Data 2", ImVec2((ImGui::GetContentRegionAvail().x - disp_x) - 10, disp_y), true, DEFAULTS.flags_c);
+    ImGui::BeginChild("Auto Data 2", ImVec2(200, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+    {
+      SDATA.D_LF_TTL.draw(sdSysData);
+      SDATA.D_RF_TTL.draw(sdSysData);
+      SDATA.D_LB_TTL.draw(sdSysData);
+      SDATA.D_RB_TTL.draw(sdSysData);
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("Auto Data 3", ImVec2((ImGui::GetContentRegionAvail().x - disp_x) - 10, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
 
       SDATA.D_TEMP_AMBIANT.draw(sdSysData);
@@ -793,40 +976,28 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
     ImGui::SameLine();
 
-    ImGui::BeginChild("Gear Display", ImVec2(disp_x, disp_y), true, DEFAULTS.flags_c);
+    ImGui::BeginChild("Gear Display", ImVec2(disp_x, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
       SDATA.L_GEAR.draw(sdSysData);
       SDATA.L_TACH.draw(sdSysData);
     }
     ImGui::EndChild();
 
-    ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x / 3, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
+    ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 2 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+    {  
+      SDATA.P_SPEED.draw(sdSysData);
+    }
+    ImGui::EndChild();
+
+    ImGui::SameLine();
+
+    ImGui::BeginChild("Data 3", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
       SDATA.G_SPEED.draw(sdSysData);
 
       SDATA.G_ACCELERATION.draw(sdSysData);
       SDATA.G_RPM.draw(sdSysData);
       SDATA.G_TORQUE.draw(sdSysData);
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("Data 2", ImVec2(ImGui::GetContentRegionAvail().x / 2, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
-    {  
-      SDATA.G_TEMP_AMBIANT.draw(sdSysData);
-      SDATA.G_TEMP_INTAKE.draw(sdSysData);
-      SDATA.G_TEMP_COOLANT.draw(sdSysData);
-      SDATA.G_TEMP_CATALYST.draw(sdSysData);
-      SDATA.G_TEMP_SUPER_TEMP.draw(sdSysData);
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("Data 3", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
-    {  
-      SDATA.P_SPEED.draw(sdSysData);
     }
     ImGui::EndChild();
   //}
