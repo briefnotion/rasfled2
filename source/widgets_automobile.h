@@ -225,12 +225,13 @@ class T_DATA_DISPLAY_PROPERTIES
 {
   public:
 
-  //COLOR_COMBO COLOR;
   string LABEL = "";
 
   int DATA_OFFSET = 90;
 
-  NEW_COLOR_SCALE COLOR_SCALE;
+  
+  COLOR_COMBO COLOR;            // If Color Scale not active then Color defaults to 
+  NEW_COLOR_SCALE COLOR_SCALE;  //  pros COLOR.
 };
 
 class T_DATA_DISPLAY
@@ -319,6 +320,10 @@ class DISPLAY_DATA_AUTOMOBILE
   string TEMP_S_TEMP_STRING = "";
   float TEMP_S_TEMP = 0;
 
+  bool LIGHTS_ON = false;
+  bool LIGHTS_BEAM_ON = false;
+  string LIGHTS_SWITCH = "";
+
   // TIRE TTL 
 
   string LF_TTL = "";
@@ -355,6 +360,8 @@ class DISPLAY_DATA_AUTOMOBILE
   T_DATA_DISPLAY D_LB_TTL;
   T_DATA_DISPLAY D_RB_TTL;
 
+  T_DATA_DISPLAY D_LIGHTS;
+
   // Guages
 
   W_GUAGE G_SPEED;
@@ -374,6 +381,8 @@ class DISPLAY_DATA_AUTOMOBILE
   // Plot
 
   W_GUAGE_PLOT P_SPEED;
+
+  //THING THING1;
 };
 
 class AUTOMOBILE_SCREEN
