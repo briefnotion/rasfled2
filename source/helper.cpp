@@ -472,6 +472,15 @@ bool BOOL_BOUNCE::bounce()
 // ---------------------------------------------------------------------------------------
 // Min Max Time Classes
 
+void MIN_MAX_TIME_SLICE::clear()
+{
+  ACTIVE = false;
+  VALUE = 0;
+  SAMPLES = 0;
+  MIN_VALUE = 0;
+  MAX_VALUE = 0;
+}
+
 void MIN_MAX_TIME_SLICE::store_value(float Value)
 {
   VALUE = VALUE + Value;

@@ -64,14 +64,11 @@ class BLANK
 
 // ---------------------------------------------------------------------------------------
 
-// utility structure for realtime plot
 class PLOT_POINT_BUFFER
 {
   private:
 
   int MAX_SIZE = 1500;
-
-  void transform();
 
   int t1_pos = 0;
 
@@ -80,7 +77,7 @@ class PLOT_POINT_BUFFER
   int OFFSET;
   ImVector<ImVec2> DATA;
 
-  PLOT_POINT_BUFFER();
+  void create(int Max_Size);
   
   void add_point(float x, float y);
   
@@ -95,17 +92,17 @@ class W_GUAGE_PLOT_PROPERTIES
 {
   public:
 
-  //COLOR_COMBO COLOR;
-  string LABEL = " ";
+  string LABEL = "Plot";
 
   float VALUE_MIN = 0;
   float VALUE_MAX = 100;
 
-  int BUFFER_SIZE = 1200;
+  int BUFFER_SIZE = 500;
 
-  //int MIN_MAX_TIME_SPAN = 60000;
-  //int MIN_MAX_TIME_SLICES = 20;
+  bool LEFT_TO_RIGHT = false;
 
+  bool MIN_MAX = false;
+  unsigned long MIN_MAX_WAIT = 1000;
 };
 
 class W_GUAGE_PLOT
@@ -116,9 +113,9 @@ class W_GUAGE_PLOT
   PLOT_POINT_BUFFER DATA2;
   PLOT_POINT_BUFFER DATA3;
 
-  float VALUE1 = 0;
-  float VALUE2 = 0;
-  float VALUE3 = 0;
+  MIN_MAX_TIME_SLICE VALUE1;
+  MIN_MAX_TIME_SLICE VALUE2;
+  MIN_MAX_TIME_SLICE VALUE3;
 
   double DATA_INPUT_POS = 0;
 
@@ -132,7 +129,7 @@ class W_GUAGE_PLOT
 
   void update_value(system_data &sdSysData, float Value1, float Value2, float Value3);
 
-  void draw(system_data &sdSysData);
+  void draw(system_data &sdSysData, ImVec2 Size);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -321,8 +318,14 @@ class DISPLAY_DATA_AUTOMOBILE
   float TEMP_S_TEMP = 0;
 
   bool LIGHTS_ON = false;
+  bool LIGHTS_PARKING_ON = false;
   bool LIGHTS_BEAM_ON = false;
   string LIGHTS_SWITCH = "";
+
+  bool PARKING_BRAKE = false;
+
+  string FUEL_LEVEL = "";
+  float FUEL_LEVEL_VAL = 0;
 
   // TIRE TTL 
 
@@ -362,6 +365,13 @@ class DISPLAY_DATA_AUTOMOBILE
 
   T_DATA_DISPLAY D_LIGHTS;
 
+  T_DATA_DISPLAY D_FUEL_LEVEL;
+
+  T_DATA_DISPLAY D_PARKING_BRAKE;
+
+  T_DATA_DISPLAY D_CRUISE_ON;
+  T_DATA_DISPLAY D_CRUISE_SPEED;
+
   // Guages
 
   W_GUAGE G_SPEED;
@@ -380,7 +390,12 @@ class DISPLAY_DATA_AUTOMOBILE
 
   // Plot
 
+  VERTICAL_BAR VB_SPEED;
+  VERTICAL_BAR VB_TACH;
+  VERTICAL_BAR VB_S_TEMP;
+
   W_GUAGE_PLOT P_SPEED;
+  W_GUAGE_PLOT P_SPEED_SLOW;
 
   //THING THING1;
 };

@@ -89,6 +89,25 @@ void THING::draw(system_data &sdSysData)
 
 // ---------------------------------------------------------------------------------------
 
+void VERTICAL_BAR::update_value(system_data &sdSysData, float Value)
+{
+  VALUE = Value;
+}
+
+void VERTICAL_BAR::draw(system_data &sdSysData, ImVec2 Size)
+{
+  float slider_pos = VALUE / PROPS.VALUE_MAX;
+
+  ImGui::PushStyleColor(ImGuiCol_FrameBg, PROPS.COLOR.BACKGROUND);
+  //ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  ImGui::PushStyleColor(ImGuiCol_FrameBgActive, PROPS.COLOR.STANDARD);
+  ImGui::PushStyleColor(ImGuiCol_SliderGrab, PROPS.COLOR.ACTIVE);
+  ImGui::VSliderFloat("##v", Size, &slider_pos, 0.0f, 1.0f, "", sdSysData.SCREEN_DEFAULTS.flags_vs);
+  ImGui::PopStyleColor(3);
+}
+
+// ---------------------------------------------------------------------------------------
+
 void W_TEXT::update_text(system_data &sdSysData, string Text)
 {
   TEXT = Text;
@@ -98,7 +117,7 @@ void W_TEXT::draw(system_data &sdSysData)
 {
   if (PROPS.COLOR.DEFAULT == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR.ACTIVE);
+    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR.TEXT);
     ImGui::Text(TEXT.c_str());
     ImGui::PopStyleColor();
   }
@@ -125,7 +144,7 @@ void W_TEXT_TF::draw(system_data &sdSysData)
 {
   if (TRUE_FALSE == true && PROPS.COLOR_TRUE.DEFAULT == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR_TRUE.ACTIVE);
+    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR_TRUE.TEXT);
     ImGui::Text(TEXT_TRUE.c_str());
     ImGui::PopStyleColor();
   }
@@ -135,7 +154,7 @@ void W_TEXT_TF::draw(system_data &sdSysData)
   }
   else if (TRUE_FALSE == false && PROPS.COLOR_FALSE.DEFAULT == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR_FALSE.ACTIVE);
+    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR_FALSE.TEXT);
     ImGui::Text(TEXT_FALSE.c_str());
     ImGui::PopStyleColor();
   }
@@ -174,11 +193,11 @@ void TEXT_CONSOLE::display(const char *name, bool *p_open, ImGuiWindowFlags flag
 
 // ---------------------------------------------------------------------------------------
 
-void text_simple_bool(string Text, bool Indication)
+void text_simple_bool(string Text, bool Indication, COLOR_COMBO COLOR)
 {
   if (Indication == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 255, 255));
+    ImGui::PushStyleColor(ImGuiCol_Text, COLOR.TEXT);
     ImGui::Text(Text.c_str());
     ImGui::PopStyleColor();
   }
@@ -186,7 +205,7 @@ void text_simple_bool(string Text, bool Indication)
   {
     ImGui::Text(Text.c_str());
   }
-}
+}\
 
 bool button_simple_enabled(string Text, bool Enabled, ImVec2 ImVec2_Size)
 {

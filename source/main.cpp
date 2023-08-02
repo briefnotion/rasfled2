@@ -1110,7 +1110,7 @@ int loop_2()
   //  cycle.
   future<void> thread_output;         // The thread containing function to printf a large 
                                       //  string.
-  bool thread_output_running = false; // Set to true when thread is active.
+  //bool thread_output_running = false; // Set to true when thread is active.
   string raw_string_buffer = "";      // A string buffer to contain the Screen buffer. 
                                       //  Redundant. Possibly consolidate the line. 
 
@@ -1442,6 +1442,7 @@ int loop_2()
       }
     }
 
+    /*
     // Before starting a new loop, close the console thread from the previous loop, if 
     //  data being printed to the screen has completed.
     if(thread_output_running == true)
@@ -1453,6 +1454,7 @@ int loop_2()
         thread_output_running = false;
       }
     }
+    */
 
     // ---------------------------------------------------------------------------------------
     // --- Prpare the Loop ---
@@ -1746,7 +1748,7 @@ int loop_2()
     if (display.is_ready(tmeCurrentMillis) == true)
     {
       // Call the Interface routine. (IO from user)
-      if (thread_output_running == false)
+      //if (thread_output_running == false)
       // If thread is not running, then update the screen display terminal interface.
       //  After the interface has an update, see if the player has a frame left over inside.
       //  the buffer. 
@@ -1905,6 +1907,7 @@ int loop_2()
     thread_render_running = false;
   }
 
+  /*
   if(thread_output_running == true)
   // Check to see if output thread was started before checking the completion status.
   {
@@ -1914,6 +1917,7 @@ int loop_2()
     }
     thread_output_running = false;
   }
+  */
   
   // Shutdown RPI.
   shutdown();

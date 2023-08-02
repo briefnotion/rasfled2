@@ -65,6 +65,32 @@ class THING
 
 // ---------------------------------------------------------------------------------------
 
+class VERTICAL_BAR_PROPERTIES
+{
+  public:
+
+  COLOR_COMBO COLOR;
+
+  float VALUE_MAX = 100;
+};
+
+class VERTICAL_BAR
+{
+  private:
+
+  float VALUE = 0;
+
+  public:
+
+  VERTICAL_BAR_PROPERTIES PROPS;
+
+  void update_value(system_data &sdSysData, float Value);
+
+  void draw(system_data &sdSysData, ImVec2 Size);
+};
+
+// ---------------------------------------------------------------------------------------
+
 class W_TEXT_PROPERTIES
 {
   public:
@@ -137,7 +163,7 @@ class TEXT_CONSOLE
 
 // ---------------------------------------------------------------------------------------
 
-void text_simple_bool(string Text, bool Indication);
+void text_simple_bool(string Text, bool Indication, COLOR_COMBO COLOR);
 
 bool button_simple_enabled(string Text, bool Enabled, ImVec2 ImVec2_Size);
 bool button_simple_color(string Text, COLOR_COMBO Color, ImVec2 ImVec2_Size);

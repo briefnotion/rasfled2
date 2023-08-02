@@ -310,6 +310,9 @@ class MIN_MAX_TIME_SLICE
 
   public:
 
+  void clear();
+  // Resets value to be used again as new.
+
   void store_value(float Value);
   // Store value and updates min max.
 

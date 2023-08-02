@@ -71,6 +71,7 @@ class COLOR_COMBO
 
   bool DEFAULT = true;
 
+  ImVec4 TEXT;
   ImVec4 BACKGROUND;
   ImVec4 STANDARD;
   ImVec4 HOVERED;
