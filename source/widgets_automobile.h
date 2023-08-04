@@ -88,11 +88,38 @@ class PLOT_POINT_BUFFER
 
 // ---------------------------------------------------------------------------------------
 
+class MIN_MAX_PLOT_POINT_BUFFER
+{
+  private:
+
+  int MAX_SIZE = 1500;
+
+  int t1_pos = 0;
+
+  public:
+
+  int OFFSET;
+  ImVector<ImVec2> MIN;
+  ImVector<ImVec2> MAX;
+
+  void create(int Max_Size);
+  
+  void add_point(float x, float Min_y, float Max_y);
+  
+  void erase();
+
+  int size();
+};
+
+// ---------------------------------------------------------------------------------------
+
 class W_GUAGE_PLOT_PROPERTIES
 {
   public:
 
   string LABEL = "Plot";
+
+  int PLOT_LINE_COUNT = 1;
 
   float VALUE_MIN = 0;
   float VALUE_MAX = 100;
@@ -103,23 +130,24 @@ class W_GUAGE_PLOT_PROPERTIES
 
   bool MIN_MAX = false;
   unsigned long MIN_MAX_WAIT = 1000;
+
+  vector<string> PLOT_LABEL;
 };
 
 class W_GUAGE_PLOT
 {
   private:
 
-  PLOT_POINT_BUFFER DATA1;
-  PLOT_POINT_BUFFER DATA2;
-  PLOT_POINT_BUFFER DATA3;
+  vector<PLOT_POINT_BUFFER> PLOT_DATA;
+  vector<MIN_MAX_PLOT_POINT_BUFFER> MIN_MAX_PLOT_DATA;
 
-  MIN_MAX_TIME_SLICE VALUE1;
-  MIN_MAX_TIME_SLICE VALUE2;
-  MIN_MAX_TIME_SLICE VALUE3;
+  vector<MIN_MAX_TIME_SLICE> MIN_MAX_DATA;
 
   double DATA_INPUT_POS = 0;
 
   TIMED_PING UPDATE_DATA;
+
+  bool boop_ready = false;
 
   public: 
 
@@ -127,7 +155,9 @@ class W_GUAGE_PLOT
 
   void create();
 
-  void update_value(system_data &sdSysData, float Value1, float Value2, float Value3);
+  void update_value(system_data &sdSysData, int Position, float Value);
+
+  void update_boop(system_data &sdSysData);
 
   void draw(system_data &sdSysData, ImVec2 Size);
 };
@@ -317,7 +347,7 @@ class DISPLAY_DATA_AUTOMOBILE
   string TEMP_S_TEMP_STRING = "";
   float TEMP_S_TEMP = 0;
 
-  bool LIGHTS_ON = false;
+  bool LIGHTS_HEDLIGHTS_ON = false;
   bool LIGHTS_PARKING_ON = false;
   bool LIGHTS_BEAM_ON = false;
   string LIGHTS_SWITCH = "";
@@ -394,8 +424,8 @@ class DISPLAY_DATA_AUTOMOBILE
   VERTICAL_BAR VB_TACH;
   VERTICAL_BAR VB_S_TEMP;
 
-  W_GUAGE_PLOT P_SPEED;
   W_GUAGE_PLOT P_SPEED_SLOW;
+  W_GUAGE_PLOT P_SPEED;
 
   //THING THING1;
 };

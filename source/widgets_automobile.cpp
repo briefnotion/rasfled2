@@ -63,59 +63,127 @@ int PLOT_POINT_BUFFER::size()
   return DATA.size();
 }
 
+// ---------------------------------------------------------------------------------------
+
+void MIN_MAX_PLOT_POINT_BUFFER::create(int Max_Size)
+{
+    OFFSET  = 0;
+    MAX_SIZE = Max_Size;
+    MIN.reserve(MAX_SIZE);
+    MAX.reserve(MAX_SIZE);
+}
+
+void MIN_MAX_PLOT_POINT_BUFFER::add_point(float x, float Min_y, float Max_y) 
+{
+  if (MIN.size() < MAX_SIZE)
+  {
+      MIN.push_back(ImVec2(x, Min_y));
+      MAX.push_back(ImVec2(x, Max_y));
+  }
+  else 
+  {
+      MIN[OFFSET] = ImVec2(x, Min_y);
+      MAX[OFFSET] = ImVec2(x, Max_y);
+      OFFSET =  (OFFSET + 1) % MAX_SIZE;
+  }
+}
+
+void MIN_MAX_PLOT_POINT_BUFFER::erase() 
+{
+  if (MIN.size() > 0) 
+  {
+      MIN.shrink(0);
+      OFFSET  = 0;
+  }
+  if (MAX.size() > 0) 
+  {
+      MAX.shrink(0);
+      OFFSET  = 0;
+  }
+}
+
+int MIN_MAX_PLOT_POINT_BUFFER::size()
+{
+  return MIN.size();
+}
+
 // -------------------------------------------------------------------------------------
 void W_GUAGE_PLOT::create()
 {
-  DATA1.create(PROPS.BUFFER_SIZE);
-  DATA2.create(PROPS.BUFFER_SIZE);
-  DATA3.create(PROPS.BUFFER_SIZE);
-}
+  for (int count = 0; count < PROPS.PLOT_LINE_COUNT; count++)
+  {
+    MIN_MAX_TIME_SLICE temp_min_max_data;
+    string temp_prop_label = to_string(count);
+    
+    MIN_MAX_DATA.push_back(temp_min_max_data);
+    PROPS.PLOT_LABEL.push_back(temp_prop_label);
+  }
 
-void W_GUAGE_PLOT::update_value(system_data &sdSysData, float Value1, float Value2, float Value3)
-{
   if (PROPS.MIN_MAX)
   {
-    VALUE1.store_value(Value1);
-    VALUE2.store_value(Value2);
-    VALUE3.store_value(Value3);
-
-    if (UPDATE_DATA.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
+    for (int count = 0; count < PROPS.PLOT_LINE_COUNT; count++)
     {
-      DATA1.add_point(DATA_INPUT_POS, VALUE1.mean());
-      DATA2.add_point(DATA_INPUT_POS, VALUE2.mean());
-      DATA3.add_point(DATA_INPUT_POS, VALUE3.mean());
+      MIN_MAX_PLOT_POINT_BUFFER temp_min_max_plot_data;
 
-      VALUE1.clear();
-      VALUE2.clear();
-      VALUE3.clear();
-      
-      if (PROPS.LEFT_TO_RIGHT)
-      {
-        DATA_INPUT_POS = DATA_INPUT_POS - 1;
-      }
-      else
-      {
-        DATA_INPUT_POS = DATA_INPUT_POS + 1;
-      }
-
-      UPDATE_DATA.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, PROPS.MIN_MAX_WAIT);
-      //UPDATE_DATA.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, 10000);
+      temp_min_max_plot_data.create(PROPS.BUFFER_SIZE);
+      MIN_MAX_PLOT_DATA.push_back(temp_min_max_plot_data);
     }
   }
   else
   {
-    DATA1.add_point(DATA_INPUT_POS, Value1);
-    DATA2.add_point(DATA_INPUT_POS, Value2);
-    DATA3.add_point(DATA_INPUT_POS, Value3);
-          
+    for (int count = 0; count < PROPS.PLOT_LINE_COUNT; count++)
+    {
+      PLOT_POINT_BUFFER temp_plot_data;
+
+      temp_plot_data.create(PROPS.BUFFER_SIZE);
+      PLOT_DATA.push_back(temp_plot_data);
+    }
+  }
+}
+
+void W_GUAGE_PLOT::update_value(system_data &sdSysData, int Position, float Value)
+{
+  if (PROPS.MIN_MAX)
+  {
+    MIN_MAX_DATA[Position].store_value(Value);
+
+    if (UPDATE_DATA.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
+    {
+      MIN_MAX_PLOT_DATA[Position].add_point(DATA_INPUT_POS, MIN_MAX_DATA[Position].min(), MIN_MAX_DATA[Position].max());
+
+      MIN_MAX_DATA[Position].clear();
+
+      boop_ready = true;
+    }
+  }
+  else
+  {
+    PLOT_DATA[Position].add_point(DATA_INPUT_POS, Value);
+
+    boop_ready = true;
+  }
+}
+
+void W_GUAGE_PLOT::update_boop(system_data &sdSysData)
+{
+  if (boop_ready)
+  {
     if (PROPS.LEFT_TO_RIGHT)
     {
-      DATA_INPUT_POS = DATA_INPUT_POS - 1;
+        DATA_INPUT_POS = DATA_INPUT_POS - 1;
     }
     else
     {
-      DATA_INPUT_POS = DATA_INPUT_POS + 1;
+        DATA_INPUT_POS = DATA_INPUT_POS + 1;
     }
+
+    if (PROPS.MIN_MAX)
+    {
+      UPDATE_DATA.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, PROPS.MIN_MAX_WAIT);
+    }
+
+    boop_ready = false;
+
   }
 }
 
@@ -143,9 +211,22 @@ void W_GUAGE_PLOT::draw(system_data &sdSysData, ImVec2 Size)
 
     ImPlot::SetupAxisLimits(ImAxis_Y1, 0, PROPS.VALUE_MAX);
 
-    ImPlot::PlotLine("SPEED", &DATA1.DATA[0].x, &DATA1.DATA[0].y, DATA1.DATA.size(), 0, DATA1.OFFSET, 2*sizeof(float));
-    ImPlot::PlotLine("S-TEMP", &DATA2.DATA[0].x, &DATA2.DATA[0].y, DATA2.DATA.size(), 0, DATA2.OFFSET, 2*sizeof(float));
-    ImPlot::PlotLine("TACH", &DATA3.DATA[0].x, &DATA3.DATA[0].y, DATA3.DATA.size(), 0, DATA3.OFFSET, 2*sizeof(float));
+    if (PROPS.MIN_MAX)
+    {
+      for (int count = 0; count < MIN_MAX_PLOT_DATA.size(); count++)
+      {
+        ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL,0.5f);
+        ImPlot::PlotShaded(PROPS.PLOT_LABEL[count].c_str(), &MIN_MAX_PLOT_DATA[count].MIN[0].x, &MIN_MAX_PLOT_DATA[count].MIN[0].y, &MIN_MAX_PLOT_DATA[count].MAX[0].y, MIN_MAX_PLOT_DATA[count].MIN.size(), 0, MIN_MAX_PLOT_DATA[count].OFFSET, 2*sizeof(float));
+      }
+    }
+    else
+    {
+      for (int count = 0; count < PLOT_DATA.size(); count++)
+      {
+        ImPlot::PlotLine(PROPS.PLOT_LABEL[count].c_str(), &PLOT_DATA[count].DATA[0].x, &PLOT_DATA[count].DATA[0].y, PLOT_DATA[count].DATA.size(), 0, PLOT_DATA[count].OFFSET, 2*sizeof(float));
+      }
+    }
+
     ImPlot::EndPlot();
   }
 }
@@ -377,17 +458,10 @@ void T_DATA_DISPLAY::draw(system_data &sdSysData)
   }
   else
   {
-    if (PROPS.COLOR.DEFAULT == true)
-    {
-      DATA.draw(sdSysData);
-    }
-    else
-    {
       DATA.PROPS.COLOR = PROPS.COLOR;
       DATA.draw(sdSysData);
     }
   }
-}
 
 // ---------------------------------------------------------------------------------------
 void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
@@ -552,20 +626,33 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   */
 
   SDATA.P_SPEED_SLOW.PROPS.LABEL = "Long Time Plot";
+  SDATA.P_SPEED_SLOW.PROPS.PLOT_LINE_COUNT = 2;
   SDATA.P_SPEED_SLOW.PROPS.VALUE_MAX = 80;
   SDATA.P_SPEED_SLOW.PROPS.LEFT_TO_RIGHT = false;
   
-  SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 1080;
-  SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 20000;
+  //SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 1080;
+  //SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 20000;
+  
+  SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 540;
+  SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 40000;
+  
+  //SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 540;
+  //SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 20000;
 
   SDATA.P_SPEED_SLOW.PROPS.MIN_MAX = true;
   SDATA.P_SPEED_SLOW.create();
+  SDATA.P_SPEED_SLOW.PROPS.PLOT_LABEL[0] = "SPEED";
+  SDATA.P_SPEED_SLOW.PROPS.PLOT_LABEL[1] = "S-TEMP";
 
   SDATA.P_SPEED.PROPS.LABEL = "Short Time Plot";
+  SDATA.P_SPEED.PROPS.PLOT_LINE_COUNT = 3;
   SDATA.P_SPEED.PROPS.VALUE_MAX = 80;
   SDATA.P_SPEED.PROPS.LEFT_TO_RIGHT = true;
   SDATA.P_SPEED.PROPS.BUFFER_SIZE = 100;
   SDATA.P_SPEED.create();
+  SDATA.P_SPEED.PROPS.PLOT_LABEL[0] = "SPEED";
+  SDATA.P_SPEED.PROPS.PLOT_LABEL[1] = "S-TEMP";
+  SDATA.P_SPEED.PROPS.PLOT_LABEL[2] = "TACH";
 
   SDATA.VB_SPEED.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
   SDATA.VB_SPEED.PROPS.VALUE_MAX = 80;
@@ -657,7 +744,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
   // Lights
 
-  SDATA.LIGHTS_ON = sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on();
+  SDATA.LIGHTS_HEDLIGHTS_ON = sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on();
   SDATA.LIGHTS_PARKING_ON = sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_parking_on();
   SDATA.LIGHTS_BEAM_ON = sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_high_beam_on();
   SDATA.LIGHTS_SWITCH = sdSysData.CAR_INFO.STATUS.INDICATORS.lights_switch();
@@ -709,7 +796,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   }
   else
   {
-    if (SDATA.LIGHTS_ON == true)
+    if (SDATA.LIGHTS_HEDLIGHTS_ON == true)
     {
       SDATA.D_LIGHTS.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
     }
@@ -739,7 +826,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     SDATA.D_CRUISE_ON.update_value(sdSysData, "OFF");
   }
 
-  SDATA.D_CRUISE_SPEED.update_value(sdSysData, to_string(SDATA.CRUISE_CONTROL_SPEED));
+  SDATA.D_CRUISE_SPEED.update_value(sdSysData, to_string((int)SDATA.CRUISE_CONTROL_SPEED));
 
   // Guages
   
@@ -762,9 +849,15 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.VB_SPEED.update_value(sdSysData, SDATA.SPEED);
   SDATA.VB_S_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);
   SDATA.VB_TACH.update_value(sdSysData, SDATA.RPM/50);
+  
+  SDATA.P_SPEED_SLOW.update_value(sdSysData, 0, SDATA.SPEED);
+  SDATA.P_SPEED_SLOW.update_value(sdSysData, 1, SDATA.TEMP_S_TEMP);
+  SDATA.P_SPEED_SLOW.update_boop(sdSysData);
 
-  SDATA.P_SPEED_SLOW.update_value(sdSysData, SDATA.SPEED, SDATA.TEMP_S_TEMP, SDATA.RPM/50);
-  SDATA.P_SPEED.update_value(sdSysData, SDATA.SPEED, SDATA.TEMP_S_TEMP, SDATA.RPM/50);
+  SDATA.P_SPEED.update_value(sdSysData, 0, SDATA.SPEED);
+  SDATA.P_SPEED.update_value(sdSysData, 1, SDATA.TEMP_S_TEMP);
+  SDATA.P_SPEED.update_value(sdSysData, 2, SDATA.RPM/50);
+  SDATA.P_SPEED.update_boop(sdSysData);
 
   /*
   //--
@@ -1038,7 +1131,6 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(sdSysData);
       SDATA.D_VOLTAGE.draw(sdSysData);
       SDATA.D_BAROMETER.draw(sdSysData);
-
     }
     ImGui::EndChild();
 
@@ -1088,8 +1180,6 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
     }
     ImGui::EndChild();
 
-
-
     //ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 2 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     //{  
     //  SDATA.P_SPEED.draw(sdSysData);
@@ -1133,17 +1223,15 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
       ImGui::SameLine();
 
+      SDATA.VB_S_TEMP.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
+      ImGui::SameLine();
       SDATA.VB_SPEED.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
       ImGui::SameLine();
       SDATA.VB_TACH.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
-      ImGui::SameLine();
-      SDATA.VB_S_TEMP.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
 
       ImGui::SameLine();
 
       SDATA.P_SPEED.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-
-
     }
     ImGui::EndChild();
 
