@@ -77,7 +77,10 @@ int SCREEN4::create(system_data &sdSysData)
   (void)io;
 
   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+  //io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls //lols
+
+  // For keyboard input redirect
+  io.WantCaptureKeyboard = true;
 
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
@@ -95,6 +98,7 @@ int SCREEN4::create(system_data &sdSysData)
   io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
   //ImFont* large_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 48.0f);
   ImFont* large_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
+  ImFont* medium_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
   // Will track as "io.Fonts->Fonts.Data[1]" manually, for now.
 
   // Prepare Screens
@@ -170,13 +174,11 @@ void SCREEN4::draw(system_data &sdSysData)
     CONSOLE.add_line(SCREEN_COMMS.printw_q_get());
   }
   
-  /*
-  Does not work yet.
+  //Does not work yet?
   if (SCREEN_COMMS.command_text_clear_get() == true)
   {
-    //COMMAND_TEXT = "";
+    COMMAND_TEXT = "";
   }
-  */
 
   DISPLAY_TIMER = sdSysData.cdTIMER.is_active();
 
@@ -192,6 +194,85 @@ void SCREEN4::draw(system_data &sdSysData)
   //(void)io;
   
   glfwPollEvents();
+
+  // Check for keybaord input
+  {
+    char character_pressed = 0;
+    bool shift_pressed = false;
+    bool backspace_pressed = false;
+    bool enter_pressed = false;
+
+    for (int i = 0; i < IM_ARRAYSIZE(io.KeysDown); i++)
+    {
+      if (io.KeysDown[i])
+      {
+        if ((i == 259 || i == ImGuiKey_Backspace) && COMMAND_TEXT.length() > 0)
+        {
+          character_pressed = i;
+          backspace_pressed = true;
+        }
+        if ( i == 257 || i == ImGuiKey_Enter || i == ImGuiKey_KeypadEnter)
+        {
+          character_pressed = i;
+          enter_pressed = true;
+        }
+        if (i == 340 || i == ImGuiKey_ModShift || i == ImGuiKey_LeftShift || i == ImGuiKey_RightShift)
+        {
+          shift_pressed = true;
+        }
+        if (i >= 32 && i < 128)
+        {
+          character_pressed = i;
+        }
+      }
+    }
+
+    if (character_pressed > 0 && character_pressed != PREV_FRAME_KEY_DOWN)
+    {
+      PREV_FRAME_KEY_DOWN = character_pressed;
+
+      // Letters
+      if (character_pressed >= 65 && character_pressed <= 90)
+      {
+        if (shift_pressed)
+        {
+          COMMAND_TEXT += character_pressed;
+          SCREEN_COMMS.command_text_set(COMMAND_TEXT);
+        }
+        else
+        {
+          COMMAND_TEXT += character_pressed + 32;
+          SCREEN_COMMS.command_text_set(COMMAND_TEXT);
+        }
+      }
+
+      // Symbols
+      else if (character_pressed >= 32 && character_pressed <= 64 || 
+                character_pressed >= 91 && character_pressed <= 96 || 
+                character_pressed >= 123 && character_pressed <= 127)
+      {
+        COMMAND_TEXT += character_pressed;
+        SCREEN_COMMS.command_text_set(COMMAND_TEXT);
+      }
+
+      // Backspace 
+      else if (backspace_pressed)
+      {
+        COMMAND_TEXT.resize(COMMAND_TEXT.size() -1);
+      }
+
+      // CR
+      else if (enter_pressed)
+      {
+        SCREEN_COMMS.carrage_return_set();
+        COMMAND_TEXT = "";
+      }
+    }
+    else if (character_pressed == 0)
+    {
+      PREV_FRAME_KEY_DOWN = 0;
+    }
+  }
 
   // Start the Dear ImGui frame
   ImGui_ImplOpenGL2_NewFrame();
@@ -225,25 +306,17 @@ void SCREEN4::draw(system_data &sdSysData)
             RESET_KEYBOARD_FOCUS = false;
           }
 
-          //ImGui::PushFont(io.Fonts->Fonts.Data[1]);
+          
+          ImGui::PushFont(io.Fonts->Fonts.Data[2]);
           ImGui::Text("CMD:");
-          //ImGui::PopFont();
 
           ImGui::SameLine();
-          // Command Line
-          {
-            static ImGuiInputTextFlags flags = ImGuiInputTextFlags_EnterReturnsTrue;
-            ImGui::PushItemWidth(150);
-            if (ImGui::InputText(" ", &COMMAND_TEXT_TEMP, flags))
-            {
-              COMMAND_TEXT = COMMAND_TEXT_TEMP;
-              COMMAND_TEXT_TEMP = "";
-              SCREEN_COMMS.command_text_set(COMMAND_TEXT);
-              //SCREEN_COMMS.carrage_return_set();
-              RESET_KEYBOARD_FOCUS = true;
-            }
-            ImGui::PopItemWidth();
-          }       
+
+          ImDrawList* draw_list = ImGui::GetWindowDrawList();
+          ImGui::Text(COMMAND_TEXT.c_str());
+          draw_list->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255, 255, 0, 128));
+          ImGui::PopFont();
+  
         }
         ImGui::EndChild();
 
@@ -538,19 +611,22 @@ void SCREEN4::draw(system_data &sdSysData)
       {
         if (button_simple_color("EXIT", sdSysData.COLOR_SELECT.COLOR_COMB_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
-          WINDOW_CLOSE = true;
+          PENDING_CONFIRM_COMMAND = "X";
+          DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
         }
 
         button_simple_enabled(" ", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
         if (button_simple_color("SYSTEM\nSHUT\nDOWN", sdSysData.COLOR_SELECT.COLOR_COMB_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
-          SCREEN_COMMS.command_text_set(" comshutd");
+          PENDING_CONFIRM_COMMAND = " comshutd";
+          DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
         }
 
         if (button_simple_color("SYSTEM\nREBOOT", sdSysData.COLOR_SELECT.COLOR_COMB_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
-          SCREEN_COMMS.command_text_set(" reboot");
+          PENDING_CONFIRM_COMMAND = " reboot";
+          DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
         }
 
         button_simple_enabled(" ", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
@@ -805,6 +881,31 @@ void SCREEN4::draw(system_data &sdSysData)
         DISPLAY_RUNNING_COLOR = false;
       }
     }
+    ImGui::End();
+  }
+
+  // ---------------------------------------------------------------------------------------
+  // Overhead Color Window
+  
+  if (DISPLAY_CONFIRM == true)
+  {
+    ImGui::SetNextWindowSize(ImVec2(90, 195));
+    if (ImGui::Begin("CONFIRM", &DISPLAY_CONFIRM, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+    {
+
+      if (button_simple_color("CONFIRM", sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+      {
+        SCREEN_COMMS.command_text_set(PENDING_CONFIRM_COMMAND);
+      }
+      
+      if (button_simple_color("DENY", sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+      {
+        PENDING_CONFIRM_COMMAND = "";
+        DISPLAY_CONFIRM = false;
+      }
+
+    }
+
     ImGui::End();
   }
 

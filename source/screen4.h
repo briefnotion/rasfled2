@@ -64,6 +64,8 @@ class SCREEN4
   bool DISPLAY_TIMER = false;
   bool DISPLAY_OVERHEAD_COLOR = false;
   bool DISPLAY_RUNNING_COLOR = false;
+  bool DISPLAY_CONFIRM = false;
+  string PENDING_CONFIRM_COMMAND = "";
 
   int DISPLAY_MENU = 0;
   int DISPLAY_SCREEN = 0;
@@ -78,6 +80,7 @@ class SCREEN4
   string COMMAND_TEXT_TEMP = "";
   string COMMAND_TEXT = "";
   string CONSOLE_TEXT = "";
+  int PREV_FRAME_KEY_DOWN = 0;
 
   // ---
   // Screen Widgets

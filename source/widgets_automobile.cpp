@@ -215,7 +215,7 @@ void W_GUAGE_PLOT::draw(system_data &sdSysData, ImVec2 Size)
     {
       for (int count = 0; count < MIN_MAX_PLOT_DATA.size(); count++)
       {
-        ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL,0.5f);
+        ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL,0.8f);
         ImPlot::PlotShaded(PROPS.PLOT_LABEL[count].c_str(), &MIN_MAX_PLOT_DATA[count].MIN[0].x, &MIN_MAX_PLOT_DATA[count].MIN[0].y, &MIN_MAX_PLOT_DATA[count].MAX[0].y, MIN_MAX_PLOT_DATA[count].MIN.size(), 0, MIN_MAX_PLOT_DATA[count].OFFSET, 2*sizeof(float));
       }
     }
@@ -356,6 +356,10 @@ void W_GUAGE::create()
 {
   MIN_MAX.PROP.TIME_SPAN = PROPS.MIN_MAX_TIME_SPAN;
   MIN_MAX.PROP.SLICES = PROPS.MIN_MAX_TIME_SLICES;
+
+  DSP_MIN.PROPS.CHANGE_NOTIFICATION = false;
+  DSP_MAX.PROPS.CHANGE_NOTIFICATION = false;
+  DSP_VALUE.PROPS.CHANGE_NOTIFICATION = false;
 }
 
 void W_GUAGE::update_value(system_data &sdSysData, float Value)
@@ -633,8 +637,8 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   //SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 1080;
   //SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 20000;
   
-  SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 540;
-  SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 40000;
+  SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 360;
+  SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 60000;
   
   //SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 540;
   //SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 20000;
@@ -1246,8 +1250,6 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       SDATA.G_TORQUE.draw(sdSysData);
     }
     ImGui::EndChild();
-  //}
-  //ImGui::End();
 }
 
 // ---------------------------------------------------------------------------------------

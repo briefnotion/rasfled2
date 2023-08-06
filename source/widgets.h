@@ -96,6 +96,8 @@ class W_TEXT_PROPERTIES
   public:
 
   COLOR_COMBO COLOR;
+
+  bool CHANGE_NOTIFICATION = true;
 };
 
 class W_TEXT
@@ -104,6 +106,8 @@ class W_TEXT
   private:
 
   string TEXT = "";
+
+  TIMED_PING UPDATE_TIMED;
 
   public:
 
@@ -133,6 +137,8 @@ class W_TEXT_TF
   string TEXT_TRUE = "";
   string TEXT_FALSE = "";
   bool TRUE_FALSE = false;
+
+  W_TEXT TEXT_TRUE_FALSE;
   
   public:
 

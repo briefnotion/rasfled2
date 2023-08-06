@@ -110,12 +110,23 @@ void VERTICAL_BAR::draw(system_data &sdSysData, ImVec2 Size)
 
 void W_TEXT::update_text(system_data &sdSysData, string Text)
 {
-  TEXT = Text;
+  if (TEXT != Text)
+  {
+    TEXT = Text;
+
+    UPDATE_TIMED.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, 100);
+  }
 }
 
 void W_TEXT::draw(system_data &sdSysData)
 {
-  if (PROPS.COLOR.DEFAULT == false)
+  if (PROPS.CHANGE_NOTIFICATION == true && UPDATE_TIMED.ping_down(sdSysData.tmeCURRENT_FRAME_TIME))
+  {
+    ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE);
+    ImGui::Text(TEXT.c_str());
+    ImGui::PopStyleColor();
+  }
+  else if (PROPS.COLOR.DEFAULT == false)
   {
     ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR.TEXT);
     ImGui::Text(TEXT.c_str());
@@ -142,26 +153,18 @@ void W_TEXT_TF::update_tf(system_data &sdSysData, bool True_False)
 
 void W_TEXT_TF::draw(system_data &sdSysData)
 {
-  if (TRUE_FALSE == true && PROPS.COLOR_TRUE.DEFAULT == false)
+  if (TRUE_FALSE == true)
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR_TRUE.TEXT);
-    ImGui::Text(TEXT_TRUE.c_str());
-    ImGui::PopStyleColor();
+    TEXT_TRUE_FALSE.PROPS.COLOR = PROPS.COLOR_TRUE;
+    TEXT_TRUE_FALSE.update_text(sdSysData, TEXT_TRUE);
   }
-  else if (TRUE_FALSE == true && PROPS.COLOR_TRUE.DEFAULT == true)
+  else
   {
-    ImGui::Text(TEXT_TRUE.c_str());
+    TEXT_TRUE_FALSE.PROPS.COLOR = PROPS.COLOR_FALSE;
+    TEXT_TRUE_FALSE.update_text(sdSysData, TEXT_FALSE);
   }
-  else if (TRUE_FALSE == false && PROPS.COLOR_FALSE.DEFAULT == false)
-  {
-    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR_FALSE.TEXT);
-    ImGui::Text(TEXT_FALSE.c_str());
-    ImGui::PopStyleColor();
-  }
-  else // if (TRUE_FALSE == false && PROPS.COLOR_FALSE.DEFAULT == true)
-  {
-    ImGui::Text(TEXT_FALSE.c_str());
-  }
+
+  TEXT_TRUE_FALSE.draw(sdSysData);
 }
 
 // ---------------------------------------------------------------------------------------
