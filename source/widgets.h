@@ -52,19 +52,6 @@ class NEW_COLOR_SCALE
 
 // ---------------------------------------------------------------------------------------
 
-/*
-class THING
-{
-  private:
-
-  public:
-
-  void draw(system_data &sdSysData);
-};
-*/
-
-// ---------------------------------------------------------------------------------------
-
 class VERTICAL_BAR_PROPERTIES
 {
   public:

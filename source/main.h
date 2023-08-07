@@ -104,7 +104,7 @@
 #include "helper.h"
 #include "configuration_storage.h"
 #include "rasapi.h"
-#include "consoleanddata.h"
+//#include "consoleanddata.h"
 #include "screen4_helper.h"
 #include "screen4.h"
 #include "LEDstuff.h"
@@ -179,7 +179,7 @@ void raw_window_player_draw_frame(string Buffer);
 
 // ---------------------------------------------------------------------------------------
 // MAIN LOOP
-int loop();
+int loop_2();
 
 // ---------------------------------------------------------------------------------------
 int main(int argc, char *argv[]);

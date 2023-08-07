@@ -312,10 +312,11 @@ void SCREEN4::draw(system_data &sdSysData)
 
           ImGui::SameLine();
 
-          ImDrawList* draw_list = ImGui::GetWindowDrawList();
           ImGui::Text(COMMAND_TEXT.c_str());
-          draw_list->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255, 255, 0, 128));
+          simple_wrap_text_box();
           ImGui::PopFont();
+
+          //OCG.draw(sdSysData);
   
         }
         ImGui::EndChild();

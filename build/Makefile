@@ -412,33 +412,6 @@ configuration_storage.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/configuration_storage.cpp.s
 .PHONY : configuration_storage.cpp.s
 
-consoleanddata.o: consoleanddata.cpp.o
-
-.PHONY : consoleanddata.o
-
-# target to build an object file
-consoleanddata.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/consoleanddata.cpp.o
-.PHONY : consoleanddata.cpp.o
-
-consoleanddata.i: consoleanddata.cpp.i
-
-.PHONY : consoleanddata.i
-
-# target to preprocess a source file
-consoleanddata.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/consoleanddata.cpp.i
-.PHONY : consoleanddata.cpp.i
-
-consoleanddata.s: consoleanddata.cpp.s
-
-.PHONY : consoleanddata.s
-
-# target to generate assembly for a file
-consoleanddata.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/consoleanddata.cpp.s
-.PHONY : consoleanddata.cpp.s
-
 fled_time.o: fled_time.cpp.o
 
 .PHONY : fled_time.o
@@ -492,114 +465,6 @@ fledcore.s: fledcore.cpp.s
 fledcore.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/fledcore.cpp.s
 .PHONY : fledcore.cpp.s
-
-gadgets.o: gadgets.cpp.o
-
-.PHONY : gadgets.o
-
-# target to build an object file
-gadgets.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets.cpp.o
-.PHONY : gadgets.cpp.o
-
-gadgets.i: gadgets.cpp.i
-
-.PHONY : gadgets.i
-
-# target to preprocess a source file
-gadgets.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets.cpp.i
-.PHONY : gadgets.cpp.i
-
-gadgets.s: gadgets.cpp.s
-
-.PHONY : gadgets.s
-
-# target to generate assembly for a file
-gadgets.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets.cpp.s
-.PHONY : gadgets.cpp.s
-
-gadgets_alerts.o: gadgets_alerts.cpp.o
-
-.PHONY : gadgets_alerts.o
-
-# target to build an object file
-gadgets_alerts.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets_alerts.cpp.o
-.PHONY : gadgets_alerts.cpp.o
-
-gadgets_alerts.i: gadgets_alerts.cpp.i
-
-.PHONY : gadgets_alerts.i
-
-# target to preprocess a source file
-gadgets_alerts.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets_alerts.cpp.i
-.PHONY : gadgets_alerts.cpp.i
-
-gadgets_alerts.s: gadgets_alerts.cpp.s
-
-.PHONY : gadgets_alerts.s
-
-# target to generate assembly for a file
-gadgets_alerts.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets_alerts.cpp.s
-.PHONY : gadgets_alerts.cpp.s
-
-gadgets_automobile.o: gadgets_automobile.cpp.o
-
-.PHONY : gadgets_automobile.o
-
-# target to build an object file
-gadgets_automobile.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets_automobile.cpp.o
-.PHONY : gadgets_automobile.cpp.o
-
-gadgets_automobile.i: gadgets_automobile.cpp.i
-
-.PHONY : gadgets_automobile.i
-
-# target to preprocess a source file
-gadgets_automobile.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets_automobile.cpp.i
-.PHONY : gadgets_automobile.cpp.i
-
-gadgets_automobile.s: gadgets_automobile.cpp.s
-
-.PHONY : gadgets_automobile.s
-
-# target to generate assembly for a file
-gadgets_automobile.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets_automobile.cpp.s
-.PHONY : gadgets_automobile.cpp.s
-
-gadgets_radio.o: gadgets_radio.cpp.o
-
-.PHONY : gadgets_radio.o
-
-# target to build an object file
-gadgets_radio.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets_radio.cpp.o
-.PHONY : gadgets_radio.cpp.o
-
-gadgets_radio.i: gadgets_radio.cpp.i
-
-.PHONY : gadgets_radio.i
-
-# target to preprocess a source file
-gadgets_radio.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets_radio.cpp.i
-.PHONY : gadgets_radio.cpp.i
-
-gadgets_radio.s: gadgets_radio.cpp.s
-
-.PHONY : gadgets_radio.s
-
-# target to generate assembly for a file
-gadgets_radio.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/gadgets_radio.cpp.s
-.PHONY : gadgets_radio.cpp.s
 
 hardware_module_door.o: hardware_module_door.cpp.o
 
@@ -681,33 +546,6 @@ helper.s: helper.cpp.s
 helper.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/helper.cpp.s
 .PHONY : helper.cpp.s
-
-helper_ncurses.o: helper_ncurses.cpp.o
-
-.PHONY : helper_ncurses.o
-
-# target to build an object file
-helper_ncurses.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/helper_ncurses.cpp.o
-.PHONY : helper_ncurses.cpp.o
-
-helper_ncurses.i: helper_ncurses.cpp.i
-
-.PHONY : helper_ncurses.i
-
-# target to preprocess a source file
-helper_ncurses.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/helper_ncurses.cpp.i
-.PHONY : helper_ncurses.cpp.i
-
-helper_ncurses.s: helper_ncurses.cpp.s
-
-.PHONY : helper_ncurses.s
-
-# target to generate assembly for a file
-helper_ncurses.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/helper_ncurses.cpp.s
-.PHONY : helper_ncurses.cpp.s
 
 home/pi/source/imgui/backends/imgui_impl_glfw.o: home/pi/source/imgui/backends/imgui_impl_glfw.cpp.o
 
@@ -1033,33 +871,6 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/main.cpp.s
 .PHONY : main.cpp.s
 
-player.o: player.cpp.o
-
-.PHONY : player.o
-
-# target to build an object file
-player.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/player.cpp.o
-.PHONY : player.cpp.o
-
-player.i: player.cpp.i
-
-.PHONY : player.i
-
-# target to preprocess a source file
-player.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/player.cpp.i
-.PHONY : player.cpp.i
-
-player.s: player.cpp.s
-
-.PHONY : player.s
-
-# target to generate assembly for a file
-player.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/player.cpp.s
-.PHONY : player.cpp.s
-
 rasapi.o: rasapi.cpp.o
 
 .PHONY : rasapi.o
@@ -1086,33 +897,6 @@ rasapi.s: rasapi.cpp.s
 rasapi.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/rasapi.cpp.s
 .PHONY : rasapi.cpp.s
-
-screen3.o: screen3.cpp.o
-
-.PHONY : screen3.o
-
-# target to build an object file
-screen3.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/screen3.cpp.o
-.PHONY : screen3.cpp.o
-
-screen3.i: screen3.cpp.i
-
-.PHONY : screen3.i
-
-# target to preprocess a source file
-screen3.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/screen3.cpp.i
-.PHONY : screen3.cpp.i
-
-screen3.s: screen3.cpp.s
-
-.PHONY : screen3.s
-
-# target to generate assembly for a file
-screen3.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/screen3.cpp.s
-.PHONY : screen3.cpp.s
 
 screen4.o: screen4.cpp.o
 
@@ -1194,33 +978,6 @@ stringthings.s: stringthings.cpp.s
 stringthings.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/stringthings.cpp.s
 .PHONY : stringthings.cpp.s
-
-symbols.o: symbols.cpp.o
-
-.PHONY : symbols.o
-
-# target to build an object file
-symbols.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/symbols.cpp.o
-.PHONY : symbols.cpp.o
-
-symbols.i: symbols.cpp.i
-
-.PHONY : symbols.i
-
-# target to preprocess a source file
-symbols.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/symbols.cpp.i
-.PHONY : symbols.cpp.i
-
-symbols.s: symbols.cpp.s
-
-.PHONY : symbols.s
-
-# target to generate assembly for a file
-symbols.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/symbols.cpp.s
-.PHONY : symbols.cpp.s
 
 system.o: system.cpp.o
 
@@ -1330,6 +1087,33 @@ widgets_automobile.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets_automobile.cpp.s
 .PHONY : widgets_automobile.cpp.s
 
+widgets_drawing.o: widgets_drawing.cpp.o
+
+.PHONY : widgets_drawing.o
+
+# target to build an object file
+widgets_drawing.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets_drawing.cpp.o
+.PHONY : widgets_drawing.cpp.o
+
+widgets_drawing.i: widgets_drawing.cpp.i
+
+.PHONY : widgets_drawing.i
+
+# target to preprocess a source file
+widgets_drawing.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets_drawing.cpp.i
+.PHONY : widgets_drawing.cpp.i
+
+widgets_drawing.s: widgets_drawing.cpp.s
+
+.PHONY : widgets_drawing.s
+
+# target to generate assembly for a file
+widgets_drawing.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/widgets_drawing.cpp.s
+.PHONY : widgets_drawing.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -1369,27 +1153,12 @@ help:
 	@echo "... configuration_storage.o"
 	@echo "... configuration_storage.i"
 	@echo "... configuration_storage.s"
-	@echo "... consoleanddata.o"
-	@echo "... consoleanddata.i"
-	@echo "... consoleanddata.s"
 	@echo "... fled_time.o"
 	@echo "... fled_time.i"
 	@echo "... fled_time.s"
 	@echo "... fledcore.o"
 	@echo "... fledcore.i"
 	@echo "... fledcore.s"
-	@echo "... gadgets.o"
-	@echo "... gadgets.i"
-	@echo "... gadgets.s"
-	@echo "... gadgets_alerts.o"
-	@echo "... gadgets_alerts.i"
-	@echo "... gadgets_alerts.s"
-	@echo "... gadgets_automobile.o"
-	@echo "... gadgets_automobile.i"
-	@echo "... gadgets_automobile.s"
-	@echo "... gadgets_radio.o"
-	@echo "... gadgets_radio.i"
-	@echo "... gadgets_radio.s"
 	@echo "... hardware_module_door.o"
 	@echo "... hardware_module_door.i"
 	@echo "... hardware_module_door.s"
@@ -1399,9 +1168,6 @@ help:
 	@echo "... helper.o"
 	@echo "... helper.i"
 	@echo "... helper.s"
-	@echo "... helper_ncurses.o"
-	@echo "... helper_ncurses.i"
-	@echo "... helper_ncurses.s"
 	@echo "... home/pi/source/imgui/backends/imgui_impl_glfw.o"
 	@echo "... home/pi/source/imgui/backends/imgui_impl_glfw.i"
 	@echo "... home/pi/source/imgui/backends/imgui_impl_glfw.s"
@@ -1438,15 +1204,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
-	@echo "... player.o"
-	@echo "... player.i"
-	@echo "... player.s"
 	@echo "... rasapi.o"
 	@echo "... rasapi.i"
 	@echo "... rasapi.s"
-	@echo "... screen3.o"
-	@echo "... screen3.i"
-	@echo "... screen3.s"
 	@echo "... screen4.o"
 	@echo "... screen4.i"
 	@echo "... screen4.s"
@@ -1456,9 +1216,6 @@ help:
 	@echo "... stringthings.o"
 	@echo "... stringthings.i"
 	@echo "... stringthings.s"
-	@echo "... symbols.o"
-	@echo "... symbols.i"
-	@echo "... symbols.s"
 	@echo "... system.o"
 	@echo "... system.i"
 	@echo "... system.s"
@@ -1471,6 +1228,9 @@ help:
 	@echo "... widgets_automobile.o"
 	@echo "... widgets_automobile.i"
 	@echo "... widgets_automobile.s"
+	@echo "... widgets_drawing.o"
+	@echo "... widgets_drawing.i"
+	@echo "... widgets_drawing.s"
 .PHONY : help
 
 

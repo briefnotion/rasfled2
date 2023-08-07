@@ -60,35 +60,6 @@ COLOR_COMBO NEW_COLOR_SCALE::get_color(float Value)
 
 // ---------------------------------------------------------------------------------------
 
-/*
-void THING::draw(system_data &sdSysData)
-{
-  
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  static ImVec4 colf = ImVec4(1.0f, 1.0f, 0.4f, 1.0f);
-  const ImU32 col = ImColor(colf);
-
-  const ImVec2 p = ImGui::GetCursorScreenPos();
-  
-  float x = p.x + 4.0f;
-  float y = p.y + 4.0f;
-  const float spacing = 10.0f;
-  static float sz = 10.0f;
-
-  //draw_list->AddNgon(ImVec2(x + sz*0.5f, y + sz*0.5f), sz*0.5f, col, 4, 2);                 
-  //x += sz + spacing;
-  
-  draw_list->AddNgonFilled(ImVec2(x + sz * 0.5f, y + sz * 0.5f), sz*0.5f, col, 4);               
-  x += sz + spacing;  // N-gon
-
-  ImGui::Dummy(ImVec2((sz + spacing) * 10.2f, (sz + spacing) * 3.0f));
-
-}
-*/
-
-// ---------------------------------------------------------------------------------------
-
 void VERTICAL_BAR::update_value(system_data &sdSysData, float Value)
 {
   VALUE = Value;

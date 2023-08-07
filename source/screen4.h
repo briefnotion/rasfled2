@@ -21,6 +21,7 @@
 #include "widgets.h"
 #include "widgets_automobile.h"
 #include "widgets_adsb.h"
+#include "widgets_drawing.h"
 
 
 // IMGui Includes
@@ -106,6 +107,8 @@ class SCREEN4
 
   W_TEXT VERSION;
   W_TEXT TEMP;
+
+  ONE_CHAR_LINE_GRAPH OCG;
 
   public:
   CONSOLE_COMMUNICATION SCREEN_COMMS;
