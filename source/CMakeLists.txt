@@ -22,7 +22,6 @@ include_directories(../../imgui/misc/cpp)
 
 include_directories(../../implot)
 
-##find_package(Curses REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
@@ -60,23 +59,15 @@ add_executable(
   helper.cpp
   stringthings.cpp
   fled_time.cpp
-  ##helper_ncurses.cpp
   json_interface.cpp
   rasapi.cpp
   hardware_module_door.cpp
   hardware_status.cpp
   animations_storage.cpp
   animations_handler.cpp
-  ##symbols.cpp
-  ##gadgets.cpp
-  ##gadgets_radio.cpp
-  ##gadgets_alerts.cpp
-  ##gadgets_automobile.cpp
   automobile_handler.cpp
   interface.cpp
-  ##player.cpp
   aircraft_coordinator.cpp
-  ##screen3.cpp
   widgets.cpp
   widgets_drawing.cpp
   widgets_automobile.cpp
@@ -84,7 +75,6 @@ add_executable(
   screen4_helper.cpp
   screen4.cpp
   system.cpp
-  ##consoleanddata.cpp
   fledcore.cpp
   
   main.cpp
@@ -92,10 +82,8 @@ add_executable(
 
 target_link_libraries(rasfled 
   ${WIRINGPI_LIBRARIES} 
-  ${WS2811_LIBRARIES} 
-  ##${CURSES_LIBRARIES} 
-  ${IMGUI_LIBRARIES} 
-  ##${GLFW_LIBRARIES} 
+  ${WS2811_LIBRARIES}
+  ${IMGUI_LIBRARIES}
   glfw
   ${OPENGL_LIBRARIES}
   ${PTHREAD_LIBRARIES}

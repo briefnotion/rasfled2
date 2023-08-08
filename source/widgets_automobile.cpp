@@ -276,6 +276,23 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
   //---
   ImGui::PushFont(io.Fonts->Fonts.Data[1]);
 
+  if (VALUE_COMPARE >= 0)
+  {
+    if (ACTIVE_WITHIN == true)
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD);
+    }
+    else
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.STANDARD);
+    }
+
+    ImGui::Text("%2d", (int)VALUE_COMPARE);
+    ImGui::PopStyleColor();
+    
+    ImGui::SetCursorScreenPos(pos);
+  }
+
   if (IS_TEXT)
   {
     ImGui::Text("%s", VALUE_TEXT.c_str());
@@ -287,18 +304,18 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
       // If cruise is on change the color
       if (is_within(VALUE, VALUE_COMPARE - PROPS.WITHIN_VALUE, VALUE_COMPARE + PROPS.WITHIN_VALUE) == true)
       {
-        ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.ACTIVE);
+        ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.TEXT);
       }
       else
       {
-        ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.ACTIVE);
+        ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT);
       }
       ImGui::Text("%2d", (int)VALUE);
       ImGui::PopStyleColor();
     }
     else if (VALUE <= -1)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.ACTIVE);
+      ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT);
       ImGui::Text("%2d", abs((int)VALUE));
       ImGui::PopStyleColor();
     }
@@ -309,7 +326,7 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
   }
   else
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_RED.ACTIVE);
+    ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_RED.TEXT);
     ImGui::Text(">>");
     ImGui::PopStyleColor();
   }
