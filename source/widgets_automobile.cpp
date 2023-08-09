@@ -563,25 +563,30 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(100, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
   SDATA.D_TEMP_SUPER_TEMP.create(sdSysData);
 
-  SDATA.D_LF_TTL.PROPS.LABEL = right_justify(9, "TTL LF:");
+  SDATA.OC_LF_TTL.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN;
+  SDATA.OC_RF_TTL.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  SDATA.OC_LB_TTL.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  SDATA.OC_RB_TTL.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
+
+  SDATA.D_LF_TTL.PROPS.LABEL = right_justify(7, "TTL LF:");
   SDATA.D_LF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(25, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_LF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(50, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_LF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(200, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.D_LF_TTL.create(sdSysData);
 
-  SDATA.D_RF_TTL.PROPS.LABEL = right_justify(9, "TTL RF:");
+  SDATA.D_RF_TTL.PROPS.LABEL = right_justify(7, "TTL RF:");
   SDATA.D_RF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(25, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_RF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(50, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_RF_TTL.PROPS.COLOR_SCALE.add_color_value_pair(200, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.D_RF_TTL.create(sdSysData);
 
-  SDATA.D_LB_TTL.PROPS.LABEL = right_justify(9, "TTL LB:");
+  SDATA.D_LB_TTL.PROPS.LABEL = right_justify(7, "TTL LB:");
   SDATA.D_LB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(25, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_LB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(50, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_LB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(200, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.D_LB_TTL.create(sdSysData);
 
-  SDATA.D_RB_TTL.PROPS.LABEL = right_justify(9, "TTL RB:");
+  SDATA.D_RB_TTL.PROPS.LABEL = right_justify(7, "TTL RB:");
   SDATA.D_RB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(25, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_RB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(50, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_RB_TTL.PROPS.COLOR_SCALE.add_color_value_pair(200, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
@@ -751,6 +756,16 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
   // Tire TTL
 
+  SDATA.LF_TTL_BUFFER_FILL = sdSysData.CAR_INFO.CALCULATED.LF_TTL.slice_size();
+  SDATA.RF_TTL_BUFFER_FILL = sdSysData.CAR_INFO.CALCULATED.RF_TTL.slice_size();
+  SDATA.LB_TTL_BUFFER_FILL = sdSysData.CAR_INFO.CALCULATED.LB_TTL.slice_size();
+  SDATA.RB_TTL_BUFFER_FILL = sdSysData.CAR_INFO.CALCULATED.RB_TTL.slice_size();
+
+  SDATA.LF_TTL_BUFFER_FILL_MAX = sdSysData.CAR_INFO.CALCULATED.LF_TTL.slice_size_max();
+  SDATA.RF_TTL_BUFFER_FILL_MAX = sdSysData.CAR_INFO.CALCULATED.RF_TTL.slice_size_max();
+  SDATA.LB_TTL_BUFFER_FILL_MAX = sdSysData.CAR_INFO.CALCULATED.LB_TTL.slice_size_max();
+  SDATA.RB_TTL_BUFFER_FILL_MAX = sdSysData.CAR_INFO.CALCULATED.RB_TTL.slice_size_max();
+
   SDATA.LF_TTL = sdSysData.CAR_INFO.CALCULATED.LF_TTL.life_percentage_mean();
   SDATA.LF_TTL_VAL = sdSysData.CAR_INFO.CALCULATED.LF_TTL.val_life_percentage_mean();
 
@@ -801,6 +816,11 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.D_TEMP_COOLANT.update_value(sdSysData, SDATA.TEMP_COOLANT_STRING, SDATA.TEMP_COOLANT);
   SDATA.D_TEMP_CATALYST.update_value(sdSysData, SDATA.TEMP_CATALYST_STRING, SDATA.TEMP_CATALYST);
   SDATA.D_TEMP_SUPER_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP_STRING, SDATA.TEMP_S_TEMP);
+
+  SDATA.OC_LF_TTL.update_value(sdSysData, SDATA.LF_TTL_BUFFER_FILL, SDATA.LF_TTL_BUFFER_FILL_MAX);
+  SDATA.OC_RF_TTL.update_value(sdSysData, SDATA.RF_TTL_BUFFER_FILL, SDATA.RF_TTL_BUFFER_FILL_MAX);
+  SDATA.OC_LB_TTL.update_value(sdSysData, SDATA.LB_TTL_BUFFER_FILL, SDATA.LB_TTL_BUFFER_FILL_MAX);
+  SDATA.OC_RB_TTL.update_value(sdSysData, SDATA.RB_TTL_BUFFER_FILL, SDATA.RB_TTL_BUFFER_FILL_MAX);
 
   SDATA.D_LF_TTL.update_value(sdSysData, SDATA.LF_TTL, (int)SDATA.LF_TTL_VAL);
   SDATA.D_RF_TTL.update_value(sdSysData, SDATA.RF_TTL, (int)SDATA.RF_TTL_VAL);
@@ -940,9 +960,21 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
     ImGui::BeginChild("Auto Data 2", ImVec2(165, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
+      
+      SDATA.OC_LF_TTL.draw(sdSysData);
+      ImGui::SameLine();
       SDATA.D_LF_TTL.draw(sdSysData);
+
+      SDATA.OC_RF_TTL.draw(sdSysData);
+      ImGui::SameLine();
       SDATA.D_RF_TTL.draw(sdSysData);
+
+      SDATA.OC_LB_TTL.draw(sdSysData);
+      ImGui::SameLine();
       SDATA.D_LB_TTL.draw(sdSysData);
+
+      SDATA.OC_RB_TTL.draw(sdSysData);
+      ImGui::SameLine();
       SDATA.D_RB_TTL.draw(sdSysData);
       
       //SDATA.THING1.draw(sdSysData);

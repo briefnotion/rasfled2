@@ -50,7 +50,8 @@ class ONE_CHAR_LINE_GRAPH_PROPERTIES
 {
   public:
 
-  COLOR_COMBO COLOR;
+  COLOR_COMBO COLOR;  // not yet working,  
+                      // needs hsv to rgb+f conversion
 };
 
 class ONE_CHAR_LINE_GRAPH
@@ -59,11 +60,12 @@ class ONE_CHAR_LINE_GRAPH
 
   float VALUE;
 
+  public:
+  
   ONE_CHAR_LINE_GRAPH_PROPERTIES PROPS;
 
-  public:
-
-  void update_value(system_data &sdSysData);
+  void update_value(system_data &sdSysData, float Value, float Max_Value);
+  // Value 0.0 - 1.0
 
   void draw(system_data &sdSysData);
 };

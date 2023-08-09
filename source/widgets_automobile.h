@@ -21,6 +21,7 @@
 #include "auto.h"
 #include "screen4_helper.h"
 #include "widgets.h"
+#include "widgets_drawing.h"
 
 #include "stringthings.h"
 #include "fled_time.h"
@@ -359,6 +360,16 @@ class DISPLAY_DATA_AUTOMOBILE
 
   // TIRE TTL 
 
+  float LF_TTL_BUFFER_FILL = 0;
+  float RF_TTL_BUFFER_FILL = 0;
+  float LB_TTL_BUFFER_FILL = 0;
+  float RB_TTL_BUFFER_FILL = 0;
+
+  float LF_TTL_BUFFER_FILL_MAX = 0;
+  float RF_TTL_BUFFER_FILL_MAX = 0;
+  float LB_TTL_BUFFER_FILL_MAX = 0;
+  float RB_TTL_BUFFER_FILL_MAX = 0;
+
   string LF_TTL = "";
   float LF_TTL_VAL = 0;
   string RF_TTL = "";
@@ -387,6 +398,11 @@ class DISPLAY_DATA_AUTOMOBILE
   T_DATA_DISPLAY D_TEMP_COOLANT;
   T_DATA_DISPLAY D_TEMP_CATALYST;
   T_DATA_DISPLAY D_TEMP_SUPER_TEMP;
+
+  ONE_CHAR_LINE_GRAPH OC_LF_TTL;
+  ONE_CHAR_LINE_GRAPH OC_RF_TTL;
+  ONE_CHAR_LINE_GRAPH OC_LB_TTL;
+  ONE_CHAR_LINE_GRAPH OC_RB_TTL;
 
   T_DATA_DISPLAY D_LF_TTL;
   T_DATA_DISPLAY D_RF_TTL;

@@ -314,10 +314,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
           ImGui::Text(COMMAND_TEXT.c_str());
           simple_wrap_text_box();
-          ImGui::PopFont();
-
-          //OCG.draw(sdSysData);
-  
+          ImGui::PopFont(); 
         }
         ImGui::EndChild();
 
