@@ -70,19 +70,23 @@ void ONE_CHAR_LINE_GRAPH::draw(system_data &sdSysData)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  //ImVec4 colf = PROPS.COLOR.TEXT;
-  ImVec4 colf = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);
-
-  ImU32 col = ImColor(colf);
-  //ImU32 col = ImColor(PROPS.COLOR.TEXT);
+  ImU32 col = PROPS.COLOR.TEXT;
 
   ImVec2 position = ImGui::GetCursorScreenPos();
+
+  float x = position.x;
+  float y = position.y + 3.0f;
   
-  float x = position.x + 4.0f;
-  float y = position.y + 4.0f;
+  //float x = position.x + 4.0f;
+  //float y = position.y + 4.0f;
   const float spacing = 10.0f;
   static float size = 12.0f;
 
+
+  if (VALUE == 0)
+  {
+    draw_list->AddNgon(ImVec2(x + size * 0.5f, y + size * 0.5f), size * 0.3f, col, 4, 1.0f);
+  }
 
   if (VALUE > 0.0f && VALUE < 0.6f)
   {
@@ -104,7 +108,7 @@ void ONE_CHAR_LINE_GRAPH::draw(system_data &sdSysData)
     draw_list->AddNgonFilled(ImVec2(x + size * 0.25f, y + size * 0.75f), size*0.25f, col, 4.0f);
   }
 
-  if (VALUE == 0 || (VALUE >= 0.5f && VALUE < 1.0f))
+  if (VALUE >= 0.5f && VALUE < 1.0f)
   {
     draw_list->AddNgon(ImVec2(x + size * 0.5f, y + size * 0.5f), size * 0.5f, col, 8, 1.5f);
   }

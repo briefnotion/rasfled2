@@ -145,6 +145,7 @@ class system_data
   AUTOMOBILE CAR_INFO;
 
   // Screen Settings
+  bool TTY_ONLY = false;
   COLOR_COMBOS COLOR_SELECT;
   WIDGET_DEFAULTS SCREEN_DEFAULTS;
 

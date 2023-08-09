@@ -124,16 +124,16 @@ class SCREEN4
   void draw(system_data &sdSysData);
   // Render window to terminal
 
-  void shutdown();
+  void shutdown(system_data &sdSysData);
   // Proper close of imgui
 
   // ----
   // Data Update Paths
-  void update_daemon_log(string Text);
+  void update_daemon_log(system_data &sdSysData, string Text);
 
-  void update_automobile_gadgets(unsigned long &tmeCurrentMillis, system_data &sdSysData);
+  void update_automobile_gadgets(system_data &sdSysData);
 
-  void update_ADS_B_gadgets(unsigned long &tmeCurrentMillis, system_data &sdSysData);
+  void update_ADS_B_gadgets(system_data &sdSysData);
 
 };
 

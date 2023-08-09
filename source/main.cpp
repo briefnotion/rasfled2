@@ -242,7 +242,7 @@ void raw_window_player_draw_frame(string Buffer)
 
 // ---------------------------------------------------------------------------------------
 // MAIN LOOP
-int loop_2()
+int loop_2(bool TTY_Only)
 //  Main Loop:
 //    Events and Light Path animations should only be called when their time is up.
 
@@ -280,9 +280,11 @@ int loop_2()
 
   // Define System Data and Console
   int return_code = 0;
-  //  REMOVE  Console cons;
-  SCREEN4 cons_2;
   system_data sdSystem;
+  sdSystem.TTY_ONLY = TTY_Only;
+
+  // Load Windows or Console
+  SCREEN4 cons_2;
 
   // Switch Lights On
   sdSystem.Lights_On.set(true);
@@ -295,9 +297,6 @@ int loop_2()
   events_and_render.set(get_frame_interval(sdSystem.CONFIG.iFRAMES_PER_SECOND));
   input_from_user.set(100);
   display.set(SCREENUPDATEDELAY);
-
-  // Console sub timer. Just a little faster to prevent blips.
-  //  REMOVE  cons.Console_Display.set(SCREENUPDATEDELAY-1);
 
   // System LogFile Variables
   FILE_WATCH watcher_daemon_log;
@@ -339,10 +338,6 @@ int loop_2()
   // Initialize the console
   cons_2.create(sdSystem);    // Prepare console.
   cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR.resize(4);
-
-  //  REMOVE  initscr();                                // REMOVE
-  //  REMOVE  cons.Screen.init();
-  //  REMOVE  cons.set_screen(sdSystem);                                // REMOVE
   
   // Print Start Info
   cons_2.SCREEN_COMMS.printw("Console Initialized ...  OK");
@@ -351,22 +346,6 @@ int loop_2()
   cons_2.SCREEN_COMMS.printw("  'X'    - Exit");
   cons_2.SCREEN_COMMS.printw("  'help' - Command List)");
   cons_2.SCREEN_COMMS.printw("");
-  
-  /*
-  // Console Key Watch
-  cons.keywatch.set((int)KEYEXIT,2);  // Exit the program.
-
-  // Debugging keys
-  cons.keywatch.set((int)KEYDEBUG,2);  // Testing Mode Toggle
-  cons.keywatch.set((int)KEYLEDTEST,2);  // Test LEDs.  Turn all on low level white.
-  cons.keywatch.set((int)'1',2);  // Door Toggles
-  cons.keywatch.set((int)'2',2);  // 
-  cons.keywatch.set((int)'3',2);  // 
-  cons.keywatch.set((int)'4',2);  // 
-
-  // Console resize key (automatic detection)
-  cons.keywatch.set(KEYRESIZE,2);
-  */
 
   // ---------------------------------------------------------------------------------------
   // System Init
@@ -884,7 +863,7 @@ int loop_2()
       while (watcher_daemon_log.line_avail() == true)
       {
         //cons.Screen.Log_Screen_TEXT_BOX.add_line(tmeCurrentMillis, watcher_daemon_log.get_next_line());
-        cons_2.update_daemon_log(watcher_daemon_log.get_next_line());
+        cons_2.update_daemon_log(sdSystem, watcher_daemon_log.get_next_line());
       }
 
       // Read ADS-B Aircraft JSON
@@ -926,11 +905,11 @@ int loop_2()
         store_event_counts(sdSystem, animations);
 
         // ADS-B - Update all ADS-B gadgets with new data.
-        cons_2.update_ADS_B_gadgets(tmeCurrentMillis, sdSystem);
+        cons_2.update_ADS_B_gadgets(sdSystem);
 
         // Automobile - Update all automobile Reference Data
         sdSystem.CAR_INFO.translate(tmeCurrentMillis);
-        cons_2.update_automobile_gadgets(tmeCurrentMillis, sdSystem);
+        cons_2.update_automobile_gadgets(sdSystem);
 
         // Update Switches to Alert system.
         /*
@@ -1087,7 +1066,7 @@ int loop_2()
   shutdown();
 
   // Shutdown Graphical Window
-  cons_2.shutdown();
+  cons_2.shutdown(sdSystem);
 
   // close open files
   watcher_daemon_log.stop();
@@ -1121,8 +1100,10 @@ int main(int argc, char *argv[])
     if (strcmp(argv[pos], "-h") == 0 || (argv[pos], "--help") == 0)
     {
       ret = 2;
-      printf("      :Load in Terminal (defalt)\n");
-      printf("-gfx  :Load Grafix Window\n");
+      printf("\n-tty  :Load in Terminal\n");
+      printf("        Warning - Command line input not yet implemented.\n");
+      printf("                  There is no way of safely exiting the program.\n");
+      printf("-gfx  :Load Graphics Window (default)\n\n");
     }
     else
     if (strcmp(argv[pos], "-tty") == 0)
@@ -1145,18 +1126,15 @@ int main(int argc, char *argv[])
 
     try
     {
-      //if (load_gfx_window == true)
+      if (load_gfx_window == true)
       {
-        ret = loop_2();
+        ret = loop_2(false);
         printf("Load Graphics Window\n");
       }
-      //else
+      else
       {
-        // CREATE A SIMPLE TEXT ONLY VERSION
-        //  DO NOT LOAD GRAPHICS
-        //  CONSOLE TO PRINTF ONLY.
-        //ret = loop(); // To be phased out?
-        //printf("Do Not Load Graphics Window\n");
+        ret = loop_2(true); // To be phased out?
+        printf("Do Not Load Graphics Window\n");
       }
     }
     catch (std::exception const& e)

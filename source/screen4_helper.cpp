@@ -47,6 +47,10 @@ void COLOR_COMBOS::init()
 
   COLOR_COMB_GREY.set(0.0f, 0.0f, 0.4f);
   COLOR_COMB_GREY.TEXT = ImColor::HSV(0.0f, 0.0f, 0.6f);
+
+  // RGB
+  //ImVec4 colf = ImVec4(0.8f, 0.8f, 0.8f, 1.0f);
+  //ImU32 col = ImColor(colf);
 }
 
 // ---------------------------------------------------------------------------------------

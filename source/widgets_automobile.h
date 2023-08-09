@@ -254,10 +254,8 @@ class T_DATA_DISPLAY_PROPERTIES
   public:
 
   string LABEL = "";
+  int LABEL_TEXT_SIZE = -1;
 
-  int DATA_OFFSET = 90;
-
-  
   COLOR_COMBO COLOR;            // If Color Scale not active then Color defaults to 
   NEW_COLOR_SCALE COLOR_SCALE;  //  pros COLOR.
 };
@@ -272,6 +270,8 @@ class T_DATA_DISPLAY
 
   W_TEXT LABEL;
   W_TEXT DATA;
+
+  ImVec2 LABEL_PIXEL_SIZE;
   
   string VALUE_STRING = "";
   float VALUE_FLOAT = 0;
