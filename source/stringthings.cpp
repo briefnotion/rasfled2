@@ -546,6 +546,13 @@ void STRING_FLOAT::store(string str_value)
   CONVERSION_SUCCESS = string_to_float(str_value, FLOAT_VALUE);
 }
 
+void STRING_FLOAT::store_val(float value)
+{
+  FLOAT_VALUE = value;
+  STR_VALUE = to_string(value);
+  CONVERSION_SUCCESS = true;
+}
+
 string STRING_FLOAT::get_str_value()
 // Return original number string value.
 {

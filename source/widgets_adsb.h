@@ -12,10 +12,16 @@
 #ifndef WIDGETS_ADSB_H
 #define WIDGETS_ADSB_H
 
+#define pi_adsb 3.14159265358979323846
+
 #include <stdio.h>
 #include <string>
+#include <cmath>
+#include <cmath>
+//#include <utility>
 
 // Rasfled Includes
+#include "stringthings.h"
 #include "system.h"
 #include "helper.h"
 #include "fled_time.h"
@@ -60,6 +66,50 @@ class W_TEXT
 */
 
 // ---------------------------------------------------------------------------------------
+// Map Tools
+
+float calculate_distance(float lat1, float long1, float lat2, float long2);
+
+ImVec2 get_miles_west_coords(float Latitude, float Longitude, float Distance_Miles);
+
+// ---------------------------------------------------------------------------------------
+
+class MAP_GLOBAL_POSITION
+{
+  public:
+  STRING_FLOAT LATITUDE;
+  STRING_FLOAT LONGITUDE;
+};
+
+// ---------------------------------------------------------------------------------------
+
+class ADSB_RANGE_Properties
+{
+  public:
+
+  COLOR_COMBO COLOR;
+};
+
+class ADSB_RANGE
+{
+  private:
+  
+  float RANGE = 25.0f;
+
+  MAP_GLOBAL_POSITION CURRENT_POSITION;
+
+  public:
+
+  ADSB_RANGE_Properties PROPS;
+
+  void set_range(float Range_Miles);
+
+  void set_current_global_position(float Latitude, float Longitude);
+  
+  void draw(system_data &sdSysData, ImVec2 Available_Space);
+};
+
+// ---------------------------------------------------------------------------------------
 
 class ADSB_WIDGET_Properties
 // Properties (duh)
@@ -78,9 +128,7 @@ class ADSB_WIDGET_Properties
   int SIZEY = 5;
   int SIZEX = 21;
 
-  bool CHANGED = true;
-
-  AIRCRAFT AIRCRAFT_DATA;
+  //bool CHANGED = true;
 };
 
 class ADSB_WIDGET
@@ -97,16 +145,14 @@ class ADSB_WIDGET
   
   private:
 
-  WIDGET_DEFAULTS DEFAULTS;
-  
-  // Gadget window
-  //PANEL ADSB_PANEL;
+  //WIDGET_DEFAULTS DEFAULTS;
 
   // Was gadget redrawn during the previous draw cycle.
-  bool WAS_REDRAWN = false;
+  //bool WAS_REDRAWN = false;
 
   int EXPIRATION_TIME = 15000;
   TIMED_PING EXPIREED;
+  bool WIDGET_ACTIVE = false;
 
   //string compass_mini_top(float Heading);
 
@@ -122,10 +168,11 @@ class ADSB_WIDGET
   float LONGITUDE = 0;
 
   //Debug
-  int Counter = 0;
-  
+  //int Counter = 0;
 
   public:
+
+  AIRCRAFT AIRCRAFT_DATA;
 
   /*
 
@@ -175,11 +222,13 @@ class ADSB_WIDGET
   // Update values of gadget
   //  Gadget will be redrawn if values did changed or animations scheduled. 
 
-  bool draw(bool Refresh, unsigned long tmeFrame_Time);
+  bool draw(system_data &sdSysData);
   // Draw all changes to Panel.
   //  Set Refresh to true to force redraw.
   //  Animations will be ignored without time reference.
   // Returns true if panel was redrawn.
+
+  bool active();
 };
 
 class DISPLAY_DATA_ADSB
@@ -214,6 +263,13 @@ class ADSB_SCREEN
 
   deque<ADSB_WIDGET> ADSB_WIDGET_q;
 
+  // Screens
+  bool DISPLAY_TABLE = true;
+  bool DISPLAY_MAP = false;
+
+  // Map Variables
+  ADSB_RANGE RANGE_INDICATOR;
+
   int find_HEX(string Hex);
   // Gadget Internal:
   //  returns gadget position of aircraft with Hex ID
@@ -223,6 +279,8 @@ class ADSB_SCREEN
   //  returns gadget position of aircraft with time expired.
   
   public:
+
+  void create(system_data &sdSysData);
   
   void update(system_data &sdSysData);
 

@@ -23,7 +23,6 @@
 #include "widgets_adsb.h"
 #include "widgets_drawing.h"
 
-
 // IMGui Includes
 #include "../../imgui/imgui.h"
 #include "../../imgui/misc/cpp/imgui_stdlib.h"
@@ -77,6 +76,8 @@ class SCREEN4
   
   // ---
   // Screen Vars
+
+  TEXTURE_IMAGE QR_CODE;
 
   string COMMAND_TEXT_TEMP = "";
   string COMMAND_TEXT = "";

@@ -29,7 +29,7 @@ void COLOR_COMBO::set(float H, float S, float V)
 void COLOR_COMBOS::init()
 {
   COLOR_COMB_BLACK.set(0.0f, 0.0f, 0.0f);
-  COLOR_COMB_WHITE.set(0.0f, 0.0f, .6f);
+  //COLOR_COMB_WHITE.set(0.0f, 0.0f, .6f);
   COLOR_COMB_ORANGE.set(0.074f, 0.8f, 0.6f);
   COLOR_COMB_YELLOW.set(0.162, 0.8f, 0.6f);
   COLOR_COMB_GREEN.set(0.333f, 0.8f, 0.6f);
@@ -38,6 +38,12 @@ void COLOR_COMBOS::init()
   COLOR_COMB_PINK.set(0.838f, 0.8f, 0.6f);
 
   // Exceptions
+  COLOR_COMB_WHITE.TEXT = ImColor::HSV(0.0f, 0.0f, 0.9f);
+  COLOR_COMB_WHITE.BACKGROUND = ImColor::HSV(0.0f, 0.0f, 0.4f);
+  COLOR_COMB_WHITE.STANDARD = ImColor::HSV(0.0f, 0.0f, 0.6f);
+  COLOR_COMB_WHITE.HOVERED = ImColor::HSV(0.0f, 0.0f, 0.7f);
+  COLOR_COMB_WHITE.ACTIVE = ImColor::HSV(0.0f, 0.0f, 0.8f);
+  COLOR_COMB_WHITE.DEFAULT = false;
 
   COLOR_COMB_RED.set(0.0f, 0.8f, 0.6f);
   COLOR_COMB_RED.TEXT = ImColor::HSV(0.0f, 0.6f, 1.0f);

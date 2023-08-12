@@ -111,8 +111,12 @@ int SCREEN4::create(system_data &sdSysData)
     //  Necessary for ImGui::CalcTextSize(hzxjhfzxjhxz)
     ImGui::EndFrame();
 
+    // QR_Image
+    QR_CODE.create(FILES_DIRECTORY, FILES_QR_CODE);
+
     // Prepare Screens
     AUTOMOBILE.create(sdSysData);
+    ADSB.create(sdSysData);
 
     // Prepare Current Screen Widgets
     LIGHTS.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
@@ -303,21 +307,18 @@ void SCREEN4::draw(system_data &sdSysData)
 
         ImGui::BeginChild("Status", ImVec2(ImGui::GetContentRegionAvail().x, 60), true, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
-
           float region_div_4 = ImGui::GetContentRegionAvail().x / 4;
 
           // Divide sub window into 4
           // Left
           ImGui::BeginChild("Status Left", ImVec2(region_div_4, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
-            
             if (RESET_KEYBOARD_FOCUS == true)
             {
               ImGui::SetKeyboardFocusHere();
               RESET_KEYBOARD_FOCUS = false;
             }
 
-            
             ImGui::PushFont(io.Fonts->Fonts.Data[2]);
             ImGui::Text("CMD:");
 
@@ -917,6 +918,14 @@ void SCREEN4::draw(system_data &sdSysData)
 
       ImGui::End();
     }
+
+    // ---------------------------------------------------------------------------------------
+
+    ImGui::Begin("GL Texture");
+    QR_CODE.draw();
+    ImGui::End();
+
+    // ---------------------------------------------------------------------------------------
 
     // Rendering
     ImGui::Render();

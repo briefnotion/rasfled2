@@ -198,6 +198,8 @@ class STRING_FLOAT
 
   public:
   void store(string str_value);
+
+  void store_val(float value);
   
   string get_str_value();
 

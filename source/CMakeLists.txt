@@ -21,6 +21,7 @@ include_directories(../../imgui/backends)
 include_directories(../../imgui/misc/cpp)
 
 include_directories(../../implot)
+##include_directories(../../stb)
 
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
