@@ -70,7 +70,17 @@ class W_TEXT
 
 float calculate_distance(float lat1, float long1, float lat2, float long2);
 
-ImVec2 get_miles_west_coords(float Latitude, float Longitude, float Distance_Miles);
+ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees);
+
+void draw_marker(system_data &sdSysData, ImVec2 Screen_Position);
+
+ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
+                                float Latitude_Center, float Longitude_Center, 
+                                float Latitude, float Longitude);
+
+ImVec2 point_position_center(ImVec4 Working_Area);
+
+ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 
 // ---------------------------------------------------------------------------------------
 
@@ -95,18 +105,50 @@ class ADSB_RANGE
   private:
   
   float RANGE = 25.0f;
+  float RADIUS_CIRCLE_POINT_SIZE = 0;
+  ImVec2 LAT_LON_TO_POINT_SCALE;
+
+  ImVec4 PREV_WORKING_AREA;
 
   MAP_GLOBAL_POSITION CURRENT_POSITION;
+
+  void calculate_lat_lon_to_point_scale();
 
   public:
 
   ADSB_RANGE_Properties PROPS;
 
+  ImVec2 ll_2_pt_scale();
+
+  MAP_GLOBAL_POSITION current_lat_lon();
+
   void set_range(float Range_Miles);
 
   void set_current_global_position(float Latitude, float Longitude);
   
-  void draw(system_data &sdSysData, ImVec2 Available_Space);
+  void draw(system_data &sdSysData, ImVec4 Working_Area);
+
+  void draw_info(system_data &sdSysData);
+};
+
+class ADSB_MAP_Properties
+{
+  
+
+};
+
+class ADSB_MAP
+{
+  private:
+  
+  ADSB_RANGE RANGE_INDICATOR;
+
+  public:
+
+  void create(system_data &sdSysData);
+
+  void draw(system_data &sdSysData, AIRCRAFT_DATA &Aircraft_List);
+
 };
 
 // ---------------------------------------------------------------------------------------
@@ -129,7 +171,7 @@ class ADSB_WIDGET_Properties
   int SIZEX = 21;
 
   //bool CHANGED = true;
-};
+}; 
 
 class ADSB_WIDGET
 // Gadget display single aircraft information to panel with 
@@ -244,15 +286,7 @@ class DISPLAY_DATA_ADSB
   string TIME_OF_SIGNAL = "";
   string POSITIONED_COUNT = "";
   string POSITIONED_AIRCRAFT = "";
-
-  /*
-  int MESSAGES = 0;
-  float SPEED = 0;
-  float SUPER_TEMP = 0;
-  string VOLTAGE = "X";
-  */
 };
-
 
 class ADSB_SCREEN
 {
@@ -268,7 +302,7 @@ class ADSB_SCREEN
   bool DISPLAY_MAP = false;
 
   // Map Variables
-  ADSB_RANGE RANGE_INDICATOR;
+  ADSB_MAP ADSB_MAP_DISPLAY;
 
   int find_HEX(string Hex);
   // Gadget Internal:
@@ -277,6 +311,8 @@ class ADSB_SCREEN
   int find_expired();
   // Gadget Internal:
   //  returns gadget position of aircraft with time expired.
+
+  //void draw_adsb_map(system_data &sdSysData);
   
   public:
 
