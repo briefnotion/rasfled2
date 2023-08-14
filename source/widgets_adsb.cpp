@@ -73,36 +73,28 @@ ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Dis
   return ret_coords;
 }
 
-void draw_marker(system_data &sdSysData, ImVec2 Screen_Position)
-{
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  draw_list->AddNgon(Screen_Position, 10, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT, 4, 1.5f);
-}
-
-ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
-                                float Latitude_Center, float Longitude_Center, 
-                                float Latitude, float Longitude)
-{
-  ImVec2 center = point_position_center(Working_Area);
-
-  ImVec2 ret_point;
-
-  float lat_diff = Latitude - Latitude_Center;
-  float lon_diff = Longitude - Longitude_Center;
-
-  ret_point.y = -(lat_diff * Scale.x) + (Working_Area.w / 2);
-  ret_point.x = (lon_diff * Scale.y) + (Working_Area.z / 2);
-
-  return ret_point;
-}
-
 ImVec2 point_position_center(ImVec4 Working_Area)
 {
   ImVec2 ret_center;
   ret_center.x = Working_Area.x + Working_Area.z / 2;
   ret_center.y = Working_Area.y + Working_Area.w / 2;
   return ret_center;
+}
+
+ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
+                                ImVec2 Lat_Lon_Center, ImVec2 Lat_Lon)
+{
+  ImVec2 center = point_position_center(Working_Area);
+
+  ImVec2 ret_point;
+
+  float lat_diff = Lat_Lon.x - Lat_Lon_Center.x;
+  float lon_diff = Lat_Lon.y - Lat_Lon_Center.y;
+
+  ret_point.y = -(lat_diff * Scale.x) + center.y;
+  ret_point.x = (lon_diff * Scale.y) + center.x;
+
+  return ret_point;
 }
 
 ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position)
@@ -114,198 +106,32 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position)
 }
 
 // ---------------------------------------------------------------------------------------
+// Markers
 
-
-
-// ---------------------------------------------------------------------------------------
-
-void ADSB_RANGE::calculate_lat_lon_to_point_scale()
-{
-  float latitude_diff = 0;
-  float longitude_diff = 0;
-
-  ImVec2 new_coords_east = get_coords_x_miles_from_coords(CURRENT_POSITION.LATITUDE.get_float_value(),
-                                                      CURRENT_POSITION.LONGITUDE.get_float_value(),
-                                                      RANGE, 90);
-  ImVec2 new_coords_south = get_coords_x_miles_from_coords(CURRENT_POSITION.LATITUDE.get_float_value(),
-                                                      CURRENT_POSITION.LONGITUDE.get_float_value(),
-                                                      RANGE, 180);
-
-  latitude_diff = abs(new_coords_south.x - CURRENT_POSITION.LATITUDE.get_float_value());
-  longitude_diff = abs(new_coords_east.y - CURRENT_POSITION.LONGITUDE.get_float_value());
-
-  LAT_LON_TO_POINT_SCALE.x =(RADIUS_CIRCLE_POINT_SIZE / latitude_diff);
-  LAT_LON_TO_POINT_SCALE.y = (RADIUS_CIRCLE_POINT_SIZE / longitude_diff);
-}
-
-ImVec2 ADSB_RANGE::ll_2_pt_scale()
-{
-  return LAT_LON_TO_POINT_SCALE;
-}
-
-MAP_GLOBAL_POSITION ADSB_RANGE::current_lat_lon()
-{
-  return CURRENT_POSITION;
-}
-
-void ADSB_RANGE::set_range(float Range_Miles)
-{
-  RANGE = Range_Miles;
-}
-
-void ADSB_RANGE::set_current_global_position(float Latitude, float Longitude)
-{
-  CURRENT_POSITION.LATITUDE.store_val(Latitude);
-  CURRENT_POSITION.LONGITUDE.store_val(Longitude);
-}
-
-void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
+void draw_marker(system_data &sdSysData, ImVec2 Screen_Position)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  ImU32 col = PROPS.COLOR.TEXT;
+  draw_list->AddNgon(Screen_Position, 4, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT, 4, 1.5f);
+}
 
-if (  PREV_WORKING_AREA.x != Working_Area.x || 
-      PREV_WORKING_AREA.y != Working_Area.y || 
-      PREV_WORKING_AREA.z != Working_Area.z || 
-      PREV_WORKING_AREA.w != Working_Area.w )
+// ---------------------------------------------------------------------------------------
+
+void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon)
+{
+  ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, LAT_LON);
+
+  switch (TYPE)
   {
-    PREV_WORKING_AREA.x = Working_Area.x;
-    PREV_WORKING_AREA.y = Working_Area.y;
-    PREV_WORKING_AREA.z = Working_Area.z;
-    PREV_WORKING_AREA.w = Working_Area.w;
-    
-    RADIUS_CIRCLE_POINT_SIZE = Working_Area.w / 2 * 0.6f;
-    
-    calculate_lat_lon_to_point_scale();
-  }
-
-  const float spacing = 10.0f;
-
-  draw_list->AddNgon(point_position_center(Working_Area), RADIUS_CIRCLE_POINT_SIZE, col, 32, 1.5f);
-}
-
-void ADSB_RANGE::draw_info(system_data &sdSysData)
-{
-  ImGui::Text("lat: %f", CURRENT_POSITION.LATITUDE.get_float_value());
-  ImGui::Text("lon: %f", CURRENT_POSITION.LONGITUDE.get_float_value());
-  ImGui::Text("rng: %.0f", RANGE);
-
-  // test
-  /*
-  for (int degrees = 0; degrees < 360; degrees = degrees + 15)
-  {  
-    ImVec2 x_miles_west;
-    x_miles_west = get_coords_x_miles_from_coords(CURRENT_POSITION.LATITUDE.get_float_value(),
-                                                CURRENT_POSITION.LONGITUDE.get_float_value(),
-                                                RANGE, degrees);
-    //x_miles_west.x = CURRENT_POSITION.LATITUDE.get_float_value();
-    //x_miles_west.y = CURRENT_POSITION.LONGITUDE.get_float_value();
-
-    ImGui::Text("---");
-
-    ImGui::Text("lat: %f", x_miles_west.x);
-    ImGui::Text("lon: %f", x_miles_west.y);
-
-    float distance = calculate_distance(CURRENT_POSITION.LATITUDE.get_float_value(),
-                                        CURRENT_POSITION.LONGITUDE.get_float_value(),
-                                        x_miles_west.x, x_miles_west.y);
-    ImGui::Text("dis: %f", distance);
-    
-    ImGui::Text("---");
-
-    ImGui::Text("lat: %f", abs(x_miles_west.x - CURRENT_POSITION.LATITUDE.get_float_value()));
-    ImGui::Text("lon: %f", abs(x_miles_west.y - CURRENT_POSITION.LONGITUDE.get_float_value()));
-    ImGui::Text("rad: %f", RADIUS_CIRCLE_POINT_SIZE);
-    ImGui::Text("scl:  %f %f", LAT_LON_TO_POINT_SCALE.x, LAT_LON_TO_POINT_SCALE.y);
-    
-    ImGui::Text("---");
-
-    ImVec2 scr_pos = point_position_lat_lon(PREV_WORKING_AREA, LAT_LON_TO_POINT_SCALE, 
-                                            CURRENT_POSITION.LATITUDE.get_float_value(), CURRENT_POSITION.LONGITUDE.get_float_value(),
-                                            x_miles_west.x, x_miles_west.y);
-
-    ImGui::Text("pnt: %f %f", scr_pos.x, scr_pos.y);
-    draw_marker(sdSysData, point_position(PREV_WORKING_AREA, scr_pos));
-  }
-  */
-}
-
-// -------------------------------------------------------------------------------------
-
-void ADSB_MAP::create(system_data &sdSysData)
-{
-  RANGE_INDICATOR.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
-  RANGE_INDICATOR.set_range(25.0f);
-
-  // KLFT - Lafayette Regional/Paul Fournet Field Airport
-  // Coordinates: 
-  //                                LATITUDE      LONGITUDE
-  // Degrees Decimal Minutes (DDM): N30°12.30'  / W91°59.27'
-  // Decimal Degrees (DD):          30.205      / -91.987833
-
-  RANGE_INDICATOR.set_current_global_position(30.205f, -91.987833f);
-}
-
-void ADSB_MAP::draw(system_data &sdSysData, AIRCRAFT_DATA &Aircraft_List)
-{
-  // working area, xy start position; zw, size.
-  ImVec4 working_area;
-
-  working_area.x = ImGui::GetCursorScreenPos().x;
-  working_area.y = ImGui::GetCursorScreenPos().y;
-  working_area.z = ImGui::GetContentRegionAvail().x;
-  working_area.w = ImGui::GetContentRegionAvail().y;
-
-  // ---
-  // All Text Below Here
-  
-
-  // Range Indicator
-  RANGE_INDICATOR.draw(sdSysData, working_area);
-  RANGE_INDICATOR.draw_info(sdSysData);
-
-  // Center Marker
-  draw_marker(sdSysData, point_position_center(working_area));
-
-  for (int aircraft = 0; aircraft < Aircraft_List.AIRCRAFTS.size(); aircraft ++)
-  {
-    if (Aircraft_List.AIRCRAFTS[aircraft].POSITION.GLOBAL_POSITION_FOUND == true)
+    case 0:
     {
-      draw_marker(sdSysData,  
-                    point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), 
-                    RANGE_INDICATOR.current_lat_lon().LATITUDE.get_float_value(), 
-                    RANGE_INDICATOR.current_lat_lon().LONGITUDE.get_float_value(),
-                    Aircraft_List.AIRCRAFTS[aircraft].POSITION.LATITUDE.get_float_value(), 
-                    Aircraft_List.AIRCRAFTS[aircraft].POSITION.LONGITUDE.get_float_value()));
+      draw_marker(sdSysData, draw_position);
+      ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5));
+
+      ImGui::Text("%s", DISPLAY_NAME.c_str());
+      break;
     }
   }
-
-  // test
-
-  /*  
-  ImVec2 test_position;
-
-  test_position.x = 323;
-  test_position.y = 323;
-  draw_marker(sdSysData, point_position(working_area, test_position));
-
-  test_position.x = 360;
-  test_position.y = 400;
-  draw_marker(sdSysData, point_position(working_area, test_position));
-
-  test_position.x = 500;
-  test_position.y = 580;
-  draw_marker(sdSysData, point_position(working_area, test_position));
-
-  test_position.x = 700;
-  test_position.y = 500;
-  draw_marker(sdSysData, point_position(working_area, test_position));
-
-  test_position.x = 653;
-  test_position.y = 223;
-  draw_marker(sdSysData, point_position(working_area, test_position));
-  */
 }
 
 // ---------------------------------------------------------------------------------------
@@ -972,6 +798,266 @@ bool ADSB_WIDGET::active()
   return WIDGET_ACTIVE;
 }
 
+void ADSB_WIDGET::draw_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon)
+{
+  if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true)
+  {
+    ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon,
+                                                  ImVec2( AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value(), 
+                                                          AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value()));
+
+    draw_marker(sdSysData, draw_position);
+
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 4));
+    ImGui::Text("%d %s", AIRCRAFT_DATA.SEEN_POS.get_int_value(), AIRCRAFT_DATA.FLIGHT.get_str_value().c_str());
+    
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 18));
+    ImGui::Text("S: %d", AIRCRAFT_DATA.SPEED.get_int_value());
+
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 31));
+    if (AIRCRAFT_DATA.ALTITUDE.conversion_success())
+    {
+      ImGui::Text("A: %d", AIRCRAFT_DATA.ALTITUDE.get_int_value() / 100);
+    }
+    else
+    {
+      ImGui::Text("A: %s", AIRCRAFT_DATA.ALTITUDE.get_str_value().c_str());
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
+void ADSB_RANGE::calculate_lat_lon_to_point_scale()
+{
+  float latitude_diff = 0;
+  float longitude_diff = 0;
+
+  ImVec2 new_coords_east = get_coords_x_miles_from_coords(CURRENT_LAT_LON.x, CURRENT_LAT_LON.y,
+                                                          RANGE, 90);
+  ImVec2 new_coords_south = get_coords_x_miles_from_coords(CURRENT_LAT_LON.x, CURRENT_LAT_LON.y,
+                                                          RANGE, 180);
+
+  latitude_diff = abs(new_coords_south.x - CURRENT_LAT_LON.x);
+  longitude_diff = abs(new_coords_east.y - CURRENT_LAT_LON.y);
+
+  LAT_LON_TO_POINT_SCALE.x =(RADIUS_CIRCLE_POINT_SIZE / latitude_diff);
+  LAT_LON_TO_POINT_SCALE.y = (RADIUS_CIRCLE_POINT_SIZE / longitude_diff);
+}
+
+ImVec2 ADSB_RANGE::ll_2_pt_scale()
+{
+  return LAT_LON_TO_POINT_SCALE;
+}
+
+ImVec2 ADSB_RANGE::current_lat_lon()
+{
+  return CURRENT_LAT_LON;
+}
+
+float ADSB_RANGE::range()
+{
+  return RANGE;
+}
+
+void ADSB_RANGE::set_range(float Range_Miles)
+{
+  RANGE = Range_Miles;
+}
+
+void ADSB_RANGE::set_current_global_position(ImVec2 Lat_Lon)
+{
+  CURRENT_LAT_LON = Lat_Lon;
+}
+
+void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
+{
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+  ImU32 col = PROPS.COLOR.TEXT;
+
+if (  PREV_WORKING_AREA.x != Working_Area.x || 
+      PREV_WORKING_AREA.y != Working_Area.y || 
+      PREV_WORKING_AREA.z != Working_Area.z || 
+      PREV_WORKING_AREA.w != Working_Area.w )
+  {
+    PREV_WORKING_AREA.x = Working_Area.x;
+    PREV_WORKING_AREA.y = Working_Area.y;
+    PREV_WORKING_AREA.z = Working_Area.z;
+    PREV_WORKING_AREA.w = Working_Area.w;
+    
+    RADIUS_CIRCLE_POINT_SIZE = Working_Area.w / 2 * 0.6f;
+    
+    calculate_lat_lon_to_point_scale();
+  }
+
+  const float spacing = 10.0f;
+
+  draw_list->AddNgon(point_position_center(Working_Area), RADIUS_CIRCLE_POINT_SIZE, col, 32, 1.5f);
+}
+
+void ADSB_RANGE::draw_info(system_data &sdSysData)
+{
+  ImGui::Text("lat: %f", CURRENT_LAT_LON.x);
+  ImGui::Text("lon: %f", CURRENT_LAT_LON.y);
+  ImGui::Text("rng: %.0f", RANGE);
+
+  // test
+  /*
+  for (int degrees = 0; degrees < 360; degrees = degrees + 15)
+  {  
+    ImVec2 x_miles_west;
+    x_miles_west = get_coords_x_miles_from_coords(CURRENT_POSITION.LATITUDE.get_float_value(),
+                                                CURRENT_POSITION.LONGITUDE.get_float_value(),
+                                                RANGE, degrees);
+    //x_miles_west.x = CURRENT_POSITION.LATITUDE.get_float_value();
+    //x_miles_west.y = CURRENT_POSITION.LONGITUDE.get_float_value();
+
+    ImGui::Text("---");
+
+    ImGui::Text("lat: %f", x_miles_west.x);
+    ImGui::Text("lon: %f", x_miles_west.y);
+
+    float distance = calculate_distance(CURRENT_POSITION.LATITUDE.get_float_value(),
+                                        CURRENT_POSITION.LONGITUDE.get_float_value(),
+                                        x_miles_west.x, x_miles_west.y);
+    ImGui::Text("dis: %f", distance);
+    
+    ImGui::Text("---");
+
+    ImGui::Text("lat: %f", abs(x_miles_west.x - CURRENT_POSITION.LATITUDE.get_float_value()));
+    ImGui::Text("lon: %f", abs(x_miles_west.y - CURRENT_POSITION.LONGITUDE.get_float_value()));
+    ImGui::Text("rad: %f", RADIUS_CIRCLE_POINT_SIZE);
+    ImGui::Text("scl:  %f %f", LAT_LON_TO_POINT_SCALE.x, LAT_LON_TO_POINT_SCALE.y);
+    
+    ImGui::Text("---");
+
+    ImVec2 scr_pos = point_position_lat_lon(PREV_WORKING_AREA, LAT_LON_TO_POINT_SCALE, 
+                                            CURRENT_POSITION.LATITUDE.get_float_value(), CURRENT_POSITION.LONGITUDE.get_float_value(),
+                                            x_miles_west.x, x_miles_west.y);
+
+    ImGui::Text("pnt: %f %f", scr_pos.x, scr_pos.y);
+    draw_marker(sdSysData, point_position(PREV_WORKING_AREA, scr_pos));
+  }
+  */
+}
+
+// -------------------------------------------------------------------------------------
+
+void ADSB_MAP::add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type)
+{
+  MAP_MARKER new_landmark;
+
+  new_landmark.LAT_LON = Lat_Lon;
+  new_landmark.DISPLAY_NAME = Display_Name;
+  new_landmark.TYPE = Type;
+
+  LANDMARKS.push_back(new_landmark);
+}
+
+void ADSB_MAP::create(system_data &sdSysData)
+{
+  RANGE_INDICATOR.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  RANGE_INDICATOR.set_range(25.0f);
+
+  // KLFT - Lafayette Regional/Paul Fournet Field Airport
+  // Coordinates: 
+  //                                LATITUDE      LONGITUDE
+  // Degrees Decimal Minutes (DDM): N30°12.30'  / W91°59.27'
+  // Decimal Degrees (DD):          30.205      / -91.987833
+
+  RANGE_INDICATOR.set_current_global_position(ImVec2(30.205f, -91.987833f));
+
+  // Add Landmarks
+  add_landmark(ImVec2(30.205f, -91.987833f), "LFY", 0);
+  add_landmark(ImVec2(30.4663333333f, -92.4238333333f), "4R7", 0);
+  add_landmark(ImVec2(30.2426666667f, -92.6735f), "3R7", 0);
+  add_landmark(ImVec2(30.533f, -91.1498333333f), "BTR", 0);
+  add_landmark(ImVec2(30.0378333333f, -91.8838333333f), "ARA", 0);
+  //add_landmark(ImVec2(30.2426666667f, -92.6735f), "3R7", 0);
+}
+
+//void ADSB_MAP::draw(system_data &sdSysData, AIRCRAFT_DATA &Aircraft_List)
+void ADSB_MAP::draw(system_data &sdSysData, deque<ADSB_WIDGET> &ADSB_Widgets)
+{
+  // working area, xy start position; zw, size.
+  ImVec4 working_area;
+
+  working_area.x = ImGui::GetCursorScreenPos().x;
+  working_area.y = ImGui::GetCursorScreenPos().y;
+  working_area.z = ImGui::GetContentRegionAvail().x;
+  working_area.w = ImGui::GetContentRegionAvail().y;
+
+  // -------------------------------------------------------------------------------------
+  // All Text Below Here
+  ImGui::Text("WARNING: Information provided here may be considered CONFIDENTIAL");
+  //ImGui::Text("%s", SDATA.TIME_OF_SIGNAL.c_str());
+  //ImGui::Text("Positions: %s", SDATA.POSITIONED_AIRCRAFT.c_str());
+
+  // Range Indicator
+  RANGE_INDICATOR.draw(sdSysData, working_area);
+  RANGE_INDICATOR.draw_info(sdSysData);
+
+
+  // All Text Above Here
+  // -------------------------------------------------------------------------------------
+
+  // Draw Landmarks
+
+  for (int landmark = 0; landmark < LANDMARKS.size(); landmark++)
+  {
+    LANDMARKS[landmark].draw(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.current_lat_lon());
+  }
+  
+  // Draw Aircraft
+  for (int aircraft = 0; aircraft < ADSB_Widgets.size(); aircraft ++)
+  {
+    ADSB_Widgets[aircraft].draw_map_marker(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.current_lat_lon());
+  }
+
+  // -------------------------------------------------------------------------------------
+  // test for point position accuracy by getting geo from range, then putting geo marker 
+  //  on range indicator.
+
+  /*
+  ImVec2 test_position;
+  ImVec2 test_position2;
+
+  test_position = get_coords_x_miles_from_coords(RANGE_INDICATOR.current_lat_lon().x, RANGE_INDICATOR.current_lat_lon().y,
+                                                  RANGE_INDICATOR.range(), 225);
+
+  test_position2 = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), 
+                                  RANGE_INDICATOR.current_lat_lon(), test_position);
+
+  draw_marker(sdSysData, test_position2);
+
+  ImGui::Text("ll: %f %f", test_position.x, test_position.y);
+  ImGui::Text("pt: %f %f", test_position2.x, test_position2.y);
+  */
+
+  /*
+  test_position.x = 323;
+  test_position.y = 323;
+  draw_marker(sdSysData, point_position(working_area, test_position));
+
+  test_position.x = 360;
+  test_position.y = 400;
+  draw_marker(sdSysData, point_position(working_area, test_position));
+
+  test_position.x = 500;
+  test_position.y = 580;
+  draw_marker(sdSysData, point_position(working_area, test_position));
+
+  test_position.x = 700;
+  test_position.y = 500;
+  draw_marker(sdSysData, point_position(working_area, test_position));
+
+  test_position.x = 653;
+  test_position.y = 223;
+  draw_marker(sdSysData, point_position(working_area, test_position));
+  */
+}
+
 // -------------------------------------------------------------------------------------
 
 int ADSB_SCREEN::find_HEX(string Hex)
@@ -1188,7 +1274,7 @@ void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_
   {
     ImGui::BeginChild("ADSB Map", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
     {
-      ADSB_MAP_DISPLAY.draw(sdSysData, SDATA.AIRCRAFT_LIST);
+      ADSB_MAP_DISPLAY.draw(sdSysData, ADSB_WIDGET_q);
     }
     ImGui::EndChild();
   }

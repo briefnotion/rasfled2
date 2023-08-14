@@ -72,83 +72,34 @@ float calculate_distance(float lat1, float long1, float lat2, float long2);
 
 ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees);
 
-void draw_marker(system_data &sdSysData, ImVec2 Screen_Position);
+ImVec2 point_position_center(ImVec4 Working_Area);
 
 ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
-                                float Latitude_Center, float Longitude_Center, 
-                                float Latitude, float Longitude);
-
-ImVec2 point_position_center(ImVec4 Working_Area);
+                                ImVec2 Lat_Lon_Center, ImVec2 Lat_Lon);
 
 ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 
 // ---------------------------------------------------------------------------------------
+// Markers
 
-class MAP_GLOBAL_POSITION
-{
-  public:
-  STRING_FLOAT LATITUDE;
-  STRING_FLOAT LONGITUDE;
-};
+void draw_marker(system_data &sdSysData, ImVec2 Screen_Position);
 
 // ---------------------------------------------------------------------------------------
 
-class ADSB_RANGE_Properties
+
+class MAP_MARKER
 {
   public:
 
-  COLOR_COMBO COLOR;
-};
+  ImVec2 LAT_LON;
+  string DISPLAY_NAME = "";
+  int TYPE = 0;
 
-class ADSB_RANGE
-{
-  private:
-  
-  float RANGE = 25.0f;
-  float RADIUS_CIRCLE_POINT_SIZE = 0;
-  ImVec2 LAT_LON_TO_POINT_SCALE;
+  // Types:
+  //  0 - Generic
+  //  1 - Airport
 
-  ImVec4 PREV_WORKING_AREA;
-
-  MAP_GLOBAL_POSITION CURRENT_POSITION;
-
-  void calculate_lat_lon_to_point_scale();
-
-  public:
-
-  ADSB_RANGE_Properties PROPS;
-
-  ImVec2 ll_2_pt_scale();
-
-  MAP_GLOBAL_POSITION current_lat_lon();
-
-  void set_range(float Range_Miles);
-
-  void set_current_global_position(float Latitude, float Longitude);
-  
-  void draw(system_data &sdSysData, ImVec4 Working_Area);
-
-  void draw_info(system_data &sdSysData);
-};
-
-class ADSB_MAP_Properties
-{
-  
-
-};
-
-class ADSB_MAP
-{
-  private:
-  
-  ADSB_RANGE RANGE_INDICATOR;
-
-  public:
-
-  void create(system_data &sdSysData);
-
-  void draw(system_data &sdSysData, AIRCRAFT_DATA &Aircraft_List);
-
+  void draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -271,7 +222,82 @@ class ADSB_WIDGET
   // Returns true if panel was redrawn.
 
   bool active();
+
+  void draw_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon);
 };
+
+// ---------------------------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------------------------
+
+class ADSB_RANGE_Properties
+{
+  public:
+
+  COLOR_COMBO COLOR;
+};
+
+class ADSB_RANGE
+{
+  private:
+  
+  float RANGE = 25.0f;
+  float RADIUS_CIRCLE_POINT_SIZE = 0;
+  ImVec2 LAT_LON_TO_POINT_SCALE;
+
+  ImVec4 PREV_WORKING_AREA;
+
+  ImVec2 CURRENT_LAT_LON;
+
+  void calculate_lat_lon_to_point_scale();
+
+  public:
+
+  ADSB_RANGE_Properties PROPS;
+
+  ImVec2 ll_2_pt_scale();
+
+  ImVec2 current_lat_lon();
+
+  float range();
+
+  void set_range(float Range_Miles);
+
+  void set_current_global_position(ImVec2 Lat_Lon);
+  
+  void draw(system_data &sdSysData, ImVec4 Working_Area);
+
+  void draw_info(system_data &sdSysData);
+};
+
+// ---------------------------------------------------------------------------------------
+
+class ADSB_MAP_Properties
+{
+  
+
+};
+
+class ADSB_MAP
+{
+  private:
+  
+  ADSB_RANGE RANGE_INDICATOR;
+  deque<MAP_MARKER> LANDMARKS;
+
+  public:
+
+  void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
+
+  void create(system_data &sdSysData);
+
+  //void draw(system_data &sdSysData, AIRCRAFT_DATA &Aircraft_List);
+  void draw(system_data &sdSysData, deque<ADSB_WIDGET> &ADSB_Widgets);
+
+};
+
+// ---------------------------------------------------------------------------------------
 
 class DISPLAY_DATA_ADSB
 {
@@ -287,6 +313,8 @@ class DISPLAY_DATA_ADSB
   string POSITIONED_COUNT = "";
   string POSITIONED_AIRCRAFT = "";
 };
+
+// ---------------------------------------------------------------------------------------
 
 class ADSB_SCREEN
 {
