@@ -82,7 +82,7 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 // ---------------------------------------------------------------------------------------
 // Markers
 
-void draw_marker(system_data &sdSysData, ImVec2 Screen_Position);
+void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color);
 
 // ---------------------------------------------------------------------------------------
 
@@ -143,7 +143,7 @@ class ADSB_WIDGET
   // Was gadget redrawn during the previous draw cycle.
   //bool WAS_REDRAWN = false;
 
-  int EXPIRATION_TIME = 15000;
+  int EXPIRATION_TIME = 5 * 60000;
   TIMED_PING EXPIREED;
   bool WIDGET_ACTIVE = false;
 
@@ -207,6 +207,8 @@ class ADSB_WIDGET
   void clear();
   // Clear values
 
+  bool is_expired(system_data &sdSysData);
+
   bool changed();
   //  Return true is screen will be redrawn on next draw.
   //  Return false if no changes made.
@@ -242,6 +244,7 @@ class ADSB_RANGE
 {
   private:
   
+  int ZOOM_LEVEL = -1;
   float RANGE = 25.0f;
   float RADIUS_CIRCLE_POINT_SIZE = 0;
   ImVec2 LAT_LON_TO_POINT_SCALE;
@@ -251,6 +254,8 @@ class ADSB_RANGE
   ImVec2 CURRENT_LAT_LON;
 
   void calculate_lat_lon_to_point_scale();
+
+  void set_zoom_level();
 
   public:
 
@@ -263,6 +268,10 @@ class ADSB_RANGE
   float range();
 
   void set_range(float Range_Miles);
+
+  void zoom_in();
+
+  void zoom_out();
 
   void set_current_global_position(ImVec2 Lat_Lon);
   
@@ -286,13 +295,14 @@ class ADSB_MAP
   ADSB_RANGE RANGE_INDICATOR;
   deque<MAP_MARKER> LANDMARKS;
 
+  bool DISPLAY_LOCATION = false;
+
   public:
 
   void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
 
   void create(system_data &sdSysData);
 
-  //void draw(system_data &sdSysData, AIRCRAFT_DATA &Aircraft_List);
   void draw(system_data &sdSysData, deque<ADSB_WIDGET> &ADSB_Widgets);
 
 };
