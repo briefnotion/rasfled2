@@ -93,6 +93,8 @@ int SCREEN4::create(system_data &sdSysData)
     style.FrameRounding = 8;
     style.ChildRounding = 8;
 
+    style.ScrollbarSize = 20;
+
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL2_Init();

@@ -75,7 +75,7 @@ ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Dis
 ImVec2 point_position_center(ImVec4 Working_Area);
 
 ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
-                                ImVec2 Lat_Lon_Center, ImVec2 Lat_Lon);
+                                ImVec2 Lat_Lon_Center, ImVec2 Lat_Lon, bool &Drawn);
 
 ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 
@@ -83,6 +83,12 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 // Markers
 
 void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color);
+
+void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color);
+
+void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color);
+
+void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, float Heading);
 
 // ---------------------------------------------------------------------------------------
 
@@ -225,7 +231,7 @@ class ADSB_WIDGET
 
   bool active();
 
-  void draw_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon);
+  void draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon);
 };
 
 // ---------------------------------------------------------------------------------------
