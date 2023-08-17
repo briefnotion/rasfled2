@@ -16,6 +16,8 @@
 
 #include <stdio.h>
 #include <string>
+#include <vector>
+#include <deque>
 #include <cmath>
 #include <cmath>
 //#include <utility>
@@ -166,8 +168,7 @@ class ADSB_WIDGET
   float LATITUDE = 0;
   float LONGITUDE = 0;
 
-  //Debug
-  //int Counter = 0;
+  vector<ImVec2> TRACK;
 
   public:
 
