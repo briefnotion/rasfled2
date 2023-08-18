@@ -69,6 +69,12 @@ class TEXTURE_IMAGE
 
   bool create(string Path, string Filename);
 
+  ImVec2 size();
+
+  int widtht();
+
+  int height();
+
   void draw();
 
 };

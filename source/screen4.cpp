@@ -208,7 +208,7 @@ void SCREEN4::draw(system_data &sdSysData)
     // ---------------------------------------------------------------------------------------
     // Handle Console Outputs
     ImGuiIO &io = ImGui::GetIO();
-    //(void)io;
+    ImGuiStyle& style = ImGui::GetStyle();
     
     glfwPollEvents();
 
@@ -923,9 +923,13 @@ void SCREEN4::draw(system_data &sdSysData)
 
     // ---------------------------------------------------------------------------------------
 
-    ImGui::Begin("GL Texture");
-    QR_CODE.draw();
-    ImGui::End();
+    {
+      //style.ScrollbarSize + style.WindowPadding.y * 2.0f and fontsize for titlebar
+      ImGui::SetNextWindowSize(ImVec2(QR_CODE.widtht() + style.WindowPadding.x * 2.0f, QR_CODE.height() +18 + style.WindowPadding.y * 2.0f));
+      ImGui::Begin("About", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
+      QR_CODE.draw();
+      ImGui::End();
+    }
 
     // ---------------------------------------------------------------------------------------
 

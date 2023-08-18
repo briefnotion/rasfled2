@@ -121,6 +121,7 @@ class TIMED_PING
 //  Simplified version of is_ready_timer.
 {
   private:
+  unsigned long START_TIME      = 0;  //  Calculated time of when variable will be ready.
   unsigned long READY_TIME      = 0;  //  Calculated time of when variable will be ready.
   bool          ENABLED         = false;  // Determine if the timer is active.
   bool          BLIP_POS        = false;
@@ -129,6 +130,8 @@ class TIMED_PING
 
   bool enabled();
   // Retruns enabled;
+
+  unsigned long start_time();
 
   void ping_up(unsigned long current_time, int delay);
   // Like, sending a ping signal out.

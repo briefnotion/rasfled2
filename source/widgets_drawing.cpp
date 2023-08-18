@@ -73,6 +73,21 @@ bool TEXTURE_IMAGE::create(string Path, string Filename)
   return ret;
 }
 
+ImVec2 TEXTURE_IMAGE::size()
+{
+  return ImVec2(IMAGE_WIDTH, IMAGE_HEIGHT);
+}
+
+int TEXTURE_IMAGE::widtht()
+{
+  return IMAGE_WIDTH;
+}
+
+int TEXTURE_IMAGE::height()
+{
+  return IMAGE_HEIGHT;
+}
+
 void TEXTURE_IMAGE::draw()
 {
   //ImGui::Text("pointer = %p", IMAGE_TEXTURE);

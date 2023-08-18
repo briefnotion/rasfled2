@@ -277,9 +277,15 @@ bool TIMED_PING::enabled()
   return ENABLED;
 }
 
+unsigned long TIMED_PING::start_time()
+{
+  return START_TIME;
+}
+
 void TIMED_PING::ping_up(unsigned long current_time, int delay)
 // Start the timer for the event that needs to be triggered.
 {
+  START_TIME      = current_time;
   READY_TIME      = current_time + delay;
   ENABLED         = true;
 }

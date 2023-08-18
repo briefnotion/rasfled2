@@ -36,6 +36,8 @@ class WIDGET_DEFAULTS
   ImGuiWindowFlags flags =        ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | 
                                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
+  
+  //ImGuiWindowFlags flags_no_title = ImGuiWindowFlags_NoTitleBar;
 
   ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
@@ -50,6 +52,8 @@ class WIDGET_DEFAULTS
   //ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
   //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | 
   //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+  
 
   // For Popup Windows Like Color Chooser.
   ImGuiWindowFlags flags_w_pop =  ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoCollapse | 

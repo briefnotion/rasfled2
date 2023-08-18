@@ -16,6 +16,50 @@
 
 // ---------------------------------------------------------------------------------------
 
+ImU32 gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigned long Duration, 
+                      ImU32 Start_Color, ImU32 End_Color)
+{
+  ImColor ret_color;
+
+  //return (fltElapsed / FltDuration);
+  float power = (float)(sdSysData.tmeCURRENT_FRAME_TIME - Start_time) / (float)Duration;
+
+  //ImColor color = ImColor(255, 0, 0);
+  //float hue, saturation, value;
+  //ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, hue, saturation, value);
+  //ImU32 alt;
+
+  //ret_color.Value.
+
+  ImU32 tmpcolor = ImColor(255, 255, 255, 255);
+
+  int start_color_r = (Start_Color >> IM_COL32_R_SHIFT) & 0xFF;
+  int start_color_g = (Start_Color >> IM_COL32_G_SHIFT) & 0xFF;
+  int start_color_b = (Start_Color >> IM_COL32_B_SHIFT) & 0xFF;
+  //int start_color_a = (Start_Color >> IM_COL32_A_SHIFT) & 0xFF;
+
+  /*
+  int end_color_r = (End_Color >> IM_COL32_R_SHIFT) & 0xFF;
+  int end_color_g = (End_Color >> IM_COL32_G_SHIFT) & 0xFF;
+  int end_color_b = (End_Color >> IM_COL32_B_SHIFT) & 0xFF;
+  int end_color_a = (End_Color >> IM_COL32_A_SHIFT) & 0xFF;
+  */
+
+  int end_color_r = (tmpcolor >> IM_COL32_R_SHIFT) & 0xFF;
+  int end_color_g = (tmpcolor >> IM_COL32_G_SHIFT) & 0xFF;
+  int end_color_b = (tmpcolor >> IM_COL32_B_SHIFT) & 0xFF;
+  //int end_color_a = (tmpcolor >> IM_COL32_A_SHIFT) & 0xFF;
+  
+  int r = (power * end_color_r) + ((1 - power) * start_color_r);
+  int g = (power * end_color_g) + ((1 - power) * start_color_g);
+  int b = (power * end_color_b) + ((1 - power) * start_color_b);
+  //int a = (power * end_color_a) + ((1 - power) * start_color_a);
+
+  return ImColor(r, g, b);
+}
+
+// ---------------------------------------------------------------------------------------
+
 bool NEW_COLOR_SCALE::active()
 {
   if (COLOR_SCALE.size() > 0)
@@ -85,7 +129,7 @@ void W_TEXT::update_text(system_data &sdSysData, string Text)
   {
     TEXT = Text;
 
-    UPDATE_TIMED.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, 100);
+    UPDATE_TIMED.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, 500);
   }
 }
 
@@ -93,7 +137,8 @@ void W_TEXT::draw(system_data &sdSysData)
 {
   if (PROPS.CHANGE_NOTIFICATION == true && UPDATE_TIMED.ping_down(sdSysData.tmeCURRENT_FRAME_TIME))
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE);
+    //ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE);
+    ImGui::PushStyleColor(ImGuiCol_Text, gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR.TEXT));
     ImGui::Text(TEXT.c_str());
     ImGui::PopStyleColor();
   }
