@@ -90,7 +90,7 @@ void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_C
 
 void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color);
 
-void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, float Heading);
+void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, int Size, float Heading);
 
 // ---------------------------------------------------------------------------------------
 

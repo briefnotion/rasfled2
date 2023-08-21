@@ -27,8 +27,8 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
-ImU32 gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigned long Duration, 
-                      ImVec4 Start_Color, ImVec4 End_Color);
+ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigned long Duration, 
+                      ImColor Start_Color, ImColor End_Color);
 
 // ---------------------------------------------------------------------------------------
 

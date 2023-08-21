@@ -121,15 +121,15 @@ int SCREEN4::create(system_data &sdSysData)
     ADSB.create(sdSysData);
 
     // Prepare Current Screen Widgets
-    LIGHTS.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    LIGHTS.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     LIGHTS.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     LIGHTS.update_text(sdSysData, "LED ILLUM", "LED ILLUM");
 
     DEBUG.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_RED;
-    DEBUG.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    DEBUG.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     DEBUG.update_text(sdSysData, "  DEBUG  ", "         ");
 
-    OVERHEAD.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    OVERHEAD.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     OVERHEAD.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     OVERHEAD.update_text(sdSysData, " OVERHEAD ", " OVERHEAD ");
 
@@ -137,43 +137,45 @@ int SCREEN4::create(system_data &sdSysData)
     HAZARD.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     HAZARD.update_text(sdSysData, "  HAZARD  ", "  HAZARD  ");
 
-    DAY_NIGHT.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    DAY_NIGHT.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     DAY_NIGHT.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     DAY_NIGHT.update_text(sdSysData, "  DAY  ", " NIGHT ");
 
-    TIMER.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    TIMER.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     TIMER.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     TIMER.update_text(sdSysData, " TIMER ", " TIMER ");
 
-    DOOR1.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    DOOR1.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     DOOR1.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     DOOR1.update_text(sdSysData, " DOOR1", " DOOR1");
 
-    DOOR2.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    DOOR2.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     DOOR2.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     DOOR2.update_text(sdSysData, " DOOR2", " DOOR2");
 
-    DOOR3.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    DOOR3.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     DOOR3.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     DOOR3.update_text(sdSysData, "DOOR3 ", "DOOR3 ");
 
-    DOOR4.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    DOOR4.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     DOOR4.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     DOOR4.update_text(sdSysData, "DOOR4 ", "DOOR4 ");
 
-    AUTO.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    AUTO.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     AUTO.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     AUTO.update_text(sdSysData, " AUTO  ", " AUTO  ");
 
-    ADSB_IND.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT;
+    ADSB_IND.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     ADSB_IND.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
     ADSB_IND.update_text(sdSysData, " ADS-B ", " ADS-B ");
 
     string version = "v: ";
     version = version + Revision;
     VERSION.update_text(sdSysData, version);
+    VERSION.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
 
     TEMP.update_text(sdSysData, "Temp: NA");
+    TEMP.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   }
 
   return 0;
@@ -480,28 +482,28 @@ void SCREEN4::draw(system_data &sdSysData)
         ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
 
-          if (button_simple_toggle_color("Console", "Console", DISPLAY_SCREEN == 0, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+          if (button_simple_toggle_color("Console", "Console", DISPLAY_SCREEN == 0, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
           {
             DISPLAY_SCREEN = 0;
           }
 
           ImGui::SameLine();
 
-          if (button_simple_toggle_color("Automobile", "Automobile", DISPLAY_SCREEN == 1, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+          if (button_simple_toggle_color("Automobile", "Automobile", DISPLAY_SCREEN == 1, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
           {
             DISPLAY_SCREEN = 1;
           }
 
           ImGui::SameLine();
 
-          if (button_simple_toggle_color("ADSB", "ADSB", DISPLAY_SCREEN == 2, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+          if (button_simple_toggle_color("ADSB", "ADSB", DISPLAY_SCREEN == 2, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
           {
             DISPLAY_SCREEN = 2;
           }
 
           ImGui::SameLine();
 
-          if (button_simple_toggle_color("LOGS", "LOGS", DISPLAY_SCREEN == 4, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+          if (button_simple_toggle_color("LOGS", "LOGS", DISPLAY_SCREEN == 4, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
           {
             DISPLAY_SCREEN = 4;
           }
@@ -561,7 +563,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
           button_simple_enabled(" ", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
-          if (button_simple_toggle_color("LIGHTS\n(On)", "LIGHTS\n(Off)", sdSysData.Lights_On.value(), sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          if (button_simple_toggle_color("LIGHTS\n(On)", "LIGHTS\n(Off)", sdSysData.Lights_On.value(), sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             if (sdSysData.Lights_On.value() == true)
             {
@@ -685,14 +687,14 @@ void SCREEN4::draw(system_data &sdSysData)
 
         ImGui::SameLine();
 
-        if (button_simple_toggle_color("2", "2", SCREEN_COMMS.DEBUG_STATUS.DOOR[1], sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+        if (button_simple_toggle_color("2", "2", SCREEN_COMMS.DEBUG_STATUS.DOOR[1], sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
         {
           SCREEN_COMMS.DEBUG_STATUS.DOOR[1] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
         }
 
         ImGui::SameLine();
 
-        if (button_simple_toggle_color("4", "4", SCREEN_COMMS.DEBUG_STATUS.DOOR[3], sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+        if (button_simple_toggle_color("4", "4", SCREEN_COMMS.DEBUG_STATUS.DOOR[3], sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
         {
           SCREEN_COMMS.DEBUG_STATUS.DOOR[3] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[3];
         }
@@ -714,7 +716,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
         ImGui::SameLine();
 
-        if (button_simple_toggle_color("1", "1", SCREEN_COMMS.DEBUG_STATUS.DOOR[0], sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+        if (button_simple_toggle_color("1", "1", SCREEN_COMMS.DEBUG_STATUS.DOOR[0], sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
         {
           SCREEN_COMMS.DEBUG_STATUS.DOOR[0] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
         }
@@ -722,7 +724,7 @@ void SCREEN4::draw(system_data &sdSysData)
         ImGui::SameLine();
 
           ImGui::TableNextColumn();
-          if (button_simple_toggle_color("3", "3", SCREEN_COMMS.DEBUG_STATUS.DOOR[2], sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+          if (button_simple_toggle_color("3", "3", SCREEN_COMMS.DEBUG_STATUS.DOOR[2], sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
           {
             SCREEN_COMMS.DEBUG_STATUS.DOOR[2] = !SCREEN_COMMS.DEBUG_STATUS.DOOR[2];
           }
@@ -902,15 +904,15 @@ void SCREEN4::draw(system_data &sdSysData)
     if (DISPLAY_CONFIRM == true)
     {
       ImGui::SetNextWindowSize(ImVec2(90, 195));
-      if (ImGui::Begin("CONFIRM", &DISPLAY_CONFIRM, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+      if (ImGui::Begin("Continue", &DISPLAY_CONFIRM, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
       {
 
-        if (button_simple_color("CONFIRM", sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        if (button_simple_color("CONFIRM", sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
           SCREEN_COMMS.command_text_set(PENDING_CONFIRM_COMMAND);
         }
         
-        if (button_simple_color("DENY", sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        if (button_simple_color("DENY", sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
           PENDING_CONFIRM_COMMAND = "";
           DISPLAY_CONFIRM = false;

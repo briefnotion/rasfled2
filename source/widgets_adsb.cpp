@@ -141,10 +141,9 @@ void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_
 }
 
 //void draw_arrow(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 col, float thickness, float arrow_size, float direction)
-void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, float Heading)
+void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, int Size, float Heading)
 {
   float thickness = 2;
-  float arrow_size = 12;
 
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
@@ -155,8 +154,8 @@ void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, 
   float rad = Heading * M_PI / 180.0f;
 
   // Calculate the arrow points
-  ImVec2 arrow_p1 = ImVec2(Screen_Position.x + arrow_size * cos(rad + M_PI / 8), Screen_Position.y + arrow_size * sin(rad + M_PI / 8));
-  ImVec2 arrow_p2 = ImVec2(Screen_Position.x + arrow_size * cos(rad - M_PI / 8), Screen_Position.y + arrow_size * sin(rad - M_PI / 8));
+  ImVec2 arrow_p1 = ImVec2(Screen_Position.x + Size * cos(rad + M_PI / 8), Screen_Position.y + Size * sin(rad + M_PI / 8));
+  ImVec2 arrow_p2 = ImVec2(Screen_Position.x + Size * cos(rad - M_PI / 8), Screen_Position.y + Size * sin(rad - M_PI / 8));
 
   // Draw the line and the arrow
   //draw_list->AddLine(p1, p2, col, thickness);
@@ -182,7 +181,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
         draw_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
         ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5));
 
-        ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT));
         ImGui::Text("%s", DISPLAY_NAME.c_str());
         ImGui::PopStyleColor();
         break;
@@ -192,7 +191,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
         draw_airport_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
         ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5));
 
-        ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT);
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT));
         ImGui::Text("%s", DISPLAY_NAME.c_str());
         ImGui::PopStyleColor();
         break;
@@ -919,17 +918,17 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
       // Draw Arrow of Aircraft nav heading on map at position
       if (AIRCRAFT_DATA.NAV_HEADING.conversion_success())
       {
-        draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, AIRCRAFT_DATA.TRACK.get_float_value());
+        draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, 20, AIRCRAFT_DATA.TRACK.get_float_value());
       }
 
       // Draw Arrow of Aircraft track heading on map at position, grey if old.
       if (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5)
       {
-        draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, AIRCRAFT_DATA.TRACK.get_float_value());
+        draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, 15, AIRCRAFT_DATA.TRACK.get_float_value());
       }
       else
       {
-        draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_GREY, AIRCRAFT_DATA.TRACK.get_float_value());
+        draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_GREY, 12, AIRCRAFT_DATA.TRACK.get_float_value());
       }
 
       // Draw track
@@ -954,7 +953,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
       }
 
       // Text describing Aircraft
-      ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT);
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
   
       ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5, draw_position.y + 8));
       ImGui::Text("%d %s", AIRCRAFT_DATA.SEEN_POS.get_int_value(), AIRCRAFT_DATA.FLIGHT.get_str_value().c_str());
@@ -1471,7 +1470,7 @@ void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_
 { 
   ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
   {
-    if (button_simple_toggle_color("ADSB", "ADSB", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_DEFAULT, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (button_simple_toggle_color("ADSB", "ADSB", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       if (SDATA.ADSB_ACTIVE == true)
       {

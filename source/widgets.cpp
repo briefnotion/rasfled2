@@ -16,44 +16,17 @@
 
 // ---------------------------------------------------------------------------------------
 
-ImU32 gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigned long Duration, 
-                      ImU32 Start_Color, ImU32 End_Color)
+ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigned long Duration, 
+                      ImColor Start_Color, ImColor End_Color)
 {
   ImColor ret_color;
 
-  //return (fltElapsed / FltDuration);
   float power = (float)(sdSysData.tmeCURRENT_FRAME_TIME - Start_time) / (float)Duration;
-
-  //ImColor color = ImColor(255, 0, 0);
-  //float hue, saturation, value;
-  //ImGui::ColorConvertRGBtoHSV(color.Value.x, color.Value.y, color.Value.z, hue, saturation, value);
-  //ImU32 alt;
-
-  //ret_color.Value.
-
-  ImU32 tmpcolor = ImColor(255, 255, 255, 255);
-
-  int start_color_r = (Start_Color >> IM_COL32_R_SHIFT) & 0xFF;
-  int start_color_g = (Start_Color >> IM_COL32_G_SHIFT) & 0xFF;
-  int start_color_b = (Start_Color >> IM_COL32_B_SHIFT) & 0xFF;
-  //int start_color_a = (Start_Color >> IM_COL32_A_SHIFT) & 0xFF;
-
-  /*
-  int end_color_r = (End_Color >> IM_COL32_R_SHIFT) & 0xFF;
-  int end_color_g = (End_Color >> IM_COL32_G_SHIFT) & 0xFF;
-  int end_color_b = (End_Color >> IM_COL32_B_SHIFT) & 0xFF;
-  int end_color_a = (End_Color >> IM_COL32_A_SHIFT) & 0xFF;
-  */
-
-  int end_color_r = (tmpcolor >> IM_COL32_R_SHIFT) & 0xFF;
-  int end_color_g = (tmpcolor >> IM_COL32_G_SHIFT) & 0xFF;
-  int end_color_b = (tmpcolor >> IM_COL32_B_SHIFT) & 0xFF;
-  //int end_color_a = (tmpcolor >> IM_COL32_A_SHIFT) & 0xFF;
   
-  int r = (power * end_color_r) + ((1 - power) * start_color_r);
-  int g = (power * end_color_g) + ((1 - power) * start_color_g);
-  int b = (power * end_color_b) + ((1 - power) * start_color_b);
-  //int a = (power * end_color_a) + ((1 - power) * start_color_a);
+  float r = (power * (float)End_Color.Value.x) + ((1 - power) * (float)Start_Color.Value.x);
+  float g = (power * (float)End_Color.Value.y) + ((1 - power) * (float)Start_Color.Value.y);
+  float b = (power * (float)End_Color.Value.z) + ((1 - power) * (float)Start_Color.Value.z);
+  float a = (power * (float)End_Color.Value.w) + ((1 - power) * (float)Start_Color.Value.w);
 
   return ImColor(r, g, b);
 }
@@ -113,10 +86,9 @@ void VERTICAL_BAR::draw(system_data &sdSysData, ImVec2 Size)
 {
   float slider_pos = VALUE / PROPS.VALUE_MAX;
 
-  ImGui::PushStyleColor(ImGuiCol_FrameBg, PROPS.COLOR.BACKGROUND);
-  //ImGui::PushStyleColor(ImGuiCol_FrameBgHovered, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
-  ImGui::PushStyleColor(ImGuiCol_FrameBgActive, PROPS.COLOR.STANDARD);
-  ImGui::PushStyleColor(ImGuiCol_SliderGrab, PROPS.COLOR.ACTIVE);
+  ImGui::PushStyleColor(ImGuiCol_FrameBg, ImU32(PROPS.COLOR.BACKGROUND));
+  ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImU32(PROPS.COLOR.STANDARD));
+  ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImU32(PROPS.COLOR.ACTIVE));
   ImGui::VSliderFloat("##v", Size, &slider_pos, 0.0f, 1.0f, "", sdSysData.SCREEN_DEFAULTS.flags_vs);
   ImGui::PopStyleColor(3);
 }
@@ -137,20 +109,15 @@ void W_TEXT::draw(system_data &sdSysData)
 {
   if (PROPS.CHANGE_NOTIFICATION == true && UPDATE_TIMED.ping_down(sdSysData.tmeCURRENT_FRAME_TIME))
   {
-    //ImGui::PushStyleColor(ImGuiCol_Text, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE);
-    ImGui::PushStyleColor(ImGuiCol_Text, gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR.TEXT));
-    ImGui::Text(TEXT.c_str());
-    ImGui::PopStyleColor();
-  }
-  else if (PROPS.COLOR.DEFAULT == false)
-  {
-    ImGui::PushStyleColor(ImGuiCol_Text, PROPS.COLOR.TEXT);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR.TEXT)));
     ImGui::Text(TEXT.c_str());
     ImGui::PopStyleColor();
   }
   else
   {
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR.TEXT));
     ImGui::Text(TEXT.c_str());
+    ImGui::PopStyleColor();
   }
 }
 
@@ -216,7 +183,7 @@ void text_simple_bool(string Text, bool Indication, COLOR_COMBO COLOR)
 {
   if (Indication == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, COLOR.TEXT);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(COLOR.TEXT));
     ImGui::Text(Text.c_str());
     ImGui::PopStyleColor();
   }
@@ -224,7 +191,7 @@ void text_simple_bool(string Text, bool Indication, COLOR_COMBO COLOR)
   {
     ImGui::Text(Text.c_str());
   }
-}\
+}
 
 bool button_simple_enabled(string Text, bool Enabled, ImVec2 ImVec2_Size)
 {
@@ -251,24 +218,14 @@ bool button_simple_color(string Text, COLOR_COMBO Color, ImVec2 ImVec2_Size)
 {
   bool ret_value = false;
 
-  if (Color.DEFAULT == false)
+  ImGui::PushStyleColor(ImGuiCol_Button, ImU32(Color.STANDARD));
+  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(Color.HOVERED));
+  ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(Color.ACTIVE));
+  if (ImGui::Button(Text.c_str(), ImVec2_Size))
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, Color.STANDARD);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, Color.HOVERED);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, Color.ACTIVE);
-    if (ImGui::Button(Text.c_str(), ImVec2_Size))
-    {
-      ret_value = true;
-    }
-    ImGui::PopStyleColor(3);
+    ret_value = true;
   }
-  else
-  {
-    if (ImGui::Button(Text.c_str(), ImVec2_Size))
-    {
-      ret_value = true;
-    }
-  }
+  ImGui::PopStyleColor(3);
 
   return ret_value;
 }
@@ -279,29 +236,22 @@ bool button_simple_toggle_color(string True_Value_Text, string False_Value_Text,
   // Does not control toggle, just shows value.
   bool ret_value = false;
 
-  if (False_Color.DEFAULT == false && Toggle == false)
+  if (Toggle == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, False_Color.STANDARD);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, False_Color.HOVERED);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, False_Color.ACTIVE);
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(False_Color.STANDARD));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(False_Color.HOVERED));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(False_Color.ACTIVE));
     if (ImGui::Button(False_Value_Text.c_str(), ImVec2_Size))
     {
       ret_value = true;
     }
     ImGui::PopStyleColor(3);
   }
-  else if (False_Color.DEFAULT == true && Toggle == false)
-  {
-    if (ImGui::Button(False_Value_Text.c_str(), ImVec2_Size))
-    {
-      ret_value = true;
-    }
-  }
   else
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, True_Color.STANDARD);
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, True_Color.HOVERED);
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, True_Color.ACTIVE);
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(True_Color.STANDARD));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(True_Color.HOVERED));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(True_Color.ACTIVE));
     if (ImGui::Button(True_Value_Text.c_str(), ImVec2_Size))
     {
       ret_value = true;

@@ -78,13 +78,11 @@ class COLOR_COMBO
 {
   public:
 
-  bool DEFAULT = true;
-
-  ImU32 TEXT;
-  ImU32 BACKGROUND;
-  ImU32 STANDARD;
-  ImU32 HOVERED;
-  ImU32 ACTIVE;
+  ImColor TEXT;
+  ImColor BACKGROUND;
+  ImColor STANDARD;
+  ImColor HOVERED;
+  ImColor ACTIVE;
 
   void set(float H, float S, float V);
 };
@@ -92,7 +90,6 @@ class COLOR_COMBO
 class COLOR_COMBOS
 {
   public: 
-  COLOR_COMBO COLOR_COMB_DEFAULT;
   COLOR_COMBO COLOR_COMB_BLACK;
   COLOR_COMBO COLOR_COMB_WHITE;
   COLOR_COMBO COLOR_COMB_GREY;
