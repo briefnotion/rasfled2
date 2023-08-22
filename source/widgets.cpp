@@ -33,6 +33,13 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
 
 // ---------------------------------------------------------------------------------------
 
+void TEST::draw(system_data &sdSysData)
+{
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(COLOR->TEXT));
+    ImGui::Text("TEXT.c_str()");
+    ImGui::PopStyleColor();
+}
+
 bool NEW_COLOR_SCALE::active()
 {
   if (COLOR_SCALE.size() > 0)
@@ -45,7 +52,7 @@ bool NEW_COLOR_SCALE::active()
   }
 }
 
-void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO Return_Color)
+void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO* Return_Color)
 {
   COLOR_VALUE_PAIR temp_color_pair;
 
@@ -55,9 +62,9 @@ void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO 
   COLOR_SCALE.push_back(temp_color_pair);
 }
 
-COLOR_COMBO NEW_COLOR_SCALE::get_color(float Value)
+COLOR_COMBO* NEW_COLOR_SCALE::get_color(float Value)
 {
-  COLOR_COMBO ret_color_combo;
+  COLOR_COMBO* ret_color_combo;
   bool found = false;
   
   if (COLOR_SCALE.size() > 0)
@@ -72,7 +79,7 @@ COLOR_COMBO NEW_COLOR_SCALE::get_color(float Value)
     }
   }
   
-  return (COLOR_COMBO) ret_color_combo;
+  return ret_color_combo;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -109,13 +116,28 @@ void W_TEXT::draw(system_data &sdSysData)
 {
   if (PROPS.CHANGE_NOTIFICATION == true && UPDATE_TIMED.ping_down(sdSysData.tmeCURRENT_FRAME_TIME))
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR.TEXT)));
+    if (PROPS.STANDARD_COLOR)
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR->STANDARD)));
+    }
+    else
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR->TEXT)));
+    }
+    
     ImGui::Text(TEXT.c_str());
     ImGui::PopStyleColor();
   }
   else
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR.TEXT));
+    if (PROPS.STANDARD_COLOR)
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR->STANDARD));
+    }
+    else
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR->TEXT));
+    }
     ImGui::Text(TEXT.c_str());
     ImGui::PopStyleColor();
   }
@@ -129,20 +151,30 @@ void W_TEXT_TF::update_text(system_data &sdSysData, string True_Text, string Fal
   TEXT_FALSE = False_Text;
 }
 
-void W_TEXT_TF::update_tf(system_data &sdSysData, bool True_False)
+bool W_TEXT_TF::update_tf(system_data &sdSysData, bool True_False)
 {
-  TRUE_FALSE = True_False;
+  if (TRUE_FALSE == True_False)
+  {
+    return false;
+  }
+  else
+  {
+    TRUE_FALSE = True_False;
+    return true;
+  }
 }
 
 void W_TEXT_TF::draw(system_data &sdSysData)
 {
   if (TRUE_FALSE == true)
   {
+    TEXT_TRUE_FALSE.PROPS.STANDARD_COLOR = false;
     TEXT_TRUE_FALSE.PROPS.COLOR = PROPS.COLOR_TRUE;
     TEXT_TRUE_FALSE.update_text(sdSysData, TEXT_TRUE);
   }
   else
   {
+    TEXT_TRUE_FALSE.PROPS.STANDARD_COLOR = true;
     TEXT_TRUE_FALSE.PROPS.COLOR = PROPS.COLOR_FALSE;
     TEXT_TRUE_FALSE.update_text(sdSysData, TEXT_FALSE);
   }
@@ -163,16 +195,20 @@ void TEXT_CONSOLE::add_line(string Text)
   } 
 }
 
-void TEXT_CONSOLE::display(const char *name, bool *p_open, ImGuiWindowFlags flags)
+void TEXT_CONSOLE::display(system_data &sdSysData, const char *name, bool *p_open, ImGuiWindowFlags flags)
 { 
   ImGui::Begin(name, p_open, flags);
   {
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+
     ImGui::TextUnformatted(CONSOLE_TEXT.c_str());
     if (CONSOLE_SCROLL_TO_BOTTOM == true && ImGui::GetScrollMaxY() > 0)
     {
       ImGui::SetScrollHereY(1.0f);
       CONSOLE_SCROLL_TO_BOTTOM = false;
     }
+    
+    ImGui::PopStyleColor();
   }
   ImGui::End();
 }
@@ -193,9 +229,11 @@ void text_simple_bool(string Text, bool Indication, COLOR_COMBO COLOR)
   }
 }
 
-bool button_simple_enabled(string Text, bool Enabled, ImVec2 ImVec2_Size)
+bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, ImVec2 ImVec2_Size)
 {
   bool ret_value = false;
+
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
 
   if (Enabled == true)
   {
@@ -211,12 +249,16 @@ bool button_simple_enabled(string Text, bool Enabled, ImVec2 ImVec2_Size)
     ImGui::EndDisabled();
   }
 
+  ImGui::PopStyleColor();
+
   return ret_value;
 }
 
-bool button_simple_color(string Text, COLOR_COMBO Color, ImVec2 ImVec2_Size)
+bool button_simple_color(system_data &sdSysData, string Text, COLOR_COMBO Color, ImVec2 ImVec2_Size)
 {
   bool ret_value = false;
+
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
 
   ImGui::PushStyleColor(ImGuiCol_Button, ImU32(Color.STANDARD));
   ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(Color.HOVERED));
@@ -225,16 +267,18 @@ bool button_simple_color(string Text, COLOR_COMBO Color, ImVec2 ImVec2_Size)
   {
     ret_value = true;
   }
-  ImGui::PopStyleColor(3);
+  ImGui::PopStyleColor(4);
 
   return ret_value;
 }
 
-bool button_simple_toggle_color(string True_Value_Text, string False_Value_Text, bool Toggle, 
+bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, string False_Value_Text, bool Toggle, 
                                 COLOR_COMBO True_Color, COLOR_COMBO False_Color, ImVec2 ImVec2_Size)
 {
   // Does not control toggle, just shows value.
   bool ret_value = false;
+
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
 
   if (Toggle == false)
   {
@@ -245,7 +289,7 @@ bool button_simple_toggle_color(string True_Value_Text, string False_Value_Text,
     {
       ret_value = true;
     }
-    ImGui::PopStyleColor(3);
+    ImGui::PopStyleColor(4);
   }
   else
   {
@@ -256,7 +300,7 @@ bool button_simple_toggle_color(string True_Value_Text, string False_Value_Text,
     {
       ret_value = true;
     }
-    ImGui::PopStyleColor(3);
+    ImGui::PopStyleColor(4);
   }
 
   return ret_value;

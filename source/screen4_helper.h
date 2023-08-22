@@ -85,6 +85,8 @@ class COLOR_COMBO
   ImColor ACTIVE;
 
   void set(float H, float S, float V);
+
+  void set_rgb(float R, float G, float B, float A, float Intensity);
 };
 
 class COLOR_COMBOS
@@ -102,7 +104,7 @@ class COLOR_COMBOS
   COLOR_COMBO COLOR_COMB_PURPLE;
   COLOR_COMBO COLOR_COMB_PINK;
 
-  void init();
+  void init(float Intensity);
 };
 
 // ---------------------------------------------------------------------------------------

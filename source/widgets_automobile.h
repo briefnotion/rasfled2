@@ -256,7 +256,7 @@ class T_DATA_DISPLAY_PROPERTIES
   string LABEL = "";
   int LABEL_TEXT_SIZE = -1;
 
-  COLOR_COMBO COLOR;            // If Color Scale not active then Color defaults to 
+  COLOR_COMBO* COLOR;            // If Color Scale not active then Color defaults to 
   NEW_COLOR_SCALE COLOR_SCALE;  //  pros COLOR.
 };
 
@@ -425,6 +425,8 @@ class DISPLAY_DATA_AUTOMOBILE
 
   W_GUAGE G_RPM;
   W_GUAGE G_TORQUE;
+
+  TEST test_color;
 
   /*
   W_GUAGE G_TEMP_AMBIANT;

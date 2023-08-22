@@ -32,12 +32,22 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
 
 // ---------------------------------------------------------------------------------------
 
+class TEST
+{
+  public:
+
+  COLOR_COMBO *COLOR;
+
+  void draw(system_data &sdSysData);
+};
+
+
 class COLOR_VALUE_PAIR
 {
   public:
 
   float LT_or_EQ = 0;
-  COLOR_COMBO COLOR;
+  COLOR_COMBO* COLOR;
 };
 
 class NEW_COLOR_SCALE
@@ -50,9 +60,9 @@ class NEW_COLOR_SCALE
 
   bool active();
 
-  void add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO Return_Color);
+  void add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO* Return_Color);
 
-  COLOR_COMBO get_color(float Value);
+  COLOR_COMBO* get_color(float Value);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -87,7 +97,8 @@ class W_TEXT_PROPERTIES
 {
   public:
 
-  COLOR_COMBO COLOR;
+  COLOR_COMBO *COLOR;
+  bool STANDARD_COLOR = false;
 
   bool CHANGE_NOTIFICATION = true;
 };
@@ -117,8 +128,8 @@ class W_TEXT_TF_PROPERTIES
 {
   public:
 
-  COLOR_COMBO COLOR_TRUE;
-  COLOR_COMBO COLOR_FALSE;
+  COLOR_COMBO* COLOR_TRUE;
+  COLOR_COMBO* COLOR_FALSE;
 };
 
 class W_TEXT_TF
@@ -137,7 +148,9 @@ class W_TEXT_TF
   W_TEXT_TF_PROPERTIES PROPS;
 
   void update_text(system_data &sdSysData, string True_Text, string False_Text);
-  void update_tf(system_data &sdSysData, bool True_False);
+  
+  bool update_tf(system_data &sdSysData, bool True_False);
+  // returns true if changed
 
   void draw(system_data &sdSysData);
 
@@ -156,16 +169,16 @@ class TEXT_CONSOLE
   public:
 
   void add_line(string Text);
-  void display(const char *name, bool *p_open, ImGuiWindowFlags flags);
+  void display(system_data &sdSysData, const char *name, bool *p_open, ImGuiWindowFlags flags);
 };
 
 // ---------------------------------------------------------------------------------------
 
 void text_simple_bool(string Text, bool Indication, COLOR_COMBO COLOR);
 
-bool button_simple_enabled(string Text, bool Enabled, ImVec2 ImVec2_Size);
-bool button_simple_color(string Text, COLOR_COMBO Color, ImVec2 ImVec2_Size);
-bool button_simple_toggle_color(string True_Value_Text, string False_Value_Text, bool Toggle, 
+bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, ImVec2 ImVec2_Size);
+bool button_simple_color(system_data &sdSysData, string Text, COLOR_COMBO Color, ImVec2 ImVec2_Size);
+bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, string False_Value_Text, bool Toggle, 
                                 COLOR_COMBO True_Color, COLOR_COMBO False_Color, ImVec2 ImVec2_Size);
 
 // ---------------------------------------------------------------------------------------

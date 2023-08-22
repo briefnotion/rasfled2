@@ -111,6 +111,8 @@ class SCREEN4
 
   ONE_CHAR_LINE_GRAPH OCG;
 
+  void set_screen_default_colors(system_data &sdSysData);
+
   public:
   CONSOLE_COMMUNICATION SCREEN_COMMS;
 
