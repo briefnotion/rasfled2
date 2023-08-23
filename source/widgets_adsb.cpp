@@ -1472,7 +1472,7 @@ void ADSB_SCREEN::update(system_data &sdSysData)
 void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
                           const char *name, bool *p_open, ImGuiWindowFlags flags)
 { 
-  ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
+  ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
     if (button_simple_toggle_color(sdSysData, "ADSB", "ADSB", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
@@ -1530,8 +1530,8 @@ void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_
           ImGui::TableSetupColumn("SQWK");
           ImGui::TableSetupColumn("G SPD");
           ImGui::TableSetupColumn("V RTE");
-          ImGui::TableSetupColumn("ALTITUDE    ");
-          ImGui::TableSetupColumn("ALTITUDE NAV");
+          ImGui::TableSetupColumn("ALTITUDE");
+          ImGui::TableSetupColumn("ALT NAV");
           ImGui::TableSetupColumn("HDG");
           ImGui::TableSetupColumn("HDG NAV");
           ImGui::TableSetupColumn("SEEN P");

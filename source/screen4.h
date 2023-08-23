@@ -64,6 +64,8 @@ class SCREEN4
   bool DISPLAY_TIMER = false;
   bool DISPLAY_OVERHEAD_COLOR = false;
   bool DISPLAY_RUNNING_COLOR = false;
+  bool DISPLAY_QR_CODE = false;
+
   bool DISPLAY_CONFIRM = false;
   string PENDING_CONFIRM_COMMAND = "";
 

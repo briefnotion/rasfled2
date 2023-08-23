@@ -32,22 +32,12 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
 
 // ---------------------------------------------------------------------------------------
 
-class TEST
-{
-  public:
-
-  COLOR_COMBO *COLOR;
-
-  void draw(system_data &sdSysData);
-};
-
-
 class COLOR_VALUE_PAIR
 {
   public:
 
   float LT_or_EQ = 0;
-  COLOR_COMBO* COLOR;
+  COLOR_COMBO COLOR;
 };
 
 class NEW_COLOR_SCALE
@@ -60,9 +50,9 @@ class NEW_COLOR_SCALE
 
   bool active();
 
-  void add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO* Return_Color);
+  void add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO Return_Color);
 
-  COLOR_COMBO* get_color(float Value);
+  COLOR_COMBO get_color(float Value);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -97,7 +87,7 @@ class W_TEXT_PROPERTIES
 {
   public:
 
-  COLOR_COMBO *COLOR;
+  COLOR_COMBO COLOR;
   bool STANDARD_COLOR = false;
 
   bool CHANGE_NOTIFICATION = true;
@@ -128,8 +118,8 @@ class W_TEXT_TF_PROPERTIES
 {
   public:
 
-  COLOR_COMBO* COLOR_TRUE;
-  COLOR_COMBO* COLOR_FALSE;
+  COLOR_COMBO COLOR_TRUE;
+  COLOR_COMBO COLOR_FALSE;
 };
 
 class W_TEXT_TF

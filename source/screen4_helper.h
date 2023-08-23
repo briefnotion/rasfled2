@@ -33,12 +33,14 @@ class WIDGET_DEFAULTS
   ImVec2 SIZE_BUTTON_MEDIUM = ImVec2(60, 60);
   ImVec2 SIZE_BUTTON_SMALL = ImVec2(43, 43);
   
+  // Main Window
   ImGuiWindowFlags flags =        ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | 
                                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoBringToFrontOnFocus;
   
   //ImGuiWindowFlags flags_no_title = ImGuiWindowFlags_NoTitleBar;
 
+  // Child Window (In Place, No Move, No Resize, No Scroll).+3.....
   ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
                                     
@@ -46,6 +48,7 @@ class WIDGET_DEFAULTS
   //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | 
   //                                  ImGuiWindowFlags_NoBringToFrontOnFocus;
 
+  // Standard Floating Window (In Place, No Move, No Resize, No Scroll)
   ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
 

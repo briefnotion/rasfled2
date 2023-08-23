@@ -33,13 +33,6 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
 
 // ---------------------------------------------------------------------------------------
 
-void TEST::draw(system_data &sdSysData)
-{
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(COLOR->TEXT));
-    ImGui::Text("TEXT.c_str()");
-    ImGui::PopStyleColor();
-}
-
 bool NEW_COLOR_SCALE::active()
 {
   if (COLOR_SCALE.size() > 0)
@@ -52,7 +45,7 @@ bool NEW_COLOR_SCALE::active()
   }
 }
 
-void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO* Return_Color)
+void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO Return_Color)
 {
   COLOR_VALUE_PAIR temp_color_pair;
 
@@ -62,9 +55,9 @@ void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO*
   COLOR_SCALE.push_back(temp_color_pair);
 }
 
-COLOR_COMBO* NEW_COLOR_SCALE::get_color(float Value)
+COLOR_COMBO NEW_COLOR_SCALE::get_color(float Value)
 {
-  COLOR_COMBO* ret_color_combo;
+  COLOR_COMBO ret_color_combo;
   bool found = false;
   
   if (COLOR_SCALE.size() > 0)
@@ -118,11 +111,11 @@ void W_TEXT::draw(system_data &sdSysData)
   {
     if (PROPS.STANDARD_COLOR)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR->STANDARD)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR.STANDARD)));
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR->TEXT)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR.TEXT)));
     }
     
     ImGui::Text(TEXT.c_str());
@@ -132,11 +125,11 @@ void W_TEXT::draw(system_data &sdSysData)
   {
     if (PROPS.STANDARD_COLOR)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR->STANDARD));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR.STANDARD));
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR->TEXT));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR.TEXT));
     }
     ImGui::Text(TEXT.c_str());
     ImGui::PopStyleColor();

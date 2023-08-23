@@ -256,7 +256,7 @@ class T_DATA_DISPLAY_PROPERTIES
   string LABEL = "";
   int LABEL_TEXT_SIZE = -1;
 
-  COLOR_COMBO* COLOR;            // If Color Scale not active then Color defaults to 
+  COLOR_COMBO COLOR;            // If Color Scale not active then Color defaults to 
   NEW_COLOR_SCALE COLOR_SCALE;  //  pros COLOR.
 };
 
@@ -379,12 +379,19 @@ class DISPLAY_DATA_AUTOMOBILE
   string RB_TTL = "";
   float RB_TTL_VAL = 0;
 
-  // Large Indicators
-
+  // Large Displays on Main Sidebar Screen
   T_LARGE_NUMBER_DISPLAY L_SPEED;
   T_LARGE_NUMBER_DISPLAY L_ACCELERATION;
   T_LARGE_NUMBER_DISPLAY L_GEAR;
   T_LARGE_NUMBER_DISPLAY L_TACH;
+
+  // Large Displays on Main Sidebar Screen
+  T_LARGE_NUMBER_DISPLAY L_SPEED_SB;
+  T_LARGE_NUMBER_DISPLAY L_ACCELERATION_SB;
+  T_LARGE_NUMBER_DISPLAY L_GEAR_SB;
+  T_LARGE_NUMBER_DISPLAY L_TACH_SB;
+  T_LARGE_NUMBER_DISPLAY L_VOLTAGE_SB;
+  T_LARGE_NUMBER_DISPLAY L_S_TEMP_SB;
 
   // Display Data
 
@@ -426,8 +433,6 @@ class DISPLAY_DATA_AUTOMOBILE
   W_GUAGE G_RPM;
   W_GUAGE G_TORQUE;
 
-  TEST test_color;
-
   /*
   W_GUAGE G_TEMP_AMBIANT;
   W_GUAGE G_TEMP_INTAKE;
@@ -465,7 +470,9 @@ class AUTOMOBILE_SCREEN
   void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
                                 const char *name, bool *p_open, ImGuiWindowFlags flags);
 
-  
+  void display_sidebar(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
+                              const char *name, bool *p_open, ImGuiWindowFlags flags);
+
 };
 
 // ---------------------------------------------------------------------------------------

@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.026_230822"
+#define Revision "2.027_230823"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -66,13 +66,13 @@
 
 // TTL Values - Individually adjust the TTL values of the auto.
 #define TTL_LF_Top_Percentage   100.15
-#define TTL_LF_Low_Percentage   99.7
+#define TTL_LF_Low_Percentage   99.5
 
 #define TTL_RF_Top_Percentage   100.15
-#define TTL_RF_Low_Percentage   99.7
+#define TTL_RF_Low_Percentage   99.5
 
 #define TTL_LB_Top_Percentage   100.15
-#define TTL_LB_Low_Percentage   99.7
+#define TTL_LB_Low_Percentage   99.5
 
 #define TTL_RB_Top_Percentage   99.37
 #define TTL_RB_Low_Percentage   98.92
