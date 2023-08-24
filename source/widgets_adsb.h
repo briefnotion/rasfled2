@@ -94,18 +94,23 @@ void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, 
 
 // ---------------------------------------------------------------------------------------
 
-
 class MAP_MARKER
 {
   public:
 
   ImVec2 LAT_LON;
   string DISPLAY_NAME = "";
+  string LONG_NAME = "";
   int TYPE = 0;
+
+  // Type 1
+  vector<float> AIRPORT_LANDING_VECTORS;
 
   // Types:
   //  0 - Generic
   //  1 - Airport
+
+  void clear();
 
   void draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon);
 };
@@ -304,9 +309,9 @@ class ADSB_MAP
 
   bool DISPLAY_LOCATION = false;
 
-  public:
-
   void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
+
+  public:
 
   void create(system_data &sdSysData);
 

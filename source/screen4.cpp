@@ -516,6 +516,14 @@ void SCREEN4::draw(system_data &sdSysData)
           else if (DISPLAY_SCREEN == 1)
           {
             AUTOMOBILE.display(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+            
+            ImGui::SameLine();
+
+            ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+            {
+              AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+            }
+            ImGui::EndChild();
           }
 
           else if (DISPLAY_SCREEN == 2)

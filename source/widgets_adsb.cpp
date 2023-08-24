@@ -167,6 +167,15 @@ void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, 
 
 // ---------------------------------------------------------------------------------------
 
+void MAP_MARKER::clear()
+{
+  LAT_LON = ImVec2(0,0);
+  DISPLAY_NAME = "";
+  LONG_NAME = "";
+  TYPE = 0;
+  AIRPORT_LANDING_VECTORS.clear();
+}
+
 void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon)
 {
   bool draw = false;
@@ -174,6 +183,28 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
 
   if (draw)
   {
+    // Possibly set colors here
+    // ---
+
+    // Draw Additional Vectors
+    if (AIRPORT_LANDING_VECTORS.size() > 1)
+      {
+        bool on_screen = false;
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+        
+        for(int vector = 0; vector < AIRPORT_LANDING_VECTORS.size(); vector++)
+        {
+          // 5 miles out.
+          ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                    get_coords_x_miles_from_coords(LAT_LON.x, LAT_LON.y, 5.0f, AIRPORT_LANDING_VECTORS[vector]), 
+                                                    on_screen);
+
+          draw_list->AddLine(draw_position, landing_vector_end, 
+                              sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.STANDARD, 2);
+        }
+      }
+
+    // Draw Symbol
     switch (TYPE)
     {
       case 0: //  0 - Generic
@@ -1204,27 +1235,241 @@ void ADSB_MAP::create(system_data &sdSysData)
   RANGE_INDICATOR.set_current_global_position(ImVec2(30.205f, -91.987833f));
 
   // Add Landmarks
-  add_landmark(ImVec2(30.205f, -91.987833f), "LFY", 0);             // KLFT - Lafayette Regional/Paul Fournet Field Airport
-  add_landmark(ImVec2(30.4663333333f, -92.4238333333f), "4R7", 0);  //
-  add_landmark(ImVec2(30.2426666667f, -92.6735f), "3R7", 0);        //
-  add_landmark(ImVec2(30.533f, -91.1498333333f), "BTR", 0);         //
-  add_landmark(ImVec2(30.0378333333f, -91.8838333333f), "ARA", 0);  //
-  add_landmark(ImVec2(30.2418333333f, -92.8306666667f), "6R1", 0);  // 6R1 - Welsh Airport
-  add_landmark(ImVec2(30.126f, -93.2235f), "LCH", 0);               // LCH - Lake Charles Regional Airport
-  add_landmark(ImVec2(30.7505f, -92.6885f), "ARA", 0);              // ACP - Allen Parish Airport
-  add_landmark(ImVec2(30.9566666667f, -92.2341666667f), "2R6", 0);  // 2R6 - Bunkie Municipal Airport
-  add_landmark(ImVec2(31.3273333333f, -92.5485f), "AEX", 0);        // AEX - Alexandria International Airport
-  add_landmark(ImVec2(30.7183333333f, -91.4786666667f), "HZR", 0);  // HZR - False River Regional Airport
-  add_landmark(ImVec2(30.1713333333f, -90.9403333333f), "REG", 0);  // REG - Louisiana Regional Airport
-  add_landmark(ImVec2(30.5216666667f, -90.4183333333f), "HDC", 0);  // HDC - Hammond Northshore Regional Airport
-  add_landmark(ImVec2(30.445f, -89.9888333333f), "L31", 0);         // L31 - St Tammany Regional Airport
-  add_landmark(ImVec2(30.3463333333f, -89.8208333333f), "ASD", 0);  // ASD - Slidell Airport
-  add_landmark(ImVec2(30.4875f, -89.6511666667f), "MJD", 0);        // MJD - Picayune Municipal Airport
-  add_landmark(ImVec2(30.0425f, -90.0281666667f), "NEW", 0);        // NEW - Lakefront Airport
-  add_landmark(ImVec2(29.8271666667f, -90.0266666667f), "NBG", 0);  // NBG - New Orleans NAS Jrb (Alvin Callender Field) Airport
-  add_landmark(ImVec2(29.9933333333f, -90.259f), "MSY", 0);         // MSY - Louis Armstrong New Orleans International Airport
-  add_landmark(ImVec2(30.0875f, -90.5828333333f), "APS", 0);        // APS - Port of South Louisiana Exec Regional Airport
-  add_landmark(ImVec2(31.1785f, -90.4718333333f), "MCB", 0);        // MCB - Mc Comb/Pike County/John E Lewis Field Airport
+  MAP_MARKER tmp_map_marker;
+
+  // add_landmark(ImVec2(30.4663333333f, -92.4238333333f), "4R7", 0);  //
+  //tmp_map_marker.clear();
+  //tmp_map_marker.LAT_LON = ImVec2( 0.0f, 0.0f);
+  //tmp_map_marker.DISPLAY_NAME = "";
+  //tmp_map_marker.LONG_NAME = "";
+  //tmp_map_marker.TYPE = 1;
+
+  // add_landmark(ImVec2(30.205f, -91.987833f), "LFY", 0);             // KLFT - Lafayette Regional/Paul Fournet Field Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.205f, -91.987833f);
+  tmp_map_marker.DISPLAY_NAME = "LFY";
+  tmp_map_marker.LONG_NAME = "Lafayette Regional/Paul Fournet Field Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(40);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(220);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(110);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(290);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.4663333333f, -92.4238333333f), "4R7", 0);  //
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.4663333333f, -92.4238333333f);
+  tmp_map_marker.DISPLAY_NAME = "4R7";
+  tmp_map_marker.LONG_NAME = "Eunice Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(160);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(340);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.2426666667f, -92.6735f), "3R7", 0);        //
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.2426666667f, -92.6735f);
+  tmp_map_marker.DISPLAY_NAME = "3R7";
+  tmp_map_marker.LONG_NAME = "Jennings Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(80);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(260);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(130);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(310);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.533f, -91.1498333333f), "BTR", 0);         //
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.533f, -91.1498333333f);
+  tmp_map_marker.DISPLAY_NAME = "BTR";
+  tmp_map_marker.LONG_NAME = "Baton Rouge Metro, Ryan";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(40);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(220);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(130);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(310);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.0378333333f, -91.8838333333f), "ARA", 0);  //
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.0378333333f, -91.8838333333f);
+  tmp_map_marker.DISPLAY_NAME = "ARA";
+  tmp_map_marker.LONG_NAME = "Acadiana Regional Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.2418333333f, -92.8306666667f), "6R1", 0);  // 6R1 - Welsh Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.2418333333f, -92.8306666667f);
+  tmp_map_marker.DISPLAY_NAME = "6R1";
+  tmp_map_marker.LONG_NAME = "Welsh Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(70);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(250);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(90);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(270);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.126f, -93.2235f), "LCH", 0);               // LCH - Lake Charles Regional Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.126f, -93.2235f);
+  tmp_map_marker.DISPLAY_NAME = "LCH";
+  tmp_map_marker.LONG_NAME = "Lake Charles Regional Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(150);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(330);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(50);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(230);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.7505f, -92.6885f), "ARA", 0);              // ACP - Allen Parish Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.7505f, -92.6885f);
+  tmp_map_marker.DISPLAY_NAME = "ACP";
+  tmp_map_marker.LONG_NAME = "Allen Parish Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.9566666667f, -92.2341666667f), "2R6", 0);  // 2R6 - Bunkie Municipal Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.9566666667f, -92.2341666667f);
+  tmp_map_marker.DISPLAY_NAME = "2R6";
+  tmp_map_marker.LONG_NAME = "Bunkie Municipal Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(31.3273333333f, -92.5485f), "AEX", 0);        // AEX - Alexandria International Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(31.3273333333f, -92.5485f);
+  tmp_map_marker.DISPLAY_NAME = "AEX";
+  tmp_map_marker.LONG_NAME = "Alexandria International Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(140);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(320);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.7183333333f, -91.4786666667f), "HZR", 0);  // HZR - False River Regional Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.7183333333f, -91.4786666667f);
+  tmp_map_marker.DISPLAY_NAME = "HZR";
+  tmp_map_marker.LONG_NAME = "False River Regional Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.1713333333f, -90.9403333333f), "REG", 0);  // REG - Louisiana Regional Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.1713333333f, -90.9403333333f);
+  tmp_map_marker.DISPLAY_NAME = "REG";
+  tmp_map_marker.LONG_NAME = "Louisiana Regional Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.5216666667f, -90.4183333333f), "HDC", 0);  // HDC - Hammond Northshore Regional Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.5216666667f, -90.4183333333f);
+  tmp_map_marker.DISPLAY_NAME = "HDC";
+  tmp_map_marker.LONG_NAME = "Hammond Northshore Regional Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(130);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(310);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.445f, -89.9888333333f), "L31", 0);         // L31 - St Tammany Regional Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.445f, -89.9888333333f);
+  tmp_map_marker.DISPLAY_NAME = "L31";
+  tmp_map_marker.LONG_NAME = "St Tammany Regional Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.3463333333f, -89.8208333333f), "ASD", 0);  // ASD - Slidell Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.3463333333f, -89.8208333333f);
+  tmp_map_marker.DISPLAY_NAME = "ASD";
+  tmp_map_marker.LONG_NAME = "Slidell Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.4875f, -89.6511666667f), "MJD", 0);        // MJD - Picayune Municipal Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.4875f, -89.6511666667f);
+  tmp_map_marker.DISPLAY_NAME = "MJD";
+  tmp_map_marker.LONG_NAME = "Picayune Municipal Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.0425f, -90.0281666667f), "NEW", 0);        // NEW - Lakefront Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.0425f, -90.0281666667f);
+  tmp_map_marker.DISPLAY_NAME = "NEW";
+  tmp_map_marker.LONG_NAME = "Lakefront Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(29.8271666667f, -90.0266666667f), "NBG", 0);  // NBG - New Orleans NAS Jrb (Alvin Callender Field) Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(29.8271666667f, -90.0266666667f);
+  tmp_map_marker.DISPLAY_NAME = "NBG";
+  tmp_map_marker.LONG_NAME = "New Orleans NAS Jrb (Alvin Callender Field) Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(40);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(220);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(140);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(320);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(29.9933333333f, -90.259f), "MSY", 0);         // MSY - Louis Armstrong New Orleans International Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(29.9933333333f, -90.259f);
+  tmp_map_marker.DISPLAY_NAME = "MSY";
+  tmp_map_marker.LONG_NAME = "Louis Armstrong New Orleans International Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(110);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(290);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(20);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(200);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(30.0875f, -90.5828333333f), "APS", 0);        // APS - Port of South Louisiana Exec Regional Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.0875f, -90.5828333333f);
+  tmp_map_marker.DISPLAY_NAME = "APS";
+  tmp_map_marker.LONG_NAME = "Port of South Louisiana Exec Regional Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // add_landmark(ImVec2(31.1785f, -90.4718333333f), "MCB", 0);        // MCB - Mc Comb/Pike County/John E Lewis Field Airport
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(31.1785f, -90.4718333333f);
+  tmp_map_marker.DISPLAY_NAME = "MCB";
+  tmp_map_marker.LONG_NAME = "Mc Comb/Pike County/John E Lewis Field Airport";
+  tmp_map_marker.TYPE = 1;
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  LANDMARKS.push_back(tmp_map_marker);
+
   //add_landmark(ImVec2(f, f), "", 0);  //
   //add_landmark(ImVec2(f, f), "", 0);  //
   //add_landmark(ImVec2(f, f), "", 0);  //

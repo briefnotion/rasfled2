@@ -325,7 +325,14 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
     }
     else  // Cruis is off, print the text.
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+      if (PROPS.COLOR_SCALE.active())
+      {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR_SCALE.get_color(VALUE).TEXT));
+      }
+      else
+      {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+      }
       ImGui::Text("%2d", (int)VALUE);
       ImGui::PopStyleColor();
     }
@@ -505,6 +512,7 @@ void T_DATA_DISPLAY::draw(system_data &sdSysData)
 // ---------------------------------------------------------------------------------------
 void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
 {
+  /*
   // Large Displays on Main Screen
   SDATA.L_SPEED.PROPS.LABEL = "V\nE\nL";
   SDATA.L_SPEED.PROPS.LABEL_ON_LEFT = true;
@@ -524,6 +532,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_TACH.PROPS.LABEL_ON_LEFT = false;
   SDATA.L_TACH.PROPS.DISPLAY_MIN_MAX = true;
   SDATA.L_TACH.create();
+  */
 
   // Large Displays on Main Sidebar Screen
   SDATA.L_SPEED_SB.PROPS.LABEL = "V\nE\nL";
@@ -553,12 +562,22 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_VOLTAGE_SB.PROPS.LABEL_ON_LEFT = true;
   SDATA.L_VOLTAGE_SB.PROPS.DISPLAY_MIN_MAX = true;
   SDATA.L_VOLTAGE_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(8, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(12, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(14, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(16, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(100, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.L_VOLTAGE_SB.create();
   
   SDATA.L_S_TEMP_SB.PROPS.LABEL = "T\nM\nP";
   SDATA.L_S_TEMP_SB.PROPS.LABEL_ON_LEFT = true;
   SDATA.L_S_TEMP_SB.PROPS.DISPLAY_MIN_MAX = true;
   SDATA.L_S_TEMP_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(40, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
+  SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(50, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(60, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(70, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(100, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
   SDATA.L_S_TEMP_SB.create();
 
   // Continuing Configuring Main Screen Widgets
@@ -574,8 +593,8 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.D_VOLTAGE.PROPS.LABEL = right_justify(10, "Voltage: ");
   SDATA.D_VOLTAGE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(8, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
-  SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(11, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
-  SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(13, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(12, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+  SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(14, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(16, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(100, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_VOLTAGE.create(sdSysData);
@@ -872,11 +891,13 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   // Update Widgets ------
 
   // Large Displays on Main Sidebar Screen
+  /*
   SDATA.L_SPEED.update_value(sdSysData, SDATA.SPEED, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
   SDATA.L_ACCELERATION.update_value(sdSysData, 10 * SDATA.ACCELERATION);
 
   SDATA.L_GEAR.update_value(sdSysData, (SDATA.GEAR_SELECTION.c_str() + SDATA.GEAR));
   SDATA.L_TACH.update_value(sdSysData, SDATA.RPM / 100);
+  */
 
   // Large Displays on Main Sidebar Screen
   SDATA.L_SPEED_SB.update_value(sdSysData, SDATA.SPEED, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
@@ -995,168 +1016,180 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
     
     ImGuiIO &io = ImGui::GetIO();
 
-    const int disp_x = 94;
-    const int disp_y = 147;
+    //const int disp_x = 94;
+    const int disp_y = 130;
 
-    ImGui::BeginChild("Speed Display", ImVec2(disp_x, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    {
-      SDATA.L_SPEED.draw(sdSysData);
+    // ---
+    // Left Side
 
-      SDATA.L_ACCELERATION.draw(sdSysData); //ImGui::TextUnformatted("Δ\nv");
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("Auto Data 1", ImVec2(200, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+    ImGui::BeginChild("Auto Screen Left Side", ImVec2(ImGui::GetContentRegionAvail().x - 100, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
       /*
-      if (ImGui::BeginTable("Automobile Data", 2, 0))
+      ImGui::BeginChild("Speed Display", ImVec2(disp_x, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::Text("Messages");
-        ImGui::TableNextColumn();
-        ImGui::Text("%d", SDATA.MESSAGES); 
+        SDATA.L_SPEED.draw(sdSysData);
 
-        ImGui::TableNextRow();
-        ImGui::TableNextColumn();
-        ImGui::Text("Steering Angle");
-        ImGui::TableNextColumn();
-        ImGui::Text("%s %s %s", SDATA.STEERING_WHEEL_ANGLE.c_str(), 
-                                SDATA.STEERING_WHEEL_LEFT_OF_CENTER.c_str(), 
-                                SDATA.STEERING_WHEEL_TURNING_DIRECTION.c_str());
-        
-        ImGui::EndTable();
+        SDATA.L_ACCELERATION.draw(sdSysData); //ImGui::TextUnformatted("Δ\nv");
       }
+      ImGui::EndChild();
+
+      ImGui::SameLine();
       */
 
-      SDATA.D_FUEL_RAIL_PRESSURE.draw(sdSysData);
-      SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(sdSysData);
-      SDATA.D_VOLTAGE.draw(sdSysData);
-      SDATA.D_BAROMETER.draw(sdSysData);
-    }
-    ImGui::EndChild();
+      ImGui::BeginChild("Auto Data 1", ImVec2(ImGui::GetContentRegionAvail().x / 4, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        /*
+        if (ImGui::BeginTable("Automobile Data", 2, 0))
+        {
+          ImGui::TableNextRow();
+          ImGui::TableNextColumn();
+          ImGui::Text("Messages");
+          ImGui::TableNextColumn();
+          ImGui::Text("%d", SDATA.MESSAGES); 
 
-    ImGui::SameLine();
+          ImGui::TableNextRow();
+          ImGui::TableNextColumn();
+          ImGui::Text("Steering Angle");
+          ImGui::TableNextColumn();
+          ImGui::Text("%s %s %s", SDATA.STEERING_WHEEL_ANGLE.c_str(), 
+                                  SDATA.STEERING_WHEEL_LEFT_OF_CENTER.c_str(), 
+                                  SDATA.STEERING_WHEEL_TURNING_DIRECTION.c_str());
+          
+          ImGui::EndTable();
+        }
+        */
 
-    ImGui::BeginChild("Auto Data 2", ImVec2(165, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    {
-      SDATA.OC_LF_TTL.draw(sdSysData);
-      ImGui::SameLine();
-      SDATA.D_LF_TTL.draw(sdSysData);
-
-      SDATA.OC_RF_TTL.draw(sdSysData);
-      ImGui::SameLine();
-      SDATA.D_RF_TTL.draw(sdSysData);
-
-      SDATA.OC_LB_TTL.draw(sdSysData);
-      ImGui::SameLine();
-      SDATA.D_LB_TTL.draw(sdSysData);
-
-      SDATA.OC_RB_TTL.draw(sdSysData);
-      ImGui::SameLine();
-      SDATA.D_RB_TTL.draw(sdSysData);
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("Auto Data 3", ImVec2(160, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    {
-      SDATA.D_TEMP_AMBIANT.draw(sdSysData);
-      SDATA.D_TEMP_INTAKE.draw(sdSysData);
-      SDATA.D_TEMP_COOLANT.draw(sdSysData);
-      SDATA.D_TEMP_CATALYST.draw(sdSysData);
-      SDATA.D_TEMP_SUPER_TEMP.draw(sdSysData);
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("Auto Data 4", ImVec2((ImGui::GetContentRegionAvail().x - disp_x) - 10, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    {
-      SDATA.D_LIGHTS.draw(sdSysData);
-      SDATA.D_FUEL_LEVEL.draw(sdSysData);
-      SDATA.D_PARKING_BRAKE.draw(sdSysData);
-      SDATA.D_CRUISE_ON.draw(sdSysData);
-      SDATA.D_CRUISE_SPEED.draw(sdSysData);
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("Gear Display", ImVec2(disp_x, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    {
-      SDATA.L_GEAR.draw(sdSysData);
-      SDATA.L_TACH.draw(sdSysData);
-    }
-    ImGui::EndChild();
-
-    //ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 2 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    //{  
-    //  SDATA.P_SPEED.draw(sdSysData);
-    //}
-    //ImGui::EndChild();
-
-    /*
-    ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 1 / 4, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    {
-      SDATA.P_SPEED_SLOW.draw(sdSysData);
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("Data 2", ImVec2(ImGui::GetContentRegionAvail().x * 1 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    {
-      SDATA.VB_SPEED.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x * 1 / 3, ImGui::GetContentRegionAvail().y));
-      ImGui::SameLine();
-      SDATA.VB_TACH.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x * 1 / 2, ImGui::GetContentRegionAvail().y));
-      ImGui::SameLine();
-      SDATA.VB_S_TEMP.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-    }
-    ImGui::EndChild();
-
-    ImGui::SameLine();
-
-    ImGui::BeginChild("Data 3", ImVec2(ImGui::GetContentRegionAvail().x * 1 / 2, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    {
-      SDATA.P_SPEED.draw(sdSysData);
-    }
-    ImGui::EndChild();
-    */
-
-    ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 2 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    { 
-
-      float size_1_3 = ImGui::GetContentRegionAvail().x * 2 / 3;
-
-      SDATA.P_SPEED_SLOW.draw(sdSysData, ImVec2(size_1_3, ImGui::GetContentRegionAvail().y));
+        SDATA.D_FUEL_RAIL_PRESSURE.draw(sdSysData);
+        SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(sdSysData);
+        SDATA.D_VOLTAGE.draw(sdSysData);
+        SDATA.D_BAROMETER.draw(sdSysData);
+      }
+      ImGui::EndChild();
 
       ImGui::SameLine();
 
-      SDATA.VB_S_TEMP.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
-      ImGui::SameLine();
-      SDATA.VB_SPEED.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
-      ImGui::SameLine();
-      SDATA.VB_TACH.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
+      ImGui::BeginChild("Auto Data 2", ImVec2(ImGui::GetContentRegionAvail().x / 3, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        SDATA.OC_LF_TTL.draw(sdSysData);
+        ImGui::SameLine();
+        SDATA.D_LF_TTL.draw(sdSysData);
+
+        SDATA.OC_RF_TTL.draw(sdSysData);
+        ImGui::SameLine();
+        SDATA.D_RF_TTL.draw(sdSysData);
+
+        SDATA.OC_LB_TTL.draw(sdSysData);
+        ImGui::SameLine();
+        SDATA.D_LB_TTL.draw(sdSysData);
+
+        SDATA.OC_RB_TTL.draw(sdSysData);
+        ImGui::SameLine();
+        SDATA.D_RB_TTL.draw(sdSysData);
+      }
+      ImGui::EndChild();
 
       ImGui::SameLine();
 
-      SDATA.P_SPEED.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-    }
-    ImGui::EndChild();
+      ImGui::BeginChild("Auto Data 3", ImVec2(ImGui::GetContentRegionAvail().x / 2, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        SDATA.D_TEMP_AMBIANT.draw(sdSysData);
+        SDATA.D_TEMP_INTAKE.draw(sdSysData);
+        SDATA.D_TEMP_COOLANT.draw(sdSysData);
+        SDATA.D_TEMP_CATALYST.draw(sdSysData);
+        SDATA.D_TEMP_SUPER_TEMP.draw(sdSysData);
+      }
+      ImGui::EndChild();
 
-    ImGui::SameLine();
+      ImGui::SameLine();
 
-    ImGui::BeginChild("Data 4", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    {
-      SDATA.G_SPEED.draw(sdSysData);
+      ImGui::BeginChild("Auto Data 4", ImVec2(ImGui::GetContentRegionAvail().x, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        SDATA.D_LIGHTS.draw(sdSysData);
+        SDATA.D_FUEL_LEVEL.draw(sdSysData);
+        SDATA.D_PARKING_BRAKE.draw(sdSysData);
+        SDATA.D_CRUISE_ON.draw(sdSysData);
+        SDATA.D_CRUISE_SPEED.draw(sdSysData);
+      }
+      ImGui::EndChild();
 
-      SDATA.G_ACCELERATION.draw(sdSysData);
-      SDATA.G_RPM.draw(sdSysData);
-      SDATA.G_TORQUE.draw(sdSysData);
+      /*
+      ImGui::SameLine();
+
+      ImGui::BeginChild("Gear Display", ImVec2(disp_x, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        SDATA.L_GEAR.draw(sdSysData);
+        SDATA.L_TACH.draw(sdSysData);
+      }
+      ImGui::EndChild();
+      */
+
+      //ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 2 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      //{  
+      //  SDATA.P_SPEED.draw(sdSysData);
+      //}
+      //ImGui::EndChild();
+
+      /*
+      ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 1 / 4, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        SDATA.P_SPEED_SLOW.draw(sdSysData);
+      }
+      ImGui::EndChild();
+
+      ImGui::SameLine();
+
+      ImGui::BeginChild("Data 2", ImVec2(ImGui::GetContentRegionAvail().x * 1 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        SDATA.VB_SPEED.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x * 1 / 3, ImGui::GetContentRegionAvail().y));
+        ImGui::SameLine();
+        SDATA.VB_TACH.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x * 1 / 2, ImGui::GetContentRegionAvail().y));
+        ImGui::SameLine();
+        SDATA.VB_S_TEMP.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+      }
+      ImGui::EndChild();
+
+      ImGui::SameLine();
+
+      ImGui::BeginChild("Data 3", ImVec2(ImGui::GetContentRegionAvail().x * 1 / 2, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        SDATA.P_SPEED.draw(sdSysData);
+      }
+      ImGui::EndChild();
+      */
+
+      ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 2 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      { 
+
+        float size_1_3 = ImGui::GetContentRegionAvail().x * 2 / 3;
+
+        SDATA.P_SPEED_SLOW.draw(sdSysData, ImVec2(size_1_3, ImGui::GetContentRegionAvail().y));
+
+        ImGui::SameLine();
+
+        SDATA.VB_S_TEMP.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
+        ImGui::SameLine();
+        SDATA.VB_SPEED.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
+        ImGui::SameLine();
+        SDATA.VB_TACH.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
+
+        ImGui::SameLine();
+
+        SDATA.P_SPEED.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+      }
+      ImGui::EndChild();
+
+      ImGui::SameLine();
+
+      ImGui::BeginChild("Data 4", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        SDATA.G_SPEED.draw(sdSysData);
+
+        SDATA.G_ACCELERATION.draw(sdSysData);
+        SDATA.G_RPM.draw(sdSysData);
+        SDATA.G_TORQUE.draw(sdSysData);
+      }
+      ImGui::EndChild();
+
     }
     ImGui::EndChild();
 }
