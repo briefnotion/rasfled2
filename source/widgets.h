@@ -172,4 +172,55 @@ bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, 
                                 COLOR_COMBO True_Color, COLOR_COMBO False_Color, ImVec2 ImVec2_Size);
 
 // ---------------------------------------------------------------------------------------
+
+class BAR_TECH_PROPERTIES
+{
+  public:
+
+  string LABEL = "";
+
+  float BAR_HEIGHT = 20;
+  float MARKER_SIZE = 5;
+
+  COLOR_COMBO COLOR_MARKER;
+  COLOR_COMBO COLOR_BACKGROUND;
+
+  float MAX = 0;
+
+  // Min Max Related
+  bool DRAW_MIN_MAX = false;
+  bool DRAW_MIN_MAX_ON_TOP = false;
+  bool DRAW_MIN_MAX_ON_BOTTOM = false;
+  bool DISPLAY_SINGLE_POINT_FLOAT = false;
+  int MIN_MAX_TIME_SPAN = 60000;
+  int MIN_MAX_TIME_SLICES = 20;
+};
+
+class BAR_TECH
+{
+  private:
+
+  float VALUE = 0;
+
+  MIN_MAX_TIME MIN_MAX;
+
+  W_TEXT DSP_MIN;
+  W_TEXT DSP_MAX;
+  W_TEXT DSP_VALUE;
+
+  void draw_min_max_val(system_data &sdSysData);
+
+  public:
+
+  BAR_TECH_PROPERTIES PROPS;
+
+  void create();
+
+  void update_value(system_data &sdSysData, float Value);
+
+  void draw(system_data &sdSysData);
+
+};
+
+// ---------------------------------------------------------------------------------------
 #endif

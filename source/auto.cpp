@@ -720,10 +720,13 @@ bool AUTOMOBILE_RPM::available()
 
 void AUTOMOBILE_RPM::store(int Rpm)
 {
-  // val - x6000
-  VAL_RPM = (Rpm - 24576) * 2;    // Wrong
+  int val = (Rpm - 24576) * 2;
+  if (Rpm > 0)
+  {
+    VAL_RPM = val;    // Wrong
 
-  RPM = to_string(VAL_RPM);
+    RPM = to_string(VAL_RPM);
+  }
 }
 
 int AUTOMOBILE_RPM::val_rpm()
@@ -738,10 +741,13 @@ string AUTOMOBILE_RPM::rpm()
 
 void AUTOMOBILE_RPM::store_2(int Rpm)
 {
-  // val - xC000
-  VAL_RPM_2 = (Rpm - 49152) * 2;    // Wrong
+  int val = (Rpm - 49152) * 2;
+  if (val > 0)
+  {
+    VAL_RPM_2 = val;    // Wrong
 
-  RPM_2 = to_string(VAL_RPM_2);
+    RPM_2 = to_string(VAL_RPM_2);
+  }
 }
 
 int AUTOMOBILE_RPM::val_rpm_2()
@@ -2167,10 +2173,6 @@ void AUTOMOBILE::translate(unsigned long tmeFrame_Time)
     // Transmission Gear Position
     STATUS.GEAR.store(DATA.AD_F0.DATA[2]);
 
-    // RPM
-    STATUS.RPM.store((DATA.AD_90.DATA[4] *256) + DATA.AD_90.DATA[5]);
-    STATUS.RPM.store_2((DATA.AD_90.DATA[2] *256) + DATA.AD_90.DATA[3]);
-
     // BRAKE PRESSURE
     STATUS.POWER.store((DATA.AD_80.DATA[5] *256) + DATA.AD_80.DATA[6]);
 
@@ -2222,6 +2224,10 @@ void AUTOMOBILE::translate(unsigned long tmeFrame_Time)
                               DATA.AD_F0.TIMESTAMP_MESSAGE_SENT, 
                               (STATUS.SPEED.SPEED_LB_TIRE.val_kmph() + STATUS.SPEED.SPEED_LB_TIRE.val_kmph() + 
                               STATUS.SPEED.SPEED_LB_TIRE.val_kmph() + STATUS.SPEED.SPEED_LB_TIRE.val_kmph()) /4);
+
+    // RPM
+    STATUS.RPM.store((DATA.AD_90.DATA[4] *256) + DATA.AD_90.DATA[5]);
+    STATUS.RPM.store_2((DATA.AD_90.DATA[2] *256) + DATA.AD_90.DATA[3]);
 
     // --------------------------------------------------------------------------------------
     

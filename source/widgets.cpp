@@ -300,4 +300,154 @@ bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, 
 }
 
 // ---------------------------------------------------------------------------------------
+
+void BAR_TECH::draw_min_max_val(system_data &sdSysData)
+{
+  if ((int)MIN_MAX.min() < 0)
+  {
+    DSP_MIN.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  }
+  else
+  {
+    DSP_MIN.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  }
+  
+  if ((int)(VALUE) < 0)
+  {
+    DSP_VALUE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  }
+  else
+  {
+    DSP_VALUE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  }
+
+  if ((int)(MIN_MAX.max()) < 0)
+  {
+    DSP_MAX.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  }
+  else
+  {
+    DSP_MAX.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  }
+
+  // Display Values
+  if (PROPS.DISPLAY_SINGLE_POINT_FLOAT)
+  {
+    DSP_MIN.update_text(sdSysData, to_string_round_to_nth(MIN_MAX.min_float(), 1));
+    DSP_VALUE.update_text(sdSysData, to_string_round_to_nth(VALUE, 1));
+    DSP_MAX.update_text(sdSysData, to_string_round_to_nth(MIN_MAX.max_float(), 1));
+  }
+  else
+  {
+    DSP_MIN.update_text(sdSysData, to_string((int)(MIN_MAX.min())));
+    DSP_VALUE.update_text(sdSysData, to_string((int)(VALUE)));
+    DSP_MAX.update_text(sdSysData, to_string((int)(MIN_MAX.max())));  
+  }
+
+  if (ImGui::BeginTable("Automobile Guage Val Min Max", 4, 0))
+  {
+    {
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+      ImGui::Text(PROPS.LABEL.c_str());
+      ImGui::PopStyleColor();
+
+      ImGui::TableNextColumn();
+      DSP_MIN.draw(sdSysData);
+      ImGui::TableNextColumn();
+      DSP_VALUE.draw(sdSysData);
+      ImGui::TableNextColumn();
+      DSP_MAX.draw(sdSysData);
+    }
+    ImGui::EndTable();
+  }
+}
+
+void BAR_TECH::create()
+{
+  MIN_MAX.PROP.TIME_SPAN = PROPS.MIN_MAX_TIME_SPAN;
+  MIN_MAX.PROP.SLICES = PROPS.MIN_MAX_TIME_SLICES;
+
+  DSP_MIN.PROPS.CHANGE_NOTIFICATION = true;
+  DSP_MAX.PROPS.CHANGE_NOTIFICATION = true;
+  DSP_VALUE.PROPS.CHANGE_NOTIFICATION = false;
+}
+
+void BAR_TECH::update_value(system_data &sdSysData, float Value)
+{
+  VALUE = Value;
+  if (PROPS.DRAW_MIN_MAX)
+  {
+    MIN_MAX.put_value(Value, sdSysData.tmeCURRENT_FRAME_TIME);
+  }
+}
+
+void BAR_TECH::draw(system_data &sdSysData)
+{
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+  ImGuiIO &io = ImGui::GetIO();
+
+  // Min Max
+  if (PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_TOP)
+  {
+    draw_min_max_val(sdSysData);
+  }
+
+  // Draw
+
+  ImVec2 pos = ImGui::GetCursorScreenPos();
+  ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
+
+  // Draw Background
+  if (VALUE >= 0)
+  {
+    draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.BACKGROUND, 5.0f, ImDrawFlags_None);
+  }
+  else
+  {
+    draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.COLOR_COMB_RED.BACKGROUND, 5.0f, ImDrawFlags_None);
+  }
+
+  // Draw Min Max Bar
+  if (PROPS.DRAW_MIN_MAX)
+  {
+    float min_location = (MIN_MAX.min_float() / PROPS.MAX) * size.x;
+    float max_location = (MIN_MAX.max_float() / PROPS.MAX) * size.x;
+
+    if (min_location < 0)
+    {
+      min_location = 0;
+    }
+    if (max_location < 0)
+    {
+      max_location = 0;
+    }
+
+    draw_list->AddRectFilled(ImVec2(pos.x + min_location, pos.y), 
+                              ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT), 
+                              PROPS.COLOR_MARKER.BACKGROUND, 5.0f, ImDrawFlags_None);
+  }
+
+  // Draw Value Marker
+  
+  //float marker_location = abs((VALUE / PROPS.MAX) * (size.x - PROPS.MARKER_SIZE *2));
+  float marker_location = abs((VALUE / PROPS.MAX) * size.x);
+
+  draw_list->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE/2, pos.y), 
+                            ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE/2 , pos.y + PROPS.BAR_HEIGHT), 
+                            PROPS.COLOR_MARKER.STANDARD, 5.0f, ImDrawFlags_None);
+
+  // Move Cursor Pos to new position
+  ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
+
+  // Min Max
+  if (PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_BOTTOM)
+  {
+    draw_min_max_val(sdSysData);
+  }
+}
+
+// ---------------------------------------------------------------------------------------
 #endif

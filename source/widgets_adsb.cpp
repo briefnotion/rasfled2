@@ -133,11 +133,20 @@ void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_C
   draw_list->AddNgon(Screen_Position, 4, Color.STANDARD, 4, 1.5f);
 }
 
-void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color)
+void draw_point_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color, float Size)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  draw_list->AddNgonFilled(Screen_Position, 4, Color.STANDARD, 4);
+  draw_list->AddNgonFilled(Screen_Position, Size, Color.TEXT, 6);
+  //draw_list->AddNgon(Screen_Position, Size, Color.TEXT, 6, 2.0f);
+}
+
+void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color, float Size)
+{
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+  //draw_list->AddNgonFilled(Screen_Position, Size, Color.STANDARD, 6);
+  draw_list->AddNgon(Screen_Position, Size, Color.TEXT, 6, 2.0f);
 }
 
 //void draw_arrow(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 col, float thickness, float arrow_size, float direction)
@@ -955,11 +964,25 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
       // Draw Arrow of Aircraft track heading on map at position, grey if old.
       if (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5)
       {
-        draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, 15, AIRCRAFT_DATA.TRACK.get_float_value());
+        if (AIRCRAFT_DATA.TRACK.conversion_success())
+        {
+          draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, 15, AIRCRAFT_DATA.TRACK.get_float_value());
+        }
+        else
+        {
+          draw_aircraft_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, 6);
+        }
       }
       else
       {
-        draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_GREY, 12, AIRCRAFT_DATA.TRACK.get_float_value());
+        if (AIRCRAFT_DATA.TRACK.conversion_success())
+        {
+          draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_GREY, 12, AIRCRAFT_DATA.TRACK.get_float_value());
+        }
+        else
+        {
+          draw_aircraft_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_GREY, 4);
+        }
       }
 
       // Draw track
@@ -979,6 +1002,8 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
           {
             draw_list->AddLine(track_position_0, track_position_1, 
                                 sdSysData.COLOR_SELECT.COLOR_COMB_GREY.TEXT, 2);
+
+            draw_point_marker(sdSysData, track_position_0, sdSysData.COLOR_SELECT.COLOR_COMB_GREY, 3);
           }
         }
       }
@@ -995,7 +1020,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
       ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5, draw_position.y + 41));
       if (AIRCRAFT_DATA.ALTITUDE.conversion_success())
       {
-        ImGui::Text("A: %d", AIRCRAFT_DATA.ALTITUDE.get_int_value() / 100);
+        ImGui::Text("A: %.1f", float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000));
       }
       else
       {
