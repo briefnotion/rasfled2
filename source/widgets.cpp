@@ -403,11 +403,13 @@ void BAR_TECH::draw(system_data &sdSysData)
   // Draw Background
   if (VALUE >= 0)
   {
-    draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.BACKGROUND, 5.0f, ImDrawFlags_None);
+    draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.DIM, 5.0f, ImDrawFlags_None);
+    draw_list->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
   }
   else
   {
-    draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.COLOR_COMB_RED.BACKGROUND, 5.0f, ImDrawFlags_None);
+    draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.COLOR_COMB_RED.DIM, 5.0f, ImDrawFlags_None);
+    draw_list->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.COLOR_COMB_RED.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
   }
 
   // Draw Min Max Bar
@@ -427,13 +429,17 @@ void BAR_TECH::draw(system_data &sdSysData)
 
     draw_list->AddRectFilled(ImVec2(pos.x + min_location, pos.y), 
                               ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT), 
-                              PROPS.COLOR_MARKER.BACKGROUND, 5.0f, ImDrawFlags_None);
+                              PROPS.COLOR_MARKER.DIM, 5.0f, ImDrawFlags_None);
+
+    draw_list->AddRect(ImVec2(pos.x + min_location, pos.y +2), 
+                              ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT -2), 
+                              PROPS.COLOR_MARKER.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
   }
 
   // Draw Value Marker
   
   //float marker_location = abs((VALUE / PROPS.MAX) * (size.x - PROPS.MARKER_SIZE *2));
-  float marker_location = abs((VALUE / PROPS.MAX) * size.x);
+  float marker_location = abs((VALUE / PROPS.MAX) * size.x +1);
 
   draw_list->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE/2, pos.y), 
                             ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE/2 , pos.y + PROPS.BAR_HEIGHT), 

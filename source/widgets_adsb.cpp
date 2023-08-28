@@ -133,11 +133,11 @@ void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_C
   draw_list->AddNgon(Screen_Position, 4, Color.STANDARD, 4, 1.5f);
 }
 
-void draw_point_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color, float Size)
+void draw_point_marker(system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, float Size)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  draw_list->AddNgonFilled(Screen_Position, Size, Color.TEXT, 6);
+  draw_list->AddNgonFilled(Screen_Position, Size, Color, 4);
   //draw_list->AddNgon(Screen_Position, Size, Color.TEXT, 6, 2.0f);
 }
 
@@ -516,22 +516,40 @@ void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long &tmeCurrentMi
 
   if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND)
   {
-    if (TRACK.size() > 0)
+    // Add only if new value not the same as prev, or no other values exist.
+    if (TRACK.size() == 0)
     {
-      if (AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value() == TRACK[TRACK.size() -1].x && 
-          AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value() == TRACK[TRACK.size() -1].y)
       {
-        // do nothing
-      }
-      else
-      {
-        ImVec2 new_lat_lon = ImVec2(Aircraft.POSITION.LATITUDE.get_float_value(), Aircraft.POSITION.LONGITUDE.get_float_value());
+        AIRCRAFT_TRACK_POINT new_lat_lon;
+        new_lat_lon.LAT_LON = ImVec2(Aircraft.POSITION.LATITUDE.get_float_value(), Aircraft.POSITION.LONGITUDE.get_float_value());
+        
+        float intensity = (32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
+
+        if (intensity < 0.2f)
+        {
+          intensity = 0.2f;
+        }
+        
+        new_lat_lon.RSSI_INTENSITY = intensity;
+
         TRACK.push_back(new_lat_lon);
       }
     }
-    else
+    else if (AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value() != TRACK[TRACK.size() -1].LAT_LON.x || 
+              AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value() != TRACK[TRACK.size() -1].LAT_LON.y)
     {
-      ImVec2 new_lat_lon = ImVec2(Aircraft.POSITION.LATITUDE.get_float_value(), Aircraft.POSITION.LONGITUDE.get_float_value());
+      AIRCRAFT_TRACK_POINT new_lat_lon;
+      new_lat_lon.LAT_LON = ImVec2(Aircraft.POSITION.LATITUDE.get_float_value(), Aircraft.POSITION.LONGITUDE.get_float_value());
+      
+      float intensity = (32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
+
+      if (intensity < 0.2f)
+      {
+        intensity = 0.2f;
+      }
+      
+      new_lat_lon.RSSI_INTENSITY = intensity;
+
       TRACK.push_back(new_lat_lon);
     }
   }
@@ -953,8 +971,37 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
                                                   ImVec2( AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value(), 
                                                           AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value()), 
                                                           draw);
+    
     if (draw)
     {
+      // Draw track first then overlay aircraft.
+      if (TRACK.size() > 1)
+      {
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+        ImVec2 track_position_0;
+        ImVec2 track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[0].LAT_LON, draw);
+        
+        for(int position = 1; position < TRACK.size(); position++)
+        {
+          track_position_0 = track_position_1;
+          track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[position].LAT_LON, draw);
+
+          if (draw)
+          {
+            ImColor point_color = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.TEXT;
+
+            point_color.Value.w = TRACK[position].RSSI_INTENSITY;
+
+            draw_point_marker(sdSysData, track_position_0, point_color, 4);
+
+            draw_list->AddLine(track_position_0, track_position_1, 
+                                sdSysData.COLOR_SELECT.COLOR_COMB_GREY.TEXT, 2);
+          }
+        }
+      }
+
+
       // Draw Arrow of Aircraft nav heading on map at position
       if (AIRCRAFT_DATA.NAV_HEADING.conversion_success())
       {
@@ -985,29 +1032,6 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
         }
       }
 
-      // Draw track
-      if (TRACK.size() > 1)
-      {
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-        ImVec2 track_position_0;
-        ImVec2 track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[0], draw);
-        
-        for(int position = 1; position < TRACK.size(); position++)
-        {
-          track_position_0 = track_position_1;
-          track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[position], draw);
-
-          if (draw)
-          {
-            draw_list->AddLine(track_position_0, track_position_1, 
-                                sdSysData.COLOR_SELECT.COLOR_COMB_GREY.TEXT, 2);
-
-            draw_point_marker(sdSysData, track_position_0, sdSysData.COLOR_SELECT.COLOR_COMB_GREY, 3);
-          }
-        }
-      }
-
       // Text describing Aircraft
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
   
@@ -1020,7 +1044,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
       ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5, draw_position.y + 41));
       if (AIRCRAFT_DATA.ALTITUDE.conversion_success())
       {
-        ImGui::Text("A: %.1f", float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000));
+        ImGui::Text("A: %.1f", float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f));
       }
       else
       {

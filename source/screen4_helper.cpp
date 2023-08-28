@@ -16,23 +16,15 @@
 
 // ---------------------------------------------------------------------------------------
 
-void COLOR_COMBO::set(float H, float S, float V)
-{
-  TEXT = ImColor::HSV(H, .7, V + .3);
-  BACKGROUND = ImColor::HSV(H, S - .3, V - .3);
-  STANDARD = ImColor::HSV(H, S, V);
-  HOVERED = ImColor::HSV(H, S + .1, V + .1);
-  ACTIVE = ImColor::HSV(H, S + .2, V + .2);
-}
-
 void COLOR_COMBO::set_rgb(float R, float G, float B, float A, float Intensity)
 {
   TEXT = ImColor((R *0.8f + 0.5f) * Intensity, (G *0.8f + 0.5f) * Intensity, (B *0.8f + 0.5f) * Intensity, A);
 
-  BACKGROUND = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.2f);
-  STANDARD = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.7f);
-  HOVERED = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.8f);
-  ACTIVE = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.9f);
+  BACKGROUND  = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.2f);
+  DIM         = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.5f);
+  STANDARD    = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.7f);
+  HOVERED     = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.8f);
+  ACTIVE      = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.9f);
 
 }
 

@@ -81,13 +81,12 @@ class COLOR_COMBO
 {
   public:
 
-  ImColor TEXT;
   ImColor BACKGROUND;
+  ImColor DIM;
   ImColor STANDARD;
   ImColor HOVERED;
   ImColor ACTIVE;
-
-  void set(float H, float S, float V);
+  ImColor TEXT;
 
   void set_rgb(float R, float G, float B, float A, float Intensity);
 };
