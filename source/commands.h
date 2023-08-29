@@ -30,8 +30,8 @@ class COMMANDS
 // Commands that can be executed as if from a shell prompt.
 {
   private:
-  //string SHUTDOWN_NOW = "sudo shutdown now";
-  string SHUTDOWN_NOW = "sudo shutdown -h -t 5";
+  string SHUTDOWN_NOW = "sudo shutdown now";
+  //string SHUTDOWN_NOW = "sudo shutdown -h -t 5";
                     //  "sleep 5 && sudo shutdown now &"
 
   string REBOOT = "sudo reboot";

@@ -396,7 +396,6 @@ void BAR_TECH::draw(system_data &sdSysData)
   }
 
   // Draw
-
   ImVec2 pos = ImGui::GetCursorScreenPos();
   ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
 
@@ -422,9 +421,18 @@ void BAR_TECH::draw(system_data &sdSysData)
     {
       min_location = 0;
     }
+    else if (min_location > size.x)
+    {
+      min_location = size.x;
+    }
+
     if (max_location < 0)
     {
       max_location = 0;
+    }
+    else if (max_location > size.x)
+    {
+      max_location = size.x;
     }
 
     draw_list->AddRectFilled(ImVec2(pos.x + min_location, pos.y), 
@@ -440,6 +448,15 @@ void BAR_TECH::draw(system_data &sdSysData)
   
   //float marker_location = abs((VALUE / PROPS.MAX) * (size.x - PROPS.MARKER_SIZE *2));
   float marker_location = abs((VALUE / PROPS.MAX) * size.x +1);
+
+  if (marker_location < 0)
+  {
+    marker_location = 0;
+  }
+  if (marker_location > size.x)
+  {
+    marker_location = size.x;
+  }
 
   draw_list->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE/2, pos.y), 
                             ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE/2 , pos.y + PROPS.BAR_HEIGHT), 

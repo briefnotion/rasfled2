@@ -742,7 +742,7 @@ string AUTOMOBILE_RPM::rpm()
 void AUTOMOBILE_RPM::store_2(int Rpm)
 {
   int val = (Rpm - 49152) * 2;
-  if (val > 0)
+  if (val > 0 && val < 10000)
   {
     VAL_RPM_2 = val;    // Wrong
 

@@ -746,6 +746,56 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.TB_TORQUE.PROPS.MAX = 255;
   SDATA.TB_TORQUE.create();
 
+  SDATA.TB_RPM_G1.PROPS.LABEL = "Tach Gear 1";
+  SDATA.TB_RPM_G1.PROPS.BAR_HEIGHT = 5;
+  SDATA.TB_RPM_G1.PROPS.MARKER_SIZE = 5;
+  SDATA.TB_RPM_G1.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
+  SDATA.TB_RPM_G1.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  SDATA.TB_RPM_G1.PROPS.MAX = 6000;
+  SDATA.TB_RPM_G1.PROPS.DRAW_MIN_MAX = true;
+  SDATA.TB_RPM_G1.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.TB_RPM_G1.create();
+
+  SDATA.TB_RPM_G2.PROPS.LABEL = "Tach Gear 2";
+  SDATA.TB_RPM_G2.PROPS.BAR_HEIGHT = 5;
+  SDATA.TB_RPM_G2.PROPS.MARKER_SIZE = 5;
+  SDATA.TB_RPM_G2.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
+  SDATA.TB_RPM_G2.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  SDATA.TB_RPM_G2.PROPS.MAX = 6000;
+  SDATA.TB_RPM_G2.PROPS.DRAW_MIN_MAX = true;
+  SDATA.TB_RPM_G2.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.TB_RPM_G2.create();
+
+  SDATA.TB_RPM_G3.PROPS.LABEL = "Tach Gear 3";
+  SDATA.TB_RPM_G3.PROPS.BAR_HEIGHT = 5;
+  SDATA.TB_RPM_G3.PROPS.MARKER_SIZE = 5;
+  SDATA.TB_RPM_G3.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
+  SDATA.TB_RPM_G3.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  SDATA.TB_RPM_G3.PROPS.MAX = 6000;
+  SDATA.TB_RPM_G3.PROPS.DRAW_MIN_MAX = true;
+  SDATA.TB_RPM_G3.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.TB_RPM_G3.create();
+
+  SDATA.TB_RPM_G4.PROPS.LABEL = "Tach Gear 4";
+  SDATA.TB_RPM_G4.PROPS.BAR_HEIGHT = 5;
+  SDATA.TB_RPM_G4.PROPS.MARKER_SIZE = 5;
+  SDATA.TB_RPM_G4.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
+  SDATA.TB_RPM_G4.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  SDATA.TB_RPM_G4.PROPS.MAX = 6000;
+  SDATA.TB_RPM_G4.PROPS.DRAW_MIN_MAX = true;
+  SDATA.TB_RPM_G4.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.TB_RPM_G4.create();
+
+  SDATA.TB_RPM_G5.PROPS.LABEL = "Tach Gear 5";
+  SDATA.TB_RPM_G5.PROPS.BAR_HEIGHT = 5;
+  SDATA.TB_RPM_G5.PROPS.MARKER_SIZE = 5;
+  SDATA.TB_RPM_G5.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
+  SDATA.TB_RPM_G5.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  SDATA.TB_RPM_G5.PROPS.MAX = 6000;
+  SDATA.TB_RPM_G5.PROPS.DRAW_MIN_MAX = true;
+  SDATA.TB_RPM_G5.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.TB_RPM_G5.create();
+
   /*
   SDATA.G_TEMP_AMBIANT.PROPS.LABEL = "Ambi";
   SDATA.G_TEMP_AMBIANT.PROPS.VALUE_MAX = 40;
@@ -820,6 +870,12 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
   SDATA.CRUISE_CONTROL_SET = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control();
   SDATA.CRUISE_CONTROL_SPEED = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control_speed();
+
+  if (SDATA.GEAR_VAL != sdSysData.CAR_INFO.STATUS.GEAR.reported())
+  {
+    SDATA.GEAR_VAL = sdSysData.CAR_INFO.STATUS.GEAR.reported();
+    SDATA.GEAR_SWITCH_DELAY.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, 500);
+  }
 
   if (sdSysData.CAR_INFO.STATUS.GEAR.reported() > 0 && sdSysData.CAR_INFO.STATUS.GEAR.reported() < 10)
   {
@@ -1002,6 +1058,27 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.TB_ACCELERATION.update_value(sdSysData, SDATA.ACCELERATION);
   SDATA.TB_RPM.update_value(sdSysData, SDATA.RPM);
   SDATA.TB_TORQUE.update_value(sdSysData, (float)SDATA.TORQUE_DEMANDED);
+  
+  if (SDATA.GEAR_VAL == 1 && SDATA.GEAR_SWITCH_DELAY.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
+  {
+    SDATA.TB_RPM_G1.update_value(sdSysData, SDATA.RPM);
+  }
+  if (SDATA.GEAR_VAL == 2 && SDATA.GEAR_SWITCH_DELAY.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
+  {
+    SDATA.TB_RPM_G2.update_value(sdSysData, SDATA.RPM);
+  } 
+  if (SDATA.GEAR_VAL == 3 && SDATA.GEAR_SWITCH_DELAY.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
+  {
+    SDATA.TB_RPM_G3.update_value(sdSysData, SDATA.RPM);
+  } 
+  if (SDATA.GEAR_VAL == 4 && SDATA.GEAR_SWITCH_DELAY.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
+  {
+    SDATA.TB_RPM_G4.update_value(sdSysData, SDATA.RPM);
+  } 
+  if (SDATA.GEAR_VAL == 5 && SDATA.GEAR_SWITCH_DELAY.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
+  {
+    SDATA.TB_RPM_G5.update_value(sdSysData, SDATA.RPM);
+  } 
 
   /*
   SDATA.G_TEMP_AMBIANT.update_value(sdSysData,  SDATA.TEMP_AMBIANT);
@@ -1040,7 +1117,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
     ImGuiIO &io = ImGui::GetIO();
 
     //const int disp_x = 94;
-    const int disp_y = 130;
+    const int disp_y = 125;
 
     // ---
     // Left Side
@@ -1136,9 +1213,14 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       ImGui::EndChild();
 
       
-      ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, 75), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, 100), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         SDATA.TB_TORQUE.draw(sdSysData);
+        SDATA.TB_RPM_G1.draw(sdSysData);
+        SDATA.TB_RPM_G2.draw(sdSysData);
+        SDATA.TB_RPM_G3.draw(sdSysData);
+        SDATA.TB_RPM_G4.draw(sdSysData);
+        SDATA.TB_RPM_G5.draw(sdSysData);
         SDATA.TB_RPM.draw(sdSysData);
       }
       ImGui::EndChild();
