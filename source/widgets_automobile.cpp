@@ -151,7 +151,7 @@ void W_GUAGE_PLOT::update_value(system_data &sdSysData, int Position, float Valu
     {
       MIN_MAX_PLOT_DATA[Position].add_point(DATA_INPUT_POS, MIN_MAX_DATA[Position].min(), MIN_MAX_DATA[Position].max());
 
-      MIN_MAX_DATA[Position].clear();
+      MIN_MAX_DATA[Position].clear(sdSysData.tmeCURRENT_FRAME_TIME);
 
       boop_ready = true;
     }
@@ -706,6 +706,15 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.D_CRUISE_SPEED.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.D_CRUISE_SPEED.create(sdSysData);
   
+  
+  SDATA.TB_STEERING.PROPS.LABEL = "Steering Wheel";
+  SDATA.TB_STEERING.PROPS.BAR_HEIGHT = 5;
+  SDATA.TB_STEERING.PROPS.MARKER_SIZE = 20;
+  SDATA.TB_STEERING.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
+  SDATA.TB_STEERING.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  SDATA.TB_STEERING.PROPS.MAX = 360;
+  SDATA.TB_STEERING.create();
+
   SDATA.TB_SPEED.PROPS.LABEL = "Speed";
   SDATA.TB_SPEED.PROPS.BAR_HEIGHT = 20;
   SDATA.TB_SPEED.PROPS.MARKER_SIZE = 5;
@@ -907,6 +916,8 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
   // Steering
 
+  SDATA.STEERING_WHEEL_ANGLE_VAL = sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle();
+  SDATA.STEERING_WHEEL_LEFT_OF_CENTER_VAL = sdSysData.CAR_INFO.STATUS.STEERING.val_left_of_center();
   SDATA.STEERING_WHEEL_ANGLE = sdSysData.CAR_INFO.STATUS.STEERING.steering_wheel_angle();
   SDATA.STEERING_WHEEL_LEFT_OF_CENTER = sdSysData.CAR_INFO.STATUS.STEERING.left_of_center();
   SDATA.STEERING_WHEEL_TURNING_DIRECTION = sdSysData.CAR_INFO.STATUS.STEERING.turning_direction();
@@ -1054,6 +1065,15 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
   // Guages
   
+  if (SDATA.STEERING_WHEEL_LEFT_OF_CENTER_VAL)
+  {
+    SDATA.TB_STEERING.update_value(sdSysData, -(SDATA.STEERING_WHEEL_ANGLE_VAL) + 180);
+  }
+  else
+  {
+    SDATA.TB_STEERING.update_value(sdSysData, (SDATA.STEERING_WHEEL_ANGLE_VAL) + 180);
+  }
+
   SDATA.TB_SPEED.update_value(sdSysData, SDATA.SPEED);
   SDATA.TB_ACCELERATION.update_value(sdSysData, SDATA.ACCELERATION);
   SDATA.TB_RPM.update_value(sdSysData, SDATA.RPM);
@@ -1212,9 +1232,9 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       }
       ImGui::EndChild();
 
-      
       ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, 100), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
+        SDATA.TB_STEERING.draw(sdSysData);
         SDATA.TB_TORQUE.draw(sdSysData);
         SDATA.TB_RPM_G1.draw(sdSysData);
         SDATA.TB_RPM_G2.draw(sdSysData);

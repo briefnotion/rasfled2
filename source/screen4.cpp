@@ -283,16 +283,19 @@ void SCREEN4::draw(system_data &sdSysData)
         if (io.KeysDown[i])
         {
           if ((i == 259 || i == ImGuiKey_Backspace) && COMMAND_TEXT.length() > 0)
+          // Check for backspace
           {
             character_pressed = i;
             backspace_pressed = true;
           }
           if ( i == 257 || i == ImGuiKey_Enter || i == ImGuiKey_KeypadEnter)
+          // Check for enter key
           {
             character_pressed = i;
             enter_pressed = true;
           }
           if (i == 340 || i == ImGuiKey_ModShift || i == ImGuiKey_LeftShift || i == ImGuiKey_RightShift)
+          // Check for shift key and characters
           {
             shift_pressed = true;
           }
@@ -341,7 +344,6 @@ void SCREEN4::draw(system_data &sdSysData)
         else if (enter_pressed)
         {
           SCREEN_COMMS.carrage_return_set();
-          COMMAND_TEXT = "";
         }
       }
       else if (character_pressed == 0)

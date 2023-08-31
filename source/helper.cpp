@@ -472,8 +472,14 @@ bool BOOL_BOUNCE::bounce()
 // ---------------------------------------------------------------------------------------
 // Min Max Time Classes
 
-void MIN_MAX_TIME_SLICE::clear()
+unsigned long MIN_MAX_TIME_SLICE::time_created()
 {
+  return TIME_CREATED;
+}
+
+void MIN_MAX_TIME_SLICE::clear(unsigned long tmeFrame_Time)
+{
+  TIME_CREATED = tmeFrame_Time;
   ACTIVE = false;
   VALUE = 0;
   SAMPLES = 0;
@@ -548,6 +554,22 @@ void MIN_MAX_TIME::create()
   }
 }
 
+void MIN_MAX_TIME::remove_old_expired_frames(unsigned long tmeFrame_Time)
+{
+  if (PROP.SAMPLE_LIMITED_SPANS == false)
+  {
+    if (old_expired_frames_check_time != tmeFrame_Time)
+    {
+      while(TIME_SLICES.empty() == false && // Not sure this routine will always pass.
+            TIME_SLICES.front().time_created() + PROP.TIME_SPAN < tmeFrame_Time)
+      {
+        TIME_SLICES.pop_front();
+      }
+      old_expired_frames_check_time = tmeFrame_Time;
+    }
+  }
+}
+
 int MIN_MAX_TIME::slice_size()
 {
   return TIME_SLICES.size();
@@ -564,6 +586,7 @@ void MIN_MAX_TIME::put_value(float Value, unsigned long tmeFrame_Time)
   if (TIME_SLICES.size() == 0)
   {
     MIN_MAX_TIME_SLICE new_time_slice;
+    new_time_slice.clear(tmeFrame_Time);
     TIME_SLICES.push_back(new_time_slice);
     ENABLED = true;
     
@@ -580,6 +603,7 @@ void MIN_MAX_TIME::put_value(float Value, unsigned long tmeFrame_Time)
         // New slice needed and max num reached. pop top and create new in back.
         TIME_SLICES.pop_front();
         MIN_MAX_TIME_SLICE new_time_slice;
+        new_time_slice.clear(tmeFrame_Time);
         create();
         TIME_SLICES.push_back(new_time_slice);
       }
@@ -587,12 +611,16 @@ void MIN_MAX_TIME::put_value(float Value, unsigned long tmeFrame_Time)
       {
         // New slice needed and max num not reached. create new in back.
         MIN_MAX_TIME_SLICE new_time_slice;
+        new_time_slice.clear(tmeFrame_Time);
         create();
         TIME_SLICES.push_back(new_time_slice);
       }
 
       TIME_SLICE_CREATED_FRAME_TIME = tmeFrame_Time;  
     }
+
+    remove_old_expired_frames(tmeFrame_Time);
+
   }
   else
   {
@@ -602,12 +630,14 @@ void MIN_MAX_TIME::put_value(float Value, unsigned long tmeFrame_Time)
       if (TIME_SLICES.size() < PROP.SLICES)
       {
         MIN_MAX_TIME_SLICE new_time_slice;
+        new_time_slice.clear(tmeFrame_Time);
         TIME_SLICES.push_back(new_time_slice);
       }
       else
       {
         TIME_SLICES.pop_front();
         MIN_MAX_TIME_SLICE new_time_slice;
+        new_time_slice.clear(tmeFrame_Time);
         TIME_SLICES.push_back(new_time_slice);
       }
       

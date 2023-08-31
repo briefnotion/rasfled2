@@ -40,7 +40,7 @@ void command_desc(CONSOLE_COMMUNICATION &cons, string strDescription)
 void consoleprinthelp(CONSOLE_COMMUNICATION &cons)
 {
   cons.printw("");
-  cons.printw("HELP SCREEN ------------");
+  cons.printw("HELP SCREEN -------------------------------");
   cons.printw("");
   cons.printw("'X' or 'exit' - Safely exits the RasFLED.");
   cons.printw("' restart'    - Restart RasFLED.");
@@ -74,6 +74,26 @@ void consoleprinthelp(CONSOLE_COMMUNICATION &cons)
   cons.printw("'\' - Turn on and off diagnosis mode.");
   cons.printw("t - Cycle Strips  c - Test LEDs   a - not specified");
   cons.printw("");
+
+  cons.printw("SERIAL PORT COMMANDS ----------------------");
+  cons.printw("");
+  cons.printw("' commo' - Start Serial Communications Recording");
+  cons.printw("' commf' - Start Serial Communications Recording");
+  cons.printw("");
+  cons.printw("']]' - Flash Recording. Store most recent communications");
+  cons.printw("");
+  cons.printw("Commands are sent to the serial port by preceeding with 'q'");
+  cons.printw("    Format: 'qXYZ' + ENTER - send 'XYZ' to serial");
+  cons.printw("");
+  cons.printw("'qp' - Toggle pause and unpause communications");
+  cons.printw("'qt' - Toggle test data");
+  cons.printw("'qf' - Toggle send only KNOWN PIDs or ALL PIDs");
+  cons.printw("");
+  cons.printw("'qv3' - Swithch to v3 system");
+  cons.printw("'qv4' - Swithch to v4 system");
+  cons.printw("");
+  cons.printw("PID are sent in same format if prepared");
+  cons.printw("  e.g. 'q0B' for 'PID_INTAKE_MANIFOLD_ABS_PRESSURE request'");
 }
 
 // Display all running events.
@@ -300,9 +320,6 @@ void process_slow_commands(CONSOLE_COMMUNICATION &cons, system_data &sdSysData,
         sdSysData.COMMS.send(comm_command);
       }
     }
-    
-    cons.command_text_clear();
-
   }
 
 // Process and call routines as entered on the command line.
@@ -318,6 +335,9 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
     if (cons.carrage_return_get() == true)
     {
       process_slow_commands(cons, sdSysData, tmeCurrentTime, Animations);
+
+      // Clear field regardless of command sent
+      cons.command_text_clear();
     }
     else
     {

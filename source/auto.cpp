@@ -721,7 +721,7 @@ bool AUTOMOBILE_RPM::available()
 void AUTOMOBILE_RPM::store(int Rpm)
 {
   int val = (Rpm - 24576) * 2;
-  if (Rpm > 0)
+  if (val > 0 && val < 10000)
   {
     VAL_RPM = val;    // Wrong
 

@@ -252,8 +252,20 @@ class ADSB_WIDGET
 
 // ---------------------------------------------------------------------------------------
 
+class DISPLAY_DATA_ADSB
+{
+  public:
 
-// ---------------------------------------------------------------------------------------
+  bool ADSB_ACTIVE = false;
+
+  AIRCRAFT_DATA AIRCRAFT_LIST;
+
+  int ADSB_WIDGET_Count = 0;
+
+  string TIME_OF_SIGNAL = "";
+  string POSITIONED_COUNT = "";
+  string POSITIONED_AIRCRAFT = "";
+};
 
 class ADSB_RANGE_Properties
 {
@@ -325,25 +337,8 @@ class ADSB_MAP
 
   void create(system_data &sdSysData);
 
-  void draw(system_data &sdSysData, deque<ADSB_WIDGET> &ADSB_Widgets);
+  void draw(system_data &sdSysData,   DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets);
 
-};
-
-// ---------------------------------------------------------------------------------------
-
-class DISPLAY_DATA_ADSB
-{
-  public:
-
-  bool ADSB_ACTIVE = false;
-
-  AIRCRAFT_DATA AIRCRAFT_LIST;
-
-  int ADSB_WIDGET_Count = 0;
-
-  string TIME_OF_SIGNAL = "";
-  string POSITIONED_COUNT = "";
-  string POSITIONED_AIRCRAFT = "";
 };
 
 // ---------------------------------------------------------------------------------------

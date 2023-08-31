@@ -49,6 +49,7 @@ void COLOR_COMBOS::init(float Intensity)
 void CONSOLE_COMMUNICATION::carrage_return_set()
 {
   CARRAGE_RETURN = true;
+  CHANGED = true;
 }
 
 bool CONSOLE_COMMUNICATION::carrage_return_get()
@@ -95,6 +96,7 @@ string CONSOLE_COMMUNICATION::command_text_get()
 void CONSOLE_COMMUNICATION::command_text_clear()
 {
   COMMAND_TEXT = "";
+  CARRAGE_RETURN = false;
   CHANGED = false;
   COMMAND_TEXT_CLEAR = true;
 }

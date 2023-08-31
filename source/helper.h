@@ -300,6 +300,7 @@ class MIN_MAX_TIME_SLICE
 {
   private:
 
+  unsigned long TIME_CREATED;
   bool ACTIVE = false;
   float VALUE = 0;
   int SAMPLES = 0;
@@ -310,7 +311,9 @@ class MIN_MAX_TIME_SLICE
 
   public:
 
-  void clear();
+  unsigned long time_created();
+
+  void clear(unsigned long tmeFrame_Time);
   // Resets value to be used again as new.
 
   void store_value(float Value);
@@ -371,6 +374,10 @@ class MIN_MAX_TIME
   unsigned long TIME_SLICE_CREATED_FRAME_TIME = 0;
 
   void create();
+
+  unsigned long old_expired_frames_check_time = 0;
+
+  void remove_old_expired_frames(unsigned long tmeFrame_Time);
 
   public:
 

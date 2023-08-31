@@ -962,9 +962,10 @@ bool ADSB_WIDGET::active()
   return WIDGET_ACTIVE;
 }
 
+// Draw all aircraft onto the maps.
 void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon)
 {
-  if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true)
+  if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.size() > 1)
   {
     bool draw = false;
     ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon,
@@ -972,22 +973,26 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
                                                           AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value()), 
                                                           draw);
     
-    if (draw)
+    //if (draw)
     {
       // Draw track first then overlay aircraft.
       if (TRACK.size() > 1)
       {
+        bool draw_0 = false;
+        bool draw_1 = false;
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
         ImVec2 track_position_0;
-        ImVec2 track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[0].LAT_LON, draw);
+        ImVec2 track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[0].LAT_LON, draw_1);
         
         for(int position = 1; position < TRACK.size(); position++)
         {
           track_position_0 = track_position_1;
-          track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[position].LAT_LON, draw);
+          draw_0 = draw_1;
 
-          if (draw)
+          track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[position].LAT_LON, draw_1);
+
+          if (draw_0 || draw_1)
           {
             ImColor point_color = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.TEXT;
 
@@ -1211,7 +1216,7 @@ void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
 
 void ADSB_RANGE::draw_info(system_data &sdSysData)
 {
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREY.TEXT));
   ImGui::Text("lat: %f", CURRENT_LAT_LON.x);
   ImGui::Text("lon: %f", CURRENT_LAT_LON.y);
   ImGui::Text("rng: %.0f", RANGE);
@@ -1525,7 +1530,7 @@ void ADSB_MAP::create(system_data &sdSysData)
   //add_landmark(ImVec2(f, f), "", 0);  //
 }
 
-void ADSB_MAP::draw(system_data &sdSysData, deque<ADSB_WIDGET> &ADSB_Widgets)
+void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets)
 {
   // working area, xy start position; zw, size.
   //    or
@@ -1540,37 +1545,48 @@ void ADSB_MAP::draw(system_data &sdSysData, deque<ADSB_WIDGET> &ADSB_Widgets)
 
   // -------------------------------------------------------------------------------------
   // All Text Below Here
-  //ImGui::Text("%s", SDATA.TIME_OF_SIGNAL.c_str());
-  //ImGui::Text("Positions: %s", SDATA.POSITIONED_AIRCRAFT.c_str());
+
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_RED.TEXT));
+  ImGui::Text("WARNING: Information may be considered CONFIDENTIAL");
+  ImGui::PopStyleColor();
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREY.TEXT));
+  ImGui::Text("Time: %s", 
+                SDATA.TIME_OF_SIGNAL.c_str());
+  ImGui::Text("Count: %s  Pos: %s",
+                SDATA.POSITIONED_COUNT.c_str(), 
+                SDATA.POSITIONED_AIRCRAFT.c_str());
+  ImGui::PopStyleColor();
+
+  // Range Indicator
+  RANGE_INDICATOR.draw_info(sdSysData);
 
   // Buttons
+  ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y + working_area.w - (3 * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL.y + 5))));
+  
   if (button_simple_color(sdSysData, "LOC", sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
   {
     DISPLAY_LOCATION = !DISPLAY_LOCATION;
   }
   
-  ImGui::SameLine();
-
-  if (button_simple_color(sdSysData, "-", sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
-  {
-    RANGE_INDICATOR.zoom_in();
-  }
-
-  ImGui::SameLine();
+  //ImGui::SameLine();
 
   if (button_simple_color(sdSysData, "+", sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
   {
     RANGE_INDICATOR.zoom_out();
   }
 
-  ImGui::SameLine();
+  //ImGui::SameLine();
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
-  ImGui::Text("WARNING: Information may be considered CONFIDENTIAL");
-  ImGui::PopStyleColor();
+  if (button_simple_color(sdSysData, "-", sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+  {
+    RANGE_INDICATOR.zoom_in();
+  }
 
-  // Range Indicator
-  RANGE_INDICATOR.draw_info(sdSysData);
+  //ImGui::SameLine();
+
+
+
+
 
   // All Text Above Here
   // -------------------------------------------------------------------------------------
@@ -1875,7 +1891,7 @@ void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_
   {
     ImGui::BeginChild("ADSB Map", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
     {
-      ADSB_MAP_DISPLAY.draw(sdSysData, ADSB_WIDGET_q);
+      ADSB_MAP_DISPLAY.draw(sdSysData, SDATA, ADSB_WIDGET_q);
     }
     ImGui::EndChild();
   }
