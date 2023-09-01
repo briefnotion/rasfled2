@@ -164,6 +164,7 @@ class W_GUAGE_PLOT
 };
 
 // ---------------------------------------------------------------------------------------
+
 class T_LARGE_NUMBER_DISPLAY_PROPERTIES
 {
   public:
@@ -191,9 +192,17 @@ class T_LARGE_NUMBER_DISPLAY
   float VALUE = 0;
   float VALUE_COMPARE = 0;
 
+  // Impact Reduction
+  float VALUE_PREVIOUS_1 = 0;
+  float VALUE_PREVIOUS_2 = 0;
+  float VALUE_FALSE_TO_DISPLAY = 0;
+
   string VALUE_TEXT = ""; 
 
   MIN_MAX_TIME MIN_MAX;
+
+  void draw_scroll_num(float Value);
+  // only for 2 digit numbers
 
   public:
 
@@ -400,6 +409,10 @@ class DISPLAY_DATA_AUTOMOBILE
   T_LARGE_NUMBER_DISPLAY L_VOLTAGE_SB;
   T_LARGE_NUMBER_DISPLAY L_S_TEMP_SB;
 
+  float test = 0;
+  
+  float test2 = 0;
+
   // Display Data
 
   T_DATA_DISPLAY D_FUEL_RAIL_PRESSURE;
@@ -441,11 +454,11 @@ class DISPLAY_DATA_AUTOMOBILE
   BAR_TECH TB_TORQUE;
   
   TIMED_PING GEAR_SWITCH_DELAY;
-  BAR_TECH TB_RPM_G1;
-  BAR_TECH TB_RPM_G2;
-  BAR_TECH TB_RPM_G3;
-  BAR_TECH TB_RPM_G4;
-  BAR_TECH TB_RPM_G5;
+  //BAR_TECH TB_RPM_G1;
+  //BAR_TECH TB_RPM_G2;
+  //BAR_TECH TB_RPM_G3;
+  //BAR_TECH TB_RPM_G4;
+  //BAR_TECH TB_RPM_G5;
 
   /*
   W_GUAGE G_TEMP_AMBIANT;

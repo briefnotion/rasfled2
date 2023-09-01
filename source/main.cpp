@@ -885,7 +885,15 @@ int loop_2(bool TTY_Only)
       processcommandlineinput(cons_2.SCREEN_COMMS, sdSystem, tmeCurrentMillis, animations);
       extraanimationdoorcheck2(cons_2.SCREEN_COMMS, sdSystem, tmeCurrentMillis, animations);
       
-    } // Is Keyboard or Mouse read ready -----------------
+      // Also delayed, File maintenance.
+      if (sdSystem.booRunning_State_File_Dirty == true)
+      {
+        save_running_state_json(cons_2.SCREEN_COMMS, sdSystem, Running_State_Filename);
+
+        // set false even if there was a save error to avoid repeats.
+        sdSystem.booRunning_State_File_Dirty = false;
+      }
+    }
 
     // Is display to console ready -----------------
     if (display.is_ready(tmeCurrentMillis) == true)
@@ -897,6 +905,29 @@ int loop_2(bool TTY_Only)
       //  the buffer. 
       //  Only start a thread and pause future screen updateas if the buffer contains a movie 
       //  frame to be displayed.
+
+
+      // !!! TESTING ONLY !!!
+
+      // Variable Redraw Rates
+      // 60 - 15 fps
+      // 30 - 30 fps
+      // 15 - 60 fps
+
+      if (sdSystem.hsHardware_Status.get_temperature() < 50)
+      {
+        display.set(15);  // Cant reach these speeds until I find the cap.
+      }
+      else if (sdSystem.hsHardware_Status.get_temperature() < 60)
+      {
+        display.set(30);
+      }
+      else
+      {
+        display.set(60);
+      }
+      // !!! TESTING ONLY !!!
+
       {
         // Refresh console data storeage from main program. This will be a pass through buffer. 
         // so the console will not have to access any real data. 
@@ -943,26 +974,7 @@ int loop_2(bool TTY_Only)
         }
         */
       }
-      
-      // Also delayed, File maintenance.
-      if (sdSystem.booRunning_State_File_Dirty == true)
-      {
-        save_running_state_json(cons_2.SCREEN_COMMS, sdSystem, Running_State_Filename);
-
-        // set false even if there was a save error to avoid repeats.
-        sdSystem.booRunning_State_File_Dirty = false;
-      }
     } // Is display to console ready -----------------
-
-
-    /*
-    //****************************
-    // Temporary Graphics Render Location
-
-    cons_2.draw(sdSystem);
-
-    //****************************
-    */
 
     // ________________________
     

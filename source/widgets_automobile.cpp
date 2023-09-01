@@ -232,7 +232,140 @@ void W_GUAGE_PLOT::draw(system_data &sdSysData, ImVec2 Size)
 }
 
 // -------------------------------------------------------------------------------------
+
+void T_LARGE_NUMBER_DISPLAY::draw_scroll_num(float Value)
+{
+  Value = abs(Value);
+
+  // Number Positions
+  ImVec2 pos1 = ImGui::GetCursorScreenPos();
+  //pos1.y = pos1.y + 10;
+  ImVec2 pos2 = ImVec2(pos1.x + 30, pos1.y);
+
+  //ImVec2(94, 75)
+
+  // Gradiant Positions
+  ImVec2 pos_grad_top_1 = ImVec2(pos1.x, pos1.y - 12);
+  ImVec2 pos_grad_top_2 = ImVec2(pos_grad_top_1.x + 60, pos_grad_top_1.y + 25);
+  ImVec2 pos_grad_bot_1 = ImVec2(pos_grad_top_1.x, pos_grad_top_1.y + 53);
+  ImVec2 pos_grad_bot_2 = ImVec2(pos_grad_top_2.x, pos_grad_top_2.y + 53);
+
+  int value_tens = (int)(Value) / 10;
+  int value_ones = (int)(Value) - value_tens * 10;
+
+  int value_ones_p2 = 0;
+  int value_ones_p1 = 0;
+  int value_ones_m1 = 0;
+
+  int value_tens_p2 = 0;
+  int value_tens_p1 = 0;
+  int value_tens_m1 = 0;
+
+  {
+    // Ones
+    if (value_ones < 9)
+    {
+      value_ones_p1 = value_ones + 1;
+    }
+    else
+    {
+      value_ones_p1 = 0;
+    }
+
+    if (value_ones_p1 < 9)
+    {
+      value_ones_p2 = value_ones_p1 + 1;
+    }
+    else
+    {
+      value_ones_p2 = 0;
+    }
+
+    if (value_ones > 0)
+    {
+      value_ones_m1 = value_ones - 1;
+    }
+    else
+    {
+      value_ones_m1 = 9;
+    }
+
+    // Tens
+    if (value_tens < 9)
+    {
+      value_tens_p1 = value_tens + 1;
+    }
+    else
+    {
+      value_tens_p1 = 0;
+    }
+
+    if (value_tens_p1 < 9)
+    {
+      value_tens_p2 = value_tens_p1 + 1;
+    }
+    else
+    {
+      value_tens_p2 = 0;
+    }
+
+    if (value_tens > 0)
+    {
+      value_tens_m1 = value_tens - 1;
+    }
+    else
+    {
+      value_tens_m1 = 9;
+    }
+  }
+
+  // Offsets
+  float offset_y = ((Value) - (int)(Value)) * 40.0f;
+  //float offset_y_tens = (((Value) / 10) - (int)((Value) / 10)) * 40.0f;
+  float offset_y_tens = 0;
+  if (value_ones == 9)
+  {
+    offset_y_tens = offset_y_tens + offset_y;
+  }
+
+  // Display
+  ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens - 80.0f));
+  ImGui::Text("%d", value_tens_p2);
+
+  ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens - 40.0f));
+  ImGui::Text("%d", value_tens_p1);
+
+  ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens));
+  ImGui::Text("%d", value_tens);
+
+  ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens + 40.0f));
+  ImGui::Text("%d", value_tens_m1);
   
+  // Ones
+  ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y - 80.0f));
+  ImGui::Text("%d", value_ones_p2);
+
+  ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y - 40.0f));
+  ImGui::Text("%d", value_ones_p1);
+
+  ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y));
+  ImGui::Text("%d", value_ones);
+
+  ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y + 40.0f));
+  ImGui::Text("%d", value_ones_m1);
+
+  // Mask Top Bot
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+  ImU32 col_a = ImGui::GetColorU32(IM_COL32(0, 0, 0, 255));
+  ImU32 col_b = ImGui::GetColorU32(IM_COL32(0, 0, 0, 0));
+  // Test Gradiants
+  //ImU32 col_a = ImGui::GetColorU32(IM_COL32(0, 255, 0, 255));
+  //ImU32 col_b = ImGui::GetColorU32(IM_COL32(0, 0, 255, 255));
+  
+  draw_list->AddRectFilledMultiColor(pos_grad_top_1, pos_grad_top_2, col_a, col_a, col_b, col_b);
+  draw_list->AddRectFilledMultiColor(pos_grad_bot_1, pos_grad_bot_2, col_b, col_b, col_a, col_a);
+}
+
 void T_LARGE_NUMBER_DISPLAY::create()
 {
   MIN_MAX.PROP.TIME_SPAN = PROPS.MIN_MAX_TIME_SPAN;
@@ -241,11 +374,18 @@ void T_LARGE_NUMBER_DISPLAY::create()
 
 void T_LARGE_NUMBER_DISPLAY::update_value(system_data &sdSysData, float Value, float Compare_Value, bool Is_Within)
 {
+  // Impact Reduction
+  VALUE_PREVIOUS_2 = VALUE_PREVIOUS_1;
+  VALUE_PREVIOUS_1 = VALUE;
+
   MIN_MAX.put_value(Value, sdSysData.tmeCURRENT_FRAME_TIME);
   VALUE = Value;
   VALUE_COMPARE = Compare_Value;
   IS_TEXT = false;
   ACTIVE_WITHIN = Is_Within;
+
+  // Impact Reduction
+  VALUE_FALSE_TO_DISPLAY = (VALUE_PREVIOUS_2 + VALUE_PREVIOUS_1 + VALUE) / 3;
 }
 
 void T_LARGE_NUMBER_DISPLAY::update_value(system_data &sdSysData, float Value)
@@ -263,120 +403,144 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
 {
   ImGuiIO &io = ImGui::GetIO();
 
-  if (PROPS.LABEL_ON_LEFT == true)
-  {
-    ImGui::TextUnformatted(PROPS.LABEL.c_str());
-    ImGui::SameLine();
-  }
-
-  //---
+  ImGui::BeginChild(PROPS.LABEL.c_str(), ImVec2(94, 75), false, sdSysData.SCREEN_DEFAULTS.flags_c);
 
   ImVec2 pos = ImGui::GetCursorScreenPos();
 
-  //---
-  ImGui::PushFont(io.Fonts->Fonts.Data[1]);
-
-  // Draw Compare Number
-  if (VALUE_COMPARE >= 0 && !IS_TEXT)
   {
-    if (ACTIVE_WITHIN == true)
+    if (PROPS.LABEL_ON_LEFT == true)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD));
+      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
+      ImGui::TextUnformatted(PROPS.LABEL.c_str());
+      pos.x = pos.x + 10;
+    }
+
+    //---
+
+    //---
+    // Draw Large Display
+    ImGui::PushFont(io.Fonts->Fonts.Data[1]);
+
+    // Draw Compare Number
+    if (VALUE_COMPARE >= 0 && !IS_TEXT)
+    {
+      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
+
+      if (ACTIVE_WITHIN == true)
+      {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD));
+      }
+      else
+      {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD));
+      }
+
+      ImGui::Text("%2d", (int)VALUE_COMPARE);
+      ImGui::PopStyleColor();
+      
+      //ImGui::SetCursorScreenPos(pos);
+    }
+
+    // Draw Value
+    if (IS_TEXT)
+    {
+      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
+
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+      ImGui::Text("%s", VALUE_TEXT.c_str());
+      ImGui::PopStyleColor();
+    }
+    else if (VALUE < 100)
+    {
+      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
+
+      if (ACTIVE_WITHIN == true)
+      {
+        // If cruise is on change the color
+        if (is_within(VALUE, VALUE_COMPARE - PROPS.WITHIN_VALUE, VALUE_COMPARE + PROPS.WITHIN_VALUE) == true)
+        {
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.TEXT));
+        }
+        else
+        {
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT));
+        }
+        //ImGui::Text("%2d", (int)VALUE);
+        draw_scroll_num(VALUE_FALSE_TO_DISPLAY);
+
+        ImGui::PopStyleColor();
+      }
+      else if (VALUE <= -1)
+      {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT));
+        //ImGui::Text("%2d", abs((int)VALUE));
+        draw_scroll_num(VALUE_FALSE_TO_DISPLAY);
+        ImGui::PopStyleColor();
+      }
+      else  // Cruis is off, print the text.
+      {
+        if (PROPS.COLOR_SCALE.active())
+        {
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR_SCALE.get_color(VALUE).TEXT));
+        }
+        else
+        {
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+        }
+        //ImGui::Text("%2d", (int)VALUE);
+        draw_scroll_num(VALUE_FALSE_TO_DISPLAY);
+        ImGui::PopStyleColor();
+      }
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD));
-    }
+      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
 
-    ImGui::Text("%2d", (int)VALUE_COMPARE);
-    ImGui::PopStyleColor();
-    
-    ImGui::SetCursorScreenPos(pos);
-  }
-
-  // Draw Value
-  if (IS_TEXT)
-  {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
-    ImGui::Text("%s", VALUE_TEXT.c_str());
-    ImGui::PopStyleColor();
-  }
-  else if (VALUE < 100)
-  {
-    if (ACTIVE_WITHIN == true)
-    {
-      // If cruise is on change the color
-      if (is_within(VALUE, VALUE_COMPARE - PROPS.WITHIN_VALUE, VALUE_COMPARE + PROPS.WITHIN_VALUE) == true)
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.TEXT));
-      }
-      else
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT));
-      }
-      ImGui::Text("%2d", (int)VALUE);
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_RED.TEXT));
+      ImGui::Text(">>");
       ImGui::PopStyleColor();
     }
-    else if (VALUE <= -1)
+
+    ImGui::PopFont();
+
+    //---
+
+    if (PROPS.LABEL_ON_LEFT == false)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT));
-      ImGui::Text("%2d", abs((int)VALUE));
+      ImGui::SameLine();
+      ImGui::TextUnformatted(PROPS.LABEL.c_str());
+    }
+
+    if (PROPS.DISPLAY_MIN_MAX)
+    {
+      string min = "";
+      string max = "";
+      min = right_justify(2, to_string(abs(MIN_MAX.min())));
+      max = right_justify(2, to_string(abs(MIN_MAX.max())));
+
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREY.TEXT));
+      
+      //pos.y = pos.y + 47;
+      ImGui::SetCursorScreenPos(ImVec2(pos.x + 53, pos.y - 0));
+
+      ImGui::Text("%s", min.c_str());
+
+      ImGui::SetCursorScreenPos(ImVec2(pos.x + 53, pos.y + 53));
+      
+      ImGui::Text("%s", max.c_str());
+      
       ImGui::PopStyleColor();
     }
-    else  // Cruis is off, print the text.
+    else
     {
-      if (PROPS.COLOR_SCALE.active())
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR_SCALE.get_color(VALUE).TEXT));
-      }
-      else
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
-      }
-      ImGui::Text("%2d", (int)VALUE);
-      ImGui::PopStyleColor();
+      ImGui::Text("      ");
     }
-  }
-  else
-  {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_RED.TEXT));
-    ImGui::Text(">>");
-    ImGui::PopStyleColor();
+
+    //pos = ImGui::GetCursorScreenPos();
+    //pos.y = pos.y - 6; 
   }
 
-  ImGui::PopFont();
-
-  //---
-
-  if (PROPS.LABEL_ON_LEFT == false)
-  {
-    ImGui::SameLine();
-    ImGui::TextUnformatted(PROPS.LABEL.c_str());
-  }
-
-  pos.y = pos.y + 47;
-  ImGui::SetCursorScreenPos(pos);
-
-  if (PROPS.DISPLAY_MIN_MAX)
-  {
-    string min = "";
-    string max = "";
-    min = right_justify(2, to_string(abs(MIN_MAX.min())));
-    max = right_justify(2, to_string(abs(MIN_MAX.max())));
-
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREY.TEXT));
-    
-    ImGui::Text("%s  %s", min.c_str(), max.c_str());
-    
-    ImGui::PopStyleColor();
-  }
-  else
-  {
-    ImGui::Text("      ");
-  }
-
-  pos = ImGui::GetCursorScreenPos();
-  pos.y = pos.y - 6; 
+  ImGui::EndChild();
 }
 
 // -------------------------------------------------------------------------------------
@@ -755,6 +919,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.TB_TORQUE.PROPS.MAX = 255;
   SDATA.TB_TORQUE.create();
 
+  /*  Doesnt work as expected
   SDATA.TB_RPM_G1.PROPS.LABEL = "Tach Gear 1";
   SDATA.TB_RPM_G1.PROPS.BAR_HEIGHT = 5;
   SDATA.TB_RPM_G1.PROPS.MARKER_SIZE = 5;
@@ -804,6 +969,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.TB_RPM_G5.PROPS.DRAW_MIN_MAX = true;
   SDATA.TB_RPM_G5.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
   SDATA.TB_RPM_G5.create();
+  */
 
   /*
   SDATA.G_TEMP_AMBIANT.PROPS.LABEL = "Ambi";
@@ -994,7 +1160,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.L_SPEED_SB.update_value(sdSysData, SDATA.SPEED, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
   SDATA.L_ACCELERATION_SB.update_value(sdSysData, 10 * SDATA.ACCELERATION);
   SDATA.L_GEAR_SB.update_value(sdSysData, (SDATA.GEAR_SELECTION.c_str() + SDATA.GEAR));
-  SDATA.L_TACH_SB.update_value(sdSysData, SDATA.RPM / 100);
+  SDATA.L_TACH_SB.update_value(sdSysData, (float)SDATA.RPM / 100.0f);
   SDATA.L_VOLTAGE_SB.update_value(sdSysData, SDATA.VOLTAGE_VAL);
   SDATA.L_S_TEMP_SB.update_value(sdSysData, SDATA.TEMP_S_TEMP);
 
@@ -1079,6 +1245,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.TB_RPM.update_value(sdSysData, SDATA.RPM);
   SDATA.TB_TORQUE.update_value(sdSysData, (float)SDATA.TORQUE_DEMANDED);
   
+  /*
   if (SDATA.GEAR_VAL == 1 && SDATA.GEAR_SWITCH_DELAY.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
   {
     SDATA.TB_RPM_G1.update_value(sdSysData, SDATA.RPM);
@@ -1098,7 +1265,8 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   if (SDATA.GEAR_VAL == 5 && SDATA.GEAR_SWITCH_DELAY.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
   {
     SDATA.TB_RPM_G5.update_value(sdSysData, SDATA.RPM);
-  } 
+  }
+  */
 
   /*
   SDATA.G_TEMP_AMBIANT.update_value(sdSysData,  SDATA.TEMP_AMBIANT);
@@ -1232,15 +1400,17 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       }
       ImGui::EndChild();
 
-      ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, 100), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, 75), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         SDATA.TB_STEERING.draw(sdSysData);
         SDATA.TB_TORQUE.draw(sdSysData);
+        /*
         SDATA.TB_RPM_G1.draw(sdSysData);
         SDATA.TB_RPM_G2.draw(sdSysData);
         SDATA.TB_RPM_G3.draw(sdSysData);
         SDATA.TB_RPM_G4.draw(sdSysData);
         SDATA.TB_RPM_G5.draw(sdSysData);
+        */
         SDATA.TB_RPM.draw(sdSysData);
       }
       ImGui::EndChild();

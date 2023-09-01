@@ -121,6 +121,7 @@ int SCREEN4::create(system_data &sdSysData)
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
+    //glfwSwapInterval(0); // No Cap Frame Rate
 
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
