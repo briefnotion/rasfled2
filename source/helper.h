@@ -13,6 +13,7 @@
 #define HELPER_H
 
 #include <deque>
+#include <vector>
 #include <string>
 #include <math.h>
 #include <chrono>
@@ -354,8 +355,6 @@ class MIN_MAX_TIME_PROPERTIES
   int SAMPLE_LIMIT = 50;
 };
 
-// ---------------------------------------------------------------------------------------
-
 class MIN_MAX_TIME
 // Contains list of min max time slices.
 // Note:
@@ -420,6 +419,40 @@ class MIN_MAX_TIME
   //  Returns 0 if value is relatively (DIRECTION_NUTRAL_RANGE) the same. 
   //  Returns 1 if value is increasing.
 };
+
+// ---------------------------------------------------------------------------------------
+// Impact Resistance
+
+class IMPACT_RESISTANCE_FLOAT
+// Floating Point varibale designed to average out the previos X entries into one
+//  value.  For fast and sparatic values.
+{
+  private:
+
+  float VALUE = -1;
+
+  int SIZE = 3;
+  vector<float> VALUE_COLLECTION;
+
+  bool first_run = true;
+
+  int STORE_POSITION = 0;
+
+  public:
+
+  void set_size(int Size);
+
+  void set_value(float Value);
+
+  float latest();
+
+  float impact();
+
+};
+
+// ---------------------------------------------------------------------------------------
+
+
 
 // ***************************************************************************************
 // FUNCTION AND PROCEDURES

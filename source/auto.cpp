@@ -56,72 +56,46 @@ bool check_availability(bool Coded_Availability, bool Source_Availabilty)
 
 void VELOCITY::store(float kmph, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  KMPH = kmph;  
-
-  MPH = velocity_translate_kmph_to_mph(KMPH);
-  METERS_PER_SECOND = velocity_translate_kmph_to_meters_per_second(KMPH);
-
-  KMPH_DISP = to_string_round_to_nth(KMPH, 2);
-  MPH_DISP = to_string_round_to_nth(MPH, 2);
-
+  KMPH.set_value(kmph);  
   TIME_STAMP_TIME_SENT = tmeFrame_Time_Sent;
-
   TIME_STAMP = tmeFrame_Time;
 }
 
 void VELOCITY::store_meters_per_second(float mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  METERS_PER_SECOND = mps;
-
-  KMPH = velocity_translate_meters_per_second_to_kmph(mps);  
-  MPH = velocity_translate_kmph_to_mph(KMPH);
-
-  KMPH_DISP = to_string_round_to_nth(KMPH, 2);
-  MPH_DISP = to_string_round_to_nth(MPH, 2);
-
+  KMPH.set_value(velocity_translate_meters_per_second_to_kmph(mps));
   TIME_STAMP_TIME_SENT = tmeFrame_Time_Sent;
-
-  TIME_STAMP = tmeFrame_Time;
-}
-
-void VELOCITY::store_miles_per_hour(float Miph, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
-{
-  METERS_PER_SECOND = velocity_translate_Miph_to_mps(Miph);
-
-  KMPH = velocity_translate_meters_per_second_to_kmph(METERS_PER_SECOND);  
-  MPH = velocity_translate_kmph_to_mph(KMPH);
-
-  KMPH_DISP = to_string_round_to_nth(KMPH, 2);
-  MPH_DISP = to_string_round_to_nth(MPH, 2);
-
-  TIME_STAMP_TIME_SENT = tmeFrame_Time_Sent;
-
   TIME_STAMP = tmeFrame_Time;
 }
 
 float VELOCITY::val_kmph()
 {
-  return KMPH;
+  return KMPH.latest();
 }
 
 float VELOCITY::val_meters_per_second()
 {
-  return METERS_PER_SECOND;
+  return velocity_translate_kmph_to_meters_per_second(KMPH.latest());
 }
 
 float VELOCITY::val_mph()
 {
-  return MPH;
+  return velocity_translate_kmph_to_mph(KMPH.latest());
+}
+
+float VELOCITY::val_mph_impres()
+{
+  return velocity_translate_kmph_to_mph(KMPH.impact());
 }
 
 string VELOCITY::kmph()
 {
-  return KMPH_DISP;
+  return to_string_round_to_nth(KMPH.latest(), 2);
 }
 
 string VELOCITY::mph()
 {
-  return MPH_DISP;
+  return to_string_round_to_nth(val_mph(), 2);
 }
 
 unsigned long VELOCITY::time_stamp()
@@ -769,9 +743,6 @@ void AUTOMOBILE_STEERING::set_source_availability(bool Available)
     PREVIOUS_STEERING_WHEEL_ANGLE = -1;
     REPORTED_STEERING_WHEEL_ANGLE = -1;
     VAL_STEERING_WHEEL_ANGLE = -1;
-    STEERING_WHEEL_ANGLE = "X";
-    DIRECTION = "X";
-    LEFT_OF_CENTER_DISP = "X";
   }
   
   SOURCE_AVAILABILITY = Available;
@@ -787,7 +758,7 @@ void AUTOMOBILE_STEERING::store_steering_wheel_angle(int Angle, int Direction)
   // x8000 at 0 deg. x8500 at 90 deg. x9000 at 180 deg.
   //VAL_STEERING_WHEEL_ANGLE = ((float)Angle - 32768);
 
-  VAL_STEERING_WHEEL_ANGLE = (((float)Angle - 32768) /4 ) *.18;
+  VAL_STEERING_WHEEL_ANGLE = (((float)Angle - (float)32768) / 4.0f ) * 0.18f;
 
   // MSB for Direction
 
@@ -795,19 +766,16 @@ void AUTOMOBILE_STEERING::store_steering_wheel_angle(int Angle, int Direction)
   if (VAL_STEERING_WHEEL_ANGLE == PREVIOUS_STEERING_WHEEL_ANGLE)
   {
     CLOCKWISE = 0;
-    DIRECTION = "--";
   }
   else
   {
     if (Direction >= 128)
     {
       CLOCKWISE = 1;
-      DIRECTION = "->";
     }
     else
     {
       CLOCKWISE = -1;
-      DIRECTION = "<-";
     }
 
     // Determine if wheel is left or right of center.
@@ -826,18 +794,8 @@ void AUTOMOBILE_STEERING::store_steering_wheel_angle(int Angle, int Direction)
       }
     }
 
-    if (LEFT_OF_CENTER == true)
-    {
-      LEFT_OF_CENTER_DISP = "<-";
-    }
-    else
-    {
-      LEFT_OF_CENTER_DISP = "->";
-    }
-
     // Set Display Variables
     PREVIOUS_STEERING_WHEEL_ANGLE = VAL_STEERING_WHEEL_ANGLE;
-    STEERING_WHEEL_ANGLE = to_string_round_to_nth(VAL_STEERING_WHEEL_ANGLE, 1) + " deg";
   }
 }
 
@@ -848,12 +806,24 @@ float AUTOMOBILE_STEERING::val_steering_wheel_angle()
 
 string AUTOMOBILE_STEERING::steering_wheel_angle()
 {
-  return STEERING_WHEEL_ANGLE;
+  return to_string_round_to_nth(VAL_STEERING_WHEEL_ANGLE, 1) + " deg";
 }
 
 string AUTOMOBILE_STEERING::turning_direction()
 {
-  return DIRECTION;
+  if (CLOCKWISE == 0)
+  {
+    return "--";
+  }
+  if (CLOCKWISE == 1)
+  {
+    return "->";
+  }
+  if (CLOCKWISE == -1)
+  {
+    return "<-";
+  }
+  return "XX";
 }
 
 bool AUTOMOBILE_STEERING::clockwise()
@@ -868,7 +838,14 @@ bool AUTOMOBILE_STEERING::val_left_of_center()
 
 string AUTOMOBILE_STEERING::left_of_center()
 {
-  return LEFT_OF_CENTER_DISP;
+  if (LEFT_OF_CENTER)
+  {
+    return "<-";
+  }
+  else
+  {
+    return "->";
+  }
 }
 
 //-----------
@@ -1481,6 +1458,8 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
     else if(data.ID == 16)
     {
       DATA.AD_10 = data;
+      PID_Recieved = data.ID;
+      ret_message_recieved = true;
     }
     else if(data.ID == 48)
     {
@@ -1553,6 +1532,8 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
     else if(data.ID == 240)
     {
       DATA.AD_F0 = data;
+      PID_Recieved = data.ID;
+      ret_message_recieved = true;
     }
     else if(data.ID == 248)
     {
@@ -1613,6 +1594,8 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
     else if(data.ID == 400)
     {
       DATA.AD_190 = data;
+      PID_Recieved = data.ID;
+      ret_message_recieved = true;
     }
     else if(data.ID == 464)
     {
@@ -2122,11 +2105,40 @@ void AUTOMOBILE::process(COMPORT &Com_Port, unsigned long tmeFrame_Time)
               STATUS.ELECTRICAL.store_control_voltage_42(message.DATA[3], message.DATA[4]);
             }
           }
-        }
+        
+          // High level Compute requiring calculation on all data.
+          //  Compute on all data but can be processor intensive.
 
-        // High level Compute requiring calculation on all data.
-        //  Compute on all data but can be processor intensive.
-        //compute_high();
+          // Only works if parse returns true as PID_RECIEVED.
+          
+          // Steering Wheel Angle
+          if (pid_recieved == 0x0010)
+          {
+            STATUS.STEERING.store_steering_wheel_angle((DATA.AD_10.DATA[6] *256) + DATA.AD_10.DATA[7], 
+                                                        DATA.AD_10.DATA[2]);
+          }
+                
+          // --------------------------------------------------------------------------------------
+          //  Fraggin' Stupid Pleb message trap / scrubber.
+
+          // Transmission Reported Speed
+          if (pid_recieved == 0x00F0)
+          {
+            STATUS.SPEED.store_trans((DATA.AD_F0.DATA[0] *256) + DATA.AD_F0.DATA[1], 1.13, tmeFrame_Time, 
+                                      DATA.AD_F0.TIMESTAMP_MESSAGE_SENT, 
+                                      (STATUS.SPEED.SPEED_LB_TIRE.val_kmph() + STATUS.SPEED.SPEED_LB_TIRE.val_kmph() + 
+                                      STATUS.SPEED.SPEED_LB_TIRE.val_kmph() + STATUS.SPEED.SPEED_LB_TIRE.val_kmph()) /4);
+          }
+
+          // Individual Tire Speed
+          if (pid_recieved == 0x0190)
+          {
+            STATUS.SPEED.store_LF((DATA.AD_190.DATA[0] *256) + DATA.AD_190.DATA[1], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
+            STATUS.SPEED.store_RF((DATA.AD_190.DATA[2] *256) + DATA.AD_190.DATA[3], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
+            STATUS.SPEED.store_LB((DATA.AD_190.DATA[4] *256) + DATA.AD_190.DATA[5], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
+            STATUS.SPEED.store_RB((DATA.AD_190.DATA[6] *256) + DATA.AD_190.DATA[7], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
+          }
+        }
 
         AVAILABILITY.set_active(STATUS, true, tmeFrame_Time);
         CHANGED = true;
@@ -2157,17 +2169,7 @@ void AUTOMOBILE::process(COMPORT &Com_Port, unsigned long tmeFrame_Time)
 void AUTOMOBILE::translate(unsigned long tmeFrame_Time)
 {
   if (AVAILABILITY.is_active() == true)
-  {  
-    // Steering Wheel Angle
-    STATUS.STEERING.store_steering_wheel_angle((DATA.AD_10.DATA[6] *256) + DATA.AD_10.DATA[7], 
-                                                DATA.AD_10.DATA[2]);
-
-    // Speed
-    STATUS.SPEED.store_LF((DATA.AD_190.DATA[0] *256) + DATA.AD_190.DATA[1], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
-    STATUS.SPEED.store_RF((DATA.AD_190.DATA[2] *256) + DATA.AD_190.DATA[3], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
-    STATUS.SPEED.store_LB((DATA.AD_190.DATA[4] *256) + DATA.AD_190.DATA[5], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
-    STATUS.SPEED.store_RB((DATA.AD_190.DATA[6] *256) + DATA.AD_190.DATA[7], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
-
+  {
     STATUS.SPEED.store_dash(DATA.AD_130.DATA[6], DATA.AD_130.DATA[7], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
 
     // Transmission Gear Position
@@ -2218,12 +2220,6 @@ void AUTOMOBILE::translate(unsigned long tmeFrame_Time)
     //  03 60 C0 40 3F 07 00 37 B8 7B 01097F4C
 
     STATUS.DOORS.store(DATA.AD_360.DATA[2]);
-
-    // Transmission Reported Speed
-    STATUS.SPEED.store_trans((DATA.AD_F0.DATA[0] *256) + DATA.AD_F0.DATA[1], 1.13, tmeFrame_Time, 
-                              DATA.AD_F0.TIMESTAMP_MESSAGE_SENT, 
-                              (STATUS.SPEED.SPEED_LB_TIRE.val_kmph() + STATUS.SPEED.SPEED_LB_TIRE.val_kmph() + 
-                              STATUS.SPEED.SPEED_LB_TIRE.val_kmph() + STATUS.SPEED.SPEED_LB_TIRE.val_kmph()) /4);
 
     // RPM
     STATUS.RPM.store((DATA.AD_90.DATA[4] *256) + DATA.AD_90.DATA[5]);

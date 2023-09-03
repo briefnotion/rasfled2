@@ -998,7 +998,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
 
             point_color.Value.w = TRACK[position].RSSI_INTENSITY;
 
-            draw_point_marker(sdSysData, track_position_0, point_color, 4);
+            draw_point_marker(sdSysData, track_position_0, point_color, 3);
 
             draw_list->AddLine(track_position_0, track_position_1, 
                                 sdSysData.COLOR_SELECT.COLOR_COMB_GREY.TEXT, 2);

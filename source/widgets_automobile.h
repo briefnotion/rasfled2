@@ -312,6 +312,7 @@ class DISPLAY_DATA_AUTOMOBILE
   int MESSAGES = -1;
   
   float SPEED = 0;
+  float SPEED_IMPRES = 0;
   float ACCELERATION = 0;
 
   float CRUISE_CONTROL_SPEED = 0;

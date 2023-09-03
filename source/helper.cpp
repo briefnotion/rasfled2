@@ -777,6 +777,60 @@ int MIN_MAX_TIME::direction()
   return ret_direction;
 }
 
+// ---------------------------------------------------------------------------------------
+// Impact Resistance
+
+void IMPACT_RESISTANCE_FLOAT::set_size(int Size)
+{
+  SIZE = Size;
+  first_run = true;
+}
+
+void IMPACT_RESISTANCE_FLOAT::set_value(float Value)
+{
+  if (first_run)
+  {
+    VALUE_COLLECTION.reserve(SIZE);
+
+    for (int count = VALUE_COLLECTION.size(); count < SIZE; count++)
+    {
+      VALUE_COLLECTION.push_back( 0.0f );
+    }
+
+    first_run = false;
+  }
+
+  VALUE = Value;
+
+  VALUE_COLLECTION[STORE_POSITION] = Value;
+  
+  STORE_POSITION++;
+  if (STORE_POSITION >= SIZE)
+  {
+    STORE_POSITION = 0;
+  }
+}
+
+float IMPACT_RESISTANCE_FLOAT::latest()
+{
+  return VALUE;
+}
+
+float IMPACT_RESISTANCE_FLOAT::impact()
+{
+  float ret_impact_value = 0.0f;
+  
+  if (VALUE_COLLECTION.size() > 0)
+  {
+    for (int pos = 0; pos < SIZE; pos++)
+    {
+      ret_impact_value = ret_impact_value + VALUE_COLLECTION[pos];
+    }
+  }
+  
+  return (ret_impact_value / (float)SIZE);
+}
+
 // ***************************************************************************************
 // FUNCTION AND PROCEDURES
 // ***************************************************************************************

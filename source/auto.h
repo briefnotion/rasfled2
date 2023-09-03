@@ -166,12 +166,7 @@ class VELOCITY
 {
   private:
 
-  float KMPH = -1;
-  float MPH = -1;
-  float METERS_PER_SECOND = -1;
-
-  string KMPH_DISP = "X";
-  string MPH_DISP = "X";
+  IMPACT_RESISTANCE_FLOAT KMPH;      // Base
 
   unsigned long TIME_STAMP = -1;            // Miliseconds.  Fairly loose timings.
   unsigned long TIME_STAMP_TIME_SENT = -1;  // Miliseconds.  Should be a more 
@@ -185,10 +180,10 @@ class VELOCITY
 
   void store(float kmph, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent);
   void store_meters_per_second(float mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent);
-  void store_miles_per_hour(float Miph, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent);
   float val_kmph();
   float val_meters_per_second();
   float val_mph();
+  float val_mph_impres();
   string kmph();
   string mph();
 
@@ -485,9 +480,6 @@ class AUTOMOBILE_STEERING
   bool LEFT_OF_CENTER = false;
 
   float VAL_STEERING_WHEEL_ANGLE = -1;
-  string STEERING_WHEEL_ANGLE = "X";
-  string DIRECTION = "X";
-  string LEFT_OF_CENTER_DISP = "X";
 
   public:
 
