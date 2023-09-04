@@ -429,24 +429,33 @@ class IMPACT_RESISTANCE_FLOAT
 {
   private:
 
-  float VALUE = -1;
+  struct IMPACT_RESISTANCE_VALUE
+  // For each letter, assign a behavior and type for it.
+  {
+    float VALUE;
+    unsigned long ENTRY_TIME;
+  };
 
-  int SIZE = 3;
-  vector<float> VALUE_COLLECTION;
+  int SIZE = 10;                    // Max Size of Entries
+  unsigned long ALIVE_TIME = 150;   // Measured in ms
 
-  bool first_run = true;
+  vector<IMPACT_RESISTANCE_VALUE> VALUE_COLLECTION;
 
-  int STORE_POSITION = 0;
+  bool FIRST_RUN = true;
+
+  int LATEST_POSITION = 0;
 
   public:
 
   void set_size(int Size);
 
-  void set_value(float Value);
+  void set_alive_time(unsigned long Alive_Time);
+
+  void set_value(unsigned long Time, float Value);
 
   float latest();
 
-  float impact();
+  float impact(unsigned long Time);
 
 };
 

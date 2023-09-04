@@ -179,6 +179,8 @@ class T_LARGE_NUMBER_DISPLAY_PROPERTIES
   int MIN_MAX_TIME_SPAN = 60000;
   int MIN_MAX_TIME_SLICES = 20;
 
+  int WHEEL_FRAME_SIZE = 6;
+
   NEW_COLOR_SCALE COLOR_SCALE;  //  pros COLOR.
 };
 
@@ -189,13 +191,9 @@ class T_LARGE_NUMBER_DISPLAY
   bool ACTIVE_WITHIN = false;
   bool IS_TEXT = false;
 
+  IMPACT_RESISTANCE_FLOAT_FRAME_COUNT VALUE_WHEEL;
   float VALUE = 0;
   float VALUE_COMPARE = 0;
-
-  // Impact Reduction
-  float VALUE_PREVIOUS_1 = 0;
-  float VALUE_PREVIOUS_2 = 0;
-  float VALUE_FALSE_TO_DISPLAY = 0;
 
   string VALUE_TEXT = ""; 
 

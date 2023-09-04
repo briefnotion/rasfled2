@@ -370,22 +370,17 @@ void T_LARGE_NUMBER_DISPLAY::create()
 {
   MIN_MAX.PROP.TIME_SPAN = PROPS.MIN_MAX_TIME_SPAN;
   MIN_MAX.PROP.SLICES = PROPS.MIN_MAX_TIME_SLICES;
+  VALUE_WHEEL.set_size(PROPS.WHEEL_FRAME_SIZE);
 }
 
 void T_LARGE_NUMBER_DISPLAY::update_value(system_data &sdSysData, float Value, float Compare_Value, bool Is_Within)
 {
-  // Impact Reduction
-  VALUE_PREVIOUS_2 = VALUE_PREVIOUS_1;
-  VALUE_PREVIOUS_1 = VALUE;
-
   MIN_MAX.put_value(Value, sdSysData.tmeCURRENT_FRAME_TIME);
   VALUE = Value;
+  VALUE_WHEEL.set_value(Value);
   VALUE_COMPARE = Compare_Value;
   IS_TEXT = false;
   ACTIVE_WITHIN = Is_Within;
-
-  // Impact Reduction
-  VALUE_FALSE_TO_DISPLAY = (VALUE_PREVIOUS_2 + VALUE_PREVIOUS_1 + VALUE) / 3;
 }
 
 void T_LARGE_NUMBER_DISPLAY::update_value(system_data &sdSysData, float Value)
@@ -466,7 +461,7 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
           ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT));
         }
         //ImGui::Text("%2d", (int)VALUE);
-        draw_scroll_num(VALUE_FALSE_TO_DISPLAY);
+        draw_scroll_num(VALUE_WHEEL.value());
 
         ImGui::PopStyleColor();
       }
@@ -474,7 +469,7 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
       {
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT));
         //ImGui::Text("%2d", abs((int)VALUE));
-        draw_scroll_num(VALUE_FALSE_TO_DISPLAY);
+        draw_scroll_num(VALUE_WHEEL.value());
         ImGui::PopStyleColor();
       }
       else  // Cruis is off, print the text.
@@ -488,7 +483,7 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
           ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
         }
         //ImGui::Text("%2d", (int)VALUE);
-        draw_scroll_num(VALUE_FALSE_TO_DISPLAY);
+        draw_scroll_num(VALUE_WHEEL.value());
         ImGui::PopStyleColor();
       }
     }
@@ -731,6 +726,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(14.3f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(16.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.L_VOLTAGE_SB.PROPS.WHEEL_FRAME_SIZE = 18;
   SDATA.L_VOLTAGE_SB.create();
   
   SDATA.L_S_TEMP_SB.PROPS.LABEL = "T\nM\nP";
@@ -742,6 +738,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(60.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(70.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.L_S_TEMP_SB.PROPS.WHEEL_FRAME_SIZE = 18;
   SDATA.L_S_TEMP_SB.create();
 
   // Continuing Configuring Main Screen Widgets
@@ -1042,7 +1039,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.LATEST_UNKNOWN_MESSAGE = sdSysData.CAR_INFO.DATA.AD_UNKNOWN.ORIG;
 
   SDATA.SPEED = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph();
-  SDATA.SPEED_IMPRES = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph_impres();
+  SDATA.SPEED_IMPRES = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph_impres(sdSysData.tmeCURRENT_FRAME_TIME);
   SDATA.ACCELERATION = sdSysData.CAR_INFO.CALCULATED.acceleration();
 
   SDATA.CRUISE_CONTROL_SET = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control();

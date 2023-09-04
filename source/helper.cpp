@@ -783,52 +783,79 @@ int MIN_MAX_TIME::direction()
 void IMPACT_RESISTANCE_FLOAT::set_size(int Size)
 {
   SIZE = Size;
-  first_run = true;
+  FIRST_RUN = true;
 }
 
-void IMPACT_RESISTANCE_FLOAT::set_value(float Value)
+void IMPACT_RESISTANCE_FLOAT::set_alive_time(unsigned long Alive_Time)
 {
-  if (first_run)
+  ALIVE_TIME = Alive_Time;
+}
+
+void IMPACT_RESISTANCE_FLOAT::set_value(unsigned long Time, float Value)
+{
+  IMPACT_RESISTANCE_VALUE new_value;
+
+  if (FIRST_RUN)
   {
     VALUE_COLLECTION.reserve(SIZE);
 
     for (int count = VALUE_COLLECTION.size(); count < SIZE; count++)
     {
-      VALUE_COLLECTION.push_back( 0.0f );
+      new_value.ENTRY_TIME = 0;
+      new_value.VALUE = -1.0f;
+      VALUE_COLLECTION.push_back(new_value);
     }
 
-    first_run = false;
+    FIRST_RUN = false;
   }
 
-  VALUE = Value;
-
-  VALUE_COLLECTION[STORE_POSITION] = Value;
-  
-  STORE_POSITION++;
-  if (STORE_POSITION >= SIZE)
+  LATEST_POSITION++;
+  if (LATEST_POSITION >= SIZE)
   {
-    STORE_POSITION = 0;
+    LATEST_POSITION = 0;
   }
+
+  VALUE_COLLECTION[LATEST_POSITION].VALUE = Value;
+  VALUE_COLLECTION[LATEST_POSITION].ENTRY_TIME = Time;
 }
 
 float IMPACT_RESISTANCE_FLOAT::latest()
 {
-  return VALUE;
+  if (VALUE_COLLECTION.size() > 0)
+  {
+    return VALUE_COLLECTION[LATEST_POSITION].VALUE;
+  }
+  else
+  {
+    return -1.0f;
+  }
 }
 
-float IMPACT_RESISTANCE_FLOAT::impact()
+float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
 {
   float ret_impact_value = 0.0f;
+  int count = 0;
   
   if (VALUE_COLLECTION.size() > 0)
   {
     for (int pos = 0; pos < SIZE; pos++)
     {
-      ret_impact_value = ret_impact_value + VALUE_COLLECTION[pos];
+      if (VALUE_COLLECTION[pos].ENTRY_TIME + ALIVE_TIME > Time)
+      {
+        count++;
+        ret_impact_value = ret_impact_value + VALUE_COLLECTION[pos].VALUE;
+      }
     }
   }
-  
-  return (ret_impact_value / (float)SIZE);
+
+  if (count == 0)
+  {
+    return latest();
+  }
+  else
+  {
+    return (ret_impact_value / (float)count);
+  }
 }
 
 // ***************************************************************************************

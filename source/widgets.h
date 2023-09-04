@@ -32,6 +32,31 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
 
 // ---------------------------------------------------------------------------------------
 
+class IMPACT_RESISTANCE_FLOAT_FRAME_COUNT
+{
+  private:
+
+  int SIZE = 6;   // 6 - about 200ms at 30fps
+  vector<float> VALUE_COLLECTION;
+
+  bool FIRST_RUN = true;
+
+  int LATEST_POSITION = 0;
+
+  float LATEST_VALUE = 0;
+
+  public:
+
+  void set_size(int Size);
+
+  void set_value(float Value);
+
+  float value();
+
+};
+
+// ---------------------------------------------------------------------------------------
+
 class COLOR_VALUE_PAIR
 {
   public:

@@ -33,6 +33,58 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
 
 // ---------------------------------------------------------------------------------------
 
+void IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::set_size(int Size)
+{
+  SIZE = Size;
+  FIRST_RUN = true;
+}
+
+void IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::set_value(float Value)
+{
+  if (FIRST_RUN)
+  {
+    VALUE_COLLECTION.reserve(SIZE);
+
+    for (int count = VALUE_COLLECTION.size(); count < SIZE; count++)
+    {
+      VALUE_COLLECTION.push_back( 0.0f );
+    }
+
+    FIRST_RUN = false;
+  }
+  
+  LATEST_VALUE = Value;
+}
+
+float IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::value()
+{
+  float ret_value = 0;
+
+  LATEST_POSITION++;
+  if (LATEST_POSITION >= SIZE)
+  {
+    LATEST_POSITION = 0;
+  }
+  
+  VALUE_COLLECTION[LATEST_POSITION] = LATEST_VALUE;
+
+  for (int pos = 0; pos < SIZE; pos++)
+  {
+    ret_value = ret_value + VALUE_COLLECTION[pos];
+  }
+
+  if (VALUE_COLLECTION.size() > 0)
+  {
+    return (ret_value / (float)SIZE);
+  }
+  else
+  {
+    return LATEST_VALUE;
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
 bool NEW_COLOR_SCALE::active()
 {
   if (COLOR_SCALE.size() > 0)

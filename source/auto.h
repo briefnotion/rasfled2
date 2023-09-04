@@ -183,7 +183,7 @@ class VELOCITY
   float val_kmph();
   float val_meters_per_second();
   float val_mph();
-  float val_mph_impres();
+  float val_mph_impres(unsigned long tmeFrame_Time);
   string kmph();
   string mph();
 

@@ -32,6 +32,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
   // -------------------------------------------------------------------------------------
   // Automobile Data Switched to Not Available
 
+  // Data Grab to reduce calc times.
+  float speed_trans_mph_impres = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph_impres(tmeCurrentTime);
+
   // Check for changes in the automobile availability
   if ((set_bool_with_change_notify(sdSysData.CAR_INFO.active(), AUTO_ACTIVE) == true))
   {
@@ -133,8 +136,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     // Alerts at non stops at low speed
     
     // Alert if door is open
-    if (sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph() > 0 && 
-        sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph() < 5)
+    if (speed_trans_mph_impres > 0 && 
+        speed_trans_mph_impres < 5)
     {
       if (sdSysData.CAR_INFO.STATUS.DOORS.hatchback_door_open() == true ||
           sdSysData.CAR_INFO.STATUS.DOORS.hood_door_open() == true ||
@@ -157,7 +160,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     // Lights
     
     // Turn off lights if speed over set value.
-    if (sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph() > activate_speed + 6)
+    if (speed_trans_mph_impres > activate_speed + 6)
     {
       if (LIGHT_DOOR_HANDLE_ON == true)
       {
@@ -180,7 +183,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 
     // -------------------------------------------------------------------------------------
     // Turn on lights if speed under set value.
-    else if (sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph() < activate_speed + 4)
+    else if (speed_trans_mph_impres < activate_speed + 4)
     {
       if (LIGHT_DOOR_HANDLE_ON == false)
       {
@@ -210,9 +213,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
       if (LIGHT_VELOCITY_ON == true)
       {
         // Multiplier
-        if (sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph() < activate_speed)
+        if (speed_trans_mph_impres < activate_speed)
         {
-          multiplier = 1 - sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph() / activate_speed;
+          multiplier = 1 - speed_trans_mph_impres / activate_speed;
         }
         else 
         {
@@ -220,9 +223,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         }
         
         // Caution Multiplier
-        if (sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph() < caution_speed)
+        if (speed_trans_mph_impres < caution_speed)
         {
-          multiplier_caution = 1 - sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph() / caution_speed;
+          multiplier_caution = 1 - speed_trans_mph_impres / caution_speed;
         }
         else 
         {
@@ -242,8 +245,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D", velocity_color.brightness(multiplier));
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O", velocity_color.brightness(multiplier));
 
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D", sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph());
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O", sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph());
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D", speed_trans_mph_impres);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O", speed_trans_mph_impres);
 
         // Keep?
         Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_PULSE", drive_pulse_color.brightness(multiplier));

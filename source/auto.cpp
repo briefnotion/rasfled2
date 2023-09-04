@@ -56,14 +56,14 @@ bool check_availability(bool Coded_Availability, bool Source_Availabilty)
 
 void VELOCITY::store(float kmph, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  KMPH.set_value(kmph);  
+  KMPH.set_value(tmeFrame_Time, kmph);  
   TIME_STAMP_TIME_SENT = tmeFrame_Time_Sent;
   TIME_STAMP = tmeFrame_Time;
 }
 
 void VELOCITY::store_meters_per_second(float mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  KMPH.set_value(velocity_translate_meters_per_second_to_kmph(mps));
+  KMPH.set_value(tmeFrame_Time, velocity_translate_meters_per_second_to_kmph(mps));
   TIME_STAMP_TIME_SENT = tmeFrame_Time_Sent;
   TIME_STAMP = tmeFrame_Time;
 }
@@ -83,9 +83,9 @@ float VELOCITY::val_mph()
   return velocity_translate_kmph_to_mph(KMPH.latest());
 }
 
-float VELOCITY::val_mph_impres()
+float VELOCITY::val_mph_impres(unsigned long tmeFrame_Time)
 {
-  return velocity_translate_kmph_to_mph(KMPH.impact());
+  return velocity_translate_kmph_to_mph(KMPH.impact(tmeFrame_Time));
 }
 
 string VELOCITY::kmph()
