@@ -33,6 +33,56 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
 
 // ---------------------------------------------------------------------------------------
 
+ImColor BOOLEAN_GRADIANT::boolean_color(system_data &sdSysData, bool Value, ImColor True_Color, ImColor False_Color)
+{
+  if (VALUE != Value)
+  {
+    VALUE = Value;
+
+    if (VALUE)
+    {
+      COLOR_START = False_Color;
+      COLOR_DESTINATION = True_Color;
+    }
+    else
+    {
+      COLOR_START = True_Color;
+      COLOR_DESTINATION = False_Color;
+    }
+
+    if (ACTIVE.ping_down(sdSysData.tmeCURRENT_FRAME_TIME))
+    { 
+      unsigned long time_elapsed = sdSysData.tmeCURRENT_FRAME_TIME - ACTIVE.start_time();
+      unsigned long time_remaining = DURATION - (time_elapsed);
+
+      ACTIVE.ping_up(sdSysData.tmeCURRENT_FRAME_TIME - time_remaining, DURATION);
+    }
+    else
+    {
+      ACTIVE.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, DURATION);
+    }
+
+  }
+
+  if (ACTIVE.ping_down(sdSysData.tmeCURRENT_FRAME_TIME))
+  {
+    return gradiant_color(sdSysData, ACTIVE.start_time(), DURATION, COLOR_START, COLOR_DESTINATION);
+  }
+  else
+  {
+    if (VALUE)
+    {
+      return True_Color;
+    }
+    else
+    {
+      return False_Color;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
 void IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::set_size(int Size)
 {
   SIZE = Size;
@@ -50,6 +100,8 @@ void IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::set_value(float Value)
       VALUE_COLLECTION.push_back( 0.0f );
     }
 
+    READ_WRITE_POS = 0;
+
     FIRST_RUN = false;
   }
   
@@ -58,24 +110,19 @@ void IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::set_value(float Value)
 
 float IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::value()
 {
-  float ret_value = 0;
-
-  LATEST_POSITION++;
-  if (LATEST_POSITION >= SIZE)
+  READ_WRITE_POS++;
+  if (READ_WRITE_POS >= SIZE)
   {
-    LATEST_POSITION = 0;
+    READ_WRITE_POS = 0;
   }
+
+  SUMMATION = SUMMATION + LATEST_VALUE - VALUE_COLLECTION[READ_WRITE_POS];
   
-  VALUE_COLLECTION[LATEST_POSITION] = LATEST_VALUE;
-
-  for (int pos = 0; pos < SIZE; pos++)
-  {
-    ret_value = ret_value + VALUE_COLLECTION[pos];
-  }
+  VALUE_COLLECTION[READ_WRITE_POS] = LATEST_VALUE;
 
   if (VALUE_COLLECTION.size() > 0)
   {
-    return (ret_value / (float)SIZE);
+    return (SUMMATION / (float)SIZE);
   }
   else
   {
@@ -430,6 +477,8 @@ void BAR_TECH::create()
 void BAR_TECH::update_value(system_data &sdSysData, float Value)
 {
   VALUE = Value;
+  VALUE_MARKER.set_value(Value);
+
   if (PROPS.DRAW_MIN_MAX)
   {
     MIN_MAX.put_value(Value, sdSysData.tmeCURRENT_FRAME_TIME);
@@ -451,7 +500,7 @@ void BAR_TECH::draw(system_data &sdSysData)
   ImVec2 pos = ImGui::GetCursorScreenPos();
   ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
 
-  // Draw Background
+  // Draw Background - Red if negative, Normal color if positive.
   if (VALUE >= 0)
   {
     draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.DIM, 5.0f, ImDrawFlags_None);
@@ -497,9 +546,7 @@ void BAR_TECH::draw(system_data &sdSysData)
   }
 
   // Draw Value Marker
-  
-  //float marker_location = abs((VALUE / PROPS.MAX) * (size.x - PROPS.MARKER_SIZE *2));
-  float marker_location = abs((VALUE / PROPS.MAX) * size.x +1);
+  float marker_location = abs((VALUE_MARKER.value() / PROPS.MAX) * size.x +1);
 
   if (marker_location < 0)
   {

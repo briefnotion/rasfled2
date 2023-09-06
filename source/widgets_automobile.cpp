@@ -438,6 +438,7 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
 
     // Draw Value
     if (IS_TEXT)
+    //  Value is text
     {
       ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
 
@@ -445,7 +446,8 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
       ImGui::Text("%s", VALUE_TEXT.c_str());
       ImGui::PopStyleColor();
     }
-    else if (VALUE < 100)
+    else if (abs(VALUE) < 100)
+    // Continue drawing rotating numbers if value is < 100
     {
       ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
 
@@ -465,14 +467,8 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
 
         ImGui::PopStyleColor();
       }
-      else if (VALUE <= -1)
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT));
-        //ImGui::Text("%2d", abs((int)VALUE));
-        draw_scroll_num(VALUE_WHEEL.value());
-        ImGui::PopStyleColor();
-      }
-      else  // Cruis is off, print the text.
+      else
+      // Positive Values
       {
         if (PROPS.COLOR_SCALE.active())
         {
@@ -480,7 +476,9 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
         }
         else
         {
-          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(WHEEL_COLOR.boolean_color(sdSysData, (VALUE >= 0), 
+                                sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT, 
+                                sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT)));
         }
         //ImGui::Text("%2d", (int)VALUE);
         draw_scroll_num(VALUE_WHEEL.value());
@@ -488,6 +486,7 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
       }
     }
     else
+    // Value is number but exceeds pritable value
     {
       ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
 

@@ -130,8 +130,10 @@ class TIMED_PING
 
   bool enabled();
   // Retruns enabled;
+  // DO NOT CALL UNLESS PASSIVELY PROBING, PING DOWN RESULTS THE SAME.
 
   unsigned long start_time();
+  // Returns Start Time.
 
   void ping_up(unsigned long current_time, int delay);
   // Like, sending a ping signal out.

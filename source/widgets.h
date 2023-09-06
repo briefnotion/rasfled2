@@ -32,7 +32,32 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
 
 // ---------------------------------------------------------------------------------------
 
+class BOOLEAN_GRADIANT
+{
+  private:
+
+  bool VALUE = false;
+
+  TIMED_PING ACTIVE;
+  
+  unsigned long DURATION = 500; // miliseconds
+
+  ImColor COLOR_START;
+  ImColor COLOR_DESTINATION;
+
+  public:
+
+  ImColor boolean_color(system_data &sdSysData, bool Value, ImColor True_Color, ImColor False_Color);
+
+};
+
+// ---------------------------------------------------------------------------------------
+
 class IMPACT_RESISTANCE_FLOAT_FRAME_COUNT
+// Spits the changes of value over SIZE number of frames.
+// Problem: Bound to FPS, If fps is halved then the value will take twice as long to 
+//  change.
+//  Unable to change without reconstructing the variable.
 {
   private:
 
@@ -41,9 +66,10 @@ class IMPACT_RESISTANCE_FLOAT_FRAME_COUNT
 
   bool FIRST_RUN = true;
 
-  int LATEST_POSITION = 0;
+  int READ_WRITE_POS = 0;
 
   float LATEST_VALUE = 0;
+  float SUMMATION = 0;
 
   public:
 
@@ -226,6 +252,7 @@ class BAR_TECH
   private:
 
   float VALUE = 0;
+  IMPACT_RESISTANCE_FLOAT_FRAME_COUNT VALUE_MARKER;
 
   MIN_MAX_TIME MIN_MAX;
 

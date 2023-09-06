@@ -426,6 +426,9 @@ class MIN_MAX_TIME
 class IMPACT_RESISTANCE_FLOAT
 // Floating Point varibale designed to average out the previos X entries into one
 //  value.  For fast and sparatic values.
+// Problem: CPU INTENSIVE. Does not have a simple routine to get the value.  Value 
+//  is calculated via for loop where all values must be read to deteimine answer.
+//  Cant change the size without reconstructing the entire variable.
 {
   private:
 

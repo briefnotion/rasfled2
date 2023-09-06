@@ -295,7 +295,7 @@ int loop_2(bool TTY_Only)
   // Set is_ready variables
   input_from_switches.set(20);
   events_and_render.set(get_frame_interval(sdSystem.CONFIG.iFRAMES_PER_SECOND));
-  input_from_user.set(100);
+  input_from_user.set(250);
   display.set(SCREENUPDATEDELAY);
 
   // System LogFile Variables
@@ -872,16 +872,6 @@ int loop_2(bool TTY_Only)
         sdSystem.AIRCRAFT_COORD.process(file_to_string(FILES_AIRCRAFT_JSON));
       }
 
-      /*
-      // --- Grabbing Data From Keyboard and update whatever is associated to the key pressed.
-      cons.readkeyboardinput2();
-
-      // Process keyboard info before displaying the screen.
-      // This will handle special redraw events such as screen resize.
-      cons.processkeyboadinput(sdSystem);
-      cons.processmouseinput(sdSystem);
-      */
-
       processcommandlineinput(cons_2.SCREEN_COMMS, sdSystem, tmeCurrentMillis, animations);
       extraanimationdoorcheck2(cons_2.SCREEN_COMMS, sdSystem, tmeCurrentMillis, animations);
       
@@ -894,6 +884,20 @@ int loop_2(bool TTY_Only)
         sdSystem.booRunning_State_File_Dirty = false;
       }
     }
+
+    // ---------------------------------------------------------------------------------------
+    // Automobile Data Process (Threadable?)
+    {
+      // Process info from comm port int automobile system.
+      sdSystem.CAR_INFO.process(sdSystem.COMMS, tmeCurrentMillis);
+
+      // Process Automobile Lights
+      automobile_handler.update_events(sdSystem, animations, tmeCurrentMillis);
+
+      // Comms flash data check and cleanup.
+      sdSystem.COMMS.flash_data_check();
+    }
+    // ---------------------------------------------------------------------------------------
 
     // Is display to console ready -----------------
     if (display.is_ready(tmeCurrentMillis) == true)
@@ -976,38 +980,17 @@ int loop_2(bool TTY_Only)
       }
     } // Is display to console ready -----------------
 
-    // ________________________
-    
-    // Comm port proccessing will be the slowest. Process here after work is done.
-    // Display received messages.
-
-    sdSystem.COMMS.cycle(tmeCurrentMillis);
-
-    // Need to stop deleting this.
-    //for (int pos = 0; pos < sdSystem.COMMS.READ_FROM_COMM.size(); pos++)
-    //{
-    //  cons.printwait(sdSystem.COMMS.READ_FROM_COMM[pos]);
-    //}
-
-    // Process info from comm port int automobile system.
-    sdSystem.CAR_INFO.process(sdSystem.COMMS, tmeCurrentMillis);
-
-    // Process Automobile Lights
-    automobile_handler.update_events(sdSystem, animations, tmeCurrentMillis);
-
-    // Comms flash data check and cleanup.
-    sdSystem.COMMS.flash_data_check();
-
-    // ________________________
-
-    // Consider aborts on errors.
-    // Check every cycle.
-    /*
-    if (return_code != 0)
+    // ---------------------------------------------------------------------------------------
+    // Comm Port Read
     {
-      cons.keywatch.in(KEYEXIT);
+      sdSystem.COMMS.cycle(tmeCurrentMillis);
+
+      // Need to stop deleting this.
+      //for (int pos = 0; pos < sdSystem.COMMS.READ_FROM_COMM.size(); pos++)
+      //{
+      //  cons.printwait(sdSystem.COMMS.READ_FROM_COMM[pos]);
+      //}
     }
-    */
 
     // ---------------------------------------------------------------------------------------
     // Now that the complete cycle is over, we need figure out how much time is remaining in 
