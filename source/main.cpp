@@ -261,6 +261,8 @@ int loop_2(bool TTY_Only)
   unsigned long   tmeSleep_Wake_time = 0; // Will contain time the cycle sleeper wakes.
 
   EFFICIANTCY_TIMER effi_timer;           // Diagnostic timer to measure cycle times.
+  EFFICIANTCY_TIMER effi_timer_screen;    // Diagnostic timer to measure cycle times.
+  EFFICIANTCY_TIMER effi_timer_comms;     // Diagnostic timer to measure cycle times.
 
   // Create Threads
   future<void> thread_render; // The thread containing function to send the led color array 
@@ -295,7 +297,7 @@ int loop_2(bool TTY_Only)
   // Set is_ready variables
   input_from_switches.set(20);
   events_and_render.set(get_frame_interval(sdSystem.CONFIG.iFRAMES_PER_SECOND));
-  input_from_user.set(250);
+  input_from_user.set(65);
   display.set(SCREENUPDATEDELAY);
 
   // System LogFile Variables
@@ -886,18 +888,6 @@ int loop_2(bool TTY_Only)
     }
 
     // ---------------------------------------------------------------------------------------
-    // Automobile Data Process (Threadable?)
-    {
-      // Process info from comm port int automobile system.
-      sdSystem.CAR_INFO.process(sdSystem.COMMS, tmeCurrentMillis);
-
-      // Process Automobile Lights
-      automobile_handler.update_events(sdSystem, animations, tmeCurrentMillis);
-
-      // Comms flash data check and cleanup.
-      sdSystem.COMMS.flash_data_check();
-    }
-    // ---------------------------------------------------------------------------------------
 
     // Is display to console ready -----------------
     if (display.is_ready(tmeCurrentMillis) == true)
@@ -909,28 +899,6 @@ int loop_2(bool TTY_Only)
       //  the buffer. 
       //  Only start a thread and pause future screen updateas if the buffer contains a movie 
       //  frame to be displayed.
-
-
-      // !!! TESTING ONLY !!!
-
-      // Variable Redraw Rates
-      // 60 - 15 fps
-      // 30 - 30 fps
-      // 15 - 60 fps
-
-      if (sdSystem.hsHardware_Status.get_temperature() < 50)
-      {
-        display.set(15);  // Cant reach these speeds until I find the cap.
-      }
-      else if (sdSystem.hsHardware_Status.get_temperature() < 60)
-      {
-        display.set(30);
-      }
-      else
-      {
-        display.set(60);
-      }
-      // !!! TESTING ONLY !!!
 
       {
         // Refresh console data storeage from main program. This will be a pass through buffer. 
@@ -957,7 +925,9 @@ int loop_2(bool TTY_Only)
         
         // Redraw the console screen with what the screen determines needs to be displayed.
         //cons.display(fsPlayer, sdSystem, tmeCurrentMillis);
+        effi_timer_screen.start_timer(tmeFled.now());
         cons_2.draw(sdSystem);
+        sdSystem.dblSCREEN_RENDER_TIME.set_data(effi_timer_screen.simple_elapsed_time(tmeFled.now()));
 
         /*
         if (cons.the_player.get_next_frame_draw_time() > 0)
@@ -982,14 +952,26 @@ int loop_2(bool TTY_Only)
 
     // ---------------------------------------------------------------------------------------
     // Comm Port Read
+    // Automobile Data Process (Threadable?)
     {
+      effi_timer_comms.start_timer(tmeFled.now());
       sdSystem.COMMS.cycle(tmeCurrentMillis);
+      sdSystem.dblCOMMS_TRANSFER_TIME.set_data(effi_timer_comms.simple_elapsed_time(tmeFled.now()));
 
       // Need to stop deleting this.
       //for (int pos = 0; pos < sdSystem.COMMS.READ_FROM_COMM.size(); pos++)
       //{
       //  cons.printwait(sdSystem.COMMS.READ_FROM_COMM[pos]);
       //}
+
+      // Process info from comm port int automobile system.
+      sdSystem.CAR_INFO.process(sdSystem.COMMS, tmeCurrentMillis);
+
+      // Process Automobile Lights
+      automobile_handler.update_events(sdSystem, animations, tmeCurrentMillis);
+
+      // Comms flash data check and cleanup.
+      sdSystem.COMMS.flash_data_check();
     }
 
     // ---------------------------------------------------------------------------------------

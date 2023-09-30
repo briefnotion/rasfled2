@@ -91,9 +91,10 @@ class system_data
 
   // System Timing
   STAT_DATA_DOUBLE dblCOMPUTETIME;   // Loop time spent while only proceessing.
-  STAT_DATA_DOUBLE dblSLEEPTIME;     // Calculated time needed to sleep.
   STAT_DATA_DOUBLE dblCYCLETIME;     // Amount of time to complete an entire cycle.
   STAT_DATA_DOUBLE dblPREVSLEEPTIME; // Stored value returned on pref sleep cycle.
+  STAT_DATA_DOUBLE dblSCREEN_RENDER_TIME; // Stored value returned on pref sleep cycle.
+  STAT_DATA_DOUBLE dblCOMMS_TRANSFER_TIME; // Stored value returned on pref sleep cycle.
 
   ALERT_SYSTEM ALERTS;
 
@@ -176,8 +177,6 @@ class system_data
 
   void read_hardware_status(int Milis_Frequency);
 
-  // reset monitor times.
-  void refresh();
  };
 // -------------------------------------------------------------------------------------
 

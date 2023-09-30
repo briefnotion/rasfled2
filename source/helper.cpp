@@ -347,26 +347,27 @@ void STAT_DATA_DOUBLE::reset_minmax()
 
 
 void EFFICIANTCY_TIMER::start_timer(double dblCurrent_Time)
-// Start the timer (stopwatch) by setting its the stopwatch time.
-//  The timer is a simple and can be considered always active. 
 {
   TIMER_STARTED = dblCurrent_Time;
 }
 
 double EFFICIANTCY_TIMER::elapsed_timer_time(double dblCurrent_Time)
-//  Returns the amount of time passed since the reset. 
 {
   return dblCurrent_Time - TIMER_STARTED;
 }
 
 double EFFICIANTCY_TIMER::elapsed_time(double dblCurrent_Time)
-// Measures the amount of time elaspeds since the privious time the function was 
-//  called, then returns the value, then resets for next time. 
 {
   double time_elapsed = dblCurrent_Time - LAST_ASKED_TIME;
   LAST_ASKED_TIME = dblCurrent_Time;
   return time_elapsed;
 }
+
+double EFFICIANTCY_TIMER::simple_elapsed_time(double dblCurrent_Time)
+{
+  return dblCurrent_Time - TIMER_STARTED;
+}
+
 // ---------------------------------------------------------------------------------------
 
 // Simple Variable to track if a TRUE value has entered.

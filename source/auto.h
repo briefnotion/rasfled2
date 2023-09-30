@@ -290,7 +290,9 @@ class AUTOMOBILE_DOORS
   void set_source_availability(bool Available);
   bool available();
 
-  void store(int Data);
+  bool store(int Data);
+  // return true if errored.
+
   bool store_from_alt_source(int Door, bool Value);
 
   bool lf_door_open();
@@ -457,11 +459,15 @@ class AUTOMOBILE_RPM
   void set_source_availability(bool Available);
   bool available();
 
-  void store(int Rpm);
+  bool store(int Rpm);
+  // return true if errored
+
   int val_rpm();
   string rpm();
 
-  void store_2(int Rpm);
+  bool store_2(int Rpm);
+  // return true if errored
+  
   int val_rpm_2();
   string rpm_2();
 };
@@ -626,7 +632,9 @@ class AUTOMOBILE_TRANSMISSION_GEAR
   string short_desc();
   string long_desc();
 
-  void store_gear_selection(int Gear, int Gear_Alt, int Transmission_Gear_Reported);
+  bool store_gear_selection(int Gear, int Gear_Alt, int Transmission_Gear_Reported);
+  // return true if errored.
+
   int gear_selection_reported();
   string gear_selection_short_desc();
   string gear_selection_long_desc();
@@ -706,6 +714,8 @@ class AUTOMOBILE_CALCULATED
   
   float S_TEMP = -1;
 
+  int CAM_COMM_ERRORS = 0;
+
   public:
 
   TIRE_TTL UNFILTHERED_LF_TTL;
@@ -739,6 +749,10 @@ class AUTOMOBILE_CALCULATED
   //  then all divided by 4 then subtracted by 30 then multiplied by 4. 
   // The results give a better single value about the amount of heat the system 
   //  is handling
+
+  int cam_comm_errors();
+
+  void inc_cam_comm_error();
 };
 
 class AUTOMOBILE_AVAILABILITY

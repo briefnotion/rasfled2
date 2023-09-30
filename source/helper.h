@@ -215,10 +215,18 @@ class EFFICIANTCY_TIMER
   public:
 
   void start_timer(double dblCurrent_Time);
+  // Start the timer (stopwatch) by setting its the stopwatch time.
+  //  The timer is a simple and can be considered always active. 
 
   double elapsed_timer_time(double dblCurrent_Time);
+  //  Returns the amount of time passed since the reset. 
 
   double elapsed_time(double dblCurrent_Time);
+  // Measures the amount of time elasped since the previous time the function was 
+  //  called, then returns the value, then resets for next time. 
+
+  double simple_elapsed_time(double dblCurrent_Time);
+  // Only returns the calc of current time - start timer time.
 };
 // ---------------------------------------------------------------------------------------
 

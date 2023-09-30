@@ -178,13 +178,6 @@ void system_data::read_hardware_status(int Milis_Frequency)
   hsHardware_Status.read_hardware_status(tmeCURRENT_FRAME_TIME, Milis_Frequency);
 }
 
-// reset monitor times.
-void system_data::refresh()
-{
-  dblCOMPUTETIME.reset_minmax();
-  dblSLEEPTIME.reset_minmax();
-  dblCYCLETIME.reset_minmax();
-}
 // -------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------

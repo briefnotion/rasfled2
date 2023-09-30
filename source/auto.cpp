@@ -242,7 +242,7 @@ bool AUTOMOBILE_DOORS::available()
   return check_availability(CODED_AVAILABILITY, SOURCE_AVAILABILITY);
 }
 
-void AUTOMOBILE_DOORS::store(int Data)
+bool AUTOMOBILE_DOORS::store(int Data)
 {
   // AD_360 also contains info on the engine running status  
 
@@ -256,6 +256,14 @@ void AUTOMOBILE_DOORS::store(int Data)
 
     HATCHBACK_DOOR_OPEN = !get_bit_value(Data, 16);
     HOOD_DOOR_OPEN = !get_bit_value(Data, 32);
+
+    return false;
+  }
+  else
+  {
+    // Insert Error Check Here
+    //return true;
+    return false;
   }
 
   //1[2]
@@ -692,7 +700,7 @@ bool AUTOMOBILE_RPM::available()
   return check_availability(CODED_AVAILABILITY, SOURCE_AVAILABILITY);
 }
 
-void AUTOMOBILE_RPM::store(int Rpm)
+bool AUTOMOBILE_RPM::store(int Rpm)
 {
   int val = (Rpm - 24576) * 2;
   if (val > 0 && val < 10000)
@@ -700,6 +708,12 @@ void AUTOMOBILE_RPM::store(int Rpm)
     VAL_RPM = val;    // Wrong
 
     RPM = to_string(VAL_RPM);
+
+    return false;
+  }
+  else
+  {
+    return true;
   }
 }
 
@@ -713,7 +727,7 @@ string AUTOMOBILE_RPM::rpm()
   return RPM;
 }
 
-void AUTOMOBILE_RPM::store_2(int Rpm)
+bool AUTOMOBILE_RPM::store_2(int Rpm)
 {
   int val = (Rpm - 49152) * 2;
   if (val > 0 && val < 10000)
@@ -721,6 +735,12 @@ void AUTOMOBILE_RPM::store_2(int Rpm)
     VAL_RPM_2 = val;    // Wrong
 
     RPM_2 = to_string(VAL_RPM_2);
+
+    return false;
+  }
+  else
+  {
+    return true;
   }
 }
 
@@ -1113,7 +1133,7 @@ string AUTOMOBILE_TRANSMISSION_GEAR::long_desc()
   return LONG_DESC;
 }
 
-void AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, int Transmission_Gear_Reported)
+bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, int Transmission_Gear_Reported)
 {
   GEAR_SELECTION_REPORTED = Gear;
 
@@ -1138,6 +1158,8 @@ void AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, 
     GEAR_SELECTION_NEUTRAL = false;
     GEAR_SELECTION_DRIVE = false;
     GEAR_SELECTION_LOW = false;
+
+    return false;
   }
   else if (Gear == 0xe0 && Gear_Alt == 0x1e && Transmission_Gear_Reported == 0)
   {
@@ -1149,6 +1171,8 @@ void AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, 
     GEAR_SELECTION_NEUTRAL = false;
     GEAR_SELECTION_DRIVE = false;
     GEAR_SELECTION_LOW = false;
+
+    return false;
   }
   else if (Gear == 0 && Gear_Alt > 0 && Transmission_Gear_Reported == 19)
   {
@@ -1160,6 +1184,8 @@ void AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, 
     GEAR_SELECTION_NEUTRAL = true;
     GEAR_SELECTION_DRIVE = false;
     GEAR_SELECTION_LOW = false;
+
+    return false;
   }
   else if (Gear >= 10 && Gear <= 96 && !get_bit_value(Gear_Alt, 64) && Transmission_Gear_Reported > 0 && 
                                                                         Transmission_Gear_Reported <= 6)
@@ -1172,6 +1198,8 @@ void AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, 
     GEAR_SELECTION_NEUTRAL = false;
     GEAR_SELECTION_DRIVE = true;
     GEAR_SELECTION_LOW = false;
+
+    return false;
   }
   else if (Gear >= 10 && Gear <= 96 && get_bit_value(Gear_Alt, 64) && Transmission_Gear_Reported == 1)
   {
@@ -1183,6 +1211,8 @@ void AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, 
     GEAR_SELECTION_NEUTRAL = false;
     GEAR_SELECTION_DRIVE = false;
     GEAR_SELECTION_LOW = true;
+
+    return false;
   }
   else
   {
@@ -1194,6 +1224,9 @@ void AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, 
     //GEAR_SELECTION_NEUTRAL = false;
     //GEAR_SELECTION_DRIVE = false;
     //GEAR_SELECTION_LOW = false;
+
+    // Insert Error Check Here
+    return false;
   }
 }
 
@@ -1395,6 +1428,16 @@ float AUTOMOBILE_CALCULATED::acceleration()
 float AUTOMOBILE_CALCULATED::s_temp()
 {
   return S_TEMP;
+}
+
+int AUTOMOBILE_CALCULATED::cam_comm_errors()
+{
+  return CAM_COMM_ERRORS;
+}
+
+void AUTOMOBILE_CALCULATED::inc_cam_comm_error()
+{
+  CAM_COMM_ERRORS++;
 }
 
 //-----------
@@ -2211,19 +2254,35 @@ void AUTOMOBILE::translate(unsigned long tmeFrame_Time)
     // The car should have never sent those messages while gear selection is in drive, much less while drive 50mph.
     // Indicates TCM Failure.
 
-    // Gear Lever Selection    
-    STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2], STATUS.GEAR.reported());
-
+    // Gear Lever Selection
+    if (STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2], STATUS.GEAR.reported()))
+    {
+      // Error Check Incomplete
+      CALCULATED.inc_cam_comm_error();
+    }
+    
     // Door Open or Closed
     //  03 60 C0 40 3F 07 00 37 B8 7B 01097D8C
     //  03 60 C0 40 00 00 00 00 00 00 01097E20 - ZEROED DATA
     //  03 60 C0 40 3F 07 00 37 B8 7B 01097F4C
 
-    STATUS.DOORS.store(DATA.AD_360.DATA[2]);
+    if(STATUS.DOORS.store(DATA.AD_360.DATA[2]))
+    {
+      // Error Check Incomplete
+      CALCULATED.inc_cam_comm_error();
+    }
 
     // RPM
-    STATUS.RPM.store((DATA.AD_90.DATA[4] *256) + DATA.AD_90.DATA[5]);
-    STATUS.RPM.store_2((DATA.AD_90.DATA[2] *256) + DATA.AD_90.DATA[3]);
+    if (STATUS.RPM.store((DATA.AD_90.DATA[4] *256) + DATA.AD_90.DATA[5]))
+    {
+      // Error Check Incomplete
+      CALCULATED.inc_cam_comm_error();
+    }
+    if (STATUS.RPM.store_2((DATA.AD_90.DATA[2] *256) + DATA.AD_90.DATA[3]))
+    {
+      // Error Check Incomplete
+      CALCULATED.inc_cam_comm_error();
+    }
 
     // --------------------------------------------------------------------------------------
     

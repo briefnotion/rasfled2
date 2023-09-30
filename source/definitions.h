@@ -21,13 +21,17 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.036_230904"
+#define Revision "2.039_230930"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
 // CONSOLE AND INTEFACE SETUP
 
-#define SCREENUPDATEDELAY 15  // in milliseconds 
+// Variable Redraw Rates
+// 60 - 15 fps
+// 30 - 30 fps
+// 15 - 60 fps
+#define SCREENUPDATEDELAY 30  // in milliseconds 
 //#define CONSOLESPLITSIZE  6
 
 // Files
