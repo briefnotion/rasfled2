@@ -263,7 +263,7 @@ bool AUTOMOBILE_DOORS::store(int Data)
   {
     // Insert Error Check Here
     //return true;
-    return false;
+    return true;
   }
 
   //1[2]
@@ -1226,7 +1226,7 @@ bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, 
     //GEAR_SELECTION_LOW = false;
 
     // Insert Error Check Here
-    return false;
+    return true;
   }
 }
 
@@ -1335,6 +1335,47 @@ VELOCITY TIRE_TTL::wheel_speed_offset()
 
 //-----------
 
+bool SIMPLE_ERRORS_DATA::triggered()
+{
+  if (TRIGGERED)
+  {
+    TRIGGERED = false;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+void SIMPLE_ERRORS_DATA::set_error(bool Value)
+{
+  if (ERRORED != Value)
+  {
+    ERRORED = Value;
+
+    if (Value)
+    {
+      TRIGGERED = true;
+    }
+  }
+}
+
+int SIMPLE_ERRORS::error_count()
+{
+  if (GEAR_SELECTION.triggered() || 
+      DOORS.triggered() || 
+      RPM1.triggered() || 
+      RPM2.triggered())
+  {
+    ERROR_COUNT++;
+  }
+
+  return ERROR_COUNT;
+}
+
+//-----------
+
 void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time)
 {
   // Set Lights
@@ -1428,16 +1469,6 @@ float AUTOMOBILE_CALCULATED::acceleration()
 float AUTOMOBILE_CALCULATED::s_temp()
 {
   return S_TEMP;
-}
-
-int AUTOMOBILE_CALCULATED::cam_comm_errors()
-{
-  return CAM_COMM_ERRORS;
-}
-
-void AUTOMOBILE_CALCULATED::inc_cam_comm_error()
-{
-  CAM_COMM_ERRORS++;
 }
 
 //-----------
@@ -2255,34 +2286,22 @@ void AUTOMOBILE::translate(unsigned long tmeFrame_Time)
     // Indicates TCM Failure.
 
     // Gear Lever Selection
-    if (STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2], STATUS.GEAR.reported()))
-    {
+    CALCULATED.CAM_COMM_ERRORS.GEAR_SELECTION.set_error(STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2], STATUS.GEAR.reported()));
       // Error Check Incomplete
-      CALCULATED.inc_cam_comm_error();
-    }
     
     // Door Open or Closed
     //  03 60 C0 40 3F 07 00 37 B8 7B 01097D8C
     //  03 60 C0 40 00 00 00 00 00 00 01097E20 - ZEROED DATA
     //  03 60 C0 40 3F 07 00 37 B8 7B 01097F4C
 
-    if(STATUS.DOORS.store(DATA.AD_360.DATA[2]))
-    {
+    CALCULATED.CAM_COMM_ERRORS.DOORS.set_error(STATUS.DOORS.store(DATA.AD_360.DATA[2]));
       // Error Check Incomplete
-      CALCULATED.inc_cam_comm_error();
-    }
 
     // RPM
-    if (STATUS.RPM.store((DATA.AD_90.DATA[4] *256) + DATA.AD_90.DATA[5]))
-    {
-      // Error Check Incomplete
-      CALCULATED.inc_cam_comm_error();
-    }
-    if (STATUS.RPM.store_2((DATA.AD_90.DATA[2] *256) + DATA.AD_90.DATA[3]))
-    {
-      // Error Check Incomplete
-      CALCULATED.inc_cam_comm_error();
-    }
+    CALCULATED.CAM_COMM_ERRORS.RPM1.set_error(STATUS.RPM.store((DATA.AD_90.DATA[4] *256) + DATA.AD_90.DATA[5]));
+    
+    CALCULATED.CAM_COMM_ERRORS.RPM2.set_error(STATUS.RPM.store_2((DATA.AD_90.DATA[2] *256) + DATA.AD_90.DATA[3]));
+    
 
     // --------------------------------------------------------------------------------------
     

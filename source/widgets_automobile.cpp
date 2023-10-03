@@ -1083,7 +1083,11 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.BAROMETER = sdSysData.CAR_INFO.STATUS.TEMPS.BARO_33.inHg();
   SDATA.BAROMETER_VAL = sdSysData.CAR_INFO.STATUS.TEMPS.BARO_33.val_inHg();
 
-  SDATA.CAM_COMM_ERR = sdSysData.CAR_INFO.CALCULATED.cam_comm_errors();
+  SDATA.CAM_COMM_ERR = sdSysData.CAR_INFO.CALCULATED.CAM_COMM_ERRORS.error_count();
+  while (SDATA.CAM_COMM_ERR > 99)
+  {
+    SDATA.CAM_COMM_ERR = SDATA.CAM_COMM_ERR / 10;
+  }
 
   // Steering
 

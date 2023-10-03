@@ -701,6 +701,38 @@ class TIRE_TTL
   VELOCITY wheel_speed_offset();
 };
 
+class SIMPLE_ERRORS_DATA
+{
+  private:
+  bool TRIGGERED = false;
+  bool ERRORED = false;
+
+  public:
+  
+  bool triggered();
+
+  void set_error(bool Value);
+};
+
+class SIMPLE_ERRORS
+// Ive written this code before, in the unfinished alerts system.  
+//  Reuse the old code or merge if this code stays.
+{
+  private:
+
+  int ERROR_COUNT = 0;
+
+  public:
+  
+  SIMPLE_ERRORS_DATA GEAR_SELECTION;
+  SIMPLE_ERRORS_DATA DOORS;
+  SIMPLE_ERRORS_DATA RPM1;
+  SIMPLE_ERRORS_DATA RPM2;
+
+  int error_count();
+  // not keeping accurate numbers. one is enough.
+};
+
 class AUTOMOBILE_CALCULATED
 {
   private:
@@ -713,8 +745,6 @@ class AUTOMOBILE_CALCULATED
   unsigned long PREVIOUS_TIME_FOR_ACC;
   
   float S_TEMP = -1;
-
-  int CAM_COMM_ERRORS = 0;
 
   public:
 
@@ -733,6 +763,8 @@ class AUTOMOBILE_CALCULATED
   MIN_MAX_TIME ACCELERATION_MIN_MAX_HISTORY;
   MIN_MAX_TIME ACCELERATION_QUICK_MEAN_HISTORY;
 
+  SIMPLE_ERRORS CAM_COMM_ERRORS;
+
   void compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time);
   // Low level Compute not requiring calculation on all data.
   //  Fast but not fully acurate.
@@ -749,10 +781,6 @@ class AUTOMOBILE_CALCULATED
   //  then all divided by 4 then subtracted by 30 then multiplied by 4. 
   // The results give a better single value about the amount of heat the system 
   //  is handling
-
-  int cam_comm_errors();
-
-  void inc_cam_comm_error();
 };
 
 class AUTOMOBILE_AVAILABILITY

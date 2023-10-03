@@ -1093,33 +1093,68 @@ void ADSB_RANGE::set_zoom_level()
 
     case 1:
     {
-      set_range(5);
+      set_range(2);
       calculate_lat_lon_to_point_scale();
       break;
     }
-    
+
     case 2:
     {
-      set_range(10);
+      set_range(5);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 3:
     {
-      set_range(25);
+      set_range(7);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 4:
     {
-      set_range(50);
+      set_range(10);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 5:
+    {
+      set_range(15);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 6:
+    {
+      set_range(25);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 7:
+    {
+      set_range(35);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 8:
+    {
+      set_range(50);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 9:
+    {
+      set_range(75);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 10:
     {
       set_range(100);
       calculate_lat_lon_to_point_scale();
@@ -1159,7 +1194,7 @@ void ADSB_RANGE::zoom_in()
 
 void ADSB_RANGE::zoom_out()
 {
-  if (ZOOM_LEVEL < 5)
+  if (ZOOM_LEVEL < 10)
   {
     ZOOM_LEVEL = ZOOM_LEVEL + 1;
     set_zoom_level();
