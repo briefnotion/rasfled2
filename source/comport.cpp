@@ -299,6 +299,33 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
   // Do not access comm port if it is shut down.
   if (ACTIVE == true)
   {
+    // Send Data
+    if (WRITE_TO_COMM.size() > 0)
+    // Sending data to comm port.
+    {
+      //while (WRITE_TO_COMM.size() > 0)
+      // Dont send more than one command per cycle. Recieving side isn't checking 
+      //  multiple commands yet.
+      {
+        if (SAVE_TO_LOG == true && WRITE_TO_COMM.size() >0 && PROPS.RECEIVE_TEST_DATA == false)
+        {
+          WRITE_TO_COMM.push_front("- Send");
+          deque_string_to_file(SAVE_TO_LOG_FILENAME, WRITE_TO_COMM, true);
+          WRITE_TO_COMM.pop_front();
+        }
+
+        // put data into send to comm port queue
+        write_to_comm(WRITE_TO_COMM.front());
+        WRITE_TO_COMM.pop_front();
+      }
+    }
+    else
+    {
+      write_to_comm("r");
+    }
+
+    // -----
+
     // Receive data.
     if(PROPS.RECEIVE_TEST_DATA == false)
     {
@@ -326,23 +353,7 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
         }
       }
     }
-    // ---
 
-    // Send Data
-    if (WRITE_TO_COMM.size() > 0)
-    // Sending data to comm port.
-    {
-      if (SAVE_TO_LOG == true && WRITE_TO_COMM.size() >0 && PROPS.RECEIVE_TEST_DATA == false)
-      {
-        WRITE_TO_COMM.push_front("- Send");
-        deque_string_to_file(SAVE_TO_LOG_FILENAME, WRITE_TO_COMM, true);
-        WRITE_TO_COMM.pop_front();
-      }
-
-      // put data into send to comm port queue
-      write_to_comm(WRITE_TO_COMM.front());
-      WRITE_TO_COMM.pop_front();
-    }
   }
 }
 

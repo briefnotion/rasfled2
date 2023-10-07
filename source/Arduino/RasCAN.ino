@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <mcp_can.h>
+#include <Vector.h>
 //#include <mcp_can_dfs.h>
 
 
@@ -132,6 +133,12 @@ class CONTROL
   {
     read_string.trim();
 
+    if (read_string == "r")
+    {
+      // Immediatly exit the function routine, this is a send data request.
+      return;
+    }
+
     if (read_string == "p")
     {
       // Command to pause and unpause input
@@ -183,9 +190,14 @@ class CONTROL
       version = 4;
       restart = true;
     }
+    else if (read_string == "v5")
+    {
+      version = 5;
+      restart = true;
+    }
 
-    // version 3 and version == 4 commands
-    if (version == 3 || version == 4)
+    // version 3 and version == 4 and version == 5commands
+    if (version == 3 || version == 4 || version == 5)
     {
       // 00 - 0F
       if (read_string == "00")
@@ -637,7 +649,7 @@ unsigned long time;
 void setup() 
 {
   // Set Default Version
-  ctrl.version = 4;
+  ctrl.version = 5;
 
   // Prep Serial
   Serial.begin(115200);
@@ -721,6 +733,25 @@ void print_hex(unsigned char value)
   Serial.print(" ");
 }
 
+
+String format_hex(unsigned char value)
+{
+  String ret_hex = "";
+  
+  if(value<16)
+  {
+    ret_hex = ret_hex + "0";
+    ret_hex = ret_hex + String(value,HEX);
+  }
+  else
+  {
+    ret_hex = ret_hex + String(value,HEX);    
+  }
+
+  ret_hex = ret_hex + " ";
+  return ret_hex;
+}
+
 void print_hex_UL(unsigned long value)
 {
   if(value == 0)
@@ -768,6 +799,58 @@ void print_hex_UL(unsigned long value)
   }
   
   Serial.print(" ");
+}
+
+String format_hex_UL(unsigned long value)
+{
+  String ret_hex = "";
+
+  if(value == 0)
+  {
+    ret_hex = "00000000";
+  }
+  else if(value < 16)
+  {
+    ret_hex = "0000000";
+    ret_hex = ret_hex + String(value, HEX);
+  }
+  else if (value < 256)
+  {
+    ret_hex = "000000";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else if (value < 4096)
+  {
+    ret_hex = "00000";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else if (value < 65536)
+  {
+    ret_hex = "0000";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else if (value < 1048576)
+  {
+    ret_hex = "000";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else if (value < 16777216)
+  {
+    ret_hex = "00";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else if (value < 268435456)
+  {
+    ret_hex = "0";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else
+  {
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  
+  ret_hex = ret_hex + " ";
+  return ret_hex;
 }
 
 // sendMsgBuf(unsigned long id, byte ext, byte rtr, byte len, byte *buf)
@@ -836,6 +919,30 @@ void serial_send_2(unsigned long Message_ID, byte Message_len, byte Message_buf[
   print_hex_UL(Message_timestamp);
 
   Serial.println();
+}
+
+
+String serial_send_format(unsigned long Message_ID, byte Message_len, byte Message_buf[], unsigned long Message_timestamp)
+{
+  String ret_send_string = "";
+  unsigned char IDl = Message_ID % 256;
+  unsigned char IDu = (Message_ID - IDl) / 256;
+
+  ret_send_string = ret_send_string + format_hex(IDu);
+  ret_send_string = ret_send_string + format_hex(IDl);
+
+  ret_send_string = ret_send_string + format_hex(Message_buf[0]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[1]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[2]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[3]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[4]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[5]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[6]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[7]);
+
+  ret_send_string = ret_send_string + format_hex_UL(Message_timestamp);
+
+  return ret_send_string;
 }
 
 bool filter(unsigned long ID)
@@ -1134,6 +1241,140 @@ void version_4()
 }
 
 // -----------------------------------------------------
+// Version 5
+
+void version_5()
+{
+  unsigned long recv_canid = 0;
+
+  unsigned long fake_two_byte_counter = 0;
+  char fake_one_byte_counter = 0;
+
+  // Vector or string sends to host.
+  const int ELEMENT_COUNT_MAX = 20;
+  String storage_array[ELEMENT_COUNT_MAX];
+  Vector<String> messages_to_send(storage_array);
+
+  ctrl.reset();
+  
+  Serial.println("Version 5");
+
+  while (ctrl.restart == false)
+  {
+    if (ctrl.start == true && CAN_MSGAVAIL == CAN0.checkReceive() ||
+          ctrl.start == true && ctrl.test == true)
+    {
+      MESSAGE_TIME = millis();
+
+      // Check to see whether data is read
+      if (ctrl.test == false)
+      {
+        // Get Can Data
+        CAN0.readMsgBufID(&ID, &len, buf);    // Read data  
+      }
+      else
+      {
+        // Get Test Data
+        ID = fake_two_byte_counter;
+        len = 8;
+        buf[0] = fake_one_byte_counter;
+        buf[1] = fake_one_byte_counter;
+        buf[2] = fake_one_byte_counter;
+        buf[3] = fake_one_byte_counter;
+        buf[4] = fake_one_byte_counter;
+        buf[5] = fake_one_byte_counter;
+        buf[6] = fake_one_byte_counter;
+        buf[7] = fake_one_byte_counter;
+        
+        fake_two_byte_counter++;
+        fake_one_byte_counter++;
+
+        if (fake_two_byte_counter > 0x0f00)
+        {
+          fake_two_byte_counter = 0;
+        }
+
+        if (fake_two_byte_counter > (256*256)-1)
+        {
+          fake_two_byte_counter = 0;                    
+        }
+        
+        if (fake_one_byte_counter > 255)
+        {
+          fake_one_byte_counter = 0;                    
+        }
+
+        delay (5);
+      }
+
+      if (ctrl.filter == true)
+      {
+        if (filter(ID) == true)
+        {
+          digitalWrite(23, HIGH); // LED ON
+
+          //serial_send_2(ID, len, buf, MESSAGE_TIME);
+          messages_to_send.push_back(serial_send_format(ID, len, buf, MESSAGE_TIME));
+
+          digitalWrite(23, LOW);  // LED OFF
+        }
+      }
+      else
+      {
+        digitalWrite(23, HIGH); // LED ON
+        //serial_send_2(ID, len, buf, MESSAGE_TIME);
+        messages_to_send.push_back(serial_send_format(ID, len, buf, MESSAGE_TIME));
+
+        digitalWrite(23, LOW);  // LED OFF
+      }
+    }
+    
+    // Read from host
+    if(Serial.available() > 0)
+    {
+      //Serial.println("-");
+      ctrl.read(read_com());
+
+      if (messages_to_send.size() > 0)
+      {
+        for (int pos = 0; pos < messages_to_send.size(); pos++)
+        {
+          Serial.println(messages_to_send[pos]);
+        }
+
+        messages_to_send.clear();
+      }
+      
+    }
+
+    // send command to CAN
+    if (ctrl.send_command == true)
+    {
+      digitalWrite(23, HIGH); // LED ON
+
+      ctrl.send_command = false;
+      sendPid(ctrl.command);
+      
+      digitalWrite(23, LOW);  // LED OFF
+    }
+
+    // send command to CAN
+    if (ctrl.send_service_command == true)
+    {
+      digitalWrite(23, HIGH); // LED ON
+
+      ctrl.send_service_command = false;
+      send_Service_Pid(ctrl.service_command, ctrl.service_command_data_00);
+      
+      digitalWrite(23, LOW);  // LED OFF
+    }
+
+    // Blink and Time
+    blink(ctrl.start == false);
+  }
+}
+
+// -----------------------------------------------------
 // Main loop
 
 void loop() 
@@ -1156,6 +1397,14 @@ void loop()
     if (ctrl.version == 4)
     {
       version_4();
+    }
+
+    // pause if in main loop
+    delay(delay_time);
+
+    if (ctrl.version == 5)
+    {
+      version_5();
     }
 
     // pause if in main loop
