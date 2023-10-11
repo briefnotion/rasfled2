@@ -889,6 +889,13 @@ int loop_2(bool TTY_Only)
 
     // ---------------------------------------------------------------------------------------
 
+    // Signal to RasCAM to get data on next read comm cycle.  
+    //  Screen draw cycle may be to much of a delay to handle?
+    //  A half milsec delay after the send in the req is an alt.
+    sdSystem.COMMS.request_to_send();
+
+    // ---------------------------------------------------------------------------------------
+
     // Is display to console ready -----------------
     if (display.is_ready(tmeCurrentMillis) == true)
     {

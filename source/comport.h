@@ -148,6 +148,13 @@ class COMPORT
 
   int recieve_size();
   // Recieve Stack size.
+
+  void request_to_send();
+  // A seperate request to send.
+  //  Needs to allow the client time to process andput together the message
+  //  together.  If seperating the request further up the program stack 
+  //  isnt working, then maybe introducing a time delay.
+  //  Timing is essential for flow of info.
  
   void cycle(unsigned long tmeFrame_Time);
   // Writes and Reads data to comm port to send and

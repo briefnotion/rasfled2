@@ -129,14 +129,14 @@ class CONTROL
   unsigned char service_command;
   unsigned char service_command_data_00;
 
-  read(String read_string)
+  bool read(String read_string)
   {
     read_string.trim();
 
     if (read_string == "r")
     {
       // Immediatly exit the function routine, this is a send data request.
-      return;
+      return true;
     }
 
     if (read_string == "p")
@@ -617,9 +617,11 @@ class CONTROL
         send_service_command = true;
       }
     }
+
+    return false;
   }
 
-  reset()
+  void reset()
   {
     test = false;
     start = true;
@@ -1333,18 +1335,18 @@ void version_5()
     if(Serial.available() > 0)
     {
       //Serial.println("-");
-      ctrl.read(read_com());
-
-      if (messages_to_send.size() > 0)
+      if (ctrl.read(read_com()) == true)
       {
-        for (int pos = 0; pos < messages_to_send.size(); pos++)
+        if (messages_to_send.size() > 0)
         {
-          Serial.println(messages_to_send[pos]);
-        }
+          for (int pos = 0; pos < messages_to_send.size(); pos++)
+          {
+            Serial.println(messages_to_send[pos]);
+          }
 
-        messages_to_send.clear();
+          messages_to_send.clear();
+        }
       }
-      
     }
 
     // send command to CAN

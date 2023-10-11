@@ -281,6 +281,14 @@ int COMPORT::recieve_size()
   return READ_FROM_COMM.size();
 }
 
+void COMPORT::request_to_send()
+{
+  if (ACTIVE == true)
+  {
+    write_to_comm("r");
+  }
+}
+
 void COMPORT::cycle(unsigned long tmeFrame_Time)
 {
   bool data_received = true;
@@ -318,10 +326,6 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
         write_to_comm(WRITE_TO_COMM.front());
         WRITE_TO_COMM.pop_front();
       }
-    }
-    else
-    {
-      write_to_comm("r");
     }
 
     // -----
