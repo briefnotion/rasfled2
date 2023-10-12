@@ -1,3 +1,6 @@
+2.043_231012
+  - Moved serial comms up in the process loop.
+
 2.042_231011
   - Changed some things.
   - Revised CAN Bus serial communications.

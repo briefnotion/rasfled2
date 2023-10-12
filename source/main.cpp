@@ -615,6 +615,13 @@ int loop_2(bool TTY_Only)
     //    sent.
 
     // ---------------------------------------------------------------------------------------
+
+    // Signal to RasCAM to get data on next read comm cycle.  
+    //  Screen draw cycle may be to much of a delay to handle?
+    //  A half milsec delay after the send in the req is an alt.
+    sdSystem.COMMS.request_to_send();
+
+    // ---------------------------------------------------------------------------------------
     // --- Read Switchs --- 
 
      // Are switches ready -----------------
@@ -849,7 +856,6 @@ int loop_2(bool TTY_Only)
     
     } // Is Events and Render ready -----------------
      
-
     // ---------------------------------------------------------------------------------------
     // Now that we have done all the hard work, read hardware, computed, generated, displayed 
     // all the lights, we will take the latter clock cycles to get keybord input and update 
@@ -888,14 +894,31 @@ int loop_2(bool TTY_Only)
     }
 
     // ---------------------------------------------------------------------------------------
+    // Comm Port Read
+    // Automobile Data Process.
+    // No need to thread. Comms are actually much faster than I was led to believe.
+    {
+      effi_timer_comms.start_timer(tmeFled.now());
+      sdSystem.COMMS.cycle(tmeCurrentMillis);
+      sdSystem.dblCOMMS_TRANSFER_TIME.set_data(effi_timer_comms.simple_elapsed_time(tmeFled.now()));
 
-    // Signal to RasCAM to get data on next read comm cycle.  
-    //  Screen draw cycle may be to much of a delay to handle?
-    //  A half milsec delay after the send in the req is an alt.
-    sdSystem.COMMS.request_to_send();
+      // Need to stop deleting this.
+      //for (int pos = 0; pos < sdSystem.COMMS.READ_FROM_COMM.size(); pos++)
+      //{
+      //  cons.printwait(sdSystem.COMMS.READ_FROM_COMM[pos]);
+      //}
+
+      // Process info from comm port int automobile system.
+      sdSystem.CAR_INFO.process(sdSystem.COMMS, tmeCurrentMillis);
+
+      // Process Automobile Lights
+      automobile_handler.update_events(sdSystem, animations, tmeCurrentMillis);
+
+      // Comms flash data check and cleanup.
+      sdSystem.COMMS.flash_data_check();
+    }
 
     // ---------------------------------------------------------------------------------------
-
     // Is display to console ready -----------------
     if (display.is_ready(tmeCurrentMillis) == true)
     {
@@ -956,30 +979,6 @@ int loop_2(bool TTY_Only)
         */
       }
     } // Is display to console ready -----------------
-
-    // ---------------------------------------------------------------------------------------
-    // Comm Port Read
-    // Automobile Data Process (Threadable?)
-    {
-      effi_timer_comms.start_timer(tmeFled.now());
-      sdSystem.COMMS.cycle(tmeCurrentMillis);
-      sdSystem.dblCOMMS_TRANSFER_TIME.set_data(effi_timer_comms.simple_elapsed_time(tmeFled.now()));
-
-      // Need to stop deleting this.
-      //for (int pos = 0; pos < sdSystem.COMMS.READ_FROM_COMM.size(); pos++)
-      //{
-      //  cons.printwait(sdSystem.COMMS.READ_FROM_COMM[pos]);
-      //}
-
-      // Process info from comm port int automobile system.
-      sdSystem.CAR_INFO.process(sdSystem.COMMS, tmeCurrentMillis);
-
-      // Process Automobile Lights
-      automobile_handler.update_events(sdSystem, animations, tmeCurrentMillis);
-
-      // Comms flash data check and cleanup.
-      sdSystem.COMMS.flash_data_check();
-    }
 
     // ---------------------------------------------------------------------------------------
     // Now that the complete cycle is over, we need figure out how much time is remaining in 
