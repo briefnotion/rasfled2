@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <mcp_can.h>
-#include <Vector.h>
 //#include <mcp_can_dfs.h>
 
 
@@ -102,6 +101,52 @@
 
 #define CAN_ID_PID                        0x7DF //  *
 
+
+// -----------------------------------------------------
+class MESSAGE_STORAGE
+// Simple message storeage system
+//  20 messages
+//  38 chars per message + null terminator
+{
+  private:
+  char MESSAGES[20][39];
+  
+  int MESSAGE_COUNT = 0;
+
+  public:
+
+  int message_count()
+  {
+    return MESSAGE_COUNT;
+  }
+
+  void store(String Message)
+  {
+    if (MESSAGE_COUNT < 20)
+    {
+      Message.toCharArray(MESSAGES[MESSAGE_COUNT], Message.length());
+      MESSAGES[MESSAGE_COUNT][38] = '\0';
+      MESSAGE_COUNT++;
+    }
+  }
+
+  String get(int Position)
+  {
+    if (Position < MESSAGE_COUNT)
+    {
+      return String (MESSAGES[Position]);
+    }
+    else
+    {
+      return "out of bounds";
+    }
+  }
+
+  void clear()
+  {
+    MESSAGE_COUNT = 0;
+  }
+};
 
 // -----------------------------------------------------
 // Control Class
@@ -1252,10 +1297,7 @@ void version_5()
   unsigned long fake_two_byte_counter = 0;
   char fake_one_byte_counter = 0;
 
-  // Vector or string sends to host.
-  const int ELEMENT_COUNT_MAX = 20;
-  String storage_array[ELEMENT_COUNT_MAX];
-  Vector<String> messages_to_send(storage_array);
+  MESSAGE_STORAGE messages_to_send;
 
   ctrl.reset();
   
@@ -1306,7 +1348,7 @@ void version_5()
           fake_one_byte_counter = 0;                    
         }
 
-        delay (5);
+        //delay (5);
       }
 
       if (ctrl.filter == true)
@@ -1316,7 +1358,7 @@ void version_5()
           digitalWrite(23, HIGH); // LED ON
 
           //serial_send_2(ID, len, buf, MESSAGE_TIME);
-          messages_to_send.push_back(serial_send_format(ID, len, buf, MESSAGE_TIME));
+          messages_to_send.store(serial_send_format(ID, len, buf, MESSAGE_TIME));
 
           digitalWrite(23, LOW);  // LED OFF
         }
@@ -1325,7 +1367,7 @@ void version_5()
       {
         digitalWrite(23, HIGH); // LED ON
         //serial_send_2(ID, len, buf, MESSAGE_TIME);
-        messages_to_send.push_back(serial_send_format(ID, len, buf, MESSAGE_TIME));
+        messages_to_send.store(serial_send_format(ID, len, buf, MESSAGE_TIME));
 
         digitalWrite(23, LOW);  // LED OFF
       }
@@ -1337,11 +1379,11 @@ void version_5()
       //Serial.println("-");
       if (ctrl.read(read_com()) == true)
       {
-        if (messages_to_send.size() > 0)
+        if (messages_to_send.message_count() > 0)
         {
-          for (int pos = 0; pos < messages_to_send.size(); pos++)
+          for (int pos = 0; pos < messages_to_send.message_count(); pos++)
           {
-            Serial.println(messages_to_send[pos]);
+            Serial.println(messages_to_send.get(pos));
           }
 
           messages_to_send.clear();

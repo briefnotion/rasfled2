@@ -258,6 +258,7 @@ int loop_2(bool TTY_Only)
   TIMED_IS_READY  events_and_render;      // Delay for the events and render system.
   TIMED_IS_READY  input_from_user;        // Delay for the input from mouse and keyboard.
   TIMED_IS_READY  display;                // Delay for displaying information on the console.
+  TIMED_IS_READY  comms_timer;                // Delay for displaying information on the console.
   unsigned long   tmeSleep_Wake_time = 0; // Will contain time the cycle sleeper wakes.
 
   EFFICIANTCY_TIMER effi_timer;           // Diagnostic timer to measure cycle times.
@@ -315,6 +316,7 @@ int loop_2(bool TTY_Only)
   int count  = 0;
 
   // Comm Port Setup
+  comms_timer.set(2);
   sdSystem.COMMS.PROPS.PORT = COMMS_PORT;
   sdSystem.COMMS.PROPS.BAUD_RATE = COMMS_BAUD;
   sdSystem.COMMS.PROPS.BIT_COUNT = COMMS_BIT_PARITY;
@@ -619,7 +621,10 @@ int loop_2(bool TTY_Only)
     // Signal to RasCAM to get data on next read comm cycle.  
     //  Screen draw cycle may be to much of a delay to handle?
     //  A half milsec delay after the send in the req is an alt.
-    sdSystem.COMMS.request_to_send();
+    if (comms_timer.is_ready_no_reset(tmeCurrentMillis) == true)
+    {
+      sdSystem.COMMS.request_to_send();
+    }
 
     // ---------------------------------------------------------------------------------------
     // --- Read Switchs --- 
@@ -897,6 +902,7 @@ int loop_2(bool TTY_Only)
     // Comm Port Read
     // Automobile Data Process.
     // No need to thread. Comms are actually much faster than I was led to believe.
+    if (comms_timer.is_ready(tmeCurrentMillis) == true)
     {
       effi_timer_comms.start_timer(tmeFled.now());
       sdSystem.COMMS.cycle(tmeCurrentMillis);
@@ -999,6 +1005,10 @@ int loop_2(bool TTY_Only)
     if (display.get_ready_time() < tmeSleep_Wake_time)
     {
       tmeSleep_Wake_time = display.get_ready_time();
+    }
+    if (comms_timer.get_ready_time() < tmeSleep_Wake_time)
+    {
+      tmeSleep_Wake_time = comms_timer.get_ready_time();
     }
 
     // Measure how much time has passed since the previous time the program was at 
