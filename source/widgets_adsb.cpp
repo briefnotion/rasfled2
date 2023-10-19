@@ -145,11 +145,9 @@ void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  //draw_list->AddNgonFilled(Screen_Position, Size, Color.STANDARD, 6);
   draw_list->AddNgon(Screen_Position, Size, Color.TEXT, 6, 2.0f);
 }
 
-//void draw_arrow(ImDrawList* draw_list, ImVec2 p1, ImVec2 p2, ImU32 col, float thickness, float arrow_size, float direction)
 void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, int Size, float Heading)
 {
   float thickness = 2;
@@ -173,7 +171,6 @@ void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, 
   draw_list->AddLine(arrow_p1, arrow_p2, Color.STANDARD, thickness);
 }
 
-
 // ---------------------------------------------------------------------------------------
 
 void MAP_MARKER::clear()
@@ -183,6 +180,7 @@ void MAP_MARKER::clear()
   LONG_NAME = "";
   TYPE = 0;
   AIRPORT_LANDING_VECTORS.clear();
+  REGION_GPS_COORDS.clear();
 }
 
 void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon)
@@ -194,24 +192,6 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
   {
     // Possibly set colors here
     // ---
-
-    // Draw Additional Vectors
-    if (AIRPORT_LANDING_VECTORS.size() > 1)
-      {
-        bool on_screen = false;
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        
-        for(int vector = 0; vector < AIRPORT_LANDING_VECTORS.size(); vector++)
-        {
-          // 5 miles out.
-          ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                    get_coords_x_miles_from_coords(LAT_LON.x, LAT_LON.y, 5.0f, AIRPORT_LANDING_VECTORS[vector]), 
-                                                    on_screen);
-
-          draw_list->AddLine(draw_position, landing_vector_end, 
-                              sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.STANDARD, 2);
-        }
-      }
 
     // Draw Symbol
     switch (TYPE)
@@ -226,12 +206,63 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
         ImGui::PopStyleColor();
         break;
       }
+      
       case 1: //  1 - Airport
       {
+        if (AIRPORT_LANDING_VECTORS.size() > 1)
+        {
+          bool on_screen = false;
+          ImDrawList* draw_list = ImGui::GetWindowDrawList();
+          
+          for(int vector = 0; vector < AIRPORT_LANDING_VECTORS.size(); vector++)
+          {
+            // 5 miles out.
+            ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                      get_coords_x_miles_from_coords(LAT_LON.x, LAT_LON.y, 5.0f, AIRPORT_LANDING_VECTORS[vector]), 
+                                                      on_screen);
+
+            draw_list->AddLine(draw_position, landing_vector_end, 
+                                sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.STANDARD, 2);
+          }
+        }
+        
         draw_airport_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
         ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5));
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.STANDARD));
+        ImGui::Text("%s", DISPLAY_NAME.c_str());
+        ImGui::PopStyleColor();
+        break;
+      }
+
+      case 2: // 2 - Region
+      {
+        ImColor Color = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.STANDARD;
+        if (REGION_GPS_COORDS.size() > 1)
+        {
+          
+          bool on_screen = false;
+          ImDrawList* draw_list = ImGui::GetWindowDrawList();
+          
+          ImVec2 landing_vector_start = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[REGION_GPS_COORDS.size() -1], draw);
+          ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[0], draw);
+          draw_list->AddLine(landing_vector_start, landing_vector_end, Color, 2);
+
+          for(int pos = 1; pos < REGION_GPS_COORDS.size(); pos++)
+          {
+            landing_vector_start = landing_vector_end;
+            landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[pos], draw);
+
+            draw_list->AddLine(landing_vector_start, landing_vector_end, 
+                                Color, 2);
+          }
+          
+        }
+        
+        //draw_airport_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+        ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5));
+
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(Color));
         ImGui::Text("%s", DISPLAY_NAME.c_str());
         ImGui::PopStyleColor();
         break;
@@ -249,197 +280,7 @@ void ADSB_WIDGET::create()
 //  Define PROP (properties before calling this routine)
 //    Property Size and Position is necessary before calling create.
 {
-  /*
-  // Create Gadget Window
-  // Create Panel
-  ADSB_PANEL.PROP.POSY = PROP.POSY;
-  ADSB_PANEL.PROP.POSX = PROP.POSX;
-  ADSB_PANEL.PROP.SIZEY = PROP.SIZEY;
-  ADSB_PANEL.PROP.SIZEX = PROP.SIZEX;
-
-  ADSB_PANEL.create();
-
-  // Create Text Fields
-
-  // Flight
-  FLIGHT.PROP.POSY = 0;
-  FLIGHT.PROP.POSX = 0;
-  FLIGHT.PROP.COLORS_ON = true;
-  FLIGHT.PROP.COLOR = COLOR_BLACK;
-  FLIGHT.PROP.BCOLOR = COLOR_BLACK;
-  FLIGHT.PROP.SIZEX = 8;
-  FLIGHT.PROP.DONT_BLANK = true;
-  FLIGHT.PROP.JUSTIFICATION_LEFT = true;
-  FLIGHT.PROP.UPDATE_INDICATION = true;
-
-  // Squawk
-  SQUAWK.PROP.POSY = 0;
-  SQUAWK.PROP.POSX = 16;
-  SQUAWK.PROP.COLORS_ON = true;
-  SQUAWK.PROP.COLOR = COLOR_BLACK;
-  SQUAWK.PROP.BCOLOR = COLOR_BLACK;
-  SQUAWK.PROP.SIZEX = 5;
-  SQUAWK.PROP.DONT_BLANK = true;
-  SQUAWK.PROP.JUSTIFICATION_RIGHT = true;
-  SQUAWK.PROP.UPDATE_INDICATION = true;
-
-  // Altitude
-  ALTITUDE.PROP.POSY = 1;
-  ALTITUDE.PROP.POSX = 14;
-  ALTITUDE.PROP.SIZEX = 6;
-  ALTITUDE.PROP.DONT_BLANK = true;
-  ALTITUDE.PROP.JUSTIFICATION_RIGHT = true;
-  ALTITUDE.PROP.UPDATE_INDICATION = true;
-
-  // Altitude Strengh Direction
-  ALTITUDE_DIRECION.PROP.SLICES = 5;
-  ALTITUDE_DIRECION.PROP.TIME_SPAN = 5000;
-  ALTITUDE_DIRECION.PROP.DIRECTION_NUTRAL_RANGE = .83;
-
-  // Altitude Indicator
-  ALTITUDE_IND.PROP.POSY = 1;
-  ALTITUDE_IND.PROP.POSX = 20;
-  ALTITUDE_IND.PROP.COLORS_ON = true;
-  ALTITUDE_IND.PROP.COLOR = COLOR_BLACK;
-  ALTITUDE_IND.PROP.BCOLOR = COLOR_BLACK;
-  ALTITUDE_IND.PROP.SIZEX = 1;
-  ALTITUDE_IND.PROP.SIZEY = 2;
-  ALTITUDE_IND.PROP.DONT_BLANK = true;
-  ALTITUDE_IND.PROP.JUSTIFICATION_LEFT = true;
-
-  // Altitude Nav
-  //NAV_ALTITUDE_MCP.PROP.LABEL = "nava";
-  NAV_ALTITUDE_MCP.PROP.POSY = 2;
-  NAV_ALTITUDE_MCP.PROP.POSX = 14;
-  NAV_ALTITUDE_MCP.PROP.COLORS_ON = true;
-  NAV_ALTITUDE_MCP.PROP.COLOR = COLOR_BLUE;
-  NAV_ALTITUDE_MCP.PROP.BCOLOR = COLOR_BLACK;
-  NAV_ALTITUDE_MCP.PROP.SIZEX = 6;
-  NAV_ALTITUDE_MCP.PROP.DONT_BLANK = true;
-  NAV_ALTITUDE_MCP.PROP.JUSTIFICATION_RIGHT = true;
-  NAV_ALTITUDE_MCP.PROP.UPDATE_INDICATION = true;
-
-  // Vertical Rate
-  D_VERTICAL_RATE.PROP.POSY = 3;
-  D_VERTICAL_RATE.PROP.POSX = 14;
-  D_VERTICAL_RATE.PROP.SIZEX = 6;
-  D_VERTICAL_RATE.PROP.DONT_BLANK = true;
-  D_VERTICAL_RATE.PROP.JUSTIFICATION_RIGHT = true;
-  D_VERTICAL_RATE.PROP.UPDATE_INDICATION = true;
-
-  // Vertical Rate Indicator
-  D_VERTICAL_RATE_IND.PROP.POSY = 3;
-  D_VERTICAL_RATE_IND.PROP.POSX = 20;
-  D_VERTICAL_RATE_IND.PROP.COLORS_ON = true;
-  D_VERTICAL_RATE_IND.PROP.COLOR = COLOR_BLACK;
-  D_VERTICAL_RATE_IND.PROP.BCOLOR = COLOR_BLACK;
-  D_VERTICAL_RATE_IND.PROP.SIZEX = 1;
-  D_VERTICAL_RATE_IND.PROP.SIZEY = 2;
-  D_VERTICAL_RATE_IND.PROP.DONT_BLANK = true;
-  D_VERTICAL_RATE_IND.PROP.JUSTIFICATION_LEFT = true;
-
-  // Speed
-  SPEED.PROP.POSY = 1;
-  SPEED.PROP.POSX = 1;
-  SPEED.PROP.SIZEX = 5;
-  SPEED.PROP.DONT_BLANK = true;
-  SPEED.PROP.JUSTIFICATION_LEFT = true;
-  SPEED.PROP.UPDATE_INDICATION = true;
-
-  // Altitude Strengh Direction
-  SPEED_DIRECION.PROP.SLICES = 5;
-  SPEED_DIRECION.PROP.TIME_SPAN = 5000;
-  SPEED_DIRECION.PROP.DIRECTION_NUTRAL_RANGE = 1;
-
-  // Speed Indicator
-  SPEED_IND.PROP.POSY = 1;
-  SPEED_IND.PROP.POSX = 0;
-  SPEED_IND.PROP.COLORS_ON = true;
-  SPEED_IND.PROP.COLOR = COLOR_BLACK;
-  SPEED_IND.PROP.BCOLOR = COLOR_BLACK;
-  SPEED_IND.PROP.SIZEX = 1;
-  SPEED_IND.PROP.SIZEY = 2;
-  SPEED_IND.PROP.DONT_BLANK = true;
-  SPEED_IND.PROP.JUSTIFICATION_LEFT = true;
-
-  // Track
-  TRACK.PROP.POSY = 1;
-  TRACK.PROP.POSX = 7;
-  TRACK.PROP.SIZEX = 3;
-  TRACK.PROP.DONT_BLANK = true;
-  TRACK.PROP.JUSTIFICATION_RIGHT = true;
-  TRACK.PROP.UPDATE_INDICATION = true;
-
-  // Track Mini Compass
-  TRACK_MINI_COMPASS.PROP.POSY = 2;
-  TRACK_MINI_COMPASS.PROP.POSX = 7;
-  TRACK_MINI_COMPASS.PROP.COLOR = COLOR_BLACK;
-  TRACK_MINI_COMPASS.PROP.BCOLOR = COLOR_BLACK;
   
-  // Track Nav
-  //NAV_HEADING.PROP.LABEL = "navt";
-  NAV_HEADING.PROP.POSY = 1;
-  NAV_HEADING.PROP.POSX = 11;
-  NAV_HEADING.PROP.COLORS_ON = true;
-  NAV_HEADING.PROP.COLOR = COLOR_BLUE;
-  NAV_HEADING.PROP.BCOLOR = COLOR_BLACK;
-  NAV_HEADING.PROP.SIZEX = 3;
-  NAV_HEADING.PROP.DONT_BLANK = true;
-  NAV_HEADING.PROP.JUSTIFICATION_LEFT = true;
-  NAV_HEADING.PROP.UPDATE_INDICATION = true;
-
-  // Track Nav Mini Compass
-  NAV_HEADING_MINI_COMPASS.PROP.POSY = 2;
-  NAV_HEADING_MINI_COMPASS.PROP.POSX = 11;
-  NAV_HEADING_MINI_COMPASS.PROP.COLOR = COLOR_BLACK;
-  NAV_HEADING_MINI_COMPASS.PROP.BCOLOR = COLOR_BLACK;
-  
-  // Coordinate Data TTL Indicator
-  COORD_TTL_IND.PROP.POSY = 0;
-  COORD_TTL_IND.PROP.POSX = 8;
-  COORD_TTL_IND.PROP.COLORS_ON = true;
-  COORD_TTL_IND.PROP.COLOR = COLOR_BLACK;
-  COORD_TTL_IND.PROP.BCOLOR = COLOR_BLACK;
-  COORD_TTL_IND.PROP.SIZEX = 3;
-  COORD_TTL_IND.PROP.DONT_BLANK = true;
-  COORD_TTL_IND.PROP.JUSTIFICATION_LEFT = true;
-  COORD_TTL_IND.PROP.UPDATE_INDICATION = true;
-
-  // Aircraft Data TTL Indicator
-  DATA_TTL_IND.PROP.POSY = 0;
-  DATA_TTL_IND.PROP.POSX = 11;
-  DATA_TTL_IND.PROP.COLORS_ON = true;
-  DATA_TTL_IND.PROP.COLOR = COLOR_BLACK;
-  DATA_TTL_IND.PROP.BCOLOR = COLOR_BLACK;
-  DATA_TTL_IND.PROP.SIZEX = 2;
-  DATA_TTL_IND.PROP.DONT_BLANK = true;
-  DATA_TTL_IND.PROP.JUSTIFICATION_LEFT = true;
-
-  // Signal Strengh Indicator
-  SIG_STR_IND.PROP.POSY = 0;
-  SIG_STR_IND.PROP.POSX = 13;
-  SIG_STR_IND.PROP.COLORS_ON = true;
-  SIG_STR_IND.PROP.COLOR = COLOR_BLACK;
-  SIG_STR_IND.PROP.BCOLOR = COLOR_BLACK;
-  SIG_STR_IND.PROP.SIZEX = 3;
-  SIG_STR_IND.PROP.DONT_BLANK = true;
-  SIG_STR_IND.PROP.JUSTIFICATION_LEFT = true;
-
-  // Signal Strengh Direction
-  SIG_STR_DIRECION.PROP.SLICES = 5;
-  SIG_STR_DIRECION.PROP.TIME_SPAN = 5000;
-  SIG_STR_DIRECION.PROP.DIRECTION_NUTRAL_RANGE = .375;
-
-  // Message
-  MESSAGE.PROP.POSY = PROP.SIZEY - 1;
-  MESSAGE.PROP.POSX = 1;
-  MESSAGE.PROP.SIZEX = PROP.SIZEX - 2;
-  MESSAGE.PROP.JUSTIFICATION_LEFT = true;
-
-  refresh();
-  */
-
-  //PROP.CHANGED = true;
 }
 
 void ADSB_WIDGET::clear()
@@ -454,33 +295,6 @@ void ADSB_WIDGET::clear()
   AIRCRAFT_DATA = blank_aircraft_data;
 
   TRACK.clear();
-
-  /*
-  // Reset Text Fields
-  FLIGHT.clear();
-  SQUAWK.clear();
-  ALTITUDE.clear();
-  NAV_ALTITUDE_MCP.clear();
-  D_VERTICAL_RATE.clear();
-  SPEED.clear();
-
-  TRACK.clear();
-  TRACK_MINI_COMPASS.clear();
-  
-  NAV_HEADING.clear();
-  NAV_HEADING_MINI_COMPASS.clear();
-
-  SIG_STR_IND.set_color(COLOR_BLACK, COLOR_BLACK);
-  SIG_STR_IND.clear();
-
-  COORD_TTL_IND.set_color(COLOR_BLACK, COLOR_BLACK);
-  COORD_TTL_IND.clear();
-  
-  DATA_TTL_IND.set_color(COLOR_BLACK, COLOR_BLACK);
-  DATA_TTL_IND.clear();
-
-  //NAV_QNH.set_text(PROP.AIRCRAFT_DATA.NAV_QNH.get_str_value());
-  */
 }
 
 bool ADSB_WIDGET::is_expired(system_data &sdSysData)
@@ -619,340 +433,6 @@ bool ADSB_WIDGET::draw(system_data &sdSysData)
     ImGui::Text(" ");
   }
   
-  //bool ret_redrawn = false;
-
-  /*
-  int tmp_bcolor = 0;
-  int tmp_color = 0;
-  */
-
-  // Check Expiration
-  //if ((EXPIREED.blip_moved(sdSysData.tmeCURRENT_FRAME_TIME) == true && EXPIREED.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false) || 
-  //    (Refresh == true && EXPIREED.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false))
-  //if ((EXPIREED.blip_moved(sdSysData.tmeCURRENT_FRAME_TIME) == true && EXPIREED.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false))
-  //{
-    // Clear all data and reset to start empty state.
-    //clear();
-    //Refresh = true;
-  //}
-
-  /*
-  if ((PROP.CHANGED == true || Refresh == true))
-  {
-    // Draw Background
-    // If No Data at all
-    if (PROP.AIRCRAFT_DATA.data_count() == 0 && PROP.AIRCRAFT_DATA.HEX.conversion_success() == false)
-    {
-      PROP.BCOLOR = COLOR_BLACK;
-      PROP.COLOR = COLOR_BLACK;
-      MESSAGE.set_text("");
-    }
-    // If No Aircraft Data
-    else if (PROP.AIRCRAFT_DATA.data_count() == 0 && PROP.AIRCRAFT_DATA.HEX.conversion_success() == true)
-    {
-      PROP.BCOLOR = COLOR_BLUE;
-      PROP.COLOR = COLOR_WHITE;
-    }
-    // If Position Found
-    else if(PROP.AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true)
-    {
-      PROP.BCOLOR = COLOR_GREEN;
-      PROP.COLOR = COLOR_BLACK;
-
-      if (LATITUDE == PROP.AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value() && 
-          LONGITUDE == PROP.AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value())
-      {
-        // Position has not changed.
-      }
-      else
-      {
-        // Coordinate Indicate Blink
-        COORD_TTL_IND.blink(tmeFrame_Time);
-        LATITUDE = PROP.AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value();
-        LONGITUDE = PROP.AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value();
-      }
-    }
-    // If No Position Found but Data Exist
-    else
-    {
-      PROP.BCOLOR = COLOR_YELLOW;
-      PROP.COLOR = COLOR_BLACK;
-    }
-
-    // Write Additional Messages
-    if (PROP.AIRCRAFT_DATA.data_count() == 0 && PROP.AIRCRAFT_DATA.HEX.conversion_success() == true)
-    {
-      MESSAGE.set_text("No Data");
-    }
-    else
-    {
-      MESSAGE.set_text("");
-    }
-
-    // If Emergency set message
-    if (PROP.AIRCRAFT_DATA.EMERGENCY.conversion_success() == true)
-    {
-      if (PROP.AIRCRAFT_DATA.EMERGENCY.get_str_value() != "none")
-      {
-        PROP.BCOLOR = COLOR_RED;
-        PROP.COLOR = COLOR_WHITE;
-        MESSAGE.set_text(PROP.AIRCRAFT_DATA.EMERGENCY.get_str_value());
-      }  
-    }
-    
-    ADSB_PANEL.set_color(PROP.BCOLOR, PROP.COLOR);
-
-    // Set Colors and Text
-
-    // Flight and Squawk
-    if (PROP.AIRCRAFT_DATA.data_count() > 0)
-    {
-      //TOP_BAR.set_color(COLOR_WHITE, COLOR_BLACK);
-      FLIGHT.set_color(COLOR_WHITE, COLOR_BLACK);
-      SQUAWK.set_color(COLOR_WHITE, COLOR_BLACK);
-    }
-    else
-    {
-      //TOP_BAR.set_color(COLOR_BLACK, COLOR_BLACK);
-      FLIGHT.set_color(COLOR_BLACK, COLOR_BLACK);
-      SQUAWK.set_color(COLOR_BLACK, COLOR_BLACK);
-    }
-
-    FLIGHT.set_text(PROP.AIRCRAFT_DATA.FLIGHT.get_str_value(), tmeFrame_Time);
-    SQUAWK.set_text(PROP.AIRCRAFT_DATA.SQUAWK.get_str_value(), tmeFrame_Time);
-
-    //Altitude and Altitude Inicator
-    if (PROP.AIRCRAFT_DATA.ALTITUDE.conversion_success()==true)
-    {
-      // Aircraft Altitude data ok
-      tmp_text_color_correction(color_range(abs(PROP.AIRCRAFT_DATA.ALTITUDE.get_int_value()), 50, 500, 3000, 12000, 40000),
-                                            tmp_bcolor, tmp_color);
-
-      ALTITUDE_IND.set_color(tmp_bcolor, tmp_color);
-
-      // Direction of value.
-      ALTITUDE_DIRECION.put_value(PROP.AIRCRAFT_DATA.ALTITUDE.get_int_value(), tmeFrame_Time);
-      int altitude_direction = ALTITUDE_DIRECION.direction();        
-      if (altitude_direction == 1)
-      {
-        ALTITUDE_IND.set_text("^\n|");
-      }
-      else if (altitude_direction == 0)
-      {
-        ALTITUDE_IND.set_text("_\n ");
-      }
-      else
-      {
-        ALTITUDE_IND.set_text("|\nv");
-      }
-      
-      ALTITUDE.set_text(PROP.AIRCRAFT_DATA.ALTITUDE.get_str_value(), tmeFrame_Time);
-    }
-    else
-    {
-      if (PROP.AIRCRAFT_DATA.ALTITUDE.get_str_value() == "ground")
-      // Aircraft Altitude data says on ground
-      {
-        ALTITUDE_IND.set_color(COLOR_RED, COLOR_WHITE);
-        ALTITUDE_IND.set_text("X\nX");
-        ALTITUDE.set_text("GROUND");
-      }
-      else
-      {
-        // Aircraft Altitude data unknown
-        ALTITUDE_IND.set_color(PROP.BCOLOR, PROP.BCOLOR);
-        ALTITUDE_IND.set_text(" \n ");
-        ALTITUDE.set_text(PROP.AIRCRAFT_DATA.ALTITUDE.get_str_value(), tmeFrame_Time);
-      }
-    }
-
-    // Aircraft Nav Altitude
-    NAV_ALTITUDE_MCP.set_color(PROP.BCOLOR, COLOR_BLUE);
-    NAV_ALTITUDE_MCP.set_text(PROP.AIRCRAFT_DATA.NAV_ALTITUDE_MCP.get_str_value(), tmeFrame_Time);
-    
-    // Aircraft Vertical Rate and Vertical Rate Indicator
-    if (PROP.AIRCRAFT_DATA.D_FLIGHT_ANGLE.conversion_success()==true)
-    {
-      tmp_text_color_correction(color_scale(abs(PROP.AIRCRAFT_DATA.D_FLIGHT_ANGLE.get_float_value()), 2, 4, 6, 8, 10),
-                                      tmp_bcolor, tmp_color);
-
-
-      D_VERTICAL_RATE_IND.set_color(tmp_bcolor, tmp_color);
-      D_VERTICAL_RATE_IND.set_text("^\nv");
-    }
-    else
-    {
-      D_VERTICAL_RATE_IND.set_color(PROP.BCOLOR, COLOR_BLACK);
-      D_VERTICAL_RATE_IND.set_text(" ");
-    }
-    
-    D_VERTICAL_RATE.set_text(PROP.AIRCRAFT_DATA.D_VERTICAL_RATE.get_str_value(), tmeFrame_Time);
-
-    // Aircraft Speed and Speed Indicator
-    if (PROP.AIRCRAFT_DATA.SPEED.conversion_success()==true)
-    {
-      tmp_text_color_correction(color_range(abs(PROP.AIRCRAFT_DATA.SPEED.get_float_value()), 60, 80, 100, 160, 600),
-                                            tmp_bcolor, tmp_color);
-
-      SPEED_IND.set_color(tmp_bcolor, tmp_color);
-
-      // Direction of value.
-      SPEED_DIRECION.put_value(PROP.AIRCRAFT_DATA.SPEED.get_float_value(), tmeFrame_Time);
-      int speed_direction = SPEED_DIRECION.direction();        
-      if (speed_direction == 1)
-      {
-        SPEED_IND.set_text("^\n|");
-      }
-      else if (speed_direction == 0)
-      {
-        SPEED_IND.set_text("_\n ");
-      }
-      else
-      {
-        SPEED_IND.set_text("|\nv");
-      }
-    }
-    else
-    {
-      SPEED_IND.set_color(PROP.BCOLOR, COLOR_BLACK);
-      SPEED_IND.set_text(" \n ");
-    }
-
-    SPEED.set_text(PROP.AIRCRAFT_DATA.SPEED.get_str_value(), tmeFrame_Time);
-
-    // Aircraft Track and Compass Track
-    if (PROP.AIRCRAFT_DATA.TRACK.conversion_success() == true)
-    {
-      TRACK_MINI_COMPASS.set_color(COLOR_BLUE, COLOR_WHITE);
-      TRACK_MINI_COMPASS.set_heading(PROP.AIRCRAFT_DATA.TRACK.get_float_value());
-      TRACK.set_text(to_string(PROP.AIRCRAFT_DATA.TRACK.get_int_value()), tmeFrame_Time);
-    }
-    else
-    {
-      TRACK_MINI_COMPASS.set_color(PROP.BCOLOR, PROP.BCOLOR);
-      TRACK_MINI_COMPASS.clear();
-      TRACK.set_text("");
-    }
-
-    // Aircraft NAV Track and Compass NAV Track
-    NAV_HEADING.set_color(PROP.BCOLOR, COLOR_BLUE);
-    if (PROP.AIRCRAFT_DATA.NAV_HEADING.conversion_success() == true)
-    {
-      NAV_HEADING_MINI_COMPASS.set_color(COLOR_BLUE, COLOR_WHITE);
-      NAV_HEADING_MINI_COMPASS.set_heading(PROP.AIRCRAFT_DATA.NAV_HEADING.get_float_value());
-      NAV_HEADING.set_text(to_string(PROP.AIRCRAFT_DATA.NAV_HEADING.get_int_value()), tmeFrame_Time);
-    }
-    else
-    {
-      NAV_HEADING_MINI_COMPASS.set_color(PROP.BCOLOR, PROP.BCOLOR);
-      NAV_HEADING_MINI_COMPASS.clear();
-      NAV_HEADING.set_text("");
-    }
-
-    // Aircraft COORD TTL, Data TTL, and RSSI Str.
-    if (PROP.AIRCRAFT_DATA.HEX.conversion_success() == true)
-    {
-      // Aircraft Geo Coordinates TTL
-      if (  PROP.AIRCRAFT_DATA.SEEN_POS.conversion_success()==true &&
-            PROP.AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true)
-      {
-        tmp_text_color_correction(color_scale(abs(PROP.AIRCRAFT_DATA.SEEN_POS.get_float_value()), 5, 45, 65, 0, 0),
-                                              tmp_bcolor, tmp_color);
-
-        COORD_TTL_IND.set_color(tmp_bcolor, tmp_color);
-        COORD_TTL_IND.set_text("( )");
-      }
-      else
-      {
-        COORD_TTL_IND.set_color(PROP.BCOLOR, PROP.BCOLOR);
-      }
-
-      // Aircraft Data TTL
-      if (PROP.AIRCRAFT_DATA.SEEN.conversion_success()==true)
-      {
-        tmp_text_color_correction(color_scale(abs(PROP.AIRCRAFT_DATA.SEEN.get_float_value()), 70, 170, 290, 0, 0),
-                                              tmp_bcolor, tmp_color);
-
-        DATA_TTL_IND.set_color(tmp_bcolor, tmp_color);
-        DATA_TTL_IND.set_text("()");
-      }
-
-      // Aircraft RSSI Strength
-      if (PROP.AIRCRAFT_DATA.RSSI.conversion_success()==true)
-      {
-        tmp_text_color_correction(color_scale(abs(PROP.AIRCRAFT_DATA.RSSI.get_float_value()), 18, 30, 32, 34, 36),
-                                              tmp_bcolor, tmp_color);
-
-        SIG_STR_IND.set_color(tmp_bcolor, tmp_color);
-
-        // Direction of value.
-        SIG_STR_DIRECION.put_value(PROP.AIRCRAFT_DATA.RSSI.get_float_value(), tmeFrame_Time);
-        int sig_direction = SIG_STR_DIRECION.direction();        
-        if (sig_direction == 1)
-        {
-          SIG_STR_IND.set_text("(^)");
-        }
-        else if (sig_direction == 0)
-        {
-          SIG_STR_IND.set_text("(-)");
-        }
-        else
-        {
-          SIG_STR_IND.set_text("(v)");
-        }
-      }
-    }
-    else
-    {
-      COORD_TTL_IND.set_color(PROP.BCOLOR, PROP.BCOLOR);
-      COORD_TTL_IND.set_text("   ");
-
-      DATA_TTL_IND.set_color(PROP.BCOLOR, PROP.BCOLOR);
-      DATA_TTL_IND.set_text("  ");
-
-      SIG_STR_IND.set_color(PROP.BCOLOR, PROP.BCOLOR);
-      SIG_STR_IND.set_text("   ");
-    }
-  }
-  */
-
-  // Write All text fields.
-
-  /*
-  FLIGHT.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-  SQUAWK.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-
-  ALTITUDE_IND.draw(ADSB_PANEL, Refresh);
-  
-  ALTITUDE.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-  
-  NAV_ALTITUDE_MCP.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-
-  D_VERTICAL_RATE_IND.draw(ADSB_PANEL, Refresh);
-  D_VERTICAL_RATE.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-
-  SPEED_IND.draw(ADSB_PANEL, Refresh);
-  SPEED.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-
-  TRACK.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-  TRACK_MINI_COMPASS.draw(ADSB_PANEL, Refresh);
-
-  NAV_HEADING.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-  NAV_HEADING_MINI_COMPASS.draw(ADSB_PANEL, Refresh);
-
-  SIG_STR_IND.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-  COORD_TTL_IND.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-  DATA_TTL_IND.draw(ADSB_PANEL, Refresh, tmeFrame_Time);
-
-  MESSAGE.draw(ADSB_PANEL, Refresh);
-  */
-
-  // Reset Properties Changed.
-  //PROP.CHANGED = false;
-
-  // Draw the Gadget.
-  //return ADSB_PANEL.draw(Refresh);
-
   return false;
 
 }
@@ -1010,7 +490,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
       // Draw Arrow of Aircraft nav heading on map at position
       if (AIRCRAFT_DATA.NAV_HEADING.conversion_success())
       {
-        draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, 20, AIRCRAFT_DATA.TRACK.get_float_value());
+        draw_aircraft_marker_direction(draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, 20, AIRCRAFT_DATA.NAV_HEADING.get_float_value());
       }
 
       // Draw Arrow of Aircraft track heading on map at position, grey if old.
@@ -1214,7 +694,7 @@ void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
   {
     RADIUS_CIRCLE_POINT_SIZE = Working_Area.w / 2 * 0.6f;
 
-    ZOOM_LEVEL = 3;
+    ZOOM_LEVEL = 7;     // Default start zoom level
     set_zoom_level();
   }
 
@@ -1557,6 +1037,159 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.TYPE = 1;
   tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
   tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  LANDMARKS.push_back(tmp_map_marker);
+
+  // Regions
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.171892f, -92.021630f);
+  tmp_map_marker.DISPLAY_NAME = "LAFAYETTE";
+  tmp_map_marker.LONG_NAME = "Lafayette";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.256561f, -91.991461f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.117371f, -91.916954f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.061830f, -92.000708f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.133856f, -92.104908f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.260154f, -92.118993f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.465774f, -91.155707f);
+  tmp_map_marker.DISPLAY_NAME = "BATON ROUGE";
+  tmp_map_marker.LONG_NAME = "Baton Rouge";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.519044f, -91.115905f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.422567f, -91.002650f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.412493f, -91.190666f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.509536f, -91.195576f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.218697f, -92.375267f);
+  tmp_map_marker.DISPLAY_NAME = "CROWLEY";
+  tmp_map_marker.LONG_NAME = "Crowley";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.240683f, -92.362441f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.202709f, -92.352575f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.192178f, -92.378662f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.206711f, -92.399431f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.242758f, -92.392746f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.232104f, -92.272845f);
+  tmp_map_marker.DISPLAY_NAME = "RAYNE";
+  tmp_map_marker.LONG_NAME = "Rayne";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.261696f, -92.262057f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.237789f, -92.248698f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.208421f, -92.271265f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.224987f, -92.281466f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.252253f, -92.280751f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.222796f, -92.681546f);
+  tmp_map_marker.DISPLAY_NAME = "JENNINGS";
+  tmp_map_marker.LONG_NAME = "Jennings";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.246112f, -92.635782f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.199958f, -92.635548f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.199327f, -92.684337f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.246110f, -92.684109f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.216662f, -93.242004f);
+  tmp_map_marker.DISPLAY_NAME = "LAKE CHARLES";
+  tmp_map_marker.LONG_NAME = "Lake Charles";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.264687f, -93.174817f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.217717f, -93.140827f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.147629f, -93.242207f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.173839f, -93.291604f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.533170f, -92.101464f);
+  tmp_map_marker.DISPLAY_NAME = "OPELOUSAS";
+  tmp_map_marker.LONG_NAME = "Opelousas";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.572481f, -92.068683f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.490883f, -92.062947f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.521117f, -92.105416f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.546091f, -92.101756f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.554890f, -92.086241f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(31.295272f, -92.485128f);
+  tmp_map_marker.DISPLAY_NAME = "ALEXANDRIA";
+  tmp_map_marker.LONG_NAME = "Alexandria";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(31.336785f, -92.457796f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(31.296117f, -92.423285f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(31.230499f, -92.506281f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(31.250400f, -92.531065f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(31.330122f, -92.500070f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.489848f, -92.440667f);
+  tmp_map_marker.DISPLAY_NAME = "EUNICE";
+  tmp_map_marker.LONG_NAME = "Eunice";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.509657f, -92.401657f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.496970f, -92.386068f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.480553f, -92.402812f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.480797f, -92.436296f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.506169f, -92.440347f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(29.982557f, -90.168530f);
+  tmp_map_marker.DISPLAY_NAME = "NEW ORLEANS";
+  tmp_map_marker.LONG_NAME = "New Orleans";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.072934f, -89.932467f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(29.860922f, -89.900349f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(29.786963f, -90.022565f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(29.938693f, -90.279924f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.046694f, -90.280212f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.272281f, -89.788092f);
+  tmp_map_marker.DISPLAY_NAME = "SLIDEL";
+  tmp_map_marker.LONG_NAME = "Slidel";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.332989f, -89.753014f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.277625f, -89.701522f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.215956f, -89.801522f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.223910f, -89.823857f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.327115f, -89.766132f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.374954f, -90.094526f);
+  tmp_map_marker.DISPLAY_NAME = "MANDEVILLE";
+  tmp_map_marker.LONG_NAME = "Mandeville";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.423856f, -90.075888f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.373179f, -90.019071f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.366490f, -90.103757f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.418023f, -90.104268f));
+  LANDMARKS.push_back(tmp_map_marker);
+
+  tmp_map_marker.clear();
+  tmp_map_marker.LAT_LON = ImVec2(30.443740f, -90.462038f);
+  tmp_map_marker.DISPLAY_NAME = "PONCHATOULA";
+  tmp_map_marker.LONG_NAME = "Ponchatoula";
+  tmp_map_marker.TYPE = 2;
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.467505f, -90.439530f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.431609f, -90.418708f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.420697f, -90.449317f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.460811f, -90.469741f));
   LANDMARKS.push_back(tmp_map_marker);
 
   //add_landmark(ImVec2(f, f), "", 0);  //

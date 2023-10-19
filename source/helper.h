@@ -302,7 +302,7 @@ class BOOL_BOUNCE
 };
 
 // ---------------------------------------------------------------------------------------
-// Bar Classes
+// Classes
 
 class MIN_MAX_TIME_SLICE
 // Simple min max data point.
@@ -431,6 +431,22 @@ class MIN_MAX_TIME
 // ---------------------------------------------------------------------------------------
 // Impact Resistance
 
+struct IMPACT_RESISTANCE_VALUE
+// For each letter, assign a behavior and type for it.
+{
+  float VALUE;
+  unsigned long ENTRY_TIME;
+};
+
+class IMPACT_RESISTANCE_FLOAT_PROPERTIES
+// Not adjustable after routine starts.
+{
+  public:
+
+  int SIZE = 10;                    // Max Size of Entries
+  unsigned long ALIVE_TIME = 150;   // Measured in ms
+};
+
 class IMPACT_RESISTANCE_FLOAT
 // Floating Point varibale designed to average out the previos X entries into one
 //  value.  For fast and sparatic values.
@@ -440,23 +456,20 @@ class IMPACT_RESISTANCE_FLOAT
 {
   private:
 
-  struct IMPACT_RESISTANCE_VALUE
-  // For each letter, assign a behavior and type for it.
-  {
-    float VALUE;
-    unsigned long ENTRY_TIME;
-  };
-
-  int SIZE = 10;                    // Max Size of Entries
-  unsigned long ALIVE_TIME = 150;   // Measured in ms
-
   vector<IMPACT_RESISTANCE_VALUE> VALUE_COLLECTION;
 
   bool FIRST_RUN = true;
 
   int LATEST_POSITION = 0;
 
+  float LATEST_VALUE = 0.0f;
+
+  bool CHANGED = true;
+  unsigned long OLDEST_ENTRY_TIME = 0;
+
   public:
+
+  IMPACT_RESISTANCE_FLOAT_PROPERTIES PROPS;
 
   void set_size(int Size);
 
@@ -471,7 +484,6 @@ class IMPACT_RESISTANCE_FLOAT
 };
 
 // ---------------------------------------------------------------------------------------
-
 
 
 // ***************************************************************************************

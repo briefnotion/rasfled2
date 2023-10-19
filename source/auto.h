@@ -761,7 +761,8 @@ class AUTOMOBILE_CALCULATED
   VELOCITY PREVIOUS_VELOCITY;
   
   MIN_MAX_TIME ACCELERATION_MIN_MAX_HISTORY;
-  MIN_MAX_TIME ACCELERATION_QUICK_MEAN_HISTORY;
+  //MIN_MAX_TIME ACCELERATION_QUICK_MEAN_HISTORY;
+  IMPACT_RESISTANCE_FLOAT ACCELERATION_QUICK_MEAN_HISTORY;
 
   SIMPLE_ERRORS CAM_COMM_ERRORS;
 
@@ -770,7 +771,7 @@ class AUTOMOBILE_CALCULATED
   //  Fast but not fully acurate.
   //  Currently call just before the data is displayed.
 
-  float acceleration();
+  float acceleration(unsigned long tmeFrame_Time);
   // Acceleration computed from averageing 4 tire speeds and comparing the times
   //  the value was sent.
   //  Respons calculated over 1 second with 4 time slices

@@ -1399,8 +1399,11 @@ void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsi
     ACCELERATION_MIN_MAX_HISTORY.PROP.SLICES = 6;
     ACCELERATION_MIN_MAX_HISTORY.PROP.TIME_SPAN = 30000;
 
-    ACCELERATION_QUICK_MEAN_HISTORY.PROP.SLICES = 4;
-    ACCELERATION_QUICK_MEAN_HISTORY.PROP.TIME_SPAN = 1000;
+    //ACCELERATION_QUICK_MEAN_HISTORY.PROP.SLICES = 4;
+    //ACCELERATION_QUICK_MEAN_HISTORY.PROP.TIME_SPAN = 1000;
+
+    ACCELERATION_QUICK_MEAN_HISTORY.PROPS.SIZE = 50;
+    ACCELERATION_QUICK_MEAN_HISTORY.PROPS.ALIVE_TIME = 1000;
     
     FIRST_RUN = false;
   }
@@ -1418,8 +1421,10 @@ void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsi
 
     if (abs(ACCELERATION) < 10)
     {
-      ACCELERATION_QUICK_MEAN_HISTORY.put_value(ACCELERATION, tmeFrame_Time);
-      ACCELERATION_MIN_MAX_HISTORY.put_value(ACCELERATION_QUICK_MEAN_HISTORY.mean_float(), tmeFrame_Time);
+      //ACCELERATION_QUICK_MEAN_HISTORY.put_value(ACCELERATION, tmeFrame_Time);
+      //ACCELERATION_MIN_MAX_HISTORY.put_value(ACCELERATION_QUICK_MEAN_HISTORY.mean_float(), tmeFrame_Time);
+      ACCELERATION_QUICK_MEAN_HISTORY.set_value(tmeFrame_Time, ACCELERATION);
+      ACCELERATION_MIN_MAX_HISTORY.put_value(ACCELERATION_QUICK_MEAN_HISTORY.impact(tmeFrame_Time), tmeFrame_Time);
     }
 
     PREVIOUS_VELOCITY_FOR_ACC = current_velocity;
@@ -1439,8 +1444,8 @@ void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsi
 
       if (Status.SPEED.SPEED_TRANS.val_mph() > 43 && Status.SPEED.SPEED_TRANS.val_mph() < 48 && 
           Status.STEERING.val_steering_wheel_angle() < 2 && 
-          ACCELERATION_QUICK_MEAN_HISTORY.mean_float() > -.2 && 
-          ACCELERATION_QUICK_MEAN_HISTORY.mean_float() < .2 ) 
+          ACCELERATION_QUICK_MEAN_HISTORY.impact(tmeFrame_Time) > -.2 && 
+          ACCELERATION_QUICK_MEAN_HISTORY.impact(tmeFrame_Time) < .2 ) 
           // Only get values at certain speeds and while drivng straight.
           // Centering speed at 45 because I can drive for hours and not get over 50mph 
           //  and Acceleration < +- .2.
@@ -1461,9 +1466,9 @@ void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsi
 
 }
 
-float AUTOMOBILE_CALCULATED::acceleration()
+float AUTOMOBILE_CALCULATED::acceleration(unsigned long tmeFrame_Time)
 {
-  return ACCELERATION_QUICK_MEAN_HISTORY.mean_float();
+  return ACCELERATION_QUICK_MEAN_HISTORY.impact(tmeFrame_Time);
 }
 
 float AUTOMOBILE_CALCULATED::s_temp()

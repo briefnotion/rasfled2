@@ -783,13 +783,13 @@ int MIN_MAX_TIME::direction()
 
 void IMPACT_RESISTANCE_FLOAT::set_size(int Size)
 {
-  SIZE = Size;
+  PROPS.SIZE = Size;
   FIRST_RUN = true;
 }
 
 void IMPACT_RESISTANCE_FLOAT::set_alive_time(unsigned long Alive_Time)
 {
-  ALIVE_TIME = Alive_Time;
+  PROPS.ALIVE_TIME = Alive_Time;
 }
 
 void IMPACT_RESISTANCE_FLOAT::set_value(unsigned long Time, float Value)
@@ -798,9 +798,9 @@ void IMPACT_RESISTANCE_FLOAT::set_value(unsigned long Time, float Value)
 
   if (FIRST_RUN)
   {
-    VALUE_COLLECTION.reserve(SIZE);
+    VALUE_COLLECTION.reserve(PROPS.SIZE);
 
-    for (int count = VALUE_COLLECTION.size(); count < SIZE; count++)
+    for (int count = VALUE_COLLECTION.size(); count < PROPS.SIZE; count++)
     {
       new_value.ENTRY_TIME = 0;
       new_value.VALUE = -1.0f;
@@ -811,13 +811,15 @@ void IMPACT_RESISTANCE_FLOAT::set_value(unsigned long Time, float Value)
   }
 
   LATEST_POSITION++;
-  if (LATEST_POSITION >= SIZE)
+  if (LATEST_POSITION >= PROPS.SIZE)
   {
     LATEST_POSITION = 0;
   }
 
   VALUE_COLLECTION[LATEST_POSITION].VALUE = Value;
   VALUE_COLLECTION[LATEST_POSITION].ENTRY_TIME = Time;
+
+  CHANGED = true;
 }
 
 float IMPACT_RESISTANCE_FLOAT::latest()
@@ -837,26 +839,39 @@ float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
   float ret_impact_value = 0.0f;
   int count = 0;
   
-  if (VALUE_COLLECTION.size() > 0)
+  if (CHANGED == true || (OLDEST_ENTRY_TIME + PROPS.ALIVE_TIME < Time))
   {
-    for (int pos = 0; pos < SIZE; pos++)
+    if (VALUE_COLLECTION.size() > 0)
     {
-      if (VALUE_COLLECTION[pos].ENTRY_TIME + ALIVE_TIME > Time)
+      OLDEST_ENTRY_TIME = Time;
+      
+      for (int pos = 0; pos < PROPS.SIZE; pos++)
       {
-        count++;
-        ret_impact_value = ret_impact_value + VALUE_COLLECTION[pos].VALUE;
+        if (VALUE_COLLECTION[pos].ENTRY_TIME + PROPS.ALIVE_TIME > Time)
+        {
+          count++;
+          ret_impact_value = ret_impact_value + VALUE_COLLECTION[pos].VALUE;
+          if (OLDEST_ENTRY_TIME > Time)
+          {
+            OLDEST_ENTRY_TIME = Time;
+          }
+        }
       }
+    }
+
+    if (count == 0)
+    {
+      LATEST_VALUE = latest();
+    }
+    else
+    {
+      LATEST_VALUE = (ret_impact_value / (float)count);
     }
   }
 
-  if (count == 0)
-  {
-    return latest();
-  }
-  else
-  {
-    return (ret_impact_value / (float)count);
-  }
+  CHANGED = false;
+
+  return LATEST_VALUE;
 }
 
 // ***************************************************************************************

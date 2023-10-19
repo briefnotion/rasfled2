@@ -1,3 +1,6 @@
+2.045_231019
+  - Changed some things.
+
 2.044_231013
   - Changed some CAN Bus serial communications things.
 

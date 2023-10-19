@@ -107,10 +107,12 @@ class MAP_MARKER
 
   // Type 1
   vector<float> AIRPORT_LANDING_VECTORS;
+  vector<ImVec2> REGION_GPS_COORDS;
 
   // Types:
   //  0 - Generic
   //  1 - Airport
+  //  2 - Region
 
   void clear();
 
@@ -188,35 +190,6 @@ class ADSB_WIDGET
   public:
 
   AIRCRAFT AIRCRAFT_DATA;
-
-  /*
-
-  // Text Fields  
-  Text_Field FLIGHT;
-  Text_Field SQUAWK;
-
-  Text_Field ALTITUDE;
-  Text_Field_Multi_Line ALTITUDE_IND;
-  Text_Field NAV_ALTITUDE_MCP; 
-
-  Text_Field D_VERTICAL_RATE;
-  Text_Field_Multi_Line D_VERTICAL_RATE_IND;
-
-  Text_Field SPEED;
-  Text_Field_Multi_Line SPEED_IND;
-
-  Text_Field TRACK;
-  Mini_Compass TRACK_MINI_COMPASS;
-  
-  Text_Field NAV_HEADING;
-  Mini_Compass NAV_HEADING_MINI_COMPASS;
-
-  Text_Field SIG_STR_IND;
-  Text_Field COORD_TTL_IND;
-  Text_Field DATA_TTL_IND;
-
-  Text_Field MESSAGE;
-  */  
 
   ADSB_WIDGET_Properties PROP;
 
