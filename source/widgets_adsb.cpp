@@ -237,7 +237,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
 
       case 2: // 2 - Region
       {
-        ImColor Color = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.STANDARD;
+        ImColor Color = sdSysData.COLOR_SELECT.COLOR_COMB_RED.STANDARD;
         if (REGION_GPS_COORDS.size() > 1)
         {
           
@@ -1046,11 +1046,23 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "LAFAYETTE";
   tmp_map_marker.LONG_NAME = "Lafayette";
   tmp_map_marker.TYPE = 2;
-  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.256561f, -91.991461f));
-  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.117371f, -91.916954f));
-  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.061830f, -92.000708f));
-  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.133856f, -92.104908f));
-  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.260154f, -92.118993f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.256323f, -91.990737f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.209173f, -91.975376f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.192592f, -91.987432f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.160652f, -91.951085f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.108378f, -91.920498f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.069544f, -91.979683f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.073432f, -92.023356f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.100806f, -92.026423f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.137705f, -92.069318f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.131181f, -92.105622f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.189960f, -92.081542f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.191015f, -92.113194f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.262811f, -92.133407f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.260867f, -92.089104f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.249578f, -92.091143f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.247825f, -92.046105f));
+  tmp_map_marker.REGION_GPS_COORDS.push_back(ImVec2(30.258446f, -92.021630f));
   LANDMARKS.push_back(tmp_map_marker);
 
   tmp_map_marker.clear();

@@ -845,7 +845,7 @@ float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
     {
       OLDEST_ENTRY_TIME = Time;
       
-      for (int pos = 0; pos < PROPS.SIZE; pos++)
+      for (int pos = 0; pos < VALUE_COLLECTION.size(); pos++)
       {
         if (VALUE_COLLECTION[pos].ENTRY_TIME + PROPS.ALIVE_TIME > Time)
         {
