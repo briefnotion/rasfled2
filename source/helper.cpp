@@ -837,8 +837,12 @@ float IMPACT_RESISTANCE_FLOAT::latest()
 float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
 {
   float ret_impact_value = 0.0f;
+  float mean = 0.0f;
+  float total = 0.0f;
+
   int count = 0;
   
+  // Calculate Total
   if (CHANGED == true || (OLDEST_ENTRY_TIME + PROPS.ALIVE_TIME < Time))
   {
     if (VALUE_COLLECTION.size() > 0)
@@ -847,25 +851,78 @@ float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
       
       for (int pos = 0; pos < VALUE_COLLECTION.size(); pos++)
       {
+        // Only add values of items not time expired.
         if (VALUE_COLLECTION[pos].ENTRY_TIME + PROPS.ALIVE_TIME > Time)
         {
           count++;
-          ret_impact_value = ret_impact_value + VALUE_COLLECTION[pos].VALUE;
+          total = total + VALUE_COLLECTION[pos].VALUE;
           if (OLDEST_ENTRY_TIME > Time)
           {
             OLDEST_ENTRY_TIME = Time;
           }
         }
       }
+      
+      // Calculate mean if count is > 0. Things could've been filterd out.
+      if (count > 0)
+      {
+        mean = (total / (float)count);          
+      }
+
+      // Recalculate Mean if Emperical Rule Enabled.
+      if (PROPS.EMPERICAL_RULE_ENABLE == true)
+      {
+        // Calculate mean without outliers.
+
+        // Reset vars to 0
+        total = 0.0f;
+        count = 0;
+
+        // Calculate Standard Deviation
+        float stdev = 0.0f;
+
+        for (int pos = 0; pos < VALUE_COLLECTION.size(); pos++)
+        {
+          if (VALUE_COLLECTION[pos].ENTRY_TIME + PROPS.ALIVE_TIME > Time)
+          {
+            stdev += pow(VALUE_COLLECTION[pos].VALUE - mean, 2.0f);
+          }
+        }
+
+        stdev = sqrt(stdev / VALUE_COLLECTION.size());
+
+        // Calculate Emperical Rule
+        for (int pos = 0; pos < VALUE_COLLECTION.size(); pos++)
+        {
+          if (VALUE_COLLECTION[pos].ENTRY_TIME + PROPS.ALIVE_TIME > Time)
+          {
+            if(abs(VALUE_COLLECTION[pos].VALUE - mean) <= (float)PROPS.EMPERICAL_RULE_DEVIATIONS * stdev)
+            {
+              count++;
+              total = total + VALUE_COLLECTION[pos].VALUE;
+            }
+          }
+        }
+              
+        // Calculate mean if count is > 0. Things could've been filterd out.
+        if (count > 0)
+        {
+          mean = (total / (float)count);
+        }
+      }
+
+      // Exits with mean being the significant var, with or without the Emperical Rule Calc
     }
 
     if (count == 0)
     {
+      // Either the collection size is 0 or everthing was filtered out
+      // Return latest value if no values calculated
       LATEST_VALUE = latest();
     }
     else
     {
-      LATEST_VALUE = (ret_impact_value / (float)count);
+      LATEST_VALUE = mean;
     }
   }
 

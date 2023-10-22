@@ -113,10 +113,11 @@ class MAP_MARKER
   //  0 - Generic
   //  1 - Airport
   //  2 - Region
+  //  3 - Interstate
 
   void clear();
 
-  void draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon);
+  void draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon, float Range);
 };
 
 // ---------------------------------------------------------------------------------------

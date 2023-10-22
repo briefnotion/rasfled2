@@ -517,11 +517,11 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
       //pos.y = pos.y + 47;
       ImGui::SetCursorScreenPos(ImVec2(pos.x + 53, pos.y - 0));
 
-      ImGui::Text("%s", min.c_str());
+      ImGui::Text("%s", max.c_str());
 
       ImGui::SetCursorScreenPos(ImVec2(pos.x + 53, pos.y + 53));
       
-      ImGui::Text("%s", max.c_str());
+      ImGui::Text("%s", min.c_str());
       
       ImGui::PopStyleColor();
     }
@@ -703,7 +703,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_ACCELERATION_SB.PROPS.LABEL_ON_LEFT = true;
   SDATA.L_ACCELERATION_SB.PROPS.DISPLAY_MIN_MAX = true;
   SDATA.L_ACCELERATION_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
-  SDATA.L_ACCELERATION_SB.PROPS.WHEEL_FRAME_SIZE = 18;
+  SDATA.L_ACCELERATION_SB.PROPS.WHEEL_FRAME_SIZE = 9;
   SDATA.L_ACCELERATION_SB.create();
   
   SDATA.L_GEAR_SB.PROPS.LABEL = "G\nE\nR";
