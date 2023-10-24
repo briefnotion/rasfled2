@@ -1,5 +1,7 @@
 # rasfled2
 
+Language: [English](https://github.com/briefnotion/rasfled2/blob/main/README.md), [Simple](https://github.com/briefnotion/rasfled2/blob/main/README.simple.md), [CyberPunk](https://github.com/briefnotion/rasfled2/blob/main/README.cyberpunk.md), [Technical](https://github.com/briefnotion/rasfled2/blob/main/README.technical.md), [Corporate](https://github.com/briefnotion/rasfled2/blob/main/README.corporate%20language.md), [Jive](https://github.com/briefnotion/rasfled2/blob/main/README.jive.md), [Cajun](https://github.com/briefnotion/rasfled2/blob/main/README.cajun.md)
+
 RasFLED 2.0: Illuminating the Future with Neon Brilliance
 
 Buckle up, tech trailblazers, as we unveil the electrifying marvel that is RasFLED 2.0. This cutting-edge control program is your ticket to a neon-drenched realm of boundless possibilities, all ensconced within the circuitry of a Raspberry Pi. Behold, a realm where innovation melds seamlessly with the digital tapestry, where a symphony of multi-colored light strips dances to the rhythm of your commands.

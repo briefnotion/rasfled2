@@ -1,5 +1,7 @@
 # rasfled2
 
+Language: [English](https://github.com/briefnotion/rasfled2/blob/main/README.md), [Simple](https://github.com/briefnotion/rasfled2/blob/main/README.simple.md), [CyberPunk](https://github.com/briefnotion/rasfled2/blob/main/README.cyberpunk.md), [Technical](https://github.com/briefnotion/rasfled2/blob/main/README.technical.md), [Corporate](https://github.com/briefnotion/rasfled2/blob/main/README.corporate%20language.md), [Jive](https://github.com/briefnotion/rasfled2/blob/main/README.jive.md), [Cajun](https://github.com/briefnotion/rasfled2/blob/main/README.cajun.md)
+
 RasFLED: Illuminative Control Paradigm for Multifaceted Light Emission on Raspberry Pi Platform
 
 RasFLED, an avant-garde initiative, materializes as a comprehensive orchestration of digital control methodologies, endeavoring to harness and regulate multi-hued luminescence phenomena. This transformative construct, meticulously architected to coalesce seamlessly with the Raspberry Pi substrate, epitomizes a novel synthesis of computational algorithms and electro-optic interfaces.

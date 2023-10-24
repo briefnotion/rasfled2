@@ -1,5 +1,7 @@
 # rasfled2
 
+Language: [English](https://github.com/briefnotion/rasfled2/blob/main/README.md), [Simple](https://github.com/briefnotion/rasfled2/blob/main/README.simple.md), [CyberPunk](https://github.com/briefnotion/rasfled2/blob/main/README.cyberpunk.md), [Technical](https://github.com/briefnotion/rasfled2/blob/main/README.technical.md), [Corporate](https://github.com/briefnotion/rasfled2/blob/main/README.corporate%20language.md), [Jive](https://github.com/briefnotion/rasfled2/blob/main/README.jive.md), [Cajun](https://github.com/briefnotion/rasfled2/blob/main/README.cajun.md)
+
 RasFLED: Lighting Up the Streets, Pi-style
 
 Yo, peep this: RasFLED is on the block, bringin' you that multi-color light game straight to your Raspberry Pi. This computer's no joke, it's got mad skills to handle all sorts of control modules. Check it, the modules in this latest drop (2.021_230814) are tailor-made for a Raspberry Pi 3b, and we got four hot modules on deck.

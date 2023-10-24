@@ -1,5 +1,7 @@
 # rasfled2
 
+Language: [English](https://github.com/briefnotion/rasfled2/blob/main/README.md), [Simple](https://github.com/briefnotion/rasfled2/blob/main/README.simple.md), [CyberPunk](https://github.com/briefnotion/rasfled2/blob/main/README.cyberpunk.md), [Technical](https://github.com/briefnotion/rasfled2/blob/main/README.technical.md), [Corporate](https://github.com/briefnotion/rasfled2/blob/main/README.corporate%20language.md), [Jive](https://github.com/briefnotion/rasfled2/blob/main/README.jive.md), [Cajun](https://github.com/briefnotion/rasfled2/blob/main/README.cajun.md)
+
 RasFLED: Cool Lights for Raspberry Pi
 
 Hey there, let's break it down. RasFLED is like this cool program that makes colorful lights do their thing on a Raspberry Pi computer. This computer is super smart and can do all sorts of stuff, especially handle different control things. Right now, in this latest version (2.021_230814), it's made to work on a Raspberry Pi 3b and has four sections that do cool stuff.

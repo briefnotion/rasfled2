@@ -1,5 +1,7 @@
 # rasfled2
 
+Language: [English](https://github.com/briefnotion/rasfled2/blob/main/README.md), [Simple](https://github.com/briefnotion/rasfled2/blob/main/README.simple.md), [CyberPunk](https://github.com/briefnotion/rasfled2/blob/main/README.cyberpunk.md), [Technical](https://github.com/briefnotion/rasfled2/blob/main/README.technical.md), [Corporate](https://github.com/briefnotion/rasfled2/blob/main/README.corporate%20language.md), [Jive](https://github.com/briefnotion/rasfled2/blob/main/README.jive.md), [Cajun](https://github.com/briefnotion/rasfled2/blob/main/README.cajun.md)
+
 RasFLED: Lumière et Contrôle Multicolores en Terre de Raspberry Pi
 
 Écoutez ça, mes amis, RasFLED arrive en fanfare, apportant avec lui le frisson de la lumière multicolore à la puissance du Raspberry Pi. L'ordinateur, souple et adaptable à souhait, peut aisément gérer une variété de modules de contrôle. Les modules individuels, dans cette version actuelle (2.021_230814), sont conçus pour fonctionner sur un Raspberry Pi 3b et comportent fièrement 4 modules distincts.

@@ -1,5 +1,8 @@
 # rasfled2
 
+Language: [English](https://github.com/briefnotion/rasfled2/blob/main/README.md), [Simple](https://github.com/briefnotion/rasfled2/blob/main/README.simple.md), [CyberPunk](https://github.com/briefnotion/rasfled2/blob/main/README.cyberpunk.md), [Technical](https://github.com/briefnotion/rasfled2/blob/main/README.technical.md), [Corporate](https://github.com/briefnotion/rasfled2/blob/main/README.corporate%20language.md), [Jive](https://github.com/briefnotion/rasfled2/blob/main/README.jive.md), [Cajun](https://github.com/briefnotion/rasfled2/blob/main/README.cajun.md)
+
+
 RasFLED: Illuminating Synergistic Capabilities on Raspberry Pi Platform
 
 Our visionary aspiration materializes as RasFLED – a pioneering program engineered to orchestrate dynamic displays through multi-hued light strips, seamlessly operable on the Raspberry Pi architecture. Capitalizing on the Pi's inherent versatility and adaptability, we have engineered an intricate framework to seamlessly accommodate a diverse array of control modules, each catering to distinct operational paradigms. Current iteration (Version 2.021_230814) boasts profound integration with Raspberry Pi 3b, embodying an intricate constellation of four meticulously structured modules.
