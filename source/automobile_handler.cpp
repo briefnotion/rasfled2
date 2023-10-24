@@ -33,7 +33,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
   // Automobile Data Switched to Not Available
 
   // Data Grab to reduce calc times.
-  float speed_trans_mph_impres = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph_impres(tmeCurrentTime);
+  //float speed_trans_mph_impres = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph_impres(tmeCurrentTime);
+  float speed_trans_mph_impres = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph();
 
   // Check for changes in the automobile availability
   if ((set_bool_with_change_notify(sdSysData.CAR_INFO.active(), AUTO_ACTIVE) == true))

@@ -1,6 +1,7 @@
 # rasfled2
 
-RasFLED: A Multi-Colored Light Strip Control Program for Raspberry Pi
+RasFLED: 
+A Multi-Colored Light Strip Control Program for Raspberry Pi
 
 RasFLED is an innovative control program tailored for multi-colored light strips, compatible with Raspberry Pi. This versatile platform accommodates various control modules, with the current iteration (Version 2.021_230814) optimized for the Raspberry Pi 3b and featuring four distinct modules.
 

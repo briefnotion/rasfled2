@@ -1308,17 +1308,19 @@ void version_5()
     if (ctrl.start == true && CAN_MSGAVAIL == CAN0.checkReceive() ||
           ctrl.start == true && ctrl.test == true)
     {
-      MESSAGE_TIME = millis();
-
       // Check to see whether data is read
       if (ctrl.test == false)
       {
         // Get Can Data
-        CAN0.readMsgBufID(&ID, &len, buf);    // Read data  
+        MESSAGE_TIME = millis();
+        CAN0.readMsgBufID(&ID, &len, buf);    // Read data
       }
       else
       {
         // Get Test Data
+        MESSAGE_TIME = millis();
+        //MESSAGE_TIME = micro();  // Returns the number of microseconds since the Arduino board began running the current program. Data type: unsigned long.
+                                 // 1 millisecond is equal to 1000
         ID = fake_two_byte_counter;
         len = 8;
         buf[0] = fake_one_byte_counter;

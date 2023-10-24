@@ -1399,9 +1399,6 @@ void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsi
     ACCELERATION_MIN_MAX_HISTORY.PROP.SLICES = 6;
     ACCELERATION_MIN_MAX_HISTORY.PROP.TIME_SPAN = 30000;
 
-    //ACCELERATION_QUICK_MEAN_HISTORY.PROP.SLICES = 4;
-    //ACCELERATION_QUICK_MEAN_HISTORY.PROP.TIME_SPAN = 1000;
-
     ACCELERATION_QUICK_MEAN_HISTORY.PROPS.SIZE = 25;
     ACCELERATION_QUICK_MEAN_HISTORY.PROPS.ALIVE_TIME = 1000;
     ACCELERATION_QUICK_MEAN_HISTORY.PROPS.EMPERICAL_RULE_ENABLE = true;
@@ -1410,31 +1407,36 @@ void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsi
   }
  
   // Calculate Acceleration and Wheel Speed offsets.
-  if (Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent() != PREVIOUS_TIME_FOR_ACC)
-  //if (Status.SPEED.SPEED_LB_TIRE.time_stamp() != PREVIOUS_VELOCITY_FOR_ACC.time_stamp())
+
+  unsigned long speed_timestamp = Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent();
+  //unsigned long speed_timestamp = Status.SPEED.SPEED_TRANS.time_stamp_time_sent();
+
+  if (speed_timestamp != PREVIOUS_TIME_FOR_ACC)
   {
-    float current_velocity = (Status.SPEED.SPEED_LF_TIRE.val_meters_per_second() + Status.SPEED.SPEED_RF_TIRE.val_meters_per_second() +
-                              Status.SPEED.SPEED_LB_TIRE.val_meters_per_second() + Status.SPEED.SPEED_RB_TIRE.val_meters_per_second()) / 4;
+    SPEED_ALL_TIRES_AVERAGE.store_meters_per_second(((Status.SPEED.SPEED_LF_TIRE.val_meters_per_second() + 
+                                                      Status.SPEED.SPEED_RF_TIRE.val_meters_per_second() +
+                                                      Status.SPEED.SPEED_LB_TIRE.val_meters_per_second() + 
+                                                      Status.SPEED.SPEED_RB_TIRE.val_meters_per_second()) / 4), 
+                                                      tmeFrame_Time,
+                                                      Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent());
+
+
+    float current_velocity = SPEED_ALL_TIRES_AVERAGE.val_meters_per_second();
+
+    //float current_velocity = Status.SPEED.SPEED_TRANS.val_meters_per_second();
 
     // Reading Acceleration from tire speed may be more accurate.
     float ACCELERATION = 1000 * (   (current_velocity - PREVIOUS_VELOCITY_FOR_ACC)  ) / 
-                        (Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent() - PREVIOUS_TIME_FOR_ACC);
+                        (speed_timestamp - PREVIOUS_TIME_FOR_ACC);
 
     if (abs(ACCELERATION) < 10)
     {
-      //ACCELERATION_QUICK_MEAN_HISTORY.put_value(ACCELERATION, tmeFrame_Time);
-      //ACCELERATION_MIN_MAX_HISTORY.put_value(ACCELERATION_QUICK_MEAN_HISTORY.mean_float(), tmeFrame_Time);
       ACCELERATION_QUICK_MEAN_HISTORY.set_value(tmeFrame_Time, ACCELERATION);
       ACCELERATION_MIN_MAX_HISTORY.put_value(ACCELERATION_QUICK_MEAN_HISTORY.impact(tmeFrame_Time), tmeFrame_Time);
     }
     
-    
-    //printf("tme %lu\t vel %f\t acc %f\t mea %f\t c %d \n", Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent() - PREVIOUS_TIME_FOR_ACC, 
-    //current_velocity, ACCELERATION, ACCELERATION_QUICK_MEAN_HISTORY.impact(tmeFrame_Time), ACCELERATION_QUICK_MEAN_HISTORY.count(tmeFrame_Time));
-
-
     PREVIOUS_VELOCITY_FOR_ACC = current_velocity;
-    PREVIOUS_TIME_FOR_ACC = Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent();
+    PREVIOUS_TIME_FOR_ACC = speed_timestamp;
 
     ACCELERATION_TIMER.ping_up(tmeFrame_Time, 250);
 
