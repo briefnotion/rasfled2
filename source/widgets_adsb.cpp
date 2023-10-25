@@ -308,14 +308,6 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
 
 //  ADSB_Channel Classes
 
-void ADSB_WIDGET::create()
-// Prepare gadget to be drawn.  
-//  Define PROP (properties before calling this routine)
-//    Property Size and Position is necessary before calling create.
-{
-  
-}
-
 void ADSB_WIDGET::clear()
 // Clear values
 {
@@ -369,7 +361,8 @@ void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long &tmeCurrentMi
       {
         AIRCRAFT_TRACK_POINT new_lat_lon;
         new_lat_lon.LAT_LON = ImVec2(Aircraft.POSITION.LATITUDE.get_float_value(), Aircraft.POSITION.LONGITUDE.get_float_value());
-        
+        new_lat_lon.ALTITUDE = (float)AIRCRAFT_DATA.ALTITUDE.get_int_value();
+
         float intensity = (32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
 
         if (intensity < 0.2f)
@@ -387,7 +380,8 @@ void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long &tmeCurrentMi
     {
       AIRCRAFT_TRACK_POINT new_lat_lon;
       new_lat_lon.LAT_LON = ImVec2(Aircraft.POSITION.LATITUDE.get_float_value(), Aircraft.POSITION.LONGITUDE.get_float_value());
-      
+      new_lat_lon.ALTITUDE = (float)AIRCRAFT_DATA.ALTITUDE.get_int_value();
+
       float intensity = (32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
 
       if (intensity < 0.2f)
@@ -410,6 +404,18 @@ bool ADSB_WIDGET::draw(system_data &sdSysData)
 //  Animations will be ignored without time reference.
 // Returns true if panel was redrawn.
 {
+  // Create vars if first run
+  if (ALTITUDE_COLOR_SCALE.active() == false)
+  {
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(500.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(1000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(2500.0f, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(12000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(45000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(65000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(100000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE);
+  }
+
   if (is_expired(sdSysData) == false)
   {
     ImGui::TableNextRow();
@@ -507,7 +513,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
 
           if (draw_0 || draw_1)
           {
-            ImColor point_color = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.TEXT;
+            ImColor point_color = ALTITUDE_COLOR_SCALE.get_color(TRACK[position].ALTITUDE).TEXT;
 
             point_color.Value.w = TRACK[position].RSSI_INTENSITY;
 

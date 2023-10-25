@@ -128,6 +128,7 @@ class AIRCRAFT_TRACK_POINT
   
   ImVec2 LAT_LON;
   float RSSI_INTENSITY = 0;
+  float ALTITUDE = 0;
 };
 
 class ADSB_WIDGET_Properties
@@ -187,18 +188,13 @@ class ADSB_WIDGET
   float LONGITUDE = 0;
 
   vector<AIRCRAFT_TRACK_POINT> TRACK;
+  NEW_COLOR_SCALE ALTITUDE_COLOR_SCALE;
 
   public:
 
   AIRCRAFT AIRCRAFT_DATA;
 
   ADSB_WIDGET_Properties PROP;
-
-
-  void create();
-  // Prepare gadget to be drawn.  
-  //  Define PROP (properties before calling this routine)
-  //    Property Size and Position is necessary before calling create.
 
   void clear();
   // Clear values
