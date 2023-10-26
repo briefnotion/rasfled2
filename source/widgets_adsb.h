@@ -196,6 +196,8 @@ class ADSB_WIDGET
 
   ADSB_WIDGET_Properties PROP;
 
+  void create(system_data &sdSysData);
+
   void clear();
   // Clear values
 

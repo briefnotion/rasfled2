@@ -308,6 +308,21 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
 
 //  ADSB_Channel Classes
 
+void ADSB_WIDGET::create(system_data &sdSysData)
+{
+  // Create vars if first run
+  if (ALTITUDE_COLOR_SCALE.active() == false)
+  {
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(500.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(1000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(2500.0f, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(12000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(45000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(65000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(100000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE);
+  }
+}
+
 void ADSB_WIDGET::clear()
 // Clear values
 {
@@ -404,18 +419,6 @@ bool ADSB_WIDGET::draw(system_data &sdSysData)
 //  Animations will be ignored without time reference.
 // Returns true if panel was redrawn.
 {
-  // Create vars if first run
-  if (ALTITUDE_COLOR_SCALE.active() == false)
-  {
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(500.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(1000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(2500.0f, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(12000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(45000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(65000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(100000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE);
-  }
-
   if (is_expired(sdSysData) == false)
   {
     ImGui::TableNextRow();
@@ -1771,6 +1774,7 @@ void ADSB_SCREEN::update(system_data &sdSysData)
         if (pos_expired_avail == -1)
         {
           ADSB_WIDGET new_adsb_widget;
+          new_adsb_widget.create(sdSysData);
           new_adsb_widget.update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.tmeCURRENT_FRAME_TIME);
           ADSB_WIDGET_q.push_back(new_adsb_widget);
         }
