@@ -469,6 +469,10 @@ void BAR_TECH::create()
   MIN_MAX.PROP.TIME_SPAN = PROPS.MIN_MAX_TIME_SPAN;
   MIN_MAX.PROP.SLICES = PROPS.MIN_MAX_TIME_SLICES;
 
+  RULER.PROPS.COLOR = PROPS.COLOR_RULER;
+  RULER.PROPS.MAX_VALUE = PROPS.MAX;
+  RULER.PROPS.MAX_TICK_LEVEL = PROPS.MAX_TICK_LEVEL;
+
   DSP_MIN.PROPS.CHANGE_NOTIFICATION = true;
   DSP_MAX.PROPS.CHANGE_NOTIFICATION = true;
   DSP_VALUE.PROPS.CHANGE_NOTIFICATION = false;
@@ -543,6 +547,11 @@ void BAR_TECH::draw(system_data &sdSysData)
     draw_list->AddRect(ImVec2(pos.x + min_location, pos.y +2), 
                               ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT -2), 
                               PROPS.COLOR_MARKER.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+
+    if (PROPS.DRAW_RULER)
+    {
+      RULER.draw(sdSysData, pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT));
+    }
   }
 
   // Draw Value Marker

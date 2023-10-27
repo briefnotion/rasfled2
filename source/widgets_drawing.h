@@ -15,6 +15,7 @@
 #include <stdio.h>
 //#include <string>
 //#include <vector>
+#include<cmath>
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
@@ -79,6 +80,8 @@ class TEXTURE_IMAGE
 
 };
 
+// ---------------------------------------------------------------------------------------
+
 class ONE_CHAR_LINE_GRAPH_PROPERTIES
 {
   public:
@@ -100,6 +103,55 @@ class ONE_CHAR_LINE_GRAPH
   // Value 0.0 - 1.0
 
   void draw(system_data &sdSysData);
+};
+
+// ---------------------------------------------------------------------------------------
+
+class DRAW_RULER_PROPERTIES
+{
+  public:
+  
+  COLOR_COMBO COLOR;
+  float POINT_SIZE = 2.0f;
+
+  float MAX_VALUE = 100.0f;
+
+  int MAX_TICK_LEVEL = 4;
+};
+
+class DRAW_RULER
+{
+  private:
+
+  ImVec2 PREV_START_POS;
+  ImVec2 PREV_END_POS;
+
+  bool draw_level_1 = false;
+  bool draw_level_2 = false;
+  bool draw_level_3 = false;
+  bool draw_level_4 = false;
+
+  float x_size = 0.0f;
+  float y_size = 0.0f;
+
+  float div_1 = 0.0f;
+  float div_2 = 0.0f;
+  float div_3 = 0.0f;
+  float div_4 = 0.0f;
+
+  float l1_size = 0.0f;
+  float l2_size = 0.0f;
+  float l3_size = 0.0f;
+  float l4_size = 0.0f;
+
+  float new_max_value = 0.0f;
+
+  public:
+
+  DRAW_RULER_PROPERTIES PROPS;
+
+  void draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
+
 };
 
 // ---------------------------------------------------------------------------------------

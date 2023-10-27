@@ -22,6 +22,7 @@
 
 #include "system.h"
 #include "screen4_helper.h"
+#include "widgets_drawing.h"
 
 using namespace std;
 
@@ -245,6 +246,11 @@ class BAR_TECH_PROPERTIES
   bool DISPLAY_SINGLE_POINT_FLOAT = false;
   int MIN_MAX_TIME_SPAN = 60000;
   int MIN_MAX_TIME_SLICES = 20;
+
+  // Ruler
+  bool DRAW_RULER = false;
+  COLOR_COMBO COLOR_RULER;
+  int MAX_TICK_LEVEL = 4;
 };
 
 class BAR_TECH
@@ -255,6 +261,8 @@ class BAR_TECH
   IMPACT_RESISTANCE_FLOAT_FRAME_COUNT VALUE_MARKER;
 
   MIN_MAX_TIME MIN_MAX;
+
+  DRAW_RULER RULER;
 
   W_TEXT DSP_MIN;
   W_TEXT DSP_MAX;
