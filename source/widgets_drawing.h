@@ -112,7 +112,7 @@ class DRAW_RULER_PROPERTIES
   public:
   
   COLOR_COMBO COLOR;
-  float POINT_SIZE = 2.0f;
+  float POINT_SIZE = 1.0f;
 
   float MAX_VALUE = 100.0f;
 
@@ -152,6 +152,72 @@ class DRAW_RULER
 
   void draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 
+};
+
+// ---------------------------------------------------------------------------------------
+
+class DRAW_GRID_PROPERTIES
+{
+  public:
+  
+  COLOR_COMBO COLOR;
+  float POINT_SIZE = 2.0f;
+
+  int SEPERATOR_COUNT_HORIZONTAL = 5;
+  int SEPERATOR_COUNT_VERTICAL = 5;
+};
+
+class DRAW_GRID
+{
+  private:
+
+  ImVec2 PREV_START_POS;
+  ImVec2 PREV_END_POS;
+
+  float X_SIZE = 0.0f;
+  float Y_SIZE = 0.0f;
+
+  public:
+
+  DRAW_GRID_PROPERTIES PROPS;
+
+  void draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
+};
+
+// ---------------------------------------------------------------------------------------
+
+class DRAW_D2_PLOT_PROPERTIES
+{
+  public:
+  
+  COLOR_COMBO COLOR_GRID;
+  float POINT_SIZE_GRID = 1.0f;
+
+  int GRID_SEPERATOR_COUNT_HORIZONTAL = 5;
+  int GRID_SEPERATOR_COUNT_VERTICAL = 5;
+};
+
+class DRAW_D2_PLOT
+{
+  private:
+
+  DRAW_GRID GRID;
+
+  ImVec2 PREV_START_POS;
+  ImVec2 PREV_END_POS;
+
+  float X_SIZE = 0.0f;
+  float Y_SIZE = 0.0f;
+
+  public:
+
+  DRAW_D2_PLOT_PROPERTIES PROPS;
+
+  void create(system_data &sdSysData);
+
+  void update();
+
+  void draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };
 
 // ---------------------------------------------------------------------------------------

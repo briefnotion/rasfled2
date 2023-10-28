@@ -265,4 +265,82 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
 
 // ---------------------------------------------------------------------------------------
 
+void DRAW_GRID::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)
+{
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+  if (PREV_START_POS.x != Start_Position.x || PREV_START_POS.y != Start_Position.y || 
+      PREV_END_POS.x != End_Position.x || PREV_END_POS.y != End_Position.y)
+  {
+    X_SIZE = ((End_Position.x - Start_Position.x) / (float)PROPS.SEPERATOR_COUNT_VERTICAL) - (1 / (float)PROPS.SEPERATOR_COUNT_VERTICAL);
+    Y_SIZE = ((End_Position.y - Start_Position.y) / (float)PROPS.SEPERATOR_COUNT_HORIZONTAL) - (1 / (float)PROPS.SEPERATOR_COUNT_HORIZONTAL);
+
+    PREV_START_POS = Start_Position;
+    PREV_END_POS = End_Position;
+  }
+
+  // Vertical Lines
+  for (int vert_count = 0; vert_count <= PROPS.SEPERATOR_COUNT_VERTICAL; vert_count++)
+  {
+    draw_list->AddLine(ImVec2(Start_Position.x + (vert_count * X_SIZE), Start_Position.y), 
+                  ImVec2(Start_Position.x + (vert_count * X_SIZE), End_Position.y), 
+                  PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+  }
+
+  // Horizontal Lines
+  for (int horz_count = 0; horz_count <= PROPS.SEPERATOR_COUNT_HORIZONTAL; horz_count++)
+  {
+    draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + (horz_count * Y_SIZE)), 
+                  ImVec2((End_Position.x), Start_Position.y + (horz_count * Y_SIZE)), 
+                  PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
+void DRAW_D2_PLOT::create(system_data &sdSysData)
+{
+  GRID.PROPS.COLOR = PROPS.COLOR_GRID;
+  GRID.PROPS.POINT_SIZE = PROPS.POINT_SIZE_GRID;
+  GRID.PROPS.SEPERATOR_COUNT_HORIZONTAL = PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL;
+  GRID.PROPS.SEPERATOR_COUNT_VERTICAL = PROPS.GRID_SEPERATOR_COUNT_VERTICAL;
+}
+
+void DRAW_D2_PLOT::update()
+{
+
+}
+
+void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)
+{
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+  if (PREV_START_POS.x != Start_Position.x || PREV_START_POS.y != Start_Position.y || 
+      PREV_END_POS.x != End_Position.x || PREV_END_POS.y != End_Position.y)
+  {
+    X_SIZE = (End_Position.x - Start_Position.x);
+    Y_SIZE = (End_Position.y - Start_Position.y);
+
+    PREV_START_POS = Start_Position;
+    PREV_END_POS = End_Position;
+  }
+
+  ImGui::BeginChild("2DPlot", ImVec2(X_SIZE, Y_SIZE), false, 
+                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
+  {
+
+
+
+    GRID.draw(sdSysData, Start_Position, End_Position);
+
+
+
+  }
+  ImGui::EndChild();
+
+}
+
+// ---------------------------------------------------------------------------------------
+
 #endif

@@ -1038,6 +1038,15 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.P_SPEED.PROPS.PLOT_LABEL[1] = "S-TEMP";
   SDATA.P_SPEED.PROPS.PLOT_LABEL[2] = "TACH";
 
+  //INPROC: SDATA.PLOT_SLOW.PROPS.COLOR_GRID = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  //INPROC: SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL = 10;
+  //INPROC: SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 10;
+  //INPROC: SDATA.PLOT_SLOW.create(sdSysData);
+
+  SDATA.GRID_SLOW.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  SDATA.GRID_SLOW.PROPS.SEPERATOR_COUNT_HORIZONTAL = 10;
+  SDATA.GRID_SLOW.PROPS.SEPERATOR_COUNT_VERTICAL = 6;
+
   SDATA.VB_SPEED.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
   SDATA.VB_SPEED.PROPS.VALUE_MAX = 80;
 
@@ -1490,8 +1499,13 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       { 
 
         float size_1_3 = ImGui::GetContentRegionAvail().x * 2 / 3;
+        ImVec2 pos1 = ImGui::GetCursorScreenPos();
+        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
 
         SDATA.P_SPEED_SLOW.draw(sdSysData, ImVec2(size_1_3, ImGui::GetContentRegionAvail().y));
+        SDATA.GRID_SLOW.draw(sdSysData, pos1, pos2);
+
+        //INPROC: SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2);
 
         ImGui::SameLine();
 
@@ -1504,6 +1518,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
         ImGui::SameLine();
 
         SDATA.P_SPEED.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+        
       }
       ImGui::EndChild();
 
