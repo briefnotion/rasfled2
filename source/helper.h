@@ -305,6 +305,17 @@ class BOOL_BOUNCE
 // ---------------------------------------------------------------------------------------
 // Classes
 
+struct MIN_MAX_TIME_SLICE_SIMPLE
+{
+  public:
+
+  float MEAN_VALUE = 0;
+  float MIN_VALUE = 0;
+  float MAX_VALUE = 0;
+  unsigned long TIME_CREATED;
+
+};
+
 class MIN_MAX_TIME_SLICE
 // Simple min max data point.
 {

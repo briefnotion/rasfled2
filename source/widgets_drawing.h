@@ -15,6 +15,7 @@
 #include <stdio.h>
 //#include <string>
 //#include <vector>
+#include <deque>
 #include<cmath>
 
 // IMGui Includes
@@ -185,6 +186,18 @@ class DRAW_GRID
 };
 
 // ---------------------------------------------------------------------------------------
+class D2_PLOT_LINE
+{
+  public:
+
+  COLOR_COMBO LINE_COLOR;
+  float POINT_SIZE = 2.0f;
+
+  bool DISPLAY_MIN_MAX = FALSE;
+  float MIN_MAX_OVERLAP_FACTOR = 1.0f;
+
+  deque<MIN_MAX_TIME_SLICE_SIMPLE> DATA_POINT;
+};
 
 class DRAW_D2_PLOT_PROPERTIES
 {
@@ -195,6 +208,14 @@ class DRAW_D2_PLOT_PROPERTIES
 
   int GRID_SEPERATOR_COUNT_HORIZONTAL = 5;
   int GRID_SEPERATOR_COUNT_VERTICAL = 5;
+
+  unsigned long DURATION_SPAN = 60 * 1000;  // Duration from start to end
+                                            //  of graph (in miliseconds)
+  int DATA_POINTS_COUNT_MAX = 100;
+  float DATA_POINTS_VALUE_MAX = 100;
+
+  bool LEFT_TO_RIGHT = TRUE;
+  bool BOTTOM_TO_TOP = TRUE;
 };
 
 class DRAW_D2_PLOT
@@ -209,13 +230,26 @@ class DRAW_D2_PLOT
   float X_SIZE = 0.0f;
   float Y_SIZE = 0.0f;
 
+  float X_FACTOR = 1.0f;
+  float Y_FACTOR = 1.0f;
+
+  float TIME_PER_POINT = 1.0f;
+  unsigned long TIME_START = 0;
+
+  vector<D2_PLOT_LINE> LINE;
+
+  ImVec2 position_on_plot(float X, float Y);
+  // Internal
+
   public:
 
   DRAW_D2_PLOT_PROPERTIES PROPS;
 
+  void create_line(system_data &sdSysData, COLOR_COMBO Color);
+
   void create(system_data &sdSysData);
 
-  void update();
+  void update(int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample);
 
   void draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };

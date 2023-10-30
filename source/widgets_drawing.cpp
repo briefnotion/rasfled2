@@ -298,17 +298,130 @@ void DRAW_GRID::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_P
 
 // ---------------------------------------------------------------------------------------
 
+ImVec2 DRAW_D2_PLOT::position_on_plot(float X, float Y)
+{
+  ImVec2 ret_vec;
+
+  // Calc
+  if (PROPS.LEFT_TO_RIGHT)
+  {
+    ret_vec.x = PREV_START_POS.x + (X * X_FACTOR);
+  }
+  else
+  {
+    ret_vec.x = PREV_END_POS.x - (X * X_FACTOR);
+  }
+
+  if (PROPS.BOTTOM_TO_TOP)
+  {
+    ret_vec.y = PREV_END_POS.y - (Y * Y_FACTOR);
+  }
+  else
+  {
+    ret_vec.y = PREV_START_POS.y + (Y * Y_FACTOR);
+  }
+
+  // Check
+  if (ret_vec.x < PREV_START_POS.x)
+  {
+    ret_vec.x = PREV_START_POS.x;
+  }
+  if (ret_vec.x > PREV_END_POS.x)
+  {
+    ret_vec.x = PREV_END_POS.x;
+  }
+  
+  if (ret_vec.y < PREV_START_POS.y)
+  {
+    ret_vec.y = PREV_START_POS.y;
+  }
+  if (ret_vec.y > PREV_END_POS.y)
+  {
+    ret_vec.y = PREV_END_POS.y;
+  }
+
+  // Return
+  return ret_vec;
+}
+
+void DRAW_D2_PLOT::create_line(system_data &sdSysData, COLOR_COMBO Color)
+{
+  D2_PLOT_LINE tmp_line;
+
+  tmp_line.LINE_COLOR = Color;
+
+  LINE.push_back(tmp_line);
+}
+
 void DRAW_D2_PLOT::create(system_data &sdSysData)
 {
   GRID.PROPS.COLOR = PROPS.COLOR_GRID;
   GRID.PROPS.POINT_SIZE = PROPS.POINT_SIZE_GRID;
   GRID.PROPS.SEPERATOR_COUNT_HORIZONTAL = PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL;
   GRID.PROPS.SEPERATOR_COUNT_VERTICAL = PROPS.GRID_SEPERATOR_COUNT_VERTICAL;
+
+  // testing
+  MIN_MAX_TIME_SLICE_SIMPLE tmp_slice;
+  
+  create_line(sdSysData, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
+  create_line(sdSysData, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  create_line(sdSysData, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
+  
+  LINE[0].DISPLAY_MIN_MAX = true;
+
+  LINE[1].DISPLAY_MIN_MAX = true;
+  LINE[1].MIN_MAX_OVERLAP_FACTOR = 1.5f;
+
+  LINE[2].DISPLAY_MIN_MAX = false;
+
+  for (int points = 0; points < PROPS.DATA_POINTS_COUNT_MAX; points++)
+  {
+    float num = (points /2) + 10;
+
+    tmp_slice.MAX_VALUE = num + 5;
+    tmp_slice.MIN_VALUE = num - 5;
+    tmp_slice.MEAN_VALUE = num;
+    tmp_slice.TIME_CREATED = (points * 600);
+
+    LINE[0].DATA_POINT.push_back(tmp_slice);
+  }
+  
+  for (int points = 0; points < PROPS.DATA_POINTS_COUNT_MAX; points++)
+  {
+    float num = 100 - (points /2) - 10;
+
+    tmp_slice.MAX_VALUE = num + 5;
+    tmp_slice.MIN_VALUE = num - 5;
+    tmp_slice.MEAN_VALUE = num;
+    tmp_slice.TIME_CREATED = (points * 600);
+
+    LINE[1].DATA_POINT.push_back(tmp_slice);
+  }
+  
+  for (int points = 0; points < PROPS.DATA_POINTS_COUNT_MAX; points++)
+  {
+    float num = (points);
+
+    tmp_slice.MAX_VALUE = num + 5;
+    tmp_slice.MIN_VALUE = num - 5;
+    tmp_slice.MEAN_VALUE = num;
+    tmp_slice.TIME_CREATED = (points * 600); 
+
+    LINE[2].DATA_POINT.push_back(tmp_slice);
+  }
 }
 
-void DRAW_D2_PLOT::update()
+void DRAW_D2_PLOT::update(int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample)
 {
+  if (Line_Number >= 0 && Line_Number < LINE.size())
+  {
+    LINE[Line_Number].DATA_POINT.push_back(Sample);
 
+    if (TIME_START == 0)
+    {
+      TIME_START = Sample.TIME_CREATED;
+    }
+  }
 }
 
 void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)
@@ -321,6 +434,11 @@ void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
     X_SIZE = (End_Position.x - Start_Position.x);
     Y_SIZE = (End_Position.y - Start_Position.y);
 
+    X_FACTOR = X_SIZE / (float)PROPS.DATA_POINTS_COUNT_MAX;
+    Y_FACTOR = Y_SIZE / (float)PROPS.DATA_POINTS_VALUE_MAX;
+
+    TIME_PER_POINT = float(PROPS.DURATION_SPAN / PROPS.DATA_POINTS_COUNT_MAX);
+
     PREV_START_POS = Start_Position;
     PREV_END_POS = End_Position;
   }
@@ -329,13 +447,44 @@ void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
                                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
   {
-
-
-
     GRID.draw(sdSysData, Start_Position, End_Position);
 
+    printf("L %d %f %f\n", LINE.size(), TIME_PER_POINT, Y_FACTOR);
 
+    for (int line = 0; line < LINE.size(); line++)
+    {
+      
+      ImVec2 mean_start;
+      ImVec2 mean_end = position_on_plot(0, LINE[line].DATA_POINT[0].MEAN_VALUE);
 
+      ImVec2 min;
+      ImVec2 max;
+
+      for (int point = 1; point < LINE[line].DATA_POINT.size(); point++)
+      {
+        mean_start = mean_end;
+
+        // Draw Min Max
+        if (LINE[line].DISPLAY_MIN_MAX)
+        {
+          min = position_on_plot(
+               ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT), 
+               LINE[line].DATA_POINT[point].MIN_VALUE);
+          max = position_on_plot(
+               ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT), 
+               LINE[line].DATA_POINT[point].MAX_VALUE);
+        }
+
+        draw_list->AddLine(min, max, LINE[line].LINE_COLOR.DIM, X_FACTOR * LINE[line].MIN_MAX_OVERLAP_FACTOR);
+        // Draw Line
+        mean_end = position_on_plot(
+              ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT), 
+              LINE[line].DATA_POINT[point].MEAN_VALUE);
+        
+        draw_list->AddLine(mean_start, mean_end, LINE[line].LINE_COLOR.STANDARD, LINE[line].POINT_SIZE);
+
+      }
+    }
   }
   ImGui::EndChild();
 
