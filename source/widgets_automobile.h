@@ -30,10 +30,6 @@
 #include "../../imgui/imgui.h"
 #include "../../imgui/misc/cpp/imgui_stdlib.h"
 
-// ImPlot Inncludes
-// https://github.com/epezent/implot
-#include "../../implot/implot.h"
-
 using namespace std;
 
 // ---------------------------------------------------------------------------------------
@@ -62,106 +58,6 @@ class BLANK
 
 };
 */
-
-// ---------------------------------------------------------------------------------------
-
-class PLOT_POINT_BUFFER
-{
-  private:
-
-  int MAX_SIZE = 1500;
-
-  int t1_pos = 0;
-
-  public:
-
-  int OFFSET;
-  ImVector<ImVec2> DATA;
-
-  void create(int Max_Size);
-  
-  void add_point(float x, float y);
-  
-  void erase();
-
-  int size();
-};
-
-// ---------------------------------------------------------------------------------------
-
-class MIN_MAX_PLOT_POINT_BUFFER
-{
-  private:
-
-  int MAX_SIZE = 1500;
-
-  int t1_pos = 0;
-
-  public:
-
-  int OFFSET;
-  ImVector<ImVec2> MIN;
-  ImVector<ImVec2> MAX;
-
-  void create(int Max_Size);
-  
-  void add_point(float x, float Min_y, float Max_y);
-  
-  void erase();
-
-  int size();
-};
-
-// ---------------------------------------------------------------------------------------
-
-class W_GUAGE_PLOT_PROPERTIES
-{
-  public:
-
-  string LABEL = "Plot";
-
-  int PLOT_LINE_COUNT = 1;
-
-  float VALUE_MIN = 0;
-  float VALUE_MAX = 100;
-
-  int BUFFER_SIZE = 500;
-
-  bool LEFT_TO_RIGHT = false;
-
-  bool MIN_MAX = false;
-  unsigned long MIN_MAX_WAIT = 1000;
-
-  vector<string> PLOT_LABEL;
-};
-
-class W_GUAGE_PLOT
-{
-  private:
-
-  vector<PLOT_POINT_BUFFER> PLOT_DATA;
-  vector<MIN_MAX_PLOT_POINT_BUFFER> MIN_MAX_PLOT_DATA;
-
-  vector<MIN_MAX_TIME_SLICE> MIN_MAX_DATA;
-
-  double DATA_INPUT_POS = 0;
-
-  TIMED_PING UPDATE_DATA;
-
-  bool boop_ready = false;
-
-  public: 
-
-  W_GUAGE_PLOT_PROPERTIES PROPS;
-
-  void create();
-
-  void update_value(system_data &sdSysData, int Position, float Value);
-
-  void update_boop(system_data &sdSysData);
-
-  void draw(system_data &sdSysData, ImVec2 Size);
-};
 
 // ---------------------------------------------------------------------------------------
 
@@ -474,12 +370,9 @@ class DISPLAY_DATA_AUTOMOBILE
   VERTICAL_BAR VB_TACH;
   VERTICAL_BAR VB_S_TEMP;
 
-  W_GUAGE_PLOT P_SPEED_SLOW;
-  W_GUAGE_PLOT P_SPEED;
-
+  DRAW_D2_PLOT PLOT_FAST;
   DRAW_D2_PLOT PLOT_SLOW;
 
-  DRAW_GRID GRID_SLOW;
 };
 
 class AUTOMOBILE_SCREEN

@@ -316,6 +316,8 @@ struct MIN_MAX_TIME_SLICE_SIMPLE
 
 };
 
+// ---------------------------------------------------------------------------------------
+
 class MIN_MAX_TIME_SLICE
 // Simple min max data point.
 {

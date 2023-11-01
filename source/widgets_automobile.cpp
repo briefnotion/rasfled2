@@ -27,210 +27,6 @@ void BLANK::display(const char *name, bool *p_open, ImGuiWindowFlags flags)
 }
 */
 
-// ---------------------------------------------------------------------------------------
-
-void PLOT_POINT_BUFFER::create(int Max_Size)
-{
-    OFFSET  = 0;
-    MAX_SIZE = Max_Size;
-    DATA.reserve(MAX_SIZE);
-}
-
-void PLOT_POINT_BUFFER::add_point(float x, float y) 
-{
-  if (DATA.size() < MAX_SIZE)
-  {
-      DATA.push_back(ImVec2(x,y));
-  }
-  else 
-  {
-      DATA[OFFSET] = ImVec2(x,y);
-      OFFSET =  (OFFSET + 1) % MAX_SIZE;
-  }
-}
-
-void PLOT_POINT_BUFFER::erase() 
-{
-  if (DATA.size() > 0) 
-  {
-      DATA.shrink(0);
-      OFFSET  = 0;
-  }
-}
-
-int PLOT_POINT_BUFFER::size()
-{
-  return DATA.size();
-}
-
-// ---------------------------------------------------------------------------------------
-
-void MIN_MAX_PLOT_POINT_BUFFER::create(int Max_Size)
-{
-    OFFSET  = 0;
-    MAX_SIZE = Max_Size;
-    MIN.reserve(MAX_SIZE);
-    MAX.reserve(MAX_SIZE);
-}
-
-void MIN_MAX_PLOT_POINT_BUFFER::add_point(float x, float Min_y, float Max_y) 
-{
-  if (MIN.size() < MAX_SIZE)
-  {
-      MIN.push_back(ImVec2(x, Min_y));
-      MAX.push_back(ImVec2(x, Max_y));
-  }
-  else 
-  {
-      MIN[OFFSET] = ImVec2(x, Min_y);
-      MAX[OFFSET] = ImVec2(x, Max_y);
-      OFFSET =  (OFFSET + 1) % MAX_SIZE;
-  }
-}
-
-void MIN_MAX_PLOT_POINT_BUFFER::erase() 
-{
-  if (MIN.size() > 0) 
-  {
-      MIN.shrink(0);
-      OFFSET  = 0;
-  }
-  if (MAX.size() > 0) 
-  {
-      MAX.shrink(0);
-      OFFSET  = 0;
-  }
-}
-
-int MIN_MAX_PLOT_POINT_BUFFER::size()
-{
-  return MIN.size();
-}
-
-// -------------------------------------------------------------------------------------
-void W_GUAGE_PLOT::create()
-{
-  for (int count = 0; count < PROPS.PLOT_LINE_COUNT; count++)
-  {
-    MIN_MAX_TIME_SLICE temp_min_max_data;
-    string temp_prop_label = to_string(count);
-    
-    MIN_MAX_DATA.push_back(temp_min_max_data);
-    PROPS.PLOT_LABEL.push_back(temp_prop_label);
-  }
-
-  if (PROPS.MIN_MAX)
-  {
-    for (int count = 0; count < PROPS.PLOT_LINE_COUNT; count++)
-    {
-      MIN_MAX_PLOT_POINT_BUFFER temp_min_max_plot_data;
-
-      temp_min_max_plot_data.create(PROPS.BUFFER_SIZE);
-      MIN_MAX_PLOT_DATA.push_back(temp_min_max_plot_data);
-    }
-  }
-  else
-  {
-    for (int count = 0; count < PROPS.PLOT_LINE_COUNT; count++)
-    {
-      PLOT_POINT_BUFFER temp_plot_data;
-
-      temp_plot_data.create(PROPS.BUFFER_SIZE);
-      PLOT_DATA.push_back(temp_plot_data);
-    }
-  }
-}
-
-void W_GUAGE_PLOT::update_value(system_data &sdSysData, int Position, float Value)
-{
-  if (PROPS.MIN_MAX)
-  {
-    MIN_MAX_DATA[Position].store_value(Value);
-
-    if (UPDATE_DATA.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == false)
-    {
-      MIN_MAX_PLOT_DATA[Position].add_point(DATA_INPUT_POS, MIN_MAX_DATA[Position].min(), MIN_MAX_DATA[Position].max());
-
-      MIN_MAX_DATA[Position].clear(sdSysData.tmeCURRENT_FRAME_TIME);
-
-      boop_ready = true;
-    }
-  }
-  else
-  {
-    PLOT_DATA[Position].add_point(DATA_INPUT_POS, Value);
-
-    boop_ready = true;
-  }
-}
-
-void W_GUAGE_PLOT::update_boop(system_data &sdSysData)
-{
-  if (boop_ready)
-  {
-    if (PROPS.LEFT_TO_RIGHT)
-    {
-        DATA_INPUT_POS = DATA_INPUT_POS - 1;
-    }
-    else
-    {
-        DATA_INPUT_POS = DATA_INPUT_POS + 1;
-    }
-
-    if (PROPS.MIN_MAX)
-    {
-      UPDATE_DATA.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, PROPS.MIN_MAX_WAIT);
-    }
-
-    boop_ready = false;
-
-  }
-}
-
-void W_GUAGE_PLOT::draw(system_data &sdSysData, ImVec2 Size)
-{
-  // Got this working as a concept, but barely.  Needs to be reintegrated.
-
-  ImPlotFlags plot_flags = ImPlotFlags_CanvasOnly;
-  ImPlotLineFlags axis_flags = ImPlotAxisFlags_NoDecorations ;
-
-  ImPlotAxisFlags flags = ImPlotAxisFlags_NoTickLabels;
-
-  if (ImPlot::BeginPlot(PROPS.LABEL.c_str(), Size, plot_flags)) 
-  {
-    ImPlot::SetupAxes(nullptr, nullptr, flags, flags);
-
-    if (PROPS.LEFT_TO_RIGHT)
-    {
-      ImPlot::SetupAxisLimits(ImAxis_X1, PROPS.BUFFER_SIZE + DATA_INPUT_POS, DATA_INPUT_POS, ImGuiCond_Always);
-    }
-    else
-    {
-      ImPlot::SetupAxisLimits(ImAxis_X1, DATA_INPUT_POS - PROPS.BUFFER_SIZE, DATA_INPUT_POS, ImGuiCond_Always);
-    }
-
-    ImPlot::SetupAxisLimits(ImAxis_Y1, 0, PROPS.VALUE_MAX);
-
-    if (PROPS.MIN_MAX)
-    {
-      for (int count = 0; count < MIN_MAX_PLOT_DATA.size(); count++)
-      {
-        ImPlot::SetNextFillStyle(IMPLOT_AUTO_COL,0.8f);
-        ImPlot::PlotShaded(PROPS.PLOT_LABEL[count].c_str(), &MIN_MAX_PLOT_DATA[count].MIN[0].x, &MIN_MAX_PLOT_DATA[count].MIN[0].y, &MIN_MAX_PLOT_DATA[count].MAX[0].y, MIN_MAX_PLOT_DATA[count].MIN.size(), 0, MIN_MAX_PLOT_DATA[count].OFFSET, 2*sizeof(float));
-      }
-    }
-    else
-    {
-      for (int count = 0; count < PLOT_DATA.size(); count++)
-      {
-        ImPlot::PlotLine(PROPS.PLOT_LABEL[count].c_str(), &PLOT_DATA[count].DATA[0].x, &PLOT_DATA[count].DATA[0].y, PLOT_DATA[count].DATA.size(), 0, PLOT_DATA[count].OFFSET, 2*sizeof(float));
-      }
-    }
-
-    ImPlot::EndPlot();
-  }
-}
-
 // -------------------------------------------------------------------------------------
 
 void T_LARGE_NUMBER_DISPLAY::draw_scroll_num(float Value)
@@ -1009,46 +805,48 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.G_TEMP_SUPER_TEMP.create();
   */
 
-  SDATA.P_SPEED_SLOW.PROPS.LABEL = "Long Time Plot";
-  SDATA.P_SPEED_SLOW.PROPS.PLOT_LINE_COUNT = 3;
-  SDATA.P_SPEED_SLOW.PROPS.VALUE_MAX = 80;
-  SDATA.P_SPEED_SLOW.PROPS.LEFT_TO_RIGHT = false;
-  
-  //SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 1080;
-  //SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 20000;
-  
-  SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 360;
-  SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 60000;
-  
-  //SDATA.P_SPEED_SLOW.PROPS.BUFFER_SIZE = 540;
-  //SDATA.P_SPEED_SLOW.PROPS.MIN_MAX_WAIT = 20000;
+  // ---
 
-  SDATA.P_SPEED_SLOW.PROPS.MIN_MAX = true;
-  SDATA.P_SPEED_SLOW.create();
-  SDATA.P_SPEED_SLOW.PROPS.PLOT_LABEL[0] = "SPEED";
-  SDATA.P_SPEED_SLOW.PROPS.PLOT_LABEL[1] = "S-TEMP";
-
-  SDATA.P_SPEED.PROPS.LABEL = "Short Time Plot";
-  SDATA.P_SPEED.PROPS.PLOT_LINE_COUNT = 3;
-  SDATA.P_SPEED.PROPS.VALUE_MAX = 80;
-  SDATA.P_SPEED.PROPS.LEFT_TO_RIGHT = true;
-  SDATA.P_SPEED.PROPS.BUFFER_SIZE = 100;
-  SDATA.P_SPEED.create();
-  SDATA.P_SPEED.PROPS.PLOT_LABEL[0] = "SPEED";
-  SDATA.P_SPEED.PROPS.PLOT_LABEL[1] = "S-TEMP";
-  SDATA.P_SPEED.PROPS.PLOT_LABEL[2] = "TACH";
-
+  // Slow Plot line
+  SDATA.PLOT_SLOW.PROPS.LABEL = "Slow";
   SDATA.PLOT_SLOW.PROPS.COLOR_GRID = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
-  SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL = 10;
-  SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 10;
-  SDATA.PLOT_SLOW.PROPS.DATA_POINTS_COUNT_MAX = 100;
-  SDATA.PLOT_SLOW.PROPS.LEFT_TO_RIGHT = FALSE;
-  SDATA.PLOT_SLOW.PROPS.BOTTOM_TO_TOP = TRUE;
-  SDATA.PLOT_SLOW.create(sdSysData);
+  SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL = 4;
+  SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 6;
+  SDATA.PLOT_SLOW.PROPS.DATA_POINTS_VALUE_MAX = 80;        // 80mph
+  SDATA.PLOT_SLOW.PROPS.DATA_POINTS_COUNT_MAX = 60 * 6;    // 6 hours, 1 per minute
+  SDATA.PLOT_SLOW.PROPS.DURATION_SPAN = 6* 60 * 60 * 1000; // 6 hours, count * min * sec * ms
+  SDATA.PLOT_SLOW.PROPS.LEFT_TO_RIGHT = false;
+  SDATA.PLOT_SLOW.PROPS.BOTTOM_TO_TOP = true;
+  SDATA.PLOT_SLOW.create(sdSysData.tmeCURRENT_FRAME_TIME);
+    
+  // Slow Plot Speed Line
+  SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, true, true, 2.0f, 2.0f);
 
-  SDATA.GRID_SLOW.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
-  SDATA.GRID_SLOW.PROPS.SEPERATOR_COUNT_HORIZONTAL = 10;
-  SDATA.GRID_SLOW.PROPS.SEPERATOR_COUNT_VERTICAL = 6;
+  // Slow Plot Temp Line
+  SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE, true, true, 2.0f, 2.0f);
+
+  // Fast Plot line
+  SDATA.PLOT_FAST.PROPS.LABEL = "Fast";
+  SDATA.PLOT_FAST.PROPS.COLOR_GRID = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  SDATA.PLOT_FAST.PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL = 4;
+  SDATA.PLOT_FAST.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 5;
+  SDATA.PLOT_FAST.PROPS.DATA_POINTS_VALUE_MAX = 80;        // 80mph
+  SDATA.PLOT_FAST.PROPS.DATA_POINTS_COUNT_MAX = 500;    // 3 points per second
+  SDATA.PLOT_FAST.PROPS.DURATION_SPAN = 5 * 1000; // 6 hours, count * min * sec * ms
+  SDATA.PLOT_FAST.PROPS.LEFT_TO_RIGHT = true;
+  SDATA.PLOT_FAST.PROPS.BOTTOM_TO_TOP = true;
+  SDATA.PLOT_FAST.create(sdSysData.tmeCURRENT_FRAME_TIME);
+    
+  // Fast  Plot Speed Line
+  SDATA.PLOT_FAST.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_BLUE, true, false, 3.0f, 2.0f);
+
+  // Fast  Plot Temp Line
+  SDATA.PLOT_FAST.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE, true, false, 3.0f, 2.0f);
+
+  // Fast  Plot RPM Line
+  SDATA.PLOT_FAST.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, true, false, 3.0f, 2.0f);
+
+  // ---
 
   SDATA.VB_SPEED.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
   SDATA.VB_SPEED.PROPS.VALUE_MAX = 80;
@@ -1317,17 +1115,13 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.VB_SPEED.update_value(sdSysData, SDATA.SPEED);
   SDATA.VB_S_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);
   SDATA.VB_TACH.update_value(sdSysData, SDATA.RPM/50);
-  
-  SDATA.P_SPEED_SLOW.update_value(sdSysData, 0, SDATA.SPEED);
-  SDATA.P_SPEED_SLOW.update_value(sdSysData, 1, SDATA.TEMP_S_TEMP);
-  SDATA.P_SPEED_SLOW.update_value(sdSysData, 2, (float)SDATA.CAM_COMM_ERR);
-  SDATA.P_SPEED_SLOW.update_boop(sdSysData);
 
-  SDATA.P_SPEED.update_value(sdSysData, 0, SDATA.SPEED);
-  SDATA.P_SPEED.update_value(sdSysData, 1, SDATA.TEMP_S_TEMP);
-  SDATA.P_SPEED.update_value(sdSysData, 2, SDATA.RPM/50);
-  SDATA.P_SPEED.update_boop(sdSysData);
-  
+  SDATA.PLOT_SLOW.update_timed(sdSysData.tmeCURRENT_FRAME_TIME, 0, SDATA.SPEED);
+  SDATA.PLOT_SLOW.update_timed(sdSysData.tmeCURRENT_FRAME_TIME, 1, SDATA.TEMP_S_TEMP);
+
+  SDATA.PLOT_FAST.update(sdSysData.tmeCURRENT_FRAME_TIME, 0, SDATA.SPEED);
+  SDATA.PLOT_FAST.update(sdSysData.tmeCURRENT_FRAME_TIME, 1, SDATA.TEMP_S_TEMP);
+  SDATA.PLOT_FAST.update(sdSysData.tmeCURRENT_FRAME_TIME, 2, (float)SDATA.RPM/50);
 }
 
 void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
@@ -1504,11 +1298,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
         float size_1_3 = ImGui::GetContentRegionAvail().x * 2 / 3;
         ImVec2 pos1 = ImGui::GetCursorScreenPos();
         ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
-
-        SDATA.P_SPEED_SLOW.draw(sdSysData, ImVec2(size_1_3, ImGui::GetContentRegionAvail().y));
-        SDATA.GRID_SLOW.draw(sdSysData, pos1, pos2);
-
-        //INPROC: SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2);
+        SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2);
 
         ImGui::SameLine();
 
@@ -1520,7 +1310,9 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
         ImGui::SameLine();
 
-        SDATA.P_SPEED.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+        pos1 = ImGui::GetCursorScreenPos();
+        pos2 = ImVec2(pos1.x + ImGui::GetContentRegionAvail().x, pos1.y + ImGui::GetContentRegionAvail().y);
+        SDATA.PLOT_FAST.draw(sdSysData, pos1, pos2);
         
       }
       ImGui::EndChild();

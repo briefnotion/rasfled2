@@ -14,8 +14,7 @@
 
 #include <stdio.h>
 //#include <string>
-//#include <vector>
-#include <deque>
+#include <vector>
 #include<cmath>
 
 // IMGui Includes
@@ -188,34 +187,50 @@ class DRAW_GRID
 // ---------------------------------------------------------------------------------------
 class D2_PLOT_LINE
 {
+
   public:
+
+  int RESERVE_SIZE = 0;
+  int RESERVE_SIZE_CUTOFF = 0;
+  int RESERVE_SIZE_TRIM_AMOUNT = 0;
 
   COLOR_COMBO LINE_COLOR;
   float POINT_SIZE = 2.0f;
 
-  bool DISPLAY_MIN_MAX = FALSE;
+  bool DISPLAY_MEAN = true;
+  bool DISPLAY_MIN_MAX = false;
   float MIN_MAX_OVERLAP_FACTOR = 1.0f;
 
-  deque<MIN_MAX_TIME_SLICE_SIMPLE> DATA_POINT;
+  MIN_MAX_TIME_SLICE VALUES;
+  TIMED_PING UPDATE_SIMPLE_VALUES;
+
+  vector<MIN_MAX_TIME_SLICE_SIMPLE> DATA_POINT;
 };
 
 class DRAW_D2_PLOT_PROPERTIES
 {
   public:
-  
-  COLOR_COMBO COLOR_GRID;
-  float POINT_SIZE_GRID = 1.0f;
 
-  int GRID_SEPERATOR_COUNT_HORIZONTAL = 5;
-  int GRID_SEPERATOR_COUNT_VERTICAL = 5;
+  string LABEL = "Label";
+  
+  COLOR_COMBO COLOR_GRID;                   // Color of grid
+  float POINT_SIZE_GRID = 1.0f;             // Size of grid lines
+  int GRID_SEPERATOR_COUNT_HORIZONTAL = 5;  // Horizontal grid line count
+  int GRID_SEPERATOR_COUNT_VERTICAL = 5;    // Vertical grid line count
+
+  int DATA_POINTS_COUNT_MAX = 100;          // Resolution of x point size
+                                            //  Keep within a few thousand max
+                                            //  Doubtful anything beyond screen.x size
+                                            //  would be viewable.
 
   unsigned long DURATION_SPAN = 60 * 1000;  // Duration from start to end
                                             //  of graph (in miliseconds)
-  int DATA_POINTS_COUNT_MAX = 100;
-  float DATA_POINTS_VALUE_MAX = 100;
+                                            //  Default is 1 minute.
 
-  bool LEFT_TO_RIGHT = TRUE;
-  bool BOTTOM_TO_TOP = TRUE;
+  float DATA_POINTS_VALUE_MAX = 100;        // Max value, top of graph value.
+
+  bool LEFT_TO_RIGHT = TRUE;                // Defalt - plot points start on left side
+  bool BOTTOM_TO_TOP = TRUE;                // Defalt - 0 value points start on bottom
 };
 
 class DRAW_D2_PLOT
@@ -233,23 +248,36 @@ class DRAW_D2_PLOT
   float X_FACTOR = 1.0f;
   float Y_FACTOR = 1.0f;
 
-  float TIME_PER_POINT = 1.0f;
+  float TIME_PER_POINT_F = 1.0f;
+  unsigned long TIME_PER_POINT_UL = 1;
   unsigned long TIME_START = 0;
 
   vector<D2_PLOT_LINE> LINE;
 
-  ImVec2 position_on_plot(float X, float Y);
+  ImVec2 position_on_plot(float X, float Y, bool &Out_Of_Bounds_X);
   // Internal
 
   public:
 
   DRAW_D2_PLOT_PROPERTIES PROPS;
 
-  void create_line(system_data &sdSysData, COLOR_COMBO Color);
+  void create_line(COLOR_COMBO Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor);
+  // Prepare line for drawing
+  //  Color of line
+  //  Show Mean Value
+  //  Show Min Max Values
+  //  Point_Size - Mean value line point size
+  //  Min_Max_Overlap_Factor - Size of min_max is calculated. Value of 2.0f will double
+  //                            the size and cause min_max lines to overlap.
+  //                            Overlapped areas should be brighter.
 
-  void create(system_data &sdSysData);
+  void create(unsigned long Start_Plot_Time);
+
+  void update(unsigned long Time, int Line_Number, float Value);
 
   void update(int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample);
+
+  void update_timed(unsigned long Time, int Line_Number, float Value);
 
   void draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };

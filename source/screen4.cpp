@@ -126,7 +126,6 @@ int SCREEN4::create(system_data &sdSysData)
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
-    ImPlot::CreateContext();
 
     ImGuiIO &io = ImGui::GetIO();
     (void)io;
@@ -1124,7 +1123,6 @@ void SCREEN4::shutdown(system_data &sdSysData)
     ImGui_ImplOpenGL2_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 
-    ImPlot::DestroyContext();
     ImGui::DestroyContext();
 
     glfwDestroyWindow(window);

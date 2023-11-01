@@ -284,7 +284,7 @@ void DRAW_GRID::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_P
   {
     draw_list->AddLine(ImVec2(Start_Position.x + (vert_count * X_SIZE), Start_Position.y), 
                   ImVec2(Start_Position.x + (vert_count * X_SIZE), End_Position.y), 
-                  PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+                  PROPS.COLOR.DIM, PROPS.POINT_SIZE);
   }
 
   // Horizontal Lines
@@ -292,13 +292,13 @@ void DRAW_GRID::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_P
   {
     draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + (horz_count * Y_SIZE)), 
                   ImVec2((End_Position.x), Start_Position.y + (horz_count * Y_SIZE)), 
-                  PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+                  PROPS.COLOR.DIM, PROPS.POINT_SIZE);
   }
 }
 
 // ---------------------------------------------------------------------------------------
 
-ImVec2 DRAW_D2_PLOT::position_on_plot(float X, float Y)
+ImVec2 DRAW_D2_PLOT::position_on_plot(float X, float Y, bool &Out_Of_Bounds_X)
 {
   ImVec2 ret_vec;
 
@@ -321,93 +321,60 @@ ImVec2 DRAW_D2_PLOT::position_on_plot(float X, float Y)
     ret_vec.y = PREV_START_POS.y + (Y * Y_FACTOR);
   }
 
-  // Check
-  if (ret_vec.x < PREV_START_POS.x)
+  // Check 
+  if (ret_vec.x < PREV_START_POS.x || ret_vec.x > PREV_END_POS.x)
   {
-    ret_vec.x = PREV_START_POS.x;
-  }
-  if (ret_vec.x > PREV_END_POS.x)
-  {
-    ret_vec.x = PREV_END_POS.x;
-  }
-  
-  if (ret_vec.y < PREV_START_POS.y)
-  {
-    ret_vec.y = PREV_START_POS.y;
-  }
-  if (ret_vec.y > PREV_END_POS.y)
-  {
-    ret_vec.y = PREV_END_POS.y;
+    Out_Of_Bounds_X = true;
   }
 
   // Return
   return ret_vec;
 }
 
-void DRAW_D2_PLOT::create_line(system_data &sdSysData, COLOR_COMBO Color)
+void DRAW_D2_PLOT::create_line(COLOR_COMBO Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor)
 {
   D2_PLOT_LINE tmp_line;
 
   tmp_line.LINE_COLOR = Color;
+  tmp_line.DISPLAY_MEAN = Display_Mean;
+  tmp_line.DISPLAY_MIN_MAX = Display_Min_Max;
+  tmp_line.POINT_SIZE = Point_Size;
+  tmp_line.MIN_MAX_OVERLAP_FACTOR = Min_Max_Overlap_Factor;
+
+  tmp_line.RESERVE_SIZE = (int)((float)PROPS.DATA_POINTS_COUNT_MAX * (float)1.5);
+  tmp_line.RESERVE_SIZE_CUTOFF = (int)((float)PROPS.DATA_POINTS_COUNT_MAX * (float)1.4);
+  tmp_line.RESERVE_SIZE_TRIM_AMOUNT = (int)((float)PROPS.DATA_POINTS_COUNT_MAX * (float).3);
+
+  tmp_line.DATA_POINT.reserve(tmp_line.RESERVE_SIZE);
 
   LINE.push_back(tmp_line);
 }
 
-void DRAW_D2_PLOT::create(system_data &sdSysData)
+void DRAW_D2_PLOT::create(unsigned long Start_Plot_Time)
 {
   GRID.PROPS.COLOR = PROPS.COLOR_GRID;
   GRID.PROPS.POINT_SIZE = PROPS.POINT_SIZE_GRID;
   GRID.PROPS.SEPERATOR_COUNT_HORIZONTAL = PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL;
   GRID.PROPS.SEPERATOR_COUNT_VERTICAL = PROPS.GRID_SEPERATOR_COUNT_VERTICAL;
 
-  // testing
-  MIN_MAX_TIME_SLICE_SIMPLE tmp_slice;
-  
-  create_line(sdSysData, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
-  create_line(sdSysData, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
-  create_line(sdSysData, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
-  
-  LINE[0].DISPLAY_MIN_MAX = true;
+  TIME_START = Start_Plot_Time;
+}
 
-  LINE[1].DISPLAY_MIN_MAX = true;
-  LINE[1].MIN_MAX_OVERLAP_FACTOR = 1.5f;
-
-  LINE[2].DISPLAY_MIN_MAX = false;
-
-  for (int points = 0; points < PROPS.DATA_POINTS_COUNT_MAX; points++)
+void DRAW_D2_PLOT::update(unsigned long Time, int Line_Number, float Value)
+{
+  if (Line_Number >= 0 && Line_Number < LINE.size())
   {
-    float num = (points /2) + 10;
+    MIN_MAX_TIME_SLICE_SIMPLE tmp_value;
 
-    tmp_slice.MAX_VALUE = num + 5;
-    tmp_slice.MIN_VALUE = num - 5;
-    tmp_slice.MEAN_VALUE = num;
-    tmp_slice.TIME_CREATED = (points * 600);
+    tmp_value.MEAN_VALUE = Value;
+    tmp_value.TIME_CREATED = Time;
 
-    LINE[0].DATA_POINT.push_back(tmp_slice);
-  }
-  
-  for (int points = 0; points < PROPS.DATA_POINTS_COUNT_MAX; points++)
-  {
-    float num = 100 - (points /2) - 10;
+    LINE[Line_Number].DATA_POINT.push_back(tmp_value);
 
-    tmp_slice.MAX_VALUE = num + 5;
-    tmp_slice.MIN_VALUE = num - 5;
-    tmp_slice.MEAN_VALUE = num;
-    tmp_slice.TIME_CREATED = (points * 600);
-
-    LINE[1].DATA_POINT.push_back(tmp_slice);
-  }
-  
-  for (int points = 0; points < PROPS.DATA_POINTS_COUNT_MAX; points++)
-  {
-    float num = (points);
-
-    tmp_slice.MAX_VALUE = num + 5;
-    tmp_slice.MIN_VALUE = num - 5;
-    tmp_slice.MEAN_VALUE = num;
-    tmp_slice.TIME_CREATED = (points * 600); 
-
-    LINE[2].DATA_POINT.push_back(tmp_slice);
+    if (LINE[Line_Number].DATA_POINT.size() >= LINE[Line_Number].RESERVE_SIZE_CUTOFF)
+    {
+      LINE[Line_Number].DATA_POINT.erase(LINE[Line_Number].DATA_POINT.begin(), LINE[Line_Number].DATA_POINT.begin() + LINE[Line_Number].RESERVE_SIZE_TRIM_AMOUNT);
+    }
   }
 }
 
@@ -421,6 +388,32 @@ void DRAW_D2_PLOT::update(int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample)
     {
       TIME_START = Sample.TIME_CREATED;
     }
+    
+    if (LINE[Line_Number].DATA_POINT.size() >= LINE[Line_Number].RESERVE_SIZE_CUTOFF)
+    {
+      LINE[Line_Number].DATA_POINT.erase(LINE[Line_Number].DATA_POINT.begin(), LINE[Line_Number].DATA_POINT.begin() + LINE[Line_Number].RESERVE_SIZE_TRIM_AMOUNT);
+    }
+  }
+}
+
+void DRAW_D2_PLOT::update_timed(unsigned long Time, int Line_Number, float Value)
+{
+  LINE[Line_Number].VALUES.store_value(Value);
+
+  if (LINE[Line_Number].UPDATE_SIMPLE_VALUES.ping_down(Time) == false)
+  {
+    MIN_MAX_TIME_SLICE_SIMPLE tmp_value;
+
+    tmp_value.MEAN_VALUE = LINE[Line_Number].VALUES.mean();
+    tmp_value.MIN_VALUE = LINE[Line_Number].VALUES.min();
+    tmp_value.MAX_VALUE = LINE[Line_Number].VALUES.max();
+    tmp_value.TIME_CREATED = LINE[Line_Number].VALUES.time_created();
+
+    update(Line_Number, tmp_value);
+
+    LINE[Line_Number].VALUES.clear(Time);
+
+    LINE[Line_Number].UPDATE_SIMPLE_VALUES.ping_up(Time, TIME_PER_POINT_UL);
   }
 }
 
@@ -437,25 +430,25 @@ void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
     X_FACTOR = X_SIZE / (float)PROPS.DATA_POINTS_COUNT_MAX;
     Y_FACTOR = Y_SIZE / (float)PROPS.DATA_POINTS_VALUE_MAX;
 
-    TIME_PER_POINT = float(PROPS.DURATION_SPAN / PROPS.DATA_POINTS_COUNT_MAX);
+    TIME_PER_POINT_F = float(PROPS.DURATION_SPAN / PROPS.DATA_POINTS_COUNT_MAX);
+    TIME_PER_POINT_UL = (PROPS.DURATION_SPAN / PROPS.DATA_POINTS_COUNT_MAX);
 
     PREV_START_POS = Start_Position;
     PREV_END_POS = End_Position;
   }
 
-  ImGui::BeginChild("2DPlot", ImVec2(X_SIZE, Y_SIZE), false, 
+  ImGui::BeginChild(PROPS.LABEL.c_str(), ImVec2(X_SIZE, Y_SIZE), false, 
                                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
   {
     GRID.draw(sdSysData, Start_Position, End_Position);
 
-    printf("L %d %f %f\n", LINE.size(), TIME_PER_POINT, Y_FACTOR);
-
     for (int line = 0; line < LINE.size(); line++)
     {
+      bool out_of_bounds_x = false;
       
       ImVec2 mean_start;
-      ImVec2 mean_end = position_on_plot(0, LINE[line].DATA_POINT[0].MEAN_VALUE);
+      ImVec2 mean_end = position_on_plot(0, LINE[line].DATA_POINT[0].MEAN_VALUE, out_of_bounds_x);
 
       ImVec2 min;
       ImVec2 max;
@@ -467,22 +460,50 @@ void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
         // Draw Min Max
         if (LINE[line].DISPLAY_MIN_MAX)
         {
+          out_of_bounds_x = false;
+
+          // New plot points continue from prev pos
+          //min = position_on_plot(
+          //     ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT_F), 
+          //     LINE[line].DATA_POINT[point].MIN_VALUE);
+          //max = position_on_plot(
+          //     ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT_F), 
+          //     LINE[line].DATA_POINT[point].MAX_VALUE);
+
+          // New plot points are added to front, plot scrolls from front
           min = position_on_plot(
-               ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT), 
-               LINE[line].DATA_POINT[point].MIN_VALUE);
+               ((float)(sdSysData.tmeCURRENT_FRAME_TIME - LINE[line].DATA_POINT[point].TIME_CREATED) / TIME_PER_POINT_F), 
+               LINE[line].DATA_POINT[point].MIN_VALUE, out_of_bounds_x);
           max = position_on_plot(
-               ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT), 
-               LINE[line].DATA_POINT[point].MAX_VALUE);
+               ((float)(sdSysData.tmeCURRENT_FRAME_TIME - LINE[line].DATA_POINT[point].TIME_CREATED) / TIME_PER_POINT_F), 
+               LINE[line].DATA_POINT[point].MAX_VALUE, out_of_bounds_x);
+
+          if (out_of_bounds_x == false)
+          {
+            draw_list->AddLine(min, max, LINE[line].LINE_COLOR.DIM, X_FACTOR * LINE[line].MIN_MAX_OVERLAP_FACTOR);
+          }
         }
-
-        draw_list->AddLine(min, max, LINE[line].LINE_COLOR.DIM, X_FACTOR * LINE[line].MIN_MAX_OVERLAP_FACTOR);
-        // Draw Line
-        mean_end = position_on_plot(
-              ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT), 
-              LINE[line].DATA_POINT[point].MEAN_VALUE);
         
-        draw_list->AddLine(mean_start, mean_end, LINE[line].LINE_COLOR.STANDARD, LINE[line].POINT_SIZE);
+        // Draw Line
+        if (LINE[line].DISPLAY_MEAN)
+        {
+          out_of_bounds_x = false;
 
+          // New plot points continue from prev pos
+          //mean_end = position_on_plot(
+          //      ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT_F), 
+          //      LINE[line].DATA_POINT[point].MEAN_VALUE);
+
+          // New plot points are added to front, plot scrolls from front
+          mean_end = position_on_plot(
+                ((float)(sdSysData.tmeCURRENT_FRAME_TIME - LINE[line].DATA_POINT[point].TIME_CREATED) / TIME_PER_POINT_F), 
+                LINE[line].DATA_POINT[point].MEAN_VALUE, out_of_bounds_x);
+          
+          if (out_of_bounds_x == false)
+          {
+            draw_list->AddLine(mean_start, mean_end, LINE[line].LINE_COLOR.STANDARD, LINE[line].POINT_SIZE);
+          }
+        }
       }
     }
   }
