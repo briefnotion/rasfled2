@@ -207,6 +207,40 @@ class D2_PLOT_LINE
   vector<MIN_MAX_TIME_SLICE_SIMPLE> DATA_POINT;
 };
 
+class DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES
+{
+  private:
+
+  public:
+
+  // Calculated
+
+  ImVec2 START_POS;
+  ImVec2 END_POS;
+
+  float X_SIZE = 0.0f;
+  float Y_SIZE = 0.0f;
+
+  float X_FACTOR = 1.0f;
+  float Y_FACTOR = 1.0f;
+
+  float TIME_PER_POINT_F = 1.0f;
+  unsigned long TIME_PER_POINT_UL = 1;
+
+  vector<D2_PLOT_LINE> LINE;
+
+  // Definable
+
+  int DATA_POINTS_COUNT_MAX = 100;          // Resolution of x point size
+                                            //  Keep within a few thousand max
+                                            //  Doubtful anything beyond screen.x size
+                                            //  would be viewable.
+
+  unsigned long DURATION_SPAN = 60 * 1000;  // Duration from start to end
+                                            //  of graph (in miliseconds)
+                                            //  Default is 1 minute.
+};
+
 class DRAW_D2_PLOT_PROPERTIES
 {
   public:
@@ -218,15 +252,6 @@ class DRAW_D2_PLOT_PROPERTIES
   int GRID_SEPERATOR_COUNT_HORIZONTAL = 5;  // Horizontal grid line count
   int GRID_SEPERATOR_COUNT_VERTICAL = 5;    // Vertical grid line count
 
-  int DATA_POINTS_COUNT_MAX = 100;          // Resolution of x point size
-                                            //  Keep within a few thousand max
-                                            //  Doubtful anything beyond screen.x size
-                                            //  would be viewable.
-
-  unsigned long DURATION_SPAN = 60 * 1000;  // Duration from start to end
-                                            //  of graph (in miliseconds)
-                                            //  Default is 1 minute.
-
   float DATA_POINTS_VALUE_MAX = 100;        // Max value, top of graph value.
 
   bool LEFT_TO_RIGHT = TRUE;                // Defalt - plot points start on left side
@@ -234,6 +259,16 @@ class DRAW_D2_PLOT_PROPERTIES
 };
 
 class DRAW_D2_PLOT
+// Declaration
+//  DRAW_D2_PLOT plot;
+//  plot.PROPS.thing = things;
+//
+//  plot.create_subgraph(size of vec, duration start to end ms);
+//  ...
+//
+//  plot.create_line(Color, dir, dir , sizes, sizes);
+//  ...
+//
 {
   private:
 
@@ -242,24 +277,21 @@ class DRAW_D2_PLOT
   ImVec2 PREV_START_POS;
   ImVec2 PREV_END_POS;
 
-  float X_SIZE = 0.0f;
-  float Y_SIZE = 0.0f;
+  float FULL_X_SIZE = 0;
+  float FULL_Y_SIZE = 0;
 
-  float X_FACTOR = 1.0f;
-  float Y_FACTOR = 1.0f;
-
-  float TIME_PER_POINT_F = 1.0f;
-  unsigned long TIME_PER_POINT_UL = 1;
   unsigned long TIME_START = 0;
 
-  vector<D2_PLOT_LINE> LINE;
+  vector<DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES> SUB_GRAPHS;
 
-  ImVec2 position_on_plot(float X, float Y, bool &Out_Of_Bounds_X);
+  ImVec2 position_on_plot(float X, float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X);
   // Internal
 
   public:
 
   DRAW_D2_PLOT_PROPERTIES PROPS;
+
+  void create_subgraph(int Max_Data_Point_Count, unsigned long Duration_Span_ms);
 
   void create_line(COLOR_COMBO Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor);
   // Prepare line for drawing
@@ -278,6 +310,8 @@ class DRAW_D2_PLOT
   void update(int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample);
 
   void update_timed(unsigned long Time, int Line_Number, float Value);
+
+  void draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 
   void draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };
