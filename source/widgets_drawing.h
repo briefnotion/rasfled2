@@ -28,7 +28,8 @@
 #include "../../stb/stb_image.h"
 
 #include "system.h"
-//#include "screen4_helper.h"
+#include "fled_time.h"
+#include "helper.h"
 
 using namespace std;
 
@@ -187,7 +188,6 @@ class DRAW_GRID
 // ---------------------------------------------------------------------------------------
 class D2_PLOT_LINE
 {
-
   public:
 
   int RESERVE_SIZE = 0;
@@ -203,6 +203,7 @@ class D2_PLOT_LINE
 
   MIN_MAX_TIME_SLICE VALUES;
   TIMED_PING UPDATE_SIMPLE_VALUES;
+  TIMED_PING MERGE_TIMER;
 
   vector<MIN_MAX_TIME_SLICE_SIMPLE> DATA_POINT;
 };
@@ -284,6 +285,8 @@ class DRAW_D2_PLOT
 
   vector<DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES> SUB_GRAPHS;
 
+  void merge(unsigned long Time, int Sub_Graph, int Line_Number);
+
   ImVec2 position_on_plot(float X, float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X);
   // Internal
 
@@ -307,7 +310,9 @@ class DRAW_D2_PLOT
 
   void update(unsigned long Time, int Line_Number, float Value);
 
-  void update(int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample);
+  void update(unsigned long Time, int Sub_Graph, int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample);
+
+  void update(unsigned long Time, int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample);
 
   void update_timed(unsigned long Time, int Line_Number, float Value);
 

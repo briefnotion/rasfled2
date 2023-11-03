@@ -298,6 +298,74 @@ void DRAW_GRID::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_P
 
 // ---------------------------------------------------------------------------------------
 
+void DRAW_D2_PLOT::merge(unsigned long Time, int Sub_Graph, int Line_Number)
+{
+  if (Sub_Graph +1 < SUB_GRAPHS.size())
+  {
+    if (Line_Number < SUB_GRAPHS[Sub_Graph].LINE.size())
+    {
+      if (SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.size() > 1)
+      {
+
+        if (SUB_GRAPHS[Sub_Graph].LINE[Line_Number].MERGE_TIMER.ping_down(Time) == false)
+        {
+          SUB_GRAPHS[Sub_Graph].LINE[Line_Number].MERGE_TIMER.ping_up(Time, SUB_GRAPHS[Sub_Graph +1].TIME_PER_POINT_UL);
+
+          unsigned long clip_time = Time - (SUB_GRAPHS[Sub_Graph].DURATION_SPAN + SUB_GRAPHS[Sub_Graph +1].TIME_PER_POINT_UL);
+
+          if (clip_time < Time)
+          {
+            int point = 0;
+
+            float mean = 0;
+            float max = 0;
+            float min = 0;
+
+            while (SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].TIME_CREATED < clip_time)
+            {
+
+              if (point == 0)
+              {
+                max = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MEAN_VALUE;
+                min = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MEAN_VALUE;
+              }
+
+              mean = mean + SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MEAN_VALUE;
+
+              if (max < SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MAX_VALUE)
+              {
+                max = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MAX_VALUE;
+              }
+              if (min < SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MIN_VALUE)
+              {
+                min = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MIN_VALUE;
+              }
+
+              point++;
+            }
+
+            MIN_MAX_TIME_SLICE_SIMPLE tmp_slice;
+            
+            tmp_slice.MEAN_VALUE = mean / (float)point;
+            tmp_slice.MAX_VALUE = max;
+            tmp_slice.MIN_VALUE = min;
+            tmp_slice.TIME_CREATED = Time;
+
+            if (point > 0)
+            {
+              SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.erase(
+                                SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.begin(), 
+                                SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.begin() + point);
+              
+              update(Time, Sub_Graph +1, Line_Number, tmp_slice);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 ImVec2 DRAW_D2_PLOT::position_on_plot(float X, float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X)
 {
   ImVec2 ret_vec;
@@ -396,6 +464,8 @@ void DRAW_D2_PLOT::update(unsigned long Time, int Line_Number, float Value)
 
       SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.push_back(tmp_value);
 
+      merge(Time, 0, Line_Number);
+
       if (SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.size() >= SUB_GRAPHS[0].LINE[Line_Number].RESERVE_SIZE_CUTOFF)
       {
         SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.erase(SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.begin(), SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.begin() + SUB_GRAPHS[0].LINE[Line_Number].RESERVE_SIZE_TRIM_AMOUNT);
@@ -404,25 +474,32 @@ void DRAW_D2_PLOT::update(unsigned long Time, int Line_Number, float Value)
   }
 }
 
-void DRAW_D2_PLOT::update(int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample)
+void DRAW_D2_PLOT::update(unsigned long Time, int Sub_Graph, int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample)
 {  
-  if (SUB_GRAPHS.size() > 0)
+  if (Sub_Graph < SUB_GRAPHS.size())
   {
-    if (Line_Number >= 0 && Line_Number < SUB_GRAPHS[0].LINE.size())
+    if (Line_Number < SUB_GRAPHS[Sub_Graph].LINE.size())
     {
-      SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.push_back(Sample);
+      SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.push_back(Sample);
 
       if (TIME_START == 0)
       {
         TIME_START = Sample.TIME_CREATED;
       }
       
-      if (SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.size() >= SUB_GRAPHS[0].LINE[Line_Number].RESERVE_SIZE_CUTOFF)
+      merge(Time, Sub_Graph, Line_Number);
+
+      if (SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.size() >= SUB_GRAPHS[Sub_Graph].LINE[Line_Number].RESERVE_SIZE_CUTOFF)
       {
-        SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.erase(SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.begin(), SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.begin() + SUB_GRAPHS[0].LINE[Line_Number].RESERVE_SIZE_TRIM_AMOUNT);
+        SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.erase(SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.begin(), SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.begin() + SUB_GRAPHS[Sub_Graph].LINE[Line_Number].RESERVE_SIZE_TRIM_AMOUNT);
       }
     }
   }
+}
+
+void DRAW_D2_PLOT::update(unsigned long Time, int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample)
+{
+  update (Time, 0, Line_Number, Sample);
 }
 
 void DRAW_D2_PLOT::update_timed(unsigned long Time, int Line_Number, float Value)
@@ -440,7 +517,7 @@ void DRAW_D2_PLOT::update_timed(unsigned long Time, int Line_Number, float Value
       tmp_value.MAX_VALUE = SUB_GRAPHS[0].LINE[Line_Number].VALUES.max();
       tmp_value.TIME_CREATED = SUB_GRAPHS[0].LINE[Line_Number].VALUES.time_created();
 
-      update(Line_Number, tmp_value);
+      update(Time, 0, Line_Number, tmp_value);
 
       SUB_GRAPHS[0].LINE[Line_Number].VALUES.clear(Time);
 
