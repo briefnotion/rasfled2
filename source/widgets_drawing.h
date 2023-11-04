@@ -190,6 +190,10 @@ class D2_PLOT_LINE
 {
   public:
 
+  void holdover_clear();
+
+  void holdover_update(MIN_MAX_TIME_SLICE_SIMPLE Slice_Value);
+
   int RESERVE_SIZE = 0;
   int RESERVE_SIZE_CUTOFF = 0;
   int RESERVE_SIZE_TRIM_AMOUNT = 0;
@@ -203,7 +207,12 @@ class D2_PLOT_LINE
 
   MIN_MAX_TIME_SLICE VALUES;
   TIMED_PING UPDATE_SIMPLE_VALUES;
+  
   TIMED_PING MERGE_TIMER;
+  float HOLDOVER_TOTAL = 0.0f;
+  float HOLDOVER_MAX = 0.0f;
+  float HOLDOVER_MIN = 0.0f;
+  float HOLDOVER_COUNT = 0.0f;
 
   vector<MIN_MAX_TIME_SLICE_SIMPLE> DATA_POINT;
 };
@@ -215,6 +224,8 @@ class DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES
   public:
 
   // Calculated
+
+  string LABEL = "";
 
   ImVec2 START_POS;
   ImVec2 END_POS;
@@ -294,7 +305,7 @@ class DRAW_D2_PLOT
 
   DRAW_D2_PLOT_PROPERTIES PROPS;
 
-  void create_subgraph(int Max_Data_Point_Count, unsigned long Duration_Span_ms);
+  void create_subgraph(int Max_Data_Point_Count, unsigned long Duration_Span_ms, string Label);
 
   void create_line(COLOR_COMBO Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor);
   // Prepare line for drawing

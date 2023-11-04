@@ -298,15 +298,45 @@ void DRAW_GRID::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_P
 
 // ---------------------------------------------------------------------------------------
 
+void D2_PLOT_LINE::holdover_clear()
+{
+  HOLDOVER_TOTAL = 0.0f;
+  HOLDOVER_MAX = 0.0f;
+  HOLDOVER_MIN = 0.0f;
+  HOLDOVER_COUNT = 0.0f;
+}
+
+void D2_PLOT_LINE::holdover_update(MIN_MAX_TIME_SLICE_SIMPLE Slice_Value)
+{
+  if (HOLDOVER_COUNT == 0)
+  {
+      HOLDOVER_MAX = Slice_Value.MEAN_VALUE;
+      HOLDOVER_MIN = Slice_Value.MEAN_VALUE;
+  }
+
+  HOLDOVER_TOTAL = HOLDOVER_TOTAL + Slice_Value.MEAN_VALUE;
+
+  if (Slice_Value.MAX_VALUE > HOLDOVER_MAX)
+  {
+      HOLDOVER_MAX = Slice_Value.MAX_VALUE;
+  }
+
+  if (Slice_Value.MIN_VALUE < HOLDOVER_MIN)
+  {
+    HOLDOVER_MIN = Slice_Value.MIN_VALUE;
+  }
+
+  HOLDOVER_COUNT++;
+}
+
 void DRAW_D2_PLOT::merge(unsigned long Time, int Sub_Graph, int Line_Number)
 {
   if (Sub_Graph +1 < SUB_GRAPHS.size())
   {
     if (Line_Number < SUB_GRAPHS[Sub_Graph].LINE.size())
     {
-      if (SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.size() > 1)
+      if (SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.size() > 0)
       {
-
         if (SUB_GRAPHS[Sub_Graph].LINE[Line_Number].MERGE_TIMER.ping_down(Time) == false)
         {
           SUB_GRAPHS[Sub_Graph].LINE[Line_Number].MERGE_TIMER.ping_up(Time, SUB_GRAPHS[Sub_Graph +1].TIME_PER_POINT_UL);
@@ -317,38 +347,18 @@ void DRAW_D2_PLOT::merge(unsigned long Time, int Sub_Graph, int Line_Number)
           {
             int point = 0;
 
-            float mean = 0;
-            float max = 0;
-            float min = 0;
-
             while (SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].TIME_CREATED < clip_time)
             {
-
-              if (point == 0)
-              {
-                max = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MEAN_VALUE;
-                min = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MEAN_VALUE;
-              }
-
-              mean = mean + SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MEAN_VALUE;
-
-              if (max < SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MAX_VALUE)
-              {
-                max = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MAX_VALUE;
-              }
-              if (min < SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MIN_VALUE)
-              {
-                min = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point].MIN_VALUE;
-              }
+              SUB_GRAPHS[Sub_Graph].LINE[Line_Number].holdover_update(SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point]);
 
               point++;
             }
 
             MIN_MAX_TIME_SLICE_SIMPLE tmp_slice;
             
-            tmp_slice.MEAN_VALUE = mean / (float)point;
-            tmp_slice.MAX_VALUE = max;
-            tmp_slice.MIN_VALUE = min;
+            tmp_slice.MEAN_VALUE = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_TOTAL / SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_COUNT;
+            tmp_slice.MAX_VALUE = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_MAX;
+            tmp_slice.MIN_VALUE = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_MIN;
             tmp_slice.TIME_CREATED = Time;
 
             if (point > 0)
@@ -356,9 +366,14 @@ void DRAW_D2_PLOT::merge(unsigned long Time, int Sub_Graph, int Line_Number)
               SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.erase(
                                 SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.begin(), 
                                 SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.begin() + point);
-              
+            }
+
+            if (point > 0 || SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_COUNT > 0)
+            {
               update(Time, Sub_Graph +1, Line_Number, tmp_slice);
             }
+            
+            SUB_GRAPHS[Sub_Graph].LINE[Line_Number].holdover_clear();
           }
         }
       }
@@ -409,10 +424,11 @@ ImVec2 DRAW_D2_PLOT::position_on_plot(float X, float Y, DRAW_D2_PLOT_SUB_GRAPH_P
   return ret_vec;
 }
 
-void DRAW_D2_PLOT::create_subgraph(int Max_Data_Point_Count, unsigned long Duration_Span_ms)
+void DRAW_D2_PLOT::create_subgraph(int Max_Data_Point_Count, unsigned long Duration_Span_ms, string Label)
 {
   DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES tmp_sub_graph;
   
+  tmp_sub_graph.LABEL = Label;
   tmp_sub_graph.DATA_POINTS_COUNT_MAX = Max_Data_Point_Count;
   tmp_sub_graph.DURATION_SPAN = Duration_Span_ms;
 
@@ -460,6 +476,8 @@ void DRAW_D2_PLOT::update(unsigned long Time, int Line_Number, float Value)
       MIN_MAX_TIME_SLICE_SIMPLE tmp_value;
 
       tmp_value.MEAN_VALUE = Value;
+      tmp_value.MAX_VALUE = Value;
+      tmp_value.MIN_VALUE = Value;
       tmp_value.TIME_CREATED = Time;
 
       SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.push_back(tmp_value);
@@ -468,7 +486,19 @@ void DRAW_D2_PLOT::update(unsigned long Time, int Line_Number, float Value)
 
       if (SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.size() >= SUB_GRAPHS[0].LINE[Line_Number].RESERVE_SIZE_CUTOFF)
       {
+        if (1 < SUB_GRAPHS.size())
+        {
+          int point = 0;
+
+          while(point < SUB_GRAPHS[0].LINE[Line_Number].RESERVE_SIZE_TRIM_AMOUNT)
+          {
+            SUB_GRAPHS[0].LINE[Line_Number].holdover_update(SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT[point]);
+            point++;
+          }
+        }
+
         SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.erase(SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.begin(), SUB_GRAPHS[0].LINE[Line_Number].DATA_POINT.begin() + SUB_GRAPHS[0].LINE[Line_Number].RESERVE_SIZE_TRIM_AMOUNT);
+
       }
     }
   }
@@ -491,7 +521,19 @@ void DRAW_D2_PLOT::update(unsigned long Time, int Sub_Graph, int Line_Number, MI
 
       if (SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.size() >= SUB_GRAPHS[Sub_Graph].LINE[Line_Number].RESERVE_SIZE_CUTOFF)
       {
+        if ((Sub_Graph) <SUB_GRAPHS.size())
+        {
+          int point = 0;
+
+          while(point < SUB_GRAPHS[Sub_Graph].LINE[Line_Number].RESERVE_SIZE_TRIM_AMOUNT)
+          {
+            SUB_GRAPHS[Sub_Graph].LINE[Line_Number].holdover_update(SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT[point]);
+            point++;
+          }
+        }
+
         SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.erase(SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.begin(), SUB_GRAPHS[Sub_Graph].LINE[Line_Number].DATA_POINT.begin() + SUB_GRAPHS[Sub_Graph].LINE[Line_Number].RESERVE_SIZE_TRIM_AMOUNT);
+
       }
     }
   }
@@ -532,6 +574,11 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
 
   for (int graph = 0; graph < SUB_GRAPHS.size(); graph++)
   {
+    ImGui::SetCursorScreenPos(ImVec2(SUB_GRAPHS[graph].START_POS.x + 5, SUB_GRAPHS[graph].START_POS.y + 5));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.STANDARD));
+    ImGui::Text("%s", SUB_GRAPHS[graph].LABEL.c_str());
+    ImGui::PopStyleColor();
+
     for (int line = 0; line < SUB_GRAPHS[graph].LINE.size(); line++)
     {
       bool min_max_out_of_bounds_x = false;
@@ -550,20 +597,12 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
       ImVec2 min;
       ImVec2 max;
 
-      for (int point = 1; point < SUB_GRAPHS[graph].LINE[line].DATA_POINT.size(); point++)
+      for (int point = 0; point < SUB_GRAPHS[graph].LINE[line].DATA_POINT.size(); point++)
       {
         // Draw Min Max
         if (SUB_GRAPHS[graph].LINE[line].DISPLAY_MIN_MAX)
         {
           min_max_out_of_bounds_x = false;
-
-          // New plot points continue from prev pos
-          //min = position_on_plot(
-          //     ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT_F), 
-          //     LINE[line].DATA_POINT[point].MIN_VALUE);
-          //max = position_on_plot(
-          //     ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT_F), 
-          //     LINE[line].DATA_POINT[point].MAX_VALUE);
 
           // New plot points are added to front, plot scrolls from front
           min = position_on_plot(
@@ -580,17 +619,12 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
         }
         
         // Draw Line
-        if (SUB_GRAPHS[graph].LINE[line].DISPLAY_MEAN)
+        if ((point > 0) && SUB_GRAPHS[graph].LINE[line].DISPLAY_MEAN)
         {
           mean_start = mean_end;
           mean_out_of_bounds_x_start = mean_out_of_bounds_x_end;
 
           mean_out_of_bounds_x_end = false;
-
-          // New plot points continue from prev pos
-          //mean_end = position_on_plot(
-          //      ((float)(LINE[line].DATA_POINT[point].TIME_CREATED - TIME_START) / TIME_PER_POINT_F), 
-          //      LINE[line].DATA_POINT[point].MEAN_VALUE);
 
           // New plot points are added to front, plot scrolls from front
           mean_end = position_on_plot(
@@ -618,7 +652,6 @@ void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
 
     for (int sub_graph = 0; sub_graph < SUB_GRAPHS.size(); sub_graph++)
     {
-
       SUB_GRAPHS[sub_graph].X_SIZE = x_size_per_subgraph;
       SUB_GRAPHS[sub_graph].Y_SIZE = (End_Position.y - Start_Position.y);
 
@@ -636,7 +669,7 @@ void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
       else
       {
         SUB_GRAPHS[sub_graph].START_POS = ImVec2(End_Position.x - ((sub_graph + 1) * x_size_per_subgraph), Start_Position.y);
-        SUB_GRAPHS[sub_graph].END_POS = ImVec2(End_Position.x + ((sub_graph) * x_size_per_subgraph), End_Position.y);
+        SUB_GRAPHS[sub_graph].END_POS = ImVec2(End_Position.x - ((sub_graph) * x_size_per_subgraph), End_Position.y);
       }
     }
 

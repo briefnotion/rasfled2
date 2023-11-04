@@ -66,9 +66,9 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   style.Colors[ImGuiCol_Header] = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.STANDARD;
   style.Colors[ImGuiCol_HeaderActive] = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.ACTIVE;
 
-  style.Colors[ImGuiCol_Separator] = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.STANDARD;
-  style.Colors[ImGuiCol_SeparatorHovered] = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.HOVERED;
-  style.Colors[ImGuiCol_SeparatorActive] = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.ACTIVE;
+  style.Colors[ImGuiCol_Separator] = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.STANDARD;
+  style.Colors[ImGuiCol_SeparatorHovered] = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.HOVERED;
+  style.Colors[ImGuiCol_SeparatorActive] = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.ACTIVE;
 
   style.Colors[ImGuiCol_ResizeGrip] = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.STANDARD;
   style.Colors[ImGuiCol_ResizeGripHovered] = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE.HOVERED;

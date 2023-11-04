@@ -697,7 +697,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.TB_ACCELERATION.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
   SDATA.TB_ACCELERATION.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
   SDATA.TB_ACCELERATION.PROPS.DRAW_MIN_MAX = true;
-  SDATA.TB_ACCELERATION.PROPS.DRAW_MIN_MAX_ON_TOP = true;
+  SDATA.TB_ACCELERATION.PROPS.DRAW_MIN_MAX_ON_BOTTOM = true;
   SDATA.TB_ACCELERATION.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
   SDATA.TB_ACCELERATION.PROPS.MAX = 10;
   SDATA.TB_ACCELERATION.PROPS.DRAW_RULER = true;
@@ -759,45 +759,39 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.PLOT_SLOW.PROPS.LABEL = "Slow";
   SDATA.PLOT_SLOW.PROPS.COLOR_GRID = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL = 4;
-  SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 6;
   SDATA.PLOT_SLOW.PROPS.DATA_POINTS_VALUE_MAX = 80;        // 80mph
   SDATA.PLOT_SLOW.PROPS.LEFT_TO_RIGHT = false;
   SDATA.PLOT_SLOW.PROPS.BOTTOM_TO_TOP = true;
   SDATA.PLOT_SLOW.create(sdSysData.tmeCURRENT_FRAME_TIME);
   
-  // Slow Subgraph 
-  SDATA.PLOT_SLOW.create_subgraph(60 * 6, 6* 60 * 60 * 1000);   // 6 hours, 1 per minute
-                                                                // 6 hours, count * min * sec * ms
+  /*
+  SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 9;
+  SDATA.PLOT_SLOW.create_subgraph(150,          1 * 1000, "1s");    // 1 sec    - 1 sec
+  SDATA.PLOT_SLOW.create_subgraph(30,           4 * 1000, "5s");    // 4 sec    - 5 sec
+  SDATA.PLOT_SLOW.create_subgraph(30,          15 * 1000, "20s");   // 15 sec   - 20 sec
+  SDATA.PLOT_SLOW.create_subgraph(30,          40 * 1000, "1m");    // 40 sec   - 1 min
+  SDATA.PLOT_SLOW.create_subgraph(30,      4 * 60 * 1000, "5m");    // 4 min    - 5 min
+  SDATA.PLOT_SLOW.create_subgraph(30,     15 * 60 * 1000, "20m");   // 15 min   - 20 min
+  SDATA.PLOT_SLOW.create_subgraph(30,     40 * 60 * 1000, "1h");    // 40 min   - 1 hr
+  SDATA.PLOT_SLOW.create_subgraph(30, 2 * 60 * 60 * 1000, "3h");    // 2 hr     - 3 hr
+  SDATA.PLOT_SLOW.create_subgraph(30, 4 * 60 * 60 * 1000, "7h");    // 6 4 hr   - 7 hr
+  */
+ 
+  SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 5;
+  SDATA.PLOT_SLOW.create_subgraph(150,          5 * 1000, "5s");    // 4 sec    - 5 sec
+  SDATA.PLOT_SLOW.create_subgraph(55,          55 * 1000, "1m");    // 40 sec   - 1 min
+  SDATA.PLOT_SLOW.create_subgraph(59,     59 * 60 * 1000, "1h");    // 40 min   - 1 hr
+  SDATA.PLOT_SLOW.create_subgraph(60, 2 * 60 * 60 * 1000, "3h");    // 2 hr     - 3 hr
+  SDATA.PLOT_SLOW.create_subgraph(60, 4 * 60 * 60 * 1000, "7h");    // 6 4 hr   - 7 hr
 
   // Slow Plot Speed Line
   SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, true, true, 2.0f, 2.0f);
 
   // Slow Plot Temp Line
   SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE, true, true, 2.0f, 2.0f);
-
-  // Fast Plot line
-  SDATA.PLOT_FAST.PROPS.LABEL = "Fast";
-  SDATA.PLOT_FAST.PROPS.COLOR_GRID = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
-  SDATA.PLOT_FAST.PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL = 4;
-  SDATA.PLOT_FAST.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 2;
-  SDATA.PLOT_FAST.PROPS.DATA_POINTS_VALUE_MAX = 80;        // 80mph
-  SDATA.PLOT_FAST.PROPS.LEFT_TO_RIGHT = true;
-  SDATA.PLOT_FAST.PROPS.BOTTOM_TO_TOP = true;
-  SDATA.PLOT_FAST.create(sdSysData.tmeCURRENT_FRAME_TIME);
   
-  // Fast Subgraph
-  SDATA.PLOT_FAST.create_subgraph(150, 5 * 1000); // 5 seconds 
-
-  SDATA.PLOT_FAST.create_subgraph(150, 25 * 1000); // 5 seconds
-
-  // Fast  Plot Speed Line
-  SDATA.PLOT_FAST.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, true, false, 3.0f, 2.0f);
-
-  // Fast  Plot Temp Line
-  SDATA.PLOT_FAST.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE, true, false, 3.0f, 2.0f);
-
-  // Fast  Plot RPM Line
-  SDATA.PLOT_FAST.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, true, false, 3.0f, 2.0f);
+  // Slow Plot Temp Line
+  SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, true, true, 2.0f, 2.0f);
 
   // ---
 
@@ -1069,12 +1063,9 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.VB_S_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);
   SDATA.VB_TACH.update_value(sdSysData, SDATA.RPM/50);
 
-  SDATA.PLOT_SLOW.update_timed(sdSysData.tmeCURRENT_FRAME_TIME, 0, SDATA.SPEED);
-  SDATA.PLOT_SLOW.update_timed(sdSysData.tmeCURRENT_FRAME_TIME, 1, SDATA.TEMP_S_TEMP);
-
-  SDATA.PLOT_FAST.update(sdSysData.tmeCURRENT_FRAME_TIME, 0, SDATA.SPEED);
-  SDATA.PLOT_FAST.update(sdSysData.tmeCURRENT_FRAME_TIME, 1, SDATA.TEMP_S_TEMP);
-  SDATA.PLOT_FAST.update(sdSysData.tmeCURRENT_FRAME_TIME, 2, (float)SDATA.RPM/50);
+  SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 0, SDATA.SPEED);
+  SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 1, SDATA.TEMP_S_TEMP);
+  SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 2, (float)SDATA.RPM/50);
 }
 
 void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
@@ -1088,60 +1079,41 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
     
     ImGuiIO &io = ImGui::GetIO();
 
-    //const int disp_x = 94;
-    const int disp_y = 125;
-
     // ---
     // Left Side
 
-    ImGui::BeginChild("Auto Screen Left Side", ImVec2(ImGui::GetContentRegionAvail().x - 100, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+    ImGui::BeginChild("Auto All Data", ImVec2(ImGui::GetContentRegionAvail().x * 7/32, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
-      /*
-      ImGui::BeginChild("Speed Display", ImVec2(disp_x, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
-        SDATA.L_SPEED.draw(sdSysData);
-
-        SDATA.L_ACCELERATION.draw(sdSysData); //ImGui::TextUnformatted("Δ\nv");
+        SDATA.D_LIGHTS.draw(sdSysData);
+        SDATA.D_FUEL_LEVEL.draw(sdSysData);
+        SDATA.D_PARKING_BRAKE.draw(sdSysData);
+        SDATA.D_CRUISE_ON.draw(sdSysData);
+        SDATA.D_CRUISE_SPEED.draw(sdSysData);
       }
-      ImGui::EndChild();
+      
+      ImGui::Separator();
 
-      ImGui::SameLine();
-      */
-
-      ImGui::BeginChild("Auto Data 1", ImVec2(ImGui::GetContentRegionAvail().x / 4, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
-        /*
-        if (ImGui::BeginTable("Automobile Data", 2, 0))
-        {
-          ImGui::TableNextRow();
-          ImGui::TableNextColumn();
-          ImGui::Text("Messages");
-          ImGui::TableNextColumn();
-          ImGui::Text("%d", SDATA.MESSAGES); 
+        SDATA.D_TEMP_AMBIANT.draw(sdSysData);
+        SDATA.D_TEMP_INTAKE.draw(sdSysData);
+        SDATA.D_TEMP_COOLANT.draw(sdSysData);
+        SDATA.D_TEMP_CATALYST.draw(sdSysData);
+        SDATA.D_TEMP_SUPER_TEMP.draw(sdSysData);
+      }
 
-          ImGui::TableNextRow();
-          ImGui::TableNextColumn();
-          ImGui::Text("Steering Angle");
-          ImGui::TableNextColumn();
-          ImGui::Text("%s %s %s", SDATA.STEERING_WHEEL_ANGLE.c_str(), 
-                                  SDATA.STEERING_WHEEL_LEFT_OF_CENTER.c_str(), 
-                                  SDATA.STEERING_WHEEL_TURNING_DIRECTION.c_str());
-          
-          ImGui::EndTable();
-        }
-        */
+      ImGui::Separator();
 
+      {
         SDATA.D_FUEL_RAIL_PRESSURE.draw(sdSysData);
         SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(sdSysData);
         SDATA.D_VOLTAGE.draw(sdSysData);
         SDATA.D_BAROMETER.draw(sdSysData);
         SDATA.D_CAM_COMM_ERROR.draw(sdSysData);
       }
-      ImGui::EndChild();
+      
+      ImGui::Separator();
 
-      ImGui::SameLine();
-
-      ImGui::BeginChild("Auto Data 2", ImVec2(ImGui::GetContentRegionAvail().x / 3, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         SDATA.OC_LF_TTL.draw(sdSysData);
         ImGui::SameLine();
@@ -1159,33 +1131,32 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
         ImGui::SameLine();
         SDATA.D_RB_TTL.draw(sdSysData);
       }
-      ImGui::EndChild();
+    }
 
-      ImGui::SameLine();
+    ImGui::EndChild();
 
-      ImGui::BeginChild("Auto Data 3", ImVec2(ImGui::GetContentRegionAvail().x / 2, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-      {
-        SDATA.D_TEMP_AMBIANT.draw(sdSysData);
-        SDATA.D_TEMP_INTAKE.draw(sdSysData);
-        SDATA.D_TEMP_COOLANT.draw(sdSysData);
-        SDATA.D_TEMP_CATALYST.draw(sdSysData);
-        SDATA.D_TEMP_SUPER_TEMP.draw(sdSysData);
+    ImGui::SameLine();
+
+    ImGui::BeginChild("Auto Screen Right Side", ImVec2(ImGui::GetContentRegionAvail().x - 100, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+    {
+      ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 8/16), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      { 
+        float size_1_3 = ImGui::GetContentRegionAvail().x - 55;
+        ImVec2 pos1 = ImGui::GetCursorScreenPos();
+        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
+        SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2);
+
+        ImGui::SameLine();
+
+        SDATA.VB_S_TEMP.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
+        ImGui::SameLine();
+        SDATA.VB_SPEED.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
+        ImGui::SameLine();
+        SDATA.VB_TACH.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));        
       }
       ImGui::EndChild();
 
-      ImGui::SameLine();
-
-      ImGui::BeginChild("Auto Data 4", ImVec2(ImGui::GetContentRegionAvail().x, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-      {
-        SDATA.D_LIGHTS.draw(sdSysData);
-        SDATA.D_FUEL_LEVEL.draw(sdSysData);
-        SDATA.D_PARKING_BRAKE.draw(sdSysData);
-        SDATA.D_CRUISE_ON.draw(sdSysData);
-        SDATA.D_CRUISE_SPEED.draw(sdSysData);
-      }
-      ImGui::EndChild();
-
-      ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, 75), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         SDATA.TB_STEERING.draw(sdSysData);
         SDATA.TB_TORQUE.draw(sdSysData);
@@ -1197,83 +1168,9 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
         SDATA.TB_RPM_G5.draw(sdSysData);
         */
         SDATA.TB_RPM.draw(sdSysData);
-      }
-      ImGui::EndChild();
 
-      /*
-      ImGui::SameLine();
+        ImGui::Separator();
 
-      ImGui::BeginChild("Gear Display", ImVec2(disp_x, disp_y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-      {
-        SDATA.L_GEAR.draw(sdSysData);
-        SDATA.L_TACH.draw(sdSysData);
-      }
-      ImGui::EndChild();
-      */
-
-      //ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 2 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-      //{  
-      //  SDATA.P_SPEED.draw(sdSysData);
-      //}
-      //ImGui::EndChild();
-
-      /*
-      ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 1 / 4, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-      {
-        SDATA.P_SPEED_SLOW.draw(sdSysData);
-      }
-      ImGui::EndChild();
-
-      ImGui::SameLine();
-
-      ImGui::BeginChild("Data 2", ImVec2(ImGui::GetContentRegionAvail().x * 1 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-      {
-        SDATA.VB_SPEED.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x * 1 / 3, ImGui::GetContentRegionAvail().y));
-        ImGui::SameLine();
-        SDATA.VB_TACH.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x * 1 / 2, ImGui::GetContentRegionAvail().y));
-        ImGui::SameLine();
-        SDATA.VB_S_TEMP.draw(sdSysData, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-      }
-      ImGui::EndChild();
-
-      ImGui::SameLine();
-
-      ImGui::BeginChild("Data 3", ImVec2(ImGui::GetContentRegionAvail().x * 1 / 2, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-      {
-        SDATA.P_SPEED.draw(sdSysData);
-      }
-      ImGui::EndChild();
-      */
-
-      ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x * 2 / 3, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-      { 
-
-        float size_1_3 = ImGui::GetContentRegionAvail().x * 2 / 3;
-        ImVec2 pos1 = ImGui::GetCursorScreenPos();
-        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
-        SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2);
-
-        ImGui::SameLine();
-
-        SDATA.VB_S_TEMP.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
-        ImGui::SameLine();
-        SDATA.VB_SPEED.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
-        ImGui::SameLine();
-        SDATA.VB_TACH.draw(sdSysData, ImVec2(10, ImGui::GetContentRegionAvail().y));
-
-        ImGui::SameLine();
-
-        pos1 = ImGui::GetCursorScreenPos();
-        pos2 = ImVec2(pos1.x + ImGui::GetContentRegionAvail().x, pos1.y + ImGui::GetContentRegionAvail().y);
-        SDATA.PLOT_FAST.draw(sdSysData, pos1, pos2);
-        
-      }
-      ImGui::EndChild();
-
-      ImGui::SameLine();
-
-      ImGui::BeginChild("Data 4", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-      {
         SDATA.TB_SPEED.draw(sdSysData);
         SDATA.TB_ACCELERATION.draw(sdSysData);
       }
@@ -1293,11 +1190,11 @@ void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData, CONSOLE_COMMUNIC
   const int disp_y = 147;
 
   SDATA.L_SPEED_SB.draw(sdSysData);
-  SDATA.L_ACCELERATION_SB.draw(sdSysData); //ImGui::TextUnformatted("Δ\nv");
-  SDATA.L_GEAR_SB.draw(sdSysData);
   SDATA.L_TACH_SB.draw(sdSysData);
-  SDATA.L_VOLTAGE_SB.draw(sdSysData);
   SDATA.L_S_TEMP_SB.draw(sdSysData);
+  SDATA.L_VOLTAGE_SB.draw(sdSysData);
+  SDATA.L_GEAR_SB.draw(sdSysData);
+  SDATA.L_ACCELERATION_SB.draw(sdSysData); //ImGui::TextUnformatted("Δ\nv");
 }
 
 // ---------------------------------------------------------------------------------------
