@@ -198,12 +198,31 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
 
   ImVec2 pos = ImGui::GetCursorScreenPos();
 
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
   {
     if (PROPS.LABEL_ON_LEFT == true)
     {
+      if (PROPS.MARKER)
+      {
+        draw_list->AddRectFilled(pos, ImVec2(pos.x + 3, pos.y + 75), PROPS.MARKER_COLOR.DIM);
+      }
+      
       ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
       ImGui::TextUnformatted(PROPS.LABEL.c_str());
       pos.x = pos.x + 10;
+    }
+    else
+    {
+      if (PROPS.MARKER)
+      {
+        draw_list->AddRectFilled(ImVec2(pos.x + 80 -3, pos.y), ImVec2(pos.x + 80 , pos.y + 75), PROPS.MARKER_COLOR.DIM);
+      }
+      
+      ImGui::SetCursorScreenPos(ImVec2(pos.x + 80 - 9, pos.y));
+      ImGui::TextUnformatted(PROPS.LABEL.c_str());
+
+      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y));
     }
 
     //---
@@ -294,12 +313,13 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
     ImGui::PopFont();
 
     //---
-
+    /*
     if (PROPS.LABEL_ON_LEFT == false)
     {
       ImGui::SameLine();
       ImGui::TextUnformatted(PROPS.LABEL.c_str());
     }
+    */
 
     if (PROPS.DISPLAY_MIN_MAX)
     {
@@ -493,6 +513,8 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_SPEED_SB.PROPS.LABEL_ON_LEFT = true;
   SDATA.L_SPEED_SB.PROPS.DISPLAY_MIN_MAX = true;
   SDATA.L_SPEED_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.L_SPEED_SB.PROPS.MARKER = true;
+  SDATA.L_SPEED_SB.PROPS.MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.L_SPEED_SB.create();
 
   SDATA.L_ACCELERATION_SB.PROPS.LABEL = "A\nC\nC";
@@ -512,6 +534,8 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_TACH_SB.PROPS.DISPLAY_MIN_MAX = true;
   SDATA.L_TACH_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
   SDATA.L_TACH_SB.PROPS.WHEEL_FRAME_SIZE = 3;
+  SDATA.L_TACH_SB.PROPS.MARKER = true;
+  SDATA.L_TACH_SB.PROPS.MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN;
   SDATA.L_TACH_SB.create();
 
   SDATA.L_VOLTAGE_SB.PROPS.LABEL = "V\nL\nT";
@@ -535,6 +559,8 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(60.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(70.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.L_S_TEMP_SB.PROPS.MARKER = true;
+  SDATA.L_S_TEMP_SB.PROPS.MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE;
   SDATA.L_S_TEMP_SB.PROPS.WHEEL_FRAME_SIZE = 33;
   SDATA.L_S_TEMP_SB.create();
 
@@ -764,34 +790,21 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.PLOT_SLOW.PROPS.BOTTOM_TO_TOP = true;
   SDATA.PLOT_SLOW.create(sdSysData.tmeCURRENT_FRAME_TIME);
   
-  /*
-  SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 9;
-  SDATA.PLOT_SLOW.create_subgraph(150,          1 * 1000, "1s");    // 1 sec    - 1 sec
-  SDATA.PLOT_SLOW.create_subgraph(30,           4 * 1000, "5s");    // 4 sec    - 5 sec
-  SDATA.PLOT_SLOW.create_subgraph(30,          15 * 1000, "20s");   // 15 sec   - 20 sec
-  SDATA.PLOT_SLOW.create_subgraph(30,          40 * 1000, "1m");    // 40 sec   - 1 min
-  SDATA.PLOT_SLOW.create_subgraph(30,      4 * 60 * 1000, "5m");    // 4 min    - 5 min
-  SDATA.PLOT_SLOW.create_subgraph(30,     15 * 60 * 1000, "20m");   // 15 min   - 20 min
-  SDATA.PLOT_SLOW.create_subgraph(30,     40 * 60 * 1000, "1h");    // 40 min   - 1 hr
-  SDATA.PLOT_SLOW.create_subgraph(30, 2 * 60 * 60 * 1000, "3h");    // 2 hr     - 3 hr
-  SDATA.PLOT_SLOW.create_subgraph(30, 4 * 60 * 60 * 1000, "7h");    // 6 4 hr   - 7 hr
-  */
- 
   SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 5;
-  SDATA.PLOT_SLOW.create_subgraph(150,          5 * 1000, "5s");    // 4 sec    - 5 sec
-  SDATA.PLOT_SLOW.create_subgraph(55,          55 * 1000, "1m");    // 40 sec   - 1 min
-  SDATA.PLOT_SLOW.create_subgraph(59,     59 * 60 * 1000, "1h");    // 40 min   - 1 hr
-  SDATA.PLOT_SLOW.create_subgraph(60, 2 * 60 * 60 * 1000, "3h");    // 2 hr     - 3 hr
-  SDATA.PLOT_SLOW.create_subgraph(60, 4 * 60 * 60 * 1000, "7h");    // 6 4 hr   - 7 hr
+  SDATA.PLOT_SLOW.create_subgraph(300,         10 * 1000, "10s");    // 10 sec    - 5 sec
+  SDATA.PLOT_SLOW.create_subgraph(58,         290 * 1000, "5m  (4:50m)");     // 290 sec   - 1 min
+  SDATA.PLOT_SLOW.create_subgraph(60,     40 * 60 * 1000, "45m   (40m)");    // 40 min   - 1 hr
+  SDATA.PLOT_SLOW.create_subgraph(60,    140 * 60 * 1000, "3h  (2:20m)");   // 2 hr     - 3 hr
+  SDATA.PLOT_SLOW.create_subgraph(60, 5 * 60 * 60 * 1000, "8h     (5h)");    // 6 4 hr   - 7 hr
 
   // Slow Plot Speed Line
-  SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, true, true, 2.0f, 2.0f);
+  SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, true, true, 2.0f, 1.0f);
 
   // Slow Plot Temp Line
-  SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE, true, true, 2.0f, 2.0f);
+  SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE, true, true, 2.0f, 1.0f);
   
   // Slow Plot Temp Line
-  SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, true, true, 2.0f, 2.0f);
+  SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, true, true, 2.0f, 1.0f);
 
   // ---
 
@@ -1063,9 +1076,9 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.VB_S_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);
   SDATA.VB_TACH.update_value(sdSysData, SDATA.RPM/50);
 
-  SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 0, SDATA.SPEED);
+  SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 2, SDATA.SPEED_IMPRES);
   SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 1, SDATA.TEMP_S_TEMP);
-  SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 2, (float)SDATA.RPM/50);
+  SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 0, (float)SDATA.RPM/50);
 }
 
 void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
@@ -1087,6 +1100,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       {
         SDATA.D_LIGHTS.draw(sdSysData);
         SDATA.D_FUEL_LEVEL.draw(sdSysData);
+        SDATA.D_VOLTAGE.draw(sdSysData);
         SDATA.D_PARKING_BRAKE.draw(sdSysData);
         SDATA.D_CRUISE_ON.draw(sdSysData);
         SDATA.D_CRUISE_SPEED.draw(sdSysData);
@@ -1107,7 +1121,6 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       {
         SDATA.D_FUEL_RAIL_PRESSURE.draw(sdSysData);
         SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(sdSysData);
-        SDATA.D_VOLTAGE.draw(sdSysData);
         SDATA.D_BAROMETER.draw(sdSysData);
         SDATA.D_CAM_COMM_ERROR.draw(sdSysData);
       }

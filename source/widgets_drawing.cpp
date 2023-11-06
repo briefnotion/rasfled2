@@ -574,7 +574,7 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
 
   for (int graph = 0; graph < SUB_GRAPHS.size(); graph++)
   {
-    ImGui::SetCursorScreenPos(ImVec2(SUB_GRAPHS[graph].START_POS.x + 5, SUB_GRAPHS[graph].START_POS.y + 5));
+    ImGui::SetCursorScreenPos(ImVec2(SUB_GRAPHS[graph].START_POS.x + 2, SUB_GRAPHS[graph].START_POS.y + 0));
     ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.STANDARD));
     ImGui::Text("%s", SUB_GRAPHS[graph].LABEL.c_str());
     ImGui::PopStyleColor();
@@ -593,6 +593,22 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
         mean_end = position_on_plot((float)(sdSysData.tmeCURRENT_FRAME_TIME - SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].TIME_CREATED), 
                                     SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].MEAN_VALUE, SUB_GRAPHS[graph], mean_out_of_bounds_x_end);
       }
+
+      /*
+      if (graph > 0)
+      {
+        if (SUB_GRAPHS[graph].LINE[line].DATA_POINT.size() > 0)
+        {
+          mean_end = position_on_plot((float)(sdSysData.tmeCURRENT_FRAME_TIME), 
+                                    SUB_GRAPHS[graph - 1].LINE[line].DATA_POINT.back().MEAN_VALUE, SUB_GRAPHS[graph], mean_out_of_bounds_x_end);
+        }
+      }
+      else if (SUB_GRAPHS[graph].LINE[line].DATA_POINT.size() > 1)
+      {
+        mean_end = position_on_plot((float)(sdSysData.tmeCURRENT_FRAME_TIME - SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].TIME_CREATED), 
+                                    SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].MEAN_VALUE, SUB_GRAPHS[graph], mean_out_of_bounds_x_end);
+      }
+      */
 
       ImVec2 min;
       ImVec2 max;
