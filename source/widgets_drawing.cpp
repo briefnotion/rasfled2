@@ -465,6 +465,12 @@ void DRAW_D2_PLOT::create(unsigned long Start_Plot_Time)
   GRID.PROPS.SEPERATOR_COUNT_VERTICAL = PROPS.GRID_SEPERATOR_COUNT_VERTICAL;
 
   TIME_START = Start_Plot_Time;
+
+  for (int sub_graph = 0; sub_graph < SUB_GRAPHS.size(); sub_graph++)
+  {
+    SUB_GRAPHS[sub_graph].TIME_PER_POINT_F = float(SUB_GRAPHS[sub_graph].DURATION_SPAN / SUB_GRAPHS[sub_graph].DATA_POINTS_COUNT_MAX);
+    SUB_GRAPHS[sub_graph].TIME_PER_POINT_UL = (SUB_GRAPHS[sub_graph].DURATION_SPAN / SUB_GRAPHS[sub_graph].DATA_POINTS_COUNT_MAX);
+  }
 }
 
 void DRAW_D2_PLOT::update(unsigned long Time, int Line_Number, float Value)
@@ -590,7 +596,7 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
       
       if (SUB_GRAPHS[graph].LINE[line].DATA_POINT.size() > 1)
       {
-        mean_end = position_on_plot((float)(sdSysData.tmeCURRENT_FRAME_TIME - SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].TIME_CREATED), 
+        mean_end = position_on_plot((float)(sdSysData.PROGRAM_TIME.current_frame_time() - SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].TIME_CREATED), 
                                     SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].MEAN_VALUE, SUB_GRAPHS[graph], mean_out_of_bounds_x_end);
       }
 
@@ -599,13 +605,13 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
       {
         if (SUB_GRAPHS[graph].LINE[line].DATA_POINT.size() > 0)
         {
-          mean_end = position_on_plot((float)(sdSysData.tmeCURRENT_FRAME_TIME), 
+          mean_end = position_on_plot((float)(sdSysData.PROGRAM_TIME.current_frame_time()), 
                                     SUB_GRAPHS[graph - 1].LINE[line].DATA_POINT.back().MEAN_VALUE, SUB_GRAPHS[graph], mean_out_of_bounds_x_end);
         }
       }
       else if (SUB_GRAPHS[graph].LINE[line].DATA_POINT.size() > 1)
       {
-        mean_end = position_on_plot((float)(sdSysData.tmeCURRENT_FRAME_TIME - SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].TIME_CREATED), 
+        mean_end = position_on_plot((float)(sdSysData.PROGRAM_TIME.current_frame_time() - SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].TIME_CREATED), 
                                     SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].MEAN_VALUE, SUB_GRAPHS[graph], mean_out_of_bounds_x_end);
       }
       */
@@ -622,10 +628,10 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
 
           // New plot points are added to front, plot scrolls from front
           min = position_on_plot(
-                ((float)(sdSysData.tmeCURRENT_FRAME_TIME - SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].TIME_CREATED) / SUB_GRAPHS[graph].TIME_PER_POINT_F), 
+                ((float)(sdSysData.PROGRAM_TIME.current_frame_time() - SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].TIME_CREATED) / SUB_GRAPHS[graph].TIME_PER_POINT_F), 
                 SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].MIN_VALUE, SUB_GRAPHS[graph], min_max_out_of_bounds_x);
           max = position_on_plot(
-                ((float)(sdSysData.tmeCURRENT_FRAME_TIME - SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].TIME_CREATED) / SUB_GRAPHS[graph].TIME_PER_POINT_F), 
+                ((float)(sdSysData.PROGRAM_TIME.current_frame_time() - SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].TIME_CREATED) / SUB_GRAPHS[graph].TIME_PER_POINT_F), 
                 SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].MAX_VALUE, SUB_GRAPHS[graph], min_max_out_of_bounds_x);
 
           if (min_max_out_of_bounds_x == false)
@@ -644,7 +650,7 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
 
           // New plot points are added to front, plot scrolls from front
           mean_end = position_on_plot(
-                ((float)(sdSysData.tmeCURRENT_FRAME_TIME - SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].TIME_CREATED) / SUB_GRAPHS[graph].TIME_PER_POINT_F), 
+                ((float)(sdSysData.PROGRAM_TIME.current_frame_time() - SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].TIME_CREATED) / SUB_GRAPHS[graph].TIME_PER_POINT_F), 
                 SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].MEAN_VALUE, SUB_GRAPHS[graph], mean_out_of_bounds_x_end);
 
           if (mean_out_of_bounds_x_start == false && mean_out_of_bounds_x_end == false)
@@ -673,9 +679,6 @@ void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
 
       SUB_GRAPHS[sub_graph].X_FACTOR = SUB_GRAPHS[sub_graph].X_SIZE / (float)SUB_GRAPHS[sub_graph].DATA_POINTS_COUNT_MAX;
       SUB_GRAPHS[sub_graph].Y_FACTOR = SUB_GRAPHS[sub_graph].Y_SIZE / (float)PROPS.DATA_POINTS_VALUE_MAX;
-
-      SUB_GRAPHS[sub_graph].TIME_PER_POINT_F = float(SUB_GRAPHS[sub_graph].DURATION_SPAN / SUB_GRAPHS[sub_graph].DATA_POINTS_COUNT_MAX);
-      SUB_GRAPHS[sub_graph].TIME_PER_POINT_UL = (SUB_GRAPHS[sub_graph].DURATION_SPAN / SUB_GRAPHS[sub_graph].DATA_POINTS_COUNT_MAX);
 
       if (PROPS.LEFT_TO_RIGHT == true)
       {

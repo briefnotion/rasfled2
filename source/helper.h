@@ -17,7 +17,7 @@
 #include <string>
 #include <chrono>
 
-#include <math.h>
+#include <cmath>
 
 #include "definitions.h"
 #include "stringthings.h"

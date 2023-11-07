@@ -21,7 +21,7 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
 {
   ImColor ret_color;
 
-  float power = (float)(sdSysData.tmeCURRENT_FRAME_TIME - Start_time) / (float)Duration;
+  float power = (float)(sdSysData.PROGRAM_TIME.current_frame_time() - Start_time) / (float)Duration;
   
   float r = (power * (float)End_Color.Value.x) + ((1 - power) * (float)Start_Color.Value.x);
   float g = (power * (float)End_Color.Value.y) + ((1 - power) * (float)Start_Color.Value.y);
@@ -50,21 +50,21 @@ ImColor BOOLEAN_GRADIANT::boolean_color(system_data &sdSysData, bool Value, ImCo
       COLOR_DESTINATION = False_Color;
     }
 
-    if (ACTIVE.ping_down(sdSysData.tmeCURRENT_FRAME_TIME))
+    if (ACTIVE.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()))
     { 
-      unsigned long time_elapsed = sdSysData.tmeCURRENT_FRAME_TIME - ACTIVE.start_time();
+      unsigned long time_elapsed = sdSysData.PROGRAM_TIME.current_frame_time() - ACTIVE.start_time();
       unsigned long time_remaining = DURATION - (time_elapsed);
 
-      ACTIVE.ping_up(sdSysData.tmeCURRENT_FRAME_TIME - time_remaining, DURATION);
+      ACTIVE.ping_up(sdSysData.PROGRAM_TIME.current_frame_time() - time_remaining, DURATION);
     }
     else
     {
-      ACTIVE.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, DURATION);
+      ACTIVE.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), DURATION);
     }
 
   }
 
-  if (ACTIVE.ping_down(sdSysData.tmeCURRENT_FRAME_TIME))
+  if (ACTIVE.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()))
   {
     return gradiant_color(sdSysData, ACTIVE.start_time(), DURATION, COLOR_START, COLOR_DESTINATION);
   }
@@ -200,13 +200,13 @@ void W_TEXT::update_text(system_data &sdSysData, string Text)
   {
     TEXT = Text;
 
-    UPDATE_TIMED.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, 500);
+    UPDATE_TIMED.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 500);
   }
 }
 
 void W_TEXT::draw(system_data &sdSysData)
 {
-  if (PROPS.CHANGE_NOTIFICATION == true && UPDATE_TIMED.ping_down(sdSysData.tmeCURRENT_FRAME_TIME))
+  if (PROPS.CHANGE_NOTIFICATION == true && UPDATE_TIMED.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()))
   {
     if (PROPS.STANDARD_COLOR)
     {
@@ -485,7 +485,7 @@ void BAR_TECH::update_value(system_data &sdSysData, float Value)
 
   if (PROPS.DRAW_MIN_MAX)
   {
-    MIN_MAX.put_value(Value, sdSysData.tmeCURRENT_FRAME_TIME);
+    MIN_MAX.put_value(Value, sdSysData.PROGRAM_TIME.current_frame_time());
   }
 }
 

@@ -280,7 +280,9 @@ class DRAW_D2_PLOT
 //
 //  plot.create_line(Color, dir, dir , sizes, sizes);
 //  ...
-//
+//  
+//  plot.create(plot_start_time);  
+
 {
   private:
 

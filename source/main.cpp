@@ -234,12 +234,6 @@ void proc_render_thread()
   ret = ws2811_render(&ledstring);  // Send values of ledstring to hardware.
 }
 
-void raw_window_player_draw_frame(string Buffer)
-// Simply printf the Buffer string to the screen.
-{
-  printf("%s", Buffer.c_str());
-}
-
 // ---------------------------------------------------------------------------------------
 // MAIN LOOP
 int loop_2(bool TTY_Only)
@@ -363,15 +357,20 @@ int loop_2(bool TTY_Only)
   sdSystem.ALERTS.PROP.SWITCH_COUNT = sdSystem.CONFIG.iNUM_SWITCHES;
   sdSystem.ALERTS.create();
   cons_2.SCREEN_COMMS.printw("Initializing Timer ...");
-  FledTime tmeFled;
+  //FledTime tmeFled;
 
   // Sleeping Loop Variables
-  tmeFled.setframetime();
+  sdSystem.PROGRAM_TIME.create();    //  Get current time.  This will be our timeframe to work in.
   
-  double tmeStartTime = tmeFled.tmeFrameMillis;
-  unsigned long tmeCurrentMillis = (unsigned long)tmeFled.tmeFrameMillis;
-  sdSystem.store_Current_Frame_Time(tmeCurrentMillis);
-
+  if (sdSystem.PROGRAM_TIME.setframetime(false) == true)
+  {
+    sdSystem.ALERT_SIMPLE = true;
+    cons_2.SCREEN_COMMS.printw("");
+    cons_2.SCREEN_COMMS.printw("Initializing Program Clock");
+    cons_2.SCREEN_COMMS.printw("");
+    sdSystem.PROGRAM_TIME.clear_error();
+  }
+  
   // ---------------------------------------------------------------------------------------
   // Load system configuration and set data
   
@@ -545,7 +544,7 @@ int loop_2(bool TTY_Only)
 
   // Initialize Switches
   hardware_monitor tmpSwitch;
-  tmpSwitch.set(true, sdSystem.tmeCURRENT_FRAME_TIME, DOOR_SWITCH_LEEWAY_TIME, true);
+  tmpSwitch.set(true, sdSystem.PROGRAM_TIME.current_frame_time(), DOOR_SWITCH_LEEWAY_TIME, true);
   for(int x=0; x<sdSystem.CONFIG.iNUM_SWITCHES; x++)
   {
     sdSystem.CONFIG.vhwDOORS.push_back(tmpSwitch);
@@ -554,7 +553,7 @@ int loop_2(bool TTY_Only)
   // -------------------------------------------------------------------------------------
 
   // Start Power On Animation
-  process_power_animation(cons_2.SCREEN_COMMS, sdSystem, tmeCurrentMillis, animations, CRGB(0, 0, 25));
+  process_power_animation(cons_2.SCREEN_COMMS, sdSystem, sdSystem.PROGRAM_TIME.now(), animations, CRGB(0, 0, 25));
   
   // ---------------------------------------------------------------------------------------
   //  Repeating Sleeping Loop until eXit is triggered.
@@ -563,7 +562,7 @@ int loop_2(bool TTY_Only)
   cons_2.SCREEN_COMMS.printw("Starting System ...");
 
   // Start the the compute timer (stopwatch) for first iteration. 
-  effi_timer.start_timer((unsigned long)tmeFled.tmeFrameMillis);
+  effi_timer.start_timer(sdSystem.PROGRAM_TIME.current_frame_time());
   
   // **************************************************************************************
   // **************************************************************************************
@@ -607,10 +606,19 @@ int loop_2(bool TTY_Only)
     // --- Prpare the Loop ---
 
     //  Get current time.  This will be our timeframe to work in.
-    tmeFled.setframetime();
-    tmeCurrentMillis = (unsigned long)tmeFled.tmeFrameMillis;
-    sdSystem.store_Current_Frame_Time(tmeCurrentMillis);
-    
+    if (sdSystem.PROGRAM_TIME.setframetime(true) == true)
+    {
+      sdSystem.ALERT_SIMPLE = true;
+      cons_2.SCREEN_COMMS.printw("");
+      cons_2.SCREEN_COMMS.printw("ALERT: PROGRAM TIME STREAM INTURPTED OR CORRUPT");
+      cons_2.SCREEN_COMMS.printw("  PREVIOUS FRAME TIME: " + to_string(sdSystem.PROGRAM_TIME.error_old_frame_time()));
+      cons_2.SCREEN_COMMS.printw("       NEW FRAME TIME: " + to_string(sdSystem.PROGRAM_TIME.error_new_frame_time()));
+      cons_2.SCREEN_COMMS.printw("           DIFFERANCE: "  + to_string(sdSystem.PROGRAM_TIME.error()));
+      cons_2.SCREEN_COMMS.printw("");
+
+      sdSystem.PROGRAM_TIME.clear_error();
+    }
+
     //  Only update the hardware when changes have been detected.
     //    This vabiable will be checked at the end of the loop.  If nothing was updated,
     //    the loop will just walk on past any hardware updates that would otherwise be
@@ -621,7 +629,7 @@ int loop_2(bool TTY_Only)
     // Signal to RasCAM to get data on next read comm cycle.  
     //  Screen draw cycle may be to much of a delay to handle?
     //  A half milsec delay after the send in the req is an alt.
-    if (comms_timer.is_ready_no_reset(tmeCurrentMillis) == true)
+    if (comms_timer.is_ready_no_reset(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       sdSystem.COMMS.request_to_send();
     }
@@ -630,7 +638,7 @@ int loop_2(bool TTY_Only)
     // --- Read Switchs --- 
 
      // Are switches ready -----------------
-    if (input_from_switches.is_ready(tmeCurrentMillis) == true)
+    if (input_from_switches.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {    
       // Read values of switches
       // Read information from car system. If not available, then get door info 
@@ -691,7 +699,7 @@ int loop_2(bool TTY_Only)
       }
 
       // Check the doors and start or end all animations
-      v_DoorMonitorAndAnimationControlModule2(cons_2.SCREEN_COMMS, sdSystem, animations, tmeCurrentMillis);
+      v_DoorMonitorAndAnimationControlModule2(cons_2.SCREEN_COMMS, sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
     }
 
     // Read light switchs and set day on or day off modes.
@@ -703,13 +711,13 @@ int loop_2(bool TTY_Only)
     // --- Check and Execute Timed Events That Are Ready ---
 
     // Is Events and Render ready -----------------
-    if (events_and_render.is_ready(tmeCurrentMillis) == true)
+    if (events_and_render.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       // MOVE RENAME ELIMINATE ??? !!!
       bool booUpdate = false;
 
       //  Run ALL GLOBAL Timed Events
-      animations.process_events(sdSystem, tmeCurrentMillis);
+      animations.process_events(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time());
 
       for(int group=0; group < sdSystem.CONFIG.LED_MAIN.at(0).g_size(); group++)
       {
@@ -720,7 +728,7 @@ int loop_2(bool TTY_Only)
           sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].booARRAY_UPDATED 
             = animations.EVENTS[channel].execute2(cons_2.SCREEN_COMMS, sdSystem, sRND, 
                 sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].crgbARRAY, 
-                tmeCurrentMillis);
+                sdSystem.PROGRAM_TIME.current_frame_time());
         }
       }
       
@@ -867,7 +875,7 @@ int loop_2(bool TTY_Only)
     // console with status and so on.
 
     // Is Keyboard or Mouse read ready -----------------
-    if (input_from_user.is_ready(tmeCurrentMillis) == true)
+    if (input_from_user.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       // Read Hardware Status before printing to screen.
       sdSystem.read_hardware_status(1000);
@@ -875,7 +883,7 @@ int loop_2(bool TTY_Only)
       // Read System log files
       while (watcher_daemon_log.line_avail() == true)
       {
-        //cons.Screen.Log_Screen_TEXT_BOX.add_line(tmeCurrentMillis, watcher_daemon_log.get_next_line());
+        //cons.Screen.Log_Screen_TEXT_BOX.add_line(sdSystem.PROGRAM_TIME.current_frame_time(), watcher_daemon_log.get_next_line());
         cons_2.update_daemon_log(sdSystem, watcher_daemon_log.get_next_line());
       }
 
@@ -885,8 +893,8 @@ int loop_2(bool TTY_Only)
         sdSystem.AIRCRAFT_COORD.process(file_to_string(FILES_AIRCRAFT_JSON));
       }
 
-      processcommandlineinput(cons_2.SCREEN_COMMS, sdSystem, tmeCurrentMillis, animations);
-      extraanimationdoorcheck2(cons_2.SCREEN_COMMS, sdSystem, tmeCurrentMillis, animations);
+      processcommandlineinput(cons_2.SCREEN_COMMS, sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
+      extraanimationdoorcheck2(cons_2.SCREEN_COMMS, sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
       
       // Also delayed, File maintenance.
       if (sdSystem.booRunning_State_File_Dirty == true)
@@ -902,11 +910,11 @@ int loop_2(bool TTY_Only)
     // Comm Port Read
     // Automobile Data Process.
     // No need to thread. Comms are actually much faster than I was led to believe.
-    if (comms_timer.is_ready(tmeCurrentMillis) == true)
+    if (comms_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
-      effi_timer_comms.start_timer(tmeFled.now());
-      sdSystem.COMMS.cycle(tmeCurrentMillis);
-      sdSystem.dblCOMMS_TRANSFER_TIME.set_data(effi_timer_comms.simple_elapsed_time(tmeFled.now()));
+      effi_timer_comms.start_timer(sdSystem.PROGRAM_TIME.now());
+      sdSystem.COMMS.cycle(sdSystem.PROGRAM_TIME.current_frame_time());
+      sdSystem.dblCOMMS_TRANSFER_TIME.set_data(effi_timer_comms.simple_elapsed_time(sdSystem.PROGRAM_TIME.now()));
 
       // Need to stop deleting this.
       //for (int pos = 0; pos < sdSystem.COMMS.READ_FROM_COMM.size(); pos++)
@@ -915,10 +923,10 @@ int loop_2(bool TTY_Only)
       //}
 
       // Process info from comm port int automobile system.
-      sdSystem.CAR_INFO.process(sdSystem.COMMS, tmeCurrentMillis);
+      sdSystem.CAR_INFO.process(sdSystem.COMMS, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // Process Automobile Lights
-      automobile_handler.update_events(sdSystem, animations, tmeCurrentMillis);
+      automobile_handler.update_events(sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // Comms flash data check and cleanup.
       sdSystem.COMMS.flash_data_check();
@@ -926,7 +934,7 @@ int loop_2(bool TTY_Only)
 
     // ---------------------------------------------------------------------------------------
     // Is display to console ready -----------------
-    if (display.is_ready(tmeCurrentMillis) == true)
+    if (display.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       // Call the Interface routine. (IO from user)
       //if (thread_output_running == false)
@@ -947,7 +955,7 @@ int loop_2(bool TTY_Only)
         cons_2.update_ADS_B_gadgets(sdSystem);
 
         // Automobile - Update all automobile Reference Data
-        sdSystem.CAR_INFO.translate(tmeCurrentMillis);
+        sdSystem.CAR_INFO.translate(sdSystem.PROGRAM_TIME.current_frame_time());
         cons_2.update_automobile_gadgets(sdSystem);
 
         // Update Switches to Alert system.
@@ -960,10 +968,10 @@ int loop_2(bool TTY_Only)
         
         
         // Redraw the console screen with what the screen determines needs to be displayed.
-        //cons.display(fsPlayer, sdSystem, tmeCurrentMillis);
-        effi_timer_screen.start_timer(tmeFled.now());
+        //cons.display(fsPlayer, sdSystem, sdSystem.PROGRAM_TIME.current_frame_time());
+        effi_timer_screen.start_timer(sdSystem.PROGRAM_TIME.now());
         cons_2.draw(sdSystem);
-        sdSystem.dblSCREEN_RENDER_TIME.set_data(effi_timer_screen.simple_elapsed_time(tmeFled.now()));
+        sdSystem.dblSCREEN_RENDER_TIME.set_data(effi_timer_screen.simple_elapsed_time(sdSystem.PROGRAM_TIME.now()));
 
         /*
         if (cons.the_player.get_next_frame_draw_time() > 0)
@@ -984,6 +992,10 @@ int loop_2(bool TTY_Only)
         }
         */
       }
+  
+      // Error?
+      sdSystem.ALERT_SIMPLE = false;
+      
     } // Is display to console ready -----------------
 
     // ---------------------------------------------------------------------------------------
@@ -1013,18 +1025,18 @@ int loop_2(bool TTY_Only)
 
     // Measure how much time has passed since the previous time the program was at 
     //  this point and store that value to be displayed in diag.
-    sdSystem.dblCYCLETIME.set_data(effi_timer.elapsed_time(tmeFled.now()));
+    sdSystem.dblCYCLETIME.set_data(effi_timer.elapsed_time(sdSystem.PROGRAM_TIME.now()));
 
     // Reset the the compute timer (stopwatch) and store the value before the program sleeps. 
-    sdSystem.dblCOMPUTETIME.set_data(effi_timer.elapsed_timer_time(tmeFled.now()));
+    sdSystem.dblCOMPUTETIME.set_data(effi_timer.elapsed_timer_time(sdSystem.PROGRAM_TIME.now()));
 
     // Determine how long the program will sleep, store the value to be displayed in diag, and put the cycle
     //  to sleep.
-    usleep ((int)(1000 * sdSystem.store_sleep_time(sdSystem.get_sleep_time(tmeFled.now(), tmeSleep_Wake_time))));
+    usleep ((int)(1000 * sdSystem.store_sleep_time(sdSystem.get_sleep_time(sdSystem.PROGRAM_TIME.now(), tmeSleep_Wake_time))));
 
     // Start the the compute timer (stopwatch) before the program as the program wakes to measure the amount of 
     //  time the compute cycle is. 
-    effi_timer.start_timer(tmeFled.now());
+    effi_timer.start_timer(sdSystem.PROGRAM_TIME.now());
 
   }// End MAIN CYCLE WHILE loop.
 
@@ -1063,8 +1075,6 @@ int loop_2(bool TTY_Only)
 
   // close open files
   watcher_daemon_log.stop();
-
-  printf("\033[?1003l\n"); // Disable mouse movement events, as l = low
 
   if(sdSystem.booREBOOT == false)
   {

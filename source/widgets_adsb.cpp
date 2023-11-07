@@ -339,7 +339,7 @@ void ADSB_WIDGET::clear()
 
 bool ADSB_WIDGET::is_expired(system_data &sdSysData)
 {
-  if (EXPIREED.ping_down(sdSysData.tmeCURRENT_FRAME_TIME) == true)
+  if (EXPIREED.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == true)
   {
     return false;
   }
@@ -358,7 +358,7 @@ bool ADSB_WIDGET::changed()
   return false;
 }
 
-void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long &tmeCurrentMillis)
+void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long tmeCurrentMillis)
 // Update values of gadget
 //  Gadget will be redrawn if values did changed or animations scheduled. 
 {
@@ -1814,23 +1814,23 @@ void ADSB_SCREEN::update(system_data &sdSysData)
         {
           ADSB_WIDGET new_adsb_widget;
           new_adsb_widget.create(sdSysData);
-          new_adsb_widget.update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.tmeCURRENT_FRAME_TIME);
+          new_adsb_widget.update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.PROGRAM_TIME.current_frame_time());
           ADSB_WIDGET_q.push_back(new_adsb_widget);
         }
         else
         {
           ADSB_WIDGET_q[pos_expired_avail].clear();
-          ADSB_WIDGET_q[pos_expired_avail].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.tmeCURRENT_FRAME_TIME);
+          ADSB_WIDGET_q[pos_expired_avail].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.PROGRAM_TIME.current_frame_time());
         }
       }
       else // slot found and pos avail.
       {
-        ADSB_WIDGET_q[pos_avail].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.tmeCURRENT_FRAME_TIME);
+        ADSB_WIDGET_q[pos_avail].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.PROGRAM_TIME.current_frame_time());
       }
     }
     else // put in found pos.
     {
-      ADSB_WIDGET_q[pos_found].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.tmeCURRENT_FRAME_TIME);
+      ADSB_WIDGET_q[pos_found].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.PROGRAM_TIME.current_frame_time());
     }
   }
 

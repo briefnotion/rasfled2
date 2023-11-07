@@ -60,7 +60,7 @@ void system_data::init()
 
 void system_data::store_Current_Frame_Time(unsigned long tmeCurrent_Time_millis)
 {
-  tmeCURRENT_FRAME_TIME = tmeCurrent_Time_millis;
+  //tmeCURRENT_FRAME_TIME = tmeCurrent_Time_millis;
   cdTIMER.update(tmeCurrent_Time_millis);
 }
 
@@ -106,7 +106,7 @@ CRGB system_data::get_countdown_color()
     CRGB countdown_color;
 
     // Get % complete
-    float pos = cdTIMER.timer_position(tmeCURRENT_FRAME_TIME);
+    float pos = cdTIMER.timer_position(PROGRAM_TIME.current_frame_time());
 
     // Get Section of Color List
     int section = floor((running_color_list.size -1) * pos);
@@ -116,7 +116,7 @@ CRGB system_data::get_countdown_color()
 
     // Get % Section complete
     unsigned long section_time_removed = section * (cdTIMER.duration() * section_size);
-    unsigned long section_elaped_time = cdTIMER.elapsed_time(tmeCURRENT_FRAME_TIME) - section_time_removed;
+    unsigned long section_elaped_time = cdTIMER.elapsed_time(PROGRAM_TIME.current_frame_time()) - section_time_removed;
 
     float pwr = ComputePower(section_elaped_time, cdTIMER.duration() * section_size);
 
@@ -148,7 +148,7 @@ void system_data::set_running_color(CRGB Running_Color, string strColor)
 
 void system_data::start_timer(int Seconds)
 {
-  cdTIMER.set_timer(tmeCURRENT_FRAME_TIME, Seconds);
+  cdTIMER.set_timer(PROGRAM_TIME.current_frame_time(), Seconds);
 }
 
 double system_data::store_sleep_time(double tmeSleep)
@@ -175,7 +175,7 @@ double system_data::get_sleep_time(double Current_Time, unsigned long Wake_Time)
 
 void system_data::read_hardware_status(int Milis_Frequency)
 {
-  hsHardware_Status.read_hardware_status(tmeCURRENT_FRAME_TIME, Milis_Frequency);
+  hsHardware_Status.read_hardware_status(PROGRAM_TIME.current_frame_time(), Milis_Frequency);
 }
 
 // -------------------------------------------------------------------------------------

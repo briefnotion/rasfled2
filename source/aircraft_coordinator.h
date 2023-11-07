@@ -14,7 +14,7 @@
 
 #include <deque>
 #include <string>
-#include <math.h>
+#include <cmath>
 
 // RASFled related header files
 #include "stringthings.h"

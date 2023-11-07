@@ -131,44 +131,75 @@ int FLED_TIME_VAR::get_second()
 // -------------------------------------------------------------------------------------
 // Keeps track of timing variables
 
-void FledTime::set()
+double FledTime::error()
+{
+  return ERROR;
+}
+
+double FledTime::error_old_frame_time()
+{
+  return OLD_FRAME_TIME;
+}
+
+double FledTime::error_new_frame_time()
+{
+  return CURRENT_FRAME_TIME;
+}
+
+void FledTime::clear_error()
+{
+  ERROR_EXIST = false;
+}
+
+void FledTime::create()
 {
   // Initialize as Start of Program Time.
   tmeStart = std::chrono::system_clock::now();
-  first_run = false;
 }
 
-double FledTime::now()
+unsigned long FledTime::now()
 {
-  if (first_run == true)
-  {
-    set();
-  }
-
   // Returns now time in milliseconds.
   // Should be Unsigned Long.
   std::chrono::time_point<std::chrono::system_clock> tmeNow = std::chrono::system_clock::now();
   std::chrono::duration<double>  dur = tmeNow - tmeStart;
 
   double nowtime = dur.count();
-  nowtime = nowtime * 1000;
+  //double nowtime = dur.count() - ERROR;
+  nowtime = nowtime * 1000.0;
   
-  return nowtime;
+  return (unsigned long)nowtime;
 }
 
-void FledTime::setframetime()
+bool FledTime::setframetime(bool Error_Check)
 {
-  if (first_run == true)
-  {
-    set();
-  }
-
   // Sets the Start of a Frame Time to now. 
   tmeFrame = std::chrono::system_clock::now();
   std::chrono::duration<double>  dur = tmeFrame - tmeStart;
 
-  tmeFrameMillis = dur.count();
-  tmeFrameMillis = tmeFrameMillis * 1000;
+  OLD_FRAME_TIME = CURRENT_FRAME_TIME;
+
+  CURRENT_FRAME_TIME = dur.count();
+  //CURRENT_FRAME_TIME = dur.count() + ERROR;
+  CURRENT_FRAME_TIME = CURRENT_FRAME_TIME * 1000.0;
+
+  //if (CURRENT_FRAME_TIME > 15000.0 && CURRENT_FRAME_TIME < 30000.0)
+  //{
+  //  CURRENT_FRAME_TIME = CURRENT_FRAME_TIME - 5000.0;
+  //}
+
+  // Check for error
+  if (Error_Check == true && (abs(CURRENT_FRAME_TIME - OLD_FRAME_TIME)) > ERROR_TOLERANCE)
+  {
+    ERROR = CURRENT_FRAME_TIME - OLD_FRAME_TIME;
+    ERROR_EXIST = true;
+
+    // Recompute with new error
+    //CURRENT_FRAME_TIME = dur.count() + ERROR;
+    //CURRENT_FRAME_TIME = CURRENT_FRAME_TIME * 1000.0;
+  }
+
+  return ERROR_EXIST;
 }
 
 double FledTime::tmeFrameElapse()
@@ -179,9 +210,15 @@ double FledTime::tmeFrameElapse()
   std::chrono::duration<double>  dur = tmeNow - tmeFrame;
   
   elapsed = dur.count();
-  elapsed = elapsed * 1000;
+  //elapsed = dur.count() - ERROR;
+  elapsed = elapsed * 1000.0;
 
   return elapsed;
+}
+
+unsigned long FledTime::current_frame_time()
+{
+  return (unsigned long)CURRENT_FRAME_TIME;
 }
   
 // ---------------------------------------------------------------------------------------

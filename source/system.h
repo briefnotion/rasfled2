@@ -81,7 +81,7 @@ class system_data
   public:
 
   // Primary Variables
-  unsigned long tmeCURRENT_FRAME_TIME = 0;
+  FledTime PROGRAM_TIME;
 
   // Main Reset
   bool booREBOOT = false;
@@ -97,6 +97,8 @@ class system_data
   STAT_DATA_DOUBLE dblCOMMS_TRANSFER_TIME; // Stored value returned on pref sleep cycle.
 
   ALERT_SYSTEM ALERTS;
+
+  bool ALERT_SIMPLE = false;
 
   // For Debuging Gadgets
   //bool DEBUG_COUNTER = false;

@@ -207,7 +207,7 @@ class ADSB_WIDGET
   //  Return true is screen will be redrawn on next draw.
   //  Return false if no changes made.
 
-  void update_aircraft(AIRCRAFT Aircraft, unsigned long &tmeCurrentMillis);
+  void update_aircraft(AIRCRAFT Aircraft, unsigned long tmeCurrentMillis);
   // Update values of gadget
   //  Gadget will be redrawn if values did changed or animations scheduled. 
 

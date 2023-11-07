@@ -352,6 +352,15 @@ void SCREEN4::draw(system_data &sdSysData)
       }
     }
 
+    // ---------------------------------------------------------------------------------------
+    // Check Alert
+    if (sdSysData.ALERT_SIMPLE == true)
+    {
+      DISPLAY_SCREEN = 0;
+    }   
+
+    // ---------------------------------------------------------------------------------------
+
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplGlfw_NewFrame();
@@ -506,10 +515,6 @@ void SCREEN4::draw(system_data &sdSysData)
 
         ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - 48), false, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
-          
-          //ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
-          //ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-
           if (DISPLAY_SCREEN == 0)
           {
             if (sdSysData.CAR_INFO.active())
@@ -900,7 +905,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
         // Calculate
         duration_time = sdSysData.cdTIMER.duration();
-        elaped_time = sdSysData.cdTIMER.elapsed_time(sdSysData.tmeCURRENT_FRAME_TIME);
+        elaped_time = sdSysData.cdTIMER.elapsed_time(sdSysData.PROGRAM_TIME.current_frame_time());
         remaining_time = duration_time - elaped_time;
 
 

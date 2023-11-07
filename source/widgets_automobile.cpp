@@ -171,7 +171,7 @@ void T_LARGE_NUMBER_DISPLAY::create()
 
 void T_LARGE_NUMBER_DISPLAY::update_value(system_data &sdSysData, float Value, float Compare_Value, bool Is_Within)
 {
-  MIN_MAX.put_value(Value, sdSysData.tmeCURRENT_FRAME_TIME);
+  MIN_MAX.put_value(Value, sdSysData.PROGRAM_TIME.current_frame_time());
   VALUE = Value;
   VALUE_WHEEL.set_value(Value);
   VALUE_COMPARE = Compare_Value;
@@ -368,7 +368,7 @@ void W_GUAGE::create()
 void W_GUAGE::update_value(system_data &sdSysData, float Value)
 {
   VALUE = Value;
-  MIN_MAX.put_value(Value, sdSysData.tmeCURRENT_FRAME_TIME);
+  MIN_MAX.put_value(Value, sdSysData.PROGRAM_TIME.current_frame_time());
 }
 
 void W_GUAGE::draw(system_data &sdSysData)
@@ -788,14 +788,13 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.PLOT_SLOW.PROPS.DATA_POINTS_VALUE_MAX = 80;        // 80mph
   SDATA.PLOT_SLOW.PROPS.LEFT_TO_RIGHT = false;
   SDATA.PLOT_SLOW.PROPS.BOTTOM_TO_TOP = true;
-  SDATA.PLOT_SLOW.create(sdSysData.tmeCURRENT_FRAME_TIME);
   
   SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 5;
-  SDATA.PLOT_SLOW.create_subgraph(300,         10 * 1000, "10s");    // 10 sec    - 5 sec
-  SDATA.PLOT_SLOW.create_subgraph(58,         290 * 1000, "5m  (4:50m)");     // 290 sec   - 1 min
-  SDATA.PLOT_SLOW.create_subgraph(60,     40 * 60 * 1000, "45m   (40m)");    // 40 min   - 1 hr
-  SDATA.PLOT_SLOW.create_subgraph(60,    140 * 60 * 1000, "3h  (2:20m)");   // 2 hr     - 3 hr
-  SDATA.PLOT_SLOW.create_subgraph(60, 5 * 60 * 60 * 1000, "8h     (5h)");    // 6 4 hr   - 7 hr
+  SDATA.PLOT_SLOW.create_subgraph(300,         10 * 1000, "10s");
+  SDATA.PLOT_SLOW.create_subgraph(58,         290 * 1000, "5m (4:50m)");
+  SDATA.PLOT_SLOW.create_subgraph(60,     40 * 60 * 1000, "45m (40m)");
+  SDATA.PLOT_SLOW.create_subgraph(60,    140 * 60 * 1000, "3h (2:20m)");
+  SDATA.PLOT_SLOW.create_subgraph(60, 5 * 60 * 60 * 1000, "8h (5h)"); 
 
   // Slow Plot Speed Line
   SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, true, true, 2.0f, 1.0f);
@@ -805,6 +804,8 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   
   // Slow Plot Temp Line
   SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, true, true, 2.0f, 1.0f);
+  
+  SDATA.PLOT_SLOW.create(sdSysData.PROGRAM_TIME.current_frame_time());
 
   // ---
 
@@ -828,7 +829,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.SPEED = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph();
   //SDATA.SPEED_IMPRES = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph_impres(sdSysData.tmeCURRENT_FRAME_TIME);
   SDATA.SPEED_IMPRES = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph();
-  SDATA.ACCELERATION = sdSysData.CAR_INFO.CALCULATED.ACCELERATION_QUICK_MEAN_HISTORY.impact(sdSysData.tmeCURRENT_FRAME_TIME);
+  SDATA.ACCELERATION = sdSysData.CAR_INFO.CALCULATED.ACCELERATION_QUICK_MEAN_HISTORY.impact(sdSysData.PROGRAM_TIME.current_frame_time());
 
   SDATA.CRUISE_CONTROL_SET = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control();
   SDATA.CRUISE_CONTROL_SPEED = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control_speed();
@@ -836,7 +837,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   if (SDATA.GEAR_VAL != sdSysData.CAR_INFO.STATUS.GEAR.reported())
   {
     SDATA.GEAR_VAL = sdSysData.CAR_INFO.STATUS.GEAR.reported();
-    SDATA.GEAR_SWITCH_DELAY.ping_up(sdSysData.tmeCURRENT_FRAME_TIME, 500);
+    SDATA.GEAR_SWITCH_DELAY.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 500);
   }
 
   if (sdSysData.CAR_INFO.STATUS.GEAR.reported() > 0 && sdSysData.CAR_INFO.STATUS.GEAR.reported() < 10)
@@ -965,9 +966,9 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.D_BAROMETER.update_value(sdSysData, SDATA.BAROMETER, SDATA.BAROMETER_VAL);
   SDATA.D_CAM_COMM_ERROR.update_value(sdSysData, to_string(SDATA.CAM_COMM_ERR));
 
-  SDATA.D_TEMP_AMBIANT.update_value(sdSysData, SDATA.TEMP_AMBIANT_STRING, SDATA.TEMP_AMBIANT);
-  SDATA.D_TEMP_INTAKE.update_value(sdSysData, SDATA.TEMP_AIR_INTAKE_STRING, SDATA.TEMP_AIR_INTAKE);
   SDATA.D_TEMP_COOLANT.update_value(sdSysData, SDATA.TEMP_COOLANT_STRING, SDATA.TEMP_COOLANT);
+  SDATA.D_TEMP_INTAKE.update_value(sdSysData, SDATA.TEMP_AIR_INTAKE_STRING, SDATA.TEMP_AIR_INTAKE);
+  SDATA.D_TEMP_AMBIANT.update_value(sdSysData, SDATA.TEMP_AMBIANT_STRING, SDATA.TEMP_AMBIANT);
   SDATA.D_TEMP_CATALYST.update_value(sdSysData, SDATA.TEMP_CATALYST_STRING, SDATA.TEMP_CATALYST);
   SDATA.D_TEMP_SUPER_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP_STRING, SDATA.TEMP_S_TEMP);
 
@@ -1076,9 +1077,9 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.VB_S_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);
   SDATA.VB_TACH.update_value(sdSysData, SDATA.RPM/50);
 
-  SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 2, SDATA.SPEED_IMPRES);
-  SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 1, SDATA.TEMP_S_TEMP);
-  SDATA.PLOT_SLOW.update(sdSysData.tmeCURRENT_FRAME_TIME, 0, (float)SDATA.RPM/50);
+  SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.SPEED_IMPRES);
+  SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, SDATA.TEMP_S_TEMP);
+  SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, (float)SDATA.RPM/50);
 }
 
 void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 

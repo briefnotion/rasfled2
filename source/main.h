@@ -59,7 +59,7 @@
 
 
 #include <stdio.h>
-#include <math.h>
+#include <cmath>
 #include <future>
 #include <wiringPi.h>
 #include <string>

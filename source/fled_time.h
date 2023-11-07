@@ -20,6 +20,7 @@
 // Standard Header Files
 #include <chrono>
 #include <ctime>
+#include <cmath>
 
 using namespace std;
 
@@ -73,19 +74,30 @@ class FledTime
   std::chrono::time_point<std::chrono::system_clock> tmeStart;
   std::chrono::time_point<std::chrono::system_clock> tmeFrame;
 
-  bool first_run = true;
+  double ERROR_TOLERANCE = 500.0;
+  double ERROR = 0.0;
+  double OLD_FRAME_TIME = 0.0;
+  bool ERROR_EXIST = false;
 
-  void set();
+  double CURRENT_FRAME_TIME = 0.0;
 
   public:
 
-  double tmeFrameMillis;
+  double error();
+  double error_old_frame_time();
+  double error_new_frame_time();
 
-  double now();
+  void clear_error();
 
-  void setframetime();
+  void create();
+
+  unsigned long now();
+
+  bool setframetime(bool Error_Check);
 
   double tmeFrameElapse();
+
+  unsigned long current_frame_time();
 };
 
 // ---------------------------------------------------------------------------------------
