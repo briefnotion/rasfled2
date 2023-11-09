@@ -74,18 +74,18 @@ class FledTime
   std::chrono::time_point<std::chrono::system_clock> tmeStart;
   std::chrono::time_point<std::chrono::system_clock> tmeFrame;
 
-  double ERROR_TOLERANCE = 500.0;
+  double ERROR_TOLERANCE = 1.0;
   double ERROR = 0.0;
-  double OLD_FRAME_TIME = 0.0;
+  double OLD_NOW_TIME = 0.0;
   bool ERROR_EXIST = false;
 
   double CURRENT_FRAME_TIME = 0.0;
 
+  bool test = false;
+
   public:
 
   double error();
-  double error_old_frame_time();
-  double error_new_frame_time();
 
   void clear_error();
 
@@ -93,7 +93,7 @@ class FledTime
 
   unsigned long now();
 
-  bool setframetime(bool Error_Check);
+  bool setframetime();
 
   double tmeFrameElapse();
 

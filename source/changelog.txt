@@ -1,3 +1,8 @@
+2.061_231107
+  - Changed some things.
+  - Rewrote the core clock functions to be more tolerable to system os time changes.
+  - Changed the CMakeLists.txt.
+
 2.060_231106
   - Changed some things.
   - System freezes if system clock time changes.

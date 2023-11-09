@@ -1110,9 +1110,9 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       ImGui::Separator();
 
       {
-        SDATA.D_TEMP_AMBIANT.draw(sdSysData);
-        SDATA.D_TEMP_INTAKE.draw(sdSysData);
         SDATA.D_TEMP_COOLANT.draw(sdSysData);
+        SDATA.D_TEMP_INTAKE.draw(sdSysData);
+        SDATA.D_TEMP_AMBIANT.draw(sdSysData);
         SDATA.D_TEMP_CATALYST.draw(sdSysData);
         SDATA.D_TEMP_SUPER_TEMP.draw(sdSysData);
       }

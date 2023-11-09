@@ -136,16 +136,6 @@ double FledTime::error()
   return ERROR;
 }
 
-double FledTime::error_old_frame_time()
-{
-  return OLD_FRAME_TIME;
-}
-
-double FledTime::error_new_frame_time()
-{
-  return CURRENT_FRAME_TIME;
-}
-
 void FledTime::clear_error()
 {
   ERROR_EXIST = false;
@@ -165,39 +155,28 @@ unsigned long FledTime::now()
   std::chrono::duration<double>  dur = tmeNow - tmeStart;
 
   double nowtime = dur.count();
-  //double nowtime = dur.count() - ERROR;
-  nowtime = nowtime * 1000.0;
+
+  // This error check routine and offset by error should prevent the program from locking up 
+  //  while waiting on timing triggers, if the internet decides the system clock needs to change
+  //  its time by a significant amount.  The problem is that there are things, such as the graphs,
+  //  that, somehow, aren't fooled by this little hack.  Not sure why yet.
+
+  // Check for error
+  if ((abs(nowtime - OLD_NOW_TIME)) > ERROR_TOLERANCE)
+  {
+    ERROR = nowtime - OLD_NOW_TIME;
+    ERROR_EXIST = true;
+  }
+  
+  OLD_NOW_TIME = nowtime;
+  nowtime = (nowtime - ERROR) * 1000.0 ;
   
   return (unsigned long)nowtime;
 }
 
-bool FledTime::setframetime(bool Error_Check)
+bool FledTime::setframetime()
 {
-  // Sets the Start of a Frame Time to now. 
-  tmeFrame = std::chrono::system_clock::now();
-  std::chrono::duration<double>  dur = tmeFrame - tmeStart;
-
-  OLD_FRAME_TIME = CURRENT_FRAME_TIME;
-
-  CURRENT_FRAME_TIME = dur.count();
-  //CURRENT_FRAME_TIME = dur.count() + ERROR;
-  CURRENT_FRAME_TIME = CURRENT_FRAME_TIME * 1000.0;
-
-  //if (CURRENT_FRAME_TIME > 15000.0 && CURRENT_FRAME_TIME < 30000.0)
-  //{
-  //  CURRENT_FRAME_TIME = CURRENT_FRAME_TIME - 5000.0;
-  //}
-
-  // Check for error
-  if (Error_Check == true && (abs(CURRENT_FRAME_TIME - OLD_FRAME_TIME)) > ERROR_TOLERANCE)
-  {
-    ERROR = CURRENT_FRAME_TIME - OLD_FRAME_TIME;
-    ERROR_EXIST = true;
-
-    // Recompute with new error
-    //CURRENT_FRAME_TIME = dur.count() + ERROR;
-    //CURRENT_FRAME_TIME = CURRENT_FRAME_TIME * 1000.0;
-  }
+  CURRENT_FRAME_TIME = now();
 
   return ERROR_EXIST;
 }
@@ -205,13 +184,7 @@ bool FledTime::setframetime(bool Error_Check)
 double FledTime::tmeFrameElapse()
 {
   // Returns, in milliseconds, the amount of time passed since frame time.
-  double elapsed;
-  std::chrono::time_point<std::chrono::system_clock> tmeNow = std::chrono::system_clock::now();
-  std::chrono::duration<double>  dur = tmeNow - tmeFrame;
-  
-  elapsed = dur.count();
-  //elapsed = dur.count() - ERROR;
-  elapsed = elapsed * 1000.0;
+  double elapsed = (double)now()- CURRENT_FRAME_TIME;
 
   return elapsed;
 }

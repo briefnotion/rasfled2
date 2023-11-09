@@ -362,12 +362,13 @@ int loop_2(bool TTY_Only)
   // Sleeping Loop Variables
   sdSystem.PROGRAM_TIME.create();    //  Get current time.  This will be our timeframe to work in.
   
-  if (sdSystem.PROGRAM_TIME.setframetime(false) == true)
+  if (sdSystem.PROGRAM_TIME.setframetime() == true)
   {
     sdSystem.ALERT_SIMPLE = true;
     cons_2.SCREEN_COMMS.printw("");
-    cons_2.SCREEN_COMMS.printw("Initializing Program Clock");
+    cons_2.SCREEN_COMMS.printw("Adjusting Program Clock");
     cons_2.SCREEN_COMMS.printw("");
+    
     sdSystem.PROGRAM_TIME.clear_error();
   }
   
@@ -606,13 +607,11 @@ int loop_2(bool TTY_Only)
     // --- Prpare the Loop ---
 
     //  Get current time.  This will be our timeframe to work in.
-    if (sdSystem.PROGRAM_TIME.setframetime(true) == true)
+    if (sdSystem.PROGRAM_TIME.setframetime() == true)
     {
       sdSystem.ALERT_SIMPLE = true;
       cons_2.SCREEN_COMMS.printw("");
       cons_2.SCREEN_COMMS.printw("ALERT: PROGRAM TIME STREAM INTURPTED OR CORRUPT");
-      cons_2.SCREEN_COMMS.printw("  PREVIOUS FRAME TIME: " + to_string(sdSystem.PROGRAM_TIME.error_old_frame_time()));
-      cons_2.SCREEN_COMMS.printw("       NEW FRAME TIME: " + to_string(sdSystem.PROGRAM_TIME.error_new_frame_time()));
       cons_2.SCREEN_COMMS.printw("           DIFFERANCE: "  + to_string(sdSystem.PROGRAM_TIME.error()));
       cons_2.SCREEN_COMMS.printw("");
 

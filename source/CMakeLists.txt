@@ -1,6 +1,7 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.18.0)
 
-add_definitions(-DBOOST_BIND_GLOBAL_PLACEHOLDERS)
+set(OpenGL_GL_PREFERENCE GLVND)
+set(CMAKE_POLICY_DEFAULT_CMP0072 NEW)
 
 set(BUILD_RELEASE ON)
 
@@ -10,33 +11,29 @@ else()
       set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-##set(CMAKE_POLICY_DEFAULT_CMP0072 NEW)
-
 project(RasFled)
-
-include_directories(../../rpi_ws281x-master)
-
-include_directories(../../imgui)
-include_directories(../../imgui/backends)
-include_directories(../../imgui/misc/cpp)
 
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
-
 find_package(Boost COMPONENTS system thread filesystem REQUIRED)
 
 find_library(WIRINGPI_LIBRARIES NAMES wiringPi)
 find_library(WS2811_LIBRARIES NAMES ws2811)
 find_library(PTHREAD_LIBRARIES NAMES pthread)
 find_library(GLFW_LIBRARIES NAMES glfw3)
-
 find_library(LIBRT rt)
 
-INCLUDE_DIRECTORIES( ${Boost_INCLUDE_DIR} )
+add_executable(rasfled)
 
-add_executable(
-  rasfled
+target_include_directories(rasfled PRIVATE 
+  ../../rpi_ws281x-master
+  ../../imgui
+  ../../imgui/backends
+  ../../imgui/misc/cpp
+  ${Boost_INCLUDE_DIR}
+)
 
+target_sources(rasfled PRIVATE
   ../../imgui/imgui.cpp
   ../../imgui/imgui_draw.cpp
   ../../imgui/imgui_tables.cpp
@@ -44,7 +41,6 @@ add_executable(
   ../../imgui/misc/cpp/imgui_stdlib.cpp
   ../../imgui/backends/imgui_impl_glfw.cpp
   ../../imgui/backends/imgui_impl_opengl2.cpp
-
   alert_system.cpp
   LEDstuff.cpp
   commands.cpp
@@ -71,14 +67,14 @@ add_executable(
   screen4.cpp
   system.cpp
   fledcore.cpp
-  
   main.cpp
 )
+
+target_compile_definitions(rasfled PRIVATE BOOST_BIND_GLOBAL_PLACEHOLDERS)
 
 target_link_libraries(rasfled 
   ${WIRINGPI_LIBRARIES} 
   ${WS2811_LIBRARIES}
-  ${IMGUI_LIBRARIES}
   glfw
   ${OPENGL_LIBRARIES}
   ${PTHREAD_LIBRARIES}

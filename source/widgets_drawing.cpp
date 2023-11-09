@@ -381,6 +381,44 @@ void DRAW_D2_PLOT::merge(unsigned long Time, int Sub_Graph, int Line_Number)
   }
 }
 
+
+ImVec2 DRAW_D2_PLOT::position_on_plot_at_start(float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X)
+{
+  ImVec2 ret_vec;
+
+  if (Y < 0)
+  {
+    Y = 0;
+  }
+
+  if (Y > PROPS.DATA_POINTS_VALUE_MAX)
+  {
+    Y = PROPS.DATA_POINTS_VALUE_MAX;
+  }
+
+  // Calc
+  if (PROPS.LEFT_TO_RIGHT)
+  {
+    ret_vec.x = Graph.START_POS.x;
+  }
+  else
+  {
+    ret_vec.x = Graph.END_POS.x;
+  }
+
+  if (PROPS.BOTTOM_TO_TOP)
+  {
+    ret_vec.y = Graph.END_POS.y - (Y * Graph.Y_FACTOR);
+  }
+  else
+  {
+    ret_vec.y = Graph.START_POS.y + (Y * Graph.Y_FACTOR);
+  }
+
+  // Return
+  return ret_vec;
+}
+
 ImVec2 DRAW_D2_PLOT::position_on_plot(float X, float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X)
 {
   ImVec2 ret_vec;
@@ -600,22 +638,6 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
                                     SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].MEAN_VALUE, SUB_GRAPHS[graph], mean_out_of_bounds_x_end);
       }
 
-      /*
-      if (graph > 0)
-      {
-        if (SUB_GRAPHS[graph].LINE[line].DATA_POINT.size() > 0)
-        {
-          mean_end = position_on_plot((float)(sdSysData.PROGRAM_TIME.current_frame_time()), 
-                                    SUB_GRAPHS[graph - 1].LINE[line].DATA_POINT.back().MEAN_VALUE, SUB_GRAPHS[graph], mean_out_of_bounds_x_end);
-        }
-      }
-      else if (SUB_GRAPHS[graph].LINE[line].DATA_POINT.size() > 1)
-      {
-        mean_end = position_on_plot((float)(sdSysData.PROGRAM_TIME.current_frame_time() - SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].TIME_CREATED), 
-                                    SUB_GRAPHS[graph].LINE[line].DATA_POINT[0].MEAN_VALUE, SUB_GRAPHS[graph], mean_out_of_bounds_x_end);
-      }
-      */
-
       ImVec2 min;
       ImVec2 max;
 
@@ -657,6 +679,22 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
           {
             draw_list->AddLine(mean_start, mean_end, SUB_GRAPHS[graph].LINE[line].LINE_COLOR.STANDARD, SUB_GRAPHS[graph].LINE[line].POINT_SIZE);
           }
+        }
+      }
+
+      // Draw holdover values, if exist
+      if (SUB_GRAPHS[graph].LINE[line].DISPLAY_MIN_MAX && 
+          graph > 0 &&  
+          SUB_GRAPHS[graph - 1].LINE[line].HOLDOVER_COUNT > 0)
+      {
+
+        min = position_on_plot_at_start(SUB_GRAPHS[graph - 1].LINE[line].HOLDOVER_MIN, SUB_GRAPHS[graph], min_max_out_of_bounds_x);
+
+        max = position_on_plot_at_start(SUB_GRAPHS[graph - 1].LINE[line].HOLDOVER_MAX, SUB_GRAPHS[graph], min_max_out_of_bounds_x);
+
+        if (min_max_out_of_bounds_x == false)
+        {
+          draw_list->AddLine(min, max, SUB_GRAPHS[graph].LINE[line].LINE_COLOR.DIM, SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
         }
       }
     }

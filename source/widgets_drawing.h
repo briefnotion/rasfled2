@@ -300,6 +300,9 @@ class DRAW_D2_PLOT
 
   void merge(unsigned long Time, int Sub_Graph, int Line_Number);
 
+  ImVec2 position_on_plot_at_start(float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X);
+  // Internal
+
   ImVec2 position_on_plot(float X, float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X);
   // Internal
 
