@@ -1,3 +1,7 @@
+2.062_231109
+  - Changed the Large Number Display.
+  - Changed the Automobile Screen.
+
 2.061_231107
   - Changed some things.
   - Rewrote the core clock functions to be more tolerable to system os time changes.

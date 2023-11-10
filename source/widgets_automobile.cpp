@@ -29,22 +29,23 @@ void BLANK::display(const char *name, bool *p_open, ImGuiWindowFlags flags)
 
 // -------------------------------------------------------------------------------------
 
-void T_LARGE_NUMBER_DISPLAY::draw_scroll_num(float Value)
+void T_LARGE_NUMBER_DISPLAY::draw_scroll_num(float Value, float Y_Height, ImVec2 Start_Pos, ImVec2 Zero_Font_Size)
 {
   Value = abs(Value);
 
   // Number Positions
-  ImVec2 pos1 = ImGui::GetCursorScreenPos();
-  //pos1.y = pos1.y + 10;
-  ImVec2 pos2 = ImVec2(pos1.x + 30, pos1.y);
+  ImVec2 pos1 = Start_Pos;
 
-  //ImVec2(94, 75)
+  pos1 = ImVec2(pos1.x, pos1.y + (Y_Height / 2.0f) - (Zero_Font_Size.y / 2.0f));
+  ImVec2 pos2 = ImVec2(pos1.x + (0.9f * Zero_Font_Size.x), pos1.y);
 
-  // Gradiant Positions
-  ImVec2 pos_grad_top_1 = ImVec2(pos1.x, pos1.y - 12);
-  ImVec2 pos_grad_top_2 = ImVec2(pos_grad_top_1.x + 60, pos_grad_top_1.y + 25);
-  ImVec2 pos_grad_bot_1 = ImVec2(pos_grad_top_1.x, pos_grad_top_1.y + 53);
-  ImVec2 pos_grad_bot_2 = ImVec2(pos_grad_top_2.x, pos_grad_top_2.y + 53);
+  if (CHANGED)
+  {
+    POS_GRAD_TOP_1 = ImVec2(Start_Pos.x, Start_Pos.y);
+    POS_GRAD_TOP_2 = ImVec2(Start_Pos.x + (1.8f * Zero_Font_Size.x), Start_Pos.y + (Y_Height / 2.0f));
+    POS_GRAD_BOT_1 = ImVec2(Start_Pos.x, Start_Pos.y + (Y_Height / 2.0f));
+    POS_GRAD_BOT_2 = ImVec2(Start_Pos.x + (1.8f * Zero_Font_Size.x), Start_Pos.y + Y_Height);
+  }
 
   int value_tens = (int)(Value) / 10;
   int value_ones = (int)(Value) - value_tens * 10;
@@ -116,8 +117,7 @@ void T_LARGE_NUMBER_DISPLAY::draw_scroll_num(float Value)
   }
 
   // Offsets
-  float offset_y = ((Value) - (int)(Value)) * 40.0f;
-  //float offset_y_tens = (((Value) / 10) - (int)((Value) / 10)) * 40.0f;
+  float offset_y = ((Value) - (int)(Value)) * (0.75f * Zero_Font_Size.y);
   float offset_y_tens = 0;
   if (value_ones == 9)
   {
@@ -125,41 +125,40 @@ void T_LARGE_NUMBER_DISPLAY::draw_scroll_num(float Value)
   }
 
   // Display
-  ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens - 80.0f));
+  
+  // Tens
+  ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens - (2.0f * 0.75f * Zero_Font_Size.y)));
   ImGui::Text("%d", value_tens_p2);
 
-  ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens - 40.0f));
+  ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens - (0.75f * Zero_Font_Size.y)));
   ImGui::Text("%d", value_tens_p1);
 
   ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens));
   ImGui::Text("%d", value_tens);
 
-  ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens + 40.0f));
+  ImGui::SetCursorScreenPos(ImVec2(pos1.x, pos1.y + offset_y_tens + (0.75f * Zero_Font_Size.y)));
   ImGui::Text("%d", value_tens_m1);
   
   // Ones
-  ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y - 80.0f));
+  ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y - (2.0f * 0.75f * Zero_Font_Size.y)));
   ImGui::Text("%d", value_ones_p2);
 
-  ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y - 40.0f));
+  ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y - (0.75f * Zero_Font_Size.y)));
   ImGui::Text("%d", value_ones_p1);
 
   ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y));
   ImGui::Text("%d", value_ones);
 
-  ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y + 40.0f));
+  ImGui::SetCursorScreenPos(ImVec2(pos2.x, pos2.y + offset_y + (0.75f * Zero_Font_Size.y)));
   ImGui::Text("%d", value_ones_m1);
 
   // Mask Top Bot
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
   ImU32 col_a = ImGui::GetColorU32(IM_COL32(0, 0, 0, 255));
   ImU32 col_b = ImGui::GetColorU32(IM_COL32(0, 0, 0, 0));
-  // Test Gradiants
-  //ImU32 col_a = ImGui::GetColorU32(IM_COL32(0, 255, 0, 255));
-  //ImU32 col_b = ImGui::GetColorU32(IM_COL32(0, 0, 255, 255));
   
-  draw_list->AddRectFilledMultiColor(pos_grad_top_1, pos_grad_top_2, col_a, col_a, col_b, col_b);
-  draw_list->AddRectFilledMultiColor(pos_grad_bot_1, pos_grad_bot_2, col_b, col_b, col_a, col_a);
+  draw_list->AddRectFilledMultiColor(POS_GRAD_TOP_1, POS_GRAD_TOP_2, col_a, col_a, col_b, col_b);
+  draw_list->AddRectFilledMultiColor(POS_GRAD_BOT_1, POS_GRAD_BOT_2, col_b, col_b, col_a, col_a);
 }
 
 void T_LARGE_NUMBER_DISPLAY::create()
@@ -190,52 +189,77 @@ void T_LARGE_NUMBER_DISPLAY::update_value(system_data &sdSysData, string Text)
   IS_TEXT = true;
 }
 
-void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
+void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Height)
 {
-  ImGuiIO &io = ImGui::GetIO();
-
-  ImGui::BeginChild(PROPS.LABEL.c_str(), ImVec2(94, 75), false, sdSysData.SCREEN_DEFAULTS.flags_c);
-
-  ImVec2 pos = ImGui::GetCursorScreenPos();
-
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
+  if (Y_Height != PREV_Y_HEIGHT)
   {
+    CHANGED = true;
+  
+    if (PROPS.VERY_LARGE)
+    {
+      DISPLAY_SIZE = ImVec2(120.0f, Y_Height);
+    }
+    else
+    {
+      DISPLAY_SIZE = ImVec2(83.0f, Y_Height);
+    }
+
+    PREV_Y_HEIGHT = Y_Height;
+  }
+
+  ImVec2 start_position = ImGui::GetCursorScreenPos();
+  ImVec2 pos_offset = ImVec2(0.0f, 0.0f);
+
+  ImGui::BeginChild(PROPS.LABEL.c_str(), DISPLAY_SIZE, false, sdSysData.SCREEN_DEFAULTS.flags_c);
+
+  if (Draw)
+  {
+    ImGuiIO &io = ImGui::GetIO();
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
     if (PROPS.LABEL_ON_LEFT == true)
     {
       if (PROPS.MARKER)
       {
-        draw_list->AddRectFilled(pos, ImVec2(pos.x + 3, pos.y + 75), PROPS.MARKER_COLOR.DIM);
+        draw_list->AddRectFilled(start_position, ImVec2(start_position.x + 3.0f, start_position.y + Y_Height), PROPS.MARKER_COLOR.DIM);
       }
       
-      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
+      ImGui::SetCursorScreenPos(ImVec2(start_position.x, start_position.y + 10.0f));
       ImGui::TextUnformatted(PROPS.LABEL.c_str());
-      pos.x = pos.x + 10;
+      pos_offset.x = pos_offset.x + 10.0f;
     }
     else
     {
       if (PROPS.MARKER)
       {
-        draw_list->AddRectFilled(ImVec2(pos.x + 80 -3, pos.y), ImVec2(pos.x + 80 , pos.y + 75), PROPS.MARKER_COLOR.DIM);
+        draw_list->AddRectFilled(ImVec2(start_position.x + DISPLAY_SIZE.x - 3, start_position.y), 
+                          ImVec2(start_position.x + DISPLAY_SIZE.x , start_position.y + Y_Height), PROPS.MARKER_COLOR.DIM);
       }
       
-      ImGui::SetCursorScreenPos(ImVec2(pos.x + 80 - 9, pos.y));
+      ImGui::SetCursorScreenPos(ImVec2(start_position.x + DISPLAY_SIZE.x - 9, start_position.y + 10.0f));
       ImGui::TextUnformatted(PROPS.LABEL.c_str());
-
-      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y));
     }
 
     //---
 
-    //---
     // Draw Large Display
-    ImGui::PushFont(io.Fonts->Fonts.Data[1]);
+    if (PROPS.VERY_LARGE)
+    {
+      ImGui::PushFont(io.Fonts->Fonts.Data[3]);
+    }
+    else
+    {
+      ImGui::PushFont(io.Fonts->Fonts.Data[1]);
+    }
+
+    if (CHANGED)
+    {
+      ZERO_SIZE = ImGui::CalcTextSize("0");
+    }
 
     // Draw Compare Number
     if (VALUE_COMPARE >= 0 && !IS_TEXT)
     {
-      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
-
       if (ACTIVE_WITHIN == true)
       {
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD));
@@ -245,27 +269,26 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD));
       }
 
+      ImGui::SetCursorScreenPos(ImVec2(start_position.x + pos_offset.x, start_position.y + (Y_Height / 2.0f) - (ZERO_SIZE.y / 2.0f)));
+
       ImGui::Text("%2d", (int)VALUE_COMPARE);
       ImGui::PopStyleColor();
-      
-      //ImGui::SetCursorScreenPos(pos);
     }
 
     // Draw Value
     if (IS_TEXT)
     //  Value is text
     {
-      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
+      ImGui::SetCursorScreenPos(ImVec2(start_position.x + pos_offset.x, start_position.y + 10.0f));
+
+      ImGui::SetCursorScreenPos(ImVec2(start_position.x + pos_offset.x, start_position.y + (Y_Height / 2.0f) - (ZERO_SIZE.y / 2.0f)));
 
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
       ImGui::Text("%s", VALUE_TEXT.c_str());
       ImGui::PopStyleColor();
     }
-    else if (abs(VALUE) < 100)
-    // Continue drawing rotating numbers if value is < 100
+    else if (abs(VALUE) < 100)  // Continue drawing rotating numbers if value is < 100
     {
-      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
-
       if (ACTIVE_WITHIN == true)
       {
         // If cruise is on change the color
@@ -277,8 +300,8 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
         {
           ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT));
         }
-        //ImGui::Text("%2d", (int)VALUE);
-        draw_scroll_num(VALUE_WHEEL.value());
+
+        draw_scroll_num(VALUE_WHEEL.value(), Y_Height, ImVec2(start_position.x + pos_offset.x, start_position.y) ,ZERO_SIZE);
 
         ImGui::PopStyleColor();
       }
@@ -295,15 +318,15 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
                                 sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT, 
                                 sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW.TEXT)));
         }
-        //ImGui::Text("%2d", (int)VALUE);
-        draw_scroll_num(VALUE_WHEEL.value());
+
+        draw_scroll_num(VALUE_WHEEL.value(), Y_Height, ImVec2(start_position.x + pos_offset.x, start_position.y), ZERO_SIZE);
         ImGui::PopStyleColor();
       }
     }
     else
     // Value is number but exceeds pritable value
     {
-      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + 10));
+      ImGui::SetCursorScreenPos(ImVec2(start_position.x + pos_offset.x, start_position.y + 10.0f));
 
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_RED.TEXT));
       ImGui::Text(">>");
@@ -311,15 +334,6 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
     }
 
     ImGui::PopFont();
-
-    //---
-    /*
-    if (PROPS.LABEL_ON_LEFT == false)
-    {
-      ImGui::SameLine();
-      ImGui::TextUnformatted(PROPS.LABEL.c_str());
-    }
-    */
 
     if (PROPS.DISPLAY_MIN_MAX)
     {
@@ -330,27 +344,32 @@ void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
 
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREY.TEXT));
       
-      //pos.y = pos.y + 47;
-      ImGui::SetCursorScreenPos(ImVec2(pos.x + 53, pos.y - 0));
+      // Display Min Max
+      {
+        ImGui::SetCursorScreenPos(ImVec2(start_position.x + (1.75f * ZERO_SIZE.x) + pos_offset.x, start_position.y));
+        ImGui::Text("%s", max.c_str());
+        ImGui::SetCursorScreenPos(ImVec2(start_position.x + (1.75f * ZERO_SIZE.x) + pos_offset.x, start_position.y + 53.0f));
+        ImGui::Text("%s", min.c_str());
+      }
 
-      ImGui::Text("%s", max.c_str());
-
-      ImGui::SetCursorScreenPos(ImVec2(pos.x + 53, pos.y + 53));
-      
-      ImGui::Text("%s", min.c_str());
-      
       ImGui::PopStyleColor();
     }
-    else
-    {
-      ImGui::Text("      ");
-    }
 
-    //pos = ImGui::GetCursorScreenPos();
-    //pos.y = pos.y - 6; 
+    CHANGED = false;  
   }
 
   ImGui::EndChild();
+
+}
+
+void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw)
+{
+  draw(sdSysData, Draw, 75.0f);
+}
+
+void T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData)
+{
+  draw(sdSysData, true, 75.0f);
 }
 
 // -------------------------------------------------------------------------------------
@@ -530,7 +549,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_GEAR_SB.create();
   
   SDATA.L_TACH_SB.PROPS.LABEL = "T\nA\nC";
-  SDATA.L_TACH_SB.PROPS.LABEL_ON_LEFT = true;
+  SDATA.L_TACH_SB.PROPS.LABEL_ON_LEFT = false;
   SDATA.L_TACH_SB.PROPS.DISPLAY_MIN_MAX = true;
   SDATA.L_TACH_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
   SDATA.L_TACH_SB.PROPS.WHEEL_FRAME_SIZE = 3;
@@ -563,6 +582,15 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_S_TEMP_SB.PROPS.MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE;
   SDATA.L_S_TEMP_SB.PROPS.WHEEL_FRAME_SIZE = 33;
   SDATA.L_S_TEMP_SB.create();
+
+  SDATA.L_SPEED_INSIDE.PROPS.LABEL = "S\nP\nE\nE\nD";
+  SDATA.L_SPEED_INSIDE.PROPS.LABEL_ON_LEFT = true;
+  SDATA.L_SPEED_INSIDE.PROPS.DISPLAY_MIN_MAX = true;
+  SDATA.L_SPEED_INSIDE.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.L_SPEED_INSIDE.PROPS.MARKER = true;
+  SDATA.L_SPEED_INSIDE.PROPS.MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  SDATA.L_SPEED_INSIDE.PROPS.VERY_LARGE = true;
+  SDATA.L_SPEED_INSIDE.create();
 
   // Continuing Configuring Main Screen Widgets
 
@@ -958,6 +986,8 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.L_VOLTAGE_SB.update_value(sdSysData, SDATA.VOLTAGE_VAL);
   SDATA.L_S_TEMP_SB.update_value(sdSysData, SDATA.TEMP_S_TEMP);
 
+  SDATA.L_SPEED_INSIDE.update_value(sdSysData, SDATA.SPEED_IMPRES, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
+
   // Display
   
   SDATA.D_FUEL_RAIL_PRESSURE.update_value(sdSysData, SDATA.FUEL_RAIL_PRESSURE, SDATA.FUEL_RAIL_PRESSURE_VAL);
@@ -1151,11 +1181,11 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
     ImGui::SameLine();
 
-    ImGui::BeginChild("Auto Screen Right Side", ImVec2(ImGui::GetContentRegionAvail().x - 100, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+    ImGui::BeginChild("Auto Screen Right Side", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
-      ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 8/16), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 8.0f/16.0f), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       { 
-        float size_1_3 = ImGui::GetContentRegionAvail().x - 55;
+        float size_1_3 = ImGui::GetContentRegionAvail().x - 55.0f;
         ImVec2 pos1 = ImGui::GetCursorScreenPos();
         ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
         SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2);
@@ -1170,7 +1200,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       }
       ImGui::EndChild();
 
-      ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x - 140.0f, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         SDATA.TB_STEERING.draw(sdSysData);
         SDATA.TB_TORQUE.draw(sdSysData);
@@ -1190,20 +1220,29 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       }
       ImGui::EndChild();
 
+      ImGui::SameLine();
+
+      ImGui::BeginChild("Large Speed Display", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+          SDATA.L_SPEED_INSIDE.draw(sdSysData, true, ImGui::GetContentRegionAvail().y);
+      }
+      ImGui::EndChild();
+
     }
     ImGui::EndChild();
 }
 
 
 void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
-                                const char *name, bool *p_open, ImGuiWindowFlags flags)
+                              const char *name, bool *p_open, ImGuiWindowFlags flags, 
+                              bool Automobile_Screen_Selected)
 {
   ImGuiIO &io = ImGui::GetIO();
 
   const int disp_x = 94;
   const int disp_y = 147;
 
-  SDATA.L_SPEED_SB.draw(sdSysData);
+  SDATA.L_SPEED_SB.draw(sdSysData, !Automobile_Screen_Selected);
   SDATA.L_TACH_SB.draw(sdSysData);
   SDATA.L_S_TEMP_SB.draw(sdSysData);
   SDATA.L_VOLTAGE_SB.draw(sdSysData);

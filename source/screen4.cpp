@@ -157,9 +157,9 @@ int SCREEN4::create(system_data &sdSysData)
     ImGui_ImplOpenGL2_Init();
 
     io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
-    //ImFont* large_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 48.0f);
     ImFont* large_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
     ImFont* medium_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
+    ImFont* very_large_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 100.0f);
     // Will track as "io.Fonts->Fonts.Data[1]" manually, for now.
 
     // Start the Dear ImGui frame
@@ -519,7 +519,7 @@ void SCREEN4::draw(system_data &sdSysData)
           {
             if (sdSysData.CAR_INFO.active())
             {
-              ImGui::BeginChild("CONSOLE_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 100, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+              ImGui::BeginChild("CONSOLE_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
                 ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
                 ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
@@ -531,7 +531,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
               ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
-                AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+                AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w, false);
               }
               ImGui::EndChild();
             }
@@ -551,7 +551,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
             ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
             {
-              AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+              AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w, false);
             }
             ImGui::EndChild();
           }
@@ -560,7 +560,7 @@ void SCREEN4::draw(system_data &sdSysData)
           {
             if (sdSysData.CAR_INFO.active())
             {
-              ImGui::BeginChild("ADSB_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 100, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+              ImGui::BeginChild("ADSB_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
                 ADSB.display(sdSysData, SCREEN_COMMS, "ADSB", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
               }
@@ -570,7 +570,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
               ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
-                AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+                AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w, false);
               }
               ImGui::EndChild();
             }
@@ -584,7 +584,7 @@ void SCREEN4::draw(system_data &sdSysData)
           {
             if (sdSysData.CAR_INFO.active())
             {
-              ImGui::BeginChild("LOGS_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 100, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+              ImGui::BeginChild("LOGS_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
                 ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
                 ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
@@ -596,7 +596,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
               ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
-                AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+                AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w, false);
               }
               ImGui::EndChild();
             }

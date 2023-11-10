@@ -75,7 +75,9 @@ class T_LARGE_NUMBER_DISPLAY_PROPERTIES
   int MIN_MAX_TIME_SPAN = 60000;
   int MIN_MAX_TIME_SLICES = 20;
 
-  int WHEEL_FRAME_SIZE = 6;
+  int WHEEL_FRAME_SIZE = 6;     // Number of draw frames spanned over value changes.
+  
+  bool VERY_LARGE = false;
 
   NEW_COLOR_SCALE COLOR_SCALE;  //  pros COLOR.
 
@@ -100,7 +102,23 @@ class T_LARGE_NUMBER_DISPLAY
 
   MIN_MAX_TIME MIN_MAX;
 
-  void draw_scroll_num(float Value);
+  // ---
+  // Positions and values
+  float PREV_Y_HEIGHT = 0.0f;
+
+  ImVec2 DISPLAY_SIZE;
+
+  ImVec2 ZERO_SIZE = ImVec2(0.0f, 0.0f);
+
+  ImVec2 POS_GRAD_TOP_1 = ImVec2(0.0f, 0.0f);
+  ImVec2 POS_GRAD_TOP_2 = ImVec2(0.0f, 0.0f);
+  ImVec2 POS_GRAD_BOT_1 = ImVec2(0.0f, 0.0f);
+  ImVec2 POS_GRAD_BOT_2 = ImVec2(0.0f, 0.0f);
+  // ---
+
+  bool CHANGED = false;
+
+  void draw_scroll_num(float Value, float Y_Height, ImVec2 Start_Pos, ImVec2 Zero_Font_Size);
   // only for 2 digit numbers
 
   public:
@@ -113,6 +131,8 @@ class T_LARGE_NUMBER_DISPLAY
   void update_value(system_data &sdSysData, float Value);
   void update_value(system_data &sdSysData, string Text);
 
+  void draw(system_data &sdSysData, bool Draw, float Y_Height);
+  void draw(system_data &sdSysData, bool Draw);
   void draw(system_data &sdSysData);
 };
 
@@ -311,6 +331,8 @@ class DISPLAY_DATA_AUTOMOBILE
   T_LARGE_NUMBER_DISPLAY L_VOLTAGE_SB;
   T_LARGE_NUMBER_DISPLAY L_S_TEMP_SB;
 
+  T_LARGE_NUMBER_DISPLAY L_SPEED_INSIDE;
+
   // Display Data
 
   T_DATA_DISPLAY D_FUEL_RAIL_PRESSURE;
@@ -395,7 +417,8 @@ class AUTOMOBILE_SCREEN
                                 const char *name, bool *p_open, ImGuiWindowFlags flags);
 
   void display_sidebar(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
-                              const char *name, bool *p_open, ImGuiWindowFlags flags);
+                              const char *name, bool *p_open, ImGuiWindowFlags flags, 
+                              bool Automobile_Screen_Selected);
 
 };
 
