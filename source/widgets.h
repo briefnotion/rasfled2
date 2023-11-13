@@ -239,6 +239,8 @@ class BAR_TECH_PROPERTIES
 
   float MAX = 0;
 
+  bool HORIZONTAL = true;
+
   // Min Max Related
   bool DRAW_MIN_MAX = false;
   bool DRAW_MIN_MAX_ON_TOP = false;

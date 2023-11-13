@@ -118,6 +118,8 @@ class DRAW_RULER_PROPERTIES
   float MAX_VALUE = 100.0f;
 
   int MAX_TICK_LEVEL = 4;
+
+  bool HORIZONTAL = true;
 };
 
 class DRAW_RULER

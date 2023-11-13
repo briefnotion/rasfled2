@@ -472,6 +472,7 @@ void BAR_TECH::create()
   RULER.PROPS.COLOR = PROPS.COLOR_RULER;
   RULER.PROPS.MAX_VALUE = PROPS.MAX;
   RULER.PROPS.MAX_TICK_LEVEL = PROPS.MAX_TICK_LEVEL;
+  RULER.PROPS.HORIZONTAL = PROPS.HORIZONTAL;
 
   DSP_MIN.PROPS.CHANGE_NOTIFICATION = true;
   DSP_MAX.PROPS.CHANGE_NOTIFICATION = true;
@@ -489,6 +490,7 @@ void BAR_TECH::update_value(system_data &sdSysData, float Value)
   }
 }
 
+
 void BAR_TECH::draw(system_data &sdSysData)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -502,81 +504,163 @@ void BAR_TECH::draw(system_data &sdSysData)
 
   // Draw
   ImVec2 pos = ImGui::GetCursorScreenPos();
+  
   ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
 
   // Draw Background - Red if negative, Normal color if positive.
-  if (VALUE >= 0)
+  if (PROPS.HORIZONTAL)
   {
-    draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.DIM, 5.0f, ImDrawFlags_None);
-    draw_list->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+    if (VALUE >= 0)
+    {
+      draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.DIM, 5.0f, ImDrawFlags_None);
+      draw_list->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+    }
+    else
+    {
+      draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.COLOR_COMB_RED.DIM, 5.0f, ImDrawFlags_None);
+      draw_list->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.COLOR_COMB_RED.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+    }
   }
   else
   {
-    draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.COLOR_COMB_RED.DIM, 5.0f, ImDrawFlags_None);
-    draw_list->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.COLOR_COMB_RED.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+    if (VALUE >= 0)
+    {
+      draw_list->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), PROPS.COLOR_BACKGROUND.DIM, 5.0f, ImDrawFlags_None);
+      draw_list->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), PROPS.COLOR_BACKGROUND.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+    }
+    else
+    {
+      draw_list->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), sdSysData.COLOR_SELECT.COLOR_COMB_RED.DIM, 5.0f, ImDrawFlags_None);
+      draw_list->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), sdSysData.COLOR_SELECT.COLOR_COMB_RED.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+    }
   }
 
   // Draw Min Max Bar
-  if (PROPS.DRAW_MIN_MAX)
+  if (PROPS.HORIZONTAL)
   {
-    float min_location = (MIN_MAX.min_float() / PROPS.MAX) * size.x;
-    float max_location = (MIN_MAX.max_float() / PROPS.MAX) * size.x;
-
-    if (min_location < 0)
+    if (PROPS.DRAW_MIN_MAX)
     {
-      min_location = 0;
+      float min_location = (MIN_MAX.min_float() / PROPS.MAX) * size.x;
+      float max_location = (MIN_MAX.max_float() / PROPS.MAX) * size.x;
+
+      if (min_location < 0)
+      {
+        min_location = 0;
+      }
+      else if (min_location > size.x)
+      {
+        min_location = size.x;
+      }
+
+      if (max_location < 0)
+      {
+        max_location = 0;
+      }
+      else if (max_location > size.x)
+      {
+        max_location = size.x;
+      }
+
+      draw_list->AddRectFilled(ImVec2(pos.x + min_location, pos.y), 
+                                ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT), 
+                                PROPS.COLOR_MARKER.DIM, 5.0f, ImDrawFlags_None);
+
+      draw_list->AddRect(ImVec2(pos.x + min_location, pos.y +2), 
+                                ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT -2), 
+                                PROPS.COLOR_MARKER.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+
+      if (PROPS.DRAW_RULER)
+      {
+        RULER.draw(sdSysData, pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT));
+      }
     }
-    else if (min_location > size.x)
+  }
+  else
+  {
+    if (PROPS.DRAW_MIN_MAX)
     {
-      min_location = size.x;
-    }
+      float min_location = (MIN_MAX.min_float() / PROPS.MAX) * size.y;
+      float max_location = (MIN_MAX.max_float() / PROPS.MAX) * size.y;
 
-    if (max_location < 0)
-    {
-      max_location = 0;
-    }
-    else if (max_location > size.x)
-    {
-      max_location = size.x;
-    }
+      if (min_location < 0)
+      {
+        min_location = 0;
+      }
+      else if (min_location > size.y)
+      {
+        min_location = size.y;
+      }
 
-    draw_list->AddRectFilled(ImVec2(pos.x + min_location, pos.y), 
-                              ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT), 
-                              PROPS.COLOR_MARKER.DIM, 5.0f, ImDrawFlags_None);
+      if (max_location < 0)
+      {
+        max_location = 0;
+      }
+      else if (max_location > size.y)
+      {
+        max_location = size.y;
+      }
 
-    draw_list->AddRect(ImVec2(pos.x + min_location, pos.y +2), 
-                              ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT -2), 
-                              PROPS.COLOR_MARKER.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+      draw_list->AddRectFilled(ImVec2(pos.x, pos.y + min_location), 
+                                ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + max_location), 
+                                PROPS.COLOR_MARKER.DIM, 5.0f, ImDrawFlags_None);
 
-    if (PROPS.DRAW_RULER)
-    {
-      RULER.draw(sdSysData, pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT));
+      draw_list->AddRect(ImVec2(pos.x +2, pos.y + min_location), 
+                                ImVec2(pos.x + PROPS.BAR_HEIGHT -2, pos.y + max_location), 
+                                PROPS.COLOR_MARKER.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+
+      if (PROPS.DRAW_RULER)
+      {
+        RULER.draw(sdSysData, pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y));
+      }
     }
   }
 
   // Draw Value Marker
-  float marker_location = abs((VALUE_MARKER.value() / PROPS.MAX) * size.x +1);
-
-  if (marker_location < 0)
+  if (PROPS.HORIZONTAL)
   {
-    marker_location = 0;
+    float marker_location = abs((VALUE_MARKER.value() / PROPS.MAX) * size.x +1);
+
+    if (marker_location < 0)
+    {
+      marker_location = 0;
+    }
+    if (marker_location > size.x)
+    {
+      marker_location = size.x;
+    }
+
+    draw_list->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE/2, pos.y), 
+                              ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE/2 , pos.y + PROPS.BAR_HEIGHT), 
+                              PROPS.COLOR_MARKER.STANDARD, 5.0f, ImDrawFlags_None);
+
+    // Move Cursor Pos to new position
+    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
+
+    // Min Max
+    if (PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_BOTTOM)
+    {
+      draw_min_max_val(sdSysData);
+    }
   }
-  if (marker_location > size.x)
+  else
   {
-    marker_location = size.x;
-  }
+    float marker_location = abs((VALUE_MARKER.value() / PROPS.MAX) * size.y +1);
 
-  draw_list->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE/2, pos.y), 
-                            ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE/2 , pos.y + PROPS.BAR_HEIGHT), 
-                            PROPS.COLOR_MARKER.STANDARD, 5.0f, ImDrawFlags_None);
+    if (marker_location < 0)
+    {
+      marker_location = 0;
+    }
+    if (marker_location > size.y)
+    {
+      marker_location = size.y;
+    }
 
-  // Move Cursor Pos to new position
-  ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
+    draw_list->AddRectFilled(ImVec2(pos.x, pos.y + marker_location - PROPS.MARKER_SIZE/2), 
+                              ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + marker_location + PROPS.MARKER_SIZE/2), 
+                              PROPS.COLOR_MARKER.STANDARD, 5.0f, ImDrawFlags_None);
 
-  // Min Max
-  if (PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_BOTTOM)
-  {
-    draw_min_max_val(sdSysData);
+    // Move Cursor Pos to new position
+    ImGui::SetCursorScreenPos(ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y));
   }
 }
 

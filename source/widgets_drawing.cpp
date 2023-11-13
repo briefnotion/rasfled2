@@ -170,6 +170,7 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
+  // Check Size Changes
   if (PREV_START_POS.x != Start_Position.x || PREV_START_POS.y != Start_Position.y || 
       PREV_END_POS.x != End_Position.x || PREV_END_POS.y != End_Position.y)
   {
@@ -188,77 +189,155 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
       new_max_value = new_max_value / 10.0f;
     }
 
-    div_1 = fmod(new_max_value /2, 10.0f);
-    if (div_1 == 0.0f)
+    if (PROPS.HORIZONTAL)
     {
-      l1_size = x_size / 2.0f;
-      draw_level_1 = true;
-    }
+      div_1 = fmod(new_max_value /2, 10.0f);
+      if (div_1 == 0.0f)
+      {
+        l1_size = x_size / 2.0f;
+        draw_level_1 = true;
+      }
 
-    div_2 = fmod(new_max_value, 10.0f);
-    if (div_2 == 0.0f)
+      div_2 = fmod(new_max_value, 10.0f);
+      if (div_2 == 0.0f)
+      {
+        l2_size = x_size / (new_max_value / 10.0f);
+        draw_level_2 = true;
+      }
+
+      div_3 = fmod(new_max_value, 5.0f);
+      if (div_3 == 0.0f)
+      {
+        l3_size = x_size / (new_max_value / 5.0f);
+        draw_level_3 = true;
+      }
+
+      //div_4 = fmod(new_max_value, 1.0f);
+      //if (div_4 == 0.0f)
+      {
+        l4_size = x_size / (new_max_value / 1.0f);
+        draw_level_4 = true;
+      }
+    }
+    else
     {
-      l2_size = x_size / (new_max_value / 10.0f);
-      draw_level_2 = true;
-    }
+      div_1 = fmod(new_max_value /2, 10.0f);
+      if (div_1 == 0.0f)
+      {
+        l1_size = y_size / 2.0f;
+        draw_level_1 = true;
+      }
 
-    div_3 = fmod(new_max_value, 5.0f);
-    if (div_3 == 0.0f)
-    {
-      l3_size = x_size / (new_max_value / 5.0f);
-      draw_level_3 = true;
-    }
+      div_2 = fmod(new_max_value, 10.0f);
+      if (div_2 == 0.0f)
+      {
+        l2_size = y_size / (new_max_value / 10.0f);
+        draw_level_2 = true;
+      }
 
-    //div_4 = fmod(new_max_value, 1.0f);
-    //if (div_4 == 0.0f)
-    {
-      l4_size = x_size / (new_max_value / 1.0f);
-      draw_level_4 = true;
-    }
+      div_3 = fmod(new_max_value, 5.0f);
+      if (div_3 == 0.0f)
+      {
+        l3_size = y_size / (new_max_value / 5.0f);
+        draw_level_3 = true;
+      }
 
+      //div_4 = fmod(new_max_value, 1.0f);
+      //if (div_4 == 0.0f)
+      {
+        l4_size = y_size / (new_max_value / 1.0f);
+        draw_level_4 = true;
+      }
+    }
+    
     PREV_START_POS = Start_Position;
     PREV_END_POS = End_Position;
   }
 
-
-  // 50% tick
-  if (PROPS.MAX_TICK_LEVEL >= 1 && draw_level_1)
+  if (PROPS.HORIZONTAL)  // Vetical is dupe of horizontal, not small but works.
   {
-    draw_list->AddLine(ImVec2(Start_Position.x + l1_size, Start_Position.y), 
-                        ImVec2(Start_Position.x + l1_size, Start_Position.y + (y_size * 0.75f)), 
-                        PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
-  }
-
-  // 10 ticks
-  if (PROPS.MAX_TICK_LEVEL >= 2 && draw_level_2)
-  {
-    for (int tenths = 1; tenths < (new_max_value / 10.0f); tenths++)
+    // 50% tick
+    if (PROPS.MAX_TICK_LEVEL >= 1 && draw_level_1)
     {
-      draw_list->AddLine(ImVec2(Start_Position.x + (tenths * l2_size), Start_Position.y), 
-                    ImVec2(Start_Position.x + (tenths * l2_size), Start_Position.y + (y_size * 0.5f)), 
-                    PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+      draw_list->AddLine(ImVec2(Start_Position.x + l1_size, Start_Position.y), 
+                          ImVec2(Start_Position.x + l1_size, Start_Position.y + (y_size * 0.75f)), 
+                          PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+    }
+
+    // 10 ticks
+    if (PROPS.MAX_TICK_LEVEL >= 2 && draw_level_2)
+    {
+      for (int tenths = 1; tenths < (new_max_value / 10.0f); tenths++)
+      {
+        draw_list->AddLine(ImVec2(Start_Position.x + (tenths * l2_size), Start_Position.y), 
+                      ImVec2(Start_Position.x + (tenths * l2_size), Start_Position.y + (y_size * 0.5f)), 
+                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+      }
+    }
+
+    // 10 halves ticks
+    if (PROPS.MAX_TICK_LEVEL >= 3 && draw_level_3)
+    {
+      for (int twentyiths = 1; twentyiths < (new_max_value / 5.0f); twentyiths++)
+      {
+        draw_list->AddLine(ImVec2(Start_Position.x + (twentyiths * l3_size), Start_Position.y), 
+                      ImVec2(Start_Position.x + (twentyiths * l3_size), Start_Position.y + (y_size * 0.25f)), 
+                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+      }
+    }
+
+    // 1 ticks
+    if (PROPS.MAX_TICK_LEVEL >= 4 && draw_level_4)
+    {
+      for (int hundreds = 1; hundreds < (new_max_value / 1.0f); hundreds++)
+      {
+        draw_list->AddLine(ImVec2(Start_Position.x + (hundreds * l4_size), Start_Position.y), 
+                      ImVec2(Start_Position.x + (hundreds * l4_size), Start_Position.y + 1.0f), 
+                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+      }
     }
   }
-
-  // 10 halves ticks
-  if (PROPS.MAX_TICK_LEVEL >= 3 && draw_level_3)
+  else
   {
-    for (int twentyiths = 1; twentyiths < (new_max_value / 5.0f); twentyiths++)
+    // 50% tick
+    if (PROPS.MAX_TICK_LEVEL >= 1 && draw_level_1)
     {
-      draw_list->AddLine(ImVec2(Start_Position.x + (twentyiths * l3_size), Start_Position.y), 
-                    ImVec2(Start_Position.x + (twentyiths * l3_size), Start_Position.y + (y_size * 0.25f)), 
-                    PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+      draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + l1_size), 
+                          ImVec2(Start_Position.x + (x_size * 0.75f), Start_Position.y + l1_size), 
+                          PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
     }
-  }
 
-  // 1 ticks
-  if (PROPS.MAX_TICK_LEVEL >= 4 && draw_level_4)
-  {
-    for (int hundreds = 1; hundreds < (new_max_value / 1.0f); hundreds++)
+    // 10 ticks
+    if (PROPS.MAX_TICK_LEVEL >= 2 && draw_level_2)
     {
-      draw_list->AddLine(ImVec2(Start_Position.x + (hundreds * l4_size), Start_Position.y), 
-                    ImVec2(Start_Position.x + (hundreds * l4_size), Start_Position.y + 1.0f), 
-                    PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+      for (int tenths = 1; tenths < (new_max_value / 10.0f); tenths++)
+      {
+        draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + (tenths * l2_size)), 
+                      ImVec2(Start_Position.x + (x_size * 0.5f), Start_Position.y + (tenths * l2_size)), 
+                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+      }
+    }
+
+    // 10 halves ticks
+    if (PROPS.MAX_TICK_LEVEL >= 3 && draw_level_3)
+    {
+      for (int twentyiths = 1; twentyiths < (new_max_value / 5.0f); twentyiths++)
+      {
+        draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + (twentyiths * l3_size)), 
+                      ImVec2(Start_Position.x + (x_size * 0.25f), Start_Position.y + (twentyiths * l3_size)), 
+                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+      }
+    }
+
+    // 1 ticks
+    if (PROPS.MAX_TICK_LEVEL >= 4 && draw_level_4)
+    {
+      for (int hundreds = 1; hundreds < (new_max_value / 1.0f); hundreds++)
+      {
+        draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + (hundreds * l4_size)), 
+                      ImVec2(Start_Position.x + 1.0f, Start_Position.y  + (hundreds * l4_size)), 
+                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+      }
     }
   }
 }
