@@ -336,7 +336,7 @@ class DRAW_D2_PLOT
 
   void draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 
-  void draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
+  bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };
 
 // ---------------------------------------------------------------------------------------

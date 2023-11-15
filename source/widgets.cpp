@@ -497,7 +497,7 @@ void BAR_TECH::draw(system_data &sdSysData)
   ImGuiIO &io = ImGui::GetIO();
 
   // Min Max
-  if (PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_TOP)
+  if (PROPS.HORIZONTAL && PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_TOP)
   {
     draw_min_max_val(sdSysData);
   }
@@ -600,12 +600,12 @@ void BAR_TECH::draw(system_data &sdSysData)
         max_location = size.y;
       }
 
-      draw_list->AddRectFilled(ImVec2(pos.x, pos.y + min_location), 
-                                ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + max_location), 
+      draw_list->AddRectFilled(ImVec2(pos.x, pos.y + size.y - max_location), 
+                                ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - min_location), 
                                 PROPS.COLOR_MARKER.DIM, 5.0f, ImDrawFlags_None);
 
-      draw_list->AddRect(ImVec2(pos.x +2, pos.y + min_location), 
-                                ImVec2(pos.x + PROPS.BAR_HEIGHT -2, pos.y + max_location), 
+      draw_list->AddRect(ImVec2(pos.x, pos.y + size.y - max_location -2), 
+                                ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - min_location +2), 
                                 PROPS.COLOR_MARKER.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
 
       if (PROPS.DRAW_RULER)
@@ -637,7 +637,7 @@ void BAR_TECH::draw(system_data &sdSysData)
     ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
 
     // Min Max
-    if (PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_BOTTOM)
+    if (PROPS.HORIZONTAL && PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_BOTTOM)
     {
       draw_min_max_val(sdSysData);
     }
@@ -655,8 +655,8 @@ void BAR_TECH::draw(system_data &sdSysData)
       marker_location = size.y;
     }
 
-    draw_list->AddRectFilled(ImVec2(pos.x, pos.y + marker_location - PROPS.MARKER_SIZE/2), 
-                              ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + marker_location + PROPS.MARKER_SIZE/2), 
+    draw_list->AddRectFilled(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE/2)), 
+                              ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE/2)), 
                               PROPS.COLOR_MARKER.STANDARD, 5.0f, ImDrawFlags_None);
 
     // Move Cursor Pos to new position

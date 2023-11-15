@@ -780,8 +780,10 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
   }
 }
 
-void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)
+bool DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)
 {
+  bool ret_clicked = false;
+
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
   if (PREV_START_POS.x != Start_Position.x || PREV_START_POS.y != Start_Position.y || 
@@ -824,9 +826,16 @@ void DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
 
     draw_graph(sdSysData, Start_Position, End_Position);
 
+    ImGui::SetCursorScreenPos(Start_Position);
+    if (ImGui::InvisibleButton("InvisibleButton", ImVec2(FULL_X_SIZE, FULL_Y_SIZE)))
+    {
+      ret_clicked = true;
+    }
+
   }
   ImGui::EndChild();
 
+  return ret_clicked;
 }
 // ---------------------------------------------------------------------------------------
 

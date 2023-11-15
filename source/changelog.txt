@@ -1,3 +1,12 @@
+2.064_231113
+  - Changed Automobile Screen
+  - Sidbar gadgets can be clicked to show:
+      Power graph 
+      Temperature graph
+      Standard display
+  - Colors of lables changed to match graph line color
+  - Top graph can be clicked to toggle Large Speed Indicator
+
 2.063_231112
   - Changed some things.
 

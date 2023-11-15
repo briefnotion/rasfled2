@@ -231,28 +231,28 @@ class BAR_TECH_PROPERTIES
 
   string LABEL = "";
 
-  float BAR_HEIGHT = 20;
-  float MARKER_SIZE = 5;
+  float BAR_HEIGHT = 20;          // Bar Size Height, or Width
+  float MARKER_SIZE = 5;          // Marker Height or Width.
 
-  COLOR_COMBO COLOR_MARKER;
-  COLOR_COMBO COLOR_BACKGROUND;
+  COLOR_COMBO COLOR_MARKER;       // Color of Marker
+  COLOR_COMBO COLOR_BACKGROUND;   // Color of Marker
 
-  float MAX = 0;
+  float MAX = 0;                  // Top Value of Graph
 
-  bool HORIZONTAL = true;
+  bool HORIZONTAL = true;         // Bar Orientation
 
   // Min Max Related
-  bool DRAW_MIN_MAX = false;
-  bool DRAW_MIN_MAX_ON_TOP = false;
-  bool DRAW_MIN_MAX_ON_BOTTOM = false;
-  bool DISPLAY_SINGLE_POINT_FLOAT = false;
-  int MIN_MAX_TIME_SPAN = 60000;
-  int MIN_MAX_TIME_SLICES = 20;
+  bool DRAW_MIN_MAX = false;                // Records and Displays Opaque Min Max Bar
+  bool DRAW_MIN_MAX_ON_TOP = false;         // Display Min Max Values on above bar
+  bool DRAW_MIN_MAX_ON_BOTTOM = false;      // Display Min Max Values on below bar
+  bool DISPLAY_SINGLE_POINT_FLOAT = false;  // Min Max Numbers Displayed will be truncated to 1 decimal point
+  int MIN_MAX_TIME_SPAN = 60000;            // Min Max Timespan in ms. Default 60 sec.
+  int MIN_MAX_TIME_SLICES = 20;             // Default split 20, 3 seconds
 
   // Ruler
-  bool DRAW_RULER = false;
-  COLOR_COMBO COLOR_RULER;
-  int MAX_TICK_LEVEL = 4;
+  bool DRAW_RULER = false;  // Draw ruler ticks
+  COLOR_COMBO COLOR_RULER;  // Ruler color
+  int MAX_TICK_LEVEL = 4;   // Tick level
 };
 
 class BAR_TECH

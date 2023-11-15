@@ -131,9 +131,9 @@ class T_LARGE_NUMBER_DISPLAY
   void update_value(system_data &sdSysData, float Value);
   void update_value(system_data &sdSysData, string Text);
 
-  void draw(system_data &sdSysData, bool Draw, float Y_Height);
-  void draw(system_data &sdSysData, bool Draw);
-  void draw(system_data &sdSysData);
+  bool draw(system_data &sdSysData, bool Draw, float Y_Height);
+  bool draw(system_data &sdSysData, bool Draw);
+  bool draw(system_data &sdSysData);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -315,26 +315,7 @@ class DISPLAY_DATA_AUTOMOBILE
   string RB_TTL = "";
   float RB_TTL_VAL = 0;
 
-  // Large Displays on Main Sidebar Screen
-  /*
-  T_LARGE_NUMBER_DISPLAY L_SPEED;
-  T_LARGE_NUMBER_DISPLAY L_ACCELERATION;
-  T_LARGE_NUMBER_DISPLAY L_GEAR;
-  T_LARGE_NUMBER_DISPLAY L_TACH;
-  */
-
-  // Large Displays on Main Sidebar Screen
-  T_LARGE_NUMBER_DISPLAY L_SPEED_SB;
-  T_LARGE_NUMBER_DISPLAY L_ACCELERATION_SB;
-  T_LARGE_NUMBER_DISPLAY L_GEAR_SB;
-  T_LARGE_NUMBER_DISPLAY L_TACH_SB;
-  T_LARGE_NUMBER_DISPLAY L_VOLTAGE_SB;
-  T_LARGE_NUMBER_DISPLAY L_S_TEMP_SB;
-
-  T_LARGE_NUMBER_DISPLAY L_SPEED_INSIDE;
-
   // Display Data
-
   T_DATA_DISPLAY D_FUEL_RAIL_PRESSURE;
   T_DATA_DISPLAY D_EVAP_SYSTEM_VAP_PRESSURE;
   T_DATA_DISPLAY D_VOLTAGE;
@@ -366,8 +347,20 @@ class DISPLAY_DATA_AUTOMOBILE
   T_DATA_DISPLAY D_CRUISE_ON;
   T_DATA_DISPLAY D_CRUISE_SPEED;
 
-  // Guages
+  // ------------------------------------------
+  // Mid Top
+  T_LARGE_NUMBER_DISPLAY L_SPEED_INSIDE;
 
+  DRAW_D2_PLOT PLOT_SLOW;
+
+  BAR_TECH VB_SPEED;
+  //BAR_TECH VB_TACH;
+  BAR_TECH VB_S_TEMP;
+  BAR_TECH VB_S_FUEL;
+  BAR_TECH VB_S_VOLTAGE;
+
+  // ------------------------------------------
+  // Mid Bottom
   BAR_TECH TB_STEERING;
   BAR_TECH TB_SPEED;
   BAR_TECH TB_ACCELERATION;
@@ -375,28 +368,40 @@ class DISPLAY_DATA_AUTOMOBILE
   BAR_TECH TB_TORQUE;
   
   TIMED_PING GEAR_SWITCH_DELAY;
-  //BAR_TECH TB_RPM_G1;
-  //BAR_TECH TB_RPM_G2;
-  //BAR_TECH TB_RPM_G3;
-  //BAR_TECH TB_RPM_G4;
-  //BAR_TECH TB_RPM_G5;
 
   /*
-  W_GUAGE G_TEMP_AMBIANT;
-  W_GUAGE G_TEMP_INTAKE;
-  W_GUAGE G_TEMP_COOLANT;
-  W_GUAGE G_TEMP_CATALYST;
-  W_GUAGE G_TEMP_SUPER_TEMP;
+  // Voltage
+  DRAW_D2_PLOT PLOT_VOLTAGE;
+
+  BAR_TECH VB_VOLTAGE;
   */
 
-  // Plot
+  // Temperature
+  DRAW_D2_PLOT PLOT_TEMPERATURE;
 
-  VERTICAL_BAR VB_SPEED;
-  VERTICAL_BAR VB_TACH;
-  VERTICAL_BAR VB_S_TEMP;
+  BAR_TECH VB_TEMPERATURE_COOLANT;
+  BAR_TECH VB_TEMPERATURE_INTAKE;
+  BAR_TECH VB_TEMPERATURE_AMBIANT;
+  BAR_TECH VB_TEMPERATURE_CATALYST;
+  BAR_TECH VB_TEMPERATURE_S_TEMP;
 
-  DRAW_D2_PLOT PLOT_SLOW;
+  // Power
+  DRAW_D2_PLOT PLOT_POWER;
 
+  BAR_TECH VB_POWER_TACH;
+  BAR_TECH VB_POWER_TORQE;
+  BAR_TECH VB_POWER_ACCELERATION;
+  BAR_TECH VB_POWER_FUEL_RAIL_P;
+  BAR_TECH VB_POWER_SYSTEM_VAPER_P;
+
+  // ------------------------------------------
+  // Large Displays on Main Sidebar Screen
+  T_LARGE_NUMBER_DISPLAY L_SPEED_SB;
+  T_LARGE_NUMBER_DISPLAY L_ACCELERATION_SB;
+  T_LARGE_NUMBER_DISPLAY L_GEAR_SB;
+  T_LARGE_NUMBER_DISPLAY L_TACH_SB;
+  T_LARGE_NUMBER_DISPLAY L_VOLTAGE_SB;
+  T_LARGE_NUMBER_DISPLAY L_S_TEMP_SB;
 };
 
 class AUTOMOBILE_SCREEN
@@ -406,6 +411,9 @@ class AUTOMOBILE_SCREEN
   DISPLAY_DATA_AUTOMOBILE SDATA;
   
   WIDGET_DEFAULTS DEFAULTS;
+
+  bool DISPLAY_LARGE_SPEED_INDICATOR = true;
+  int DISPLAY_MID_BOTTOM = 0;
 
   public:
   
