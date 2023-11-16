@@ -259,24 +259,6 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
       ZERO_SIZE = ImGui::CalcTextSize("0");
     }
 
-    // Draw Compare Number
-    if (VALUE_COMPARE >= 0 && !IS_TEXT)
-    {
-      if (ACTIVE_WITHIN == true)
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD));
-      }
-      else
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD));
-      }
-
-      ImGui::SetCursorScreenPos(ImVec2(start_position.x + pos_offset.x, start_position.y + (Y_Height / 2.0f) - (ZERO_SIZE.y / 2.0f)));
-
-      ImGui::Text("%2d", (int)VALUE_COMPARE);
-      ImGui::PopStyleColor();
-    }
-
     // Draw Value
     if (IS_TEXT)
     //  Value is text
@@ -336,6 +318,35 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
     }
 
     ImGui::PopFont();
+
+    // Draw Compare Number - Small
+    if (VALUE_COMPARE >= 0 && !IS_TEXT)
+    {
+      if (PROPS.VERY_LARGE)
+      {
+        ImGui::PushFont(io.Fonts->Fonts.Data[1]);
+      }
+
+      if (ACTIVE_WITHIN == true)
+      {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD));
+      }
+      else
+      {
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.STANDARD));
+      }
+
+      ImGui::SetCursorScreenPos(ImVec2(start_position.x + pos_offset.x, start_position.y));
+
+      ImGui::Text("%2d", (int)VALUE_COMPARE);
+      
+      ImGui::PopStyleColor();
+
+      if (PROPS.VERY_LARGE)
+      {
+        ImGui::PopFont();
+      }
+    }
 
     if (PROPS.DISPLAY_MIN_MAX)
     {
@@ -734,10 +745,10 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     SDATA.PLOT_SLOW.create_subgraph(60, 5 * 60 * 60 * 1000, "8h (5h)"); 
 
     //SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, true, true, 2.0f, 1.0f);
-    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE, true, true, 2.0f, 1.0f);
-    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, true, true, 2.0f, 1.0f);
-    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_CYAN, true, true, 2.0f, 1.0f);
     SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_RED, true, true, 2.0f, 1.0f);
+    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, true, true, 2.0f, 1.0f);
+    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE, true, true, 2.0f, 1.0f);
+    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_CYAN, true, true, 2.0f, 1.0f);
     
     SDATA.PLOT_SLOW.create(sdSysData.PROGRAM_TIME.current_frame_time());
   }
@@ -747,7 +758,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     {
       SDATA.VB_SPEED.PROPS.LABEL = "Speed Vertical";
       SDATA.VB_SPEED.PROPS.BAR_HEIGHT = 30 / 4;
-      SDATA.VB_SPEED.PROPS.MARKER_SIZE = 5;
+      SDATA.VB_SPEED.PROPS.MARKER_SIZE = 15;
       SDATA.VB_SPEED.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
       SDATA.VB_SPEED.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
       SDATA.VB_SPEED.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -759,27 +770,10 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       SDATA.VB_SPEED.PROPS.MAX_TICK_LEVEL = 2;
       SDATA.VB_SPEED.create();
     }
-    /*
-    {
-      SDATA.VB_TACH.PROPS.LABEL = "Tach Vertical";
-      SDATA.VB_TACH.PROPS.BAR_HEIGHT = 30 / 5;
-      SDATA.VB_TACH.PROPS.MARKER_SIZE = 5;
-      SDATA.VB_TACH.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
-      SDATA.VB_TACH.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN;
-      SDATA.VB_TACH.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
-      SDATA.VB_TACH.PROPS.DRAW_MIN_MAX = true;
-      SDATA.VB_TACH.PROPS.MAX = 80;
-      SDATA.VB_TACH.PROPS.HORIZONTAL = false;
-      SDATA.VB_TACH.PROPS.DRAW_RULER = true;
-      SDATA.VB_TACH.PROPS.COLOR_RULER = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
-      SDATA.VB_TACH.PROPS.MAX_TICK_LEVEL = 2;
-      SDATA.VB_TACH.create();
-    }
-    */
     {
       SDATA.VB_S_TEMP.PROPS.LABEL = "Temp Vertical";
       SDATA.VB_S_TEMP.PROPS.BAR_HEIGHT = 30 / 4;
-      SDATA.VB_S_TEMP.PROPS.MARKER_SIZE = 5;
+      SDATA.VB_S_TEMP.PROPS.MARKER_SIZE = 15;
       SDATA.VB_S_TEMP.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
       SDATA.VB_S_TEMP.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE;
       SDATA.VB_S_TEMP.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -794,7 +788,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     {
       SDATA.VB_S_FUEL.PROPS.LABEL = "Fuel Vertical";
       SDATA.VB_S_FUEL.PROPS.BAR_HEIGHT = 30 / 4;
-      SDATA.VB_S_FUEL.PROPS.MARKER_SIZE = 5;
+      SDATA.VB_S_FUEL.PROPS.MARKER_SIZE = 15;
       SDATA.VB_S_FUEL.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
       SDATA.VB_S_FUEL.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_CYAN;
       SDATA.VB_S_FUEL.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -809,7 +803,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     {
       SDATA.VB_S_VOLTAGE.PROPS.LABEL = "Voltage Vertical";
       SDATA.VB_S_VOLTAGE.PROPS.BAR_HEIGHT = 30 / 4;
-      SDATA.VB_S_VOLTAGE.PROPS.MARKER_SIZE = 5;
+      SDATA.VB_S_VOLTAGE.PROPS.MARKER_SIZE = 15;
       SDATA.VB_S_VOLTAGE.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
       SDATA.VB_S_VOLTAGE.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_RED;
       SDATA.VB_S_VOLTAGE.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -959,11 +953,11 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       SDATA.PLOT_TEMPERATURE.create_subgraph(60, 5 * 60 * 60 * 1000, "8h (5h)"); 
 
       // Plot Voltage Line
-      SDATA.PLOT_TEMPERATURE.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, true, true, 2.0f, 1.0f);
-      SDATA.PLOT_TEMPERATURE.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW, true, true, 2.0f, 1.0f);
-      SDATA.PLOT_TEMPERATURE.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_CYAN, true, true, 2.0f, 1.0f);
       SDATA.PLOT_TEMPERATURE.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE, true, true, 2.0f, 1.0f);
       SDATA.PLOT_TEMPERATURE.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE, true, true, 2.0f, 1.0f);
+      SDATA.PLOT_TEMPERATURE.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW, true, true, 2.0f, 1.0f);
+      SDATA.PLOT_TEMPERATURE.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_CYAN, true, true, 2.0f, 1.0f);
+      SDATA.PLOT_TEMPERATURE.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE, true, true, 2.0f, 1.0f);
 
       SDATA.PLOT_TEMPERATURE.create(sdSysData.PROGRAM_TIME.current_frame_time());
     }
@@ -973,7 +967,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       {
         SDATA.VB_TEMPERATURE_COOLANT.PROPS.LABEL = "Coolant Vertical";
         SDATA.VB_TEMPERATURE_COOLANT.PROPS.BAR_HEIGHT = 30 / 5;
-        SDATA.VB_TEMPERATURE_COOLANT.PROPS.MARKER_SIZE = 5;
+        SDATA.VB_TEMPERATURE_COOLANT.PROPS.MARKER_SIZE = 15;
         SDATA.VB_TEMPERATURE_COOLANT.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
         SDATA.VB_TEMPERATURE_COOLANT.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
         SDATA.VB_TEMPERATURE_COOLANT.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -988,7 +982,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       {
         SDATA.VB_TEMPERATURE_INTAKE.PROPS.LABEL = "Intake Vertical";
         SDATA.VB_TEMPERATURE_INTAKE.PROPS.BAR_HEIGHT = 30 / 5;
-        SDATA.VB_TEMPERATURE_INTAKE.PROPS.MARKER_SIZE = 5;
+        SDATA.VB_TEMPERATURE_INTAKE.PROPS.MARKER_SIZE = 15;
         SDATA.VB_TEMPERATURE_INTAKE.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
         SDATA.VB_TEMPERATURE_INTAKE.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
         SDATA.VB_TEMPERATURE_INTAKE.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -1003,7 +997,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       {
         SDATA.VB_TEMPERATURE_AMBIANT.PROPS.LABEL = "Ambiant Vertical";
         SDATA.VB_TEMPERATURE_AMBIANT.PROPS.BAR_HEIGHT = 30 / 5;
-        SDATA.VB_TEMPERATURE_AMBIANT.PROPS.MARKER_SIZE = 5;
+        SDATA.VB_TEMPERATURE_AMBIANT.PROPS.MARKER_SIZE = 15;
         SDATA.VB_TEMPERATURE_AMBIANT.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
         SDATA.VB_TEMPERATURE_AMBIANT.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_CYAN;
         SDATA.VB_TEMPERATURE_AMBIANT.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -1018,7 +1012,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       {
         SDATA.VB_TEMPERATURE_CATALYST.PROPS.LABEL = "Catalyst Vertical";
         SDATA.VB_TEMPERATURE_CATALYST.PROPS.BAR_HEIGHT = 30 / 5;
-        SDATA.VB_TEMPERATURE_CATALYST.PROPS.MARKER_SIZE = 5;
+        SDATA.VB_TEMPERATURE_CATALYST.PROPS.MARKER_SIZE = 15;
         SDATA.VB_TEMPERATURE_CATALYST.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
         SDATA.VB_TEMPERATURE_CATALYST.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE;
         SDATA.VB_TEMPERATURE_CATALYST.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -1033,7 +1027,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       {
         SDATA.VB_TEMPERATURE_S_TEMP.PROPS.LABEL = "S Temp Vertical";
         SDATA.VB_TEMPERATURE_S_TEMP.PROPS.BAR_HEIGHT = 30 / 5;
-        SDATA.VB_TEMPERATURE_S_TEMP.PROPS.MARKER_SIZE = 5;
+        SDATA.VB_TEMPERATURE_S_TEMP.PROPS.MARKER_SIZE = 15;
         SDATA.VB_TEMPERATURE_S_TEMP.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
         SDATA.VB_TEMPERATURE_S_TEMP.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE;
         SDATA.VB_TEMPERATURE_S_TEMP.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -1066,11 +1060,11 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       SDATA.PLOT_POWER.create_subgraph(60, 5 * 60 * 60 * 1000, "8h (5h)"); 
 
       // Plot Voltage Line
+      SDATA.PLOT_POWER.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE, true, true, 2.0f, 1.0f);
+      SDATA.PLOT_POWER.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_PINK, true, true, 2.0f, 1.0f);
       SDATA.PLOT_POWER.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, true, true, 2.0f, 1.0f);
       SDATA.PLOT_POWER.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_RED, true, true, 2.0f, 1.0f);
       SDATA.PLOT_POWER.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_CYAN, true, true, 2.0f, 1.0f);
-      SDATA.PLOT_POWER.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE, true, true, 2.0f, 1.0f);
-      SDATA.PLOT_POWER.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_PINK, true, true, 2.0f, 1.0f);
 
       SDATA.PLOT_POWER.create(sdSysData.PROGRAM_TIME.current_frame_time());
     }
@@ -1080,7 +1074,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       {
         SDATA.VB_POWER_TACH.PROPS.LABEL = "Tach Vertical";
         SDATA.VB_POWER_TACH.PROPS.BAR_HEIGHT = 30 / 5;
-        SDATA.VB_POWER_TACH.PROPS.MARKER_SIZE = 5;
+        SDATA.VB_POWER_TACH.PROPS.MARKER_SIZE = 15;
         SDATA.VB_POWER_TACH.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
         SDATA.VB_POWER_TACH.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN;
         SDATA.VB_POWER_TACH.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -1095,7 +1089,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       {
         SDATA.VB_POWER_TORQE.PROPS.LABEL = "Torque Vertical";
         SDATA.VB_POWER_TORQE.PROPS.BAR_HEIGHT = 30 / 5;
-        SDATA.VB_POWER_TORQE.PROPS.MARKER_SIZE = 5;
+        SDATA.VB_POWER_TORQE.PROPS.MARKER_SIZE = 15;
         SDATA.VB_POWER_TORQE.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
         SDATA.VB_POWER_TORQE.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_RED;
         SDATA.VB_POWER_TORQE.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -1110,7 +1104,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       {
         SDATA.VB_POWER_ACCELERATION.PROPS.LABEL = "Acceleration Vertical";
         SDATA.VB_POWER_ACCELERATION.PROPS.BAR_HEIGHT = 30 / 5;
-        SDATA.VB_POWER_ACCELERATION.PROPS.MARKER_SIZE = 5;
+        SDATA.VB_POWER_ACCELERATION.PROPS.MARKER_SIZE = 15;
         SDATA.VB_POWER_ACCELERATION.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
         SDATA.VB_POWER_ACCELERATION.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_CYAN;
         SDATA.VB_POWER_ACCELERATION.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -1125,7 +1119,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       {
         SDATA.VB_POWER_FUEL_RAIL_P.PROPS.LABEL = "Fuel Rail Pressure Vertical";
         SDATA.VB_POWER_FUEL_RAIL_P.PROPS.BAR_HEIGHT = 30 / 5;
-        SDATA.VB_POWER_FUEL_RAIL_P.PROPS.MARKER_SIZE = 5;
+        SDATA.VB_POWER_FUEL_RAIL_P.PROPS.MARKER_SIZE = 15;
         SDATA.VB_POWER_FUEL_RAIL_P.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
         SDATA.VB_POWER_FUEL_RAIL_P.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE;
         SDATA.VB_POWER_FUEL_RAIL_P.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -1140,7 +1134,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       {
         SDATA.VB_POWER_SYSTEM_VAPER_P.PROPS.LABEL = "System Vaper Pressure Vertical";
         SDATA.VB_POWER_SYSTEM_VAPER_P.PROPS.BAR_HEIGHT = 30 / 5;
-        SDATA.VB_POWER_SYSTEM_VAPER_P.PROPS.MARKER_SIZE = 5;
+        SDATA.VB_POWER_SYSTEM_VAPER_P.PROPS.MARKER_SIZE = 15;
         SDATA.VB_POWER_SYSTEM_VAPER_P.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
         SDATA.VB_POWER_SYSTEM_VAPER_P.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_PINK;
         SDATA.VB_POWER_SYSTEM_VAPER_P.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
@@ -1358,15 +1352,13 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   {
     SDATA.L_SPEED_INSIDE.update_value(sdSysData, SDATA.SPEED_IMPRES, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
 
-    //SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, (float)SDATA.RPM/50);
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, SDATA.TEMP_S_TEMP);
+    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, SDATA.SPEED_IMPRES);
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
+    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.TEMP_S_TEMP);
+    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
 
     SDATA.VB_SPEED.update_value(sdSysData, SDATA.SPEED);
     SDATA.VB_S_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);
-    //SDATA.VB_TACH.update_value(sdSysData, SDATA.RPM/50);
     SDATA.VB_S_FUEL.update_value(sdSysData, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
     SDATA.VB_S_VOLTAGE.update_value(sdSysData, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
   }
@@ -1401,11 +1393,11 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
     // DISPLAY_MID_BOTTOM = 2 - Temperature
     {
-      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, SDATA.TEMP_COOLANT);
-      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, SDATA.TEMP_AIR_INTAKE);
-      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.TEMP_AMBIANT);
-      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, SDATA.TEMP_CATALYST / 10.0f);
-      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, SDATA.TEMP_S_TEMP);
+      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, SDATA.TEMP_CATALYST / 10.0f);
+      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, SDATA.TEMP_S_TEMP);
+      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.TEMP_AIR_INTAKE);
+      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, SDATA.TEMP_AMBIANT);
+      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, SDATA.TEMP_COOLANT);
 
       SDATA.VB_TEMPERATURE_COOLANT.update_value(sdSysData, SDATA.TEMP_COOLANT);
       SDATA.VB_TEMPERATURE_INTAKE.update_value(sdSysData, SDATA.TEMP_AIR_INTAKE);
@@ -1416,17 +1408,17 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
     // DISPLAY_MID_BOTTOM = 3 - Power
     {
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, (float)SDATA.RPM/50);
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, ((float)SDATA.TORQUE_DEMANDED / 40.0f) + 50.0f);
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, (SDATA.ACCELERATION * 10.0f / 2.0f) +  + 50.0f);
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, (SDATA.FUEL_RAIL_PRESSURE_VAL / 40.0f) + 50.0f);
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 40.0f) + 50.0f);
+      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, (SDATA.FUEL_RAIL_PRESSURE_VAL / 40.0f) + 50.0f);
+      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
+      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, (float)SDATA.RPM/50);
+      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, ((float)SDATA.TORQUE_DEMANDED / 40.0f) + 50.0f);
+      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, (SDATA.ACCELERATION * 10.0f / 2.0f) +  + 50.0f);
 
       SDATA.VB_POWER_TACH.update_value(sdSysData, (float)SDATA.RPM/50);
       SDATA.VB_POWER_TORQE.update_value(sdSysData, ((float)SDATA.TORQUE_DEMANDED / 40.0f) + 50.0f);
       SDATA.VB_POWER_ACCELERATION.update_value(sdSysData, (SDATA.ACCELERATION * 10.0f / 2.0f) +  + 50.0f);
       SDATA.VB_POWER_FUEL_RAIL_P.update_value(sdSysData, (SDATA.FUEL_RAIL_PRESSURE_VAL / 40.0f) + 50.0f);
-      SDATA.VB_POWER_SYSTEM_VAPER_P.update_value(sdSysData, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 40.0f) + 50.0f);
+      SDATA.VB_POWER_SYSTEM_VAPER_P.update_value(sdSysData, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
     }
   }
 }
@@ -1526,10 +1518,9 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
       ImGui::SameLine();
 
-      SDATA.VB_S_TEMP.draw(sdSysData);
       SDATA.VB_SPEED.draw(sdSysData);
-      //SDATA.VB_TACH.draw(sdSysData);
-      SDATA.VB_S_FUEL.draw(sdSysData);  
+      SDATA.VB_S_FUEL.draw(sdSysData); 
+      SDATA.VB_S_TEMP.draw(sdSysData); 
       SDATA.VB_S_VOLTAGE.draw(sdSysData);       
     }
     ImGui::EndChild();
@@ -1582,8 +1573,8 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
         ImGui::SameLine();
 
         SDATA.VB_POWER_TACH.draw(sdSysData);
-        SDATA.VB_POWER_TORQE.draw(sdSysData);
         SDATA.VB_POWER_ACCELERATION.draw(sdSysData);
+        SDATA.VB_POWER_TORQE.draw(sdSysData);
         SDATA.VB_POWER_FUEL_RAIL_P.draw(sdSysData);
         SDATA.VB_POWER_SYSTEM_VAPER_P.draw(sdSysData);
       }
