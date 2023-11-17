@@ -63,6 +63,34 @@ bool Load_Texture_From_File(const char* filename, GLuint* out_texture, int* out_
 
 // ---------------------------------------------------------------------------------------
 
+void MARKER_GADGET::draw(ImDrawList* draw_list, ImVec2 Start_Pos, ImVec2 Size, bool Display)
+{
+  if (PROPS.ENABLED && Display)
+  {
+    if (PROPS.HORIZONTAL)
+    {
+      draw_list->AddRectFilled(ImVec2(Start_Pos.x, Start_Pos.y), 
+                    ImVec2(Start_Pos.x + Size.x, Start_Pos.y + PROPS.SIZE), PROPS.COLOR.DIM);
+      // No left side, relabel for bottom is not necessary.
+    }
+    else
+    {
+      if (PROPS.LEFT_SIDE)
+      {
+        draw_list->AddRectFilled(ImVec2(Start_Pos.x, Start_Pos.y), 
+                      ImVec2(Start_Pos.x + PROPS.SIZE, Start_Pos.y + Size.y), PROPS.COLOR.DIM);
+      }
+      else
+      {
+        draw_list->AddRectFilled(ImVec2(Start_Pos.x + Size.x - PROPS.SIZE , Start_Pos.y), 
+                      ImVec2(Start_Pos.x + Size.x, Start_Pos.y + Size.y), PROPS.COLOR.DIM);
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
 bool TEXTURE_IMAGE::create(string Path, string Filename)
 {
   string qr_code_image_file = Path + Filename;
@@ -91,7 +119,7 @@ int TEXTURE_IMAGE::height()
 void TEXTURE_IMAGE::draw()
 {
   //ImGui::Text("pointer = %p", IMAGE_TEXTURE);
-  //ImGui::Text("size = %d x %d", IMAGE_WIDTH, IMAGE_HEIGHT);
+  //ImGui::Text("sizeline = %d x %d", IMAGE_WIDTH, IMAGE_HEIGHT);
   ImGui::Image((void*)(intptr_t)IMAGE_TEXTURE, ImVec2(IMAGE_WIDTH, IMAGE_HEIGHT));
 }
 

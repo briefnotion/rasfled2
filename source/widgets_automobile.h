@@ -81,8 +81,8 @@ class T_LARGE_NUMBER_DISPLAY_PROPERTIES
 
   NEW_COLOR_SCALE COLOR_SCALE;  //  pros COLOR.
 
-  bool MARKER = false;
-  COLOR_COMBO MARKER_COLOR;
+  bool DISPLAY_MARKER = false;
+  COLOR_COMBO DISPLAY_MARKER_COLOR;
 };
 
 class T_LARGE_NUMBER_DISPLAY
@@ -102,8 +102,11 @@ class T_LARGE_NUMBER_DISPLAY
 
   MIN_MAX_TIME MIN_MAX;
 
+  MARKER_GADGET MARKER;
+
   // ---
   // Positions and values
+  ImVec2 FRAME_START_POS = ImVec2(0.0f, 0.0f);
   float PREV_Y_HEIGHT = 0.0f;
 
   ImVec2 DISPLAY_SIZE;
@@ -188,6 +191,9 @@ class T_DATA_DISPLAY_PROPERTIES
 
   COLOR_COMBO COLOR;            // If Color Scale not active then Color defaults to 
   NEW_COLOR_SCALE COLOR_SCALE;  //  pros COLOR.
+
+  bool DISPLAY_MARKER = false;
+  COLOR_COMBO DISPLAY_MARKER_COLOR;
 };
 
 class T_DATA_DISPLAY
@@ -206,6 +212,8 @@ class T_DATA_DISPLAY
   string VALUE_STRING = "";
   float VALUE_FLOAT = 0;
 
+  MARKER_GADGET MARKER;
+
   public:
 
   T_DATA_DISPLAY_PROPERTIES PROPS;
@@ -215,6 +223,7 @@ class T_DATA_DISPLAY
   void update_value(system_data &sdSysData, string String_Value, float Float_Value);
   void update_value(system_data &sdSysData, string String_Value);
 
+  void draw(system_data &sdSysData, bool Draw_Marker);
   void draw(system_data &sdSysData);
 };
 
@@ -412,8 +421,13 @@ class AUTOMOBILE_SCREEN
   
   WIDGET_DEFAULTS DEFAULTS;
 
+  bool DISPLAY_DATA = true;
   bool DISPLAY_LARGE_SPEED_INDICATOR = true;
-  int DISPLAY_MID_BOTTOM = 0;
+
+  int DISPLAY_MID_BOTTOM = 0; // 0 - Large Horizontal Bars
+                              // 1 - Unused
+                              // 2 - Temp Graph
+                              // 3 - Power Graph
 
   public:
   

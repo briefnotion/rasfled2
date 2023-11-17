@@ -166,6 +166,11 @@ void T_LARGE_NUMBER_DISPLAY::create()
   MIN_MAX.PROP.TIME_SPAN = PROPS.MIN_MAX_TIME_SPAN;
   MIN_MAX.PROP.SLICES = PROPS.MIN_MAX_TIME_SLICES;
   VALUE_WHEEL.set_size(PROPS.WHEEL_FRAME_SIZE);
+
+  MARKER.PROPS.ENABLED = PROPS.DISPLAY_MARKER;
+  MARKER.PROPS.COLOR = PROPS.DISPLAY_MARKER_COLOR;
+  MARKER.PROPS.LEFT_SIDE = PROPS.LABEL_ON_LEFT;
+  MARKER.PROPS.SIZE = 3.0f;
 }
 
 void T_LARGE_NUMBER_DISPLAY::update_value(system_data &sdSysData, float Value, float Compare_Value, bool Is_Within)
@@ -193,7 +198,11 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
 {
   bool ret_clicked = false;
 
-  if (Y_Height != PREV_Y_HEIGHT)
+  ImVec2 start_position = ImGui::GetCursorScreenPos();
+
+  if (Y_Height != PREV_Y_HEIGHT || 
+        FRAME_START_POS.x != start_position.x || 
+        FRAME_START_POS.y != start_position.y)
   {
     CHANGED = true;
   
@@ -206,10 +215,10 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
       DISPLAY_SIZE = ImVec2(83.0f, Y_Height);
     }
 
+    FRAME_START_POS = start_position;
     PREV_Y_HEIGHT = Y_Height;
   }
 
-  ImVec2 start_position = ImGui::GetCursorScreenPos();
   ImVec2 pos_offset = ImVec2(0.0f, 0.0f);
 
   ImGui::BeginChild(PROPS.LABEL.c_str(), DISPLAY_SIZE, false, sdSysData.SCREEN_DEFAULTS.flags_c);
@@ -219,25 +228,16 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
     ImGuiIO &io = ImGui::GetIO();
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
+    MARKER.draw(draw_list, start_position, DISPLAY_SIZE, true);
+
     if (PROPS.LABEL_ON_LEFT == true)
     {
-      if (PROPS.MARKER)
-      {
-        draw_list->AddRectFilled(start_position, ImVec2(start_position.x + 3.0f, start_position.y + Y_Height), PROPS.MARKER_COLOR.DIM);
-      }
-      
       ImGui::SetCursorScreenPos(ImVec2(start_position.x, start_position.y + 10.0f));
       ImGui::TextUnformatted(PROPS.LABEL.c_str());
       pos_offset.x = pos_offset.x + 10.0f;
     }
     else
-    {
-      if (PROPS.MARKER)
-      {
-        draw_list->AddRectFilled(ImVec2(start_position.x + DISPLAY_SIZE.x - 3, start_position.y), 
-                          ImVec2(start_position.x + DISPLAY_SIZE.x , start_position.y + Y_Height), PROPS.MARKER_COLOR.DIM);
-      }
-      
+    { 
       ImGui::SetCursorScreenPos(ImVec2(start_position.x + DISPLAY_SIZE.x - 9, start_position.y + 10.0f));
       ImGui::TextUnformatted(PROPS.LABEL.c_str());
     }
@@ -329,11 +329,11 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
 
       if (ACTIVE_WITHIN == true)
       {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.STANDARD));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.TEXT));
       }
       else
       {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN.STANDARD));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_GREY.TEXT));
       }
 
       ImGui::SetCursorScreenPos(ImVec2(start_position.x + pos_offset.x, start_position.y));
@@ -484,6 +484,12 @@ void T_DATA_DISPLAY::create(system_data &sdSysData)
   {
     LABEL_PIXEL_SIZE = ImGui::CalcTextSize(linefill(PROPS.LABEL_TEXT_SIZE, "X").c_str());
   }
+
+  MARKER.PROPS.ENABLED = PROPS.DISPLAY_MARKER;
+  MARKER.PROPS.COLOR = PROPS.DISPLAY_MARKER_COLOR;
+  MARKER.PROPS.LEFT_SIDE = true;
+  MARKER.PROPS.SIZE = 5.0f;
+  MARKER.PROPS.HORIZONTAL = true;
 }
 
 void T_DATA_DISPLAY::update_value(system_data &sdSysData, string String_Value, float Float_Value)
@@ -501,9 +507,11 @@ void T_DATA_DISPLAY::update_value(system_data &sdSysData, string String_Value)
   update_value(sdSysData, String_Value, 0);
 }
 
-void T_DATA_DISPLAY::draw(system_data &sdSysData)
+void T_DATA_DISPLAY::draw(system_data &sdSysData, bool Draw_Marker)
 {
   ImVec2 pos = ImGui::GetCursorScreenPos();
+
+  MARKER.draw(ImGui::GetWindowDrawList(), pos, ImVec2(50.0f, 20.0f), Draw_Marker);
 
   LABEL.draw(sdSysData);
   ImGui::SameLine();
@@ -522,6 +530,11 @@ void T_DATA_DISPLAY::draw(system_data &sdSysData)
   }
 }
 
+void T_DATA_DISPLAY::draw(system_data &sdSysData)
+{
+  draw(sdSysData, false);
+}
+
 // ---------------------------------------------------------------------------------------
 void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
 {
@@ -530,77 +543,85 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_SPEED_SB.PROPS.LABEL_ON_LEFT = true;
   SDATA.L_SPEED_SB.PROPS.WHEEL_FRAME_SIZE = 8;
   SDATA.L_SPEED_SB.PROPS.DISPLAY_MIN_MAX = true;
-  SDATA.L_SPEED_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
-  SDATA.L_SPEED_SB.PROPS.MARKER = true;
-  SDATA.L_SPEED_SB.PROPS.MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  SDATA.L_SPEED_SB.PROPS.MIN_MAX_TIME_SPAN = 5* 60000;
+  SDATA.L_SPEED_SB.PROPS.DISPLAY_MARKER = true;
+  SDATA.L_SPEED_SB.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.L_SPEED_SB.create();
 
   SDATA.L_ACCELERATION_SB.PROPS.LABEL = "A\nC\nC";
   SDATA.L_ACCELERATION_SB.PROPS.LABEL_ON_LEFT = true;
   SDATA.L_ACCELERATION_SB.PROPS.DISPLAY_MIN_MAX = true;
-  SDATA.L_ACCELERATION_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.L_ACCELERATION_SB.PROPS.MIN_MAX_TIME_SPAN = 5* 60000;
   SDATA.L_ACCELERATION_SB.PROPS.WHEEL_FRAME_SIZE = 33;
+  SDATA.L_ACCELERATION_SB.PROPS.DISPLAY_MARKER = true;
+  SDATA.L_ACCELERATION_SB.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_CYAN;
   SDATA.L_ACCELERATION_SB.create();
   
   SDATA.L_GEAR_SB.PROPS.LABEL = "G\nE\nR";
   SDATA.L_GEAR_SB.PROPS.LABEL_ON_LEFT = true;
-  SDATA.L_GEAR_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.L_GEAR_SB.PROPS.MIN_MAX_TIME_SPAN = 5* 60000;
   SDATA.L_GEAR_SB.create();
   
   SDATA.L_TACH_SB.PROPS.LABEL = "T\nA\nC";
   SDATA.L_TACH_SB.PROPS.LABEL_ON_LEFT = true;
   SDATA.L_TACH_SB.PROPS.DISPLAY_MIN_MAX = true;
-  SDATA.L_TACH_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.L_TACH_SB.PROPS.MIN_MAX_TIME_SPAN = 5* 60000;
   SDATA.L_TACH_SB.PROPS.WHEEL_FRAME_SIZE = 3;
-  SDATA.L_TACH_SB.PROPS.MARKER = true;
-  SDATA.L_TACH_SB.PROPS.MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN;
+  SDATA.L_TACH_SB.PROPS.DISPLAY_MARKER = true;
+  SDATA.L_TACH_SB.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_GREEN;
   SDATA.L_TACH_SB.create();
 
   SDATA.L_VOLTAGE_SB.PROPS.LABEL = "V\nL\nT";
   SDATA.L_VOLTAGE_SB.PROPS.LABEL_ON_LEFT = true;
   SDATA.L_VOLTAGE_SB.PROPS.DISPLAY_MIN_MAX = true;
-  SDATA.L_VOLTAGE_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.L_VOLTAGE_SB.PROPS.MIN_MAX_TIME_SPAN = 5* 60000;
   SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(8.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(12.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(14.3f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(16.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.L_VOLTAGE_SB.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
-  SDATA.L_VOLTAGE_SB.PROPS.MARKER = true;
-  SDATA.L_VOLTAGE_SB.PROPS.MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_RED;
+  SDATA.L_VOLTAGE_SB.PROPS.DISPLAY_MARKER = true;
+  SDATA.L_VOLTAGE_SB.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_RED;
   SDATA.L_VOLTAGE_SB.PROPS.WHEEL_FRAME_SIZE = 18;
   SDATA.L_VOLTAGE_SB.create();
   
   SDATA.L_S_TEMP_SB.PROPS.LABEL = "T\nM\nP";
   SDATA.L_S_TEMP_SB.PROPS.LABEL_ON_LEFT = true;
   SDATA.L_S_TEMP_SB.PROPS.DISPLAY_MIN_MAX = true;
-  SDATA.L_S_TEMP_SB.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
+  SDATA.L_S_TEMP_SB.PROPS.MIN_MAX_TIME_SPAN = 5* 60000;
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(40.0f, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(50.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(60.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(70.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
-  SDATA.L_S_TEMP_SB.PROPS.MARKER = true;
-  SDATA.L_S_TEMP_SB.PROPS.MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE;
+  SDATA.L_S_TEMP_SB.PROPS.DISPLAY_MARKER = true;
+  SDATA.L_S_TEMP_SB.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE;
   SDATA.L_S_TEMP_SB.PROPS.WHEEL_FRAME_SIZE = 33;
   SDATA.L_S_TEMP_SB.create();
 
   // Continuing Configuring Main Screen Widgets
 
   SDATA.D_FUEL_RAIL_PRESSURE.PROPS.LABEL = right_justify(10, "F Rail P: ");
-  SDATA.D_FUEL_RAIL_PRESSURE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE;
+  SDATA.D_FUEL_RAIL_PRESSURE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  SDATA.D_FUEL_RAIL_PRESSURE.PROPS.DISPLAY_MARKER = true;
+  SDATA.D_FUEL_RAIL_PRESSURE.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE;
   SDATA.D_FUEL_RAIL_PRESSURE.create(sdSysData);
 
   SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.PROPS.LABEL = right_justify(10, "Sys Vp P: ");
-  SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_PINK;
+  SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+  SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.PROPS.DISPLAY_MARKER = true;
+  SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_PINK;
   SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.create(sdSysData);
 
   SDATA.D_VOLTAGE.PROPS.LABEL = right_justify(10, "Voltage: ");
-  SDATA.D_VOLTAGE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_RED;
+  SDATA.D_VOLTAGE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(8.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(12.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(14.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(16.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_VOLTAGE.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
+  SDATA.D_VOLTAGE.PROPS.DISPLAY_MARKER = true;
+  SDATA.D_VOLTAGE.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_RED;
   SDATA.D_VOLTAGE.create(sdSysData);
 
   SDATA.D_BAROMETER.PROPS.LABEL = right_justify(10, "Baro: ");
@@ -612,21 +633,25 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.D_CAM_COMM_ERROR.create(sdSysData);
 
   SDATA.D_TEMP_AMBIANT.PROPS.LABEL = right_justify(10, "Ambiant: ");
-  SDATA.D_TEMP_AMBIANT.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_CYAN;
+  SDATA.D_TEMP_AMBIANT.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.D_TEMP_AMBIANT.PROPS.COLOR_SCALE.add_color_value_pair(0.0f, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
   SDATA.D_TEMP_AMBIANT.PROPS.COLOR_SCALE.add_color_value_pair(30.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.D_TEMP_AMBIANT.PROPS.COLOR_SCALE.add_color_value_pair(38.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_TEMP_AMBIANT.PROPS.COLOR_SCALE.add_color_value_pair(43.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_TEMP_AMBIANT.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.D_TEMP_AMBIANT.PROPS.DISPLAY_MARKER = true;
+  SDATA.D_TEMP_AMBIANT.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_CYAN;
   SDATA.D_TEMP_AMBIANT.create(sdSysData);
 
   SDATA.D_TEMP_INTAKE.PROPS.LABEL = right_justify(10, "Intake: ");
-  SDATA.D_TEMP_INTAKE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+  SDATA.D_TEMP_INTAKE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.D_TEMP_INTAKE.PROPS.COLOR_SCALE.add_color_value_pair(10.0f, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
   SDATA.D_TEMP_INTAKE.PROPS.COLOR_SCALE.add_color_value_pair(40.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.D_TEMP_INTAKE.PROPS.COLOR_SCALE.add_color_value_pair(48.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_TEMP_INTAKE.PROPS.COLOR_SCALE.add_color_value_pair(53.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_TEMP_INTAKE.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.D_TEMP_INTAKE.PROPS.DISPLAY_MARKER = true;
+  SDATA.D_TEMP_INTAKE.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
   SDATA.D_TEMP_INTAKE.create(sdSysData);
 
   SDATA.D_TEMP_COOLANT.PROPS.LABEL = right_justify(10, "Coolant: ");
@@ -636,24 +661,30 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.D_TEMP_COOLANT.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_TEMP_COOLANT.PROPS.COLOR_SCALE.add_color_value_pair(110.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_TEMP_COOLANT.PROPS.COLOR_SCALE.add_color_value_pair(200.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.D_TEMP_COOLANT.PROPS.DISPLAY_MARKER = true;
+  SDATA.D_TEMP_COOLANT.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.D_TEMP_COOLANT.create(sdSysData);
 
   SDATA.D_TEMP_CATALYST.PROPS.LABEL = right_justify(10, "Catalyst: ");
-  SDATA.D_TEMP_CATALYST.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE;
+  SDATA.D_TEMP_CATALYST.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(150.0f, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
   SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(750.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(850.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(950.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_TEMP_CATALYST.PROPS.COLOR_SCALE.add_color_value_pair(2000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.D_TEMP_CATALYST.PROPS.DISPLAY_MARKER = true;
+  SDATA.D_TEMP_CATALYST.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE;
   SDATA.D_TEMP_CATALYST.create(sdSysData);
 
   SDATA.D_TEMP_SUPER_TEMP.PROPS.LABEL = right_justify(10, "S-Temp: ");
-  SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE;
+  SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(40.0f, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
   SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(50.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
   SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(60.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(70.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_TEMP_SUPER_TEMP.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
+  SDATA.D_TEMP_SUPER_TEMP.PROPS.DISPLAY_MARKER = true;
+  SDATA.D_TEMP_SUPER_TEMP.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE;
   SDATA.D_TEMP_SUPER_TEMP.create(sdSysData);
 
   SDATA.OC_LF_TTL.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE;
@@ -693,11 +724,13 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.D_LIGHTS.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.D_LIGHTS.create(sdSysData);
 
+  SDATA.D_FUEL_LEVEL.PROPS.LABEL = right_justify(10, "FUEL LVL: ");
+  SDATA.D_FUEL_LEVEL.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
   SDATA.D_FUEL_LEVEL.PROPS.COLOR_SCALE.add_color_value_pair(1.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
   SDATA.D_FUEL_LEVEL.PROPS.COLOR_SCALE.add_color_value_pair(4.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
   SDATA.D_FUEL_LEVEL.PROPS.COLOR_SCALE.add_color_value_pair(14.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
-  SDATA.D_FUEL_LEVEL.PROPS.LABEL = right_justify(10, "FUEL LVL: ");
-  SDATA.D_FUEL_LEVEL.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_CYAN;
+  SDATA.D_FUEL_LEVEL.PROPS.DISPLAY_MARKER = true;
+  SDATA.D_FUEL_LEVEL.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_CYAN;
   SDATA.D_FUEL_LEVEL.create(sdSysData);
 
   SDATA.D_PARKING_BRAKE.PROPS.COLOR_SCALE.add_color_value_pair(0.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
@@ -721,9 +754,9 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     SDATA.L_SPEED_INSIDE.PROPS.LABEL_ON_LEFT = true;
     SDATA.L_SPEED_INSIDE.PROPS.WHEEL_FRAME_SIZE = 8;
     SDATA.L_SPEED_INSIDE.PROPS.DISPLAY_MIN_MAX = true;
-    SDATA.L_SPEED_INSIDE.PROPS.MIN_MAX_TIME_SPAN = 10 * 60000;
-    SDATA.L_SPEED_INSIDE.PROPS.MARKER = true;
-    SDATA.L_SPEED_INSIDE.PROPS.MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+    SDATA.L_SPEED_INSIDE.PROPS.MIN_MAX_TIME_SPAN = 5* 60000;
+    SDATA.L_SPEED_INSIDE.PROPS.DISPLAY_MARKER = true;
+    SDATA.L_SPEED_INSIDE.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
     SDATA.L_SPEED_INSIDE.PROPS.VERY_LARGE = true;
     SDATA.L_SPEED_INSIDE.create();
   }
@@ -1431,58 +1464,80 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
   // ---
   // Left Side
 
-  ImGui::BeginChild("Auto All Data", ImVec2(ImGui::GetContentRegionAvail().x * 7/32, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+  if (DISPLAY_DATA)
   {
+    ImGui::BeginChild("Auto All Data", ImVec2(ImGui::GetContentRegionAvail().x * 7/32, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
-      SDATA.D_LIGHTS.draw(sdSysData);
-      SDATA.D_FUEL_LEVEL.draw(sdSysData);
-      SDATA.D_VOLTAGE.draw(sdSysData);
-      SDATA.D_PARKING_BRAKE.draw(sdSysData);
-      SDATA.D_CRUISE_ON.draw(sdSysData);
-      SDATA.D_CRUISE_SPEED.draw(sdSysData);
+      ImVec2 frame_start_pos = ImGui::GetCursorScreenPos();
+      ImVec2 frame_size = ImGui::GetContentRegionAvail();
+
+      {
+        SDATA.D_LIGHTS.draw(sdSysData);
+        SDATA.D_FUEL_LEVEL.draw(sdSysData, true);
+        SDATA.D_VOLTAGE.draw(sdSysData, true);
+        SDATA.D_PARKING_BRAKE.draw(sdSysData);
+        SDATA.D_CRUISE_ON.draw(sdSysData);
+        SDATA.D_CRUISE_SPEED.draw(sdSysData);
+      }
+      
+      ImGui::Separator();
+
+      {
+        SDATA.D_TEMP_COOLANT.draw(sdSysData, DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_INTAKE.draw(sdSysData, DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_AMBIANT.draw(sdSysData, DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_CATALYST.draw(sdSysData, DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_SUPER_TEMP.draw(sdSysData, true);
+      }
+
+      ImGui::Separator();
+
+      {
+        SDATA.D_FUEL_RAIL_PRESSURE.draw(sdSysData, DISPLAY_MID_BOTTOM == 3);
+        SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(sdSysData, DISPLAY_MID_BOTTOM == 3);
+        SDATA.D_BAROMETER.draw(sdSysData);
+        SDATA.D_CAM_COMM_ERROR.draw(sdSysData);
+      }
+      
+      ImGui::Separator();
+
+      {
+        SDATA.OC_LF_TTL.draw(sdSysData);
+        ImGui::SameLine();
+        SDATA.D_LF_TTL.draw(sdSysData);
+
+        SDATA.OC_RF_TTL.draw(sdSysData);
+        ImGui::SameLine();
+        SDATA.D_RF_TTL.draw(sdSysData);
+
+        SDATA.OC_LB_TTL.draw(sdSysData);
+        ImGui::SameLine();
+        SDATA.D_LB_TTL.draw(sdSysData);
+
+        SDATA.OC_RB_TTL.draw(sdSysData);
+        ImGui::SameLine();
+        SDATA.D_RB_TTL.draw(sdSysData);
+      }
+
+      ImGui::SetCursorScreenPos(frame_start_pos);
+      if (ImGui::InvisibleButton("E\nx\np\na\nn\nd", frame_size))
+      {
+        DISPLAY_DATA = false;
+      }
     }
-    
-    ImGui::Separator();
-
-    {
-      SDATA.D_TEMP_COOLANT.draw(sdSysData);
-      SDATA.D_TEMP_INTAKE.draw(sdSysData);
-      SDATA.D_TEMP_AMBIANT.draw(sdSysData);
-      SDATA.D_TEMP_CATALYST.draw(sdSysData);
-      SDATA.D_TEMP_SUPER_TEMP.draw(sdSysData);
-    }
-
-    ImGui::Separator();
-
-    {
-      SDATA.D_FUEL_RAIL_PRESSURE.draw(sdSysData);
-      SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(sdSysData);
-      SDATA.D_BAROMETER.draw(sdSysData);
-      SDATA.D_CAM_COMM_ERROR.draw(sdSysData);
-    }
-    
-    ImGui::Separator();
-
-    {
-      SDATA.OC_LF_TTL.draw(sdSysData);
-      ImGui::SameLine();
-      SDATA.D_LF_TTL.draw(sdSysData);
-
-      SDATA.OC_RF_TTL.draw(sdSysData);
-      ImGui::SameLine();
-      SDATA.D_RF_TTL.draw(sdSysData);
-
-      SDATA.OC_LB_TTL.draw(sdSysData);
-      ImGui::SameLine();
-      SDATA.D_LB_TTL.draw(sdSysData);
-
-      SDATA.OC_RB_TTL.draw(sdSysData);
-      ImGui::SameLine();
-      SDATA.D_RB_TTL.draw(sdSysData);
-    }
+    ImGui::EndChild();
   }
-
-  ImGui::EndChild();
+  else
+  {
+    ImGui::BeginChild("Auto All Data", ImVec2(35.0f, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+    {
+      if (ImGui::Button("###E\nx\np\na\nn\nd", ImGui::GetContentRegionAvail()))
+      {
+        DISPLAY_DATA = true;
+      }
+    }
+    ImGui::EndChild();
+  }
 
   ImGui::SameLine();
 
@@ -1519,9 +1574,9 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       ImGui::SameLine();
 
       SDATA.VB_SPEED.draw(sdSysData);
-      SDATA.VB_S_FUEL.draw(sdSysData); 
-      SDATA.VB_S_TEMP.draw(sdSysData); 
-      SDATA.VB_S_VOLTAGE.draw(sdSysData);       
+      SDATA.VB_S_FUEL.draw(sdSysData);
+      SDATA.VB_S_TEMP.draw(sdSysData);
+      SDATA.VB_S_VOLTAGE.draw(sdSysData);
     }
     ImGui::EndChild();
 

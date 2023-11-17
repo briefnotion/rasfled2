@@ -59,6 +59,30 @@ bool Load_Texture_From_File(const char* filename, GLuint* out_texture, int* out_
 
 // ---------------------------------------------------------------------------------------
 
+class MARKER_GADGET_PROPERTIES
+{
+  public:
+
+  bool ENABLED = false;
+  COLOR_COMBO COLOR;
+  float SIZE = 3.0f;
+  bool LEFT_SIDE = true;
+  bool HORIZONTAL = false;
+};
+
+class MARKER_GADGET
+{
+  private:
+
+  public:
+
+  MARKER_GADGET_PROPERTIES PROPS;
+
+  void draw(ImDrawList* draw_list, ImVec2 Start_Pos, ImVec2 Size, bool Display);
+};
+
+// ---------------------------------------------------------------------------------------
+
 class TEXTURE_IMAGE
 {
   private:

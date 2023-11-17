@@ -1,3 +1,8 @@
+2.066_231116
+  - Reverted Data Label Colors back to white and created markers colored corresponding 
+      to graph line colors.
+  - Automobile Data can be hidden by clicking in the data area.
+
 2.065_231114
   - Changed some of the graphs line color overlaps.
   - Changed the Cruise Control Value to be more visible.
