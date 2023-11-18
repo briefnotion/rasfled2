@@ -63,14 +63,14 @@ bool Load_Texture_From_File(const char* filename, GLuint* out_texture, int* out_
 
 // ---------------------------------------------------------------------------------------
 
-void MARKER_GADGET::draw(ImDrawList* draw_list, ImVec2 Start_Pos, ImVec2 Size, bool Display)
+void MARKER_GADGET::draw(system_data &sdSysData, ImDrawList* draw_list, ImVec2 Start_Pos, ImVec2 Size, bool Display)
 {
   if (PROPS.ENABLED && Display)
   {
     if (PROPS.HORIZONTAL)
     {
       draw_list->AddRectFilled(ImVec2(Start_Pos.x, Start_Pos.y), 
-                    ImVec2(Start_Pos.x + Size.x, Start_Pos.y + PROPS.SIZE), PROPS.COLOR.DIM);
+                    ImVec2(Start_Pos.x + Size.x, Start_Pos.y + PROPS.SIZE), sdSysData.COLOR_SELECT.color(PROPS.COLOR).DIM);
       // No left side, relabel for bottom is not necessary.
     }
     else
@@ -78,12 +78,12 @@ void MARKER_GADGET::draw(ImDrawList* draw_list, ImVec2 Start_Pos, ImVec2 Size, b
       if (PROPS.LEFT_SIDE)
       {
         draw_list->AddRectFilled(ImVec2(Start_Pos.x, Start_Pos.y), 
-                      ImVec2(Start_Pos.x + PROPS.SIZE, Start_Pos.y + Size.y), PROPS.COLOR.DIM);
+                      ImVec2(Start_Pos.x + PROPS.SIZE, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR).DIM);
       }
       else
       {
         draw_list->AddRectFilled(ImVec2(Start_Pos.x + Size.x - PROPS.SIZE , Start_Pos.y), 
-                      ImVec2(Start_Pos.x + Size.x, Start_Pos.y + Size.y), PROPS.COLOR.DIM);
+                      ImVec2(Start_Pos.x + Size.x, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR).DIM);
       }
     }
   }
@@ -141,7 +141,7 @@ void ONE_CHAR_LINE_GRAPH::draw(system_data &sdSysData)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  ImU32 col = PROPS.COLOR.TEXT;
+  ImU32 col = sdSysData.COLOR_SELECT.color(PROPS.COLOR).TEXT;
 
   ImVec2 position = ImGui::GetCursorScreenPos();
 
@@ -289,7 +289,7 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
     {
       draw_list->AddLine(ImVec2(Start_Position.x + l1_size, Start_Position.y), 
                           ImVec2(Start_Position.x + l1_size, Start_Position.y + (y_size * 0.75f)), 
-                          PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+                          sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD, PROPS.POINT_SIZE);
     }
 
     // 10 ticks
@@ -299,7 +299,7 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
       {
         draw_list->AddLine(ImVec2(Start_Position.x + (tenths * l2_size), Start_Position.y), 
                       ImVec2(Start_Position.x + (tenths * l2_size), Start_Position.y + (y_size * 0.5f)), 
-                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+                      sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD, PROPS.POINT_SIZE);
       }
     }
 
@@ -310,7 +310,7 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
       {
         draw_list->AddLine(ImVec2(Start_Position.x + (twentyiths * l3_size), Start_Position.y), 
                       ImVec2(Start_Position.x + (twentyiths * l3_size), Start_Position.y + (y_size * 0.25f)), 
-                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+                      sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD, PROPS.POINT_SIZE);
       }
     }
 
@@ -321,7 +321,7 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
       {
         draw_list->AddLine(ImVec2(Start_Position.x + (hundreds * l4_size), Start_Position.y), 
                       ImVec2(Start_Position.x + (hundreds * l4_size), Start_Position.y + 1.0f), 
-                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+                      sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD, PROPS.POINT_SIZE);
       }
     }
   }
@@ -332,7 +332,7 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
     {
       draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + l1_size), 
                           ImVec2(Start_Position.x + (x_size * 0.75f), Start_Position.y + l1_size), 
-                          PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+                          sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD, PROPS.POINT_SIZE);
     }
 
     // 10 ticks
@@ -342,7 +342,7 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
       {
         draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + (tenths * l2_size)), 
                       ImVec2(Start_Position.x + (x_size * 0.5f), Start_Position.y + (tenths * l2_size)), 
-                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+                      sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD, PROPS.POINT_SIZE);
       }
     }
 
@@ -353,7 +353,7 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
       {
         draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + (twentyiths * l3_size)), 
                       ImVec2(Start_Position.x + (x_size * 0.25f), Start_Position.y + (twentyiths * l3_size)), 
-                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+                      sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD, PROPS.POINT_SIZE);
       }
     }
 
@@ -364,7 +364,7 @@ void DRAW_RULER::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_
       {
         draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + (hundreds * l4_size)), 
                       ImVec2(Start_Position.x + 1.0f, Start_Position.y  + (hundreds * l4_size)), 
-                      PROPS.COLOR.STANDARD, PROPS.POINT_SIZE);
+                      sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD, PROPS.POINT_SIZE);
       }
     }
   }
@@ -391,7 +391,7 @@ void DRAW_GRID::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_P
   {
     draw_list->AddLine(ImVec2(Start_Position.x + (vert_count * X_SIZE), Start_Position.y), 
                   ImVec2(Start_Position.x + (vert_count * X_SIZE), End_Position.y), 
-                  PROPS.COLOR.DIM, PROPS.POINT_SIZE);
+                  sdSysData.COLOR_SELECT.color(PROPS.COLOR).DIM, PROPS.POINT_SIZE);
   }
 
   // Horizontal Lines
@@ -399,7 +399,7 @@ void DRAW_GRID::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_P
   {
     draw_list->AddLine(ImVec2(Start_Position.x, Start_Position.y + (horz_count * Y_SIZE)), 
                   ImVec2((End_Position.x), Start_Position.y + (horz_count * Y_SIZE)), 
-                  PROPS.COLOR.DIM, PROPS.POINT_SIZE);
+                  sdSysData.COLOR_SELECT.color(PROPS.COLOR).DIM, PROPS.POINT_SIZE);
   }
 }
 
@@ -580,7 +580,7 @@ void DRAW_D2_PLOT::create_subgraph(int Max_Data_Point_Count, unsigned long Durat
   SUB_GRAPHS.push_back(tmp_sub_graph);
 }
 
-void DRAW_D2_PLOT::create_line(COLOR_COMBO Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor)
+void DRAW_D2_PLOT::create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor)
 {
   for (int graph = 0; graph < SUB_GRAPHS.size(); graph++)
   {
@@ -765,7 +765,7 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
 
           if (min_max_out_of_bounds_x == false)
           {
-            draw_list->AddLine(min, max, SUB_GRAPHS[graph].LINE[line].LINE_COLOR.DIM, SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
+            draw_list->AddLine(min, max, sdSysData.COLOR_SELECT.color(SUB_GRAPHS[graph].LINE[line].LINE_COLOR).DIM, SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
           }
         }
         
@@ -784,7 +784,7 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
 
           if (mean_out_of_bounds_x_start == false && mean_out_of_bounds_x_end == false)
           {
-            draw_list->AddLine(mean_start, mean_end, SUB_GRAPHS[graph].LINE[line].LINE_COLOR.STANDARD, SUB_GRAPHS[graph].LINE[line].POINT_SIZE);
+            draw_list->AddLine(mean_start, mean_end, sdSysData.COLOR_SELECT.color(SUB_GRAPHS[graph].LINE[line].LINE_COLOR).STANDARD, SUB_GRAPHS[graph].LINE[line].POINT_SIZE);
           }
         }
       }
@@ -801,7 +801,7 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
 
         if (min_max_out_of_bounds_x == false)
         {
-          draw_list->AddLine(min, max, SUB_GRAPHS[graph].LINE[line].LINE_COLOR.DIM, SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
+          draw_list->AddLine(min, max, sdSysData.COLOR_SELECT.color(SUB_GRAPHS[graph].LINE[line].LINE_COLOR).DIM, SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
         }
       }
     }

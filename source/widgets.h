@@ -89,7 +89,7 @@ class COLOR_VALUE_PAIR
   public:
 
   float LT_or_EQ = 0;
-  COLOR_COMBO COLOR;
+  int COLOR;
 };
 
 class NEW_COLOR_SCALE
@@ -102,9 +102,9 @@ class NEW_COLOR_SCALE
 
   bool active();
 
-  void add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO Return_Color);
+  void add_color_value_pair(float Value_Is_LT_or_EQ, int Return_Color);
 
-  COLOR_COMBO get_color(float Value);
+  int get_color(float Value);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ class W_TEXT_PROPERTIES
 {
   public:
 
-  COLOR_COMBO COLOR;
+  int COLOR;
   bool STANDARD_COLOR = false;
 
   bool CHANGE_NOTIFICATION = true;
@@ -170,8 +170,8 @@ class W_TEXT_TF_PROPERTIES
 {
   public:
 
-  COLOR_COMBO COLOR_TRUE;
-  COLOR_COMBO COLOR_FALSE;
+  int COLOR_TRUE;
+  int COLOR_FALSE;
 };
 
 class W_TEXT_TF
@@ -251,7 +251,7 @@ class BAR_TECH_PROPERTIES
 
   // Ruler
   bool DRAW_RULER = false;  // Draw ruler ticks
-  COLOR_COMBO COLOR_RULER;  // Ruler color
+  int COLOR_RULER;  // Ruler color
   int MAX_TICK_LEVEL = 4;   // Tick level
 };
 

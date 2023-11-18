@@ -32,17 +32,90 @@ void COLOR_COMBOS::init(float Intensity)
 {
   // Base Colors
   COLOR_COMB_BLACK.set_rgb(0.0f, 0.0f, 0.0f, 1.0f, Intensity);
+  COLOR_COMB_WHITE.set_rgb(1.0f, 1.0f, 1.0f, 1.0f, Intensity);
+  COLOR_COMB_GREY.set_rgb(0.2f, 0.2f, 0.2f, 1.0f, Intensity);
+  COLOR_COMB_RED.set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
   COLOR_COMB_ORANGE.set_rgb(1.0f, 0.75f, 0.0f, 1.0f, Intensity);
   COLOR_COMB_YELLOW.set_rgb(1.0f, 1.0f, 0.0f, 1.0f, Intensity);
   COLOR_COMB_GREEN.set_rgb(0.0f, 1.0f, 0.0f, 1.0f, Intensity);
   COLOR_COMB_CYAN.set_rgb(0.0f, 1.0f, 1.0f, 1.0f, Intensity);
+  COLOR_COMB_BLUE.set_rgb(0.0f, 0.0f, 1.0f, 1.0f, Intensity);
   COLOR_COMB_PURPLE.set_rgb(1.0f, 0.0f, 1.0f, 1.0f, Intensity);
   COLOR_COMB_PINK.set_rgb(1.0f, 0.0f, 0.5f, 1.0f, Intensity);
-  COLOR_COMB_WHITE.set_rgb(1.0f, 1.0f, 1.0f, 1.0f, Intensity);
-  COLOR_COMB_RED.set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
-  COLOR_COMB_BLUE.set_rgb(0.0f, 0.0f, 1.0f, 1.0f, Intensity);
-  COLOR_COMB_GREY.set_rgb(0.2f, 0.2f, 0.2f, 1.0f, Intensity);
+
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_BLACK);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_WHITE);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_GREY);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_RED);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_ORANGE);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_YELLOW);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_GREEN);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_CYAN);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_BLUE);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_PURPLE);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_PINK);
 }
+
+COLOR_COMBO COLOR_COMBOS::color(int Color)
+{
+  return COLOR_COMBINATIONS[Color];
+}
+
+int COLOR_COMBOS::black()
+{
+  return 0;
+}
+
+int COLOR_COMBOS::white()
+{
+  return 1;
+}
+
+int COLOR_COMBOS::grey()
+{
+  return 2;
+}
+
+int COLOR_COMBOS::red()
+{
+  return 3;
+}
+
+int COLOR_COMBOS::orange()
+{
+  return 4;
+}
+
+int COLOR_COMBOS::yellow()
+{
+  return 5;
+}
+
+int COLOR_COMBOS::green()
+{
+  return 6;
+}
+
+int COLOR_COMBOS::cyan()
+{
+  return 7;
+}
+
+int COLOR_COMBOS::blue()
+{
+  return 8;
+}
+
+int COLOR_COMBOS::purple()
+{
+  return 9;
+}
+
+int COLOR_COMBOS::pink()
+{
+  return 10;
+}
+
 
 // ---------------------------------------------------------------------------------------
 

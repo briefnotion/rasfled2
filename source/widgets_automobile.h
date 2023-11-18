@@ -82,7 +82,7 @@ class T_LARGE_NUMBER_DISPLAY_PROPERTIES
   NEW_COLOR_SCALE COLOR_SCALE;  //  pros COLOR.
 
   bool DISPLAY_MARKER = false;
-  COLOR_COMBO DISPLAY_MARKER_COLOR;
+  int DISPLAY_MARKER_COLOR;
 };
 
 class T_LARGE_NUMBER_DISPLAY
@@ -145,7 +145,6 @@ class W_GUAGE_PROPERTIES
 {
   public:
 
-  //COLOR_COMBO COLOR;
   string LABEL = " ";
 
   float VALUE_MIN = 0;
@@ -189,11 +188,11 @@ class T_DATA_DISPLAY_PROPERTIES
   string LABEL = "";
   int LABEL_TEXT_SIZE = -1;
 
-  COLOR_COMBO COLOR;            // If Color Scale not active then Color defaults to 
+  int COLOR;            // If Color Scale not active then Color defaults to 
   NEW_COLOR_SCALE COLOR_SCALE;  //  pros COLOR.
 
   bool DISPLAY_MARKER = false;
-  COLOR_COMBO DISPLAY_MARKER_COLOR;
+  int DISPLAY_MARKER_COLOR;
 };
 
 class T_DATA_DISPLAY

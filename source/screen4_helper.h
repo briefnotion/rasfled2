@@ -93,6 +93,10 @@ class COLOR_COMBO
 
 class COLOR_COMBOS
 {
+  private:
+
+  vector<COLOR_COMBO> COLOR_COMBINATIONS;
+
   public: 
   COLOR_COMBO COLOR_COMB_BLACK;
   COLOR_COMBO COLOR_COMB_WHITE;
@@ -107,6 +111,20 @@ class COLOR_COMBOS
   COLOR_COMBO COLOR_COMB_PINK;
 
   void init(float Intensity);
+
+  COLOR_COMBO color(int Color);
+
+  int black();
+  int white();
+  int grey();
+  int red();
+  int orange();
+  int yellow();
+  int green();
+  int cyan();
+  int blue();
+  int purple();
+  int pink();
 };
 
 // ---------------------------------------------------------------------------------------

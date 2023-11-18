@@ -1,3 +1,6 @@
+2.067_231117
+  - Started changing the way color values are stored.
+
 2.066_231116
   - Reverted Data Label Colors back to white and created markers colored corresponding 
       to graph line colors.

@@ -144,7 +144,7 @@ bool NEW_COLOR_SCALE::active()
   }
 }
 
-void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO Return_Color)
+void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, int Return_Color)
 {
   COLOR_VALUE_PAIR temp_color_pair;
 
@@ -154,9 +154,9 @@ void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, COLOR_COMBO 
   COLOR_SCALE.push_back(temp_color_pair);
 }
 
-COLOR_COMBO NEW_COLOR_SCALE::get_color(float Value)
+int NEW_COLOR_SCALE::get_color(float Value)
 {
-  COLOR_COMBO ret_color_combo;
+  int ret_color_combo;
   bool found = false;
   
   if (COLOR_SCALE.size() > 0)
@@ -210,11 +210,11 @@ void W_TEXT::draw(system_data &sdSysData)
   {
     if (PROPS.STANDARD_COLOR)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR.STANDARD)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD)));
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, PROPS.COLOR.TEXT)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, sdSysData.COLOR_SELECT.color(PROPS.COLOR).TEXT)));
     }
     
     ImGui::Text(TEXT.c_str());
@@ -224,11 +224,11 @@ void W_TEXT::draw(system_data &sdSysData)
   {
     if (PROPS.STANDARD_COLOR)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR.STANDARD));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD));
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(PROPS.COLOR.TEXT));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).TEXT));
     }
     ImGui::Text(TEXT.c_str());
     ImGui::PopStyleColor();
@@ -404,29 +404,29 @@ void BAR_TECH::draw_min_max_val(system_data &sdSysData)
 {
   if ((int)MIN_MAX.min() < 0)
   {
-    DSP_MIN.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+    DSP_MIN.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
   }
   else
   {
-    DSP_MIN.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+    DSP_MIN.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
   }
   
   if ((int)(VALUE) < 0)
   {
-    DSP_VALUE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+    DSP_VALUE.PROPS.COLOR = sdSysData.COLOR_SELECT.yellow();
   }
   else
   {
-    DSP_VALUE.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+    DSP_VALUE.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
   }
 
   if ((int)(MIN_MAX.max()) < 0)
   {
-    DSP_MAX.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
+    DSP_MAX.PROPS.COLOR = sdSysData.COLOR_SELECT.yellow();
   }
   else
   {
-    DSP_MAX.PROPS.COLOR = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
+    DSP_MAX.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
   }
 
   // Display Values

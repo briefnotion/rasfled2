@@ -313,13 +313,13 @@ void ADSB_WIDGET::create(system_data &sdSysData)
   // Create vars if first run
   if (ALTITUDE_COLOR_SCALE.active() == false)
   {
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(500.0f, sdSysData.COLOR_SELECT.COLOR_COMB_RED);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(1000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(2500.0f, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(12000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_GREEN);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(45000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_BLUE);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(65000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_PURPLE);
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(100000.0f, sdSysData.COLOR_SELECT.COLOR_COMB_WHITE);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(500.0f, sdSysData.COLOR_SELECT.red());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(1000.0f, sdSysData.COLOR_SELECT.yellow());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(2500.0f, sdSysData.COLOR_SELECT.orange());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(12000.0f, sdSysData.COLOR_SELECT.green());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(45000.0f, sdSysData.COLOR_SELECT.blue());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(65000.0f, sdSysData.COLOR_SELECT.purple());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(100000.0f, sdSysData.COLOR_SELECT.white());
   }
 }
 
@@ -516,7 +516,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
 
           if (draw_0 || draw_1)
           {
-            ImColor point_color = ALTITUDE_COLOR_SCALE.get_color(TRACK[position].ALTITUDE).TEXT;
+            ImColor point_color = sdSysData.COLOR_SELECT.color(ALTITUDE_COLOR_SCALE.get_color(TRACK[position].ALTITUDE)).TEXT;
 
             point_color.Value.w = TRACK[position].RSSI_INTENSITY;
 

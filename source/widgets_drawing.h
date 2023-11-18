@@ -64,7 +64,7 @@ class MARKER_GADGET_PROPERTIES
   public:
 
   bool ENABLED = false;
-  COLOR_COMBO COLOR;
+  int COLOR;
   float SIZE = 3.0f;
   bool LEFT_SIDE = true;
   bool HORIZONTAL = false;
@@ -78,7 +78,7 @@ class MARKER_GADGET
 
   MARKER_GADGET_PROPERTIES PROPS;
 
-  void draw(ImDrawList* draw_list, ImVec2 Start_Pos, ImVec2 Size, bool Display);
+  void draw(system_data &sdSysData, ImDrawList* draw_list, ImVec2 Start_Pos, ImVec2 Size, bool Display);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -111,7 +111,7 @@ class ONE_CHAR_LINE_GRAPH_PROPERTIES
 {
   public:
 
-  COLOR_COMBO COLOR;
+  int COLOR;
 };
 
 class ONE_CHAR_LINE_GRAPH
@@ -136,7 +136,7 @@ class DRAW_RULER_PROPERTIES
 {
   public:
   
-  COLOR_COMBO COLOR;
+  int COLOR;
   float POINT_SIZE = 1.0f;
 
   float MAX_VALUE = 100.0f;
@@ -187,7 +187,7 @@ class DRAW_GRID_PROPERTIES
 {
   public:
   
-  COLOR_COMBO COLOR;
+  int COLOR;
   float POINT_SIZE = 2.0f;
 
   int SEPERATOR_COUNT_HORIZONTAL = 5;
@@ -224,7 +224,7 @@ class D2_PLOT_LINE
   int RESERVE_SIZE_CUTOFF = 0;
   int RESERVE_SIZE_TRIM_AMOUNT = 0;
 
-  COLOR_COMBO LINE_COLOR;
+  int LINE_COLOR;
   float POINT_SIZE = 2.0f;
 
   bool DISPLAY_MEAN = true;
@@ -285,7 +285,7 @@ class DRAW_D2_PLOT_PROPERTIES
 
   string LABEL = "Label";
   
-  COLOR_COMBO COLOR_GRID;                   // Color of grid
+  int COLOR_GRID;                   // Color of grid
   float POINT_SIZE_GRID = 1.0f;             // Size of grid lines
   int GRID_SEPERATOR_COUNT_HORIZONTAL = 5;  // Horizontal grid line count
   int GRID_SEPERATOR_COUNT_VERTICAL = 5;    // Vertical grid line count
@@ -338,7 +338,7 @@ class DRAW_D2_PLOT
 
   void create_subgraph(int Max_Data_Point_Count, unsigned long Duration_Span_ms, string Label);
 
-  void create_line(COLOR_COMBO Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor);
+  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor);
   // Prepare line for drawing
   //  Color of line
   //  Show Mean Value
