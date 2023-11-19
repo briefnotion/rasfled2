@@ -30,6 +30,19 @@ void COLOR_COMBO::set_rgb(float R, float G, float B, float A, float Intensity)
 
 void COLOR_COMBOS::init(float Intensity)
 {
+  COLOR_COMBO COLOR_COMB_BLACK; 
+  COLOR_COMBO COLOR_COMB_WHITE;
+  COLOR_COMBO COLOR_COMB_GREY;
+  COLOR_COMBO COLOR_COMB_RED;
+  COLOR_COMBO COLOR_COMB_ORANGE;
+  COLOR_COMBO COLOR_COMB_YELLOW;
+  COLOR_COMBO COLOR_COMB_GREEN;
+  COLOR_COMBO COLOR_COMB_CYAN;
+  COLOR_COMBO COLOR_COMB_BLUE;
+  COLOR_COMBO COLOR_COMB_PURPLE;
+  COLOR_COMBO COLOR_COMB_PINK;
+  COLOR_COMBO COLOR_COMB_CORPO;
+
   // Base Colors
   COLOR_COMB_BLACK.set_rgb(0.0f, 0.0f, 0.0f, 1.0f, Intensity);
   COLOR_COMB_WHITE.set_rgb(1.0f, 1.0f, 1.0f, 1.0f, Intensity);
@@ -43,6 +56,11 @@ void COLOR_COMBOS::init(float Intensity)
   COLOR_COMB_PURPLE.set_rgb(1.0f, 0.0f, 1.0f, 1.0f, Intensity);
   COLOR_COMB_PINK.set_rgb(1.0f, 0.0f, 0.5f, 1.0f, Intensity);
 
+  // Specific Colors
+  COLOR_COMB_CORPO.set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
+  COLOR_COMB_CORPO.TEXT = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
+
+  // Put colors in vector list for reference
   COLOR_COMBINATIONS.push_back(COLOR_COMB_BLACK);
   COLOR_COMBINATIONS.push_back(COLOR_COMB_WHITE);
   COLOR_COMBINATIONS.push_back(COLOR_COMB_GREY);
@@ -54,11 +72,74 @@ void COLOR_COMBOS::init(float Intensity)
   COLOR_COMBINATIONS.push_back(COLOR_COMB_BLUE);
   COLOR_COMBINATIONS.push_back(COLOR_COMB_PURPLE);
   COLOR_COMBINATIONS.push_back(COLOR_COMB_PINK);
+  COLOR_COMBINATIONS.push_back(COLOR_COMB_CORPO);
 }
 
 COLOR_COMBO COLOR_COMBOS::color(int Color)
 {
-  return COLOR_COMBINATIONS[Color];
+  if (void_color)
+  {
+    return COLOR_COMBINATIONS[void_color_value];
+  }
+  else
+  {
+    return COLOR_COMBINATIONS[Color];
+  }
+}
+
+COLOR_COMBO COLOR_COMBOS::c_black()
+{
+  return color(0);
+}
+
+COLOR_COMBO COLOR_COMBOS::c_white()
+{
+  return color(1);
+}
+
+COLOR_COMBO COLOR_COMBOS::c_grey()
+{
+  return color(2);
+}
+
+COLOR_COMBO COLOR_COMBOS::c_red()
+{
+  return color(3);
+}
+
+COLOR_COMBO COLOR_COMBOS::c_orange()
+{
+  return color(4);
+}
+
+COLOR_COMBO COLOR_COMBOS::c_yellow()
+{
+  return color(5);
+}
+
+COLOR_COMBO COLOR_COMBOS::c_green()
+{
+  return color(6);
+}
+
+COLOR_COMBO COLOR_COMBOS::c_cyan()
+{
+  return color(7);
+}
+
+COLOR_COMBO COLOR_COMBOS::c_blue()
+{
+  return color(8);
+}
+
+COLOR_COMBO COLOR_COMBOS::c_purple()
+{
+  return color(9);
+}
+
+COLOR_COMBO COLOR_COMBOS::c_pink()
+{
+  return color(10);
 }
 
 int COLOR_COMBOS::black()

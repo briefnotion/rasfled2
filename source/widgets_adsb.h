@@ -37,35 +37,6 @@
 
 using namespace std;
 
-// ---------------------------------------------------------------------------------------
-
-/*
-class BLANK
-// ---------------------------------------------------------------------------------------
-
-class W_TEXT_PROPERTIES
-{
-  public:
-
-  COLOR_COMBO COLOR;
-};
-
-class W_TEXT
-{
-  private:
-
-  string TEXT = "";
-
-  public:
-
-  W_TEXT_PROPERTIES PROPS;
-
-  void update_text(unsigned long tmeCurrentMillis, string Text);
-
-  void draw(unsigned long tmeCurrentMillis);
-
-};
-*/
 
 // ---------------------------------------------------------------------------------------
 // Map Tools
@@ -84,15 +55,15 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 // ---------------------------------------------------------------------------------------
 // Markers
 
-void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color);
+void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
-void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color);
+void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
 void draw_point_marker(system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, float Size);
 
-void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, COLOR_COMBO &Color, float Size);
+void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color, float Size);
 
-void draw_aircraft_marker_direction(ImVec2 Screen_Position, COLOR_COMBO &Color, int Size, float Heading);
+void draw_aircraft_marker_direction(system_data &sdSysData, ImVec2 Screen_Position, int Color, int Size, float Heading);
 
 // ---------------------------------------------------------------------------------------
 
@@ -243,7 +214,7 @@ class ADSB_RANGE_Properties
 {
   public:
 
-  COLOR_COMBO COLOR;
+  int COLOR;
 };
 
 class ADSB_RANGE

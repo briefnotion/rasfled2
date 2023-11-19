@@ -176,24 +176,6 @@ int NEW_COLOR_SCALE::get_color(float Value)
 
 // ---------------------------------------------------------------------------------------
 
-void VERTICAL_BAR::update_value(system_data &sdSysData, float Value)
-{
-  VALUE = Value;
-}
-
-void VERTICAL_BAR::draw(system_data &sdSysData, ImVec2 Size)
-{
-  float slider_pos = VALUE / PROPS.VALUE_MAX;
-
-  ImGui::PushStyleColor(ImGuiCol_FrameBg, ImU32(PROPS.COLOR.BACKGROUND));
-  ImGui::PushStyleColor(ImGuiCol_FrameBgActive, ImU32(PROPS.COLOR.STANDARD));
-  ImGui::PushStyleColor(ImGuiCol_SliderGrab, ImU32(PROPS.COLOR.ACTIVE));
-  ImGui::VSliderFloat("##v", Size, &slider_pos, 0.0f, 1.0f, "", sdSysData.SCREEN_DEFAULTS.flags_vs);
-  ImGui::PopStyleColor(3);
-}
-
-// ---------------------------------------------------------------------------------------
-
 void W_TEXT::update_text(system_data &sdSysData, string Text)
 {
   if (TEXT != Text)
@@ -210,11 +192,11 @@ void W_TEXT::draw(system_data &sdSysData)
   {
     if (PROPS.STANDARD_COLOR)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.c_orange().ACTIVE, sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD)));
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.COLOR_COMB_ORANGE.ACTIVE, sdSysData.COLOR_SELECT.color(PROPS.COLOR).TEXT)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.c_orange().ACTIVE, sdSysData.COLOR_SELECT.color(PROPS.COLOR).TEXT)));
     }
     
     ImGui::Text(TEXT.c_str());
@@ -291,7 +273,7 @@ void TEXT_CONSOLE::display(system_data &sdSysData, const char *name, bool *p_ope
 { 
   ImGui::Begin(name, p_open, flags);
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
 
     ImGui::TextUnformatted(CONSOLE_TEXT.c_str());
     if (CONSOLE_SCROLL_TO_BOTTOM == true && ImGui::GetScrollMaxY() > 0)
@@ -307,11 +289,11 @@ void TEXT_CONSOLE::display(system_data &sdSysData, const char *name, bool *p_ope
 
 // ---------------------------------------------------------------------------------------
 
-void text_simple_bool(string Text, bool Indication, COLOR_COMBO COLOR)
+void text_simple_bool(system_data &sdSysData, string Text, bool Indication, int COLOR)
 {
   if (Indication == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(COLOR.TEXT));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(COLOR).TEXT));
     ImGui::Text(Text.c_str());
     ImGui::PopStyleColor();
   }
@@ -325,7 +307,7 @@ bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, Im
 {
   bool ret_value = false;
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
 
   if (Enabled == true)
   {
@@ -336,9 +318,11 @@ bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, Im
   }
   else
   {
-    ImGui::BeginDisabled();
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(sdSysData.COLOR_SELECT.c_blue().BACKGROUND)); 
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(sdSysData.COLOR_SELECT.c_blue().BACKGROUND));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(sdSysData.COLOR_SELECT.c_blue().BACKGROUND));
     ImGui::Button(Text.c_str(), ImVec2_Size);
-    ImGui::EndDisabled();
+    ImGui::PopStyleColor(3);
   }
 
   ImGui::PopStyleColor();
@@ -346,15 +330,15 @@ bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, Im
   return ret_value;
 }
 
-bool button_simple_color(system_data &sdSysData, string Text, COLOR_COMBO Color, ImVec2 ImVec2_Size)
+bool button_simple_color(system_data &sdSysData, string Text, int Color, ImVec2 ImVec2_Size)
 {
   bool ret_value = false;
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
 
-  ImGui::PushStyleColor(ImGuiCol_Button, ImU32(Color.STANDARD));
-  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(Color.HOVERED));
-  ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(Color.ACTIVE));
+  ImGui::PushStyleColor(ImGuiCol_Button, ImU32(sdSysData.COLOR_SELECT.color(Color).STANDARD));
+  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(sdSysData.COLOR_SELECT.color(Color).HOVERED));
+  ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(sdSysData.COLOR_SELECT.color(Color).ACTIVE));
   if (ImGui::Button(Text.c_str(), ImVec2_Size))
   {
     ret_value = true;
@@ -365,18 +349,18 @@ bool button_simple_color(system_data &sdSysData, string Text, COLOR_COMBO Color,
 }
 
 bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, string False_Value_Text, bool Toggle, 
-                                COLOR_COMBO True_Color, COLOR_COMBO False_Color, ImVec2 ImVec2_Size)
+                                int True_Color, int False_Color, ImVec2 ImVec2_Size)
 {
   // Does not control toggle, just shows value.
   bool ret_value = false;
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
 
   if (Toggle == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(False_Color.STANDARD));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(False_Color.HOVERED));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(False_Color.ACTIVE));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(sdSysData.COLOR_SELECT.color(False_Color).STANDARD));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(sdSysData.COLOR_SELECT.color(False_Color).HOVERED));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(sdSysData.COLOR_SELECT.color(False_Color).ACTIVE));
     if (ImGui::Button(False_Value_Text.c_str(), ImVec2_Size))
     {
       ret_value = true;
@@ -385,9 +369,9 @@ bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, 
   }
   else
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(True_Color.STANDARD));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(True_Color.HOVERED));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(True_Color.ACTIVE));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(sdSysData.COLOR_SELECT.color(True_Color).STANDARD));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(sdSysData.COLOR_SELECT.color(True_Color).HOVERED));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(sdSysData.COLOR_SELECT.color(True_Color).ACTIVE));
     if (ImGui::Button(True_Value_Text.c_str(), ImVec2_Size))
     {
       ret_value = true;
@@ -449,7 +433,7 @@ void BAR_TECH::draw_min_max_val(system_data &sdSysData)
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
       
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.TEXT));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
       ImGui::Text(PROPS.LABEL.c_str());
       ImGui::PopStyleColor();
 
@@ -490,7 +474,6 @@ void BAR_TECH::update_value(system_data &sdSysData, float Value)
   }
 }
 
-
 void BAR_TECH::draw(system_data &sdSysData)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -512,26 +495,26 @@ void BAR_TECH::draw(system_data &sdSysData)
   {
     if (VALUE >= 0)
     {
-      draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.DIM, 5.0f, ImDrawFlags_None);
-      draw_list->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), PROPS.COLOR_BACKGROUND.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+      draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.color(PROPS.COLOR_BACKGROUND).DIM, 5.0f, ImDrawFlags_None);
+      draw_list->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.color(PROPS.COLOR_BACKGROUND).BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
     }
     else
     {
-      draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.COLOR_COMB_RED.DIM, 5.0f, ImDrawFlags_None);
-      draw_list->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.COLOR_COMB_RED.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+      draw_list->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.c_red().DIM, 5.0f, ImDrawFlags_None);
+      draw_list->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.c_red().BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
     }
   }
   else
   {
     if (VALUE >= 0)
     {
-      draw_list->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), PROPS.COLOR_BACKGROUND.DIM, 5.0f, ImDrawFlags_None);
-      draw_list->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), PROPS.COLOR_BACKGROUND.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+      draw_list->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR_BACKGROUND).DIM, 5.0f, ImDrawFlags_None);
+      draw_list->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR_BACKGROUND).BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
     }
     else
     {
-      draw_list->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), sdSysData.COLOR_SELECT.COLOR_COMB_RED.DIM, 5.0f, ImDrawFlags_None);
-      draw_list->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), sdSysData.COLOR_SELECT.COLOR_COMB_RED.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+      draw_list->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), sdSysData.COLOR_SELECT.c_red().DIM, 5.0f, ImDrawFlags_None);
+      draw_list->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), sdSysData.COLOR_SELECT.c_red().BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
     }
   }
 
@@ -563,11 +546,11 @@ void BAR_TECH::draw(system_data &sdSysData)
 
       draw_list->AddRectFilled(ImVec2(pos.x + min_location, pos.y), 
                                 ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT), 
-                                PROPS.COLOR_MARKER.DIM, 5.0f, ImDrawFlags_None);
+                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).DIM, 5.0f, ImDrawFlags_None);
 
       draw_list->AddRect(ImVec2(pos.x + min_location, pos.y +2), 
                                 ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT -2), 
-                                PROPS.COLOR_MARKER.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
 
       if (PROPS.DRAW_RULER)
       {
@@ -602,11 +585,11 @@ void BAR_TECH::draw(system_data &sdSysData)
 
       draw_list->AddRectFilled(ImVec2(pos.x, pos.y + size.y - max_location), 
                                 ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - min_location), 
-                                PROPS.COLOR_MARKER.DIM, 5.0f, ImDrawFlags_None);
+                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).DIM, 5.0f, ImDrawFlags_None);
 
       draw_list->AddRect(ImVec2(pos.x, pos.y + size.y - max_location -2), 
                                 ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - min_location +2), 
-                                PROPS.COLOR_MARKER.BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
 
       if (PROPS.DRAW_RULER)
       {
@@ -631,7 +614,7 @@ void BAR_TECH::draw(system_data &sdSysData)
 
     draw_list->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE/2, pos.y), 
                               ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE/2 , pos.y + PROPS.BAR_HEIGHT), 
-                              PROPS.COLOR_MARKER.STANDARD, 5.0f, ImDrawFlags_None);
+                              sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD, 5.0f, ImDrawFlags_None);
 
     // Move Cursor Pos to new position
     ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
@@ -657,7 +640,7 @@ void BAR_TECH::draw(system_data &sdSysData)
 
     draw_list->AddRectFilled(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE/2)), 
                               ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE/2)), 
-                              PROPS.COLOR_MARKER.STANDARD, 5.0f, ImDrawFlags_None);
+                              sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD, 5.0f, ImDrawFlags_None);
 
     // Move Cursor Pos to new position
     ImGui::SetCursorScreenPos(ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y));

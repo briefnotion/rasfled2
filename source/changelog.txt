@@ -1,3 +1,6 @@
+2.068_231118
+  - Night mode added activated by hidden button in upper right corner.
+
 2.067_231117
   - Started changing the way color values are stored.
 

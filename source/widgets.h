@@ -109,32 +109,6 @@ class NEW_COLOR_SCALE
 
 // ---------------------------------------------------------------------------------------
 
-class VERTICAL_BAR_PROPERTIES
-{
-  public:
-
-  COLOR_COMBO COLOR;
-
-  float VALUE_MAX = 100;
-};
-
-class VERTICAL_BAR
-{
-  private:
-
-  float VALUE = 0;
-
-  public:
-
-  VERTICAL_BAR_PROPERTIES PROPS;
-
-  void update_value(system_data &sdSysData, float Value);
-
-  void draw(system_data &sdSysData, ImVec2 Size);
-};
-
-// ---------------------------------------------------------------------------------------
-
 class W_TEXT_PROPERTIES
 {
   public:
@@ -216,12 +190,12 @@ class TEXT_CONSOLE
 
 // ---------------------------------------------------------------------------------------
 
-void text_simple_bool(string Text, bool Indication, COLOR_COMBO COLOR);
+void text_simple_bool(system_data &sdSysData, string Text, bool Indication, int COLOR);
 
 bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, ImVec2 ImVec2_Size);
-bool button_simple_color(system_data &sdSysData, string Text, COLOR_COMBO Color, ImVec2 ImVec2_Size);
+bool button_simple_color(system_data &sdSysData, string Text, int Color, ImVec2 ImVec2_Size);
 bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, string False_Value_Text, bool Toggle, 
-                                COLOR_COMBO True_Color, COLOR_COMBO False_Color, ImVec2 ImVec2_Size);
+                                int True_Color, int False_Color, ImVec2 ImVec2_Size);
 
 // ---------------------------------------------------------------------------------------
 
@@ -234,8 +208,8 @@ class BAR_TECH_PROPERTIES
   float BAR_HEIGHT = 20;          // Bar Size Height, or Width
   float MARKER_SIZE = 5;          // Marker Height or Width.
 
-  COLOR_COMBO COLOR_MARKER;       // Color of Marker
-  COLOR_COMBO COLOR_BACKGROUND;   // Color of Marker
+  int COLOR_MARKER;       // Color of Marker
+  int COLOR_BACKGROUND;   // Color of Marker
 
   float MAX = 0;                  // Top Value of Graph
 

@@ -97,22 +97,27 @@ class COLOR_COMBOS
 
   vector<COLOR_COMBO> COLOR_COMBINATIONS;
 
-  public: 
-  COLOR_COMBO COLOR_COMB_BLACK;
-  COLOR_COMBO COLOR_COMB_WHITE;
-  COLOR_COMBO COLOR_COMB_GREY;
-  COLOR_COMBO COLOR_COMB_RED;
-  COLOR_COMBO COLOR_COMB_ORANGE;
-  COLOR_COMBO COLOR_COMB_YELLOW;
-  COLOR_COMBO COLOR_COMB_GREEN;
-  COLOR_COMBO COLOR_COMB_CYAN;
-  COLOR_COMBO COLOR_COMB_BLUE;
-  COLOR_COMBO COLOR_COMB_PURPLE;
-  COLOR_COMBO COLOR_COMB_PINK;
+  int void_color_value = 11;
+
+  public:
+
+  bool void_color = false;
 
   void init(float Intensity);
 
   COLOR_COMBO color(int Color);
+
+  COLOR_COMBO c_black();
+  COLOR_COMBO c_white();
+  COLOR_COMBO c_grey();
+  COLOR_COMBO c_red();
+  COLOR_COMBO c_orange();
+  COLOR_COMBO c_yellow();
+  COLOR_COMBO c_green();
+  COLOR_COMBO c_cyan();
+  COLOR_COMBO c_blue();
+  COLOR_COMBO c_purple();
+  COLOR_COMBO c_pink();
 
   int black();
   int white();

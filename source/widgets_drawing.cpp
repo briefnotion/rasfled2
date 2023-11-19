@@ -18,10 +18,10 @@
 
 // ---------------------------------------------------------------------------------------
 
-void simple_wrap_text_box()
+void simple_wrap_text_box(system_data &sdSysData)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
-  draw_list->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), IM_COL32(255, 255, 0, 128));
+  draw_list->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), sdSysData.COLOR_SELECT.c_yellow().ACTIVE);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -726,7 +726,7 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
   for (int graph = 0; graph < SUB_GRAPHS.size(); graph++)
   {
     ImGui::SetCursorScreenPos(ImVec2(SUB_GRAPHS[graph].START_POS.x + 2, SUB_GRAPHS[graph].START_POS.y + 0));
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.COLOR_COMB_WHITE.STANDARD));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().STANDARD));
     ImGui::Text("%s", SUB_GRAPHS[graph].LABEL.c_str());
     ImGui::PopStyleColor();
 
