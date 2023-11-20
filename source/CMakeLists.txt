@@ -42,6 +42,7 @@ target_sources(rasfled PRIVATE
   ../../imgui/backends/imgui_impl_glfw.cpp
   ../../imgui/backends/imgui_impl_opengl2.cpp
   alert_system.cpp
+  alert_system_2.cpp
   LEDstuff.cpp
   commands.cpp
   comport.cpp

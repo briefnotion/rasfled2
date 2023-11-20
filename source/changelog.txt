@@ -1,3 +1,6 @@
+2.069_231119
+  - Start building a replacement alert system.
+
 2.068_231118
   - Night mode added activated by hidden button in upper right corner.
 

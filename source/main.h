@@ -104,7 +104,6 @@
 #include "helper.h"
 #include "configuration_storage.h"
 #include "rasapi.h"
-//#include "consoleanddata.h"
 #include "screen4_helper.h"
 #include "screen4.h"
 #include "LEDstuff.h"

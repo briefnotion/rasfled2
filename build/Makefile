@@ -223,6 +223,33 @@ alert_system.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/alert_system.cpp.s
 .PHONY : alert_system.cpp.s
 
+alert_system_2.o: alert_system_2.cpp.o
+
+.PHONY : alert_system_2.o
+
+# target to build an object file
+alert_system_2.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/alert_system_2.cpp.o
+.PHONY : alert_system_2.cpp.o
+
+alert_system_2.i: alert_system_2.cpp.i
+
+.PHONY : alert_system_2.i
+
+# target to preprocess a source file
+alert_system_2.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/alert_system_2.cpp.i
+.PHONY : alert_system_2.cpp.i
+
+alert_system_2.s: alert_system_2.cpp.s
+
+.PHONY : alert_system_2.s
+
+# target to generate assembly for a file
+alert_system_2.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/alert_system_2.cpp.s
+.PHONY : alert_system_2.cpp.s
+
 animations_handler.o: animations_handler.cpp.o
 
 .PHONY : animations_handler.o
@@ -1078,6 +1105,9 @@ help:
 	@echo "... alert_system.o"
 	@echo "... alert_system.i"
 	@echo "... alert_system.s"
+	@echo "... alert_system_2.o"
+	@echo "... alert_system_2.i"
+	@echo "... alert_system_2.s"
 	@echo "... animations_handler.o"
 	@echo "... animations_handler.i"
 	@echo "... animations_handler.s"

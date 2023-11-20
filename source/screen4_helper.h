@@ -42,7 +42,8 @@ class WIDGET_DEFAULTS
 
   // Child Window (In Place, No Move, No Resize, No Scroll).+3.....
   ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
+                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar |
+                                    ImGuiWindowFlags_NoBringToFrontOnFocus;
                                     
   //ImGuiWindowFlags flags_c =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
   //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar | 
@@ -50,7 +51,8 @@ class WIDGET_DEFAULTS
 
   // Standard Floating Window (In Place, No Move, No Resize, No Scroll)
   ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse;
+                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse |
+                                    ImGuiWindowFlags_NoBringToFrontOnFocus;
 
   //ImGuiWindowFlags flags_w =      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
   //                                  ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoCollapse | 

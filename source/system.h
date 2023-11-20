@@ -24,6 +24,7 @@
 
 #include "aircraft_coordinator.h"
 #include "alert_system.h"
+#include "alert_system_2.h"
 #include "comport.h"
 #include "auto.h"
 
@@ -97,8 +98,7 @@ class system_data
   STAT_DATA_DOUBLE dblCOMMS_TRANSFER_TIME; // Stored value returned on pref sleep cycle.
 
   ALERT_SYSTEM ALERTS;
-
-  bool ALERT_SIMPLE = false;
+  ALERT_SYSTEM_2 ALERTS_2;
 
   // For Debuging Gadgets
   //bool DEBUG_COUNTER = false;

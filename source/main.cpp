@@ -364,10 +364,11 @@ int loop_2(bool TTY_Only)
   
   if (sdSystem.PROGRAM_TIME.setframetime() == true)
   {
-    sdSystem.ALERT_SIMPLE = true;
     cons_2.SCREEN_COMMS.printw("");
     cons_2.SCREEN_COMMS.printw("Adjusting Program Clock");
     cons_2.SCREEN_COMMS.printw("");
+
+    sdSystem.ALERTS_2.add_generic_alert("Adjusting Program Clock");
     
     sdSystem.PROGRAM_TIME.clear_error();
   }
@@ -609,11 +610,13 @@ int loop_2(bool TTY_Only)
     //  Get current time.  This will be our timeframe to work in.
     if (sdSystem.PROGRAM_TIME.setframetime() == true)
     {
-      sdSystem.ALERT_SIMPLE = true;
       cons_2.SCREEN_COMMS.printw("");
       cons_2.SCREEN_COMMS.printw("ALERT: PROGRAM TIME STREAM INTURPTED OR CORRUPT");
       cons_2.SCREEN_COMMS.printw("           DIFFERANCE: "  + to_string(sdSystem.PROGRAM_TIME.error()));
       cons_2.SCREEN_COMMS.printw("");
+
+      sdSystem.ALERTS_2.add_generic_alert("ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
+                                          to_string(sdSystem.PROGRAM_TIME.error()));
 
       sdSystem.PROGRAM_TIME.clear_error();
     }
@@ -992,8 +995,8 @@ int loop_2(bool TTY_Only)
         */
       }
   
-      // Error?
-      sdSystem.ALERT_SIMPLE = false;
+      // Alert system checks
+      sdSystem.ALERTS_2.alert_list_clean();
       
     } // Is display to console ready -----------------
 

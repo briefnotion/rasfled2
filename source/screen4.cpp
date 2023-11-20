@@ -370,13 +370,6 @@ void SCREEN4::draw(system_data &sdSysData)
     }
 
     // ---------------------------------------------------------------------------------------
-    // Check Alert
-    if (sdSysData.ALERT_SIMPLE == true)
-    {
-      DISPLAY_SCREEN = 0;
-    }   
-
-    // ---------------------------------------------------------------------------------------
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL2_NewFrame();
@@ -1100,6 +1093,38 @@ void SCREEN4::draw(system_data &sdSysData)
       }
 
       ImGui::End();
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Alert Windows
+
+    if (sdSysData.ALERTS_2.GENERIC_ALERTS.size() > 0)
+    {
+      for (int alert_num = 0; alert_num < sdSysData.ALERTS_2.GENERIC_ALERTS.size(); alert_num++)
+      {
+        ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+
+        ImGui::SetNextWindowSize(ImVec2(300, 100));
+        
+        if (sdSysData.ALERTS_2.GENERIC_ALERTS[alert_num].DISPLAY)
+        {
+          ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+          
+          if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.GENERIC_ALERTS[alert_num].ID)).c_str(), &sdSysData.ALERTS_2.GENERIC_ALERTS[alert_num].DISPLAY, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+          {
+            ImGui::Text(sdSysData.ALERTS_2.GENERIC_ALERTS[alert_num].TEXT.c_str());
+
+            ImGui::SetCursorScreenPos(screen_pos);
+            if (ImGui::InvisibleButton("Acknowlege Alert", ImGui::GetContentRegionAvail()))
+            {
+              sdSysData.ALERTS_2.GENERIC_ALERTS[alert_num].acknowlege();
+            }
+          }
+          ImGui::End();
+
+          ImGui::PopStyleColor();
+        }
+      }
     }
 
     // ---------------------------------------------------------------------------------------
