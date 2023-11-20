@@ -1,3 +1,9 @@
+2.070_231120
+  - Put Alert Monitors on:
+      S-Temp
+      Coolant Temp 
+      Voltage 
+
 2.069_231119
   - Start building a replacement alert system.
 

@@ -113,6 +113,8 @@ class SCREEN4
 
   ONE_CHAR_LINE_GRAPH OCG;
 
+  BAR_TECH BAR_TIMER;
+
   bool CHANGED = false;
 
   void set_screen_default_colors(system_data &sdSysData);

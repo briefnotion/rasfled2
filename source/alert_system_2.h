@@ -17,42 +17,64 @@
 #include <string>
 #include <deque>
 
+// -------------------------------------------------------------------------------------
+
+// Reserved Alert List
+#define RESERVE_ALERT_LIST_SIZE     10
+
+#define RESERVE_ALERT_TEMP_S_TEMP   0
+#define RESERVE_ALERT_TEMP_COOLANT  1
+#define RESERVE_ALERT_ELEC_VOLTAGE  2
+
+// -------------------------------------------------------------------------------------
+
 using namespace std;
 
 // -------------------------------------------------------------------------------------
 //  Alert Class
 
-class ALERT_2_TYPE_GENERIC
+class ALERT_2_TYPE_MONITOR
 {
   private:
 
+  int ID = 0;
+
+  bool ACTIVE = false;
+  
   bool ACKNOWLEGED = false;
+  bool DISPLAY = true;
+  string ALERT_TEXT = "";
 
   public:
 
-  bool ACTIVE = false;
-  bool DISPLAY = true;
+  void alert_no_condition(int Id, string Alert_Text);
 
-  int ID = 0;
+  bool alert_condition(int Id, bool Raise_Alert, bool Clear_Alert);
+  // returns true if requesting a description.
+  
+  bool active();
+  bool display();
+  int id();
+  string alert_text();
 
-  string TEXT = "";
-
+  void update_alert_text(string Text);
   void acknowlege();
-
   bool is_clear();
+  void clear();
 };
 
 class ALERT_SYSTEM_2
 {
   private:
 
-  int LATEST_ID = 0;
+  int LATEST_ID = 10000;
 
   bool CHANGED = false;
   
   public:
   
-  deque<ALERT_2_TYPE_GENERIC> GENERIC_ALERTS;
+  deque<ALERT_2_TYPE_MONITOR> ALERTS;
+  ALERT_2_TYPE_MONITOR ALERTS_RESERVE[RESERVE_ALERT_LIST_SIZE];
 
   bool changed();
   // 

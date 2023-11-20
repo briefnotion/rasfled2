@@ -243,6 +243,22 @@ int SCREEN4::create(system_data &sdSysData)
 
     TEMP.update_text(sdSysData, "Temp: NA");
     TEMP.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
+
+    {
+      BAR_TIMER.PROPS.LABEL = "Timer";
+      BAR_TIMER.PROPS.BAR_HEIGHT = 20;
+      BAR_TIMER.PROPS.MARKER_SIZE = 15;
+      BAR_TIMER.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.blue();
+      BAR_TIMER.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.yellow();
+      BAR_TIMER.PROPS.DRAW_MIN_MAX_ON_TOP = false;
+      BAR_TIMER.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
+      BAR_TIMER.PROPS.DRAW_MIN_MAX = false;
+      BAR_TIMER.PROPS.MAX = 1;
+      BAR_TIMER.PROPS.DRAW_RULER = true;
+      BAR_TIMER.PROPS.COLOR_RULER = sdSysData.COLOR_SELECT.white();
+      BAR_TIMER.PROPS.MAX_TICK_LEVEL = 3;
+      BAR_TIMER.create();
+    }
   }
 
   return 0;
@@ -519,7 +535,7 @@ void SCREEN4::draw(system_data &sdSysData)
             ImGui::SetCursorScreenPos(start_position);
             if (ImGui::InvisibleButton("CORPO VOID", ImGui::GetContentRegionAvail()))
             {
-              sdSysData.COLOR_SELECT.void_color = !sdSysData.COLOR_SELECT.void_color;
+              sdSysData.COLOR_SELECT.toggle_void_color(sdSysData.PROGRAM_TIME.current_frame_time());
               CHANGED = true;
             }
           }
@@ -913,17 +929,17 @@ void SCREEN4::draw(system_data &sdSysData)
 
     if (DISPLAY_TIMER == true)
     {
-      ImGui::SetNextWindowSize(ImVec2(200, 60));
+      ImGui::SetNextWindowSize(ImVec2(250, 90));
       if (ImGui::Begin("Timer", &DISPLAY_TIMER, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
       {
         long elaped_time = 0;
-        unsigned long duration_time = 0;
-        long remaining_time = 0;
+        float duration_time = 0;
+        float remaining_time = 0;
 
         // Calculate
-        duration_time = sdSysData.cdTIMER.duration();
+        duration_time = (float)sdSysData.cdTIMER.duration();
         elaped_time = sdSysData.cdTIMER.elapsed_time(sdSysData.PROGRAM_TIME.current_frame_time());
-        remaining_time = duration_time - elaped_time;
+        remaining_time = (float)duration_time - (float)elaped_time;
 
 
         string timer_dsp =  linemerge_right_justify(2, "00", to_string(millis_to_time_minutes(remaining_time))) + ":" + 
@@ -931,7 +947,9 @@ void SCREEN4::draw(system_data &sdSysData)
 
         // Display Timer
 
-        ImGui::ProgressBar((((float)remaining_time) / (float)duration_time), ImVec2(-1.0f,0.0f), timer_dsp.c_str());
+        ImGui::Text("Remaining Time: %s", timer_dsp.c_str());
+        BAR_TIMER.update_value(sdSysData, remaining_time / duration_time);
+        BAR_TIMER.draw(sdSysData);
       }
       ImGui::End();
     }
@@ -1098,26 +1116,57 @@ void SCREEN4::draw(system_data &sdSysData)
     // ---------------------------------------------------------------------------------------
     // Alert Windows
 
-    if (sdSysData.ALERTS_2.GENERIC_ALERTS.size() > 0)
+    // Go through and display all reserve
+    for (int alert_num = 0; alert_num < RESERVE_ALERT_LIST_SIZE; alert_num++)
     {
-      for (int alert_num = 0; alert_num < sdSysData.ALERTS_2.GENERIC_ALERTS.size(); alert_num++)
+      if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].active())
       {
         ImVec2 screen_pos = ImGui::GetCursorScreenPos();
 
         ImGui::SetNextWindowSize(ImVec2(300, 100));
         
-        if (sdSysData.ALERTS_2.GENERIC_ALERTS[alert_num].DISPLAY)
+        if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].display())
         {
           ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
           
-          if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.GENERIC_ALERTS[alert_num].ID)).c_str(), &sdSysData.ALERTS_2.GENERIC_ALERTS[alert_num].DISPLAY, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+          if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
           {
-            ImGui::Text(sdSysData.ALERTS_2.GENERIC_ALERTS[alert_num].TEXT.c_str());
+            ImGui::Text(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].alert_text().c_str());
 
             ImGui::SetCursorScreenPos(screen_pos);
-            if (ImGui::InvisibleButton("Acknowlege Alert", ImGui::GetContentRegionAvail()))
+            if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), ImGui::GetContentRegionAvail()))
             {
-              sdSysData.ALERTS_2.GENERIC_ALERTS[alert_num].acknowlege();
+              sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].acknowlege();
+            }
+          }
+          ImGui::End();
+
+          ImGui::PopStyleColor();
+        }
+      }
+    }
+
+    // Go through and display all generic alerts
+    if (sdSysData.ALERTS_2.ALERTS.size() > 0)
+    {
+      for (int alert_num = 0; alert_num < sdSysData.ALERTS_2.ALERTS.size(); alert_num++)
+      {
+        ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+
+        ImGui::SetNextWindowSize(ImVec2(300, 100));
+        
+        if (sdSysData.ALERTS_2.ALERTS[alert_num].display())
+        {
+          ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+          
+          if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+          {
+            ImGui::Text(sdSysData.ALERTS_2.ALERTS[alert_num].alert_text().c_str());
+
+            ImGui::SetCursorScreenPos(screen_pos);
+            if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), ImGui::GetContentRegionAvail()))
+            {
+              sdSysData.ALERTS_2.ALERTS[alert_num].acknowlege();
             }
           }
           ImGui::End();

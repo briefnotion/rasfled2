@@ -87,6 +87,27 @@ COLOR_COMBO COLOR_COMBOS::color(int Color)
   }
 }
 
+void COLOR_COMBOS::toggle_void_color(unsigned long Time)
+{
+  /*
+  // Fade default colors from one color to another over time
+  if (void_color)
+  {
+    color = gradiant_color();
+  }
+  else
+  {
+    color = gradiant_color();
+  }
+  */
+
+  if (void_color_fade_timer.ping_down(Time) == false)
+  {
+    void_color = !void_color;
+    void_color_fade_timer.ping_up(Time, 5000);
+  }
+}
+
 COLOR_COMBO COLOR_COMBOS::c_black()
 {
   return color(0);

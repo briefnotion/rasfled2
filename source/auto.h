@@ -20,6 +20,7 @@
 #include "fled_time.h"
 #include "stringthings.h"
 #include "helper.h"
+#include "alert_system_2.h"
 
 #include "comport.h"
 
@@ -767,7 +768,7 @@ class AUTOMOBILE_CALCULATED
 
   SIMPLE_ERRORS CAM_COMM_ERRORS;
 
-  void compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time);
+  void compute_low(ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time);
   // Low level Compute not requiring calculation on all data.
   //  Fast but not fully acurate.
   //  Currently call just before the data is displayed.
@@ -830,7 +831,7 @@ class AUTOMOBILE
   int REQUESTED_PID_SEND_LIST_POSITION = -1;
 
   TIMED_PING REQUESTED_PID_TIMER_WAIT;
-  int REQUESTED_PID_TIMER_WAIT_DELAY = 100;
+  int REQUESTED_PID_TIMER_WAIT_DELAY = 50;
   //int REQUESTED_PID_TIMER_TIMEOUT_DELAY = 250;
 
   bool parse(string Line, int &PID_Recieved);
@@ -856,9 +857,9 @@ class AUTOMOBILE
 
   bool active();
 
-  void process(COMPORT &Com_Port, unsigned long tmeFrame_Time);
+  void process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time);
 
-  void translate(unsigned long tmeFrame_Time);
+  void translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time);
 };
 
 

@@ -1376,7 +1376,7 @@ int SIMPLE_ERRORS::error_count()
 
 //-----------
 
-void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time)
+void AUTOMOBILE_CALCULATED::compute_low(ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time)
 {
   // Set Lights
   Status.INDICATORS.process();
@@ -1471,6 +1471,11 @@ void AUTOMOBILE_CALCULATED::compute_low(AUTOMOBILE_TRANSLATED_DATA &Status, unsi
               Status.TEMPS.AIR_INTAKE_0f.val_c() + 
               Status.TEMPS.COOLANT_05.val_c() + 
               (Status.TEMPS.CATALYST_3C.val_c() / 20)) / 4) - 30) * 3;
+
+  if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_S_TEMP].alert_condition(RESERVE_ALERT_TEMP_S_TEMP, S_TEMP >= 60.0f, S_TEMP < 50.0f))
+  {
+    ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_S_TEMP].update_alert_text("S-Temp Value is " + to_string(S_TEMP));
+  }
 
 }
 
@@ -2040,7 +2045,7 @@ bool AUTOMOBILE::active()
   return AVAILABILITY.is_active();
 }
 
-void AUTOMOBILE::process(COMPORT &Com_Port, unsigned long tmeFrame_Time)
+void AUTOMOBILE::process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time)
 {
   int pid_recieved = 0;
 
@@ -2094,6 +2099,11 @@ void AUTOMOBILE::process(COMPORT &Com_Port, unsigned long tmeFrame_Time)
               // Dont send another request until wait delay is up
               // REQUESTED_PID_TIMER_WAIT.ping_up(tmeFrame_Time, REQUESTED_PID_TIMER_WAIT_DELAY);
               STATUS.TEMPS.store_coolant_05(message.DATA[3]);
+
+              if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].alert_condition(RESERVE_ALERT_TEMP_COOLANT, STATUS.TEMPS.COOLANT_05.val_c() >= 100.0f, STATUS.TEMPS.COOLANT_05.val_c() < 80.0f))
+              {
+                ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].update_alert_text("Collant Temp Value is " + to_string(STATUS.TEMPS.COOLANT_05.val_c()));
+              }
             }
 
             if (message.DATA[2] == 0x67)  // Engine coolant temperature
@@ -2155,7 +2165,6 @@ void AUTOMOBILE::process(COMPORT &Com_Port, unsigned long tmeFrame_Time)
 
           // Check message to make sure its in correct format
           if (message.DATA[0] == 0x04 && message.DATA[1] == 0x41)
-            // Voltage
           {
             if (message.DATA[2] == 0x1F)  // Run time since engine start - 07 E8 04 41 1F 00 AA 00 00 00 0002140B
             {
@@ -2190,6 +2199,11 @@ void AUTOMOBILE::process(COMPORT &Com_Port, unsigned long tmeFrame_Time)
               // Dont send another request until wait delay is up
               // REQUESTED_PID_TIMER_WAIT.ping_up(tmeFrame_Time, REQUESTED_PID_TIMER_WAIT_DELAY);
               STATUS.ELECTRICAL.store_control_voltage_42(message.DATA[3], message.DATA[4]);
+
+              if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].alert_condition(RESERVE_ALERT_ELEC_VOLTAGE, STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f, STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() >= 12.0f))
+              {
+                ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].update_alert_text("Voltage Value is " + to_string(STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v()));
+              }
             }
           }
         
@@ -2253,7 +2267,7 @@ void AUTOMOBILE::process(COMPORT &Com_Port, unsigned long tmeFrame_Time)
   }
 }
 
-void AUTOMOBILE::translate(unsigned long tmeFrame_Time)
+void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time)
 {
   if (AVAILABILITY.is_active() == true)
   {
@@ -2321,7 +2335,7 @@ void AUTOMOBILE::translate(unsigned long tmeFrame_Time)
     // Low level Compute not requiring calculation on all data.
     //  Fast but not fully acurate.
     //  Currently call just before the data is displayed.
-    CALCULATED.compute_low(STATUS, tmeFrame_Time);
+    CALCULATED.compute_low(ALERTS_2, STATUS, tmeFrame_Time);
 
     /*
     // Move **********************************************************************************

@@ -925,7 +925,7 @@ int loop_2(bool TTY_Only)
       //}
 
       // Process info from comm port int automobile system.
-      sdSystem.CAR_INFO.process(sdSystem.COMMS, sdSystem.PROGRAM_TIME.current_frame_time());
+      sdSystem.CAR_INFO.process(sdSystem.ALERTS_2, sdSystem.COMMS, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // Process Automobile Lights
       automobile_handler.update_events(sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
@@ -957,7 +957,7 @@ int loop_2(bool TTY_Only)
         cons_2.update_ADS_B_gadgets(sdSystem);
 
         // Automobile - Update all automobile Reference Data
-        sdSystem.CAR_INFO.translate(sdSystem.PROGRAM_TIME.current_frame_time());
+        sdSystem.CAR_INFO.translate(sdSystem.ALERTS_2, sdSystem.PROGRAM_TIME.current_frame_time());
         cons_2.update_automobile_gadgets(sdSystem);
 
         // Update Switches to Alert system.

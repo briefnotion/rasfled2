@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+#include "fled_time.h"
+
 // IMGui Includes
 #include "../../imgui/imgui.h"
 #include "../../imgui/misc/cpp/imgui_stdlib.h"
@@ -100,14 +102,16 @@ class COLOR_COMBOS
   vector<COLOR_COMBO> COLOR_COMBINATIONS;
 
   int void_color_value = 11;
+  bool void_color = false;
+  TIMED_PING void_color_fade_timer;
 
   public:
-
-  bool void_color = false;
 
   void init(float Intensity);
 
   COLOR_COMBO color(int Color);
+
+  void toggle_void_color(unsigned long Time);
 
   COLOR_COMBO c_black();
   COLOR_COMBO c_white();
