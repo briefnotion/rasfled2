@@ -313,7 +313,7 @@ class AUTOMOBILE_GUAGES
   bool SOURCE_AVAILABILITY = false;
 
   int COOLANT = -1;
-  string COLLANT_DISP = "X";
+  string COOLANT_DISP = "X";
 
   public:
 

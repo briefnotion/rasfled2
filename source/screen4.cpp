@@ -824,7 +824,10 @@ void SCREEN4::draw(system_data &sdSysData)
             DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
           }
 
-          button_simple_enabled(sdSysData, " ", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
+          if (button_simple_color(sdSysData, "DISPLAY\nACTIVE\nALERTS", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          {
+            sdSysData.ALERTS_2.display_active_alerts();
+          }
 
           if (button_simple_color(sdSysData, "DEBUG", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
@@ -1121,12 +1124,10 @@ void SCREEN4::draw(system_data &sdSysData)
     {
       if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].active())
       {
-        ImVec2 screen_pos = ImGui::GetCursorScreenPos();
-
-        ImGui::SetNextWindowSize(ImVec2(300, 100));
-        
         if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].display())
         {
+          ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+          ImGui::SetNextWindowSize(ImVec2(300, 100));
           ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
           
           if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 

@@ -1,3 +1,10 @@
+2.071_231121
+  - Put Alert Monitors on:
+      Intake Temperature
+      Fuel Level 
+  - Created a "Show Active Alerts" button on System Menu.
+  - Changed the PID Request order and times.
+
 2.070_231120
   - Put Alert Monitors on:
       S-Temp

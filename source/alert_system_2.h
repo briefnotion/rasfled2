@@ -20,11 +20,13 @@
 // -------------------------------------------------------------------------------------
 
 // Reserved Alert List
-#define RESERVE_ALERT_LIST_SIZE     10
+#define RESERVE_ALERT_LIST_SIZE     5
 
 #define RESERVE_ALERT_TEMP_S_TEMP   0
 #define RESERVE_ALERT_TEMP_COOLANT  1
 #define RESERVE_ALERT_ELEC_VOLTAGE  2
+#define RESERVE_ALERT_FUEL_LEVEL    3
+#define RESERVE_ALERT_TEMP_INTAKE   4
 
 // -------------------------------------------------------------------------------------
 
@@ -57,6 +59,8 @@ class ALERT_2_TYPE_MONITOR
   int id();
   string alert_text();
 
+  void set_display_on();
+
   void update_alert_text(string Text);
   void acknowlege();
   bool is_clear();
@@ -83,6 +87,8 @@ class ALERT_SYSTEM_2
   //
 
   void alert_list_clean();
+
+  void display_active_alerts();
 
 };
 

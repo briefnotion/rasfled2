@@ -73,6 +73,11 @@ int ALERT_2_TYPE_MONITOR::id()
   return ID;
 }
 
+void ALERT_2_TYPE_MONITOR::set_display_on()
+{
+  DISPLAY = true;
+}
+
 string ALERT_2_TYPE_MONITOR::alert_text()
 {
   return ALERT_TEXT;
@@ -142,5 +147,23 @@ void ALERT_SYSTEM_2::alert_list_clean()
     }
   }
 }
+
+void ALERT_SYSTEM_2::display_active_alerts()
+{
+  for (int alert_pos = 0; alert_pos < RESERVE_ALERT_LIST_SIZE; alert_pos++)
+  {
+    if (ALERTS_RESERVE[alert_pos].active())
+    {
+      ALERTS_RESERVE[alert_pos].set_display_on();
+    }
+  }
+
+  for (int alert_pos = 0; alert_pos < ALERTS.size(); alert_pos++)
+  {
+    ALERTS_RESERVE[alert_pos].set_display_on();
+  }
+}
+
+
 
 #endif

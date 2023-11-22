@@ -336,7 +336,7 @@ void AUTOMOBILE_GUAGES::set_source_availability(bool Available)
   if (SOURCE_AVAILABILITY == true && Available == false)
   {
     COOLANT = -1;
-    COLLANT_DISP = "X";
+    COOLANT_DISP = "X";
   }
   
   SOURCE_AVAILABILITY = Available;
@@ -350,7 +350,7 @@ bool AUTOMOBILE_GUAGES::available()
 void AUTOMOBILE_GUAGES::store_coolant(int Value)
 {
   COOLANT = Value;
-  COLLANT_DISP = to_string(COOLANT) + " c";
+  COOLANT_DISP = to_string(COOLANT) + " c";
 }
 
 int AUTOMOBILE_GUAGES::val_coolant()
@@ -360,7 +360,7 @@ int AUTOMOBILE_GUAGES::val_coolant()
 
 string AUTOMOBILE_GUAGES::coolant()
 {
-  return COLLANT_DISP;
+  return COOLANT_DISP;
 }
 
 //-----------
@@ -1952,13 +1952,14 @@ void AUTOMOBILE::set_default_request_pid_list()
 {
   // https://en.wikipedia.org/wiki/OBD-II_PIDs
 
+  /*
   //add_to_pid_send_list("03"); //  PID_FUEL_STATUS                   0x03  //  * 07 E8 04 41 03 02 00 00 00 00 0001D846
   //  	Fuel system status
 
   //add_to_pid_send_list("04"); //  PID_CALC_ENGINE_LOAD              0x04  //  * 07 E9 03 41 04 80 00 00 00 00 0001DC1A
   //  	Calculated engine load
   
-  add_to_pid_send_list("05"); //  PID_COOLANT_TEMP                  0x05  //  * 07 E8 03 41 05 6F 00 00 00 00 0003E108
+  //add_to_pid_send_list("05"); //  PID_COOLANT_TEMP                  0x05  //  * 07 E8 03 41 05 6F 00 00 00 00 0003E108
   //  	Engine coolant temperature
   
   //add_to_pid_send_list("06"); //  PID_SHORT_TERM_FUEL_TRIM_1        0x06  //  * 07 E8 03 41 06 7E 00 00 00 00 0002EF49
@@ -1972,10 +1973,12 @@ void AUTOMOBILE::set_default_request_pid_list()
   
   //add_to_pid_send_list("0D"); //  PID_VEHICLE_SPEED                 0x0D  //  * 07 E8 03 41 0D 36 00 00 00 00 000415C3
   //  Vehicle speed
+  */
   
-  add_to_pid_send_list("0F"); //  PID_INTAKE_AIR_TEMP               0x0F  //  * 07 E8 03 41 0F 4F 00 00 00 00 000419BF
+  //add_to_pid_send_list("0F"); //  PID_INTAKE_AIR_TEMP               0x0F  //  * 07 E8 03 41 0F 4F 00 00 00 00 000419BF
   //  Intake air temperature
   
+  /*
   //add_to_pid_send_list("10"); //  PID_MASS_AIR_FLOW_RATE            0x10  //  * 07 E8 04 41 10 01 85 00 00 00 00030FBF
   //  Mass air flow sensor (MAF) air flow rate
   
@@ -1984,43 +1987,51 @@ void AUTOMOBILE::set_default_request_pid_list()
   
   //add_to_pid_send_list("1C"); //  PID_OBD_STANDARDS                 0x1C  //  * 07 E9 03 41 1C 09 00 00 00 00 00020C2C
   //  OBD standards this vehicle conforms to
+  */
   
-  add_to_pid_send_list("1F"); //  PID_RUN_TIME_SINCE_START          0x1F  //  * 07 E8 04 41 1F 00 AA 00 00 00 0002140B
+  //add_to_pid_send_list("1F"); //  PID_RUN_TIME_SINCE_START          0x1F  //  * 07 E8 04 41 1F 00 AA 00 00 00 0002140B
   //  Run time since engine start
   
+  /*
   //add_to_pid_send_list("21"); //  PID_DISTANCE_TRAVELED_MIL_ON      0x21  //  * 07 E8 04 41 21 00 00 00 00 00 0003272F
   //  Distance traveled with malfunction indicator lamp (MIL) on
+  */
   
-  add_to_pid_send_list("23"); //  PID_FUEL_RAIL_PRESSURE_GAUGE      0x23  //  * 07 E8 04 41 23 00 E1 00 00 00 00032EEB
+  //add_to_pid_send_list("23"); //  PID_FUEL_RAIL_PRESSURE_GAUGE      0x23  //  * 07 E8 04 41 23 00 E1 00 00 00 00032EEB
   //  Fuel Rail Gauge Pressure (diesel, or gasoline direct injection)
   
+  /*
   //add_to_pid_send_list("2F"); //  PID_FUEL_TANK_LEVEL               0x2F  //  * 07 E8 03 41 2F 75 00 00 00 00 00054D00
   //  Fuel Tank Level Input
   
   //add_to_pid_send_list("31"); //  PID_DISTANCE_SINCE_CODES_CLEARED  0x31  //  * 07 E8 04 41 31 08 9E 00 00 00 00033AA3
   //  Distance traveled since codes cleared
+  */
   
-  add_to_pid_send_list("32"); //  PID_EVAP_SYSTEM_VAPOR_PRESSURE    0x32  //  * 07 E8 04 41 32 FF 77 00 00 00 000662D9
+  //add_to_pid_send_list("32"); //  PID_EVAP_SYSTEM_VAPOR_PRESSURE    0x32  //  * 07 E8 04 41 32 FF 77 00 00 00 000662D9
   //  Evap. System Vapor Pressure
   
-  add_to_pid_send_list("33"); //  PID_BARAMETRIC_PRESSURE           0x33  //  * 07 E9 03 41 33 64 00 00 00 00 0002371D
+  //add_to_pid_send_list("33"); //  PID_BARAMETRIC_PRESSURE           0x33  //  * 07 E9 03 41 33 64 00 00 00 00 0002371D
   //  Absolute Barometric Pressure
   
-  add_to_pid_send_list("3C"); //  PID_CATALYST_TEMP_BANK_1_SENSOR_1 0x3C  //  * 07 E8 04 41 3C 19 A3 00 00 00 00066801
+  //add_to_pid_send_list("3C"); //  PID_CATALYST_TEMP_BANK_1_SENSOR_1 0x3C  //  * 07 E8 04 41 3C 19 A3 00 00 00 00066801
   //  Catalyst Temperature: Bank 1, Sensor 1
   
-  add_to_pid_send_list("42"); //  PID_CONTROL_VOLTAGE               0x42  //  * 07 E8 04 41 42 36 17 00 00 00 00070902
+  //add_to_pid_send_list("42"); //  PID_CONTROL_VOLTAGE               0x42  //  * 07 E8 04 41 42 36 17 00 00 00 00070902
   //  Control module voltage
   
+  /*
   //add_to_pid_send_list("43"); //  PID_ABSOLUTE_LOAD                 0x43  //  * 07 E8 04 41 43 00 1C 00 00 00 00046644
   //  Absolute load value
   
   //add_to_pid_send_list("44"); //  PID_COMMANDED_AIR_FUEL_RATIO      0x44  //  * 07 E8 04 41 44 70 A3 00 00 00 00046A22
   //  Commanded Air-Fuel Equivalence Ratio (lambda,λ)
+  */
   
-  add_to_pid_send_list("46"); //  PID_AMBIENT_AIR_TEMPERATURE       0x46  //  * 07 E8 03 41 46 4C 00 00 00 00 00057D0B
+  //add_to_pid_send_list("46"); //  PID_AMBIENT_AIR_TEMPERATURE       0x46  //  * 07 E8 03 41 46 4C 00 00 00 00 00057D0B
   //  Ambient air temperature
   
+  /*
   //add_to_pid_send_list("47"); //  PID_ABSOLOUTE_TROTTLE_POSITION_B  0x47  //  * 07 E8 03 41 47 2B 00 00 00 00 00068C53
   //  Absolute throttle position B
   
@@ -2032,7 +2043,78 @@ void AUTOMOBILE::set_default_request_pid_list()
   
   //add_to_pid_send_list("4C"); //  PID_COMMANDED_THROTTLE_ACTUATOR_E 0x4C  //  * 07 E8 03 41 4C 14 00 00 00 00 00069FE5
   //  Commanded throttle actuator
+  */
   
+  // Differant queue
+
+  {
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    add_to_pid_send_list("42"); // Voltage
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    add_to_pid_send_list("0F"); // Intake Temp
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    add_to_pid_send_list("3C"); // Catalyst Temp
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    add_to_pid_send_list("46"); // Ambiant Temp
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+  }
+
+  add_to_pid_send_list("23"); // Fuel Rail Pressure
+  add_to_pid_send_list("32"); // Evap Sys Pressure
+  add_to_pid_send_list("33"); // Barro Pressure
+
+  {
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    add_to_pid_send_list("42"); // Voltage
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    add_to_pid_send_list("0F"); // Intake Temp
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    add_to_pid_send_list("3C"); // Catalyst Temp
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+    add_to_pid_send_list("46"); // Ambiant Temp
+    
+    add_to_pid_send_list("23"); // Fuel Rail Pressure
+    add_to_pid_send_list("32"); // Evap Sys Pressure
+  }
+
+  add_to_pid_send_list("23"); // Fuel Rail Pressure
+  add_to_pid_send_list("32"); // Evap Sys Pressure
+  add_to_pid_send_list("1F"); // Run Time since start
+
 }
 
 string AUTOMOBILE::requested_pid()
@@ -2102,7 +2184,7 @@ void AUTOMOBILE::process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned l
 
               if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].alert_condition(RESERVE_ALERT_TEMP_COOLANT, STATUS.TEMPS.COOLANT_05.val_c() >= 100.0f, STATUS.TEMPS.COOLANT_05.val_c() < 80.0f))
               {
-                ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].update_alert_text("Collant Temp Value is " + to_string(STATUS.TEMPS.COOLANT_05.val_c()));
+                ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].update_alert_text("Coolant Temp Value is " + STATUS.TEMPS.COOLANT_05.c());
               }
             }
 
@@ -2118,6 +2200,11 @@ void AUTOMOBILE::process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned l
               // Dont send another request until wait delay is up
               // REQUESTED_PID_TIMER_WAIT.ping_up(tmeFrame_Time, REQUESTED_PID_TIMER_WAIT_DELAY);
               STATUS.TEMPS.store_air_intake_0f(message.DATA[3]);
+
+              if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_INTAKE].alert_condition(RESERVE_ALERT_TEMP_INTAKE, STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= 50.0f, STATUS.TEMPS.AIR_INTAKE_0f.val_c() < 40.0f))
+              {
+                ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_INTAKE].update_alert_text("Intake Temp Value is " + STATUS.TEMPS.AIR_INTAKE_0f.c());
+              }
             }
 
             if (message.DATA[2] == 0x68)  // Intake air temperature
@@ -2202,7 +2289,7 @@ void AUTOMOBILE::process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned l
 
               if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].alert_condition(RESERVE_ALERT_ELEC_VOLTAGE, STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f, STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() >= 12.0f))
               {
-                ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].update_alert_text("Voltage Value is " + to_string(STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v()));
+                ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].update_alert_text("Voltage Value is " + STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
               }
             }
           }
@@ -2290,6 +2377,11 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     STATUS.FUEL.store_consumed(DATA.AD_200.DATA[7]);
     STATUS.FUEL.store_percentage(DATA.AD_C0.DATA[7]);
     STATUS.FUEL.store_level(DATA.AD_380.DATA[7]);
+
+    if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].alert_condition(RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 2.0f, STATUS.FUEL.val_level() > 7.0f))
+    {
+      ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].update_alert_text("S-Temp Value is " + STATUS.FUEL.level());
+    }
 
     // Guages
     STATUS.GUAGES.store_coolant(DATA.AD_100.DATA[3]);
