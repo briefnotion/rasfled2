@@ -784,7 +784,7 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImV
 
           if (mean_out_of_bounds_x_start == false && mean_out_of_bounds_x_end == false)
           {
-            draw_list->AddLine(mean_start, mean_end, sdSysData.COLOR_SELECT.color(SUB_GRAPHS[graph].LINE[line].LINE_COLOR).STANDARD, SUB_GRAPHS[graph].LINE[line].POINT_SIZE);
+            draw_list->AddLine(mean_start, mean_end, sdSysData.COLOR_SELECT.color(SUB_GRAPHS[graph].LINE[line].LINE_COLOR).STANDARD_V, SUB_GRAPHS[graph].LINE[line].POINT_SIZE);
           }
         }
       }

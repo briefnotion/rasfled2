@@ -237,7 +237,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
 
       case 2: // 2 - Region
       {
-        ImColor Color = sdSysData.COLOR_SELECT.c_cyan().STANDARD;
+        ImColor Color = sdSysData.COLOR_SELECT.c_cyan().STANDARD_V;
         if (REGION_GPS_COORDS.size() > 1)
         {
           

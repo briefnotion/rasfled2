@@ -131,6 +131,9 @@ class COMPORT
 
   //bool CHANGED = false;
 
+  bool record_in_progress();
+  // returns true if comms are being recored to file.
+
   void log_file_on();
   // Starts logging to file
   

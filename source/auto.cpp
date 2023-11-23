@@ -961,22 +961,26 @@ void AUTOMOBILE_TEMPATURE::store_coolant_05(int Sensor_Temp)
   COOLANT_05.store_c(method_temp_1(Sensor_Temp));
 }
 
+/*
 void AUTOMOBILE_TEMPATURE::store_coolant_67(int Sensor_Temp_B, int Sensor_Temp_C)
 {
   COOLANT_67_b.store_c(method_temp_1(Sensor_Temp_B));
   COOLANT_67_c.store_c(method_temp_1(Sensor_Temp_C));
 }
+*/
 
 void AUTOMOBILE_TEMPATURE::store_air_intake_0f(int Sensor_Temp)
 {
   AIR_INTAKE_0f.store_c(method_temp_1(Sensor_Temp));
 }
 
+/*
 void AUTOMOBILE_TEMPATURE::store_air_intake_68(int Sensor_Temp_B, int Sensor_Temp_C)
 {
   AIR_INTAKE_68_b.store_c(method_temp_1(Sensor_Temp_B));
   AIR_INTAKE_68_b.store_c(method_temp_1(Sensor_Temp_C));
 }
+*/
 
 void AUTOMOBILE_TEMPATURE::store_ambiant_air_46(int Sensor_Temp)
 {
@@ -1527,16 +1531,13 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
   valid.catch_false(string_hex_to_int(Line.substr(24, 2), data.DATA[6]));
   valid.catch_false(string_hex_to_int(Line.substr(27, 2), data.DATA[7]));
 
-  if (Line.size() == 38)
-  {
-    valid.catch_false(string_hex_to_int(Line.substr(30, 2), time_byte_0));
-    valid.catch_false(string_hex_to_int(Line.substr(32, 2), time_byte_1));
-    valid.catch_false(string_hex_to_int(Line.substr(34, 2), time_byte_2));
-    valid.catch_false(string_hex_to_int(Line.substr(36, 2), time_byte_3));
+  valid.catch_false(string_hex_to_int(Line.substr(30, 2), time_byte_0));
+  valid.catch_false(string_hex_to_int(Line.substr(32, 2), time_byte_1));
+  valid.catch_false(string_hex_to_int(Line.substr(34, 2), time_byte_2));
+  valid.catch_false(string_hex_to_int(Line.substr(36, 2), time_byte_3));
 
-    data.TIMESTAMP_MESSAGE_SENT = (time_byte_0 * (256 ^3)) + (time_byte_1 * (256 ^2)) + 
-                      (time_byte_2 * 256) + time_byte_3;
-  }
+  data.TIMESTAMP_MESSAGE_SENT = (time_byte_0 * (256 ^3)) + (time_byte_1 * (256 ^2)) + 
+                    (time_byte_2 * 256) + time_byte_3;
 
   if (valid.has_false() == false)
   {
@@ -1958,10 +1959,12 @@ void AUTOMOBILE::set_default_request_pid_list()
 
   //add_to_pid_send_list("04"); //  PID_CALC_ENGINE_LOAD              0x04  //  * 07 E9 03 41 04 80 00 00 00 00 0001DC1A
   //  	Calculated engine load
-  
+  */  
+
   //add_to_pid_send_list("05"); //  PID_COOLANT_TEMP                  0x05  //  * 07 E8 03 41 05 6F 00 00 00 00 0003E108
   //  	Engine coolant temperature
   
+  /*
   //add_to_pid_send_list("06"); //  PID_SHORT_TERM_FUEL_TRIM_1        0x06  //  * 07 E8 03 41 06 7E 00 00 00 00 0002EF49
   //  Short term fuel trim—Bank 1
   
@@ -2028,7 +2031,7 @@ void AUTOMOBILE::set_default_request_pid_list()
   //  Commanded Air-Fuel Equivalence Ratio (lambda,λ)
   */
   
-  //add_to_pid_send_list("46"); //  PID_AMBIENT_AIR_TEMPERATURE       0x46  //  * 07 E8 03 41 46 4C 00 00 00 00 00057D0B
+  //  add_to_pid_send_list("46"); //  PID_AMBIENT_AIR_TEMPERATURE       0x46  //  * 07 E8 03 41 46 4C 00 00 00 00 00057D0B
   //  Ambient air temperature
   
   /*
@@ -2077,6 +2080,7 @@ void AUTOMOBILE::set_default_request_pid_list()
     add_to_pid_send_list("32"); // Evap Sys Pressure
   }
 
+  add_to_pid_send_list("05");
   add_to_pid_send_list("23"); // Fuel Rail Pressure
   add_to_pid_send_list("32"); // Evap Sys Pressure
   add_to_pid_send_list("33"); // Barro Pressure
@@ -2188,12 +2192,15 @@ void AUTOMOBILE::process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned l
               }
             }
 
+            /*
+            Unknown
             if (message.DATA[2] == 0x67)  // Engine coolant temperature
             {
               // Dont send another request until wait delay is up
               // REQUESTED_PID_TIMER_WAIT.ping_up(tmeFrame_Time, REQUESTED_PID_TIMER_WAIT_DELAY);
               STATUS.TEMPS.store_coolant_67(message.DATA[3], message.DATA[4]);
             }
+            */
 
             if (message.DATA[2] == 0x0F)  // Intake air temperature - 07 E8 03 41 0F 4D 00 00 00 00 00127FEE
             {
@@ -2207,12 +2214,15 @@ void AUTOMOBILE::process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned l
               }
             }
 
+            /*
+            Unknown
             if (message.DATA[2] == 0x68)  // Intake air temperature
             {
               // Dont send another request until wait delay is up
               // REQUESTED_PID_TIMER_WAIT.ping_up(tmeFrame_Time, REQUESTED_PID_TIMER_WAIT_DELAY);
               STATUS.TEMPS.store_air_intake_68(message.DATA[3], message.DATA[4]);
             }
+            */
             
             if (message.DATA[2] == 0x46)  // Ambient air temperature - 07 E8 03 41 46 4A 00 00 00 00 001264BF
             {
@@ -2248,10 +2258,9 @@ void AUTOMOBILE::process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned l
               // REQUESTED_PID_TIMER_WAIT.ping_up(tmeFrame_Time, REQUESTED_PID_TIMER_WAIT_DELAY);
               STATUS.TEMPS.store_abs_baro_33(message.DATA[3]);
             }
-          }
-
+          }          
+          else if (message.DATA[0] == 0x04 && message.DATA[1] == 0x41)
           // Check message to make sure its in correct format
-          if (message.DATA[0] == 0x04 && message.DATA[1] == 0x41)
           {
             if (message.DATA[2] == 0x1F)  // Run time since engine start - 07 E8 04 41 1F 00 AA 00 00 00 0002140B
             {
@@ -2326,10 +2335,11 @@ void AUTOMOBILE::process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned l
             STATUS.SPEED.store_LB((DATA.AD_190.DATA[4] *256) + DATA.AD_190.DATA[5], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
             STATUS.SPEED.store_RB((DATA.AD_190.DATA[6] *256) + DATA.AD_190.DATA[7], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
           }
+        
+          AVAILABILITY.set_active(STATUS, true, tmeFrame_Time);
+          CHANGED = true;
+        
         }
-
-        AVAILABILITY.set_active(STATUS, true, tmeFrame_Time);
-        CHANGED = true;
       }
     }
   }

@@ -614,7 +614,7 @@ void BAR_TECH::draw(system_data &sdSysData)
 
     draw_list->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE/2, pos.y), 
                               ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE/2 , pos.y + PROPS.BAR_HEIGHT), 
-                              sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD, 5.0f, ImDrawFlags_None);
+                              sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);
 
     // Move Cursor Pos to new position
     ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
@@ -640,7 +640,7 @@ void BAR_TECH::draw(system_data &sdSysData)
 
     draw_list->AddRectFilled(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE/2)), 
                               ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE/2)), 
-                              sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD, 5.0f, ImDrawFlags_None);
+                              sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);
 
     // Move Cursor Pos to new position
     ImGui::SetCursorScreenPos(ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y));

@@ -88,6 +88,7 @@ class COLOR_COMBO
   ImColor BACKGROUND;
   ImColor DIM;
   ImColor STANDARD;
+  ImColor STANDARD_V;
   ImColor HOVERED;
   ImColor ACTIVE;
   ImColor TEXT;

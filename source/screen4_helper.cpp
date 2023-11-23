@@ -23,6 +23,7 @@ void COLOR_COMBO::set_rgb(float R, float G, float B, float A, float Intensity)
   BACKGROUND  = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.2f);
   DIM         = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.5f);
   STANDARD    = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.7f);
+  STANDARD_V  = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.7f);
   HOVERED     = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.8f);
   ACTIVE      = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.9f);
 
@@ -58,6 +59,7 @@ void COLOR_COMBOS::init(float Intensity)
 
   // Specific Colors
   COLOR_COMB_CORPO.set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
+  COLOR_COMB_CORPO.STANDARD_V = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
   COLOR_COMB_CORPO.TEXT = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
 
   // Put colors in vector list for reference

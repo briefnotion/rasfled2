@@ -50,8 +50,8 @@ class AUTOMOBILE_DATA_LINE
 
   int ID = -1;
 
-  int ID_DATA[2];
-  int DATA[8];
+  int ID_DATA[2] = {0};
+  int DATA[8] = {0};
 
   unsigned long TIMESTAMP_MESSAGE_SENT = 0;
     // Measured in miliseconds
@@ -546,12 +546,12 @@ class AUTOMOBILE_TEMPATURE
   public:
 
   TEMPERATURE COOLANT_05;
-  TEMPERATURE COOLANT_67_b;
-  TEMPERATURE COOLANT_67_c;
+  //TEMPERATURE COOLANT_67_b;
+  //TEMPERATURE COOLANT_67_c;
   
   TEMPERATURE AIR_INTAKE_0f;
-  TEMPERATURE AIR_INTAKE_68_a;
-  TEMPERATURE AIR_INTAKE_68_b;
+  //TEMPERATURE AIR_INTAKE_68_a;
+  //TEMPERATURE AIR_INTAKE_68_b;
 
   TEMPERATURE AMBIANT_AIR_46;
 
@@ -567,10 +567,10 @@ class AUTOMOBILE_TEMPATURE
   bool available();
 
   void store_coolant_05(int Sensor_Temp);
-  void store_coolant_67(int Sensor_Temp_B, int Sensor_Temp_C);
+  //void store_coolant_67(int Sensor_Temp_B, int Sensor_Temp_C);
 
   void store_air_intake_0f(int Sensor_Temp);
-  void store_air_intake_68(int Sensor_Temp_B, int Sensor_Temp_C);
+  //void store_air_intake_68(int Sensor_Temp_B, int Sensor_Temp_C);
 
   void store_ambiant_air_46(int Sensor_Temp);
   void store_oil_5c(int Sensor_Temp);

@@ -75,6 +75,11 @@ bool COMPORT::read_from_comm()
   return ret_data_read;
 }
 
+bool COMPORT::record_in_progress()
+{
+  return SAVE_TO_LOG;
+}
+
 void COMPORT::log_file_on()
 {
   SAVE_TO_LOG_FILENAME = PROPS.SAVE_LOG_FILENAME + "_data_" + file_format_system_time() + ".txt";
