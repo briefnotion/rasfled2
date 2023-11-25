@@ -46,43 +46,53 @@ void consoleprinthelp(CONSOLE_COMMUNICATION &cons);
 void consoleprintevents(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, ANIMATION_HANDLER &Animations);
 
 // Display all running events.
-void consoleprintconfig(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, ANIMATION_HANDLER &Animations);
+//void consoleprintconfig(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, ANIMATION_HANDLER &Animations);
+void consoleprintconfig(CONSOLE_COMMUNICATION &cons, system_data &sdSysData);
 
 // -------------------------------------------------------------------------------------
-void process_power_animation(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor);
+//void process_power_animation(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor);
+void process_power_animation(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor);
 
 // -------------------------------------------------------------------------------------
 // Pulses
 
 // Set To End All Pulses
-void processcommandpulseend(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+//void processcommandpulseend(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+void processcommandpulseend(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
 
 // Flash Color All Channels
-void processcommandflash(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBflashcolor);
+//void processcommandflash(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBflashcolor);
+void processcommandflash(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
 
 // Pulse Color All Channels
-void processcommandpulse(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor);
+//void processcommandpulse(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor);
+void processcommandpulse(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor);
 // Pulse Color All Channels
-void processcommandpulsecountdown(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+//void processcommandpulsecountdown(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+void processcommandpulsecountdown(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
 
 // -------------------------------------------------------------------------------------
 // Overhead Illum
 
 // Set To End All Overhead Illumination
-void processcommandoverheadillumend(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+//void processcommandoverheadillumend(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+void processcommandoverheadillumend(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
 
 // -------------------------------------------------------------------------------------
 // Overhead Illumination Color
-void processcommandoverheadillum(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor);
+//void processcommandoverheadillum(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor);
+void processcommandoverheadillum(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
 
 // -------------------------------------------------------------------------------------
 // Hazard
 
 // Set To End All Hazard
-void processcommandhazardend(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+//void processcommandhazardend(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+void processcommandhazardend(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
 
 // Hazard
-void processcommandhazard(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+//void processcommandhazard(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+void processcommandhazard(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
 
 // -------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------
@@ -92,10 +102,12 @@ bool check_command(CONSOLE_COMMUNICATION &cons, string command, string descripti
 bool check_command_with_num_param(CONSOLE_COMMUNICATION &cons, string command, string description, int num_start, int num_len, int &Parameter);
 
 // Test Routine Area
-void run_test(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+//void run_test(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+void run_test(CONSOLE_COMMUNICATION &cons);
 
-void process_slow_commands(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, 
-            unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+//void process_slow_commands(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, 
+//            unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations);
+void process_slow_commands(CONSOLE_COMMUNICATION &cons, system_data &sdSysData);
 
 // Process and call routines as entered on the command line.
 void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, 

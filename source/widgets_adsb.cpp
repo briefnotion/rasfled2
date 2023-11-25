@@ -33,10 +33,10 @@ void BLANK::display(const char *name, bool *p_open, ImGuiWindowFlags flags)
 float calculate_distance(float lat1, float lon1, float lat2, float lon2)
 {
   // Convert latitude and longitude from degrees to radians
-  lat1 = lat1 * M_PI / 180.0;
-  lon1 = lon1 * M_PI / 180.0;
-  lat2 = lat2 * M_PI / 180.0;
-  lon2 = lon2 * M_PI / 180.0;
+  lat1 = lat1 * float_PI / 180.0f;
+  lon1 = lon1 * float_PI / 180.0f;
+  lat2 = lat2 * float_PI / 180.0f;
+  lon2 = lon2 * float_PI / 180.0f;
 
   // Calculate the differences between the coordinates
   double dlat = lat2 - lat1;
@@ -57,18 +57,16 @@ ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Dis
 {
   ImVec2 ret_coords;
 
-  double EARTH_RADIUS_MILES = 3963.191;  // Radius of the Earth in miles
+  float lat1Rad = Latitude * float_PI / 180.0f;
+  float lon1Rad = Longitude * float_PI / 180.0f;
+  float angularDistance = Distance_Miles / float_EARTH_RADIUS;
 
-  double lat1Rad = (double)Latitude * M_PI / 180.0;
-  double lon1Rad = (double)Longitude * M_PI / 180.0;
-  double angularDistance = (double)Distance_Miles / EARTH_RADIUS_MILES;
-
-  double lat2Rad = asin(sin(lat1Rad) * cos(angularDistance) + cos(lat1Rad) * sin(angularDistance) * cos((double)Bearing_Degrees * M_PI / 180.0));
-  double lon2Rad = lon1Rad + atan2(sin(Bearing_Degrees * M_PI / 180.0) * sin(angularDistance) * cos(lat1Rad),
+  float lat2Rad = asin(sin(lat1Rad) * cos(angularDistance) + cos(lat1Rad) * sin(angularDistance) * cos(Bearing_Degrees * float_PI / 180.0f));
+  float lon2Rad = lon1Rad + atan2(sin(Bearing_Degrees * float_PI / 180.0f) * sin(angularDistance) * cos(lat1Rad),
                                     cos(angularDistance) - sin(lat1Rad) * sin(lat2Rad));
 
-  ret_coords.x = (float)(lat2Rad * 180.0 / M_PI);
-  ret_coords.y = (float)(lon2Rad * 180.0 / M_PI);
+  ret_coords.x = (lat2Rad * 180.0f / float_PI);
+  ret_coords.y = (lon2Rad * 180.0f / float_PI);
 
   return ret_coords;
 }
@@ -76,8 +74,8 @@ ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Dis
 ImVec2 point_position_center(ImVec4 Working_Area)
 {
   ImVec2 ret_center;
-  ret_center.x = Working_Area.x + Working_Area.z / 2;
-  ret_center.y = Working_Area.y + Working_Area.w / 2;
+  ret_center.x = Working_Area.x + Working_Area.z / 2.0f;
+  ret_center.y = Working_Area.y + Working_Area.w / 2.0f;
   return ret_center;
 }
 
@@ -123,46 +121,46 @@ void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  draw_list->AddNgon(Screen_Position, 4, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4, 1.5f);
+  draw_list->AddNgon(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
 }
 
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  draw_list->AddNgon(Screen_Position, 4, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4, 1.5f);
+  draw_list->AddNgon(Screen_Position, 4.0f, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
 }
 
-void draw_point_marker(system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, float Size)
+//void draw_point_marker(system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, float Size)
+void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  draw_list->AddNgonFilled(Screen_Position, Size, Color, 4);
-  //draw_list->AddNgon(Screen_Position, Size, Color.TEXT, 6, 2.0f);
+  draw_list->AddNgonFilled(Screen_Position, Size, Color, 4.0f);
 }
 
 void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color, float Size)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  draw_list->AddNgon(Screen_Position, Size, sdSysData.COLOR_SELECT.color(Color).TEXT, 6, 2.0f);
+  draw_list->AddNgon(Screen_Position, Size, sdSysData.COLOR_SELECT.color(Color).TEXT, 6.0f, 2.0f);
 }
 
-void draw_aircraft_marker_direction(system_data &sdSysData, ImVec2 Screen_Position, int Color, int Size, float Heading)
+void draw_aircraft_marker_direction(system_data &sdSysData, ImVec2 Screen_Position, int Color, float Size, float Heading)
 {
-  float thickness = 2;
+  float thickness = 2.0f;
 
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
   // Adjust thhe degrees into heading.
-  Heading = Heading + 90;
+  Heading = Heading + 90.0f;
 
   // Convert direction from degrees to radians
-  float rad = Heading * M_PI / 180.0f;
+  float rad = Heading * float_PI / 180.0f;
 
   // Calculate the arrow points
-  ImVec2 arrow_p1 = ImVec2(Screen_Position.x + Size * cos(rad + M_PI / 8), Screen_Position.y + Size * sin(rad + M_PI / 8));
-  ImVec2 arrow_p2 = ImVec2(Screen_Position.x + Size * cos(rad - M_PI / 8), Screen_Position.y + Size * sin(rad - M_PI / 8));
+  ImVec2 arrow_p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI / 8.0f), Screen_Position.y + Size * sin(rad + float_PI / 8.0f));
+  ImVec2 arrow_p2 = ImVec2(Screen_Position.x + Size * cos(rad - float_PI / 8.0f), Screen_Position.y + Size * sin(rad - float_PI / 8.0f));
 
   // Draw the line and the arrow
   //draw_list->AddLine(p1, p2, col, thickness);
@@ -175,7 +173,7 @@ void draw_aircraft_marker_direction(system_data &sdSysData, ImVec2 Screen_Positi
 
 void MAP_MARKER::clear()
 {
-  LAT_LON = ImVec2(0,0);
+  LAT_LON = ImVec2(0.0f, 0.0f);
   DISPLAY_NAME = "";
   LONG_NAME = "";
   TYPE = 0;
@@ -199,7 +197,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
       case 0: //  0 - Generic
       {
         draw_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.yellow());
-        ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5));
+        ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5.0f));
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
         ImGui::Text("%s", DISPLAY_NAME.c_str());
@@ -214,7 +212,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
           bool on_screen = false;
           ImDrawList* draw_list = ImGui::GetWindowDrawList();
           
-          for(int vector = 0; vector < AIRPORT_LANDING_VECTORS.size(); vector++)
+          for(int vector = 0; vector < (int)AIRPORT_LANDING_VECTORS.size(); vector++)
           {
             // 5 miles out.
             ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
@@ -227,7 +225,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
         }
         
         draw_airport_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.yellow());
-        ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5));
+        ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5.0f));
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
         ImGui::Text("%s", DISPLAY_NAME.c_str());
@@ -238,28 +236,27 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
       case 2: // 2 - Region
       {
         ImColor Color = sdSysData.COLOR_SELECT.c_cyan().STANDARD_V;
-        if (REGION_GPS_COORDS.size() > 1)
+        if (REGION_GPS_COORDS.size() > 1.0f)
         {
-          
-          bool on_screen = false;
+          //bool on_screen = false;
           ImDrawList* draw_list = ImGui::GetWindowDrawList();
           
-          ImVec2 landing_vector_start = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[REGION_GPS_COORDS.size() -1], draw);
+          ImVec2 landing_vector_start = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[REGION_GPS_COORDS.size() -1.0f], draw);
           ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[0], draw);
-          draw_list->AddLine(landing_vector_start, landing_vector_end, Color, 2);
+          draw_list->AddLine(landing_vector_start, landing_vector_end, Color, 2.0f);
 
-          for(int pos = 1; pos < REGION_GPS_COORDS.size(); pos++)
+          for(int pos = 1; pos < (int)REGION_GPS_COORDS.size(); pos++)
           {
             landing_vector_start = landing_vector_end;
             landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[pos], draw);
 
             draw_list->AddLine(landing_vector_start, landing_vector_end, 
-                                Color, 2);
+                                Color, 2.0f);
           }
         }
         
         //draw_airport_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW);
-        ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5));
+        ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5.0f));
 
         if (Range < 35.0f)
         {
@@ -283,7 +280,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
           ImVec2 landing_vector_start; 
           ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[0], on_screen_2);
 
-          for(int pos = 1; pos < REGION_GPS_COORDS.size(); pos++)
+          for(int pos = 1; pos < (int)REGION_GPS_COORDS.size(); pos++)
           {
             landing_vector_start = landing_vector_end;
             on_screen_1 = on_screen_2;
@@ -293,7 +290,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
             if (on_screen_1 == true || on_screen_2 == true)
             {
               draw_list->AddLine(landing_vector_start, landing_vector_end, 
-                                  Color, 2);
+                                  Color, 2.0f);
             }
           }
         }
@@ -507,7 +504,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
         ImVec2 track_position_0;
         ImVec2 track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[0].LAT_LON, draw_1);
         
-        for(int position = 1; position < TRACK.size(); position++)
+        for(int position = 1; position < (int)TRACK.size(); position++)
         {
           track_position_0 = track_position_1;
           draw_0 = draw_1;
@@ -520,10 +517,10 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
 
             point_color.Value.w = TRACK[position].RSSI_INTENSITY;
 
-            draw_point_marker(sdSysData, track_position_0, point_color, 3);
+            draw_point_marker(track_position_0, point_color, 3.0f);
 
             draw_list->AddLine(track_position_0, track_position_1, 
-                                sdSysData.COLOR_SELECT.c_grey().TEXT, 2);
+                                sdSysData.COLOR_SELECT.c_grey().TEXT, 2.0f);
           }
         }
       }
@@ -532,7 +529,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
       // Draw Arrow of Aircraft nav heading on map at position
       if (AIRCRAFT_DATA.NAV_HEADING.conversion_success())
       {
-        draw_aircraft_marker_direction(sdSysData, draw_position, sdSysData.COLOR_SELECT.green(), 20, AIRCRAFT_DATA.NAV_HEADING.get_float_value());
+        draw_aircraft_marker_direction(sdSysData, draw_position, sdSysData.COLOR_SELECT.green(), 20.0f, AIRCRAFT_DATA.NAV_HEADING.get_float_value());
       }
 
       // Draw Arrow of Aircraft track heading on map at position, grey if old.
@@ -540,35 +537,35 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
       {
         if (AIRCRAFT_DATA.TRACK.conversion_success())
         {
-          draw_aircraft_marker_direction(sdSysData, draw_position, sdSysData.COLOR_SELECT.white(), 15, AIRCRAFT_DATA.TRACK.get_float_value());
+          draw_aircraft_marker_direction(sdSysData, draw_position, sdSysData.COLOR_SELECT.white(), 15.0f, AIRCRAFT_DATA.TRACK.get_float_value());
         }
         else
         {
-          draw_aircraft_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.white(), 6);
+          draw_aircraft_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.white(), 6.0f);
         }
       }
       else
       {
         if (AIRCRAFT_DATA.TRACK.conversion_success())
         {
-          draw_aircraft_marker_direction(sdSysData, draw_position, sdSysData.COLOR_SELECT.grey(), 12, AIRCRAFT_DATA.TRACK.get_float_value());
+          draw_aircraft_marker_direction(sdSysData, draw_position, sdSysData.COLOR_SELECT.grey(), 12.0f, AIRCRAFT_DATA.TRACK.get_float_value());
         }
         else
         {
-          draw_aircraft_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.grey(), 4);
+          draw_aircraft_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.grey(), 4.0f);
         }
       }
 
       // Text describing Aircraft
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
   
-      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5, draw_position.y + 8));
+      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5.0f, draw_position.y + 8.0f));
       ImGui::Text("%d %s", AIRCRAFT_DATA.SEEN_POS.get_int_value(), AIRCRAFT_DATA.FLIGHT.get_str_value().c_str());
       
-      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5, draw_position.y + 25));
+      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5.0f, draw_position.y + 25.0f));
       ImGui::Text("S: %d", AIRCRAFT_DATA.SPEED.get_int_value());
 
-      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5, draw_position.y + 41));
+      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5.0f, draw_position.y + 41.0f));
       if (AIRCRAFT_DATA.ALTITUDE.conversion_success())
       {
         ImGui::Text("A: %.1f", float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f));
@@ -591,9 +588,9 @@ void ADSB_RANGE::calculate_lat_lon_to_point_scale()
   float longitude_diff = 0;
 
   ImVec2 new_coords_east = get_coords_x_miles_from_coords(CURRENT_LAT_LON.x, CURRENT_LAT_LON.y,
-                                                          RANGE, 90);
+                                                          RANGE, 90.0f);
   ImVec2 new_coords_south = get_coords_x_miles_from_coords(CURRENT_LAT_LON.x, CURRENT_LAT_LON.y,
-                                                          RANGE, 180);
+                                                          RANGE, 180.0f);
 
   latitude_diff = abs(new_coords_south.x - CURRENT_LAT_LON.x);
   longitude_diff = abs(new_coords_east.y - CURRENT_LAT_LON.y);
@@ -608,77 +605,77 @@ void ADSB_RANGE::set_zoom_level()
   {
     case 0:
     {
-      set_range(1);
+      set_range(1.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
 
     case 1:
     {
-      set_range(2);
+      set_range(2.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
 
     case 2:
     {
-      set_range(5);
+      set_range(5.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 3:
     {
-      set_range(7);
+      set_range(7.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 4:
     {
-      set_range(10);
+      set_range(10.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 5:
     {
-      set_range(15);
+      set_range(15.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 6:
     {
-      set_range(25);
+      set_range(25.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 7:
     {
-      set_range(35);
+      set_range(35.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 8:
     {
-      set_range(50);
+      set_range(50.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 9:
     {
-      set_range(75);
+      set_range(75.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 10:
     {
-      set_range(100);
+      set_range(100.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
@@ -734,7 +731,7 @@ void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
 
   if (ZOOM_LEVEL == -1)
   {
-    RADIUS_CIRCLE_POINT_SIZE = Working_Area.w / 2 * 0.6f;
+    RADIUS_CIRCLE_POINT_SIZE = Working_Area.w / 2.0f * 0.6f;
 
     ZOOM_LEVEL = 7;     // Default start zoom level
     set_zoom_level();
@@ -756,12 +753,12 @@ void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
   }
   */
 
-  const float spacing = 10.0f;
+  //const float spacing = 10.0f;
 
   ImVec2 center = point_position_center(Working_Area);
   
   draw_list->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD), 32, 1.5f);
-  draw_list->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE *2, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD), 32, 1.5f);
+  draw_list->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE * 2.0f, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD), 32, 1.5f);
   
   ImGui::SetCursorScreenPos(ImVec2(center.x, center.y - RADIUS_CIRCLE_POINT_SIZE + 5));
   
@@ -861,10 +858,10 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "LFY";
   tmp_map_marker.LONG_NAME = "Lafayette Regional/Paul Fournet Field Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(40);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(220);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(110);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(290);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(40.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(220.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(110.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(290.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.4663333333f, -92.4238333333f), "4R7", 0);  //
@@ -873,8 +870,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "4R7";
   tmp_map_marker.LONG_NAME = "Eunice Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(160);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(340);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(160.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(340.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.2426666667f, -92.6735f), "3R7", 0);        //
@@ -883,10 +880,10 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "3R7";
   tmp_map_marker.LONG_NAME = "Jennings Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(80);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(260);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(130);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(310);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(80.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(260.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(130.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(310.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.533f, -91.1498333333f), "BTR", 0);         //
@@ -895,10 +892,10 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "BTR";
   tmp_map_marker.LONG_NAME = "Baton Rouge Metro, Ryan";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(40);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(220);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(130);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(310);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(40.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(220.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(130.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(310.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.0378333333f, -91.8838333333f), "ARA", 0);  //
@@ -907,8 +904,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "ARA";
   tmp_map_marker.LONG_NAME = "Acadiana Regional Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.2418333333f, -92.8306666667f), "6R1", 0);  // 6R1 - Welsh Airport
@@ -917,10 +914,10 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "6R1";
   tmp_map_marker.LONG_NAME = "Welsh Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(70);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(250);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(90);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(270);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(70.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(250.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(90.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(270.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.126f, -93.2235f), "LCH", 0);               // LCH - Lake Charles Regional Airport
@@ -929,10 +926,10 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "LCH";
   tmp_map_marker.LONG_NAME = "Lake Charles Regional Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(150);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(330);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(50);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(230);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(150.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(330.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(50.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(230.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.7505f, -92.6885f), "ARA", 0);              // ACP - Allen Parish Airport
@@ -941,8 +938,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "ACP";
   tmp_map_marker.LONG_NAME = "Allen Parish Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.9566666667f, -92.2341666667f), "2R6", 0);  // 2R6 - Bunkie Municipal Airport
@@ -951,8 +948,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "2R6";
   tmp_map_marker.LONG_NAME = "Bunkie Municipal Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(31.3273333333f, -92.5485f), "AEX", 0);        // AEX - Alexandria International Airport
@@ -961,8 +958,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "AEX";
   tmp_map_marker.LONG_NAME = "Alexandria International Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(140);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(320);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(140.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(320.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.7183333333f, -91.4786666667f), "HZR", 0);  // HZR - False River Regional Airport
@@ -971,8 +968,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "HZR";
   tmp_map_marker.LONG_NAME = "False River Regional Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.1713333333f, -90.9403333333f), "REG", 0);  // REG - Louisiana Regional Airport
@@ -981,8 +978,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "REG";
   tmp_map_marker.LONG_NAME = "Louisiana Regional Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.5216666667f, -90.4183333333f), "HDC", 0);  // HDC - Hammond Northshore Regional Airport
@@ -991,10 +988,10 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "HDC";
   tmp_map_marker.LONG_NAME = "Hammond Northshore Regional Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(130);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(310);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(130.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(310.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.445f, -89.9888333333f), "L31", 0);         // L31 - St Tammany Regional Airport
@@ -1003,8 +1000,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "L31";
   tmp_map_marker.LONG_NAME = "St Tammany Regional Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.3463333333f, -89.8208333333f), "ASD", 0);  // ASD - Slidell Airport
@@ -1013,8 +1010,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "ASD";
   tmp_map_marker.LONG_NAME = "Slidell Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.4875f, -89.6511666667f), "MJD", 0);        // MJD - Picayune Municipal Airport
@@ -1023,8 +1020,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "MJD";
   tmp_map_marker.LONG_NAME = "Picayune Municipal Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.0425f, -90.0281666667f), "NEW", 0);        // NEW - Lakefront Airport
@@ -1033,8 +1030,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "NEW";
   tmp_map_marker.LONG_NAME = "Lakefront Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(180.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(360.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(29.8271666667f, -90.0266666667f), "NBG", 0);  // NBG - New Orleans NAS Jrb (Alvin Callender Field) Airport
@@ -1043,10 +1040,10 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "NBG";
   tmp_map_marker.LONG_NAME = "New Orleans NAS Jrb (Alvin Callender Field) Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(40);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(220);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(140);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(320);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(40.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(220.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(140.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(320.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(29.9933333333f, -90.259f), "MSY", 0);         // MSY - Louis Armstrong New Orleans International Airport
@@ -1055,10 +1052,10 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "MSY";
   tmp_map_marker.LONG_NAME = "Louis Armstrong New Orleans International Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(110);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(290);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(20);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(200);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(110.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(290.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(20.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(200.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(30.0875f, -90.5828333333f), "APS", 0);        // APS - Port of South Louisiana Exec Regional Airport
@@ -1067,8 +1064,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "APS";
   tmp_map_marker.LONG_NAME = "Port of South Louisiana Exec Regional Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // add_landmark(ImVec2(31.1785f, -90.4718333333f), "MCB", 0);        // MCB - Mc Comb/Pike County/John E Lewis Field Airport
@@ -1077,8 +1074,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "MCB";
   tmp_map_marker.LONG_NAME = "Mc Comb/Pike County/John E Lewis Field Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(170.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(350.0f);
   LANDMARKS.push_back(tmp_map_marker);
   
   tmp_map_marker.clear();
@@ -1086,8 +1083,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   tmp_map_marker.DISPLAY_NAME = "IYA";
   tmp_map_marker.LONG_NAME = "Abbeville Chris Crusta Memorial Airport";
   tmp_map_marker.TYPE = 1;
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(159);
-  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(339);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(159.0f);
+  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(339.0f);
   LANDMARKS.push_back(tmp_map_marker);
 
   // Regions
@@ -1635,7 +1632,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   RANGE_INDICATOR.draw_info(sdSysData);
 
   // Buttons
-  ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y + working_area.w - (3 * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL.y + 5))));
+  ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y + working_area.w - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL.y + 5.0f))));
   
   if (button_simple_color(sdSysData, "LOC", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
   {
@@ -1669,13 +1666,13 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
   // Draw Landmarks
 
-  for (int landmark = 0; landmark < LANDMARKS.size(); landmark++)
+  for (int landmark = 0; landmark < (int)LANDMARKS.size(); landmark++)
   {
     LANDMARKS[landmark].draw(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.current_lat_lon(), RANGE_INDICATOR.range());
   }
   
   // Draw Aircraft
-  for (int aircraft = 0; aircraft < ADSB_Widgets.size(); aircraft ++)
+  for (int aircraft = 0; aircraft < (int)ADSB_Widgets.size(); aircraft ++)
   {
     if (ADSB_Widgets[aircraft].is_expired(sdSysData) == false)
     {
@@ -1689,7 +1686,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::SetNextWindowSize(ImVec2(133, 350));
     if (ImGui::Begin("Location", &DISPLAY_LOCATION, sdSysData.SCREEN_DEFAULTS.flags_w_pop_scroll)) 
     {
-      for (int location = 0; location < LANDMARKS.size(); location ++)
+      for (int location = 0; location < (int)LANDMARKS.size(); location ++)
       {
         if (button_simple_color(sdSysData, LANDMARKS[location].DISPLAY_NAME.c_str(), sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
         {
@@ -1752,7 +1749,7 @@ int ADSB_SCREEN::find_HEX(string Hex)
 //  returns gadget position of aircraft with Hex ID
 {
   int return_int = -1;
-  for(int x=0; (x < ADSB_WIDGET_q.size()) && (return_int == -1); x++)
+  for(int x=0; (x < (int)ADSB_WIDGET_q.size()) && (return_int == -1); x++)
   {
     if(ADSB_WIDGET_q[x].AIRCRAFT_DATA.HEX.get_str_value() == Hex)
     {
@@ -1767,7 +1764,7 @@ int ADSB_SCREEN::find_expired()
 //  returns gadget position of aircraft with time expired.
 {
   int return_int = -1;
-  for(int x=0; (x < ADSB_WIDGET_q.size()) && (return_int == -1); x++)
+  for(int x=0; (x < (int)ADSB_WIDGET_q.size()) && (return_int == -1); x++)
   {
     if(ADSB_WIDGET_q[x].active() == false || ADSB_WIDGET_q[x].AIRCRAFT_DATA.data_count() == 0)
     {
@@ -1794,7 +1791,7 @@ void ADSB_SCREEN::update(system_data &sdSysData)
   SDATA.ADSB_ACTIVE = sdSysData.AIRCRAFT_COORD.is_active();
 
   // Prepare list to display.
-  for (int pos_search = 0; pos_search < SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos_search++)
+  for (int pos_search = 0; pos_search < (int)SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos_search++)
   {
     //Search gadget list for existing item to update.
     pos_found = find_HEX(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search].HEX.get_str_value());
@@ -1854,8 +1851,9 @@ void ADSB_SCREEN::update(system_data &sdSysData)
   sdSysData.AIRCRAFT_COORD.DATA.CHANGED = false;
 }
 
-void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
-                          const char *name, bool *p_open, ImGuiWindowFlags flags)
+//void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
+//                          const char *name, bool *p_open, ImGuiWindowFlags flags)
+void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms)
 { 
   ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
@@ -1926,7 +1924,7 @@ void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_
         }
         
         //for (int pos = 0; pos < SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos++)
-        for (int pos = 0; pos < ADSB_WIDGET_q.size(); pos++)
+        for (int pos = 0; pos < (int)ADSB_WIDGET_q.size(); pos++)
         {
           ADSB_WIDGET_q[pos].draw(sdSysData);
           /*

@@ -68,7 +68,7 @@ void timed_event::ClearAll(int intStartPos, int intEndPos)
 //Remove all timed event animations on a specific animation strip.
 {
 
-  for (int x = 0; x < teDATA.size(); x++)
+  for (int x = 0; x < (int)teDATA.size(); x++)
 
   if (teDATA[x].booCOMPLETE == false && 
       (  ((teDATA[x].intSTARTPOS >= intStartPos)  
@@ -86,9 +86,10 @@ void timed_event::ClearAll(int intStartPos, int intEndPos)
 
 // -------------------------------------------------------------------------------------
 // Timed Event LED Animations
-
+//bigCRGB timed_event::crgb_anim_color(stupid_random sRND, unsigned long tmeCurrentTime, unsigned long tmeAnimTime,
+//                        int intLED, int intEvent, timed_event_data &EventInfo)
 bigCRGB timed_event::crgb_anim_color(stupid_random sRND, unsigned long tmeCurrentTime, unsigned long tmeAnimTime,
-                        int intLED, int intEvent, timed_event_data &EventInfo)
+                        int intLED, timed_event_data &EventInfo)
 //  Returns a CRGB value of the single LED respective to what its value should
 //    be as it is in its time path.
 
@@ -196,7 +197,7 @@ bigCRGB timed_event::crgb_anim_color(stupid_random sRND, unsigned long tmeCurren
         }
         else
         {
-          if ((tmeElapsed * 2) <= (EventInfo.intDURATION))
+          if ((int)(tmeElapsed * 2) <= (EventInfo.intDURATION))
           {
             fltPower = ComputePowerHalfBot(tmeElapsed,EventInfo.intDURATION);
           }
@@ -235,7 +236,7 @@ bigCRGB timed_event::crgb_anim_color(stupid_random sRND, unsigned long tmeCurren
           CRGB crgbA;
           CRGB crgbB;
           //  Swap to second color and power down at mid point.
-          if ((tmeElapsed * 2) <= (EventInfo.intDURATION))
+          if ((int)(tmeElapsed * 2) <= (EventInfo.intDURATION))
           {
             fltPower = ComputePowerHalfBot(tmeElapsed,EventInfo.intDURATION);
 
@@ -337,10 +338,10 @@ bigCRGB timed_event::crgb_anim_color(stupid_random sRND, unsigned long tmeCurren
 
             // Continue with the lights illumination if it was lucky enough to be 
             //  turned on and if it was lucky enough to fall within the time to be turned on.
-            if ((NewElapsedTime >= 0) && (NewElapsedTime <= NewElapsedTime + NewDuration))
+            if (NewElapsedTime <= NewElapsedTime + NewDuration)
             {
               // Modified Pulse Routine ----  Pulse routine used offten.  I should function it. 
-              if ((NewElapsedTime * 2) <= (NewDuration))
+              if ((int)(NewElapsedTime * 2) <= (NewDuration))
               { 
                 fltPower = ComputePowerHalfBot(NewElapsedTime,NewDuration);
               }
@@ -400,7 +401,7 @@ void timed_event::process_led_light(int &led, timed_event_data &teDATA, system_d
           //  Breaking the norm, but also passing the led ID and
           //  original 4 colors to ... (consider rewrite)
           tempColor = crgb_anim_color(sRND, tmeCurrentTime, tmeStartAnim, 
-                                      led, 0, teDATA);  // Remove event param
+                                      led, teDATA);  // Remove event param
 
           //  Update the events completeness if its still active.
           if (tempColor.complete == false)
@@ -437,7 +438,8 @@ void timed_event::process_led_light(int &led, timed_event_data &teDATA, system_d
   } // End if tmeCurrentTime >= tmeStartAnim
 }
 
-bool timed_event::execute2(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime)
+//bool timed_event::execute2(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime)
+bool timed_event::execute2(system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime)
 //  Sets all requested light paths, start to end position, to begin their animation
 //    at a future time.
 
@@ -460,10 +462,10 @@ bool timed_event::execute2(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, 
   if (teDATA.size() > 0)
   {
     // Process each event, one by one.
-    for (int event = 0; event < teDATA.size(); event++)
+    for (int event = 0; event < (int)teDATA.size(); event++)
     {
-      int led_start = 0;
-      int led_end = 0;
+      //int led_start = 0;
+      //int led_end = 0;
 
       if (teDATA[event].booCOMPLETE == false)
       {

@@ -162,20 +162,27 @@ int SCREEN4::create(system_data &sdSysData)
 
     set_screen_default_colors(sdSysData);
 
-    style.WindowRounding = 8;
-    style.FrameRounding = 8;
-    style.ChildRounding = 8;
+    style.WindowRounding = 8.0f;
+    style.FrameRounding = 8.0f;
+    style.ChildRounding = 8.0f;
 
-    style.ScrollbarSize = 20;
+    style.ScrollbarSize = 20.0f;
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL2_Init();
 
+    /*
     io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
     ImFont* large_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
     ImFont* medium_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
     ImFont* very_large_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 100.0f);
+    */
+
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 100.0f);
     // Will track as "io.Fonts->Fonts.Data[1]" manually, for now.
 
     // Start the Dear ImGui frame
@@ -196,51 +203,51 @@ int SCREEN4::create(system_data &sdSysData)
     // Prepare Current Screen Widgets
     LIGHTS.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     LIGHTS.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    LIGHTS.update_text(sdSysData, "LED ILLUM", "LED ILLUM");
+    LIGHTS.update_text("LED ILLUM", "LED ILLUM");
 
     DEBUG.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.red();
     DEBUG.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.white();
-    DEBUG.update_text(sdSysData, "  DEBUG  ", "         ");
+    DEBUG.update_text("  DEBUG  ", "         ");
 
     OVERHEAD.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     OVERHEAD.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    OVERHEAD.update_text(sdSysData, " OVERHEAD ", " OVERHEAD ");
+    OVERHEAD.update_text(" OVERHEAD ", " OVERHEAD ");
 
     HAZARD.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.red();
     HAZARD.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    HAZARD.update_text(sdSysData, "  HAZARD  ", "  HAZARD  ");
+    HAZARD.update_text("  HAZARD  ", "  HAZARD  ");
 
     DAY_NIGHT.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     DAY_NIGHT.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    DAY_NIGHT.update_text(sdSysData, "  DAY  ", " NIGHT ");
+    DAY_NIGHT.update_text("  DAY  ", " NIGHT ");
 
     TIMER.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     TIMER.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    TIMER.update_text(sdSysData, " TIMER ", " TIMER ");
+    TIMER.update_text(" TIMER ", " TIMER ");
 
     DOOR1.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     DOOR1.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    DOOR1.update_text(sdSysData, " DOOR1", " DOOR1");
+    DOOR1.update_text(" DOOR1", " DOOR1");
 
     DOOR2.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     DOOR2.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    DOOR2.update_text(sdSysData, " DOOR2", " DOOR2");
+    DOOR2.update_text(" DOOR2", " DOOR2");
 
     DOOR3.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     DOOR3.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    DOOR3.update_text(sdSysData, "DOOR3 ", "DOOR3 ");
+    DOOR3.update_text("DOOR3 ", "DOOR3 ");
 
     DOOR4.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     DOOR4.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    DOOR4.update_text(sdSysData, "DOOR4 ", "DOOR4 ");
+    DOOR4.update_text("DOOR4 ", "DOOR4 ");
 
     AUTO.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     AUTO.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    AUTO.update_text(sdSysData, " AUTO  ", " AUTO  ");
+    AUTO.update_text(" AUTO  ", " AUTO  ");
 
     ADSB_IND.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     ADSB_IND.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    ADSB_IND.update_text(sdSysData, " ADS-B ", " ADS-B ");
+    ADSB_IND.update_text(" ADS-B ", " ADS-B ");
 
     string version = "v: ";
     version = version + Revision;
@@ -252,14 +259,14 @@ int SCREEN4::create(system_data &sdSysData)
 
     {
       BAR_TIMER.PROPS.LABEL = "Timer";
-      BAR_TIMER.PROPS.BAR_HEIGHT = 20;
-      BAR_TIMER.PROPS.MARKER_SIZE = 15;
+      BAR_TIMER.PROPS.BAR_HEIGHT = 20.0f;
+      BAR_TIMER.PROPS.MARKER_SIZE = 15.0f;
       BAR_TIMER.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.blue();
       BAR_TIMER.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.yellow();
       BAR_TIMER.PROPS.DRAW_MIN_MAX_ON_TOP = false;
       BAR_TIMER.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
       BAR_TIMER.PROPS.DRAW_MIN_MAX = false;
-      BAR_TIMER.PROPS.MAX = 1;
+      BAR_TIMER.PROPS.MAX = 1.0f;
       BAR_TIMER.PROPS.DRAW_RULER = true;
       BAR_TIMER.PROPS.COLOR_RULER = sdSysData.COLOR_SELECT.white();
       BAR_TIMER.PROPS.MAX_TICK_LEVEL = 3;
@@ -365,9 +372,9 @@ void SCREEN4::draw(system_data &sdSysData)
         }
 
         // Symbols
-        else if (character_pressed >= 32 && character_pressed <= 64 || 
-                  character_pressed >= 91 && character_pressed <= 96 || 
-                  character_pressed >= 123 && character_pressed <= 127)
+        else if ((character_pressed >= 32 && character_pressed <= 64) || 
+                  (character_pressed >= 91 && character_pressed <= 96) || 
+                  (character_pressed >= 123 && character_pressed <= 127))
         {
           COMMAND_TEXT += character_pressed;
           SCREEN_COMMS.command_text_set(COMMAND_TEXT);
@@ -404,14 +411,14 @@ void SCREEN4::draw(system_data &sdSysData)
 
     if (ImGui::Begin("Window", &show_test_window, sdSysData.SCREEN_DEFAULTS.flags)) // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
     {
-      ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 85, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+      ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 85.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         // ---------------------------------------------------------------------------------------
         // Status Sub Window
 
-        ImGui::BeginChild("Status", ImVec2(ImGui::GetContentRegionAvail().x, 60), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+        ImGui::BeginChild("Status", ImVec2(ImGui::GetContentRegionAvail().x, 60.0f), true, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
-          float region_div_4 = ImGui::GetContentRegionAvail().x / 4;
+          float region_div_4 = ImGui::GetContentRegionAvail().x / 4.0f;
 
           // Divide sub window into 4
           // Left
@@ -440,15 +447,15 @@ void SCREEN4::draw(system_data &sdSysData)
           // Mid
           ImGui::SameLine();
 
-          ImGui::BeginChild("Status Mid", ImVec2(region_div_4 * 2, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          ImGui::BeginChild("Status Mid", ImVec2(region_div_4 * 2.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
             // Display Lights Off mode toggle.
             ImGui::BeginGroup();
             {
-              LIGHTS.update_tf(sdSysData, sdSysData.Lights_On.value());
+              LIGHTS.update_tf(sdSysData.Lights_On.value());
               LIGHTS.draw(sdSysData);
 
-              DEBUG.update_tf(sdSysData, SCREEN_COMMS.DEBUG_STATUS.DEBUG);
+              DEBUG.update_tf(SCREEN_COMMS.DEBUG_STATUS.DEBUG);
               DEBUG.draw(sdSysData);
             }
             ImGui::EndGroup();
@@ -458,10 +465,10 @@ void SCREEN4::draw(system_data &sdSysData)
             // Status Group
             ImGui::BeginGroup();
             {
-              OVERHEAD.update_tf(sdSysData, sdSysData.booOverheadRunning);
+              OVERHEAD.update_tf(sdSysData.booOverheadRunning);
               OVERHEAD.draw(sdSysData);
 
-              HAZARD.update_tf(sdSysData, sdSysData.booHazardRunning);
+              HAZARD.update_tf(sdSysData.booHazardRunning);
               HAZARD.draw(sdSysData);
             }
             ImGui::EndGroup();
@@ -472,14 +479,14 @@ void SCREEN4::draw(system_data &sdSysData)
             ImGui::BeginGroup();
             {
               // Lights
-              if (DAY_NIGHT.update_tf(sdSysData, sdSysData.Day_On_With_Override.value()))
+              if (DAY_NIGHT.update_tf(sdSysData.Day_On_With_Override.value()))
               {
                 //set_screen_default_colors(sdSysData);
               }
               DAY_NIGHT.draw(sdSysData);
 
               // Timer
-              TIMER.update_tf(sdSysData, sdSysData.cdTIMER.is_active());
+              TIMER.update_tf(sdSysData.cdTIMER.is_active());
               TIMER.draw(sdSysData);
             }
             ImGui::EndGroup();
@@ -489,21 +496,21 @@ void SCREEN4::draw(system_data &sdSysData)
             // Door Group
             ImGui::BeginGroup();
             {
-              DOOR2.update_tf(sdSysData, sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value);
+              DOOR2.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value);
               DOOR2.draw(sdSysData);
               
               ImGui::SameLine();
               
-              DOOR4.update_tf(sdSysData, sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value);
+              DOOR4.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value);
               DOOR4.draw(sdSysData);
 
 
-              DOOR1.update_tf(sdSysData, sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value);
+              DOOR1.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value);
               DOOR1.draw(sdSysData);
               
               ImGui::SameLine();
               
-              DOOR3.update_tf(sdSysData, sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value);
+              DOOR3.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value);
               DOOR3.draw(sdSysData);
             }
             ImGui::EndGroup();
@@ -513,10 +520,10 @@ void SCREEN4::draw(system_data &sdSysData)
             // Auto ADSB
             ImGui::BeginGroup();
             {
-              AUTO.update_tf(sdSysData, sdSysData.CAR_INFO.active());
+              AUTO.update_tf(sdSysData.CAR_INFO.active());
               AUTO.draw(sdSysData);
 
-              ADSB_IND.update_tf(sdSysData, sdSysData.AIRCRAFT_COORD.is_active());
+              ADSB_IND.update_tf(sdSysData.AIRCRAFT_COORD.is_active());
               ADSB_IND.draw(sdSysData);
             }
             ImGui::EndGroup();
@@ -570,7 +577,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
               ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
-                AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w, false);
+                AUTOMOBILE.display_sidebar(sdSysData, false);
               }
               ImGui::EndChild();
             }
@@ -584,13 +591,13 @@ void SCREEN4::draw(system_data &sdSysData)
 
           else if (DISPLAY_SCREEN == 1)
           {
-            AUTOMOBILE.display(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+            AUTOMOBILE.display(sdSysData, SCREEN_COMMS);
             
             ImGui::SameLine();
 
             ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
             {
-              AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w, false);
+              AUTOMOBILE.display_sidebar(sdSysData, false);
             }
             ImGui::EndChild();
           }
@@ -601,7 +608,7 @@ void SCREEN4::draw(system_data &sdSysData)
             {
               ImGui::BeginChild("ADSB_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
-                ADSB.display(sdSysData, SCREEN_COMMS, "ADSB", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+                ADSB.display(sdSysData, SCREEN_COMMS);
               }
               ImGui::EndChild();
 
@@ -609,13 +616,13 @@ void SCREEN4::draw(system_data &sdSysData)
 
               ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
-                AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w, false);
+                AUTOMOBILE.display_sidebar(sdSysData, false);
               }
               ImGui::EndChild();
             }
             else
             {
-              ADSB.display(sdSysData, SCREEN_COMMS, "ADSB", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+              ADSB.display(sdSysData, SCREEN_COMMS);
             }
           }
 
@@ -635,7 +642,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
               ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
-                AUTOMOBILE.display_sidebar(sdSysData, SCREEN_COMMS, "Automobile", NULL, sdSysData.SCREEN_DEFAULTS.flags_w, false);
+                AUTOMOBILE.display_sidebar(sdSysData, false);
               }
               ImGui::EndChild();
             }
@@ -699,7 +706,7 @@ void SCREEN4::draw(system_data &sdSysData)
       // ---------------------------------------------------------------------------------------
       // Menus Sub Window
 
-      ImGui::BeginChild("System Menu", ImVec2(0, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+      ImGui::BeginChild("System Menu", ImVec2(0.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         // Main Menu
         if (DISPLAY_MENU == 0)
@@ -942,8 +949,8 @@ void SCREEN4::draw(system_data &sdSysData)
       if (ImGui::Begin("Timer", &DISPLAY_TIMER, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
       {
         long elaped_time = 0;
-        float duration_time = 0;
-        float remaining_time = 0;
+        float duration_time = 0.0f;
+        float remaining_time = 0.0f;
 
         // Calculate
         duration_time = (float)sdSysData.cdTIMER.duration();
@@ -1156,7 +1163,7 @@ void SCREEN4::draw(system_data &sdSysData)
     // Go through and display all generic alerts
     if (sdSysData.ALERTS_2.ALERTS.size() > 0)
     {
-      for (int alert_num = 0; alert_num < sdSysData.ALERTS_2.ALERTS.size(); alert_num++)
+      for (int alert_num = 0; alert_num < (int)sdSysData.ALERTS_2.ALERTS.size(); alert_num++)
       {
         ImVec2 screen_pos = ImGui::GetCursorScreenPos();
 
@@ -1188,7 +1195,7 @@ void SCREEN4::draw(system_data &sdSysData)
     if (DISPLAY_QR_CODE == true)
     {
       //style.ScrollbarSize + style.WindowPadding.y * 2.0f and fontsize for titlebar
-      ImGui::SetNextWindowSize(ImVec2(QR_CODE.widtht() + style.WindowPadding.x * 2.0f, QR_CODE.height() +18 + style.WindowPadding.y * 2.0f));
+      ImGui::SetNextWindowSize(ImVec2(QR_CODE.widtht() + style.WindowPadding.x * 2.0f, QR_CODE.height() + 18.0f + style.WindowPadding.y * 2.0f));
       ImGui::Begin("About", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
       QR_CODE.draw();
       ImGui::End();

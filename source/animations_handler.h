@@ -110,9 +110,11 @@ class ANIMATION_HANDLER
   // Load all animations json file into system memory, LIBRARY, to be duplicated, 
   //  duplicate modified, then duplicate called, when needed.
 
+  //void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
+  //                    string Collection_Name, string Animation_Name, int On_Group, 
+  //                      string String_Var_1, string String_Var_2);
   void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-                      string Collection_Name, string Animation_Name, int On_Group, 
-                      string String_Var_1, string String_Var_2);
+                      string Collection_Name, string Animation_Name, int On_Group);
   // Primary Call Animation Routine including all parameters
   //  sdSysData - System Data
   //  tmeCurrentTime - Time
@@ -131,9 +133,9 @@ class ANIMATION_HANDLER
   //  Animation_Name  - json animations animation from collection
   //  Runs on all groups defined by the json
 
-  void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-                      string Collection_Name, string Animation_Name,
-                      int On_Group);
+  //void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
+  //                    string Collection_Name, string Animation_Name,
+  //                    int On_Group);
   // Call Animation Routine with limited parameters
   //  sdSysData - System Data
   //  tmeCurrentTime - Time
@@ -141,9 +143,11 @@ class ANIMATION_HANDLER
   //  Animation_Name  - json animations animation from collection
   //  Runs on specific group
 
-  void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-                      string Collection_Name, string Animation_Name, 
-                      string String_Var_1, string String_Var_2);
+  //void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
+  //                    string Collection_Name, string Animation_Name, 
+  //                    string String_Var_1, string String_Var_2);
+  //void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
+  //                    string Collection_Name, string Animation_Name);
   // Call Animation Routine with limited parameters
   //  sdSysData - System Data
   //  tmeCurrentTime - Time

@@ -21,12 +21,12 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
 {
   ImColor ret_color;
 
-  float power = (float)(sdSysData.PROGRAM_TIME.current_frame_time() - Start_time) / (float)Duration;
+  float power = (float)(sdSysData.PROGRAM_TIME.current_frame_time() - (float)Start_time) / (float)Duration;
   
-  float r = (power * (float)End_Color.Value.x) + ((1 - power) * (float)Start_Color.Value.x);
-  float g = (power * (float)End_Color.Value.y) + ((1 - power) * (float)Start_Color.Value.y);
-  float b = (power * (float)End_Color.Value.z) + ((1 - power) * (float)Start_Color.Value.z);
-  float a = (power * (float)End_Color.Value.w) + ((1 - power) * (float)Start_Color.Value.w);
+  float r = (power * End_Color.Value.x) + ((1.0f - power) * Start_Color.Value.x);
+  float g = (power * End_Color.Value.y) + ((1.0f - power) * Start_Color.Value.y);
+  float b = (power * End_Color.Value.z) + ((1.0f - power) * Start_Color.Value.z);
+  //float a = (power * End_Color.Value.w) + ((1.0f - power) * Start_Color.Value.w);
 
   return ImColor(r, g, b);
 }
@@ -156,12 +156,12 @@ void NEW_COLOR_SCALE::add_color_value_pair(float Value_Is_LT_or_EQ, int Return_C
 
 int NEW_COLOR_SCALE::get_color(float Value)
 {
-  int ret_color_combo;
+  int ret_color_combo = 0;
   bool found = false;
   
   if (COLOR_SCALE.size() > 0)
   {
-    for (int pos = 0; pos < COLOR_SCALE.size() && found == false; pos++)
+    for (int pos = 0; pos < (int)COLOR_SCALE.size() && found == false; pos++)
     {
       if (Value <= COLOR_SCALE[pos].LT_or_EQ)
       {
@@ -219,13 +219,15 @@ void W_TEXT::draw(system_data &sdSysData)
 
 // ---------------------------------------------------------------------------------------
 
-void W_TEXT_TF::update_text(system_data &sdSysData, string True_Text, string False_Text)
+//void W_TEXT_TF::update_text(system_data &sdSysData, string True_Text, string False_Text)
+void W_TEXT_TF::update_text(string True_Text, string False_Text)
 {
   TEXT_TRUE = True_Text;
   TEXT_FALSE = False_Text;
 }
 
-bool W_TEXT_TF::update_tf(system_data &sdSysData, bool True_False)
+//bool W_TEXT_TF::update_tf(system_data &sdSysData, bool True_False)
+bool W_TEXT_TF::update_tf(bool True_False)
 {
   if (TRUE_FALSE == True_False)
   {
@@ -477,7 +479,7 @@ void BAR_TECH::update_value(system_data &sdSysData, float Value)
 void BAR_TECH::draw(system_data &sdSysData)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
-  ImGuiIO &io = ImGui::GetIO();
+  //ImGuiIO &io = ImGui::GetIO();
 
   // Min Max
   if (PROPS.HORIZONTAL && PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_TOP)
@@ -526,18 +528,18 @@ void BAR_TECH::draw(system_data &sdSysData)
       float min_location = (MIN_MAX.min_float() / PROPS.MAX) * size.x;
       float max_location = (MIN_MAX.max_float() / PROPS.MAX) * size.x;
 
-      if (min_location < 0)
+      if (min_location < 0.0f)
       {
-        min_location = 0;
+        min_location = 0.0f;
       }
       else if (min_location > size.x)
       {
         min_location = size.x;
       }
 
-      if (max_location < 0)
+      if (max_location < 0.0f)
       {
-        max_location = 0;
+        max_location = 0.0f;
       }
       else if (max_location > size.x)
       {
@@ -548,8 +550,8 @@ void BAR_TECH::draw(system_data &sdSysData)
                                 ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT), 
                                 sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).DIM, 5.0f, ImDrawFlags_None);
 
-      draw_list->AddRect(ImVec2(pos.x + min_location, pos.y +2), 
-                                ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT -2), 
+      draw_list->AddRect(ImVec2(pos.x + min_location, pos.y + 2.0f), 
+                                ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT - 2.0f), 
                                 sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
 
       if (PROPS.DRAW_RULER)
@@ -567,7 +569,7 @@ void BAR_TECH::draw(system_data &sdSysData)
 
       if (min_location < 0)
       {
-        min_location = 0;
+        min_location = 0.0f;
       }
       else if (min_location > size.y)
       {
@@ -576,7 +578,7 @@ void BAR_TECH::draw(system_data &sdSysData)
 
       if (max_location < 0)
       {
-        max_location = 0;
+        max_location = 0.0f;
       }
       else if (max_location > size.y)
       {
@@ -587,8 +589,8 @@ void BAR_TECH::draw(system_data &sdSysData)
                                 ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - min_location), 
                                 sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).DIM, 5.0f, ImDrawFlags_None);
 
-      draw_list->AddRect(ImVec2(pos.x, pos.y + size.y - max_location -2), 
-                                ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - min_location +2), 
+      draw_list->AddRect(ImVec2(pos.x, pos.y + size.y - max_location - 2.0f), 
+                                ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - min_location + 2.0f), 
                                 sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
 
       if (PROPS.DRAW_RULER)
@@ -601,19 +603,19 @@ void BAR_TECH::draw(system_data &sdSysData)
   // Draw Value Marker
   if (PROPS.HORIZONTAL)
   {
-    float marker_location = abs((VALUE_MARKER.value() / PROPS.MAX) * size.x +1);
+    float marker_location = abs((VALUE_MARKER.value() / PROPS.MAX) * size.x + 1.0f);
 
-    if (marker_location < 0)
+    if (marker_location < 0.0f)
     {
-      marker_location = 0;
+      marker_location = 0.0f;
     }
     if (marker_location > size.x)
     {
       marker_location = size.x;
     }
 
-    draw_list->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE/2, pos.y), 
-                              ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE/2 , pos.y + PROPS.BAR_HEIGHT), 
+    draw_list->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
+                              ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
                               sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);
 
     // Move Cursor Pos to new position
@@ -629,17 +631,17 @@ void BAR_TECH::draw(system_data &sdSysData)
   {
     float marker_location = abs((VALUE_MARKER.value() / PROPS.MAX) * size.y +1);
 
-    if (marker_location < 0)
+    if (marker_location < 0.0f)
     {
-      marker_location = 0;
+      marker_location = 0.0f;
     }
     if (marker_location > size.y)
     {
       marker_location = size.y;
     }
 
-    draw_list->AddRectFilled(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE/2)), 
-                              ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE/2)), 
+    draw_list->AddRectFilled(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
+                              ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
                               sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);
 
     // Move Cursor Pos to new position

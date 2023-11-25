@@ -95,8 +95,8 @@ class T_LARGE_NUMBER_DISPLAY
   IMPACT_RESISTANCE_FLOAT_FRAME_COUNT VALUE_WHEEL;
   BOOLEAN_GRADIANT WHEEL_COLOR;
 
-  float VALUE = 0;
-  float VALUE_COMPARE = 0;
+  float VALUE = 0.0f;
+  float VALUE_COMPARE = 0.0f;
 
   string VALUE_TEXT = ""; 
 
@@ -132,7 +132,8 @@ class T_LARGE_NUMBER_DISPLAY
 
   void update_value(system_data &sdSysData, float Value, float Compare_Value, bool Is_Within);
   void update_value(system_data &sdSysData, float Value);
-  void update_value(system_data &sdSysData, string Text);
+  //void update_value(system_data &sdSysData, string Text);
+  void update_value(string Text);
 
   bool draw(system_data &sdSysData, bool Draw, float Y_Height);
   bool draw(system_data &sdSysData, bool Draw);
@@ -147,8 +148,8 @@ class W_GUAGE_PROPERTIES
 
   string LABEL = " ";
 
-  float VALUE_MIN = 0;
-  float VALUE_MAX = 75;
+  float VALUE_MIN = 0.0f;
+  float VALUE_MAX = 75.0f;
 
   int MIN_MAX_TIME_SPAN = 60000;
   int MIN_MAX_TIME_SLICES = 20;
@@ -165,7 +166,7 @@ class W_GUAGE
   W_TEXT DSP_MAX;
   W_TEXT DSP_VALUE;
 
-  float VALUE = 0;
+  float VALUE = 0.0f;
   MIN_MAX_TIME MIN_MAX;
 
   public:
@@ -209,7 +210,7 @@ class T_DATA_DISPLAY
   ImVec2 LABEL_PIXEL_SIZE;
   
   string VALUE_STRING = "";
-  float VALUE_FLOAT = 0;
+  float VALUE_FLOAT = 0.0f;
 
   MARKER_GADGET MARKER;
 
@@ -238,11 +239,11 @@ class DISPLAY_DATA_AUTOMOBILE
 
   int MESSAGES = -1;
   
-  float SPEED = 0;
-  float SPEED_IMPRES = 0;
-  float ACCELERATION = 0;
+  float SPEED = 0.0f;
+  float SPEED_IMPRES = 0.0f;
+  float ACCELERATION = 0.0f;
 
-  float CRUISE_CONTROL_SPEED = 0;
+  float CRUISE_CONTROL_SPEED = 0.0f;
   bool CRUISE_CONTROL_SET = false;
 
   int GEAR_VAL = 0;
@@ -255,21 +256,21 @@ class DISPLAY_DATA_AUTOMOBILE
   // Pressure
 
   string FUEL_RAIL_PRESSURE = "X";
-  float FUEL_RAIL_PRESSURE_VAL = 0;
+  float FUEL_RAIL_PRESSURE_VAL = 0.0f;
   string EVAP_SYSTEM_VAP_PRESSURE = "X";
-  float EVAP_SYSTEM_VAP_PRESSURE_VAL = 0;
+  float EVAP_SYSTEM_VAP_PRESSURE_VAL = 0.0f;
 
   string VOLTAGE = "X";
-  float VOLTAGE_VAL = 0;
+  float VOLTAGE_VAL = 0.0f;
 
   string BAROMETER = "X";
-  float BAROMETER_VAL = 0;
+  float BAROMETER_VAL = 0.0f;
 
   int CAM_COMM_ERR = 0;
 
   // Steering
 
-  float STEERING_WHEEL_ANGLE_VAL = 0;
+  float STEERING_WHEEL_ANGLE_VAL = 0.0f;
   bool STEERING_WHEEL_LEFT_OF_CENTER_VAL = false;
   string STEERING_WHEEL_ANGLE = "X";
   string STEERING_WHEEL_LEFT_OF_CENTER = "X";
@@ -278,19 +279,19 @@ class DISPLAY_DATA_AUTOMOBILE
   // Temp
 
   string TEMP_AMBIANT_STRING = "";
-  float TEMP_AMBIANT = 0;
+  float TEMP_AMBIANT = 0.0f;
   
   string TEMP_AIR_INTAKE_STRING = "";
-  float TEMP_AIR_INTAKE = 0;
+  float TEMP_AIR_INTAKE = 0.0f;
   
   string TEMP_COOLANT_STRING = "";
-  float TEMP_COOLANT = 0;
+  float TEMP_COOLANT = 0.0f;
 
   string TEMP_CATALYST_STRING = "";
-  float TEMP_CATALYST = 0;
+  float TEMP_CATALYST = 0.0f;
 
   string TEMP_S_TEMP_STRING = "";
-  float TEMP_S_TEMP = 0;
+  float TEMP_S_TEMP = 0.0f;
 
   bool LIGHTS_HEDLIGHTS_ON = false;
   bool LIGHTS_PARKING_ON = false;
@@ -300,28 +301,28 @@ class DISPLAY_DATA_AUTOMOBILE
   bool PARKING_BRAKE = false;
 
   string FUEL_LEVEL = "";
-  float FUEL_LEVEL_VAL = 0;
+  float FUEL_LEVEL_VAL = 0.0f;
 
   // TIRE TTL 
 
-  float LF_TTL_BUFFER_FILL = 0;
-  float RF_TTL_BUFFER_FILL = 0;
-  float LB_TTL_BUFFER_FILL = 0;
-  float RB_TTL_BUFFER_FILL = 0;
+  float LF_TTL_BUFFER_FILL = 0.0f;
+  float RF_TTL_BUFFER_FILL = 0.0f;
+  float LB_TTL_BUFFER_FILL = 0.0f;
+  float RB_TTL_BUFFER_FILL = 0.0f;
 
-  float LF_TTL_BUFFER_FILL_MAX = 0;
-  float RF_TTL_BUFFER_FILL_MAX = 0;
-  float LB_TTL_BUFFER_FILL_MAX = 0;
-  float RB_TTL_BUFFER_FILL_MAX = 0;
+  float LF_TTL_BUFFER_FILL_MAX = 0.0f;
+  float RF_TTL_BUFFER_FILL_MAX = 0.0f;
+  float LB_TTL_BUFFER_FILL_MAX = 0.0f;
+  float RB_TTL_BUFFER_FILL_MAX = 0.0f;
 
   string LF_TTL = "";
-  float LF_TTL_VAL = 0;
+  float LF_TTL_VAL = 0.0f;
   string RF_TTL = "";
-  float RF_TTL_VAL = 0;
+  float RF_TTL_VAL = 0.0f;
   string LB_TTL = "";
-  float LB_TTL_VAL = 0;
+  float LB_TTL_VAL = 0.0f;
   string RB_TTL = "";
-  float RB_TTL_VAL = 0;
+  float RB_TTL_VAL = 0.0f;
 
   // Display Data
   T_DATA_DISPLAY D_FUEL_RAIL_PRESSURE;
@@ -434,11 +435,14 @@ class AUTOMOBILE_SCREEN
 
   void update(system_data &sdSysData);
 
-  void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
-                                const char *name, bool *p_open, ImGuiWindowFlags flags);
+  //void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
+  //                              const char *name, bool *p_open, ImGuiWindowFlags flags);
+  void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms);
 
-  void display_sidebar(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
-                              const char *name, bool *p_open, ImGuiWindowFlags flags, 
+  //void display_sidebar(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
+  //                            const char *name, bool *p_open, ImGuiWindowFlags flags, 
+  //                            bool Automobile_Screen_Selected);
+  void display_sidebar(system_data &sdSysData, 
                               bool Automobile_Screen_Selected);
 
 };

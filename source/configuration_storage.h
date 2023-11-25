@@ -26,11 +26,13 @@ using namespace std;
 //  Configuration
 
 // Load Configuration
-bool load_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename);
+//bool load_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename);
+bool load_json_configuration(system_data &sdSysData, string Directory, string Filename);
 
 // -------------------------------------------------------------------------------------
 // Save Configuration
-bool save_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename);
+//bool save_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename);
+bool save_json_configuration(system_data &sdSysData, string Directory, string Filename);
 
 // -------------------------------------------------------------------------------------
 //  Running State
@@ -39,7 +41,8 @@ bool save_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
 bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename);
 
 // Save Saved State
-bool save_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename);
+//bool save_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename);
+bool save_running_state_json(system_data &sdSysData, string strFilename);
 
 // -------------------------------------------------------------------------------------
 // Load Playlist

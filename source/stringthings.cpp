@@ -61,7 +61,7 @@ string linemerge_left_justify(int size, string line, string text)
     return_string = text;
   }
 
-  if((return_string.size() > size) && (size > 0))
+  if(((int)return_string.size() > size) && (size > 0))
   {
     return_string.erase(size, line.size() - size);
   }
@@ -93,7 +93,7 @@ string linemerge_right_justify(int size, string line, string text)
     return_string = text;
   }
 
-  if(return_string.size() > size)
+  if((int)return_string.size() > size)
   {
     return_string.erase(0, return_string.size() - size);
   }
@@ -107,11 +107,11 @@ string right_justify(int size, string text)
 {
   string return_string = "";
 
-  if (text.size() > size)
+  if ((int)text.size() > size)
   {
     return_string = text.erase(0, text.size()- size);
   }
-  else if (text.size() == size)
+  else if ((int)text.size() == size)
   {
     return_string = text;
   }
@@ -141,11 +141,11 @@ string center_justify(int size, string text)
 {
   string return_string = "";
 
-  if (text.size() > size)
+  if ((int)text.size() > size)
   {
     return_string = left_justify(size, text);
   }
-  else if (text.size() == size)
+  else if ((int)text.size() == size)
   {
     return_string = text;
   }
@@ -220,7 +220,7 @@ bool left_of_char(string Text, char Break_Char, string &Left)
 
   int pos = Text.find(Break_Char);
 
-  if (pos == string::npos)
+  if (pos == (int)string::npos)
   {
     ret_success = false;
   }
@@ -238,7 +238,7 @@ bool right_of_char(string Text, char Break_Char, string &Right)
 
   int pos = Text.find(Break_Char);
 
-  if (pos == string::npos)
+  if (pos == (int)string::npos)
   {
     ret_success = false;
   }
@@ -378,9 +378,9 @@ string to_string_round_to_nth(float Value, int nth)
 
   int pos = ret_string.find('.');
 
-  if (pos != string::npos)
+  if (pos != (int)string::npos)
   {
-    if (pos + nth +1 <= ret_string.size())
+    if (pos + nth +1 <= (int)ret_string.size())
     {
       ret_string.erase(pos + nth +1, ret_string.size() - (pos + nth));
     }

@@ -66,7 +66,7 @@ void countdown_timer::update(unsigned long Current_Time_millis)
 {
   if (ACTIVE == true)
   {
-    if (elapsed_time(Current_Time_millis) >= DURATION)
+    if (elapsed_time(Current_Time_millis) >= (long)DURATION)
     {
       if (TRIGGERED == false)
       {
@@ -599,7 +599,7 @@ void MIN_MAX_TIME::put_value(float Value, unsigned long tmeFrame_Time)
     // Slices are time based, new slice created at when time elapsed.
     if (tmeFrame_Time > TIME_SLICE_CREATED_FRAME_TIME + SLICE_TIME)
     {
-      if (TIME_SLICES.size() >= PROP.SLICES)
+      if ((int)TIME_SLICES.size() >= PROP.SLICES)
       {
         // New slice needed and max num reached. pop top and create new in back.
         TIME_SLICES.pop_front();
@@ -608,7 +608,7 @@ void MIN_MAX_TIME::put_value(float Value, unsigned long tmeFrame_Time)
         create();
         TIME_SLICES.push_back(new_time_slice);
       }
-      else if (TIME_SLICES.size() < PROP.SLICES)
+      else if ((int)TIME_SLICES.size() < PROP.SLICES)
       {
         // New slice needed and max num not reached. create new in back.
         MIN_MAX_TIME_SLICE new_time_slice;
@@ -628,7 +628,7 @@ void MIN_MAX_TIME::put_value(float Value, unsigned long tmeFrame_Time)
     // Slices disregard time and instead based on sample size.
     if (TIME_SLICES.back().samples() > PROP.SAMPLE_LIMIT)
     {
-      if (TIME_SLICES.size() < PROP.SLICES)
+      if ((int)TIME_SLICES.size() < PROP.SLICES)
       {
         MIN_MAX_TIME_SLICE new_time_slice;
         new_time_slice.clear(tmeFrame_Time);
@@ -662,7 +662,7 @@ float MIN_MAX_TIME::min_float()
     {
       min = TIME_SLICES[0].min();
 
-      for (int x = 1; x < TIME_SLICES.size(); x++)
+      for (int x = 1; x < (int)TIME_SLICES.size(); x++)
       {
         if (min > TIME_SLICES[x].min())
         {
@@ -694,7 +694,7 @@ float MIN_MAX_TIME::max_float()
     {
       max = TIME_SLICES[0].max();
 
-      for (int x = 1; x < TIME_SLICES.size(); x++)
+      for (int x = 1; x < (int)TIME_SLICES.size(); x++)
       {
         if (max < TIME_SLICES[x].max())
         {
@@ -727,7 +727,7 @@ float MIN_MAX_TIME::mean_float()
   {
     if (TIME_SLICES.size()> 0)
     {
-      for (int x = 0; x < TIME_SLICES.size(); x++)
+      for (int x = 0; x < (int)TIME_SLICES.size(); x++)
       {
         total_total = total_total + TIME_SLICES[x].total();
         total_samples = total_samples + TIME_SLICES[x].samples();
@@ -755,7 +755,7 @@ int MIN_MAX_TIME::direction()
   {
     if (TIME_SLICES.size()> 0)
     {
-      for (int x = 1; x < TIME_SLICES.size(); x++)
+      for (int x = 1; x < (int)TIME_SLICES.size(); x++)
       {
         value_difference = value_difference + (TIME_SLICES[x].mean() - TIME_SLICES[x-1].mean());
       }
@@ -836,7 +836,7 @@ float IMPACT_RESISTANCE_FLOAT::latest()
 
 float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
 {
-  float ret_impact_value = 0.0f;
+  //float ret_impact_value = 0.0f;
   float mean = 0.0f;
   float total = 0.0f;
 
@@ -849,7 +849,7 @@ float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
     {
       OLDEST_ENTRY_TIME = Time;
       
-      for (int pos = 0; pos < VALUE_COLLECTION.size(); pos++)
+      for (int pos = 0; pos < (int)VALUE_COLLECTION.size(); pos++)
       {
         // Only add values of items not time expired.
         if (VALUE_COLLECTION[pos].ENTRY_TIME + PROPS.ALIVE_TIME > Time)
@@ -881,7 +881,7 @@ float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
         // Calculate Standard Deviation
         float stdev = 0.0f;
 
-        for (int pos = 0; pos < VALUE_COLLECTION.size(); pos++)
+        for (int pos = 0; pos < (int)VALUE_COLLECTION.size(); pos++)
         {
           if (VALUE_COLLECTION[pos].ENTRY_TIME + PROPS.ALIVE_TIME > Time)
           {
@@ -892,7 +892,7 @@ float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
         stdev = sqrt(stdev / VALUE_COLLECTION.size());
 
         // Calculate Emperical Rule
-        for (int pos = 0; pos < VALUE_COLLECTION.size(); pos++)
+        for (int pos = 0; pos < (int)VALUE_COLLECTION.size(); pos++)
         {
           if (VALUE_COLLECTION[pos].ENTRY_TIME + PROPS.ALIVE_TIME > Time)
           {

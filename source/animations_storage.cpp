@@ -35,24 +35,24 @@ bool ANIMATIONS_STORAGE::load_collections(string Directory, string Filename)
     // Parse Animations and store into memory
 
     // Collections
-    for (int collection = 0; collection < animations_json.ROOT.DATA.size(); collection++)
+    for (int collection = 0; collection < (int)animations_json.ROOT.DATA.size(); collection++)
     {
 
       ANIMATIONS_COLLECTION tmp_collection;
       tmp_collection.LABEL = animations_json.ROOT.DATA[collection].label();
 
       // Animations
-      for (int animation = 0; animation < animations_json.ROOT.DATA[collection].DATA[0].DATA.size(); animation++)
+      for (int animation = 0; animation < (int)animations_json.ROOT.DATA[collection].DATA[0].DATA.size(); animation++)
       {
         ANIMATIONS_ANIMATION tmp_animation;
         tmp_animation.LABEL = animations_json.ROOT.DATA[collection].DATA[0].DATA[animation].label();
 
         // Events
-        for (int event = 0; event < animations_json.ROOT.DATA[collection].DATA[0].DATA[animation].DATA.size(); event++)
+        for (int event = 0; event < (int)animations_json.ROOT.DATA[collection].DATA[0].DATA[animation].DATA.size(); event++)
         {
           ANIMATIONS_EVENT tmp_event;
           // Event items
-          for (int item = 0; item < animations_json.ROOT.DATA[collection].DATA[0].DATA[animation].DATA[event].DATA.size(); item++)
+          for (int item = 0; item < (int)animations_json.ROOT.DATA[collection].DATA[0].DATA[animation].DATA[event].DATA.size(); item++)
           {
             // Run on conditions
             animations_json.ROOT.DATA[collection].DATA[0].DATA[animation].DATA[event].DATA[item].get_if_is("Run_On_LED_Strip_ID", tmp_animation.Run_On_LED_Strip_ID);
@@ -103,7 +103,7 @@ int ANIMATIONS_STORAGE::get_collection_pos(string Name)
 {
   int ret_pos = -1;
 
-  for (int pos = 0; pos < COLLECTION.size() && ret_pos == -1; pos++)
+  for (int pos = 0; pos < (int)COLLECTION.size() && ret_pos == -1; pos++)
   {
     if (COLLECTION[pos].LABEL == Name)
     {
@@ -118,7 +118,7 @@ int ANIMATIONS_STORAGE::get_animation_pos(int Collection_Pos ,string Name)
 {
   int ret_pos = -1;
 
-  for (int pos = 0; pos < COLLECTION[Collection_Pos].ANIMATIONS.size() && ret_pos == -1; pos++)
+  for (int pos = 0; pos < (int)COLLECTION[Collection_Pos].ANIMATIONS.size() && ret_pos == -1; pos++)
   {
     if (COLLECTION[Collection_Pos].ANIMATIONS[pos].LABEL == Name)
     {

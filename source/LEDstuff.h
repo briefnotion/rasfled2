@@ -96,7 +96,8 @@ class v_profile_strip
 
   // -------------------------------------------------------------------------------------
 
-  void set(int intId, string strName, string strPosition, int intStart_Pos, bool forward, bool bot_at_start);
+  //void set(int intId, string strName, string strPosition, int intStart_Pos, bool forward, bool bot_at_start);
+  void set(int intId, string strName, string strPosition, bool forward, bool bot_at_start);
 
   void create(int size);
 
@@ -135,7 +136,8 @@ class v_profile_strip_group
 
   void status_set(string strName, string strStatus);
 
-  void set(int intId, string strName, int intStart_Pos);
+  //void set(int intId, string strName, int intStart_Pos);
+  void set(int intId, string strName);
 
   int led_count();
 

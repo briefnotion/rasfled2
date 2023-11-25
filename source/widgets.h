@@ -69,8 +69,8 @@ class IMPACT_RESISTANCE_FLOAT_FRAME_COUNT
 
   int READ_WRITE_POS = 0;
 
-  float LATEST_VALUE = 0;
-  float SUMMATION = 0;
+  float LATEST_VALUE = 0.0f;
+  float SUMMATION = 0.0f;
 
   public:
 
@@ -88,7 +88,7 @@ class COLOR_VALUE_PAIR
 {
   public:
 
-  float LT_or_EQ = 0;
+  float LT_or_EQ = 0.0f;
   int COLOR;
 };
 
@@ -163,9 +163,11 @@ class W_TEXT_TF
 
   W_TEXT_TF_PROPERTIES PROPS;
 
-  void update_text(system_data &sdSysData, string True_Text, string False_Text);
+  //void update_text(system_data &sdSysData, string True_Text, string False_Text);
+  void update_text(string True_Text, string False_Text);
   
-  bool update_tf(system_data &sdSysData, bool True_False);
+  //bool update_tf(system_data &sdSysData, bool True_False);
+  bool update_tf(bool True_False);
   // returns true if changed
 
   void draw(system_data &sdSysData);
@@ -205,13 +207,13 @@ class BAR_TECH_PROPERTIES
 
   string LABEL = "";
 
-  float BAR_HEIGHT = 20;          // Bar Size Height, or Width
+  float BAR_HEIGHT = 20.0f;          // Bar Size Height, or Width
   float MARKER_SIZE = 5;          // Marker Height or Width.
 
   int COLOR_MARKER;       // Color of Marker
   int COLOR_BACKGROUND;   // Color of Marker
 
-  float MAX = 0;                  // Top Value of Graph
+  float MAX = 0.0f;                  // Top Value of Graph
 
   bool HORIZONTAL = true;         // Bar Orientation
 
@@ -233,7 +235,7 @@ class BAR_TECH
 {
   private:
 
-  float VALUE = 0;
+  float VALUE = 0.0f;
   IMPACT_RESISTANCE_FLOAT_FRAME_COUNT VALUE_MARKER;
 
   MIN_MAX_TIME MIN_MAX;

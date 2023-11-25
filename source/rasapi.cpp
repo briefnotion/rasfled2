@@ -312,7 +312,8 @@ string FILE_WATCH::get_next_line()
   return str_read_line;
 }
 
-bool check_create_working_dir(string Directory)
+//bool check_create_working_dir(string Directory)
+bool check_create_working_dir()
 {
   // Not Coded
   return false;
@@ -396,7 +397,7 @@ bool deque_string_to_file(string Dir_Filename, deque<string> &qFile, bool Append
   {
     if (Append == true)
     {
-      for (int pos = 0; pos < qFile.size(); pos++)
+      for (int pos = 0; pos < (int)qFile.size(); pos++)
       {
         fsFile << qFile[pos];
         fsFile << endl;

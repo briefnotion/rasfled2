@@ -46,7 +46,7 @@ string AIRCRAFT::simple_float_to_string(int Decimal_Positions, float Number)
 
   c1 = return_string.find(".") + 1;
 
-  if(c1!=std::string::npos)
+  if(c1 != (int)std::string::npos)
   {
     return_string.erase(c1 + Decimal_Positions, return_string.size() - c1 - Decimal_Positions);
   }
@@ -202,7 +202,7 @@ void AIRCRAFT_COORDINATOR::post_post_process()
   if (DATA.NOW.conversion_success() == true)
   {
     int dec_pos = DATA.NOW.get_str_value().find('.');
-    if (dec_pos != string::npos)
+    if (dec_pos != (int)string::npos)
     {
       DATA.CONVERTED_TIME.put_seconds(string_to_ulong(DATA.NOW.get_str_value().erase(dec_pos)));
       DATA.CONVERTED_TIME.put_deciseconds(string_to_int(DATA.NOW.get_str_value().erase(0, dec_pos +1)));
@@ -227,7 +227,7 @@ bool AIRCRAFT_COORDINATOR::process(string JSON_Text)
     DATA.AIRCRAFTS.clear();
     DATA.POSITIONED_AIRCRAFT = 0;
 
-    for(int root = 0; root < AIRCRAFT_JSON.ROOT.DATA.size(); root++)
+    for(int root = 0; root < (int)AIRCRAFT_JSON.ROOT.DATA.size(); root++)
     {
       // Load Top Level Messages
       if (AIRCRAFT_JSON.ROOT.DATA[root].label() == "now")
@@ -245,7 +245,7 @@ bool AIRCRAFT_COORDINATOR::process(string JSON_Text)
       if (AIRCRAFT_JSON.ROOT.DATA[root].label() == "aircraft")
       {
         for (int aircraft_list = 0; 
-              aircraft_list < AIRCRAFT_JSON.ROOT.DATA[root].DATA.size(); aircraft_list++)
+              aircraft_list < (int)AIRCRAFT_JSON.ROOT.DATA[root].DATA.size(); aircraft_list++)
         {
           // For Each Aircraft
 
@@ -259,7 +259,7 @@ bool AIRCRAFT_COORDINATOR::process(string JSON_Text)
 
           // Process Messages in Aircraft
           for (int data_element = 0; 
-                data_element < AIRCRAFT_JSON.ROOT.DATA[root].DATA[aircraft_list].DATA.size(); data_element++)
+                data_element < (int)AIRCRAFT_JSON.ROOT.DATA[root].DATA[aircraft_list].DATA.size(); data_element++)
           {
             // For Each Data Element
 

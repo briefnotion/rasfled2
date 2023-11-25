@@ -23,7 +23,7 @@ void HARDWARE_STATUS::read_temperature()
   char data[buf_size];
 
   FILE *fshardware;
-  size_t bytesread;
+  //size_t bytesread;
 
   if(ENABLED==true)
   {
@@ -57,7 +57,7 @@ void HARDWARE_STATUS::read_low_voltage()
   char data[buf_size];
 
   FILE *fshardware;
-  size_t bytesread;
+  //size_t bytesread;
 
   if(ENABLED==true)
   {

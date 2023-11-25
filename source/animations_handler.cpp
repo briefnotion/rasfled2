@@ -21,7 +21,7 @@ void ANIMATION_HANDLER::add_to_schedule_list(string Collection_Name, string Anim
 {
   bool found = false;
 
-  for(int pos = 0; pos < SCHEDULE_LIST.size() && found == false; pos ++)
+  for(int pos = 0; pos < (int)SCHEDULE_LIST.size() && found == false; pos ++)
   {
     if (SCHEDULE_LIST[pos].Collection_Name == Collection_Name &&
         SCHEDULE_LIST[pos].Animation_Name == Animation_Name &&
@@ -52,7 +52,7 @@ void ANIMATION_HANDLER::EvClearRunning(int Channel_Num, int Event_Num, unsigned 
 {
   EVENTS[Channel_Num].teDATA[Event_Num].booCOMPLETE = true;
             
-  for (int eventscan = 0; eventscan < EVENTS[Channel_Num].teDATA.size(); eventscan++)
+  for (int eventscan = 0; eventscan < (int)EVENTS[Channel_Num].teDATA.size(); eventscan++)
   {
     if(tmeCurrentTime >= EVENTS[Channel_Num].teDATA[eventscan].tmeSTARTTIME)
     {
@@ -90,7 +90,7 @@ void ANIMATION_HANDLER::EvSetToEnd(int Channel_Num, int Event_Num, unsigned long
   }
 
   // Step through each event in this channel. 
-  for (int eventscan = 0; eventscan < EVENTS[Channel_Num].teDATA.size(); eventscan++)
+  for (int eventscan = 0; eventscan < (int)EVENTS[Channel_Num].teDATA.size(); eventscan++)
   {
     // *** Remove the event regardless of active or clear on end, the other stuff is too complex for scheduling. ***
     // Has the event started running yet, or do we plan on ending future scheduled events also?
@@ -448,13 +448,13 @@ void ANIMATION_HANDLER::create_events(system_data &sdSysData)
 {
   int count = 0;
 
-  for(int system = 0; system < sdSysData.CONFIG.LED_MAIN.size(); system++)
+  for(int system = 0; system < (int)sdSysData.CONFIG.LED_MAIN.size(); system++)
   {
     // For Every Strip in Group in System
-    for(int group = 0; group < sdSysData.CONFIG.LED_MAIN[system].vLED_GROUPS.size(); group++)
+    for(int group = 0; group < (int)sdSysData.CONFIG.LED_MAIN[system].vLED_GROUPS.size(); group++)
     {
       // For Every Strip in Strip in Group
-      for(int strip = 0; strip < sdSysData.CONFIG.LED_MAIN[system].vLED_GROUPS[group].vLED_STRIPS.size(); strip++)
+      for(int strip = 0; strip < (int)sdSysData.CONFIG.LED_MAIN[system].vLED_GROUPS[group].vLED_STRIPS.size(); strip++)
       {
         timed_event tmp_event;
         EVENTS.push_back(tmp_event);
@@ -475,9 +475,11 @@ bool ANIMATION_HANDLER::load_collections(string Directory, string Filename)
   return LIBRARY.load_collections(Directory, Filename);
 }
 
+//void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime, 
+//                              string Collection_Name, string Animation_Name, int On_Group, 
+//                              string String_Var_1, string String_Var_2)
 void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime, 
-                              string Collection_Name, string Animation_Name, int On_Group, 
-                              string String_Var_1, string String_Var_2)
+                              string Collection_Name, string Animation_Name, int On_Group)
 
 {
   int collection_pos = -1;
@@ -494,15 +496,15 @@ void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tme
   if (collection_pos > -1 && animation_pos > -1)
   {
     // For Every System
-    for(int system = 0; system < sdSysData.CONFIG.LED_MAIN.size(); system++)
+    for(int system = 0; system < (int)sdSysData.CONFIG.LED_MAIN.size(); system++)
     {
       // For Every group in in System
-      for(int group = 0; group < sdSysData.CONFIG.LED_MAIN[system].vLED_GROUPS.size(); group++)
+      for(int group = 0; group < (int)sdSysData.CONFIG.LED_MAIN[system].vLED_GROUPS.size(); group++)
       {
         if (On_Group == -1 || On_Group == group)
         {
           // For Every Strip in Group
-          for(int strip = 0; strip < sdSysData.CONFIG.LED_MAIN[system].vLED_GROUPS[group].vLED_STRIPS.size(); strip++)
+          for(int strip = 0; strip < (int)sdSysData.CONFIG.LED_MAIN[system].vLED_GROUPS[group].vLED_STRIPS.size(); strip++)
           {
             // Check run on conditions and only run event with correct conditions.
             // Conditions to put event in list are:
@@ -534,7 +536,7 @@ void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tme
             if(set_events.has_false() == false)
             {
               for (int event = 0; 
-                  event < LIBRARY.COLLECTION[collection_pos].ANIMATIONS[animation_pos].EVENTS.size(); 
+                  event < (int)LIBRARY.COLLECTION[collection_pos].ANIMATIONS[animation_pos].EVENTS.size(); 
                   event++)
               {
                 // Determine the event channel to receive the event.
@@ -574,7 +576,7 @@ void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tme
                 new_timed_event.booCOMPLETE = false;
 
                 // Only set the event if Animation_Walk_Type and Animation_Of_LED is not -1
-                if(new_timed_event.bytANIMATION > -1)
+                //if(new_timed_event.bytANIMATION > -1)
                 {
                   EVENTS[channel].set_timed_event(new_timed_event);
                 }
@@ -605,33 +607,44 @@ void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tme
 void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
                       string Collection_Name, string Animation_Name)
 {
-  call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, -1, "", "");
+  //call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, -1, "", "");
+  call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, -1);
 }
 
+/*
 void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
                       string Collection_Name, string Animation_Name,
                       int On_Group)
 {
-  call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, On_Group, "", "");
+  //call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, On_Group, "", "");
+  call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, On_Group);
 }
+*/
 
+/*
+//void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
+//                      string Collection_Name, string Animation_Name, 
+//                      string String_Var_1, string String_Var_2)
 void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-                      string Collection_Name, string Animation_Name, 
-                      string String_Var_1, string String_Var_2)
+                      string Collection_Name, string Animation_Name)
 {
-  call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, -1, String_Var_1, String_Var_2);
+  //call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, -1, String_Var_1, String_Var_2);
+  call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, -1);
 }
+*/
 
+/*
 void modify_running_animation_brightness(string Event_Identification, float Brightness)
 {
   
 }
+*/
 
 void ANIMATION_HANDLER::mod_run_anim_color_start_1(string Label, CRGB Color)
 {
-  for (int channel = 0; channel < EVENTS.size(); channel++)
+  for (int channel = 0; channel < (int)EVENTS.size(); channel++)
   {
-    for (int event = 0; event < EVENTS[channel].teDATA.size(); event++)
+    for (int event = 0; event < (int)EVENTS[channel].teDATA.size(); event++)
     {
       if (EVENTS[channel].teDATA[event].strIdent == Label)
       {
@@ -643,9 +656,9 @@ void ANIMATION_HANDLER::mod_run_anim_color_start_1(string Label, CRGB Color)
 
 void ANIMATION_HANDLER::mod_run_anim_color_start_2(string Label, CRGB Color)
 {
-  for (int channel = 0; channel < EVENTS.size(); channel++)
+  for (int channel = 0; channel < (int)EVENTS.size(); channel++)
   {
-    for (int event = 0; event < EVENTS[channel].teDATA.size(); event++)
+    for (int event = 0; event < (int)EVENTS[channel].teDATA.size(); event++)
     {
       if (EVENTS[channel].teDATA[event].strIdent == Label)
       {
@@ -657,9 +670,9 @@ void ANIMATION_HANDLER::mod_run_anim_color_start_2(string Label, CRGB Color)
 
 void ANIMATION_HANDLER::mod_run_anim_color_dest_1(string Label, CRGB Color)
 {
-  for (int channel = 0; channel < EVENTS.size(); channel++)
+  for (int channel = 0; channel < (int)EVENTS.size(); channel++)
   {
-    for (int event = 0; event < EVENTS[channel].teDATA.size(); event++)
+    for (int event = 0; event < (int)EVENTS[channel].teDATA.size(); event++)
     {
       if (EVENTS[channel].teDATA[event].strIdent == Label)
       {
@@ -671,9 +684,9 @@ void ANIMATION_HANDLER::mod_run_anim_color_dest_1(string Label, CRGB Color)
 
 void ANIMATION_HANDLER::mod_run_anim_color_dest_2(string Label, CRGB Color)
 {
-  for (int channel = 0; channel < EVENTS.size(); channel++)
+  for (int channel = 0; channel < (int)EVENTS.size(); channel++)
   {
-    for (int event = 0; event < EVENTS[channel].teDATA.size(); event++)
+    for (int event = 0; event < (int)EVENTS[channel].teDATA.size(); event++)
     {
       if (EVENTS[channel].teDATA[event].strIdent == Label)
       {
@@ -685,9 +698,9 @@ void ANIMATION_HANDLER::mod_run_anim_color_dest_2(string Label, CRGB Color)
 
 void ANIMATION_HANDLER::mod_run_anim_velocity(string Label, float Velocity)
 {
-  for (int channel = 0; channel < EVENTS.size(); channel++)
+  for (int channel = 0; channel < (int)EVENTS.size(); channel++)
   {
-    for (int event = 0; event < EVENTS[channel].teDATA.size(); event++)
+    for (int event = 0; event < (int)EVENTS[channel].teDATA.size(); event++)
     {
       if (EVENTS[channel].teDATA[event].strIdent == Label)
       {
@@ -699,9 +712,9 @@ void ANIMATION_HANDLER::mod_run_anim_velocity(string Label, float Velocity)
 
 void ANIMATION_HANDLER::process_events(system_data &sdSysData, unsigned long tmeCurrentTime)
 {
-  for (int channel = 0; channel < EVENTS.size(); channel++)
+  for (int channel = 0; channel < (int)EVENTS.size(); channel++)
   {
-    for (int event = 0; event < EVENTS[channel].teDATA.size(); event++)
+    for (int event = 0; event < (int)EVENTS[channel].teDATA.size(); event++)
     {
       if (tmeCurrentTime >= EVENTS[channel].teDATA[event].tmeSTARTTIME && 
           EVENTS[channel].teDATA[event].booCOMPLETE == false)
@@ -748,9 +761,9 @@ void ANIMATION_HANDLER::process_events(system_data &sdSysData, unsigned long tme
   }
 
   // Check Schedule list and call requested animations.
-  if (SCHEDULE_LIST.size() >= 0)
+  if ((int)SCHEDULE_LIST.size() >= 0)
   {
-    for(int pos = 0; pos < SCHEDULE_LIST.size(); pos ++)
+    for(int pos = 0; pos < (int)SCHEDULE_LIST.size(); pos ++)
     {
       call_animation(sdSysData, tmeCurrentTime, SCHEDULE_LIST[pos].Collection_Name, SCHEDULE_LIST[pos].Animation_Name, SCHEDULE_LIST[pos].Assigned_Group);
     }

@@ -33,8 +33,8 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
 {
   using namespace std;
 
-  int opencount = 0;
-  bool changedetected = false;
+  //int opencount = 0;
+  //bool changedetected = false;
 
   // Scan Through Doors and Check for Changes
 
@@ -52,7 +52,7 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
   int recent_opened_door_count = 0;
   int recent_closed_door_count = 0;
 
-  for (int door=0; door < sdSysData.CONFIG.vhwDOORS.size(); door++)
+  for (int door=0; door < (int)sdSysData.CONFIG.vhwDOORS.size(); door++)
   {
 
     if(sdSysData.CONFIG.vhwDOORS.at(door).booVALUE == true)
@@ -82,7 +82,7 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
   }
 
   // Count number of changes. if non then do nothing.
-  for (int pos = 0; pos < sdSysData.CONFIG.vhwDOORS.size(); pos++)
+  for (int pos = 0; pos < (int)sdSysData.CONFIG.vhwDOORS.size(); pos++)
   {
     if (door_mini[pos] == -1 || door_mini[pos] == 2)
     {
@@ -108,7 +108,7 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
 
       // Step through door status and turn on extteriors of newly opened door and running anim on
       //  the doors that are still closed
-      for(int pos = 0; pos < sdSysData.CONFIG.vhwDOORS.size(); pos++)
+      for(int pos = 0; pos < (int)sdSysData.CONFIG.vhwDOORS.size(); pos++)
       {
         if (door_mini[pos] == -1)
         {
@@ -140,7 +140,7 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
       Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "This Door Closed - Overhead");
 
       // Run recently closed door anims
-      for(int pos = 0; pos < sdSysData.CONFIG.vhwDOORS.size(); pos++)
+      for(int pos = 0; pos < (int)sdSysData.CONFIG.vhwDOORS.size(); pos++)
       {
         if ((tmeCurrentTime - sdSysData.CONFIG.vhwDOORS.at(pos).tmeTOGGLEDTIME) < 15000)
         {
@@ -151,10 +151,10 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
     // Condition - More than 2 doors are open and one is closed.
     //    or
     // Condition - More than 1 doors is open and another is opened.
-    else if (prev_open_door_count >0 && recent_closed_door_count > 0 ||
-              prev_open_door_count >0 && recent_opened_door_count > 0)
+    else if ((prev_open_door_count > 0 && recent_closed_door_count > 0) ||
+              (prev_open_door_count > 0 && recent_opened_door_count > 0))
     {
-      for(int pos = 0; pos < sdSysData.CONFIG.vhwDOORS.size(); pos++)
+      for(int pos = 0; pos < (int)sdSysData.CONFIG.vhwDOORS.size(); pos++)
       {
         if (door_mini[pos] == -1)
         {

@@ -75,10 +75,12 @@
 // -------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------
 // Graphics
+/*
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
+*/
 
 // -------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------
@@ -88,7 +90,8 @@ static void glfw_error_callback(int error, const char* description)
 // Display Materix Prepare.
 
 //  Copy the Prepared Matrix to the Display Matrix.
-void MatrixPrepare(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount)
+//void MatrixPrepare(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount)
+void MatrixPrepare(CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount)
 {
   for (int lcount = 0; lcount < intLEDCOUNT; lcount++)
   {
@@ -230,8 +233,9 @@ void setup()
 //  to the lights on a seperate thread.
 void proc_render_thread()
 {
-  int ret = 0;  // contains fail or pass status of the render routine.
-  ret = ws2811_render(&ledstring);  // Send values of ledstring to hardware.
+  //int ret = 0;  // contains fail or pass status of the render routine.
+  //ret = ws2811_render(&ledstring);  // Send values of ledstring to hardware.
+  ws2811_render(&ledstring);  // Send values of ledstring to hardware.
 }
 
 // ---------------------------------------------------------------------------------------
@@ -287,7 +291,8 @@ int loop_2(bool TTY_Only)
   sdSystem.Lights_On.set(true);
   
   // Initialize wiring pi
-  int intRet = wiringPiSetup(); 
+  //int intRet = wiringPiSetup();
+  wiringPiSetup();
 
   // Set is_ready variables
   input_from_switches.set(20);
@@ -395,7 +400,7 @@ int loop_2(bool TTY_Only)
   // Loading Configuration from files
   // yes, it resaves the file.  as is for now.
 
-  if (load_json_configuration(cons_2.SCREEN_COMMS, sdSystem, Working_Directory, Configuration_Files_JSON) == true)
+  if (load_json_configuration(sdSystem, Working_Directory, Configuration_Files_JSON) == true)
   {
     cons_2.SCREEN_COMMS.printw("  Configuration file loaded.");
   }
@@ -404,7 +409,7 @@ int loop_2(bool TTY_Only)
     cons_2.SCREEN_COMMS.printw("  Configuration file not loaded.  Generating Working Configuration File.");
     sdSystem.ALERTS.add_generic_alert("Configuration file not loaded.  Generating Working Configuration File.");
 
-    if (save_json_configuration(cons_2.SCREEN_COMMS, sdSystem, Working_Directory, Configuration_Files_JSON) == true)
+    if (save_json_configuration(sdSystem, Working_Directory, Configuration_Files_JSON) == true)
     {
       cons_2.SCREEN_COMMS.printw("    Configuration file created.");
       sdSystem.ALERTS.add_generic_alert("Configuration file created.");
@@ -555,7 +560,7 @@ int loop_2(bool TTY_Only)
   // -------------------------------------------------------------------------------------
 
   // Start Power On Animation
-  process_power_animation(cons_2.SCREEN_COMMS, sdSystem, sdSystem.PROGRAM_TIME.now(), animations, CRGB(0, 0, 25));
+  process_power_animation(sdSystem, sdSystem.PROGRAM_TIME.now(), animations, CRGB(0, 0, 25));
   
   // ---------------------------------------------------------------------------------------
   //  Repeating Sleeping Loop until eXit is triggered.
@@ -728,7 +733,7 @@ int loop_2(bool TTY_Only)
           int channel = sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].intCHANNEL;
 
           sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].booARRAY_UPDATED 
-            = animations.EVENTS[channel].execute2(cons_2.SCREEN_COMMS, sdSystem, sRND, 
+            = animations.EVENTS[channel].execute2(sdSystem, sRND, 
                 sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].crgbARRAY, 
                 sdSystem.PROGRAM_TIME.current_frame_time());
         }
@@ -809,7 +814,7 @@ int loop_2(bool TTY_Only)
           {
             for(int strip=0; strip < sdSystem.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
             {
-              MatrixPrepare(cons_2.SCREEN_COMMS, sdSystem, 
+              MatrixPrepare(
                     sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY, 
                     sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(), 
                     matrix, mcount);
@@ -901,7 +906,7 @@ int loop_2(bool TTY_Only)
       // Also delayed, File maintenance.
       if (sdSystem.booRunning_State_File_Dirty == true)
       {
-        save_running_state_json(cons_2.SCREEN_COMMS, sdSystem, Running_State_Filename);
+        save_running_state_json(sdSystem, Running_State_Filename);
 
         // set false even if there was a save error to avoid repeats.
         sdSystem.booRunning_State_File_Dirty = false;
@@ -1102,7 +1107,7 @@ int main(int argc, char *argv[])
 
   for (int pos = 1; pos < argc; pos++)
   {
-    if (strcmp(argv[pos], "-h") == 0 || (argv[pos], "--help") == 0)
+    if (strcmp(argv[pos], "-h") == 0 || strcmp(argv[pos], "--help") == 0)
     {
       ret = 2;
       printf("\n-tty  :Load in Terminal\n");

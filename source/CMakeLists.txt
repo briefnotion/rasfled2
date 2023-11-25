@@ -82,3 +82,10 @@ target_link_libraries(rasfled
   ${LIBRT}
   ${Boost_LIBRARIES}
 )
+
+# Strict
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
+  target_compile_options(rasfled PRIVATE -Wall -Wextra -Werror)
+elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  target_compile_options(rasfled PRIVATE -Weverything -Werror)
+endif()

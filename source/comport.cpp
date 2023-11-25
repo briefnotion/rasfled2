@@ -34,7 +34,7 @@ void COMPORT::write_to_comm(string Command)
   char *cmd = new char [Command.size() + 1];
   strcpy(cmd, Command.c_str());
 
-  while (pos < Command.size())
+  while (pos < (int)Command.size())
   {
     n_written = write( USB, &cmd[pos], 1 );
     pos = pos + n_written;
@@ -380,7 +380,7 @@ void COMPORT::flash_data_check()
     FLASH_DATA_WRITE = false;
   }
 
-  if (FLASH_DATA.size() > PROPS.FLASH_DATA_SIZE + 500)
+  if ((int)FLASH_DATA.size() > PROPS.FLASH_DATA_SIZE + 500)
   {
     FLASH_DATA.erase(FLASH_DATA.begin(), FLASH_DATA.begin() + FLASH_DATA.size() - PROPS.FLASH_DATA_SIZE);
   }

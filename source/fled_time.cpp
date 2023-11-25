@@ -66,7 +66,7 @@ int FLED_TIME_VAR::get_miliseconds()
 
 int FLED_TIME_VAR::get_year()
 {
-  int return_int = 0;
+  //int return_int = 0;
 
   if (TIME_UPDATED == false)
   {
@@ -78,7 +78,7 @@ int FLED_TIME_VAR::get_year()
 
 int FLED_TIME_VAR::get_month()
 {
-  int return_int = 0;
+  //int return_int = 0;
 
   if (TIME_UPDATED == false)
   {

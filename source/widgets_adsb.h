@@ -59,11 +59,12 @@ void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
-void draw_point_marker(system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, float Size);
+//void draw_point_marker(system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, float Size);
+void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size);
 
 void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color, float Size);
 
-void draw_aircraft_marker_direction(system_data &sdSysData, ImVec2 Screen_Position, int Color, int Size, float Heading);
+void draw_aircraft_marker_direction(system_data &sdSysData, ImVec2 Screen_Position, int Color, float Size, float Heading);
 
 // ---------------------------------------------------------------------------------------
 
@@ -98,8 +99,8 @@ class AIRCRAFT_TRACK_POINT
   public:
   
   ImVec2 LAT_LON;
-  float RSSI_INTENSITY = 0;
-  float ALTITUDE = 0;
+  float RSSI_INTENSITY = 0.0f;
+  float ALTITUDE = 0.0f;
 };
 
 class ADSB_WIDGET_Properties
@@ -107,7 +108,7 @@ class ADSB_WIDGET_Properties
 {
   public: 
 
-  int ID;
+  int ID = 0;
   string NAME = "";
   string LABEL = "";
 
@@ -155,8 +156,8 @@ class ADSB_WIDGET
   MIN_MAX_TIME SIG_STR_DIRECION;
 
   // Last known good cood data
-  float LATITUDE = 0;
-  float LONGITUDE = 0;
+  float LATITUDE = 0.0f;
+  float LONGITUDE = 0.0f;
 
   vector<AIRCRAFT_TRACK_POINT> TRACK;
   NEW_COLOR_SCALE ALTITUDE_COLOR_SCALE;
@@ -223,7 +224,7 @@ class ADSB_RANGE
   
   int ZOOM_LEVEL = -1;
   float RANGE = 25.0f;
-  float RADIUS_CIRCLE_POINT_SIZE = 0;
+  float RADIUS_CIRCLE_POINT_SIZE = 0.0f;
   ImVec2 LAT_LON_TO_POINT_SCALE;
 
   ImVec4 PREV_WORKING_AREA;
@@ -318,8 +319,9 @@ class ADSB_SCREEN
   
   void update(system_data &sdSysData);
 
-  void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
-                const char *name, bool *p_open, ImGuiWindowFlags flags);
+  //void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
+  //              const char *name, bool *p_open, ImGuiWindowFlags flags);
+  void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms);
 };
 
 // ---------------------------------------------------------------------------------------

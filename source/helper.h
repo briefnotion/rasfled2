@@ -19,11 +19,20 @@
 
 #include <cmath>
 
+#include "helper.h"
 #include "definitions.h"
 #include "stringthings.h"
 #include "fled_time.h"
 
 using namespace std;
+
+// ***************************************************************************************
+// Global Definitions
+// ***************************************************************************************
+
+# define float_PI		3.14159265358979323846f   // pi
+# define float_EARTH_RADIUS		3963.191f       // Earth Radius
+
 
 // ***************************************************************************************
 // STRUCTURES AND CLASSES

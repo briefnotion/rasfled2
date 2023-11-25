@@ -25,9 +25,6 @@ using namespace std;
 
 CRGB::CRGB()
 {
-  char r = 0;
-  char g = 0;
-  char b = 0;
 }
 
 // cRGB override for passing non varible to varible. 
@@ -56,13 +53,16 @@ CRGB CRGB::StringtoCRGB(string strCRGB)
 {
   // Expected input: string with 3 numbers seperated by commas.
   int c1, c2;
-  int r, g, b = 0;
+  int r = 0;
+  int g = 0;
+  int b = 0;
 
   c1 = strCRGB.find(",");
-  if (c1!=string::npos)
+  if (c1 != (int)string::npos)
   {
     c2 = strCRGB.find(",",c1+1);
-    if (c2!=string::npos);
+
+    if (c2 != (int)string::npos)
     {
       r = string_to_int(strCRGB.substr(0,c1)); 
       g = string_to_int(strCRGB.substr(c1+1,c2-c1-1));
@@ -90,13 +90,14 @@ CRGB CRGB::brightness(float Multiplier)
 //      future
 
 // LED Strip
-void v_profile_strip::set(int intId, string strName, string strPosition, int intStart_Pos, bool forward, bool bot_at_start)
+//void v_profile_strip::set(int intId, string strName, string strPosition, int intStart_Pos, bool forward, bool bot_at_start)
+void v_profile_strip::set(int intId, string strName, string strPosition, bool forward, bool bot_at_start)
 {
   intID       = intId;
   strNAME     = strName;
   strPOSITION = strPosition;
 
-  int intGROUP_START_POS  = intStart_Pos;
+  //int intGROUP_START_POS  = intStart_Pos;
   booFORWARD              = forward;
   booBOT_AT_START         = bot_at_start;
 }
@@ -170,7 +171,7 @@ bool v_profile_strip::position(string position)
 int v_profile_strip_group::find(string strName)
 {
   int ret = -1;
-  for(int x=0; x < vLED_STRIPS.size(); x++)
+  for(int x=0; x < (int)vLED_STRIPS.size(); x++)
   {
     if(vLED_STRIPS.at(x).strNAME == strName)
     {
@@ -187,7 +188,7 @@ string v_profile_strip_group::status(string strName)
 
 void v_profile_strip_group::status_set(string strName, string strStatus)
 {
-  for (int s=0; s < vLED_STRIPS.size(); s++)
+  for (int s=0; s < (int)vLED_STRIPS.size(); s++)
   {
     if(vLED_STRIPS.at(s).strNAME == strName)
     {
@@ -196,18 +197,19 @@ void v_profile_strip_group::status_set(string strName, string strStatus)
   }
 }
 
-void v_profile_strip_group::set(int intId, string strName, int intStart_Pos)
+//void v_profile_strip_group::set(int intId, string strName, int intStart_Pos)
+void v_profile_strip_group::set(int intId, string strName)
 {
   intID                   = intId;
   strNAME                 = strName;
-  int intGROUP_START_POS  = intStart_Pos;
+  //int intGROUP_START_POS  = intStart_Pos;
 }
 
 int v_profile_strip_group::led_count()
 // Returns all led count in Group
 {
   int count = 0;
-  for(int x=0; x<vLED_STRIPS.size(); x++)
+  for(int x=0; x < (int)vLED_STRIPS.size(); x++)
   {
     count = count + vLED_STRIPS.at(x).led_count();
   }
@@ -220,9 +222,10 @@ void v_profile_strip_group::add_strip(int intID, string strName, string strPosit
   v_profile_strip tmp_profile_strip;
 
   // Get Start Pos
-  int startpos = 0;
+  //int startpos = 0;
 
-  tmp_profile_strip.set(intID, strName, strPosition, startpos, forward, bot_at_start);
+  //tmp_profile_strip.set(intID, strName, strPosition, startpos, forward, bot_at_start);
+  tmp_profile_strip.set(intID, strName, strPosition, forward, bot_at_start);
   tmp_profile_strip.create(size);
   vLED_STRIPS.push_back(tmp_profile_strip);
 }
@@ -242,7 +245,7 @@ int v_profile_strip_main::led_count()
 // Returns all led count in Main group
 {
   int count = 0;
-  for(int x=0; x<vLED_GROUPS.size(); x++)
+  for(int x=0; x < (int)vLED_GROUPS.size(); x++)
   {
     count = count + vLED_GROUPS.at(x).led_count();
   }
@@ -260,7 +263,8 @@ void v_profile_strip_main::add_group(int intId, string strName)
 {
   v_profile_strip_group tmp_led_group;
 
-  tmp_led_group.set(intId, strName, 0);
+  //tmp_led_group.set(intId, strName, 0);
+  tmp_led_group.set(intId, strName);
   vLED_GROUPS.push_back(tmp_led_group);
 }
 
@@ -273,12 +277,12 @@ void v_profile_strip_main::update_start_positions()
 
   int_START_POS = pos;
 
-  for(int x=0; x<vLED_GROUPS.size(); x++)
+  for(int x=0; x < (int)vLED_GROUPS.size(); x++)
   {
     GROUP_MAP.add(vLED_GROUPS.at(x).vLED_STRIPS.size());
     
     vLED_GROUPS.at(x).intGROUP_START_POS = pos;
-    for(int y=0; y<vLED_GROUPS.at(x).vLED_STRIPS.size(); y++)
+    for(int y=0; y < (int)vLED_GROUPS.at(x).vLED_STRIPS.size(); y++)
     {
       vLED_GROUPS.at(x).vLED_STRIPS.at(y).intLED_START_POS = pos;
       pos = pos + vLED_GROUPS.at(x).vLED_STRIPS.at(y).led_count();

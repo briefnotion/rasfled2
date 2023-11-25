@@ -134,7 +134,7 @@ void ALERT_SYSTEM_2::alert_list_clean()
   if (ALERTS.size() > 0)
   {
     int alert_num = 0;
-    while (alert_num < ALERTS.size())
+    while (alert_num < (int)ALERTS.size())
     {
       if (ALERTS[alert_num].is_clear())
       {
@@ -158,7 +158,7 @@ void ALERT_SYSTEM_2::display_active_alerts()
     }
   }
 
-  for (int alert_pos = 0; alert_pos < ALERTS.size(); alert_pos++)
+  for (int alert_pos = 0; alert_pos < (int)ALERTS.size(); alert_pos++)
   {
     ALERTS_RESERVE[alert_pos].set_display_on();
   }

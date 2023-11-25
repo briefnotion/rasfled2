@@ -20,7 +20,8 @@ using namespace std;
 // -------------------------------------------------------------------------------------
 
 // Load Configuration
-bool load_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename)
+//bool load_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename)
+bool load_json_configuration(system_data &sdSysData, string Directory, string Filename)
 {
   JSON_INTERFACE configuration_json;
 
@@ -52,7 +53,7 @@ bool load_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       if (leds_pos > -1)
       { 
         // System
-        int mid = 0;
+        //int mid = 0;
         string mname;
         v_profile_strip_main tmainstripprofile;
 
@@ -66,7 +67,7 @@ bool load_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         // LED Groups
         int led_group_pos = configuration_json.ROOT.DATA[leds_pos].find_label_pos("LED Groups");
 
-        for(int led_group=0; led_group < configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA.size(); led_group++)
+        for(int led_group=0; led_group < (int)configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA.size(); led_group++)
         {
           sdSysData.CONFIG.LED_MAIN.at(0).add_group(
             string_to_int(configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].value_from_list("LED_Group_ID")), 
@@ -75,7 +76,7 @@ bool load_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
           // Strip List
           int led_strip_group_pos = configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].find_label_pos("Strip Group");
 
-          for (int led_strip_pos = 0; led_strip_pos < configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].DATA[led_strip_group_pos].DATA.size(); led_strip_pos++)
+          for (int led_strip_pos = 0; led_strip_pos < (int)configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].DATA[led_strip_group_pos].DATA.size(); led_strip_pos++)
           {
             int sid = led_strip_pos;
             string sname = configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].DATA[led_strip_group_pos].DATA[led_strip_pos].value_from_list("LED_Strip_Name");
@@ -117,7 +118,8 @@ bool load_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
 
 // -------------------------------------------------------------------------------------
 // Save Configuration
-bool save_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename)
+//bool save_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename)
+bool save_json_configuration(system_data &sdSysData, string Directory, string Filename)
 {
   bool ret_success = false;
 
@@ -209,14 +211,14 @@ bool save_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
   car_group.create_label_value(quotify("SyStem_ID"), to_string(sdSysData.CONFIG.LED_MAIN.at(0).intID));
 
   // Groups
-  for(int x=0; x<sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.size(); x++)
+  for(int x=0; x < (int)sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.size(); x++)
   {
     strip_group.clear_data();
     strip_group.create_label_value(quotify("LED_Group_Name"), quotify(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(x).strNAME));
     strip_group.create_label_value(quotify("LED_Group_ID"), to_string(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(x).intID));
 
     // Strips
-    for(int y=0; y<sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(x).vLED_STRIPS.size(); y++)
+    for(int y=0; y < (int)sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(x).vLED_STRIPS.size(); y++)
     {
       v_profile_strip strip;
       string write;
@@ -337,7 +339,8 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
 
 
 // Save Saved State
-bool save_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename)
+//bool save_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename)
+bool save_running_state_json(system_data &sdSysData, string strFilename)
 {
   JSON_INTERFACE state_json;
   deque<string> state_dq_string;

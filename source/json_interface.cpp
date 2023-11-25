@@ -38,10 +38,10 @@ bool remove_opens_and_closes(string &Entry, char Open, char Close)
 
   // Filter out Brackets.
   start = Entry.find(Open);
-  if (start != std::string::npos)
+  if (start != (int)std::string::npos)
   {
     last = Entry.find_last_of(Close);
-    if (last != std::string::npos)
+    if (last != (int)std::string::npos)
     {
       Entry = Entry.substr(start +1, last -1);
       ret_success = true;
@@ -63,7 +63,7 @@ string parse_value(string Text, int Label_Size)
 
 int pos_of_first_non_space(int Start, string Text)
 {
-  for (int pos = Start; pos < Text.size() && Text[pos] == ' '; pos++)
+  for (int pos = Start; pos < (int)Text.size() && Text[pos] == ' '; pos++)
   {
       Start = pos +1;
   }
@@ -77,7 +77,7 @@ int JSON_ENTRY::find_closing(string Text, int Start_Pos, char Opening, char Clos
 {
   int ret_position = 0;
   int counter = 1;
-  for (int pos = Start_Pos +1; pos < Text.size() && counter >0; pos++)
+  for (int pos = Start_Pos +1; pos < (int)Text.size() && counter >0; pos++)
   {
     ret_position = pos;
 
@@ -96,7 +96,7 @@ int JSON_ENTRY::find_closing(string Text, int Start_Pos, char Opening, char Clos
 bool JSON_ENTRY::check_entry(string &Entry, int &Size_Of_Entry, int &Size_Of_Label, 
                               bool &Is_A_Set, bool &Is_A_List, bool &Is_A_Value)
 {
-  bool ret_success = false;
+  //bool ret_success = false;
 
   int pos_of_colon = -1;
   int working_pos = 0;
@@ -131,7 +131,7 @@ bool JSON_ENTRY::check_entry(string &Entry, int &Size_Of_Entry, int &Size_Of_Lab
     // Determine middle seperator positon.
     pos_of_colon = Entry.find(':', working_pos);
     
-    if (pos_of_colon != std::string::npos)
+    if (pos_of_colon != (int)std::string::npos)
     {
       // Move to first word after seperator.
       working_pos = pos_of_first_non_space(pos_of_colon +1, Entry);
@@ -180,7 +180,7 @@ bool JSON_ENTRY::parse_item_list(string Entry, bool Is_Set, string Set_Name)
 
   int entry_size = 0;
   int label_size = 0;
-  int value_size = 0;
+  //int value_size = 0;
   bool is_value_set = false;
   bool is_value_list = false;
   bool is_value_value = false;
@@ -286,7 +286,7 @@ bool JSON_ENTRY::parse_item_list(string Entry, bool Is_Set, string Set_Name)
 
 void JSON_ENTRY::clear_data()
 {
-  for (int x = 0; x < DATA.size(); x++)
+  for (int x = 0; x < (int)DATA.size(); x++)
   {
     DATA[x].clear_data();
   }
@@ -297,7 +297,7 @@ int JSON_ENTRY::find_label_pos(string Label_In_List)
 {
   int ret_pos = -1;
 
-  for (int pos = 0; pos < DATA.size() && ret_pos == -1; pos++)
+  for (int pos = 0; pos < (int)DATA.size() && ret_pos == -1; pos++)
   {
     if (DATA[pos].label() == Label_In_List)
     {
@@ -537,7 +537,7 @@ void JSON_INTERFACE::json_debug_to_string_deque(deque<string> &JSON_Print_Build,
   {
     if (Json_entry.DATA.size() > 0)
     {
-      for (int x = 0; x < Json_entry.DATA.size(); x++)
+      for (int x = 0; x < (int)Json_entry.DATA.size(); x++)
       {
         {
           json_debug_to_string_deque(JSON_Print_Build, Json_entry.DATA[x], Level, x);
@@ -569,12 +569,12 @@ void JSON_INTERFACE::json_to_string_deque(deque<string> &JSON_Print_Build, JSON_
   {
     if (Json_entry.DATA.size() > 0)
     {
-      for (int x = 0; x < Json_entry.DATA.size(); x++)
+      for (int x = 0; x < (int)Json_entry.DATA.size(); x++)
       {
         {
           string New_Trailing_Seperator = "";
 
-          if ( x < Json_entry.DATA.size() -1)
+          if ( x < (int)Json_entry.DATA.size() -1)
           {
             New_Trailing_Seperator = " ,";
           }

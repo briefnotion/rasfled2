@@ -806,7 +806,7 @@ void AUTOMOBILE_STEERING::store_steering_wheel_angle(int Angle, int Direction)
         LEFT_OF_CENTER = false;
       }
     }
-    else if (CLOCKWISE = -1)
+    else if (CLOCKWISE == -1)
     {
       if (VAL_STEERING_WHEEL_ANGLE > PREVIOUS_STEERING_WHEEL_ANGLE)
       {
@@ -1500,7 +1500,7 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
   bool ret_message_recieved = false;
   
   string left = "";
-  int pos = 0;
+  //int pos = 0;
 
   int upper = 0;
   int lower = 0;
@@ -2353,7 +2353,7 @@ void AUTOMOBILE::process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned l
 
     REQUESTED_PID_SEND_LIST_POSITION ++;
 
-    if (REQUESTED_PID_SEND_LIST_POSITION < 0 || REQUESTED_PID_SEND_LIST_POSITION > REQUESTED_PID_SEND_LIST.size() -1)
+    if (REQUESTED_PID_SEND_LIST_POSITION < 0 || REQUESTED_PID_SEND_LIST_POSITION > (int)REQUESTED_PID_SEND_LIST.size() -1)
     {
       REQUESTED_PID_SEND_LIST_POSITION = 0;
     }
