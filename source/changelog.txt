@@ -1,24 +1,22 @@
 2.073_231124
-  - Enabled Strict Compile
-  - Corrected issues arisen through strict compile.
-  - Corrected a few bugs.
-  - May have created a few bugs.
+- Enabled Strict Compile.
+- Corrected issues that arose through strict compile.
+- Fixed a few bugs.
+- Possibly introduced a few bugs.
 
-  - Note:
-      Previous compiled code was 1.698 megabytes.
-      Newly combined code is 1.696 megabytes.
-      The size of the code was reduced by 1228 bytes.
-      On the Raspberry 3B, the program (with doors closed, on the 
-        console screen, and adsb off) hovers around 15% to 22% single 
-        cpu core usage at 30fps. While OpenGL layer is normally never 
-        exceeds 60% single core cpu usage, even with the the most complex
-        graphics being rendered. 
-      In the most extreme conditions, full auto with 2 graphs 
-        displaying 8 hours of data, all doors open, and adsb on, 
-        single core usage can be up to 90% at 30fps. Core temp 
-        rarely exceeds 58c. 
-      
-
+- Note:
+    - The size of the previously compiled code was 1.698 megabytes.
+    - The size of the newly compiled code is 1.696 megabytes.
+    - The code size was reduced by 1228 bytes.
+    - On the Raspberry 3B, the program (with doors closed, on the 
+        console screen, and ADS-B off) hovers around 15% to 22% of 
+        single CPU core usage at 30 FPS. The OpenGL layer normally 
+        never exceeds 60% of single core CPU usage, even with the 
+        most complex graphics being rendered.
+    - In the most extreme conditions (full auto with 2 graphs 
+        displaying 8 hours of data, all doors open, and ADS-B on), 
+        single core usage can be up to 90% at 30 FPS. The core 
+        temperature rarely exceeds 58°C.
 
 2.072_231123
   - Corrected some bugs.
