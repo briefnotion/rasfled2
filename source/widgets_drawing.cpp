@@ -118,14 +118,11 @@ int TEXTURE_IMAGE::height()
 
 void TEXTURE_IMAGE::draw()
 {
-  //ImGui::Text("pointer = %p", IMAGE_TEXTURE);
-  //ImGui::Text("sizeline = %d x %d", IMAGE_WIDTH, IMAGE_HEIGHT);
   ImGui::Image((void*)(intptr_t)IMAGE_TEXTURE, ImVec2(IMAGE_WIDTH, IMAGE_HEIGHT));
 }
 
 // ---------------------------------------------------------------------------------------
 
-//void ONE_CHAR_LINE_GRAPH::update_value(system_data &sdSysData, float Value, float Max_Value)
 void ONE_CHAR_LINE_GRAPH::update_value(float Value, float Max_Value)
 {
   if (Max_Value > 0)
@@ -490,7 +487,6 @@ void DRAW_D2_PLOT::merge(unsigned long Time, int Sub_Graph, int Line_Number)
 }
 
 
-//ImVec2 DRAW_D2_PLOT::position_on_plot_at_start(float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X)
 ImVec2 DRAW_D2_PLOT::position_on_plot_at_start(float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph)
 {
   ImVec2 ret_vec;

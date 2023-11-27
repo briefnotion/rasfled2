@@ -34,10 +34,6 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
-//static void glfw_error_callback(int error, const char* description);
-
-// ---------------------------------------------------------------------------------------
-
 class SCREEN4
 {
   private:
@@ -92,6 +88,10 @@ class SCREEN4
   AUTOMOBILE_SCREEN AUTOMOBILE;
   ADSB_SCREEN ADSB;
   TEXT_CONSOLE DAEMON_LOG;
+
+  // --- 
+
+  bool RESTACK_WINDOWS = false;
 
   // --- 
   // Widgets

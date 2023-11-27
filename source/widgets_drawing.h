@@ -124,7 +124,6 @@ class ONE_CHAR_LINE_GRAPH
   
   ONE_CHAR_LINE_GRAPH_PROPERTIES PROPS;
 
-  //void update_value(system_data &sdSysData, float Value, float Max_Value);
   void update_value(float Value, float Max_Value);
   // Value 0.0 - 1.0
 
@@ -327,7 +326,6 @@ class DRAW_D2_PLOT
 
   void merge(unsigned long Time, int Sub_Graph, int Line_Number);
 
-  //ImVec2 position_on_plot_at_start(float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X);
   ImVec2 position_on_plot_at_start(float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph);
   // Internal
 
@@ -360,7 +358,6 @@ class DRAW_D2_PLOT
 
   void update_timed(unsigned long Time, int Line_Number, float Value);
 
-  //void draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
   void draw_graph(system_data &sdSysData);
 
   bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);

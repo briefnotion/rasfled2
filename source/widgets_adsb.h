@@ -59,7 +59,6 @@ void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
-//void draw_point_marker(system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, float Size);
 void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size);
 
 void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color, float Size);

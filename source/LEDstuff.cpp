@@ -90,14 +90,12 @@ CRGB CRGB::brightness(float Multiplier)
 //      future
 
 // LED Strip
-//void v_profile_strip::set(int intId, string strName, string strPosition, int intStart_Pos, bool forward, bool bot_at_start)
 void v_profile_strip::set(int intId, string strName, string strPosition, bool forward, bool bot_at_start)
 {
   intID       = intId;
   strNAME     = strName;
   strPOSITION = strPosition;
 
-  //int intGROUP_START_POS  = intStart_Pos;
   booFORWARD              = forward;
   booBOT_AT_START         = bot_at_start;
 }
@@ -197,12 +195,10 @@ void v_profile_strip_group::status_set(string strName, string strStatus)
   }
 }
 
-//void v_profile_strip_group::set(int intId, string strName, int intStart_Pos)
 void v_profile_strip_group::set(int intId, string strName)
 {
   intID                   = intId;
   strNAME                 = strName;
-  //int intGROUP_START_POS  = intStart_Pos;
 }
 
 int v_profile_strip_group::led_count()
@@ -221,10 +217,6 @@ void v_profile_strip_group::add_strip(int intID, string strName, string strPosit
 {
   v_profile_strip tmp_profile_strip;
 
-  // Get Start Pos
-  //int startpos = 0;
-
-  //tmp_profile_strip.set(intID, strName, strPosition, startpos, forward, bot_at_start);
   tmp_profile_strip.set(intID, strName, strPosition, forward, bot_at_start);
   tmp_profile_strip.create(size);
   vLED_STRIPS.push_back(tmp_profile_strip);
@@ -263,7 +255,6 @@ void v_profile_strip_main::add_group(int intId, string strName)
 {
   v_profile_strip_group tmp_led_group;
 
-  //tmp_led_group.set(intId, strName, 0);
   tmp_led_group.set(intId, strName);
   vLED_GROUPS.push_back(tmp_led_group);
 }

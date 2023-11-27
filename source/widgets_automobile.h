@@ -132,7 +132,6 @@ class T_LARGE_NUMBER_DISPLAY
 
   void update_value(system_data &sdSysData, float Value, float Compare_Value, bool Is_Within);
   void update_value(system_data &sdSysData, float Value);
-  //void update_value(system_data &sdSysData, string Text);
   void update_value(string Text);
 
   bool draw(system_data &sdSysData, bool Draw, float Y_Height);
@@ -435,13 +434,8 @@ class AUTOMOBILE_SCREEN
 
   void update(system_data &sdSysData);
 
-  //void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
-  //                              const char *name, bool *p_open, ImGuiWindowFlags flags);
   void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms);
 
-  //void display_sidebar(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
-  //                            const char *name, bool *p_open, ImGuiWindowFlags flags, 
-  //                            bool Automobile_Screen_Selected);
   void display_sidebar(system_data &sdSysData, 
                               bool Automobile_Screen_Selected);
 

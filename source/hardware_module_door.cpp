@@ -33,9 +33,6 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
 {
   using namespace std;
 
-  //int opencount = 0;
-  //bool changedetected = false;
-
   // Scan Through Doors and Check for Changes
 
   // DO NOT CLEAR ANIMATIONS HERE!  CLEAR ANIMATIONS IN ANIMATION SCRIPT!

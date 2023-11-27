@@ -71,17 +71,6 @@
 // FUNCTION AND PROCEDURES
 // ***************************************************************************************
 
-
-// -------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------
-// Graphics
-/*
-static void glfw_error_callback(int error, const char* description)
-{
-    fprintf(stderr, "GLFW Error %d: %s\n", error, description);
-}
-*/
-
 // -------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------
 // Matrix Manipulation
@@ -90,7 +79,6 @@ static void glfw_error_callback(int error, const char* description)
 // Display Materix Prepare.
 
 //  Copy the Prepared Matrix to the Display Matrix.
-//void MatrixPrepare(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount)
 void MatrixPrepare(CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount)
 {
   for (int lcount = 0; lcount < intLEDCOUNT; lcount++)
@@ -214,9 +202,6 @@ void shutdown()
 {
   // Shutdown the LED strip routine.
   ws2811_fini(&ledstring);
-
-  // Shutdown NCurses.
-  //endwin();
 }
 
 // ---------------------------------------------------------------------------------------

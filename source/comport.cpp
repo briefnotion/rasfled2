@@ -28,16 +28,15 @@ void COMPORT::write_to_comm(string Command)
 {
   Command = Command + '\n';
 
-  int n_written = 0;
-  int pos = 0;
+  int n_written = write(USB, Command.c_str(), Command.size());
 
-  char *cmd = new char [Command.size() + 1];
-  strcpy(cmd, Command.c_str());
-
-  while (pos < (int)Command.size())
+  if (n_written == -1) 
   {
-    n_written = write( USB, &cmd[pos], 1 );
-    pos = pos + n_written;
+    // Handle error here
+  } 
+  else if (n_written != (int)Command.size()) 
+  {
+    // Not all characters were written
   }
 }
 

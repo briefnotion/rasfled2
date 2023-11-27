@@ -172,13 +172,6 @@ int SCREEN4::create(system_data &sdSysData)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL2_Init();
 
-    /*
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
-    ImFont* large_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
-    ImFont* medium_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
-    ImFont* very_large_font = io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 100.0f);
-    */
-
     io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
     io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
     io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
@@ -569,7 +562,9 @@ void SCREEN4::draw(system_data &sdSysData)
               {
                 ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
                 ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+                
                 CONSOLE.display(sdSysData, "Console", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+                  
               }
               ImGui::EndChild();
 
@@ -634,7 +629,9 @@ void SCREEN4::draw(system_data &sdSysData)
               {
                 ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
                 ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+
                 DAEMON_LOG.display(sdSysData, "System Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+                
               }
               ImGui::EndChild();
 
@@ -668,12 +665,13 @@ void SCREEN4::draw(system_data &sdSysData)
         // ---------------------------------------------------------------------------------------
         // Tabs Sub Window
 
-        ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+        ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x - 150.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
 
           if (button_simple_toggle_color(sdSysData, "Console", "Console", DISPLAY_SCREEN == 0, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
           {
             DISPLAY_SCREEN = 0;
+            RESTACK_WINDOWS = true;
           }
 
           ImGui::SameLine();
@@ -695,6 +693,7 @@ void SCREEN4::draw(system_data &sdSysData)
           if (button_simple_toggle_color(sdSysData, "LOGS", "LOGS", DISPLAY_SCREEN == 4, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
           {
             DISPLAY_SCREEN = 4;
+            RESTACK_WINDOWS = true;
           }
         }
         ImGui::EndChild();
@@ -943,7 +942,7 @@ void SCREEN4::draw(system_data &sdSysData)
     // ---------------------------------------------------------------------------------------
     // Timer Window
 
-    if (DISPLAY_TIMER == true)
+    if (DISPLAY_TIMER == true && RESTACK_WINDOWS == false)
     {
       ImGui::SetNextWindowSize(ImVec2(250, 90));
       if (ImGui::Begin("Timer", &DISPLAY_TIMER, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
@@ -973,7 +972,7 @@ void SCREEN4::draw(system_data &sdSysData)
     // ---------------------------------------------------------------------------------------
     // Overhead Color Window
     
-    if (DISPLAY_OVERHEAD_COLOR == true)
+    if (DISPLAY_OVERHEAD_COLOR == true && RESTACK_WINDOWS == false)
     {
       ImGui::SetNextWindowSize(ImVec2(143, 292));
       if (ImGui::Begin("Overhead Color", &DISPLAY_OVERHEAD_COLOR, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
@@ -1040,7 +1039,7 @@ void SCREEN4::draw(system_data &sdSysData)
     // ---------------------------------------------------------------------------------------
     // Overhead Color Window
     
-    if (DISPLAY_RUNNING_COLOR == true)
+    if (DISPLAY_RUNNING_COLOR == true && RESTACK_WINDOWS == false)
     {
       ImGui::SetNextWindowSize(ImVec2(143, 292));
       if (ImGui::Begin("Running Color", &DISPLAY_RUNNING_COLOR, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
@@ -1107,7 +1106,7 @@ void SCREEN4::draw(system_data &sdSysData)
     // ---------------------------------------------------------------------------------------
     // Overhead Color Window
     
-    if (DISPLAY_CONFIRM == true)
+    if (DISPLAY_CONFIRM == true && RESTACK_WINDOWS == false)
     {
       ImGui::SetNextWindowSize(ImVec2(90, 195));
       if (ImGui::Begin("Continue", &DISPLAY_CONFIRM, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
@@ -1132,63 +1131,68 @@ void SCREEN4::draw(system_data &sdSysData)
     // ---------------------------------------------------------------------------------------
     // Alert Windows
 
-    // Go through and display all reserve
-    for (int alert_num = 0; alert_num < RESERVE_ALERT_LIST_SIZE; alert_num++)
+    if (RESTACK_WINDOWS == false)
     {
-      if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].active())
+      // Go through and display all reserve
+      for (int alert_num = 0; alert_num < RESERVE_ALERT_LIST_SIZE; alert_num++)
       {
-        if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].display())
+        if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].active())
+        {
+          if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].display())
+          {
+            ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+            ImGui::SetNextWindowSize(ImVec2(300, 100));
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+            
+            if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+            {
+              ImGui::Text(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].alert_text().c_str());
+
+              ImGui::SetCursorScreenPos(screen_pos);
+              if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), ImGui::GetContentRegionAvail()))
+              {
+                sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].acknowlege();
+              }
+            }
+            ImGui::End();
+
+            ImGui::PopStyleColor();
+          }
+        }
+      }
+    
+      // Go through and display all generic alerts
+      if (sdSysData.ALERTS_2.ALERTS.size() > 0)
+      {
+        for (int alert_num = 0; alert_num < (int)sdSysData.ALERTS_2.ALERTS.size(); alert_num++)
         {
           ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+
           ImGui::SetNextWindowSize(ImVec2(300, 100));
-          ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
           
-          if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+          if (sdSysData.ALERTS_2.ALERTS[alert_num].display())
           {
-            ImGui::Text(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].alert_text().c_str());
-
-            ImGui::SetCursorScreenPos(screen_pos);
-            if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), ImGui::GetContentRegionAvail()))
+            ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+            
+            if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
             {
-              sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].acknowlege();
-            }
-          }
-          ImGui::End();
+              ImGui::Text(sdSysData.ALERTS_2.ALERTS[alert_num].alert_text().c_str());
 
-          ImGui::PopStyleColor();
+              ImGui::SetCursorScreenPos(screen_pos);
+              if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), ImGui::GetContentRegionAvail()))
+              {
+                sdSysData.ALERTS_2.ALERTS[alert_num].acknowlege();
+              }
+            }
+            ImGui::End();
+
+            ImGui::PopStyleColor();
+          }
         }
       }
     }
 
-    // Go through and display all generic alerts
-    if (sdSysData.ALERTS_2.ALERTS.size() > 0)
-    {
-      for (int alert_num = 0; alert_num < (int)sdSysData.ALERTS_2.ALERTS.size(); alert_num++)
-      {
-        ImVec2 screen_pos = ImGui::GetCursorScreenPos();
-
-        ImGui::SetNextWindowSize(ImVec2(300, 100));
-        
-        if (sdSysData.ALERTS_2.ALERTS[alert_num].display())
-        {
-          ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
-          
-          if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
-          {
-            ImGui::Text(sdSysData.ALERTS_2.ALERTS[alert_num].alert_text().c_str());
-
-            ImGui::SetCursorScreenPos(screen_pos);
-            if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), ImGui::GetContentRegionAvail()))
-            {
-              sdSysData.ALERTS_2.ALERTS[alert_num].acknowlege();
-            }
-          }
-          ImGui::End();
-
-          ImGui::PopStyleColor();
-        }
-      }
-    }
+    RESTACK_WINDOWS = false;
 
     // ---------------------------------------------------------------------------------------
 

@@ -20,7 +20,6 @@ using namespace std;
 // -------------------------------------------------------------------------------------
 
 // Load Configuration
-//bool load_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename)
 bool load_json_configuration(system_data &sdSysData, string Directory, string Filename)
 {
   JSON_INTERFACE configuration_json;
@@ -53,7 +52,6 @@ bool load_json_configuration(system_data &sdSysData, string Directory, string Fi
       if (leds_pos > -1)
       { 
         // System
-        //int mid = 0;
         string mname;
         v_profile_strip_main tmainstripprofile;
 
@@ -118,7 +116,6 @@ bool load_json_configuration(system_data &sdSysData, string Directory, string Fi
 
 // -------------------------------------------------------------------------------------
 // Save Configuration
-//bool save_json_configuration(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string Directory, string Filename)
 bool save_json_configuration(system_data &sdSysData, string Directory, string Filename)
 {
   bool ret_success = false;
@@ -339,7 +336,6 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
 
 
 // Save Saved State
-//bool save_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename)
 bool save_running_state_json(system_data &sdSysData, string strFilename)
 {
   JSON_INTERFACE state_json;

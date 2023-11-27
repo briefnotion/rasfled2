@@ -1,3 +1,9 @@
+2.074_231125
+  - Corrected problem causing the program to freeze when comm Port 
+      data received.
+  - Windows pulled forward when Console and Log tabs selected. 
+  - Removed commented changes. 
+
 2.073_231124
 - Enabled Strict Compile.
 - Corrected issues that arose through strict compile.

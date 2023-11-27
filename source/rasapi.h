@@ -102,7 +102,6 @@ class FILE_WATCH
   string get_next_line();
 };
 
-//bool check_create_working_dir(string Directory);
 bool check_create_working_dir();
 // Not Coded
 

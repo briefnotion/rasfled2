@@ -126,8 +126,6 @@ class timed_event
   // -------------------------------------------------------------------------------------
   // Timed Event LED Animations
 
-  //bigCRGB crgb_anim_color(stupid_random sRND, unsigned long tmeCurrentTime, unsigned long tmeAnimTime,
-  //                        int intLED, int intEvent, timed_event_data &EventInfo);
   bigCRGB crgb_anim_color(stupid_random sRND, unsigned long tmeCurrentTime, unsigned long tmeAnimTime,
                           int intLED, timed_event_data &EventInfo);
 
@@ -136,7 +134,6 @@ class timed_event
   void process_led_light(int &led, timed_event_data &teDATA, system_data &sdSysData, stupid_random &sRND, unsigned long &tmeCurrentTime, 
                           bigCRGB bigcrgbNewColor[], bool &booEventComplete, bool &booPixelColorChanged); // return
 
-  //bool execute2(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime);
   bool execute2(system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime);
 };
 

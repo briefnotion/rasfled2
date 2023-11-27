@@ -110,9 +110,6 @@ class ANIMATION_HANDLER
   // Load all animations json file into system memory, LIBRARY, to be duplicated, 
   //  duplicate modified, then duplicate called, when needed.
 
-  //void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-  //                    string Collection_Name, string Animation_Name, int On_Group, 
-  //                      string String_Var_1, string String_Var_2);
   void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
                       string Collection_Name, string Animation_Name, int On_Group);
   // Primary Call Animation Routine including all parameters
@@ -132,30 +129,6 @@ class ANIMATION_HANDLER
   //  Collection_Name - json animations collection name
   //  Animation_Name  - json animations animation from collection
   //  Runs on all groups defined by the json
-
-  //void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-  //                    string Collection_Name, string Animation_Name,
-  //                    int On_Group);
-  // Call Animation Routine with limited parameters
-  //  sdSysData - System Data
-  //  tmeCurrentTime - Time
-  //  Collection_Name - json animations collection name
-  //  Animation_Name  - json animations animation from collection
-  //  Runs on specific group
-
-  //void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-  //                    string Collection_Name, string Animation_Name, 
-  //                    string String_Var_1, string String_Var_2);
-  //void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-  //                    string Collection_Name, string Animation_Name);
-  // Call Animation Routine with limited parameters
-  //  sdSysData - System Data
-  //  tmeCurrentTime - Time
-  //  Collection_Name - json animations collection name
-  //  Animation_Name  - json animations animation from collection
-  //  Runs on all groups defined by the json
-  //  String_Var_1    - For passing data, like collection name, to other events, via the json settings
-  //  String_Var_2    - For passing data, like animation name, to other events, via the json settings
 
   void mod_run_anim_color_start_1(string Label, CRGB Color);
   // Search through active animations with Identity and change.

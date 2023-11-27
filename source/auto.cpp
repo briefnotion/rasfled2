@@ -1500,7 +1500,6 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
   bool ret_message_recieved = false;
   
   string left = "";
-  //int pos = 0;
 
   int upper = 0;
   int lower = 0;

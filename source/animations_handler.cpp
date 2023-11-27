@@ -475,9 +475,6 @@ bool ANIMATION_HANDLER::load_collections(string Directory, string Filename)
   return LIBRARY.load_collections(Directory, Filename);
 }
 
-//void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime, 
-//                              string Collection_Name, string Animation_Name, int On_Group, 
-//                              string String_Var_1, string String_Var_2)
 void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime, 
                               string Collection_Name, string Animation_Name, int On_Group)
 
@@ -576,7 +573,7 @@ void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tme
                 new_timed_event.booCOMPLETE = false;
 
                 // Only set the event if Animation_Walk_Type and Animation_Of_LED is not -1
-                //if(new_timed_event.bytANIMATION > -1)
+                // Not Implemented
                 {
                   EVENTS[channel].set_timed_event(new_timed_event);
                 }
@@ -607,38 +604,8 @@ void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tme
 void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
                       string Collection_Name, string Animation_Name)
 {
-  //call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, -1, "", "");
   call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, -1);
 }
-
-/*
-void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-                      string Collection_Name, string Animation_Name,
-                      int On_Group)
-{
-  //call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, On_Group, "", "");
-  call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, On_Group);
-}
-*/
-
-/*
-//void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-//                      string Collection_Name, string Animation_Name, 
-//                      string String_Var_1, string String_Var_2)
-void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
-                      string Collection_Name, string Animation_Name)
-{
-  //call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, -1, String_Var_1, String_Var_2);
-  call_animation(sdSysData,  tmeCurrentTime,  Collection_Name, Animation_Name, -1);
-}
-*/
-
-/*
-void modify_running_animation_brightness(string Event_Identification, float Brightness)
-{
-  
-}
-*/
 
 void ANIMATION_HANDLER::mod_run_anim_color_start_1(string Label, CRGB Color)
 {

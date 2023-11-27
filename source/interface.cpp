@@ -123,7 +123,6 @@ void consoleprintevents(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, ANI
 }
 
 // Display all running events.
-//void consoleprintconfig(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, ANIMATION_HANDLER &Animations)
 void consoleprintconfig(CONSOLE_COMMUNICATION &cons, system_data &sdSysData)
 {
   cons.printw("Configuration");
@@ -172,7 +171,6 @@ void consoleprintconfig(CONSOLE_COMMUNICATION &cons, system_data &sdSysData)
 
 // -------------------------------------------------------------------------------------
 
-//void process_power_animation(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor)
 void process_power_animation(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor)
 {
   sdSysData.TMP_PASSTHRU_COLOR = cRGBpulsecolor;
@@ -184,7 +182,6 @@ void process_power_animation(system_data &sdSysData, unsigned long tmeCurrentTim
 // Pulses
 
 // Set To End All Pulses
-//void processcommandpulseend(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 void processcommandpulseend(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
   Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "PULSE COLOR STOP");
@@ -193,14 +190,12 @@ void processcommandpulseend(system_data &sdSysData, unsigned long tmeCurrentTime
 }
 
 // Flash Color All Channels
-//void processcommandflash(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBflashcolor)
 void processcommandflash(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
   Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "FLASH");
 }
 
 // Pulse Color All Channels
-//void processcommandpulse(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor)
 void processcommandpulse(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor)
 {
   sdSysData.PULSE_COLOR = cRGBpulsecolor;
@@ -209,7 +204,6 @@ void processcommandpulse(system_data &sdSysData, unsigned long tmeCurrentTime, A
 }
 
 // Pulse Color All Channels
-//void processcommandpulsecountdown(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 void processcommandpulsecountdown(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
   Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "COUNTDOWN TIMER");
@@ -220,7 +214,6 @@ void processcommandpulsecountdown(system_data &sdSysData, unsigned long tmeCurre
 // Overhead Illum
 
 // Set To End All Overhead Illumination
-//void processcommandoverheadillumend(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 void processcommandoverheadillumend(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
   Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "All Doors Closed - Overhead");
@@ -228,7 +221,6 @@ void processcommandoverheadillumend(system_data &sdSysData, unsigned long tmeCur
 }
 
 // Overhead Illumination Color
-//void processcommandoverheadillum(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor)
 void processcommandoverheadillum(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
   Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "A Door Opened - Overhead");
@@ -239,7 +231,6 @@ void processcommandoverheadillum(system_data &sdSysData, unsigned long tmeCurren
 // Hazard
 
 // Set To End All Hazard
-//void processcommandhazardend(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 void processcommandhazardend(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
   Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD STOP");
@@ -247,7 +238,6 @@ void processcommandhazardend(system_data &sdSysData, unsigned long tmeCurrentTim
 }
 
 // Hazard
-//void processcommandhazard(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 void processcommandhazard(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
   Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD");
@@ -309,7 +299,6 @@ bool check_command_with_num_param(CONSOLE_COMMUNICATION &cons, string command, s
   return boo_return;  
 }
 
-//void run_test(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 void run_test(CONSOLE_COMMUNICATION &cons)
 {
   cons.printw("Test ...");
@@ -319,8 +308,6 @@ void run_test(CONSOLE_COMMUNICATION &cons)
   cons.printw("------------------");
 }
 
-//void process_slow_commands(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, 
-//            unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 void process_slow_commands(CONSOLE_COMMUNICATION &cons, system_data &sdSysData)
   {
     if (cons.command_text_get().size() > 1)
@@ -334,7 +321,6 @@ void process_slow_commands(CONSOLE_COMMUNICATION &cons, system_data &sdSysData)
     }
   }
 
-// Process and call routines as entered on the command line.
 void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, 
               unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {

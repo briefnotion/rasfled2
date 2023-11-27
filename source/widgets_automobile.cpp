@@ -1461,8 +1461,6 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   }
 }
 
-//void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
-//                                const char *name, bool *p_open, ImGuiWindowFlags flags)
 void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms)
 { 
   //ImGuiIO &io = ImGui::GetIO();
@@ -1692,17 +1690,9 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
   ImGui::EndChild();
 }
 
-//void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, 
-//                              const char *name, bool *p_open, ImGuiWindowFlags flags, 
-//                              bool Automobile_Screen_Selected)
 void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData,
                               bool Automobile_Screen_Selected)
 {
-  //ImGuiIO &io = ImGui::GetIO();
-
-  //const int disp_x = 94;
-  //const int disp_y = 147;
-
   if (SDATA.L_SPEED_SB.draw(sdSysData, !Automobile_Screen_Selected))
   {
     DISPLAY_MID_BOTTOM = 0;

@@ -219,14 +219,12 @@ void W_TEXT::draw(system_data &sdSysData)
 
 // ---------------------------------------------------------------------------------------
 
-//void W_TEXT_TF::update_text(system_data &sdSysData, string True_Text, string False_Text)
 void W_TEXT_TF::update_text(string True_Text, string False_Text)
 {
   TEXT_TRUE = True_Text;
   TEXT_FALSE = False_Text;
 }
 
-//bool W_TEXT_TF::update_tf(system_data &sdSysData, bool True_False)
 bool W_TEXT_TF::update_tf(bool True_False)
 {
   if (TRUE_FALSE == True_False)
@@ -479,8 +477,7 @@ void BAR_TECH::update_value(system_data &sdSysData, float Value)
 void BAR_TECH::draw(system_data &sdSysData)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
-  //ImGuiIO &io = ImGui::GetIO();
-
+  
   // Min Max
   if (PROPS.HORIZONTAL && PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_TOP)
   {

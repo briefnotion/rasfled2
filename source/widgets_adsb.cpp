@@ -131,7 +131,6 @@ void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Col
   draw_list->AddNgon(Screen_Position, 4.0f, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
 }
 
-//void draw_point_marker(system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, float Size)
 void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -1851,8 +1850,6 @@ void ADSB_SCREEN::update(system_data &sdSysData)
   sdSysData.AIRCRAFT_COORD.DATA.CHANGED = false;
 }
 
-//void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
-//                          const char *name, bool *p_open, ImGuiWindowFlags flags)
 void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms)
 { 
   ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);

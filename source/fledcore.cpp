@@ -86,8 +86,6 @@ void timed_event::ClearAll(int intStartPos, int intEndPos)
 
 // -------------------------------------------------------------------------------------
 // Timed Event LED Animations
-//bigCRGB timed_event::crgb_anim_color(stupid_random sRND, unsigned long tmeCurrentTime, unsigned long tmeAnimTime,
-//                        int intLED, int intEvent, timed_event_data &EventInfo)
 bigCRGB timed_event::crgb_anim_color(stupid_random sRND, unsigned long tmeCurrentTime, unsigned long tmeAnimTime,
                         int intLED, timed_event_data &EventInfo)
 //  Returns a CRGB value of the single LED respective to what its value should
@@ -438,7 +436,6 @@ void timed_event::process_led_light(int &led, timed_event_data &teDATA, system_d
   } // End if tmeCurrentTime >= tmeStartAnim
 }
 
-//bool timed_event::execute2(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime)
 bool timed_event::execute2(system_data &sdSysData, stupid_random sRND, CRGB hwLEDArray[], unsigned long tmeCurrentTime)
 //  Sets all requested light paths, start to end position, to begin their animation
 //    at a future time.
@@ -464,8 +461,6 @@ bool timed_event::execute2(system_data &sdSysData, stupid_random sRND, CRGB hwLE
     // Process each event, one by one.
     for (int event = 0; event < (int)teDATA.size(); event++)
     {
-      //int led_start = 0;
-      //int led_end = 0;
 
       if (teDATA[event].booCOMPLETE == false)
       {

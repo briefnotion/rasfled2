@@ -96,7 +96,6 @@ int JSON_ENTRY::find_closing(string Text, int Start_Pos, char Opening, char Clos
 bool JSON_ENTRY::check_entry(string &Entry, int &Size_Of_Entry, int &Size_Of_Label, 
                               bool &Is_A_Set, bool &Is_A_List, bool &Is_A_Value)
 {
-  //bool ret_success = false;
 
   int pos_of_colon = -1;
   int working_pos = 0;
@@ -180,7 +179,7 @@ bool JSON_ENTRY::parse_item_list(string Entry, bool Is_Set, string Set_Name)
 
   int entry_size = 0;
   int label_size = 0;
-  //int value_size = 0;
+  
   bool is_value_set = false;
   bool is_value_list = false;
   bool is_value_value = false;
