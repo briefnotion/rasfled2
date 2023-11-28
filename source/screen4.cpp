@@ -1142,7 +1142,19 @@ void SCREEN4::draw(system_data &sdSysData)
           {
             ImVec2 screen_pos = ImGui::GetCursorScreenPos();
             ImGui::SetNextWindowSize(ImVec2(300, 100));
-            ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+
+            if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].warning())
+            {
+              ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
+              ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
+              ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
+            }
+            else
+            {
+              ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_red().DIM));
+              ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_red().DIM));
+              ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().DIM));
+            }
             
             if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
             {
@@ -1156,7 +1168,7 @@ void SCREEN4::draw(system_data &sdSysData)
             }
             ImGui::End();
 
-            ImGui::PopStyleColor();
+            ImGui::PopStyleColor(3);
           }
         }
       }
@@ -1172,21 +1184,32 @@ void SCREEN4::draw(system_data &sdSysData)
           
           if (sdSysData.ALERTS_2.ALERTS[alert_num].display())
           {
-            ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+            if (sdSysData.ALERTS_2.ALERTS[alert_num].warning())
+            {
+              ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
+              ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
+              ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
+            }
+            else
+            {
+              ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_red().DIM));
+              ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_red().DIM));
+              ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().DIM));
+            }
             
             if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
             {
               ImGui::Text(sdSysData.ALERTS_2.ALERTS[alert_num].alert_text().c_str());
 
               ImGui::SetCursorScreenPos(screen_pos);
-              if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), ImGui::GetContentRegionAvail()))
+              if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(sdSysData.ALERTS_2.ALERTS[alert_num].id())).c_str(), ImGui::GetContentRegionAvail()))
               {
                 sdSysData.ALERTS_2.ALERTS[alert_num].acknowlege();
               }
             }
             ImGui::End();
 
-            ImGui::PopStyleColor();
+            ImGui::PopStyleColor(3);
           }
         }
       }

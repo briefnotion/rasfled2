@@ -35,27 +35,36 @@ bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_
     {
       ID = Id;
       ACTIVE = false;
+      WARNING = false;
       ret_description_request = true;
     }  
   }
-
-  if (Raise_Alert)
+  else if (Raise_Alert)
   {
+    WARNING = false;
+    ret_description_request = true;
+
     if (ACTIVE == false)
     {
       ID = Id;
       ACTIVE = true;
       ACKNOWLEGED = false;
       DISPLAY = true;
-      ret_description_request = true;
-    }
-    else
-    {
-      ret_description_request = true;
     }
   }
+  else if (ACTIVE)
+  {
+    WARNING = true;
+    ret_description_request = true;
+  }
+
 
   return ret_description_request;
+}
+
+bool ALERT_2_TYPE_MONITOR::warning()
+{
+  return WARNING;
 }
 
 bool ALERT_2_TYPE_MONITOR::active()

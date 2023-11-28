@@ -1474,11 +1474,11 @@ void AUTOMOBILE_CALCULATED::compute_low(ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRA
   S_TEMP = (((Status.TEMPS.AMBIANT_AIR_46.val_c() + 
               Status.TEMPS.AIR_INTAKE_0f.val_c() + 
               Status.TEMPS.COOLANT_05.val_c() + 
-              (Status.TEMPS.CATALYST_3C.val_c() / 20)) / 4) - 30) * 3;
+              (Status.TEMPS.CATALYST_3C.val_c() / 20.0f)) / 4.0f) - 30.0f) * 3.0f;
 
   if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_S_TEMP].alert_condition(RESERVE_ALERT_TEMP_S_TEMP, S_TEMP >= 60.0f, S_TEMP < 50.0f))
   {
-    ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_S_TEMP].update_alert_text("S-Temp Value is " + to_string(S_TEMP));
+    ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_S_TEMP].update_alert_text("S-Temp Value is " + to_string((int)S_TEMP));
   }
 
 }

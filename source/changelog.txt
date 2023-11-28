@@ -1,3 +1,6 @@
+2.075_231127
+  - Modified the alert system.
+
 2.074_231125
   - Corrected problem causing the program to freeze when comm Port 
       data received.

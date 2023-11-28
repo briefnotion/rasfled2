@@ -42,10 +42,18 @@ class ALERT_2_TYPE_MONITOR
   int ID = 0;
 
   bool ACTIVE = false;
+  // Indicates alert was raised.
+  // Will stay in true condition until alert is cleared.
+  //  or value in condition is clear
+
+  bool WARNING = false;
+  // Indicates alert was raised and clear of the raise alert condition 
+  //  but has not yet passed the clear alert condition.
+  //  aka, in between active and clear.
   
-  bool ACKNOWLEGED = false;
-  bool DISPLAY = true;
-  string ALERT_TEXT = "";
+  bool ACKNOWLEGED = false; // Indicates the alert was acknowedeged.
+  bool DISPLAY = true;      // Determine if alert is to be displayed.
+  string ALERT_TEXT = "";   // Text of alert
 
   public:
 
@@ -54,17 +62,28 @@ class ALERT_2_TYPE_MONITOR
   bool alert_condition(int Id, bool Raise_Alert, bool Clear_Alert);
   // returns true if requesting a description.
   
-  bool active();
-  bool display();
-  int id();
-  string alert_text();
+  bool active();        // Returns ACTIVE value
+  bool warning();       // Returns WARNING value
+  bool display();       // Returns DISPLAY value
+  int id();             // ID of alert
+  string alert_text();  // Text value of alert
 
   void set_display_on();
+  // Will set display to true
 
   void update_alert_text(string Text);
+  // Change the text value of the alert;
+
   void acknowlege();
+  // Indicates the alert was acknowedeged.
+  //  Also, turns display off.
+
   bool is_clear();
+  // Returns true if alert is: acknowledged, not active, and not to be 
+  //  displayed.
+
   void clear();
+  // Sets active to false;
 };
 
 class ALERT_SYSTEM_2
