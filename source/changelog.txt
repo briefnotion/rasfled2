@@ -1,3 +1,13 @@
+2.076_231128
+  - Remove large speedometer from automobile top graph.
+  - Created a movable window of large speedometer, visible from all screens, 
+      toggled by clicking the sidebar speedometer.
+  - Removed all other hidden sidebar buttons.
+  - Bottom of automobile screen is clickable, and rotates from bars, to 
+      temp graph, to power graph, and back to bars, by clicking.
+  - Removed Show Alerts button from system menu.
+  - Created Show Alerts, right of tabs, only visible if alerts exist.
+
 2.075_231127
   - Modified the alert system.
 

@@ -356,9 +356,12 @@ class DISPLAY_DATA_AUTOMOBILE
   T_DATA_DISPLAY D_CRUISE_SPEED;
 
   // ------------------------------------------
-  // Mid Top
-  T_LARGE_NUMBER_DISPLAY L_SPEED_INSIDE;
+  // Outside
+  bool L_SPEED_OUTSIDE_DRAW = false;
+  T_LARGE_NUMBER_DISPLAY L_SPEED_OUTSIDE;
 
+  // ------------------------------------------
+  // Mid Top
   DRAW_D2_PLOT PLOT_SLOW;
 
   BAR_TECH VB_SPEED;
@@ -421,7 +424,6 @@ class AUTOMOBILE_SCREEN
   WIDGET_DEFAULTS DEFAULTS;
 
   bool DISPLAY_DATA = true;
-  bool DISPLAY_LARGE_SPEED_INDICATOR = true;
 
   int DISPLAY_MID_BOTTOM = 0; // 0 - Large Horizontal Bars
                               // 1 - Unused
@@ -436,8 +438,7 @@ class AUTOMOBILE_SCREEN
 
   void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms);
 
-  void display_sidebar(system_data &sdSysData, 
-                              bool Automobile_Screen_Selected);
+  void display_sidebar(system_data &sdSysData, bool Automobile_Screen_Selected, bool Restack_Windows);
 
 };
 

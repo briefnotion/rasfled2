@@ -753,17 +753,17 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.D_CRUISE_SPEED.create(sdSysData);
 
   // ------------------------------------------
-  // Mid Top
+  // Outside
   {
-    SDATA.L_SPEED_INSIDE.PROPS.LABEL = "S\nP\nE\nE\nD";
-    SDATA.L_SPEED_INSIDE.PROPS.LABEL_ON_LEFT = true;
-    SDATA.L_SPEED_INSIDE.PROPS.WHEEL_FRAME_SIZE = 8;
-    SDATA.L_SPEED_INSIDE.PROPS.DISPLAY_MIN_MAX = true;
-    SDATA.L_SPEED_INSIDE.PROPS.MIN_MAX_TIME_SPAN = 5* 60000;
-    SDATA.L_SPEED_INSIDE.PROPS.DISPLAY_MARKER = true;
-    SDATA.L_SPEED_INSIDE.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.white();
-    SDATA.L_SPEED_INSIDE.PROPS.VERY_LARGE = true;
-    SDATA.L_SPEED_INSIDE.create();
+    SDATA.L_SPEED_OUTSIDE.PROPS.LABEL = "S\nP\nE\nE\nD";
+    SDATA.L_SPEED_OUTSIDE.PROPS.LABEL_ON_LEFT = true;
+    SDATA.L_SPEED_OUTSIDE.PROPS.WHEEL_FRAME_SIZE = 8;
+    SDATA.L_SPEED_OUTSIDE.PROPS.DISPLAY_MIN_MAX = true;
+    SDATA.L_SPEED_OUTSIDE.PROPS.MIN_MAX_TIME_SPAN = 5* 60000;
+    SDATA.L_SPEED_OUTSIDE.PROPS.DISPLAY_MARKER = true;
+    SDATA.L_SPEED_OUTSIDE.PROPS.DISPLAY_MARKER_COLOR = sdSysData.COLOR_SELECT.white();
+    SDATA.L_SPEED_OUTSIDE.PROPS.VERY_LARGE = true;
+    SDATA.L_SPEED_OUTSIDE.create();
   }
 
   // Slow Plot line
@@ -1384,12 +1384,15 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
   SDATA.D_CRUISE_SPEED.update_value(sdSysData, to_string((int)SDATA.CRUISE_CONTROL_SPEED));
 
+  // ------------------------------------------
+  // Outside
+  {
+    SDATA.L_SPEED_OUTSIDE.update_value(sdSysData, SDATA.SPEED_IMPRES, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
+  }
 
   // ------------------------------------------
   // Mid Top
   {
-    SDATA.L_SPEED_INSIDE.update_value(sdSysData, SDATA.SPEED_IMPRES, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
-
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, SDATA.SPEED_IMPRES);
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.TEMP_S_TEMP);
@@ -1548,21 +1551,6 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
   // Show Center Region
   ImGui::BeginChild("Auto Screen Right Side", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    // Show Large Display
-    if (DISPLAY_LARGE_SPEED_INDICATOR) 
-    {
-      ImGui::BeginChild("Large Speed Display", ImVec2(140.0f, ImGui::GetContentRegionAvail().y * 8.0f / 16.0f), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-      {
-        if (SDATA.L_SPEED_INSIDE.draw(sdSysData, true, ImGui::GetContentRegionAvail().y))
-        {
-          DISPLAY_LARGE_SPEED_INDICATOR = !DISPLAY_LARGE_SPEED_INDICATOR;
-        }
-      }
-      ImGui::EndChild();
-
-      ImGui::SameLine();
-    }
-
     // Show Upper Center Region
     ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 8.0f / 16.0f), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
@@ -1572,7 +1560,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       
       if (SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2))
       {
-        DISPLAY_LARGE_SPEED_INDICATOR = !DISPLAY_LARGE_SPEED_INDICATOR;
+        //
       }
 
       ImGui::SameLine();
@@ -1587,59 +1575,11 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
     // Show Alt Data
     ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
-      /*
-      if (DISPLAY_MID_BOTTOM == 1)
-      // Show Voltage
-      {
-        float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
-        ImVec2 pos1 = ImGui::GetCursorScreenPos();
-        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
-
-        SDATA.PLOT_VOLTAGE.draw(sdSysData, pos1, pos2);
-
-        ImGui::SameLine();
-
-        SDATA.VB_VOLTAGE.draw(sdSysData);
-      }
-      else if (DISPLAY_MID_BOTTOM == 2)
-      */
-      if (DISPLAY_MID_BOTTOM == 2)
-      // Show Temperature
-      {
-        float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
-        ImVec2 pos1 = ImGui::GetCursorScreenPos();
-        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
-
-        SDATA.PLOT_TEMPERATURE.draw(sdSysData, pos1, pos2);
-
-        ImGui::SameLine();
-
-        SDATA.VB_TEMPERATURE_COOLANT.draw(sdSysData);
-        SDATA.VB_TEMPERATURE_INTAKE.draw(sdSysData);
-        SDATA.VB_TEMPERATURE_AMBIANT.draw(sdSysData);
-        SDATA.VB_TEMPERATURE_CATALYST.draw(sdSysData);
-        SDATA.VB_TEMPERATURE_S_TEMP.draw(sdSysData);
-      }
-      else if (DISPLAY_MID_BOTTOM == 3)
-      // Show Power
-      {
-        float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
-        ImVec2 pos1 = ImGui::GetCursorScreenPos();
-        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
-
-        SDATA.PLOT_POWER.draw(sdSysData, pos1, pos2);
-
-        ImGui::SameLine();
-
-        SDATA.VB_POWER_TACH.draw(sdSysData);
-        SDATA.VB_POWER_ACCELERATION.draw(sdSysData);
-        SDATA.VB_POWER_TORQE.draw(sdSysData);
-        SDATA.VB_POWER_FUEL_RAIL_P.draw(sdSysData);
-        SDATA.VB_POWER_SYSTEM_VAPER_P.draw(sdSysData);
-      }
-      else //(DISPLAY_MID_BOTTOM == 0)
+      if (DISPLAY_MID_BOTTOM == 0)
       // Show bars
       {
+        ImVec2 pos1 = ImGui::GetCursorScreenPos();
+
         SDATA.TB_STEERING.draw(sdSysData);
         SDATA.TB_TORQUE.draw(sdSysData);
         SDATA.TB_RPM.draw(sdSysData);
@@ -1680,9 +1620,73 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
             Screen_Comms.command_text_set("]]");
           }
         }
-        
         ImGui::EndChild();
 
+        // Change Screens
+        ImGui::SetCursorScreenPos(pos1);
+        if (ImGui::InvisibleButton("InvisibleButton", ImGui::GetContentRegionAvail()))
+        {
+          DISPLAY_MID_BOTTOM++;
+        }
+
+      }
+
+      else if (DISPLAY_MID_BOTTOM == 1)
+      // Show Voltage
+      {
+        // advance
+        DISPLAY_MID_BOTTOM++;
+      }
+
+      else if (DISPLAY_MID_BOTTOM == 2)
+      // Show Temperature
+      {
+        float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
+        ImVec2 pos1 = ImGui::GetCursorScreenPos();
+        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
+
+        // Change Screens
+        if (SDATA.PLOT_TEMPERATURE.draw(sdSysData, pos1, pos2))
+        {
+          DISPLAY_MID_BOTTOM++;
+        }
+
+        ImGui::SameLine();
+
+        SDATA.VB_TEMPERATURE_COOLANT.draw(sdSysData);
+        SDATA.VB_TEMPERATURE_INTAKE.draw(sdSysData);
+        SDATA.VB_TEMPERATURE_AMBIANT.draw(sdSysData);
+        SDATA.VB_TEMPERATURE_CATALYST.draw(sdSysData);
+        SDATA.VB_TEMPERATURE_S_TEMP.draw(sdSysData);
+
+      }
+
+      else if (DISPLAY_MID_BOTTOM == 3)
+      // Show Power
+      {
+        float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
+        ImVec2 pos1 = ImGui::GetCursorScreenPos();
+        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
+
+        // Change Screens
+        if (SDATA.PLOT_POWER.draw(sdSysData, pos1, pos2))
+        {
+          DISPLAY_MID_BOTTOM++;
+        }
+
+        ImGui::SameLine();
+
+        SDATA.VB_POWER_TACH.draw(sdSysData);
+        SDATA.VB_POWER_ACCELERATION.draw(sdSysData);
+        SDATA.VB_POWER_TORQE.draw(sdSysData);
+        SDATA.VB_POWER_FUEL_RAIL_P.draw(sdSysData);
+        SDATA.VB_POWER_SYSTEM_VAPER_P.draw(sdSysData);
+      }
+
+      else
+      {
+        // reset
+        DISPLAY_MID_BOTTOM = 0;
       }
     }
     ImGui::EndChild();
@@ -1690,37 +1694,52 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
   ImGui::EndChild();
 }
 
-void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData,
-                              bool Automobile_Screen_Selected)
+void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData, bool Automobile_Screen_Selected, bool Restack_Windows)
 {
   if (SDATA.L_SPEED_SB.draw(sdSysData, !Automobile_Screen_Selected))
   {
-    DISPLAY_MID_BOTTOM = 0;
+    SDATA.L_SPEED_OUTSIDE_DRAW = !SDATA.L_SPEED_OUTSIDE_DRAW;
   }
 
   if (SDATA.L_TACH_SB.draw(sdSysData))
   {
-    DISPLAY_MID_BOTTOM = 3;
+    //
   }
 
   if (SDATA.L_S_TEMP_SB.draw(sdSysData))
   {
-    DISPLAY_MID_BOTTOM = 2;
+    //
   }
   
   if (SDATA.L_VOLTAGE_SB.draw(sdSysData))
   {
-    DISPLAY_MID_BOTTOM = 1;
+    //
   }
 
   if (SDATA.L_GEAR_SB.draw(sdSysData))
   {
-    DISPLAY_MID_BOTTOM = 0;
+    //
   }
 
   if (SDATA.L_ACCELERATION_SB.draw(sdSysData)) //ImGui::TextUnformatted("Δ\nv");
   {
-    DISPLAY_MID_BOTTOM = 0;
+    //
+  }
+
+  if (SDATA.L_SPEED_OUTSIDE_DRAW && Restack_Windows == false)
+  {
+    ImGui::SetNextWindowSize(ImVec2(140, 250));
+
+    if (ImGui::Begin("SPEED", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+    {
+      if (SDATA.L_SPEED_OUTSIDE.draw(sdSysData, true, ImGui::GetContentRegionAvail().y))
+      {
+        SDATA.L_SPEED_OUTSIDE_DRAW = !SDATA.L_SPEED_OUTSIDE_DRAW;
+      }
+    }
+
+    ImGui::End();
+
   }
 
 }

@@ -2389,7 +2389,7 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
 
     if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].alert_condition(RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 2.0f, STATUS.FUEL.val_level() > 7.0f))
     {
-      ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].update_alert_text("S-Temp Value is " + STATUS.FUEL.level());
+      ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].update_alert_text("Fuel Level is " + STATUS.FUEL.level());
     }
 
     // Guages

@@ -58,7 +58,6 @@ bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_
     ret_description_request = true;
   }
 
-
   return ret_description_request;
 }
 
@@ -125,6 +124,11 @@ bool ALERT_SYSTEM_2::changed()
   return CHANGED;
 }
 
+int ALERT_SYSTEM_2::alert_count()
+{
+  return (ALERTS.size() + ALERTS_RESERVE_COUNT);
+}
+
 void ALERT_SYSTEM_2::add_generic_alert(string Text)
 {
   ALERT_2_TYPE_MONITOR tmp_alert;
@@ -153,6 +157,15 @@ void ALERT_SYSTEM_2::alert_list_clean()
       {
         alert_num++;
       }
+    }
+  }
+
+  ALERTS_RESERVE_COUNT = 0;
+  for (int res_alert_pos = 0; res_alert_pos < RESERVE_ALERT_LIST_SIZE; res_alert_pos++)
+  {
+    if (ALERTS_RESERVE[res_alert_pos].active())
+    {
+      ALERTS_RESERVE_COUNT++;
     }
   }
 }

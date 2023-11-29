@@ -93,6 +93,8 @@ class ALERT_SYSTEM_2
   int LATEST_ID = 10000;
 
   bool CHANGED = false;
+
+  int ALERTS_RESERVE_COUNT = 0;
   
   public:
   
@@ -101,6 +103,8 @@ class ALERT_SYSTEM_2
 
   bool changed();
   // 
+
+  int alert_count();
 
   void add_generic_alert(string Text);
   //
