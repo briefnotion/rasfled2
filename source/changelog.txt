@@ -1,3 +1,8 @@
+2.077_231130
+  - Changed some animations.
+  - Changed ADSB map button size.
+  - Testing routines added to CAN.
+
 2.076_231128
   - Remove large speedometer from automobile top graph.
   - Created a movable window of large speedometer, visible from all screens, 

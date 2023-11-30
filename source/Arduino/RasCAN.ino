@@ -174,6 +174,8 @@ class CONTROL
   unsigned char service_command;
   unsigned char service_command_data_00;
 
+  bool send_service_command_2 = false;
+
   bool read(String read_string)
   {
     read_string.trim();
@@ -202,10 +204,12 @@ class CONTROL
       if (test == true)
       {
         test = false;
+        Serial.println("Test Data Off");
       }
       else
       {
         test = true;
+        Serial.println("Test Data On");
       }
     }
     else if (read_string == "f")
@@ -214,10 +218,12 @@ class CONTROL
       if (filter == true)
       {
         filter = false;
+        Serial.println("Filter Off");
       }
       else
       {
         filter = true;
+        Serial.println("Filter On");
       }
     }
     else if (read_string == "q")
@@ -635,27 +641,31 @@ class CONTROL
       // B0 - BF
 
       // Service Command
+      else if (read_string == "vin")
+      {
+        send_service_command_2 = true;
+      }
 
       // Tire Pressure
-      else if (read_string == "22 2A 00")
+      else if (read_string == "t1")
       {
         service_command = 0x2A;
         service_command_data_00 = 0x00;
         send_service_command = true;
       }
-      else if (read_string == "22 2A 01")
+      else if (read_string == "t2")
       {
         service_command = 0x2A;
         service_command_data_00 = 0x01;
         send_service_command = true;
       }
-      else if (read_string == "22 2A 02")
+      else if (read_string == "t3")
       {
         service_command = 0x2A;
         service_command_data_00 = 0x02;
         send_service_command = true;
       }
-      else if (read_string == "22 2A 03")
+      else if (read_string == "t4")
       {
         service_command = 0x2A;
         service_command_data_00 = 0x03;
@@ -912,6 +922,19 @@ void send_Service_Pid(unsigned char __pid, unsigned char data_0)
 {
     unsigned char tmp[8] = {0x02, 0x22, __pid, data_0, 0, 0, 0, 0};
     CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
+}
+
+void send_Service_Pid_2(unsigned char __pid, unsigned char data_0) 
+{
+  // VIN Message request
+  unsigned char tmp[8] = {0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+  // 0x7DF is the OBD-II broadcast ID
+  // 0 - standard message
+  // 8 - message size
+  CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
+
+  // message should be recreived on 0x7E8
 }
 
 void serial_send(unsigned long ID, byte len, byte buf[])
@@ -1411,6 +1434,18 @@ void version_5()
 
       ctrl.send_service_command = false;
       send_Service_Pid(ctrl.service_command, ctrl.service_command_data_00);
+      
+      digitalWrite(23, LOW);  // LED OFF
+    }
+
+    // send command to CAN
+    if (ctrl.send_service_command_2 == true)
+    {
+      digitalWrite(23, HIGH); // LED ON
+
+      ctrl.send_service_command_2 = false;
+
+      send_Service_Pid_2(ctrl.service_command, ctrl.service_command_data_00);
       
       digitalWrite(23, LOW);  // LED OFF
     }

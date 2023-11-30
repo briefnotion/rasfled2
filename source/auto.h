@@ -21,6 +21,7 @@
 #include "stringthings.h"
 #include "helper.h"
 #include "alert_system_2.h"
+#include "screen4_helper.h"
 
 #include "comport.h"
 
@@ -857,7 +858,7 @@ class AUTOMOBILE
 
   bool active();
 
-  void process(ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time);
+  void process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time);
 
   void translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time);
 };

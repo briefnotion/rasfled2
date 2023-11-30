@@ -1383,20 +1383,21 @@
 
         {
           "Comment_1" : "Show Door Illumination Light", 
+          "Comment_2" : "Bright lights over open door, on during day or night", 
           "Label" : "TDOO",
           "Start_Delay_Time" : 750, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15, 
-          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith", 
-          "Start_1" : "0,0,0", "Dest_1" : "64,64,64", 
-          "Start_2" : "0,0,0", "Dest_2" : "0,0,0", 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "64,64,64", 
           "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_start|10", 
           "Clear_On_End" : false
         },
         {
+          "Comment_1" : "Show Door Illumination Light", 
+          "Comment_2" : "Bright lights over open door, on during day or night", 
           "Label" : "TDOO",
           "Start_Delay_Time" : 750, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15, 
-          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith", 
-          "Start_1" : "0,0,0", "Dest_1" : "64,64,64", 
-          "Start_2" : "0,0,0", "Dest_2" : "0,0,0", 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "64,64,64", 
           "LED_Start_Pos" : "from_1/2|1", "LED_End_Pos" : "from_end|10", 
           "Clear_On_End" : false
         }
@@ -1531,7 +1532,7 @@
           "Start_1" : "0,0,0", "Dest_1" : "16,0,0", 
           "Start_2" : "0,0,0", "Dest_2" : "0,0,0",
           "LED_Start_Pos" : "from_2/3|0", "LED_End_Pos" : "from_top|0", 
-          "Clear_On_End" : false, "Off_During_Day" : true
+          "Clear_On_End" : false, "Off_During_Day" : false
         },
         {
           "Label" : "TDOE",
@@ -1540,7 +1541,7 @@
           "Start_1" : "0,0,0", "Dest_1" : "16,0,0", 
           "Start_2" : "0,0,0", "Dest_2" : "0,0,0",
           "LED_Start_Pos" : "from_2/3|0", "LED_End_Pos" : "from_bot|0", 
-          "Clear_On_End" : false, "Off_During_Day" : true
+          "Clear_On_End" : false, "Off_During_Day" : false
         },
         {
           "Comment_1" : "Puddle Lights", 

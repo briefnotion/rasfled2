@@ -76,6 +76,10 @@ class COMPORT_PROPERTIES
   // Flash Data Recorder
   bool FLASH_DATA_RECORDER_ACTIVE = false;
   int FLASH_DATA_SIZE = 5000;
+
+  // Simple property to for exteral routines to know if output should be sent
+  //  to console
+  bool PRINT_RECEIVED_DATA = false;
 };
 
 class COMPORT

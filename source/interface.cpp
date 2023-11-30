@@ -77,6 +77,10 @@ void consoleprinthelp(CONSOLE_COMMUNICATION &cons)
 
   cons.printw("SERIAL PORT COMMANDS ----------------------");
   cons.printw("");
+  cons.printw("' startcomm' - Start COM port");
+  cons.printw("' stopcomm'  - Stop COM port");
+  cons.printw("");
+  cons.printw("' commp' - Toggle Serial Print to Console");
   cons.printw("' commo' - Start Serial Communications Recording");
   cons.printw("' commf' - Start Serial Communications Recording");
   cons.printw("");
@@ -370,6 +374,13 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       }
       
       // Stop Comm Port
+      
+      if (check_command(cons," commp", "Toggle Print Received Data"))
+      {
+        sdSysData.COMMS.PROPS.PRINT_RECEIVED_DATA = !sdSysData.COMMS.PROPS.PRINT_RECEIVED_DATA;
+        cons.printw("PRINT_RECEIVED_DATA set to " + to_string(sdSysData.COMMS.PROPS.PRINT_RECEIVED_DATA));
+      }
+      
       if (check_command(cons," stopcomm", "Start Comms Port"))
       {
         sdSysData.COMMS.close_port();
