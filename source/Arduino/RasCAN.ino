@@ -175,6 +175,14 @@ class CONTROL
   unsigned char service_command_data_00;
 
   bool send_service_command_2 = false;
+  unsigned char service_command_2_data_00;
+  unsigned char service_command_2_data_01;
+  unsigned char service_command_2_data_02;
+  unsigned char service_command_2_data_03;
+  unsigned char service_command_2_data_04;
+  unsigned char service_command_2_data_05;
+  unsigned char service_command_2_data_06;
+  unsigned char service_command_2_data_07;
 
   bool read(String read_string)
   {
@@ -643,9 +651,23 @@ class CONTROL
       // Service Command
       else if (read_string == "vin")
       {
+        // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
+        // no signs of working
+
+        // Request pid list in mode 9?
+        service_command_2_data_00 = 0x02;
+        service_command_2_data_01 = 0x09;
+        service_command_2_data_02 = 0x00;
+        service_command_2_data_03 = 0x00;
+        service_command_2_data_04 = 0x00;
+        service_command_2_data_05 = 0x00;
+        service_command_2_data_06 = 0x00;
+        service_command_2_data_07 = 0x00;
+
         send_service_command_2 = true;
       }
 
+      /*
       // Tire Pressure
       else if (read_string == "t1")
       {
@@ -671,6 +693,7 @@ class CONTROL
         service_command_data_00 = 0x03;
         send_service_command = true;
       }
+      */
     }
 
     return false;
@@ -924,10 +947,11 @@ void send_Service_Pid(unsigned char __pid, unsigned char data_0)
     CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
 }
 
-void send_Service_Pid_2(unsigned char __pid, unsigned char data_0) 
+void send_Service_Pid_2(  unsigned char data_0, unsigned char data_1, unsigned char data_2, unsigned char data_3, 
+                          unsigned char data_4, unsigned char data_5, unsigned char data_6, unsigned char data_7) 
 {
   // VIN Message request
-  unsigned char tmp[8] = {0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00};
+  unsigned char tmp[8] = {data_0, data_1, data_2, data_3, data_4, data_5, data_6, data_7};
 
   // 0x7DF is the OBD-II broadcast ID
   // 0 - standard message
@@ -1445,7 +1469,10 @@ void version_5()
 
       ctrl.send_service_command_2 = false;
 
-      send_Service_Pid_2(ctrl.service_command, ctrl.service_command_data_00);
+      send_Service_Pid_2( ctrl.service_command_2_data_00, ctrl.service_command_2_data_01, 
+                          ctrl.service_command_2_data_02, ctrl.service_command_2_data_03, 
+                          ctrl.service_command_2_data_04, ctrl.service_command_2_data_05, 
+                          ctrl.service_command_2_data_06, ctrl.service_command_2_data_07);
       
       digitalWrite(23, LOW);  // LED OFF
     }

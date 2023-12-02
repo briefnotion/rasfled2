@@ -1453,11 +1453,11 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
       SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
       SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, (float)SDATA.RPM/50);
       SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, ((float)SDATA.TORQUE_DEMANDED / 40.0f) + 50.0f);
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, (SDATA.ACCELERATION * 10.0f / 2.0f) +  + 50.0f);
+      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, (SDATA.ACCELERATION * 10.0f) + 50.0f);
 
       SDATA.VB_POWER_TACH.update_value(sdSysData, (float)SDATA.RPM/50);
       SDATA.VB_POWER_TORQE.update_value(sdSysData, ((float)SDATA.TORQUE_DEMANDED / 40.0f) + 50.0f);
-      SDATA.VB_POWER_ACCELERATION.update_value(sdSysData, (SDATA.ACCELERATION * 10.0f / 2.0f) +  + 50.0f);
+      SDATA.VB_POWER_ACCELERATION.update_value(sdSysData, (SDATA.ACCELERATION * 10.0f) + 50.0f);
       SDATA.VB_POWER_FUEL_RAIL_P.update_value(sdSysData, (SDATA.FUEL_RAIL_PRESSURE_VAL / 40.0f) + 50.0f);
       SDATA.VB_POWER_SYSTEM_VAPER_P.update_value(sdSysData, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
     }

@@ -1382,24 +1382,44 @@
         },
 
         {
-          "Comment_1" : "Show Door Illumination Light", 
+          "Comment_1" : "Show Door Illumination Light",
+          "Label" : "TDOO",
+          "Start_Delay_Time" : 750, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15,
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith",
+          "Start_1" : "0,0,0", "Dest_1" : "32,32,32",
+          "Start_2" : "0,0,0", "Dest_2" : "0,0,0",
+          "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_start|10",
+          "Clear_On_End" : false
+        },
+        {
+          "Label" : "TDOO",
+          "Start_Delay_Time" : 750, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15,
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith",
+          "Start_1" : "0,0,0", "Dest_1" : "32,32,32",
+          "Start_2" : "0,0,0", "Dest_2" : "0,0,0",
+          "LED_Start_Pos" : "from_1/2|1", "LED_End_Pos" : "from_end|10",
+          "Clear_On_End" : false
+        },
+
+        {
+          "Comment_1" : "Show Door Illumination Light Pulse", 
           "Comment_2" : "Bright lights over open door, on during day or night", 
           "Label" : "TDOO",
           "Start_Delay_Time" : 750, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
           "Dest_1" : "64,64,64", 
           "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_start|10", 
-          "Clear_On_End" : false
+          "Repeat" : true, "Clear_On_End" : false
         },
         {
-          "Comment_1" : "Show Door Illumination Light", 
+          "Comment_1" : "Show Door Illumination Light Pulse", 
           "Comment_2" : "Bright lights over open door, on during day or night", 
           "Label" : "TDOO",
           "Start_Delay_Time" : 750, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
           "Dest_1" : "64,64,64", 
           "LED_Start_Pos" : "from_1/2|1", "LED_End_Pos" : "from_end|10", 
-          "Clear_On_End" : false
+          "Repeat" : true, "Clear_On_End" : false
         }
       ],
 

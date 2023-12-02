@@ -84,12 +84,14 @@ void consoleprinthelp(CONSOLE_COMMUNICATION &cons)
   cons.printw("' commo' - Start Serial Communications Recording");
   cons.printw("' commf' - Start Serial Communications Recording");
   cons.printw("");
+  cons.printw("' autoreq' - Toggle Serial Print to Console");
+  cons.printw("");
   cons.printw("']]' - Flash Recording. Store most recent communications");
   cons.printw("");
   cons.printw("Commands are sent to the serial port by preceeding with 'q'");
   cons.printw("    Format: 'qXYZ' + ENTER - send 'XYZ' to serial");
   cons.printw("");
-  cons.printw("'qp' - Toggle pause and unpause communications");
+  cons.printw("'qp' - Toggle pause and unpause CAN BUS");
   cons.printw("'qt' - Toggle test data");
   cons.printw("'qf' - Toggle send only KNOWN PIDs or ALL PIDs");
   cons.printw("");
@@ -397,6 +399,12 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       {
         sdSysData.COMMS.log_file_off();
         sdSysData.COMMS.send("-- STOPPING COMMS LOG --");
+      }
+
+      if (check_command(cons," autoreq", "Toggle Request Data from Automobile"))
+      {
+        sdSysData.CAR_INFO.PROPS.DATA_REQUEST_ENABLE = !sdSysData.CAR_INFO.PROPS.DATA_REQUEST_ENABLE;
+        cons.printw("Automobile DATA_REQUEST_ENABLE set to " + to_string(sdSysData.CAR_INFO.PROPS.DATA_REQUEST_ENABLE));
       }
 
       if (check_command(cons,"]]", "Store Comms Flash Data"))

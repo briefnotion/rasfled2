@@ -12,56 +12,57 @@
 
 #define PID_PIDS_SUPPORTED_01_20          0x00  //  
 #define PID_MONITOR                       0x01  //  
-#define PID_FUEL_STATUS                   0x03  //  
-#define PID_CALC_ENGINE_LOAD              0x04  //  
-#define PID_COOLANT_TEMP                  0x05  //  *
-#define PID_SHORT_TERM_FUEL_TRIM_1        0x06  //  
-#define PID_LONG_TERM_FUEL_TRIM_1         0x07  //  
+#define PID_FUEL_STATUS                   0x03  //  * 07 E8 04 41 03 02 00 00 00 00 0001D846
+#define PID_CALC_ENGINE_LOAD              0x04  //  * 07 E9 03 41 04 80 00 00 00 00 0001DC1A
+#define PID_COOLANT_TEMP                  0x05  //  * 07 E8 03 41 05 6F 00 00 00 00 0003E108
+#define PID_SHORT_TERM_FUEL_TRIM_1        0x06  //  * 07 E8 03 41 06 7E 00 00 00 00 0002EF49
+#define PID_LONG_TERM_FUEL_TRIM_1         0x07  //  * 07 E8 03 41 07 89 00 00 00 00 0003FE53
 #define PID_SHORT_TERM_FUEL_TRIM_2        0x08  //  
 #define PID_LONG_TERM_FUEL_TRIM_2         0x09  //  
 #define PID_FUEL_PRESSURE                 0x0A  //  
 #define PID_INTAKE_MANIFOLD_ABS_PRESSURE  0x0B  //  
-#define PID_ENGIN_PRM                     0x0C  //  *
-#define PID_VEHICLE_SPEED                 0x0D  //  *
-#define PID_INTAKE_AIR_TEMP               0x0F  //  
+#define PID_ENGIN_PRM                     0x0C  //  * 07 E8 04 41 0C 14 6B 00 00 00 0007338C
+#define PID_VEHICLE_SPEED                 0x0D  //  * 07 E8 03 41 0D 36 00 00 00 00 000415C3
+#define PID_INTAKE_AIR_TEMP               0x0F  //  * 07 E8 03 41 0F 4F 00 00 00 00 000419BF
 
-#define PID_MASS_AIR_FLOW_RATE            0x10  //  
-#define PID_THROTTLE_POSITION             0x11  //  
+#define PID_MASS_AIR_FLOW_RATE            0x10  //  * 07 E8 04 41 10 01 85 00 00 00 00030FBF
+#define PID_THROTTLE_POSITION             0x11  //  * 07 E8 03 41 11 2A 00 00 00 00 000529D8
 //#define PID_OXYGEN_SENSOR                 0x14 //  
-#define PID_OBD_STANDARDS                 0x1C  //  
+#define PID_OBD_STANDARDS                 0x1C  //  * 07 E9 03 41 1C 09 00 00 00 00 00020C2C
+                                                //  * 07 E8 03 41 1C 03 00 00 00 00 00020C30
 #define PID_OXYGEN_SENSOR_PRESENT         0x1D  //  
-#define PID_RUN_TIME_SINCE_START          0x1F  //  
+#define PID_RUN_TIME_SINCE_START          0x1F  //  * 07 E8 04 41 1F 00 AA 00 00 00 0002140B
 
 #define PID_PIDS_SUPPORTED_21_40          0x20  //  
-#define PID_DISTANCE_TRAVELED_MIL_ON      0x21  //  
+#define PID_DISTANCE_TRAVELED_MIL_ON      0x21  //  * 07 E8 04 41 21 00 00 00 00 00 0003272F
 #define PID_FUEL_RAIL_PRESSURE_MANIFOLD   0x22  //  
-#define PID_FUEL_RAIL_PRESSURE_GAUGE      0x23  //  
+#define PID_FUEL_RAIL_PRESSURE_GAUGE      0x23  //  * 07 E8 04 41 23 00 E1 00 00 00 00032EEB
 //#define PID_OXYGEN_SENSOR                 0x24  //  
 #define PID_COMMANDED_ERG                 0x2C  //  
-#define PID_FUEL_TANK_LEVEL               0x2F  //  
+#define PID_FUEL_TANK_LEVEL               0x2F  //  * 07 E8 03 41 2F 75 00 00 00 00 00054D00
 
-#define PID_DISTANCE_SINCE_CODES_CLEARED  0x31  //  
-#define PID_EVAP_SYSTEM_VAPOR_PRESSURE    0x32  //  
-#define PID_BARAMETRIC_PRESSURE           0x33  //  
+#define PID_DISTANCE_SINCE_CODES_CLEARED  0x31  //  * 07 E8 04 41 31 08 9E 00 00 00 00033AA3
+#define PID_EVAP_SYSTEM_VAPOR_PRESSURE    0x32  //  * 07 E8 04 41 32 FF 77 00 00 00 000662D9
+#define PID_BARAMETRIC_PRESSURE           0x33  //  * 07 E9 03 41 33 64 00 00 00 00 0002371D
 //#define PID_OXYGEN_SENSOR                 0x34  //  
-#define PID_CATALYST_TEMP_BANK_1_SENSOR_1 0x3C  //  
+#define PID_CATALYST_TEMP_BANK_1_SENSOR_1 0x3C  //  * 07 E8 04 41 3C 19 A3 00 00 00 00066801
 #define PID_CATALYST_TEMP_BANK_2_SENSOR_1 0x3D  //  
 #define PID_CATALYST_TEMP_BANK_1_SENSOR_2 0x3E  //  
 #define PID_CATALYST_TEMP_BANK_2_SENSOR_2 0x3F  //  
 
 #define PID_PIDS_SUPPORTED_41_60          0x40  //  
 #define PID_MONITOR_STATUS_DRIVE_CYCLE    0x41  //  
-#define PID_CONTROL_VOLTAGE               0x42  //  
-#define PID_ABSOLUTE_LOAD                 0x43  //  
-#define PID_COMMANDED_AIR_FUEL_RATIO      0x44  //  
+#define PID_CONTROL_VOLTAGE               0x42  //  * 07 E8 04 41 42 36 17 00 00 00 00070902
+#define PID_ABSOLUTE_LOAD                 0x43  //  * 07 E8 04 41 43 00 1C 00 00 00 00046644
+#define PID_COMMANDED_AIR_FUEL_RATIO      0x44  //  * 07 E8 04 41 44 70 A3 00 00 00 00046A22
 #define PID_RELATIVE_TROTTLE_POS          0x45  //  
-#define PID_AMBIENT_AIR_TEMPERATURE       0x46  //  
-#define PID_ABSOLOUTE_TROTTLE_POSITION_B  0x47  //  
+#define PID_AMBIENT_AIR_TEMPERATURE       0x46  //  * 07 E8 03 41 46 4C 00 00 00 00 00057D0B
+#define PID_ABSOLOUTE_TROTTLE_POSITION_B  0x47  //  * 07 E8 03 41 47 2B 00 00 00 00 00068C53
 #define PID_ABSOLOUTE_TROTTLE_POSITION_C  0x48  //  
-#define PID_ACCELERATORE_PEDAL_POSITION_D 0x49  //  
-#define PID_ACCELERATORE_PEDAL_POSITION_E 0x4A  //  
+#define PID_ACCELERATORE_PEDAL_POSITION_D 0x49  //  * 07 E9 03 41 49 27 00 00 00 00 00026486
+#define PID_ACCELERATORE_PEDAL_POSITION_E 0x4A  //  * 07 E8 03 41 4A 14 00 00 00 00 0006980A
 #define PID_ACCELERATORE_PEDAL_POSITION_F 0x4B  //  
-#define PID_COMMANDED_THROTTLE_ACTUATOR_E 0x4C  //  
+#define PID_COMMANDED_THROTTLE_ACTUATOR_E 0x4C  //  * 07 E8 03 41 4C 14 00 00 00 00 00069FE5
 #define PID_TIME_RUN_WITH_MIL_ON          0x4D  //  
 #define PID_TIME_SINCE_TROUBLE_CODES_CLEARED                0x4E  //  
 #define PID_MAX_VAL_FUEL_AIR_RATIO_OV_OCUR_MAN_ABS_PRESS    0x4F  //  
@@ -102,6 +103,52 @@
 
 
 // -----------------------------------------------------
+class MESSAGE_STORAGE
+// Simple message storeage system
+//  20 messages
+//  38 chars per message + null terminator
+{
+  private:
+  char MESSAGES[20][39];
+  
+  int MESSAGE_COUNT = 0;
+
+  public:
+
+  int message_count()
+  {
+    return MESSAGE_COUNT;
+  }
+
+  void store(String Message)
+  {
+    if (MESSAGE_COUNT < 20)
+    {
+      Message.toCharArray(MESSAGES[MESSAGE_COUNT], Message.length());
+      MESSAGES[MESSAGE_COUNT][38] = '\0';
+      MESSAGE_COUNT++;
+    }
+  }
+
+  String get(int Position)
+  {
+    if (Position < MESSAGE_COUNT)
+    {
+      return String (MESSAGES[Position]);
+    }
+    else
+    {
+      return "out of bounds";
+    }
+  }
+
+  void clear()
+  {
+    MESSAGE_COUNT = 0;
+  }
+};
+
+// -----------------------------------------------------
 // Control Class
 class CONTROL
 {
@@ -123,9 +170,21 @@ class CONTROL
   bool send_command = false;
   unsigned char command;
 
-  read(String read_string)
+  bool send_service_command = false;
+  unsigned char service_command;
+  unsigned char service_command_data_00;
+
+  bool send_service_command_2 = false;
+
+  bool read(String read_string)
   {
     read_string.trim();
+
+    if (read_string == "r")
+    {
+      // Immediatly exit the function routine, this is a send data request.
+      return true;
+    }
 
     if (read_string == "p")
     {
@@ -145,10 +204,12 @@ class CONTROL
       if (test == true)
       {
         test = false;
+        Serial.println("Test Data Off");
       }
       else
       {
         test = true;
+        Serial.println("Test Data On");
       }
     }
     else if (read_string == "f")
@@ -157,10 +218,12 @@ class CONTROL
       if (filter == true)
       {
         filter = false;
+        Serial.println("Filter Off");
       }
       else
       {
         filter = true;
+        Serial.println("Filter On");
       }
     }
     else if (read_string == "q")
@@ -178,9 +241,14 @@ class CONTROL
       version = 4;
       restart = true;
     }
+    else if (read_string == "v5")
+    {
+      version = 5;
+      restart = true;
+    }
 
-    // version 3 and version == 4 commands
-    if (version == 3 || version == 4)
+    // version 3 and version == 4 and version == 5commands
+    if (version == 3 || version == 4 || version == 5)
     {
       // 00 - 0F
       if (read_string == "00")
@@ -572,10 +640,43 @@ class CONTROL
 
       // B0 - BF
 
+      // Service Command
+      else if (read_string == "vin")
+      {
+        send_service_command_2 = true;
+      }
+
+      // Tire Pressure
+      else if (read_string == "t1")
+      {
+        service_command = 0x2A;
+        service_command_data_00 = 0x00;
+        send_service_command = true;
+      }
+      else if (read_string == "t2")
+      {
+        service_command = 0x2A;
+        service_command_data_00 = 0x01;
+        send_service_command = true;
+      }
+      else if (read_string == "t3")
+      {
+        service_command = 0x2A;
+        service_command_data_00 = 0x02;
+        send_service_command = true;
+      }
+      else if (read_string == "t4")
+      {
+        service_command = 0x2A;
+        service_command_data_00 = 0x03;
+        send_service_command = true;
+      }
     }
+
+    return false;
   }
 
-  reset()
+  void reset()
   {
     test = false;
     start = true;
@@ -605,7 +706,7 @@ unsigned long time;
 void setup() 
 {
   // Set Default Version
-  ctrl.version = 4;
+  ctrl.version = 5;
 
   // Prep Serial
   Serial.begin(115200);
@@ -689,6 +790,25 @@ void print_hex(unsigned char value)
   Serial.print(" ");
 }
 
+
+String format_hex(unsigned char value)
+{
+  String ret_hex = "";
+  
+  if(value<16)
+  {
+    ret_hex = ret_hex + "0";
+    ret_hex = ret_hex + String(value,HEX);
+  }
+  else
+  {
+    ret_hex = ret_hex + String(value,HEX);    
+  }
+
+  ret_hex = ret_hex + " ";
+  return ret_hex;
+}
+
 void print_hex_UL(unsigned long value)
 {
   if(value == 0)
@@ -738,9 +858,83 @@ void print_hex_UL(unsigned long value)
   Serial.print(" ");
 }
 
-void sendPid(unsigned char __pid) {
+String format_hex_UL(unsigned long value)
+{
+  String ret_hex = "";
+
+  if(value == 0)
+  {
+    ret_hex = "00000000";
+  }
+  else if(value < 16)
+  {
+    ret_hex = "0000000";
+    ret_hex = ret_hex + String(value, HEX);
+  }
+  else if (value < 256)
+  {
+    ret_hex = "000000";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else if (value < 4096)
+  {
+    ret_hex = "00000";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else if (value < 65536)
+  {
+    ret_hex = "0000";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else if (value < 1048576)
+  {
+    ret_hex = "000";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else if (value < 16777216)
+  {
+    ret_hex = "00";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else if (value < 268435456)
+  {
+    ret_hex = "0";
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  else
+  {
+    ret_hex = ret_hex + String(value, HEX);    
+  }
+  
+  ret_hex = ret_hex + " ";
+  return ret_hex;
+}
+
+// sendMsgBuf(unsigned long id, byte ext, byte rtr, byte len, byte *buf)
+
+void sendPid(unsigned char __pid) 
+{
     unsigned char tmp[8] = {0x02, 0x01, __pid, 0, 0, 0, 0, 0};
     CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
+}
+
+void send_Service_Pid(unsigned char __pid, unsigned char data_0) 
+{
+    unsigned char tmp[8] = {0x02, 0x22, __pid, data_0, 0, 0, 0, 0};
+    CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
+}
+
+void send_Service_Pid_2(unsigned char __pid, unsigned char data_0) 
+{
+  // VIN Message request
+  unsigned char tmp[8] = {0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00};
+
+  // 0x7DF is the OBD-II broadcast ID
+  // 0 - standard message
+  // 8 - message size
+  CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
+
+  // message should be recreived on 0x7E8
 }
 
 void serial_send(unsigned long ID, byte len, byte buf[])
@@ -795,6 +989,30 @@ void serial_send_2(unsigned long Message_ID, byte Message_len, byte Message_buf[
   print_hex_UL(Message_timestamp);
 
   Serial.println();
+}
+
+
+String serial_send_format(unsigned long Message_ID, byte Message_len, byte Message_buf[], unsigned long Message_timestamp)
+{
+  String ret_send_string = "";
+  unsigned char IDl = Message_ID % 256;
+  unsigned char IDu = (Message_ID - IDl) / 256;
+
+  ret_send_string = ret_send_string + format_hex(IDu);
+  ret_send_string = ret_send_string + format_hex(IDl);
+
+  ret_send_string = ret_send_string + format_hex(Message_buf[0]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[1]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[2]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[3]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[4]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[5]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[6]);
+  ret_send_string = ret_send_string + format_hex(Message_buf[7]);
+
+  ret_send_string = ret_send_string + format_hex_UL(Message_timestamp);
+
+  return ret_send_string;
 }
 
 bool filter(unsigned long ID)
@@ -1076,6 +1294,162 @@ void version_4()
       digitalWrite(23, LOW);  // LED OFF
     }
 
+    // send command to CAN
+    if (ctrl.send_service_command == true)
+    {
+      digitalWrite(23, HIGH); // LED ON
+
+      ctrl.send_service_command = false;
+      send_Service_Pid(ctrl.service_command, ctrl.service_command_data_00);
+      
+      digitalWrite(23, LOW);  // LED OFF
+    }
+
+    // Blink and Time
+    blink(ctrl.start == false);
+  }
+}
+
+// -----------------------------------------------------
+// Version 5
+
+void version_5()
+{
+  unsigned long recv_canid = 0;
+
+  unsigned long fake_two_byte_counter = 0;
+  char fake_one_byte_counter = 0;
+
+  MESSAGE_STORAGE messages_to_send;
+
+  ctrl.reset();
+  
+  Serial.println("Version 5");
+
+  while (ctrl.restart == false)
+  {
+    if (ctrl.start == true && CAN_MSGAVAIL == CAN0.checkReceive() ||
+          ctrl.start == true && ctrl.test == true)
+    {
+      // Check to see whether data is read
+      if (ctrl.test == false)
+      {
+        // Get Can Data
+        MESSAGE_TIME = millis();
+        CAN0.readMsgBufID(&ID, &len, buf);    // Read data
+      }
+      else
+      {
+        // Get Test Data
+        MESSAGE_TIME = millis();
+        //MESSAGE_TIME = micro();  // Returns the number of microseconds since the Arduino board began running the current program. Data type: unsigned long.
+                                 // 1 millisecond is equal to 1000
+        ID = fake_two_byte_counter;
+        len = 8;
+        buf[0] = fake_one_byte_counter;
+        buf[1] = fake_one_byte_counter;
+        buf[2] = fake_one_byte_counter;
+        buf[3] = fake_one_byte_counter;
+        buf[4] = fake_one_byte_counter;
+        buf[5] = fake_one_byte_counter;
+        buf[6] = fake_one_byte_counter;
+        buf[7] = fake_one_byte_counter;
+        
+        fake_two_byte_counter++;
+        fake_one_byte_counter++;
+
+        if (fake_two_byte_counter > 0x0f00)
+        {
+          fake_two_byte_counter = 0;
+        }
+
+        if (fake_two_byte_counter > (256*256)-1)
+        {
+          fake_two_byte_counter = 0;                    
+        }
+        
+        if (fake_one_byte_counter > 255)
+        {
+          fake_one_byte_counter = 0;                    
+        }
+
+        //delay (5);
+      }
+
+      if (ctrl.filter == true)
+      {
+        if (filter(ID) == true)
+        {
+          digitalWrite(23, HIGH); // LED ON
+
+          //serial_send_2(ID, len, buf, MESSAGE_TIME);
+          messages_to_send.store(serial_send_format(ID, len, buf, MESSAGE_TIME));
+
+          digitalWrite(23, LOW);  // LED OFF
+        }
+      }
+      else
+      {
+        digitalWrite(23, HIGH); // LED ON
+        //serial_send_2(ID, len, buf, MESSAGE_TIME);
+        messages_to_send.store(serial_send_format(ID, len, buf, MESSAGE_TIME));
+
+        digitalWrite(23, LOW);  // LED OFF
+      }
+    }
+    
+    // Read from host
+    if(Serial.available() > 0)
+    {
+      //Serial.println("-");
+      if (ctrl.read(read_com()) == true)
+      {
+        if (messages_to_send.message_count() > 0)
+        {
+          for (int pos = 0; pos < messages_to_send.message_count(); pos++)
+          {
+            Serial.println(messages_to_send.get(pos));
+          }
+
+          messages_to_send.clear();
+        }
+      }
+    }
+
+    // send command to CAN
+    if (ctrl.send_command == true)
+    {
+      digitalWrite(23, HIGH); // LED ON
+
+      ctrl.send_command = false;
+      sendPid(ctrl.command);
+      
+      digitalWrite(23, LOW);  // LED OFF
+    }
+
+    // send command to CAN
+    if (ctrl.send_service_command == true)
+    {
+      digitalWrite(23, HIGH); // LED ON
+
+      ctrl.send_service_command = false;
+      send_Service_Pid(ctrl.service_command, ctrl.service_command_data_00);
+      
+      digitalWrite(23, LOW);  // LED OFF
+    }
+
+    // send command to CAN
+    if (ctrl.send_service_command_2 == true)
+    {
+      digitalWrite(23, HIGH); // LED ON
+
+      ctrl.send_service_command_2 = false;
+
+      send_Service_Pid_2(ctrl.service_command, ctrl.service_command_data_00);
+      
+      digitalWrite(23, LOW);  // LED OFF
+    }
+
     // Blink and Time
     blink(ctrl.start == false);
   }
@@ -1104,6 +1478,14 @@ void loop()
     if (ctrl.version == 4)
     {
       version_4();
+    }
+
+    // pause if in main loop
+    delay(delay_time);
+
+    if (ctrl.version == 5)
+    {
+      version_5();
     }
 
     // pause if in main loop
