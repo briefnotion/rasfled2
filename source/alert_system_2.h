@@ -20,13 +20,14 @@
 // -------------------------------------------------------------------------------------
 
 // Reserved Alert List
-#define RESERVE_ALERT_LIST_SIZE     5
+#define RESERVE_ALERT_LIST_SIZE       6
 
-#define RESERVE_ALERT_TEMP_S_TEMP   0
-#define RESERVE_ALERT_TEMP_COOLANT  1
-#define RESERVE_ALERT_ELEC_VOLTAGE  2
-#define RESERVE_ALERT_FUEL_LEVEL    3
-#define RESERVE_ALERT_TEMP_INTAKE   4
+#define RESERVE_ALERT_TEMP_S_TEMP     0
+#define RESERVE_ALERT_TEMP_COOLANT    1
+#define RESERVE_ALERT_ELEC_VOLTAGE    2
+#define RESERVE_ALERT_FUEL_LEVEL      3
+#define RESERVE_ALERT_TEMP_INTAKE     4
+#define RESERVE_ALERT_UNKNOWN_MESSAGE 5
 
 // -------------------------------------------------------------------------------------
 
@@ -52,7 +53,7 @@ class ALERT_2_TYPE_MONITOR
   //  aka, in between active and clear.
   
   bool ACKNOWLEGED = false; // Indicates the alert was acknowedeged.
-  bool DISPLAY = true;      // Determine if alert is to be displayed.
+  bool DISPLAY = false;      // Determine if alert is to be displayed.
   string ALERT_TEXT = "";   // Text of alert
 
   public:

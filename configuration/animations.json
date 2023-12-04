@@ -1362,7 +1362,7 @@
         {
           "Comment_1" : "Turn off or reverse current overhead colored lights", 
           "Label" : "TDOO",
-          "Start_Delay_Time" : 250, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15, 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith", 
           "Start_1" : "0,0,0", "Dest_1" : "running_color", 
           "Start_2" : "0,0,0", "Dest_2" : "0,0,64",
@@ -1372,7 +1372,7 @@
         },
         {
           "Label" : "TDOO",
-          "Start_Delay_Time" : 250, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15, 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith", 
           "Start_1" : "0,0,0", "Dest_1" : "running_color", 
           "Start_2" : "0,0,0", "Dest_2" : "0,0,64",
@@ -1384,7 +1384,7 @@
         {
           "Comment_1" : "Show Door Illumination Light",
           "Label" : "TDOO",
-          "Start_Delay_Time" : 750, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15,
+          "Start_Delay_Time" : 250, "Duration_Of_Brighness" : 500, "Speed_Of_LED_Walk" : 15,
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith",
           "Start_1" : "0,0,0", "Dest_1" : "32,32,32",
           "Start_2" : "0,0,0", "Dest_2" : "0,0,0",
@@ -1393,7 +1393,7 @@
         },
         {
           "Label" : "TDOO",
-          "Start_Delay_Time" : 750, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15,
+          "Start_Delay_Time" : 250, "Duration_Of_Brighness" : 500, "Speed_Of_LED_Walk" : 15,
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith",
           "Start_1" : "0,0,0", "Dest_1" : "32,32,32",
           "Start_2" : "0,0,0", "Dest_2" : "0,0,0",
@@ -1405,7 +1405,7 @@
           "Comment_1" : "Show Door Illumination Light Pulse", 
           "Comment_2" : "Bright lights over open door, on during day or night", 
           "Label" : "TDOO",
-          "Start_Delay_Time" : 750, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15, 
+          "Start_Delay_Time" : 250, "Duration_Of_Brighness" : 2000, "Speed_Of_LED_Walk" : 120, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
           "Dest_1" : "64,64,64", 
           "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_start|10", 
@@ -1415,7 +1415,7 @@
           "Comment_1" : "Show Door Illumination Light Pulse", 
           "Comment_2" : "Bright lights over open door, on during day or night", 
           "Label" : "TDOO",
-          "Start_Delay_Time" : 750, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 15, 
+          "Start_Delay_Time" : 250, "Duration_Of_Brighness" : 2000, "Speed_Of_LED_Walk" : 120, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
           "Dest_1" : "64,64,64", 
           "LED_Start_Pos" : "from_1/2|1", "LED_End_Pos" : "from_end|10", 
@@ -1547,7 +1547,7 @@
         },
         {
           "Label" : "TDOE",
-          "Start_Delay_Time" : 500, "Duration_Of_Brighness" : 2000, "Speed_Of_LED_Walk" : 150, 
+          "Start_Delay_Time" : 200, "Duration_Of_Brighness" : 2000, "Speed_Of_LED_Walk" : 150, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith", 
           "Start_1" : "0,0,0", "Dest_1" : "16,0,0", 
           "Start_2" : "0,0,0", "Dest_2" : "0,0,0",
@@ -1556,7 +1556,7 @@
         },
         {
           "Label" : "TDOE",
-          "Start_Delay_Time" : 500, "Duration_Of_Brighness" : 2000, "Speed_Of_LED_Walk" : 150, 
+          "Start_Delay_Time" : 200, "Duration_Of_Brighness" : 2000, "Speed_Of_LED_Walk" : 150, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith", 
           "Start_1" : "0,0,0", "Dest_1" : "16,0,0", 
           "Start_2" : "0,0,0", "Dest_2" : "0,0,0",

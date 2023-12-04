@@ -167,6 +167,10 @@ class CONTROL
 
   bool restart = false;
 
+  // ---
+
+  bool send_test_response = false;
+
   bool send_command = false;
   unsigned char command;
 
@@ -183,6 +187,8 @@ class CONTROL
   unsigned char service_command_2_data_05;
   unsigned char service_command_2_data_06;
   unsigned char service_command_2_data_07;
+
+    // ---
 
   bool read(String read_string)
   {
@@ -648,8 +654,46 @@ class CONTROL
 
       // B0 - BF
 
-      // Service Command
-      else if (read_string == "vin")
+      // request mode 3 Show Diagnostic Codes
+      else if (read_string == "diags")
+      {
+        // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
+        // no signs of working
+
+        // Request pid list in mode 9?
+        service_command_2_data_00 = 0x02;
+        service_command_2_data_01 = 0x03;
+        service_command_2_data_02 = 0x00;
+        service_command_2_data_03 = 0x00;
+        service_command_2_data_04 = 0x00;
+        service_command_2_data_05 = 0x00;
+        service_command_2_data_06 = 0x00;
+        service_command_2_data_07 = 0x00;
+
+        send_service_command_2 = true;
+      }
+
+      // request mode 3 Clear Diagnostic Codes
+      else if (read_string == "diagc")
+      {
+        // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
+        // no signs of working
+
+        // Request pid list in mode 9?
+        service_command_2_data_00 = 0x02;
+        service_command_2_data_01 = 0x04;
+        service_command_2_data_02 = 0x00;
+        service_command_2_data_03 = 0x00;
+        service_command_2_data_04 = 0x00;
+        service_command_2_data_05 = 0x00;
+        service_command_2_data_06 = 0x00;
+        service_command_2_data_07 = 0x00;
+
+        send_service_command_2 = true;
+      }
+
+      // request mode 9 supported list
+      else if (read_string == "ser")
       {
         // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
         // no signs of working
@@ -667,33 +711,83 @@ class CONTROL
         send_service_command_2 = true;
       }
 
-      /*
+      // request mode 9 vin list
+      else if (read_string == "vin")
+      {
+        // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
+        // no signs of working
+
+        // Request pid list in mode 9?
+        service_command_2_data_00 = 0x02;
+        service_command_2_data_01 = 0x09;
+        service_command_2_data_02 = 0x02;
+        service_command_2_data_03 = 0x00;
+        service_command_2_data_04 = 0x00;
+        service_command_2_data_05 = 0x00;
+        service_command_2_data_06 = 0x00;
+        service_command_2_data_07 = 0x00;
+
+        send_service_command_2 = true;
+      }
+
       // Tire Pressure
       else if (read_string == "t1")
       {
-        service_command = 0x2A;
-        service_command_data_00 = 0x00;
-        send_service_command = true;
+        service_command_2_data_00 = 0x02;
+        service_command_2_data_01 = 0x22;
+        service_command_2_data_02 = 0x00;
+        service_command_2_data_03 = 0x00;
+        service_command_2_data_04 = 0x00;
+        service_command_2_data_05 = 0x00;
+        service_command_2_data_06 = 0x00;
+        service_command_2_data_07 = 0x00;
+
+        send_service_command_2 = true;
       }
       else if (read_string == "t2")
       {
-        service_command = 0x2A;
-        service_command_data_00 = 0x01;
-        send_service_command = true;
+        service_command_2_data_00 = 0x02;
+        service_command_2_data_01 = 0x22;
+        service_command_2_data_02 = 0x01;
+        service_command_2_data_03 = 0x00;
+        service_command_2_data_04 = 0x00;
+        service_command_2_data_05 = 0x00;
+        service_command_2_data_06 = 0x00;
+        service_command_2_data_07 = 0x00;
+
+        send_service_command_2 = true;
       }
       else if (read_string == "t3")
       {
-        service_command = 0x2A;
-        service_command_data_00 = 0x02;
-        send_service_command = true;
+        service_command_2_data_00 = 0x02;
+        service_command_2_data_01 = 0x22;
+        service_command_2_data_02 = 0x02;
+        service_command_2_data_03 = 0x00;
+        service_command_2_data_04 = 0x00;
+        service_command_2_data_05 = 0x00;
+        service_command_2_data_06 = 0x00;
+        service_command_2_data_07 = 0x00;
+
+        send_service_command_2 = true;
       }
       else if (read_string == "t4")
       {
-        service_command = 0x2A;
-        service_command_data_00 = 0x03;
-        send_service_command = true;
+        service_command_2_data_00 = 0x02;
+        service_command_2_data_01 = 0x22;
+        service_command_2_data_02 = 0x03;
+        service_command_2_data_03 = 0x00;
+        service_command_2_data_04 = 0x00;
+        service_command_2_data_05 = 0x00;
+        service_command_2_data_06 = 0x00;
+        service_command_2_data_07 = 0x00;
+
+        send_service_command_2 = true;
       }
-      */
+
+      else if (read_string == "test")
+      {
+        send_test_response = true;
+      }
     }
 
     return false;
@@ -937,20 +1031,28 @@ String format_hex_UL(unsigned long value)
 
 void sendPid(unsigned char __pid) 
 {
-    unsigned char tmp[8] = {0x02, 0x01, __pid, 0, 0, 0, 0, 0};
-    CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
+  // 2 bytes
+  // service 1
+  // pid
+
+  unsigned char tmp[8] = {0x02, 0x01, __pid, 0, 0, 0, 0, 0};
+  CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
 }
 
+/*
 void send_Service_Pid(unsigned char __pid, unsigned char data_0) 
 {
     unsigned char tmp[8] = {0x02, 0x22, __pid, data_0, 0, 0, 0, 0};
     CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
 }
+*/
 
 void send_Service_Pid_2(  unsigned char data_0, unsigned char data_1, unsigned char data_2, unsigned char data_3, 
                           unsigned char data_4, unsigned char data_5, unsigned char data_6, unsigned char data_7) 
 {
-  // VIN Message request
+  // data_0 - number of bytes
+  // data_1 - mode
+  // data_2 - param ...
   unsigned char tmp[8] = {data_0, data_1, data_2, data_3, data_4, data_5, data_6, data_7};
 
   // 0x7DF is the OBD-II broadcast ID
@@ -1118,221 +1220,6 @@ bool filter(unsigned long ID)
   return ret_pass;
 }
 
-// -----------------------------------------------------
-// Version 3
-
-void version_3()
-{
-  unsigned long recv_canid = 0;
-
-  unsigned long fake_two_byte_counter = 0;
-  char fake_one_byte_counter = 0;
-
-  ctrl.reset();
-  
-  Serial.println("Version 3");
-
-  while (ctrl.restart == false)
-  {
-    if (ctrl.start == true && CAN_MSGAVAIL == CAN0.checkReceive() ||
-          ctrl.start == true && ctrl.test == true)
-    {
-      MESSAGE_TIME = millis();
-
-      // Check to see whether data is read
-      if (ctrl.test == false)
-      {
-        // Get Can Data
-        CAN0.readMsgBufID(&ID, &len, buf);    // Read data  
-      }
-      else
-      {
-        // Get Test Data
-        ID = fake_two_byte_counter;
-        len = 8;
-        buf[0] = fake_one_byte_counter;
-        buf[1] = fake_one_byte_counter;
-        buf[2] = fake_one_byte_counter;
-        buf[3] = fake_one_byte_counter;
-        buf[4] = fake_one_byte_counter;
-        buf[5] = fake_one_byte_counter;
-        buf[6] = fake_one_byte_counter;
-        buf[7] = fake_one_byte_counter;
-        
-        fake_two_byte_counter++;
-        fake_one_byte_counter++;
-
-        if (fake_two_byte_counter > (256*256)-1)
-        {
-          fake_two_byte_counter = 0;                    
-        }
-        
-        if (fake_one_byte_counter > 255)
-        {
-          fake_one_byte_counter = 0;                    
-        }
-
-        delay (5);
-      }
-
-      //if (filter(ID) == true)
-      if (true == true)
-      {
-        digitalWrite(23, HIGH); // LED ON
-        serial_send_2(ID, len, buf, MESSAGE_TIME);
-        digitalWrite(23, LOW);  // LED OFF
-      }
-    }
-    
-    // Read from host
-    if(Serial.available() > 0)
-    {
-      //Serial.println("-");
-      ctrl.read(read_com());
-    }
-
-    // send command to CAN
-    if (ctrl.send_command == true)
-    {
-      digitalWrite(23, HIGH); // LED ON
-
-      ctrl.send_command = false;
-
-      if (ctrl.command == PID_VEHICLE_SPEED)
-      {
-        sendPid(PID_VEHICLE_SPEED);
-      }
-      else if (ctrl.command == PID_ENGIN_PRM)
-      {
-        sendPid(PID_ENGIN_PRM);
-      }
-      else if (ctrl.command == PID_COOLANT_TEMP)
-      {
-        sendPid(PID_COOLANT_TEMP);
-      }
-
-      //sendPid(ctrl.command);
-      
-      digitalWrite(23, LOW);  // LED OFF
-    }
-
-    // Blink and Time
-    blink(ctrl.start == false);
-  }
-}
-
-// -----------------------------------------------------
-// Version 4
-
-void version_4()
-{
-  unsigned long recv_canid = 0;
-
-  unsigned long fake_two_byte_counter = 0;
-  char fake_one_byte_counter = 0;
-
-  ctrl.reset();
-  
-  Serial.println("Version 4");
-
-  while (ctrl.restart == false)
-  {
-    if (ctrl.start == true && CAN_MSGAVAIL == CAN0.checkReceive() ||
-          ctrl.start == true && ctrl.test == true)
-    {
-      MESSAGE_TIME = millis();
-
-      // Check to see whether data is read
-      if (ctrl.test == false)
-      {
-        // Get Can Data
-        CAN0.readMsgBufID(&ID, &len, buf);    // Read data  
-      }
-      else
-      {
-        // Get Test Data
-        ID = fake_two_byte_counter;
-        len = 8;
-        buf[0] = fake_one_byte_counter;
-        buf[1] = fake_one_byte_counter;
-        buf[2] = fake_one_byte_counter;
-        buf[3] = fake_one_byte_counter;
-        buf[4] = fake_one_byte_counter;
-        buf[5] = fake_one_byte_counter;
-        buf[6] = fake_one_byte_counter;
-        buf[7] = fake_one_byte_counter;
-        
-        fake_two_byte_counter++;
-        fake_one_byte_counter++;
-
-        if (fake_two_byte_counter > 0x0f00)
-        {
-          fake_two_byte_counter = 0;
-        }
-
-        if (fake_two_byte_counter > (256*256)-1)
-        {
-          fake_two_byte_counter = 0;                    
-        }
-        
-        if (fake_one_byte_counter > 255)
-        {
-          fake_one_byte_counter = 0;                    
-        }
-
-        delay (5);
-      }
-
-      if (ctrl.filter == true)
-      {
-        if (filter(ID) == true)
-        {
-          digitalWrite(23, HIGH); // LED ON
-          serial_send_2(ID, len, buf, MESSAGE_TIME);
-          digitalWrite(23, LOW);  // LED OFF
-        }
-      }
-      else
-      {
-        digitalWrite(23, HIGH); // LED ON
-        serial_send_2(ID, len, buf, MESSAGE_TIME);
-        digitalWrite(23, LOW);  // LED OFF
-      }
-    }
-    
-    // Read from host
-    if(Serial.available() > 0)
-    {
-      //Serial.println("-");
-      ctrl.read(read_com());
-    }
-
-    // send command to CAN
-    if (ctrl.send_command == true)
-    {
-      digitalWrite(23, HIGH); // LED ON
-
-      ctrl.send_command = false;
-      sendPid(ctrl.command);
-      
-      digitalWrite(23, LOW);  // LED OFF
-    }
-
-    // send command to CAN
-    if (ctrl.send_service_command == true)
-    {
-      digitalWrite(23, HIGH); // LED ON
-
-      ctrl.send_service_command = false;
-      send_Service_Pid(ctrl.service_command, ctrl.service_command_data_00);
-      
-      digitalWrite(23, LOW);  // LED OFF
-    }
-
-    // Blink and Time
-    blink(ctrl.start == false);
-  }
-}
 
 // -----------------------------------------------------
 // Version 5
@@ -1452,17 +1339,6 @@ void version_5()
     }
 
     // send command to CAN
-    if (ctrl.send_service_command == true)
-    {
-      digitalWrite(23, HIGH); // LED ON
-
-      ctrl.send_service_command = false;
-      send_Service_Pid(ctrl.service_command, ctrl.service_command_data_00);
-      
-      digitalWrite(23, LOW);  // LED OFF
-    }
-
-    // send command to CAN
     if (ctrl.send_service_command_2 == true)
     {
       digitalWrite(23, HIGH); // LED ON
@@ -1473,6 +1349,18 @@ void version_5()
                           ctrl.service_command_2_data_02, ctrl.service_command_2_data_03, 
                           ctrl.service_command_2_data_04, ctrl.service_command_2_data_05, 
                           ctrl.service_command_2_data_06, ctrl.service_command_2_data_07);
+      
+      digitalWrite(23, LOW);  // LED OFF
+    }
+
+    // send test resonse
+    if (ctrl.send_test_response == true)
+    {
+      digitalWrite(23, HIGH); // LED ON
+
+      ctrl.send_test_response = false;
+
+      Serial.println("07 e9 06 41 00 98 18 00 13 00 018e398b");
       
       digitalWrite(23, LOW);  // LED OFF
     }
@@ -1494,25 +1382,15 @@ void loop()
     // pause if in main loop
     delay(delay_time);
 
-    if (ctrl.version == 3)
-    {
-      version_3();
-    }
-
-    // pause if in main loop
-    delay(delay_time);
-
-    if (ctrl.version == 4)
-    {
-      version_4();
-    }
-
-    // pause if in main loop
-    delay(delay_time);
-
     if (ctrl.version == 5)
     {
       version_5();
+    }
+    else
+    {
+      Serial.println("Version Not Supported");
+      Serial.println("Changing to Version 5");
+      ctrl.version = 5;
     }
 
     // pause if in main loop

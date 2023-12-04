@@ -22,6 +22,7 @@ using namespace std;
 void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Alert_Text)
 {
   ID = Id;
+  DISPLAY = true;
   ALERT_TEXT = Alert_Text;
 }
 

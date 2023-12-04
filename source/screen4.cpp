@@ -1146,8 +1146,8 @@ void SCREEN4::draw(system_data &sdSysData)
       // Go through and display all reserve
       for (int alert_num = 0; alert_num < RESERVE_ALERT_LIST_SIZE; alert_num++)
       {
-        if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].active())
-        {
+        //if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].active())
+        //{
           if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].display())
           {
             ImVec2 screen_pos = ImGui::GetCursorScreenPos();
@@ -1159,11 +1159,17 @@ void SCREEN4::draw(system_data &sdSysData)
               ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
               ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
             }
-            else
+            else if(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].active())
             {
               ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
               ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
               ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+            }
+            else
+            {
+              ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_green().STANDARD));
+              ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_green().STANDARD));
+              ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_green().STANDARD));
             }
             
             if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
@@ -1180,7 +1186,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
             ImGui::PopStyleColor(3);
           }
-        }
+        //}
       }
     
       // Go through and display all generic alerts

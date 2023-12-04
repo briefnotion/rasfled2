@@ -1,3 +1,9 @@
+2.079_231202
+  - Modified some animations.
+  - Modified alert system.
+  - Testing routines added to CAN.
+  - Added CAN Bus message alerts for unknown messages.
+
 2.078_231201
   - Changed some animations.
   - command ' autoreq' added to toggle requesting 
