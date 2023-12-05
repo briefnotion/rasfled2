@@ -658,7 +658,7 @@ class CONTROL
       else if (read_string == "diags")
       {
         // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
-        // no signs of working
+        // partially works. cant read responses
 
         // Request pid list in mode 9?
         service_command_2_data_00 = 0x02;
@@ -677,7 +677,7 @@ class CONTROL
       else if (read_string == "diagc")
       {
         // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
-        // no signs of working
+        // works - clears lamp and codes
 
         // Request pid list in mode 9?
         service_command_2_data_00 = 0x02;
@@ -696,7 +696,7 @@ class CONTROL
       else if (read_string == "ser")
       {
         // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
-        // no signs of working
+        // works- returns list of supported mode 9 pids
 
         // Request pid list in mode 9?
         service_command_2_data_00 = 0x02;
@@ -715,8 +715,7 @@ class CONTROL
       else if (read_string == "vin")
       {
         // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
-        // no signs of working
-
+        // doesnt work - may not be supported. returns nothing.
         // Request pid list in mode 9?
         service_command_2_data_00 = 0x02;
         service_command_2_data_01 = 0x09;
@@ -732,6 +731,7 @@ class CONTROL
 
       // Tire Pressure
       else if (read_string == "t1")
+      // doesnt work
       {
         service_command_2_data_00 = 0x02;
         service_command_2_data_01 = 0x22;
@@ -745,6 +745,7 @@ class CONTROL
         send_service_command_2 = true;
       }
       else if (read_string == "t2")
+      // doesnt work
       {
         service_command_2_data_00 = 0x02;
         service_command_2_data_01 = 0x22;
@@ -758,6 +759,7 @@ class CONTROL
         send_service_command_2 = true;
       }
       else if (read_string == "t3")
+      // doesnt work
       {
         service_command_2_data_00 = 0x02;
         service_command_2_data_01 = 0x22;
@@ -771,6 +773,7 @@ class CONTROL
         send_service_command_2 = true;
       }
       else if (read_string == "t4")
+      // doesnt work
       {
         service_command_2_data_00 = 0x02;
         service_command_2_data_01 = 0x22;
@@ -1349,6 +1352,16 @@ void version_5()
                           ctrl.service_command_2_data_02, ctrl.service_command_2_data_03, 
                           ctrl.service_command_2_data_04, ctrl.service_command_2_data_05, 
                           ctrl.service_command_2_data_06, ctrl.service_command_2_data_07);
+
+      // clear vars
+      ctrl.service_command_2_data_00 = 0x00;
+      ctrl.service_command_2_data_01 = 0x00;
+      ctrl.service_command_2_data_02 = 0x00;
+      ctrl.service_command_2_data_03 = 0x00;
+      ctrl.service_command_2_data_04 = 0x00;
+      ctrl.service_command_2_data_05 = 0x00;
+      ctrl.service_command_2_data_06 = 0x00;
+      ctrl.service_command_2_data_07 = 0x00;
       
       digitalWrite(23, LOW);  // LED OFF
     }

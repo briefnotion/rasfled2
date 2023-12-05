@@ -382,6 +382,31 @@ bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, 
   return ret_value;
 }
 
+bool confirm_dialog(system_data &sdSysData, bool &Choice)
+{
+  bool ret_choice_clicked = false;
+
+  ImGui::SetNextWindowSize(ImVec2(90, 195));
+  
+  if (ImGui::Begin("Continue", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+  {
+    if (button_simple_color(sdSysData, "CONFIRM", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    {
+      Choice = true;
+      ret_choice_clicked = true;
+    }
+    
+    if (button_simple_color(sdSysData, "DENY", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    {
+      Choice = false;
+      ret_choice_clicked = true;
+    }
+  }
+  ImGui::End();
+
+  return ret_choice_clicked;
+}
+
 // ---------------------------------------------------------------------------------------
 
 void BAR_TECH::draw_min_max_val(system_data &sdSysData)

@@ -1,3 +1,10 @@
+2.080_231204
+  - Changed CAN bus, but not compiled or tested. COMM bugs still exist.
+  - Confirm Dialog now a widget.
+  - Added "Clear Diagnostics" button to auto screen to clear 
+      "malfunction indicator light" and all diagnostic codes. Should not 
+      need to be a regular thing.
+
 2.079_231202
   - Modified some animations.
   - Modified alert system.

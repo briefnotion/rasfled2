@@ -265,6 +265,16 @@ bool CONSOLE_COMMUNICATION::command_text_changed()
   }
 }
 
+void CONSOLE_COMMUNICATION::command_pending_set(string Text)
+{
+  PENDING_CONFIRM_COMMAND = Text;
+}
+
+void CONSOLE_COMMUNICATION::command_pending_send()
+{
+  command_text_set(PENDING_CONFIRM_COMMAND);
+}
+
 string CONSOLE_COMMUNICATION::command_text_get()
 {
   return COMMAND_TEXT;
@@ -274,7 +284,7 @@ void CONSOLE_COMMUNICATION::command_text_clear()
 {
   COMMAND_TEXT = "";
   CARRAGE_RETURN = false;
-  CHANGED = false;
+  CHANGED = true;
   COMMAND_TEXT_CLEAR = true;
 }
 

@@ -161,6 +161,8 @@ class CONSOLE_COMMUNICATION
   string PRINT_Q = "";
   bool PRINT_Q_AVAIL = false;
 
+  string PENDING_CONFIRM_COMMAND = "";
+
   public:
 
   DEBUG DEBUG_STATUS;
@@ -173,6 +175,9 @@ class CONSOLE_COMMUNICATION
   void command_text_set(string Text);
   bool command_text_changed();
   string command_text_get();
+
+  void command_pending_set(string Text);
+  void command_pending_send();
 
   void command_text_clear();
   bool command_text_clear_get();

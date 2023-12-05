@@ -425,6 +425,8 @@ class AUTOMOBILE_SCREEN
 
   bool DISPLAY_DATA = true;
 
+  bool DISPLAY_CONFIRM = false;
+
   int DISPLAY_MID_BOTTOM = 0; // 0 - Large Horizontal Bars
                               // 1 - Unused
                               // 2 - Temp Graph
@@ -436,7 +438,7 @@ class AUTOMOBILE_SCREEN
 
   void update(system_data &sdSysData);
 
-  void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms);
+  void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, bool &Display_Confirm);
 
   void display_sidebar(system_data &sdSysData, bool Automobile_Screen_Selected, bool Restack_Windows);
 

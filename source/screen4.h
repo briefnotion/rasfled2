@@ -63,7 +63,6 @@ class SCREEN4
   bool DISPLAY_QR_CODE = false;
 
   bool DISPLAY_CONFIRM = false;
-  string PENDING_CONFIRM_COMMAND = "";
 
   int DISPLAY_MENU = 0;
   int DISPLAY_SCREEN = 0;

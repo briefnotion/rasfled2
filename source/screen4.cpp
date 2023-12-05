@@ -586,7 +586,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
           else if (DISPLAY_SCREEN == 1)
           {
-            AUTOMOBILE.display(sdSysData, SCREEN_COMMS);
+            AUTOMOBILE.display(sdSysData, SCREEN_COMMS, DISPLAY_CONFIRM);
             
             ImGui::SameLine();
 
@@ -831,7 +831,7 @@ void SCREEN4::draw(system_data &sdSysData)
         {
           if (button_simple_color(sdSysData, "EXIT", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
-            PENDING_CONFIRM_COMMAND = "X";
+            SCREEN_COMMS.command_pending_set("X");
             DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
           }
 
@@ -839,13 +839,13 @@ void SCREEN4::draw(system_data &sdSysData)
 
           if (button_simple_color(sdSysData, "SYSTEM\nSHUT\nDOWN", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
-            PENDING_CONFIRM_COMMAND = " comshutd";
+            SCREEN_COMMS.command_pending_set(" comshutd");
             DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
           }
 
           if (button_simple_color(sdSysData, "SYSTEM\nREBOOT", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
-            PENDING_CONFIRM_COMMAND = " reboot";
+            SCREEN_COMMS.command_pending_set(" reboot");
             DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
           }
 
@@ -1118,24 +1118,20 @@ void SCREEN4::draw(system_data &sdSysData)
     
     if (DISPLAY_CONFIRM == true && RESTACK_WINDOWS == false)
     {
-      ImGui::SetNextWindowSize(ImVec2(90, 195));
-      if (ImGui::Begin("Continue", &DISPLAY_CONFIRM, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
-      {
+      bool choice = false;
 
-        if (button_simple_color(sdSysData, "CONFIRM", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+      if (confirm_dialog(sdSysData, choice))
+      {
+        if (choice)
         {
-          SCREEN_COMMS.command_text_set(PENDING_CONFIRM_COMMAND);
-        }
-        
-        if (button_simple_color(sdSysData, "DENY", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
-        {
-          PENDING_CONFIRM_COMMAND = "";
+          SCREEN_COMMS.command_pending_send();
           DISPLAY_CONFIRM = false;
         }
-
+        else
+        {
+          DISPLAY_CONFIRM = false;
+        }
       }
-
-      ImGui::End();
     }
 
     // ---------------------------------------------------------------------------------------

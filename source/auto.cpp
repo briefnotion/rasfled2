@@ -2046,13 +2046,39 @@ void AUTOMOBILE::set_default_request_pid_list()
   //add_to_pid_send_list("4C"); //  PID_COMMANDED_THROTTLE_ACTUATOR_E 0x4C  //  * 07 E8 03 41 4C 14 00 00 00 00 00069FE5
   //  Commanded throttle actuator
   */
+
+  // Supported Service Codes List
+  // Mode 09 Pid 00
+  // 00 - 07 e9 06 49 00 14 40 00 00 00 00102d4f
+  //                      0001010001000000
+  //  (dec) 04 06 10
+  //  (hex) 04 06 0a
+
+  // Mode 03 Pid 00
+  //  xx - 07 e9 02 43 00 00 00 00 00 00 00115ac8 - not yet decyphered.
+
   
-  // Supported PID list:
-  //  00 - 07 e9 06 41 00 98 18 00 13 00 018e398b
-  //      10011000000110000000000000010011
+  // Supported PID list: (Those guys back then were genius, because this code is brilliant)
+  //  00 - 07 e9 06 41 00 98 18 00 13 00 000da162
+  //                      10011000000110000000000000010011
+
+  //  20 - 07 e9 06 41 20 80 01 a0 01 00 000e16c5
+  //                      10000000000000011010000000000001
+
+  //  40 - 07 e8 06 41 40 fe d0 80 00 00 000ed695
+  //                      11111110110100001000000000000000
+
+  //  Supported PIDs:
+  //  (dec) 01 04 05 12 13 28 31 32 
+  //  (hex) 00 04 05 0c 0d 1c 1f 20
+  
+  //  (dec) 33 48 49 51 64
+  //  (hex) 21 30 31 33 40
+
+  //  (dec) 65 66 67 68 69 70 71 73 74 79
+  //  (hex) 41 42 43 44 45 46 47 49 4a 4f
 
   // Differant queue
-
   {
     add_to_pid_send_list("23"); //  PID_FUEL_RAIL_PRESSURE_GAUGE      0x23  //  * 07 E8 04 41 23 00 E1 00 00 00 00032EEB
     add_to_pid_send_list("32"); //  PID_EVAP_SYSTEM_VAPOR_PRESSURE    0x32  //  * 07 E8 04 41 32 FF 77 00 00 00 000662D9

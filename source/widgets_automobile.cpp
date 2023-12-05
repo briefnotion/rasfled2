@@ -1464,7 +1464,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   }
 }
 
-void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms)
+void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, bool &Display_Confirm)
 { 
   //ImGuiIO &io = ImGui::GetIO();
 
@@ -1590,7 +1590,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
         SDATA.TB_ACCELERATION.draw(sdSysData);
 
         // DISPLAY_MID_BOTTOM - Buttons
-        ImGui::BeginChild("Record Buttons Left", ImVec2(ImGui::GetContentRegionAvail().x - 215.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+        ImGui::BeginChild("Record Buttons Left", ImVec2(ImGui::GetContentRegionAvail().x - 322.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
           // Noting Displayed Here
         }
@@ -1600,6 +1600,14 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
         ImGui::BeginChild("Record Buttons Right", ImGui::GetContentRegionAvail(), false, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
+          if (button_simple_color(sdSysData, "CLEAR DIAG\nCODES", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+          {
+            Screen_Comms.command_pending_set("qdiagc");
+            Display_Confirm = !Display_Confirm;
+          }
+
+          ImGui::SameLine();
+
           if (button_simple_toggle_color(sdSysData, "RECORD\n(On)", "RECORD", sdSysData.COMMS.record_in_progress(), 
                                 sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
           {

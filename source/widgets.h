@@ -199,6 +199,12 @@ bool button_simple_color(system_data &sdSysData, string Text, int Color, ImVec2 
 bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, string False_Value_Text, bool Toggle, 
                                 int True_Color, int False_Color, ImVec2 ImVec2_Size);
 
+bool confirm_dialog(system_data &sdSysData, bool &Choice);
+// Display confirmation dialog.
+// Returns:
+//  true if clicked
+//  Choice returned when clicked is true or false
+
 // ---------------------------------------------------------------------------------------
 
 class BAR_TECH_PROPERTIES
