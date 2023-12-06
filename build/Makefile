@@ -331,6 +331,33 @@ auto.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/auto.cpp.s
 .PHONY : auto.cpp.s
 
+auto_nova.o: auto_nova.cpp.o
+
+.PHONY : auto_nova.o
+
+# target to build an object file
+auto_nova.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/auto_nova.cpp.o
+.PHONY : auto_nova.cpp.o
+
+auto_nova.i: auto_nova.cpp.i
+
+.PHONY : auto_nova.i
+
+# target to preprocess a source file
+auto_nova.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/auto_nova.cpp.i
+.PHONY : auto_nova.cpp.i
+
+auto_nova.s: auto_nova.cpp.s
+
+.PHONY : auto_nova.s
+
+# target to generate assembly for a file
+auto_nova.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/auto_nova.cpp.s
+.PHONY : auto_nova.cpp.s
+
 automobile_handler.o: automobile_handler.cpp.o
 
 .PHONY : automobile_handler.o
@@ -1117,6 +1144,9 @@ help:
 	@echo "... auto.o"
 	@echo "... auto.i"
 	@echo "... auto.s"
+	@echo "... auto_nova.o"
+	@echo "... auto_nova.i"
+	@echo "... auto_nova.s"
 	@echo "... automobile_handler.o"
 	@echo "... automobile_handler.i"
 	@echo "... automobile_handler.s"

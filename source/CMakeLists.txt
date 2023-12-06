@@ -46,6 +46,7 @@ target_sources(rasfled PRIVATE
   LEDstuff.cpp
   commands.cpp
   comport.cpp
+  auto_nova.cpp
   auto.cpp
   configuration_storage.cpp
   helper.cpp

@@ -1845,7 +1845,7 @@ void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_
 { 
   ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    if (button_simple_toggle_color(sdSysData, "ADSB", "ADSB", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (button_simple_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       if (SDATA.ADSB_ACTIVE == true)
       {

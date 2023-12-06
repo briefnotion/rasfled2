@@ -1,3 +1,13 @@
+2.081_231205
+  - Small changes made to interface.
+  - Added a "Malfunction Indicator Lamp" alert.
+  - Started developing the Nova system to be:
+      A system designed to find the meaning behind the values 
+        of the data that is actively being sent over the CAM bus. 
+      Labeled NOVA, because the system would be essential if I 
+        ever managed to get a new car.  And getting a new car 
+        would be absolutely nova.
+
 2.080_231204
   - Changed CAN bus, but not compiled or tested. COMM bugs still exist.
   - Confirm Dialog now a widget.

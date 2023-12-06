@@ -1,5 +1,5 @@
 // ***************************************************************************************
-// *size
+// *
 // *    Core       | Everything within this document is proprietary to Core Dynamics.
 // *    Dynamics   | Any unauthorized duplication will be subject to prosecution.
 // *
@@ -228,6 +228,18 @@ float VOLTAGE::val_v()
 string VOLTAGE::v()
 {
   return to_string_round_to_nth(V, 1) + " v";
+}
+
+//-----------
+
+void AUTOMOBILE_SYSTEM::store_malfunction_indicator_light(bool Value)
+{
+  MALFUNCTION_INDICATOR_LIGHT = Value;
+}
+
+bool AUTOMOBILE_SYSTEM::malfunction_indicator_light()
+{
+  return MALFUNCTION_INDICATOR_LIGHT;
 }
 
 //-----------
@@ -2144,6 +2156,7 @@ void AUTOMOBILE::set_default_request_pid_list()
     add_to_pid_send_list("32"); // Evap Sys Pressure
   }
 
+  add_to_pid_send_list("01"); // Monitor status since DTCs cleared
   add_to_pid_send_list("23"); // Fuel Rail Pressure
   add_to_pid_send_list("32"); // Evap Sys Pressure
   add_to_pid_send_list("1F"); //  PID_RUN_TIME_SINCE_START          0x1F  //  * 07 E8 04 41 1F 00 AA 00 00 00 0002140B
@@ -2226,12 +2239,29 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
             // Check message to make sure its in correct format
             if (message.DATA[0] == 0x03 && message.DATA[1] == 0x41)
             {
-              if (message.DATA[2] == 0x05)  // Engine coolant temperature - 07 E8 03 41 05 7A 00 00 00 00 00125F9C
+              if (message.DATA[2] == 0x01)  // System (MIL)
+              {
+                // Dont send another request until wait delay is up
+                STATUS.SYSTEM.store_malfunction_indicator_light(bit_value(message.DATA[3], 7));
+
+                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_MIL].alert_condition(RESERVE_ALERT_MIL, 
+                                                  STATUS.SYSTEM.malfunction_indicator_light() == true , 
+                                                  STATUS.SYSTEM.malfunction_indicator_light() == false))
+                {
+                  ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_MIL].update_alert_text("Malfunction Indicator Lamp is " + to_string(STATUS.SYSTEM.malfunction_indicator_light()));
+                }
+
+                message_processed = true;
+              }
+
+              else if (message.DATA[2] == 0x05)  // Engine coolant temperature - 07 E8 03 41 05 7A 00 00 00 00 00125F9C
               {
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_coolant_05(message.DATA[3]);
 
-                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].alert_condition(RESERVE_ALERT_TEMP_COOLANT, STATUS.TEMPS.COOLANT_05.val_c() >= 100.0f, STATUS.TEMPS.COOLANT_05.val_c() < 80.0f))
+                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].alert_condition(RESERVE_ALERT_TEMP_COOLANT, 
+                                                  STATUS.TEMPS.COOLANT_05.val_c() >= 100.0f, 
+                                                  STATUS.TEMPS.COOLANT_05.val_c() < 80.0f))
                 {
                   ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].update_alert_text("Coolant Temp Value is " + STATUS.TEMPS.COOLANT_05.c());
                 }
@@ -2254,7 +2284,9 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_air_intake_0f(message.DATA[3]);
 
-                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_INTAKE].alert_condition(RESERVE_ALERT_TEMP_INTAKE, STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= 50.0f, STATUS.TEMPS.AIR_INTAKE_0f.val_c() < 40.0f))
+                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_INTAKE].alert_condition(RESERVE_ALERT_TEMP_INTAKE, 
+                                                  STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= 50.0f, 
+                                                  STATUS.TEMPS.AIR_INTAKE_0f.val_c() < 40.0f))
                 {
                   ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_INTAKE].update_alert_text("Intake Temp Value is " + STATUS.TEMPS.AIR_INTAKE_0f.c());
                 }
@@ -2352,7 +2384,9 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 // Dont send another request until wait delay is up
                 STATUS.ELECTRICAL.store_control_voltage_42(message.DATA[3], message.DATA[4]);
 
-                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].alert_condition(RESERVE_ALERT_ELEC_VOLTAGE, STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f, STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() >= 12.0f))
+                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].alert_condition(RESERVE_ALERT_ELEC_VOLTAGE, 
+                                                  STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f, 
+                                                  STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() >= 12.0f))
                 {
                   ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].update_alert_text("Voltage Value is " + STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
                 }
@@ -2409,6 +2443,8 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
             CHANGED = true;
           }
 
+          // Process Nova Calculations
+          NOVA.process(pid_recieved, message.DATA);
         }
       }
     }
@@ -2461,7 +2497,7 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     STATUS.FUEL.store_percentage(DATA.AD_C0.DATA[7]);
     STATUS.FUEL.store_level(DATA.AD_380.DATA[7]);
 
-    if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].alert_condition(RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 2.0f, STATUS.FUEL.val_level() > 7.0f))
+    if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].alert_condition(RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 2.0f, STATUS.FUEL.val_level() > 4.0f))
     {
       ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].update_alert_text("Fuel Level is " + STATUS.FUEL.level());
     }

@@ -22,6 +22,7 @@
 #include "helper.h"
 #include "alert_system_2.h"
 #include "screen4_helper.h"
+#include "auto_nova.h"
 
 #include "comport.h"
 
@@ -267,6 +268,20 @@ class VOLTAGE
   string v();
 
   unsigned long time_stamp();
+};
+
+class AUTOMOBILE_SYSTEM
+{
+  private:
+
+  bool MALFUNCTION_INDICATOR_LIGHT = false;
+
+  public:
+
+  void store_malfunction_indicator_light(bool Value);
+
+  bool malfunction_indicator_light();
+
 };
 
 class AUTOMOBILE_DOORS
@@ -651,6 +666,7 @@ class AUTOMOBILE_TRANSLATED_DATA
 {
   public:
 
+  AUTOMOBILE_SYSTEM SYSTEM;
   AUTOMOBILE_STEERING STEERING;
   AUTOMOBILE_TRANSMISSION_GEAR GEAR;
   AUTOMOBILE_VELOCITY SPEED;
@@ -849,6 +865,7 @@ class AUTOMOBILE
   AUTOMOBILE_TRANSLATED_DATA STATUS;
   AUTOMOBILE_CALCULATED CALCULATED;
   AUTOMOBILE_PROPERTIES PROPS;
+  AUTOMOBILE_NOVA NOVA;
 
   int message_count = 0;
 

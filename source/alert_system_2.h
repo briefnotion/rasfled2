@@ -20,7 +20,7 @@
 // -------------------------------------------------------------------------------------
 
 // Reserved Alert List
-#define RESERVE_ALERT_LIST_SIZE       6
+#define RESERVE_ALERT_LIST_SIZE       7
 
 #define RESERVE_ALERT_TEMP_S_TEMP     0
 #define RESERVE_ALERT_TEMP_COOLANT    1
@@ -28,6 +28,7 @@
 #define RESERVE_ALERT_FUEL_LEVEL      3
 #define RESERVE_ALERT_TEMP_INTAKE     4
 #define RESERVE_ALERT_UNKNOWN_MESSAGE 5
+#define RESERVE_ALERT_MIL             6
 
 // -------------------------------------------------------------------------------------
 

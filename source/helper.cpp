@@ -1075,6 +1075,21 @@ bool get_bit_value(int baseline, int bit_set_compare)
   return ret_bit_on;
 }
 
+bool bit_value(unsigned char Value, int Bit_Location)
+{
+  /*
+  //  Skip range checks for now.
+  // Ensure the bit location is within the range of 0 to 7
+  if (Bit_Location < 0 || Bit_Location > 7) 
+  {
+      return false; // Or handle the error as needed
+  }
+  */
+
+  // Shift the bit to the least significant position and mask with 1
+  return (Value >> Bit_Location) & 1;
+}
+
 int two_byte_complement_signed(unsigned char byte1, unsigned char byte2) 
 {
   // thank you chat gpt.

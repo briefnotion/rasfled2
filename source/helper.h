@@ -570,6 +570,11 @@ bool get_bit_value(int baseline, int bit_set_compare);
 // Returns true if bit is same else returns false.
 // eg: D8, check for bit 0001000 is:
 //   if (get_bit_value(216, 8) == true)
+// Needs Depreciation
+
+bool bit_value(unsigned char Value, int Bit_Location);
+//  Checks if a bit at a given position in a byte is 
+//    on or off, returning true or false.
 
 int two_byte_complement_signed(unsigned char byte1, unsigned char byte2);
 //  Bytes entwined, cybermorphing defined,
