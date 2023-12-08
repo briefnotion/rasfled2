@@ -33,31 +33,12 @@
 using namespace std;
 
 // ---------------------------------------------------------------------------------------
+//  Nova Widget 
+void draw_bit(system_data &sdSysData, ImDrawList* draw_list, 
+              ImVec2 Start_Pos, bool Value, bool Ping);
 
-/*
-class BLANK_PROPERTIES
-{
-  public:
-
-  COLOR_COMBO COLOR;
-};
-
-class BLANK
-{
-  private:
-
-  string TEXT = "";
-
-  public:
-
-  W_TEXT_PROPERTIES PROPS;
-
-  void update_text(unsigned long tmeCurrentMillis, string Text);
-
-  void draw(unsigned long tmeCurrentMillis);
-
-};
-*/
+void nova_draw(system_data &sdSysData, ImDrawList* draw_list, 
+                NOVA_BITS_VALUE &Value);
 
 // ---------------------------------------------------------------------------------------
 
@@ -426,11 +407,15 @@ class AUTOMOBILE_SCREEN
   bool DISPLAY_DATA = true;
 
   bool DISPLAY_CONFIRM = false;
+  
+  bool DISPLAY_NOVA = false;
 
   int DISPLAY_MID_BOTTOM = 0; // 0 - Large Horizontal Bars
                               // 1 - Unused
                               // 2 - Temp Graph
                               // 3 - Power Graph
+
+  void nova(system_data &sdSysData);
 
   public:
   

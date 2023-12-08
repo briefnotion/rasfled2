@@ -52,7 +52,6 @@ class AUTOMOBILE_DATA_LINE
 
   int ID = -1;
 
-  int ID_DATA[2] = {0};
   int DATA[8] = {0};
 
   unsigned long TIMESTAMP_MESSAGE_SENT = 0;
@@ -852,6 +851,10 @@ class AUTOMOBILE
   TIMED_PING REQUESTED_PID_TIMER_WAIT;
   int REQUESTED_PID_TIMER_WAIT_DELAY = 50;
   //int REQUESTED_PID_TIMER_TIMEOUT_DELAY = 250;
+
+  int LATEST_PID;
+  int LATEST_DATA[8] = {0};
+  // Hoping to return to this because its hacky.
 
   bool parse(string Line, int &PID_Recieved);
   // Returns true if line is considered a message recieved.

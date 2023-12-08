@@ -14,18 +14,58 @@
 
 #include "widgets_automobile.h"
 
-// ---------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
+//  Nova Widget Class
 
-/*
-void BLANK::display(const char *name, bool *p_open, ImGuiWindowFlags flags)
-{ 
-  ImGui::Begin(name, p_open, flags);
+void draw_bit(system_data &sdSysData, ImDrawList* draw_list, 
+              ImVec2 Start_Pos, bool Value, bool Ping)
+{
+  if (Ping)
   {
-
+    if (Value)
+    {
+      draw_list->AddNgonFilled(Start_Pos, 4, sdSysData.COLOR_SELECT.c_white().STANDARD_V , 4.0f);
+    }
+    else
+    {
+      draw_list->AddNgon(Start_Pos, 4, sdSysData.COLOR_SELECT.c_white().STANDARD_V, 4.0f);
+    }
   }
-  ImGui::End();
+  else
+  {
+    if (Value)
+    {
+      draw_list->AddNgonFilled(Start_Pos, 4, sdSysData.COLOR_SELECT.c_blue().STANDARD , 4.0f);
+    }
+    else
+    {
+      draw_list->AddNgon(Start_Pos, 4, sdSysData.COLOR_SELECT.c_blue().STANDARD, 4.0f);
+    }
+  }
 }
-*/
+
+void nova_draw(system_data &sdSysData, ImDrawList* draw_list, NOVA_BITS_VALUE &Value)
+{
+  ImVec2 current_position = ImGui::GetCursorScreenPos();
+  unsigned long current_time_frame = sdSysData.PROGRAM_TIME.current_frame_time();
+
+  ImGui::Text("%X", Value.ID);
+
+  for (int bit = 0; bit < 64; bit++)
+  {
+    draw_bit(sdSysData, draw_list, ImVec2(current_position.x + 50.0f + (8.5f * (float)bit), current_position.y + 10.0f),
+              Value.NOVA_BITS[bit], Value.HILIGHT[bit].ping_down(current_time_frame));
+
+    if (bit % 8 == 0)
+    {
+      draw_list->AddLine(ImVec2(current_position.x + 46.0f + (8.5f * (float)bit), current_position.y + 2.0f), 
+                          ImVec2(current_position.x + 46.0f + (8.5f * (float)bit), current_position.y + 18.0f), 
+                          sdSysData.COLOR_SELECT.c_white().STANDARD, 2.0f);
+    }
+  }
+
+  ImGui::SetCursorScreenPos(ImVec2(current_position.x, current_position.y + 13.0f));
+}
 
 // -------------------------------------------------------------------------------------
 
@@ -541,6 +581,42 @@ void T_DATA_DISPLAY::draw(system_data &sdSysData)
 }
 
 // ---------------------------------------------------------------------------------------
+
+void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
+{
+    if (button_simple_color(sdSysData, "NOVA", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+    {
+      DISPLAY_NOVA = false;
+    }
+
+    ImGui::SameLine();
+
+    if (button_simple_toggle_color(sdSysData, "ENABLE\n(On)", "ENABLE\n(Off)", sdSysData.CAR_INFO.NOVA.ENABLED, 
+                          sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+    {
+      sdSysData.CAR_INFO.NOVA.ENABLED = !sdSysData.CAR_INFO.NOVA.ENABLED;
+    }
+
+    ImGui::SameLine();
+    ImGui::Text("Size: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size());
+
+    //test
+    
+    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+    for(int items = 0; items < (int)sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size(); items++)
+    {
+      nova_draw(sdSysData, draw_list, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
+      /*
+      for(int y = 0; y < 64; y++)
+      {
+        printf("%d ", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[x].NOVA_BITS[y]);
+      }
+      */
+    }
+
+}
+
 void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
 {
   // Large Displays on Main Sidebar Screen
@@ -1549,157 +1625,170 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
   ImGui::SameLine();
 
   // Show Center Region
-  ImGui::BeginChild("Auto Screen Right Side", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+  if (DISPLAY_NOVA)
   {
-    // Show Upper Center Region
-    ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 8.0f / 16.0f), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+    ImGui::BeginChild("Nova", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
-      float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
-      ImVec2 pos1 = ImGui::GetCursorScreenPos();
-      ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
-      
-      if (SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2))
-      {
-        //
-      }
-
-      ImGui::SameLine();
-
-      SDATA.VB_SPEED.draw(sdSysData);
-      SDATA.VB_S_FUEL.draw(sdSysData);
-      SDATA.VB_S_TEMP.draw(sdSysData);
-      SDATA.VB_S_VOLTAGE.draw(sdSysData);
-    }
-    ImGui::EndChild();
-
-    // Show Alt Data
-    ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-    {
-      if (DISPLAY_MID_BOTTOM == 0)
-      // Show bars
-      {
-        ImVec2 pos1 = ImGui::GetCursorScreenPos();
-
-        SDATA.TB_STEERING.draw(sdSysData);
-        SDATA.TB_TORQUE.draw(sdSysData);
-        SDATA.TB_RPM.draw(sdSysData);
-
-        ImGui::Separator();
-
-        SDATA.TB_SPEED.draw(sdSysData);
-        SDATA.TB_ACCELERATION.draw(sdSysData);
-
-        // DISPLAY_MID_BOTTOM - Buttons
-        ImGui::BeginChild("Record Buttons Left", ImVec2(ImGui::GetContentRegionAvail().x - 322.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
-        {
-          // Noting Displayed Here
-        }
-        ImGui::EndChild();
-
-        ImGui::SameLine();
-
-        ImGui::BeginChild("Record Buttons Right", ImGui::GetContentRegionAvail(), false, sdSysData.SCREEN_DEFAULTS.flags_c);
-        {
-          if (button_simple_color(sdSysData, "CLEAR DIAG\nCODES", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
-          {
-            Screen_Comms.command_pending_set("qdiagc");
-            Display_Confirm = !Display_Confirm;
-          }
-
-          ImGui::SameLine();
-
-          if (button_simple_toggle_color(sdSysData, "RECORD\n(On)", "RECORD", sdSysData.COMMS.record_in_progress(), 
-                                sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
-          {
-            if (sdSysData.COMMS.record_in_progress())
-            {
-              Screen_Comms.command_text_set(" commf");
-            }
-            else
-            {
-              Screen_Comms.command_text_set(" commo");
-            }
-          }
-
-          ImGui::SameLine();
-
-          if (button_simple_color(sdSysData, "FLASH REC", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
-          {
-            Screen_Comms.command_text_set("]]");
-          }
-        }
-        ImGui::EndChild();
-
-        // Change Screens
-        ImGui::SetCursorScreenPos(pos1);
-        if (ImGui::InvisibleButton("InvisibleButton", ImGui::GetContentRegionAvail()))
-        {
-          DISPLAY_MID_BOTTOM++;
-        }
-
-      }
-
-      else if (DISPLAY_MID_BOTTOM == 1)
-      // Show Voltage
-      {
-        // advance
-        DISPLAY_MID_BOTTOM++;
-      }
-
-      else if (DISPLAY_MID_BOTTOM == 2)
-      // Show Temperature
-      {
-        float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
-        ImVec2 pos1 = ImGui::GetCursorScreenPos();
-        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
-
-        // Change Screens
-        if (SDATA.PLOT_TEMPERATURE.draw(sdSysData, pos1, pos2))
-        {
-          DISPLAY_MID_BOTTOM++;
-        }
-
-        ImGui::SameLine();
-
-        SDATA.VB_TEMPERATURE_COOLANT.draw(sdSysData);
-        SDATA.VB_TEMPERATURE_INTAKE.draw(sdSysData);
-        SDATA.VB_TEMPERATURE_AMBIANT.draw(sdSysData);
-        SDATA.VB_TEMPERATURE_CATALYST.draw(sdSysData);
-        SDATA.VB_TEMPERATURE_S_TEMP.draw(sdSysData);
-
-      }
-
-      else if (DISPLAY_MID_BOTTOM == 3)
-      // Show Power
-      {
-        float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
-        ImVec2 pos1 = ImGui::GetCursorScreenPos();
-        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
-
-        // Change Screens
-        if (SDATA.PLOT_POWER.draw(sdSysData, pos1, pos2))
-        {
-          DISPLAY_MID_BOTTOM++;
-        }
-
-        ImGui::SameLine();
-
-        SDATA.VB_POWER_TACH.draw(sdSysData);
-        SDATA.VB_POWER_ACCELERATION.draw(sdSysData);
-        SDATA.VB_POWER_TORQE.draw(sdSysData);
-        SDATA.VB_POWER_FUEL_RAIL_P.draw(sdSysData);
-        SDATA.VB_POWER_SYSTEM_VAPER_P.draw(sdSysData);
-      }
-
-      else
-      {
-        // reset
-        DISPLAY_MID_BOTTOM = 0;
-      }
+      nova(sdSysData);
     }
     ImGui::EndChild();
   }
-  ImGui::EndChild();
+  else
+  {
+    ImGui::BeginChild("Auto Screen Right Side", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+    {
+      // Show Upper Center Region
+      ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 8.0f / 16.0f), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
+        ImVec2 pos1 = ImGui::GetCursorScreenPos();
+        ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
+        
+        if (SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2))
+        {
+          //
+        }
+
+        ImGui::SameLine();
+
+        SDATA.VB_SPEED.draw(sdSysData);
+        SDATA.VB_S_FUEL.draw(sdSysData);
+        SDATA.VB_S_TEMP.draw(sdSysData);
+        SDATA.VB_S_VOLTAGE.draw(sdSysData);
+      }
+      ImGui::EndChild();
+
+      // Show Alt Data
+      ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      {
+        if (DISPLAY_MID_BOTTOM == 0)
+        // Show bars
+        {
+          ImVec2 pos1 = ImGui::GetCursorScreenPos();
+
+          SDATA.TB_STEERING.draw(sdSysData);
+          SDATA.TB_TORQUE.draw(sdSysData);
+          SDATA.TB_RPM.draw(sdSysData);
+
+          ImGui::Separator();
+
+          SDATA.TB_SPEED.draw(sdSysData);
+          SDATA.TB_ACCELERATION.draw(sdSysData);
+
+          // DISPLAY_MID_BOTTOM - Buttons
+          ImGui::BeginChild("Record Buttons Left", ImVec2(ImGui::GetContentRegionAvail().x - 322.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          {
+            if (button_simple_color(sdSysData, "NOVA", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            {
+              DISPLAY_NOVA = true;
+            }
+          }
+          ImGui::EndChild();
+
+          ImGui::SameLine();
+
+          ImGui::BeginChild("Record Buttons Right", ImGui::GetContentRegionAvail(), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          {
+            if (button_simple_color(sdSysData, "CLEAR DIAG\nCODES", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            {
+              Screen_Comms.command_pending_set("qdiagc");
+              Display_Confirm = !Display_Confirm;
+            }
+
+            ImGui::SameLine();
+
+            if (button_simple_toggle_color(sdSysData, "RECORD\n(On)", "RECORD", sdSysData.COMMS.record_in_progress(), 
+                                  sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            {
+              if (sdSysData.COMMS.record_in_progress())
+              {
+                Screen_Comms.command_text_set(" commf");
+              }
+              else
+              {
+                Screen_Comms.command_text_set(" commo");
+              }
+            }
+
+            ImGui::SameLine();
+
+            if (button_simple_color(sdSysData, "FLASH REC", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            {
+              Screen_Comms.command_text_set("]]");
+            }
+          }
+          ImGui::EndChild();
+
+          // Change Screens
+          ImGui::SetCursorScreenPos(pos1);
+          if (ImGui::InvisibleButton("InvisibleButton", ImGui::GetContentRegionAvail()))
+          {
+            DISPLAY_MID_BOTTOM++;
+          }
+        }
+
+        else if (DISPLAY_MID_BOTTOM == 1)
+        // Show Voltage
+        {
+          // advance
+          DISPLAY_MID_BOTTOM++;
+        }
+
+        else if (DISPLAY_MID_BOTTOM == 2)
+        // Show Temperature
+        {
+          float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
+          ImVec2 pos1 = ImGui::GetCursorScreenPos();
+          ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
+
+          // Change Screens
+          if (SDATA.PLOT_TEMPERATURE.draw(sdSysData, pos1, pos2))
+          {
+            DISPLAY_MID_BOTTOM++;
+          }
+
+          ImGui::SameLine();
+
+          SDATA.VB_TEMPERATURE_COOLANT.draw(sdSysData);
+          SDATA.VB_TEMPERATURE_INTAKE.draw(sdSysData);
+          SDATA.VB_TEMPERATURE_AMBIANT.draw(sdSysData);
+          SDATA.VB_TEMPERATURE_CATALYST.draw(sdSysData);
+          SDATA.VB_TEMPERATURE_S_TEMP.draw(sdSysData);
+
+        }
+
+        else if (DISPLAY_MID_BOTTOM == 3)
+        // Show Power
+        {
+          float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
+          ImVec2 pos1 = ImGui::GetCursorScreenPos();
+          ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
+
+          // Change Screens
+          if (SDATA.PLOT_POWER.draw(sdSysData, pos1, pos2))
+          {
+            DISPLAY_MID_BOTTOM++;
+          }
+
+          ImGui::SameLine();
+
+          SDATA.VB_POWER_TACH.draw(sdSysData);
+          SDATA.VB_POWER_ACCELERATION.draw(sdSysData);
+          SDATA.VB_POWER_TORQE.draw(sdSysData);
+          SDATA.VB_POWER_FUEL_RAIL_P.draw(sdSysData);
+          SDATA.VB_POWER_SYSTEM_VAPER_P.draw(sdSysData);
+        }
+
+        else
+        {
+          // reset
+          DISPLAY_MID_BOTTOM = 0;
+        }
+      }
+      ImGui::EndChild();
+    }
+    ImGui::EndChild();
+  }
 }
 
 void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData, bool Automobile_Screen_Selected, bool Restack_Windows)

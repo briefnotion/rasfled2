@@ -1527,12 +1527,11 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
 
   data.ORIG = Line;
 
+  //02 00 F2 00 B7 EC 00 00 C0 67 004205B1
+
   valid.catch_false(string_hex_to_int(Line.substr(0, 2), upper));
   valid.catch_false(string_hex_to_int(Line.substr(3, 2), lower));
-
-  valid.catch_false(string_hex_to_int(Line.substr(6, 2), data.ID_DATA[0]));
-  valid.catch_false(string_hex_to_int(Line.substr(3, 2), data.ID_DATA[1]));
-
+   
   valid.catch_false(string_hex_to_int(Line.substr(6, 2), data.DATA[0]));
   valid.catch_false(string_hex_to_int(Line.substr(9, 2), data.DATA[1]));
   valid.catch_false(string_hex_to_int(Line.substr(12, 2), data.DATA[2]));
@@ -1552,7 +1551,19 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
 
   if (valid.has_false() == false)
   {
+    // Compute ID
     data.ID = upper *256 + lower;
+
+    // Store into latest values
+    LATEST_PID = data.ID;
+    LATEST_DATA[0] = data.DATA[0];
+    LATEST_DATA[1] = data.DATA[1];
+    LATEST_DATA[2] = data.DATA[2];
+    LATEST_DATA[3] = data.DATA[3];
+    LATEST_DATA[4] = data.DATA[4];
+    LATEST_DATA[5] = data.DATA[5];
+    LATEST_DATA[6] = data.DATA[6];
+    LATEST_DATA[7] = data.DATA[7];
 
     // Put value in pos
     if(data.ID == 0)
@@ -2179,10 +2190,10 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
 
   if (AVAILABILITY.check_for_live_data(tmeFrame_Time) == false)
   {
-   if (AVAILABILITY.set_active(STATUS, false, tmeFrame_Time) == true)
-   {
-    CHANGED = true;
-   }
+    if (AVAILABILITY.set_active(STATUS, false, tmeFrame_Time) == true)
+    {
+      CHANGED = true;
+    }
   }
 
   if (Com_Port.recieve_size() > 0)
@@ -2230,15 +2241,15 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
             recieved_cam_message = true;
           }
 
-
           // Check to see if the message received was directed to this device, or was passively read.
           if (recieved_cam_message == true)
           {
             bool message_processed = false;
 
             // Check message to make sure its in correct format
-            if (message.DATA[0] == 0x03 && message.DATA[1] == 0x41)
+            if (message.DATA[1] == 0x41)
             {
+
               if (message.DATA[2] == 0x01)  // System (MIL)
               {
                 // Dont send another request until wait delay is up
@@ -2254,7 +2265,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 message_processed = true;
               }
 
-              else if (message.DATA[2] == 0x05)  // Engine coolant temperature - 07 E8 03 41 05 7A 00 00 00 00 00125F9C
+              if (message.DATA[2] == 0x05)  // Engine coolant temperature - 07 E8 03 41 05 7A 00 00 00 00 00125F9C
               {
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_coolant_05(message.DATA[3]);
@@ -2343,11 +2354,8 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
 
                 message_processed = true;
               }
-            }          
-            else if (message.DATA[0] == 0x04 && message.DATA[1] == 0x41)
-            // Check message to make sure its in correct format
-            {
-              if (message.DATA[2] == 0x1F)  // Run time since engine start - 07 E8 04 41 1F 00 AA 00 00 00 0002140B
+            
+              else if (message.DATA[2] == 0x1F)  // Run time since engine start - 07 E8 04 41 1F 00 AA 00 00 00 0002140B
               {
                 // Dont send another request until wait delay is up
                 STATUS.ELECTRICAL.store_run_time_since_start_1f(message.DATA[3], message.DATA[4]);
@@ -2442,10 +2450,11 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
             AVAILABILITY.set_active(STATUS, true, tmeFrame_Time);
             CHANGED = true;
           }
-
-          // Process Nova Calculations
-          NOVA.process(pid_recieved, message.DATA);
         }
+
+        // Process Nova Calculations
+        NOVA.process(tmeFrame_Time, LATEST_PID, LATEST_DATA);
+
       }
     }
   }
@@ -2467,9 +2476,9 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
     REQUESTED_PID = REQUESTED_PID_SEND_LIST[REQUESTED_PID_SEND_LIST_POSITION];
 
     if (PROPS.DATA_REQUEST_ENABLE)
-      {
-        Com_Port.send(REQUESTED_PID);
-      }
+    {
+      Com_Port.send(REQUESTED_PID);
+    }
   }
 }
 

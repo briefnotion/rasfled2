@@ -1,3 +1,11 @@
+2.082_231206
+  - Embeded a chilling echo of the dystopian sprawl in auto_nova.h,
+      because coding gets boring to read. 
+                       /\_/\  
+                      ( o.o ) 
+                       > ^ <
+  - First level nova routine works and will be tested tomorrow.
+
 2.081_231205
   - Small changes made to interface.
   - Added a "Malfunction Indicator Lamp" alert.
