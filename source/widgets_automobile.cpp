@@ -18,28 +18,60 @@
 //  Nova Widget Class
 
 void draw_bit(system_data &sdSysData, ImDrawList* draw_list, 
-              ImVec2 Start_Pos, bool Value, bool Ping)
+              ImVec2 Start_Pos, bool Value, bool Ping, bool Details)
 {
-  if (Ping)
+  if (Details)
   {
-    if (Value)
+    if (Ping)
     {
-      draw_list->AddNgonFilled(Start_Pos, 4, sdSysData.COLOR_SELECT.c_white().STANDARD_V , 4.0f);
+      if (Value)
+      {
+        draw_list->AddRectFilled(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 15.0f), sdSysData.COLOR_SELECT.c_white().STANDARD_V);
+      }
+      else
+      {
+        draw_list->AddRect(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 7.0f), sdSysData.COLOR_SELECT.c_white().STANDARD_V);
+      }
     }
     else
     {
-      draw_list->AddNgon(Start_Pos, 4, sdSysData.COLOR_SELECT.c_white().STANDARD_V, 4.0f);
+      if (Value)
+      {
+        draw_list->AddRectFilled(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 15.0f), sdSysData.COLOR_SELECT.c_blue().STANDARD);
+      }
+      else
+      {
+        draw_list->AddRect(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 7.0f), sdSysData.COLOR_SELECT.c_blue().STANDARD);
+      }
     }
   }
   else
   {
-    if (Value)
+    if (Ping)
     {
-      draw_list->AddNgonFilled(Start_Pos, 4, sdSysData.COLOR_SELECT.c_blue().STANDARD , 4.0f);
+      if (Value)
+      {
+        draw_list->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
+                            sdSysData.COLOR_SELECT.c_white().STANDARD_V, 5.0f);
+      }
+      else
+      {
+        draw_list->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
+                            sdSysData.COLOR_SELECT.c_white().STANDARD_V, 1.0f);
+      }
     }
     else
     {
-      draw_list->AddNgon(Start_Pos, 4, sdSysData.COLOR_SELECT.c_blue().STANDARD, 4.0f);
+      if (Value)
+      {
+        draw_list->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
+                            sdSysData.COLOR_SELECT.c_blue().STANDARD, 5.0f);
+      }
+      else
+      {
+        draw_list->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
+                            sdSysData.COLOR_SELECT.c_blue().STANDARD, 1.0f);
+      }
     }
   }
 }
@@ -49,22 +81,33 @@ void nova_draw(system_data &sdSysData, ImDrawList* draw_list, NOVA_BITS_VALUE &V
   ImVec2 current_position = ImGui::GetCursorScreenPos();
   unsigned long current_time_frame = sdSysData.PROGRAM_TIME.current_frame_time();
 
-  ImGui::Text("%X", Value.ID);
+  if (Value.DETAILS)
+  {
+    ImGui::Text("%X", Value.ID);
+  }
 
   for (int bit = 0; bit < 64; bit++)
   {
-    draw_bit(sdSysData, draw_list, ImVec2(current_position.x + 50.0f + (8.5f * (float)bit), current_position.y + 10.0f),
-              Value.NOVA_BITS[bit], Value.HILIGHT[bit].ping_down(current_time_frame));
+    draw_bit(sdSysData, draw_list, ImVec2(current_position.x + 40.0f + (9.5f * (float)bit), current_position.y + 5.0f),
+              Value.NOVA_BITS[bit], Value.HILIGHT[bit].ping_down(current_time_frame), Value.DETAILS);
 
+    // draw lines
     if (bit % 8 == 0)
     {
-      draw_list->AddLine(ImVec2(current_position.x + 46.0f + (8.5f * (float)bit), current_position.y + 2.0f), 
-                          ImVec2(current_position.x + 46.0f + (8.5f * (float)bit), current_position.y + 18.0f), 
-                          sdSysData.COLOR_SELECT.c_white().STANDARD, 2.0f);
+      draw_list->AddLine(ImVec2(current_position.x + 38.0f + (9.5f * (float)bit), current_position.y + 1.0f), 
+                          ImVec2(current_position.x + 38.0f + (9.5f * (float)bit), current_position.y + 4.0f), 
+                          sdSysData.COLOR_SELECT.c_white().STANDARD_V, 2.0f);
     }
   }
 
-  ImGui::SetCursorScreenPos(ImVec2(current_position.x, current_position.y + 13.0f));
+  if (Value.DETAILS)
+  {
+    ImGui::SetCursorScreenPos(ImVec2(current_position.x, current_position.y + 27.0f));
+  }
+  else
+  {
+    ImGui::SetCursorScreenPos(ImVec2(current_position.x, current_position.y + 7.0f));
+  }
 }
 
 // -------------------------------------------------------------------------------------
@@ -584,37 +627,58 @@ void T_DATA_DISPLAY::draw(system_data &sdSysData)
 
 void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 {
-    if (button_simple_color(sdSysData, "NOVA", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+  ImGui::BeginChild("Nova Display Buttons", ImVec2(90.0f, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+  {
+    if (button_simple_color(sdSysData, "NOVA", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       DISPLAY_NOVA = false;
     }
 
-    ImGui::SameLine();
-
     if (button_simple_toggle_color(sdSysData, "ENABLE\n(On)", "ENABLE\n(Off)", sdSysData.CAR_INFO.NOVA.ENABLED, 
-                          sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+                    sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       sdSysData.CAR_INFO.NOVA.ENABLED = !sdSysData.CAR_INFO.NOVA.ENABLED;
     }
 
-    ImGui::SameLine();
     ImGui::Text("Size: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size());
 
-    //test
-    
+  }
+  ImGui::EndChild();
+
+  ImGui::SameLine();
+
+  ImGui::BeginChild("Nova Display Bit View", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+  {
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+    ImVec2 button_adjust;
 
     for(int items = 0; items < (int)sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size(); items++)
     {
-      nova_draw(sdSysData, draw_list, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
-      /*
-      for(int y = 0; y < 64; y++)
-      {
-        printf("%d ", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[x].NOVA_BITS[y]);
-      }
-      */
-    }
+      button_adjust = ImGui::GetCursorScreenPos();
 
+      if(sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS)
+      {
+        if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,27.0f)))
+        {
+          sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
+        }
+      }
+      else
+      {
+        if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,7.0f)))
+        {
+          sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
+        }
+      }
+
+      ImGui::SetCursorScreenPos(button_adjust);
+
+      nova_draw(sdSysData, draw_list, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
+    }
+  }    
+  
+  ImGui::EndChild();
 }
 
 void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
@@ -1627,7 +1691,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
   // Show Center Region
   if (DISPLAY_NOVA)
   {
-    ImGui::BeginChild("Nova", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+    ImGui::BeginChild("Nova", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
       nova(sdSysData);
     }

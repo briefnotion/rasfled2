@@ -1,3 +1,6 @@
+2.083_231208
+  - Put some work into Nova.
+
 2.082_231206
   - Embeded a chilling echo of the dystopian sprawl in auto_nova.h,
       because coding gets boring to read. 

@@ -35,7 +35,7 @@ using namespace std;
 // ---------------------------------------------------------------------------------------
 //  Nova Widget 
 void draw_bit(system_data &sdSysData, ImDrawList* draw_list, 
-              ImVec2 Start_Pos, bool Value, bool Ping);
+              ImVec2 Start_Pos, bool Value, bool Ping, bool Details);
 
 void nova_draw(system_data &sdSysData, ImDrawList* draw_list, 
                 NOVA_BITS_VALUE &Value);

@@ -67,11 +67,15 @@ struct NOVA_BITS_VALUE
   bool NOVA_BITS[64] = {0};
   TIMED_PING FREQUENCY[64];
   TIMED_PING HILIGHT[64];
+
+  bool DETAILS = false;
 };
 
 class NOVA_ITEM
 {
   private:
+
+  void set_bits(unsigned long tmeFrame_Time, unsigned char Byte_Num, int &Bit_Num);
 
   public:
   
