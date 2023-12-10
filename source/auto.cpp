@@ -595,6 +595,27 @@ void AUTOMOBILE_INDICATORS::store_cruise_control(int Data_1, int Data_2, float M
   }
 }
 
+void AUTOMOBILE_INDICATORS::store_signal(int Signal_Lights)
+{
+  if (bit_value(Signal_Lights, 4))
+  {
+    if (bit_value(Signal_Lights, 5))
+    {
+      SIGNAL_RIGHT = true;
+    }
+    else
+    {
+      SIGNAL_LEFT = true;
+    }
+  }
+  else
+  {
+    SIGNAL_LEFT = false;
+    SIGNAL_RIGHT = false;
+  }
+
+}
+
 bool AUTOMOBILE_INDICATORS::val_light_switch()
 {
   return LIGHT_SWITCH;
@@ -623,6 +644,16 @@ bool AUTOMOBILE_INDICATORS::val_lights_headlights_on()
 bool AUTOMOBILE_INDICATORS::val_lights_parking_on()
 {
   return LIGHTS_PARKING_ON;
+}
+
+bool AUTOMOBILE_INDICATORS::val_sinal_left()
+{
+  return SIGNAL_LEFT;
+}
+
+bool AUTOMOBILE_INDICATORS::val_sinal_right()
+{
+  return SIGNAL_RIGHT;
 }
 
 bool AUTOMOBILE_INDICATORS::val_parking_brake()
@@ -2500,6 +2531,7 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     STATUS.INDICATORS.store_on(DATA.AD_C8.DATA[3]);
     //STATUS.INDICATORS.store_ignition(DATA.AD_C8.DATA[1]);
     STATUS.INDICATORS.store_cruise_control(DATA.AD_200.DATA[6], DATA.AD_200.DATA[7], .312);
+    STATUS.INDICATORS.store_signal(DATA.AD_260.DATA[3]);
 
     // FUEL
     STATUS.FUEL.store_consumed(DATA.AD_200.DATA[7]);

@@ -404,6 +404,55 @@ void SCREEN4::draw(system_data &sdSysData)
 
     if (ImGui::Begin("Window", &show_test_window, sdSysData.SCREEN_DEFAULTS.flags)) // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
     {
+      // Auto Signal Lights
+      if (sdSysData.CAR_INFO.active())
+      {
+        if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left())
+        {
+          if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
+          {
+            BLINKER_BLINK = !BLINKER_BLINK;
+            PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 500);
+          }
+
+          if (BLINKER_BLINK)
+          {
+            //draw_list->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(viewport->Size.x / 2.0f, viewport->Size.y), sdSysData.COLOR_SELECT.c_yellow().STANDARD);
+
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+      
+            draw_list->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(viewport->Size.x / 2.0f, viewport->Size.y), 
+                          sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD);
+          }
+        }
+        else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
+        {
+          //ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+          if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
+          {
+            BLINKER_BLINK = !BLINKER_BLINK;
+            PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 500);
+          }
+
+          if (BLINKER_BLINK)
+          {
+            //draw_list->AddRectFilled(ImVec2(viewport->Size.x / 2.0f, 0.0f), ImVec2(viewport->Size.x, viewport->Size.y), sdSysData.COLOR_SELECT.c_yellow().STANDARD);
+
+            ImDrawList* draw_list = ImGui::GetWindowDrawList();
+      
+            draw_list->AddRectFilledMultiColor(ImVec2(viewport->Size.x / 2.0f, 0.0f), ImVec2(viewport->Size.x, viewport->Size.y), 
+                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD, 
+                          sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+          }
+        }
+        //else
+        //{
+        //  BLINKER_BLINK = true;
+        //}
+      }
+      
       ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 85.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         // ---------------------------------------------------------------------------------------
@@ -1146,7 +1195,6 @@ void SCREEN4::draw(system_data &sdSysData)
         //{
           if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].display())
           {
-            ImVec2 screen_pos = ImGui::GetCursorScreenPos();
             ImGui::SetNextWindowSize(ImVec2(300, 100));
 
             if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].warning())
@@ -1170,6 +1218,7 @@ void SCREEN4::draw(system_data &sdSysData)
             
             if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
             {
+              ImVec2 screen_pos = ImGui::GetCursorScreenPos();
               ImGui::Text(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].alert_text().c_str());
 
               ImGui::SetCursorScreenPos(screen_pos);
@@ -1190,8 +1239,6 @@ void SCREEN4::draw(system_data &sdSysData)
       {
         for (int alert_num = 0; alert_num < (int)sdSysData.ALERTS_2.ALERTS.size(); alert_num++)
         {
-          ImVec2 screen_pos = ImGui::GetCursorScreenPos();
-
           ImGui::SetNextWindowSize(ImVec2(300, 100));
           
           if (sdSysData.ALERTS_2.ALERTS[alert_num].display())
@@ -1211,6 +1258,7 @@ void SCREEN4::draw(system_data &sdSysData)
             
             if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
             {
+              ImVec2 screen_pos = ImGui::GetCursorScreenPos();
               ImGui::Text(sdSysData.ALERTS_2.ALERTS[alert_num].alert_text().c_str());
 
               ImGui::SetCursorScreenPos(screen_pos);

@@ -114,6 +114,10 @@ class SCREEN4
 
   BAR_TECH BAR_TIMER;
 
+  // Blinkers
+  TIMED_PING PING_BLINKER;
+  bool BLINKER_BLINK = true;
+
   bool CHANGED = false;
 
   void set_screen_default_colors(system_data &sdSysData);

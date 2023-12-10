@@ -122,7 +122,8 @@ class AUTOMOBILE_DATA
   AUTOMOBILE_DATA_LINE AD_247;
   AUTOMOBILE_DATA_LINE AD_252;  //  02 52 00 00 00 0F FF 20 00 60 *
   AUTOMOBILE_DATA_LINE AD_253;  //  02 10 00 00 00 00 FA 8B 00 00
-  AUTOMOBILE_DATA_LINE AD_260;  //? 608 - Auto Start Stop Button?
+  AUTOMOBILE_DATA_LINE AD_260;  // Signal Lights D5 D4
+                                //? 608 - Auto Start Stop Button?
                                 //  02 60 88 82 00 0E 25 61 90 00
   AUTOMOBILE_DATA_LINE AD_270;  //  02 70 5E 4A 04 21 00 00 00 00
   AUTOMOBILE_DATA_LINE AD_280;  //  02 80 46 30 9E 72 05 12 C0 00
@@ -396,6 +397,9 @@ class AUTOMOBILE_INDICATORS
   bool LIGHT_SWITCH = false;
   string LIGHTS_DESC = "X";
 
+  bool SIGNAL_LEFT = false;
+  bool SIGNAL_RIGHT = false;
+
   bool PARKING_BRAKE = false;
   string PARKING_BRAKE_DESC = "X";
 
@@ -419,12 +423,17 @@ class AUTOMOBILE_INDICATORS
   void store_ignition(int Ignition);
   void store_cruise_control(int Data_1, int Data_2, float Multiplier);
 
+  void store_signal(int Signal_Lights);
+
   bool val_light_switch();
   int val_lights_pos();
   string lights_switch();
   bool val_lights_high_beam_on();
   bool val_lights_headlights_on();
   bool val_lights_parking_on();
+
+  bool val_sinal_left();
+  bool val_sinal_right();
 
   bool val_parking_brake();
   string parking_brake();

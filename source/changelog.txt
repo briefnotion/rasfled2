@@ -1,3 +1,8 @@
+2.084_231209
+  - Added x252 and x260 to be transfered through RasCAN, for 
+      Blinker lights, and Brake Peddle (Position/Pressure)
+  - Added Blinker light coded to auto and screen. 
+  
 2.083_231208
   - Put some work into Nova.
 

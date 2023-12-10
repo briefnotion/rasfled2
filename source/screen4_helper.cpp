@@ -81,7 +81,14 @@ COLOR_COMBO COLOR_COMBOS::color(int Color)
 {
   if (void_color)
   {
-    return COLOR_COMBINATIONS[void_color_value];
+    if (Color == 0)
+    {
+      return COLOR_COMBINATIONS[0];
+    }
+    else
+    {
+      return COLOR_COMBINATIONS[void_color_value];
+    }
   }
   else
   {

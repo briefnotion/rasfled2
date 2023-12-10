@@ -1190,6 +1190,14 @@ bool filter(unsigned long ID)
       ret_pass = true;
       break;
 
+    case (0x252):
+      ret_pass = true;
+      break;
+
+    case (0x260):
+      ret_pass = true;
+      break;
+
     case (0x200):
       ret_pass = true;
       break;
