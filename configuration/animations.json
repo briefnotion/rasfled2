@@ -507,6 +507,58 @@
         }
       ],
 
+      "Automobile - Signal_Left_On" : 
+      [
+        {
+          "Comment_1" : "Labels: AUSIGNAL_LEFT",
+          "Comment_2" : "Animation to turn on Left Signal Light."
+        },
+        {
+          "Label" : "AUSIGNAL_LEFT", 
+          "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUSIGNAL_LEFT_ON"
+        }
+      ],
+
+      "Automobile - Signal_Left_Off" : 
+      [
+        {
+          "Comment_1" : "Labels: AUSIGNAL_LEFT_F",
+          "Comment_2" : "Animation to turn off Left Signal Light."
+        },
+        {
+          "Label" : "AUSIGNAL_LEFT_F", 
+          "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUSIGNAL_LEFT_OFF"
+        }
+      ],
+
+      "Automobile - Signal_Right_On" : 
+      [
+        {
+          "Comment_1" : "Labels: AUSIGNAL_Right",
+          "Comment_2" : "Animation to turn on Right Signal Light."
+        },
+        {
+          "Label" : "AUSIGNAL_RIGHT", 
+          "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUSIGNAL_RIGHT_ON"
+        }
+      ],
+
+      "Automobile - Signal_Right_Off" : 
+      [
+        {
+          "Comment_1" : "Labels: AUSIGNAL_RIGHT_F",
+          "Comment_2" : "Animation to turn off Right Signal Light."
+        },
+        {
+          "Label" : "AUSIGNAL_RIGHT_F", 
+          "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUSIGNAL_RIGHT_OFF"
+        }
+      ],
+
       "Automobile - Velocity_On" : 
       [
         {
@@ -2103,6 +2155,120 @@
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
           "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
           "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUGEAR_DRIVE_D"
+        }
+      ],
+
+      "AUSIGNAL_LEFT_ON" : 
+      [
+        {
+          "Comment_1" : "Labels: AUSIGNAL_LEFT",
+          "Comment_2" : "Animation for Left Signal Light.", 
+          "Run_On_LED_LED_Strip_Name" : "Door"
+        },
+        {
+          "Label" : "AUSIGNAL_LEFT", 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 400, "Speed_Of_LED_Walk" : 10, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "32,32,0", 
+          "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_top|0"
+        },
+        {
+          "Label" : "AUSIGNAL_LEFT", 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 400, "Speed_Of_LED_Walk" : 10, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "32,32,0", 
+          "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_bot|0"
+        },
+        {
+          "Label" : "AUSIGNAL_LEFT", 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 50, "Speed_Of_LED_Walk" : 10, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "32,32,32", 
+          "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_top|0"
+        },
+        {
+          "Label" : "AUSIGNAL_LEFT", 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 50, "Speed_Of_LED_Walk" : 10, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "32,32,32", 
+          "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_bot|0"
+        },
+        {
+          "Label" : "AUSIGNAL_LEFT", 
+          "Start_Delay_Time" : 800, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUSIGNAL_LEFT_ON"
+        }
+      ],
+
+      "AUSIGNAL_LEFT_OFF" : 
+      [
+        {
+          "Comment_1" : "Labels: AUSIGNAL_LEFT_F",
+          "Comment_2" : "Animation for Left Signal Light.", 
+          "Run_On_LED_LED_Strip_Name" : "Door"
+        },
+        {
+          "Label" : "AUSIGNAL_LEFT_F",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
+          "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUSIGNAL_LEFT"
+        } 
+      ],
+
+      "AUSIGNAL_RIGHT_ON" : 
+      [
+        {
+          "Comment_1" : "Labels: AUSIGNAL_RIGHT",
+          "Comment_2" : "Animation for Right Signal Light.", 
+          "Run_On_LED_LED_Strip_Name" : "Door"
+        },
+        {
+          "Label" : "AUSIGNAL_RIGHT", 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 400, "Speed_Of_LED_Walk" : 10, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "32,32,0", 
+          "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_top|0"
+        },
+        {
+          "Label" : "AUSIGNAL_RIGHT", 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 400, "Speed_Of_LED_Walk" : 10, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "32,32,0", 
+          "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_bot|0"
+        },
+        {
+          "Label" : "AUSIGNAL_RIGHT", 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 50, "Speed_Of_LED_Walk" : 10, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "32,32,32", 
+          "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_top|0"
+        },
+        {
+          "Label" : "AUSIGNAL_RIGHT", 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 50, "Speed_Of_LED_Walk" : 10, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "32,32,32", 
+          "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_bot|0"
+        },
+        {
+          "Label" : "AUSIGNAL_RIGHT", 
+          "Start_Delay_Time" : 800, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUSIGNAL_RIGHT_ON"
+        }
+      ],
+
+      "AUSIGNAL_RIGHT_OFF" : 
+      [
+        {
+          "Comment_1" : "Labels: AUSIGNAL_RIGHT_F",
+          "Comment_2" : "Animation for Right Signal Light.", 
+          "Run_On_LED_LED_Strip_Name" : "Door"
+        },
+        {
+          "Label" : "AUSIGNAL_RIGHT_F", 
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
+          "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUSIGNAL_RIGHT"
         }
       ],
 

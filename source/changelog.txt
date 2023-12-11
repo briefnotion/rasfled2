@@ -1,3 +1,8 @@
+2.085_231210
+  - Added Brake peddle (pressure or position) to auto library.
+      Completely untested because of no purpose.
+  - Added Signal Light animations to the door exteriors.
+
 2.084_231209
   - Added x252 and x260 to be transfered through RasCAN, for 
       Blinker lights, and Brake Peddle (Position/Pressure)

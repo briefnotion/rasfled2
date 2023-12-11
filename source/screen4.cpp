@@ -45,7 +45,9 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   //}
   
   ImGuiStyle& style = ImGui::GetStyle();
-    
+
+  //style.Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+
   style.Colors[ImGuiCol_Text] = sdSysData.COLOR_SELECT.c_white().TEXT;
 
   style.Colors[ImGuiCol_TitleBg] = sdSysData.COLOR_SELECT.c_blue().STANDARD;
@@ -412,7 +414,7 @@ void SCREEN4::draw(system_data &sdSysData)
           if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
           {
             BLINKER_BLINK = !BLINKER_BLINK;
-            PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 500);
+            PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 400);
           }
 
           if (BLINKER_BLINK)
@@ -433,7 +435,7 @@ void SCREEN4::draw(system_data &sdSysData)
           if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
           {
             BLINKER_BLINK = !BLINKER_BLINK;
-            PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 500);
+            PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 400);
           }
 
           if (BLINKER_BLINK)
@@ -458,6 +460,7 @@ void SCREEN4::draw(system_data &sdSysData)
         // ---------------------------------------------------------------------------------------
         // Status Sub Window
 
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
         ImGui::BeginChild("Status", ImVec2(ImGui::GetContentRegionAvail().x, 60.0f), true, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
           float region_div_4 = ImGui::GetContentRegionAvail().x / 4.0f;
@@ -597,6 +600,7 @@ void SCREEN4::draw(system_data &sdSysData)
           ImGui::EndChild();        
         }
         ImGui::EndChild();
+        ImGui::PopStyleColor();
 
         // ---------------------------------------------------------------------------------------
         // Console Sub Window
@@ -619,11 +623,13 @@ void SCREEN4::draw(system_data &sdSysData)
 
               ImGui::SameLine();
 
+              ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
               ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
                 AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
               }
               ImGui::EndChild();
+              ImGui::PopStyleColor();
             }
             else
             {
@@ -635,15 +641,19 @@ void SCREEN4::draw(system_data &sdSysData)
 
           else if (DISPLAY_SCREEN == 1)
           {
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
             AUTOMOBILE.display(sdSysData, SCREEN_COMMS, DISPLAY_CONFIRM);
+            ImGui::PopStyleColor();
             
             ImGui::SameLine();
 
+            ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
             ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
             {
               AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
             }
             ImGui::EndChild();
+            ImGui::PopStyleColor();
           }
 
           else if (DISPLAY_SCREEN == 2)
@@ -652,17 +662,21 @@ void SCREEN4::draw(system_data &sdSysData)
             {
               ImGui::BeginChild("ADSB_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
                 ADSB.display(sdSysData, SCREEN_COMMS);
+                ImGui::PopStyleColor();
               }
               ImGui::EndChild();
 
               ImGui::SameLine();
 
+              ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
               ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
                 AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
               }
               ImGui::EndChild();
+              ImGui::PopStyleColor();
             }
             else
             {
@@ -686,11 +700,13 @@ void SCREEN4::draw(system_data &sdSysData)
 
               ImGui::SameLine();
 
+              ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
               ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
                 AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
               }
               ImGui::EndChild();
+              ImGui::PopStyleColor();
             }
             else
             {

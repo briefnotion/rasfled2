@@ -157,12 +157,13 @@ class TIMED_PING
   // Check for the event triggered time.
   // Returns true if interval time has not passed, and ping is enabled.
   //  Disables after returning false.
-  // Returns false if not enabled or time is passed.
+  // Returns false on all other conditions.
 
   bool blip_visible(unsigned long current_time);
   // Check for the event triggered time.
   // Returns true if interval time has not passed, and ping is enabled.
-  // Returns false if not enabled or time is passed.
+  //  Enabled remains true.
+  // Returns false on all other conditions.
   
   bool blip_moved(unsigned long current_time);
   // Check to see if return ping has changed from false to true or true to false.

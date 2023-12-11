@@ -125,6 +125,48 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
       }
     }
 
+    // Signal Lights
+    // Left
+    if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left(), SIGNAL_LEFT))
+    {
+      if (SIGNAL_LEFT)
+      {
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_On", 0);
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_On", 1);
+      }
+      else
+      {
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_Off");
+        SIGNAL_OFF_REDUNDANCY.ping_up(tmeCurrentTime, 2000);
+      }
+    }
+
+    // Right
+    if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right(), SIGNAL_RIGHT))
+    {
+      if (SIGNAL_RIGHT)
+      {
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_On", 2);
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_On", 3);
+      }
+      else
+      {
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_Off");
+        SIGNAL_OFF_REDUNDANCY.ping_up(tmeCurrentTime, 2000);
+      }
+    }
+
+    // Signal Off Reduncancy - because saw a stuck signal in testing.
+    // Sends Signal_XXXXX_Off andimation to all channels after 2 second delay if both signals are off.
+    if (SIGNAL_OFF_REDUNDANCY.enabled()== true && SIGNAL_LEFT == false && SIGNAL_RIGHT == false)
+    {
+      if (SIGNAL_OFF_REDUNDANCY.ping_down(tmeCurrentTime) == false)
+      {
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_Off");
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_Off");
+      }
+    }
+
     // -------------------------------------------------------------------------------------
     // While Driving
     float multiplier = 0;

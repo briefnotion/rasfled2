@@ -37,6 +37,10 @@ class AUTOMOBILE_HANDLER
   bool GEAR_REVERSE = false;
   bool GEAR_DRIVE = false;
 
+  bool SIGNAL_LEFT = false;
+  bool SIGNAL_RIGHT = false;
+  TIMED_PING SIGNAL_OFF_REDUNDANCY;
+
   bool LIGHT_DRIVE_ON = false;
   bool LIGHT_VELOCITY_ON = false;
   bool LIGHT_DOOR_HANDLE_ON = false;

@@ -232,6 +232,18 @@ string VOLTAGE::v()
 
 //-----------
 
+void AUTOMOBILE_BRAKE::store_value(int A, int B)
+{
+  VAL_VALUE = (A * 256) + B;
+}
+
+float AUTOMOBILE_BRAKE::val_value()
+{
+  return (float) VAL_VALUE;
+}
+
+//-----------
+
 void AUTOMOBILE_SYSTEM::store_malfunction_indicator_light(bool Value)
 {
   MALFUNCTION_INDICATOR_LIGHT = Value;
@@ -2523,6 +2535,9 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     STATUS.GEAR.store(DATA.AD_F0.DATA[2]);
 
     // BRAKE PRESSURE
+    STATUS.BRAKE.store_value(DATA.AD_252.DATA[1], DATA.AD_252.DATA[2]);
+
+    // LOAD
     STATUS.POWER.store((DATA.AD_80.DATA[5] *256) + DATA.AD_80.DATA[6]);
 
     // INDICATORS int Lights, int Parking_Brake, int Ignition

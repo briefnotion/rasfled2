@@ -670,6 +670,22 @@ class AUTOMOBILE_TRANSMISSION_GEAR
   bool gear_selection_low();
 };
 
+class AUTOMOBILE_BRAKE
+{
+  private:
+
+  int VAL_VALUE = 0;  // Units unknown
+                  // Range?: 0 - (256 * 256)
+
+  public:
+
+  // THIS ROUTINE HAS NOT BEEN TESTED.
+
+  void store_value(int A, int B);
+
+  float val_value();
+};
+
 class AUTOMOBILE_TRANSLATED_DATA
 {
   public:
@@ -686,6 +702,7 @@ class AUTOMOBILE_TRANSLATED_DATA
   AUTOMOBILE_DOORS DOORS;
   AUTOMOBILE_GUAGES GUAGES;
   AUTOMOBILE_ELECTRICAL ELECTRICAL;
+  AUTOMOBILE_BRAKE BRAKE;
 };
 
 class TIRE_TTL

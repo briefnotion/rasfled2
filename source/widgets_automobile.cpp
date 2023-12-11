@@ -464,7 +464,6 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
       ret_clicked = true;
     }
   }
-
   ImGui::EndChild();
 
   return ret_clicked;
