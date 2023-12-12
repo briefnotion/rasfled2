@@ -120,6 +120,8 @@ class SCREEN4
 
   bool CHANGED = false;
 
+  void signal_lights(system_data &sdSysData, ImVec2 Window_Size);
+
   void set_screen_default_colors(system_data &sdSysData);
 
   public:

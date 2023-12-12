@@ -1,3 +1,6 @@
+2.086_231211
+  - Adjusted the Signal lights.
+
 2.085_231210
   - Added Brake peddle (pressure or position) to auto library.
       Completely untested because of no purpose.

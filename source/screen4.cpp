@@ -33,6 +33,57 @@ struct InputTextCallback_UserData
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 
+void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
+{
+  if (sdSysData.CAR_INFO.active())
+  {
+    if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left())
+    {
+      if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
+      {
+        BLINKER_BLINK = !BLINKER_BLINK;
+        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (789 / 2));
+      }
+
+      if (BLINKER_BLINK)
+      {
+        //draw_list->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(viewport->Size.x / 2.0f, viewport->Size.y), sdSysData.COLOR_SELECT.c_yellow().STANDARD);
+
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+  
+        draw_list->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
+                      sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                      sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD);
+      }
+    }
+    else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
+    {
+      //ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+      if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
+      {
+        BLINKER_BLINK = !BLINKER_BLINK;
+        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (789 / 2));
+      }
+
+      if (BLINKER_BLINK)
+      {
+        //draw_list->AddRectFilled(ImVec2(viewport->Size.x / 2.0f, 0.0f), ImVec2(viewport->Size.x, viewport->Size.y), sdSysData.COLOR_SELECT.c_yellow().STANDARD);
+
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+  
+        draw_list->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
+                      sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD, 
+                      sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+      }
+    }
+    //else
+    //{
+    //  BLINKER_BLINK = true;
+    //}
+  }
+}
+
 void SCREEN4::set_screen_default_colors(system_data &sdSysData)
 {
   //if (sdSysData.Day_On_With_Override.value() == true)
@@ -405,62 +456,13 @@ void SCREEN4::draw(system_data &sdSysData)
     ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
 
     if (ImGui::Begin("Window", &show_test_window, sdSysData.SCREEN_DEFAULTS.flags)) // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-    {
-      // Auto Signal Lights
-      if (sdSysData.CAR_INFO.active())
-      {
-        if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left())
-        {
-          if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
-          {
-            BLINKER_BLINK = !BLINKER_BLINK;
-            PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 400);
-          }
-
-          if (BLINKER_BLINK)
-          {
-            //draw_list->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(viewport->Size.x / 2.0f, viewport->Size.y), sdSysData.COLOR_SELECT.c_yellow().STANDARD);
-
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-      
-            draw_list->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(viewport->Size.x / 2.0f, viewport->Size.y), 
-                          sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
-                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD);
-          }
-        }
-        else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
-        {
-          //ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-          if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
-          {
-            BLINKER_BLINK = !BLINKER_BLINK;
-            PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 400);
-          }
-
-          if (BLINKER_BLINK)
-          {
-            //draw_list->AddRectFilled(ImVec2(viewport->Size.x / 2.0f, 0.0f), ImVec2(viewport->Size.x, viewport->Size.y), sdSysData.COLOR_SELECT.c_yellow().STANDARD);
-
-            ImDrawList* draw_list = ImGui::GetWindowDrawList();
-      
-            draw_list->AddRectFilledMultiColor(ImVec2(viewport->Size.x / 2.0f, 0.0f), ImVec2(viewport->Size.x, viewport->Size.y), 
-                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD, 
-                          sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
-          }
-        }
-        //else
-        //{
-        //  BLINKER_BLINK = true;
-        //}
-      }
-      
+    {      
       ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 85.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         // ---------------------------------------------------------------------------------------
         // Status Sub Window
 
-        ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+        //ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
         ImGui::BeginChild("Status", ImVec2(ImGui::GetContentRegionAvail().x, 60.0f), true, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
           float region_div_4 = ImGui::GetContentRegionAvail().x / 4.0f;
@@ -600,7 +602,7 @@ void SCREEN4::draw(system_data &sdSysData)
           ImGui::EndChild();        
         }
         ImGui::EndChild();
-        ImGui::PopStyleColor();
+        //ImGui::PopStyleColor();
 
         // ---------------------------------------------------------------------------------------
         // Console Sub Window
@@ -933,8 +935,12 @@ void SCREEN4::draw(system_data &sdSysData)
       }
       ImGui::EndChild();
 
+      // Auto Signal Lights
+      signal_lights(sdSysData, viewport->Size);
+
     }
     ImGui::End();
+
 
     // ---------------------------------------------------------------------------------------
     // Debug Window
