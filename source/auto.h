@@ -94,6 +94,9 @@ class AUTOMOBILE_DATA
   AUTOMOBILE_DATA_LINE AD_B0;
   AUTOMOBILE_DATA_LINE AD_C0;   //? 192 - Guages? Fuel % hex 3A
   AUTOMOBILE_DATA_LINE AD_C8;   //* 200 - Headlamp status, Ignition Status, Parking Brake Status
+                                //        Key In          - [5] 4 on, 3 off
+                                //        Key Out         - [5] 4 off, 3 on
+                                //        Engine Running  - [5] 5 on
   AUTOMOBILE_DATA_LINE AD_D0;   // 208? - Gear Lever Status, Transmission Gear Position
   AUTOMOBILE_DATA_LINE AD_E0;
   AUTOMOBILE_DATA_LINE AD_F0;   //* 240 - Velocity (1,2) and Transmission Gear (3)
@@ -147,7 +150,7 @@ class AUTOMOBILE_DATA
   AUTOMOBILE_DATA_LINE AD_3B4;  //  03 88 00 00 47 45 46 87 28 50
   AUTOMOBILE_DATA_LINE AD_400;  //  temp according to chat
                                 //  04 00 24 00 00 00 00 00 00 00
-  AUTOMOBILE_DATA_LINE AD_405;  //  04 05 01 67 67 13 ED 45 08 9C
+  AUTOMOBILE_DATA_LINE AD_405;  //  04 05 01 67 67 13 ED 45 08 9C - Hazard Lights Blink on [5]7&6
   AUTOMOBILE_DATA_LINE AD_40A;  //  04 0A FF 16 21 00 21 01 10 00 - Partial VIN and other static ids
   AUTOMOBILE_DATA_LINE AD_435;  //  04 35 B2 28 91 DC FF D7 C3 E4
   AUTOMOBILE_DATA_LINE AD_455;  //  04 55 00 00 00 00 00 00 00 00
@@ -400,11 +403,15 @@ class AUTOMOBILE_INDICATORS
   bool SIGNAL_LEFT = false;
   bool SIGNAL_RIGHT = false;
 
+  bool HAZARDS = false;
+  TIMED_PING HAZARD_CHECK;
+
+  int KEYS_IN_IGNITION = 0;
+
   bool PARKING_BRAKE = false;
   string PARKING_BRAKE_DESC = "X";
 
   bool IGNITION = false;
-  string IGNITION_DESC = "X";
 
   bool CRUISE_CONTROL = false;
   float CRUISE_CONTROL_SPEED = -1;
@@ -424,6 +431,8 @@ class AUTOMOBILE_INDICATORS
   void store_cruise_control(int Data_1, int Data_2, float Multiplier);
 
   void store_signal(int Signal_Lights);
+  void store_hazards(unsigned long current_time, int Hazard);
+  void store_key_in_ignition(int Key_Switch);
 
   bool val_light_switch();
   int val_lights_pos();
@@ -435,11 +444,14 @@ class AUTOMOBILE_INDICATORS
   bool val_sinal_left();
   bool val_sinal_right();
 
+  bool val_hazards();
+  int val_key_in_ignition();
+
   bool val_parking_brake();
   string parking_brake();
 
-  bool ignition();
-  string val_ignition();
+  bool val_ignition();
+  string ignition();
 
   bool cruise_control();
   float cruise_control_speed();

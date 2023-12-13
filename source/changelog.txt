@@ -1,3 +1,10 @@
+2.087_231212
+  - Dimmed Hazard lights to Red 48.
+  - Adjusted the Signal lights.
+  - Added Ignition, Key Switch, and Hazards for testing. 
+  - Added Indicators to Nova screen for checking values of 
+      Ignition, Key Switch, and Hazards.
+  
 2.086_231211
   - Adjusted the Signal lights.
 

@@ -42,7 +42,7 @@ void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
       if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
       {
         BLINKER_BLINK = !BLINKER_BLINK;
-        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (789 / 2));
+        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (792 / 2));
       }
 
       if (BLINKER_BLINK)
@@ -63,7 +63,7 @@ void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
       if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
       {
         BLINKER_BLINK = !BLINKER_BLINK;
-        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (789 / 2));
+        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (792 / 2));
       }
 
       if (BLINKER_BLINK)

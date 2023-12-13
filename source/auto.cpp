@@ -508,8 +508,6 @@ void AUTOMOBILE_INDICATORS::set_source_availability(bool Available)
 
     PARKING_BRAKE_DESC = "X";
 
-    IGNITION_DESC = "X";
-
     CRUISE_CONTROL_SPEED = -1;
   }
   
@@ -587,9 +585,13 @@ void AUTOMOBILE_INDICATORS::store_on(int Light_Bits)
 void AUTOMOBILE_INDICATORS::store_ignition(int Ignition)
 {
   // Parse Ignition
-  if (Ignition == 0)
+  if (bit_value(Ignition, 5))
   {
-    // UNKNOWN
+    IGNITION = true;
+  }
+  else
+  {
+    IGNITION = false;
   }
 }
 
@@ -626,6 +628,42 @@ void AUTOMOBILE_INDICATORS::store_signal(int Signal_Lights)
     SIGNAL_RIGHT = false;
   }
 
+}
+
+void AUTOMOBILE_INDICATORS::store_hazards(unsigned long current_time, int Hazard)
+{
+  if (bit_value(Hazard, 7) && bit_value(Hazard, 6))
+  {
+    HAZARDS = true;
+    HAZARD_CHECK.ping_up(current_time, 2000);
+  }
+  else
+  {
+    if (HAZARD_CHECK.enabled() && HAZARD_CHECK.ping_down(current_time) == false)
+    {
+      HAZARDS = false;
+    }
+  }
+}
+
+void AUTOMOBILE_INDICATORS::store_key_in_ignition(int Key_Switch)
+{
+  if (!bit_value(Key_Switch, 4) && bit_value(Key_Switch, 3))
+  {
+    KEYS_IN_IGNITION = -1;  // No key in ignition
+  }
+  else if (bit_value(Key_Switch, 4) && !bit_value(Key_Switch, 3))
+  {
+    KEYS_IN_IGNITION = 1; // Key in ignition, in off position
+  }
+  else if (bit_value(Key_Switch, 4) && bit_value(Key_Switch, 3))
+  {
+    KEYS_IN_IGNITION = 2; // Key in running position
+  }
+  else
+  {
+    KEYS_IN_IGNITION = 0; // Unknown
+  }
 }
 
 bool AUTOMOBILE_INDICATORS::val_light_switch()
@@ -668,6 +706,16 @@ bool AUTOMOBILE_INDICATORS::val_sinal_right()
   return SIGNAL_RIGHT;
 }
 
+bool AUTOMOBILE_INDICATORS::val_hazards()
+{
+  return HAZARDS;
+}
+
+int AUTOMOBILE_INDICATORS::val_key_in_ignition()
+{
+  return KEYS_IN_IGNITION;
+}
+
 bool AUTOMOBILE_INDICATORS::val_parking_brake()
 {
   return PARKING_BRAKE;
@@ -678,14 +726,22 @@ string AUTOMOBILE_INDICATORS::parking_brake()
   return PARKING_BRAKE_DESC;
 }
 
-bool AUTOMOBILE_INDICATORS::ignition()
+bool AUTOMOBILE_INDICATORS::val_ignition()
 {
   return IGNITION;
 }
 
-string AUTOMOBILE_INDICATORS::val_ignition()
+string AUTOMOBILE_INDICATORS::ignition()
 {
-  return IGNITION_DESC;
+  if (IGNITION)
+  {
+    return "ENGINE RUNNING";
+  }
+  else
+  {
+    return "ENGINE OFF";
+  }
+  
 }
 
 bool AUTOMOBILE_INDICATORS::cruise_control()
@@ -2542,11 +2598,15 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
 
     // INDICATORS int Lights, int Parking_Brake, int Ignition
     STATUS.INDICATORS.store_lights(DATA.AD_C8.DATA[7]);
+    STATUS.INDICATORS.store_key_in_ignition(DATA.AD_C8.DATA[5]);
+
     STATUS.INDICATORS.store_lights_high_beam(DATA.AD_360.DATA[0]);
     STATUS.INDICATORS.store_on(DATA.AD_C8.DATA[3]);
-    //STATUS.INDICATORS.store_ignition(DATA.AD_C8.DATA[1]);
+    STATUS.INDICATORS.store_ignition(DATA.AD_C8.DATA[5]);
     STATUS.INDICATORS.store_cruise_control(DATA.AD_200.DATA[6], DATA.AD_200.DATA[7], .312);
     STATUS.INDICATORS.store_signal(DATA.AD_260.DATA[3]);
+
+    STATUS.INDICATORS.store_hazards(tmeFrame_Time, DATA.AD_405.DATA[5]);
 
     // FUEL
     STATUS.FUEL.store_consumed(DATA.AD_200.DATA[7]);

@@ -1210,6 +1210,10 @@ bool filter(unsigned long ID)
       ret_pass = true;
       break;
 
+    case (0x405):
+      ret_pass = true;
+      break;
+
     // Messages on PIDs with:
     case (0x7E8):
       ret_pass = true;
