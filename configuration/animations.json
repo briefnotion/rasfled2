@@ -2195,7 +2195,7 @@
         },
         {
           "Label" : "AUSIGNAL_LEFT", 
-          "Start_Delay_Time" : 792, "Animation_Walk_Type" : "AnEvSchedule",
+          "Start_Delay_Time" : 786, "Animation_Walk_Type" : "AnEvSchedule",
           "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUSIGNAL_LEFT_ON"
         }
       ],
@@ -2252,7 +2252,7 @@
         },
         {
           "Label" : "AUSIGNAL_RIGHT", 
-          "Start_Delay_Time" : 792, "Animation_Walk_Type" : "AnEvSchedule",
+          "Start_Delay_Time" : 786, "Animation_Walk_Type" : "AnEvSchedule",
           "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUSIGNAL_RIGHT_ON"
         }
       ],

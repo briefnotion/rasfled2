@@ -1,3 +1,9 @@
+2.088_231213
+  - Adjusted the Signal lights.
+  - System will shutdown if ignition switch is off for 9min.
+  - Pid ID will display if mouse hoving over.
+  - Made another attempt at finding the hazard lights.
+
 2.087_231212
   - Dimmed Hazard lights to Red 48.
   - Adjusted the Signal lights.

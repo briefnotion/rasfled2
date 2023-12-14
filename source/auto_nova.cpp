@@ -100,6 +100,12 @@ void AUTOMOBILE_NOVA::process(unsigned long tmeFrame_Time,int Pid, int Message[]
       tmp_nova_item.store_value(tmeFrame_Time, Pid, Message[0], Message[1], Message[2], Message[3], 
                                                     Message[4], Message[5], Message[6], Message[7]);
 
+      // Filter
+      if (Pid == 0x7e8 || Pid == 0x7e9 || Pid == 0x7ea || Pid == 0x7eb)
+      {
+        tmp_nova_item.NOVA_VALUE.NON_CONSISTANT = true;
+      }
+
       NOVA_ITEMS.push_back(tmp_nova_item);
     }
     else

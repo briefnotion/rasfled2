@@ -27,7 +27,7 @@ void AUTOMOBILE_HANDLER::alert(system_data &sdSysData, ANIMATION_HANDLER &Animat
   }
 }
 
-void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime)
+void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime)
 {
   // -------------------------------------------------------------------------------------
   // Automobile Data Switched to Not Available
@@ -154,6 +154,28 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_Off");
         SIGNAL_OFF_REDUNDANCY.ping_up(tmeCurrentTime, 2000);
       }
+    }
+
+    // Ignition Shutdown
+    if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition() , IGNITION))
+    {
+      if (IGNITION == false)
+      {
+        IGNITION_WARNING_TIMER.ping_up(tmeCurrentTime, 8 * 60000);
+        IGNITION_SHUTDOWN_TIMER.ping_up(tmeCurrentTime, 9 * 60000);
+      }
+    }
+
+    // Shutdown Waring
+    if (IGNITION == false && IGNITION_WARNING_TIMER.enabled() && IGNITION_WARNING_TIMER.ping_down(tmeCurrentTime) == false)
+    {
+      sdSysData.ALERTS_2.add_generic_alert("System shutting down in 1 minute.");
+    }
+
+    // Shutdown
+    if (IGNITION == false && IGNITION_SHUTDOWN_TIMER.enabled() && IGNITION_SHUTDOWN_TIMER.ping_down(tmeCurrentTime) == false)
+    {
+      cons.command_text_set(" comshutd");
     }
 
     // Signal Off Reduncancy - because saw a stuck signal in testing.

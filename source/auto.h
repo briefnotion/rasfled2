@@ -406,7 +406,7 @@ class AUTOMOBILE_INDICATORS
   bool HAZARDS = false;
   TIMED_PING HAZARD_CHECK;
 
-  int KEYS_IN_IGNITION = 0;
+  int IGNITION_SWITCH = 0;
 
   bool PARKING_BRAKE = false;
   string PARKING_BRAKE_DESC = "X";
@@ -432,7 +432,7 @@ class AUTOMOBILE_INDICATORS
 
   void store_signal(int Signal_Lights);
   void store_hazards(unsigned long current_time, int Hazard);
-  void store_key_in_ignition(int Key_Switch);
+  void store_ignition_switch(int Key_Switch);
 
   bool val_light_switch();
   int val_lights_pos();
@@ -445,7 +445,7 @@ class AUTOMOBILE_INDICATORS
   bool val_sinal_right();
 
   bool val_hazards();
-  int val_key_in_ignition();
+  int val_ignition_switch();
 
   bool val_parking_brake();
   string parking_brake();

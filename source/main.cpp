@@ -918,7 +918,7 @@ int loop_2(bool TTY_Only)
       sdSystem.CAR_INFO.process(cons_2.SCREEN_COMMS, sdSystem.ALERTS_2, sdSystem.COMMS, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // Process Automobile Lights
-      automobile_handler.update_events(sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
+      automobile_handler.update_events(sdSystem, cons_2.SCREEN_COMMS, animations, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // Comms flash data check and cleanup.
       sdSystem.COMMS.flash_data_check();

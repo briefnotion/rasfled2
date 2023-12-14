@@ -42,7 +42,7 @@ void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
       if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
       {
         BLINKER_BLINK = !BLINKER_BLINK;
-        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (792 / 2));
+        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (786 / 2));
       }
 
       if (BLINKER_BLINK)
@@ -63,7 +63,7 @@ void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
       if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
       {
         BLINKER_BLINK = !BLINKER_BLINK;
-        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (792 / 2));
+        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (786 / 2));
       }
 
       if (BLINKER_BLINK)
@@ -109,7 +109,7 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   style.Colors[ImGuiCol_FrameBgHovered] = sdSysData.COLOR_SELECT.c_blue().HOVERED;
   style.Colors[ImGuiCol_FrameBgActive] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
 
-  style.Colors[ImGuiCol_Border] = sdSysData.COLOR_SELECT.c_blue().DIM;
+  style.Colors[ImGuiCol_Border] = sdSysData.COLOR_SELECT.c_blue().BACKGROUND;
   style.Colors[ImGuiCol_BorderShadow] = sdSysData.COLOR_SELECT.c_yellow().BACKGROUND;
 
   style.Colors[ImGuiCol_CheckMark] = sdSysData.COLOR_SELECT.c_blue().STANDARD;

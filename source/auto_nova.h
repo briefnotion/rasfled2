@@ -68,6 +68,8 @@ struct NOVA_BITS_VALUE
   TIMED_PING FREQUENCY[64];
   TIMED_PING HILIGHT[64];
 
+  bool NON_CONSISTANT = false;
+
   bool DETAILS = false;
 };
 

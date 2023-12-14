@@ -15,6 +15,7 @@
 // Standard Header Files
 #include <stdio.h>
 
+#include "screen4_helper.h"
 #include "auto.h"
 #include "animations_handler.h"
 #include "LEDstuff.h"
@@ -41,6 +42,10 @@ class AUTOMOBILE_HANDLER
   bool SIGNAL_RIGHT = false;
   TIMED_PING SIGNAL_OFF_REDUNDANCY;
 
+  bool IGNITION = false;
+  TIMED_PING IGNITION_WARNING_TIMER;
+  TIMED_PING IGNITION_SHUTDOWN_TIMER;
+
   bool LIGHT_DRIVE_ON = false;
   bool LIGHT_VELOCITY_ON = false;
   bool LIGHT_DOOR_HANDLE_ON = false;
@@ -52,7 +57,7 @@ class AUTOMOBILE_HANDLER
 
   public:
 
-  void update_events(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
+  void update_events(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
 };
 
 // -------------------------------------------------------------------------------------

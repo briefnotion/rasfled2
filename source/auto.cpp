@@ -646,23 +646,27 @@ void AUTOMOBILE_INDICATORS::store_hazards(unsigned long current_time, int Hazard
   }
 }
 
-void AUTOMOBILE_INDICATORS::store_key_in_ignition(int Key_Switch)
+void AUTOMOBILE_INDICATORS::store_ignition_switch(int Key_Switch)
 {
-  if (!bit_value(Key_Switch, 4) && bit_value(Key_Switch, 3))
+  if (!bit_value(Key_Switch, 4) && bit_value(Key_Switch, 3))        // xxx
   {
-    KEYS_IN_IGNITION = -1;  // No key in ignition
+    IGNITION_SWITCH = -1;  // No key in ignition
   }
-  else if (bit_value(Key_Switch, 4) && !bit_value(Key_Switch, 3))
+  else if (bit_value(Key_Switch, 4) && !bit_value(Key_Switch, 3))   // xxx
   {
-    KEYS_IN_IGNITION = 1; // Key in ignition, in off position
+    IGNITION_SWITCH = 1; // Key in ignition, in off position
   }
-  else if (bit_value(Key_Switch, 4) && bit_value(Key_Switch, 3))
+  //else if (bit_value(Key_Switch, 5) && !bit_value(Key_Switch, 4))   // xxx
+  //{
+  //  IGNITION_SWITCH = 2; // Key in acc position
+  //}
+  else if (bit_value(Key_Switch, 4) && bit_value(Key_Switch, 3))    // xxx
   {
-    KEYS_IN_IGNITION = 2; // Key in running position
+    IGNITION_SWITCH = 3; // Key in running position
   }
   else
   {
-    KEYS_IN_IGNITION = 0; // Unknown
+    IGNITION_SWITCH = 0; // Unknown
   }
 }
 
@@ -711,9 +715,9 @@ bool AUTOMOBILE_INDICATORS::val_hazards()
   return HAZARDS;
 }
 
-int AUTOMOBILE_INDICATORS::val_key_in_ignition()
+int AUTOMOBILE_INDICATORS::val_ignition_switch()
 {
-  return KEYS_IN_IGNITION;
+  return IGNITION_SWITCH;
 }
 
 bool AUTOMOBILE_INDICATORS::val_parking_brake()
@@ -2598,7 +2602,7 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
 
     // INDICATORS int Lights, int Parking_Brake, int Ignition
     STATUS.INDICATORS.store_lights(DATA.AD_C8.DATA[7]);
-    STATUS.INDICATORS.store_key_in_ignition(DATA.AD_C8.DATA[5]);
+    STATUS.INDICATORS.store_ignition_switch(DATA.AD_C8.DATA[5]);
 
     STATUS.INDICATORS.store_lights_high_beam(DATA.AD_360.DATA[0]);
     STATUS.INDICATORS.store_on(DATA.AD_C8.DATA[3]);
@@ -2606,7 +2610,7 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     STATUS.INDICATORS.store_cruise_control(DATA.AD_200.DATA[6], DATA.AD_200.DATA[7], .312);
     STATUS.INDICATORS.store_signal(DATA.AD_260.DATA[3]);
 
-    STATUS.INDICATORS.store_hazards(tmeFrame_Time, DATA.AD_405.DATA[5]);
+    STATUS.INDICATORS.store_hazards(tmeFrame_Time, DATA.AD_310.DATA[4]);
 
     // FUEL
     STATUS.FUEL.store_consumed(DATA.AD_200.DATA[7]);

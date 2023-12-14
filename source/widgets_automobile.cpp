@@ -653,15 +653,15 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
       ImGui::Text("HAZ OFF");
     }
 
-    if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_key_in_ignition() == -1)
+    if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition_switch() == -1)
     {
       ImGui::Text("KEY OUT");
     }
-    else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_key_in_ignition() == 1)
+    else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition_switch() == 1)
     {
       ImGui::Text("KEY IN");
     }
-    else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_key_in_ignition() == 2)
+    else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition_switch() == 3)
     {
       ImGui::Text("KEY EN");
     }
@@ -691,26 +691,34 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 
     for(int items = 0; items < (int)sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size(); items++)
     {
-      button_adjust = ImGui::GetCursorScreenPos();
-
-      if(sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS)
+      if (sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NON_CONSISTANT == false)
       {
-        if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,27.0f)))
-        {
-          sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
-        }
-      }
-      else
-      {
-        if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,7.0f)))
-        {
-          sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
-        }
-      }
+        button_adjust = ImGui::GetCursorScreenPos();
 
-      ImGui::SetCursorScreenPos(button_adjust);
+        if(sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS)
+        {
+          if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,27.0f)))
+          {
+            sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
+          }
+        }
+        else
+        {
+          if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,7.0f)))
+          {
+            sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
+          }
+         
+          if (ImGui::IsItemHovered())
+          {
+            ImGui::Text("%X", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.ID);
+          }
+        }
 
-      nova_draw(sdSysData, draw_list, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
+        ImGui::SetCursorScreenPos(button_adjust);
+
+        nova_draw(sdSysData, draw_list, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
+      }
     }
   }    
   
