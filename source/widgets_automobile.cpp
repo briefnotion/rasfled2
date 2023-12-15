@@ -640,44 +640,6 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
     }
 
     ImGui::Text("Size: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size());
-
-    // testing
-    // hazards definitely not working
-    
-    if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards())
-    {
-      ImGui::Text("HAZ ON");
-    }
-    else
-    {
-      ImGui::Text("HAZ OFF");
-    }
-
-    if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition_switch() == -1)
-    {
-      ImGui::Text("KEY OUT");
-    }
-    else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition_switch() == 1)
-    {
-      ImGui::Text("KEY IN");
-    }
-    else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition_switch() == 3)
-    {
-      ImGui::Text("KEY EN");
-    }
-    else
-    {
-      ImGui::Text("KEY UNK");
-    }
-
-    if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition())
-    {
-      ImGui::Text("IGN ON");
-    }
-    else
-    {
-      ImGui::Text("IGN OFF");
-    }
   }
   ImGui::EndChild();
 

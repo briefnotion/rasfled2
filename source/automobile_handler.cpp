@@ -156,6 +156,21 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
       }
     }
 
+    // Hazards
+    if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards(), HAZARDS))
+    {
+      if (HAZARDS)
+      {
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD");
+        sdSysData.booHazardRunning = true;
+      }
+      else
+      {
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD STOP");
+        sdSysData.booHazardRunning = false;
+      }
+    }
+
     // Ignition Shutdown
     if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition() , IGNITION))
     {

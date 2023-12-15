@@ -37,18 +37,32 @@ void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
 {
   if (sdSysData.CAR_INFO.active())
   {
+    if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards())
+    {
+      if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
+      {
+        BLINKER_BLINK = !BLINKER_BLINK;
+        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (790 / 2));
+      }
+
+      if (BLINKER_BLINK)
+      {
+        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+  
+        draw_list->AddRectFilled(ImVec2(0.0f, 0.0f), Window_Size, sdSysData.COLOR_SELECT.c_yellow().STANDARD);
+      }
+    }
+
     if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left())
     {
       if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
       {
         BLINKER_BLINK = !BLINKER_BLINK;
-        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (786 / 2));
+        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (790 / 2));
       }
 
       if (BLINKER_BLINK)
       {
-        //draw_list->AddRectFilled(ImVec2(0.0f, 0.0f), ImVec2(viewport->Size.x / 2.0f, viewport->Size.y), sdSysData.COLOR_SELECT.c_yellow().STANDARD);
-
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
   
         draw_list->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
@@ -58,18 +72,14 @@ void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
     }
     else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
     {
-      //ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
       if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
       {
         BLINKER_BLINK = !BLINKER_BLINK;
-        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (786 / 2));
+        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (790 / 2));
       }
 
       if (BLINKER_BLINK)
       {
-        //draw_list->AddRectFilled(ImVec2(viewport->Size.x / 2.0f, 0.0f), ImVec2(viewport->Size.x, viewport->Size.y), sdSysData.COLOR_SELECT.c_yellow().STANDARD);
-
         ImDrawList* draw_list = ImGui::GetWindowDrawList();
   
         draw_list->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 

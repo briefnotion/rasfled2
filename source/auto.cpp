@@ -630,12 +630,38 @@ void AUTOMOBILE_INDICATORS::store_signal(int Signal_Lights)
 
 }
 
+// Datastream regarding this protocol:
+// Scanned... No signs that hazard indicators, active or inactive, are 
+// interfacing with the auto's comp. Hypothesis: the hazard indicator 
+// circuitry is isolated, a standalone subsystem, designed to maintain 
+// functionality even if the rest of the auto suffers damage or shorts.
+// 
+// However, the sys does seem to register the left and right 
+// signal indicators independently. The data packets regarding these 
+// indicators are glitchy. Sometimes, they're received instantly, other 
+// times, they're erratic. Can't compute why the data isn't reliable. 
+// Suspect the delayed packets are due to the cam bus filtering out low 
+// priority data, or there's a glitch in my RasCAN causing the packets 
+// to be lost or not received.
+// 
+// So, how are hazard indicators read? Scanned the two bit values, 
+// 7 for right signal, 6 for left. If both are active simultaneously, 
+// then hazard indicators must be engaged. Because the indicators 
+// blink, (it's possible that it's just the bit values of the indicators 
+// on the dashboard,) I'm not registering the hazard indicators as 
+// disengaged until there's been a consistent 5 seconds where both signal 
+// indicators were inactive simultaneously.
+// 
+// Initially, this timer was set to 2 seconds, which wasn't sufficient, 
+// because the communication error consistently lasted for a longer 
+// duration.
+
 void AUTOMOBILE_INDICATORS::store_hazards(unsigned long current_time, int Hazard)
 {
   if (bit_value(Hazard, 7) && bit_value(Hazard, 6))
   {
     HAZARDS = true;
-    HAZARD_CHECK.ping_up(current_time, 2000);
+    HAZARD_CHECK.ping_up(current_time, 5000);
   }
   else
   {

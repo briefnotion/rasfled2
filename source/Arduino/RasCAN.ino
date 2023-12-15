@@ -109,7 +109,7 @@ class MESSAGE_STORAGE
 //  38 chars per message + null terminator
 {
   private:
-  char MESSAGES[20][39];
+  char MESSAGES[30][39];
   
   int MESSAGE_COUNT = 0;
 
@@ -122,7 +122,7 @@ class MESSAGE_STORAGE
 
   void store(String Message)
   {
-    if (MESSAGE_COUNT < 20)
+    if (MESSAGE_COUNT < 30)
     {
       Message.toCharArray(MESSAGES[MESSAGE_COUNT], Message.length());
       MESSAGES[MESSAGE_COUNT][38] = '\0';
@@ -1299,7 +1299,7 @@ void version_5()
           fake_one_byte_counter = 0;                    
         }
 
-        //delay (5);
+        delay (1);
       }
 
       if (ctrl.filter == true)
@@ -1308,7 +1308,6 @@ void version_5()
         {
           digitalWrite(23, HIGH); // LED ON
 
-          //serial_send_2(ID, len, buf, MESSAGE_TIME);
           messages_to_send.store(serial_send_format(ID, len, buf, MESSAGE_TIME));
 
           digitalWrite(23, LOW);  // LED OFF
@@ -1317,7 +1316,7 @@ void version_5()
       else
       {
         digitalWrite(23, HIGH); // LED ON
-        //serial_send_2(ID, len, buf, MESSAGE_TIME);
+
         messages_to_send.store(serial_send_format(ID, len, buf, MESSAGE_TIME));
 
         digitalWrite(23, LOW);  // LED OFF
@@ -1327,7 +1326,6 @@ void version_5()
     // Read from host
     if(Serial.available() > 0)
     {
-      //Serial.println("-");
       if (ctrl.read(read_com()) == true)
       {
         if (messages_to_send.message_count() > 0)

@@ -1,3 +1,12 @@
+2.089_231214
+- Adjusted the Signal lights timer and changed signal color 
+    to Amber. 
+- Adjusted the Hazard lights timer and changed signal color 
+    to Amber. 
+- Tied Left and Right sigal being on at the same time to 
+    RasFLEDs hazard light system.
+- Increased RasCAM buffer size.
+        
 2.088_231213
   - Adjusted the Signal lights.
   - System will shutdown if ignition switch is off for 9min.

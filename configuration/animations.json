@@ -741,12 +741,12 @@
         {
           "Label" : "HAZARD",
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 500, "Speed_Of_LED_Walk" : 0, 
-          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", "Dest_1" : "48,0,0",
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", "Dest_1" : "32,8,0",
           "Clear_On_End" : false
         },
         {
           "Label" : "HAZARD", 
-          "Start_Delay_Time" : 1000, "Animation_Walk_Type" : "AnEvSchedule",
+          "Start_Delay_Time" : 790, "Animation_Walk_Type" : "AnEvSchedule",
           "String_Var_1" : "Car", "String_Var_2" : "HAZARD - Simple"
         }
       ],
@@ -1286,12 +1286,12 @@
         {
           "Label" : "HAZARD",
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 500, "Speed_Of_LED_Walk" : 0, 
-          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", "Dest_1" : "48,0,0",
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", "Dest_1" : "32,8,0",
           "Clear_On_End" : false
         },
         {
           "Label" : "HAZARD", 
-          "Start_Delay_Time" : 1000, "Animation_Walk_Type" : "AnEvSchedule",
+          "Start_Delay_Time" : 790, "Animation_Walk_Type" : "AnEvSchedule",
           "String_Var_1" : "Pyrrhic", "String_Var_2" : "HAZARD"
         }
       ],
@@ -2169,14 +2169,14 @@
           "Label" : "AUSIGNAL_LEFT", 
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 400, "Speed_Of_LED_Walk" : 10, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
-          "Dest_1" : "32,32,0", 
+          "Dest_1" : "32,8,0", 
           "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_top|0"
         },
         {
           "Label" : "AUSIGNAL_LEFT", 
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 400, "Speed_Of_LED_Walk" : 10, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
-          "Dest_1" : "32,32,0", 
+          "Dest_1" : "32,8,0", 
           "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_bot|0"
         },
         {
@@ -2195,7 +2195,7 @@
         },
         {
           "Label" : "AUSIGNAL_LEFT", 
-          "Start_Delay_Time" : 786, "Animation_Walk_Type" : "AnEvSchedule",
+          "Start_Delay_Time" : 790, "Animation_Walk_Type" : "AnEvSchedule",
           "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUSIGNAL_LEFT_ON"
         }
       ],
@@ -2226,14 +2226,14 @@
           "Label" : "AUSIGNAL_RIGHT", 
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 400, "Speed_Of_LED_Walk" : 10, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
-          "Dest_1" : "32,32,0", 
+          "Dest_1" : "32,8,0", 
           "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_top|0"
         },
         {
           "Label" : "AUSIGNAL_RIGHT", 
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 400, "Speed_Of_LED_Walk" : 10, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
-          "Dest_1" : "32,32,0", 
+          "Dest_1" : "32,8,0", 
           "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_bot|0"
         },
         {
@@ -2252,7 +2252,7 @@
         },
         {
           "Label" : "AUSIGNAL_RIGHT", 
-          "Start_Delay_Time" : 786, "Animation_Walk_Type" : "AnEvSchedule",
+          "Start_Delay_Time" : 790, "Animation_Walk_Type" : "AnEvSchedule",
           "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUSIGNAL_RIGHT_ON"
         }
       ],
