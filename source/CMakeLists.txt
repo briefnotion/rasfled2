@@ -65,6 +65,7 @@ target_sources(rasfled PRIVATE
   widgets_drawing.cpp
   widgets_automobile.cpp
   widgets_adsb.cpp
+  sounds.cpp
   screen4_helper.cpp
   screen4.cpp
   system.cpp

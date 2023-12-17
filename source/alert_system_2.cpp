@@ -140,6 +140,8 @@ void ALERT_SYSTEM_2::add_generic_alert(string Text)
 
   LATEST_ID++;
 
+  SOUND_SYSTEM.play_test();
+
   CHANGED = true;
 }
 

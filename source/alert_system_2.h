@@ -17,6 +17,9 @@
 #include <string>
 #include <deque>
 
+// RASFled related header files
+#include "sounds.h"
+
 // -------------------------------------------------------------------------------------
 
 // Reserved Alert List
@@ -97,6 +100,8 @@ class ALERT_SYSTEM_2
   bool CHANGED = false;
 
   int ALERTS_RESERVE_COUNT = 0;
+
+  SOUNDS SOUND_SYSTEM;  // Primitive sound system.
   
   public:
   

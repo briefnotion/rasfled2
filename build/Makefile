@@ -952,6 +952,33 @@ screen4_helper.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/screen4_helper.cpp.s
 .PHONY : screen4_helper.cpp.s
 
+sounds.o: sounds.cpp.o
+
+.PHONY : sounds.o
+
+# target to build an object file
+sounds.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/sounds.cpp.o
+.PHONY : sounds.cpp.o
+
+sounds.i: sounds.cpp.i
+
+.PHONY : sounds.i
+
+# target to preprocess a source file
+sounds.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/sounds.cpp.i
+.PHONY : sounds.cpp.i
+
+sounds.s: sounds.cpp.s
+
+.PHONY : sounds.s
+
+# target to generate assembly for a file
+sounds.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/sounds.cpp.s
+.PHONY : sounds.cpp.s
+
 stringthings.o: stringthings.cpp.o
 
 .PHONY : stringthings.o
@@ -1213,6 +1240,9 @@ help:
 	@echo "... screen4_helper.o"
 	@echo "... screen4_helper.i"
 	@echo "... screen4_helper.s"
+	@echo "... sounds.o"
+	@echo "... sounds.i"
+	@echo "... sounds.s"
 	@echo "... stringthings.o"
 	@echo "... stringthings.i"
 	@echo "... stringthings.s"

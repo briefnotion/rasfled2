@@ -949,6 +949,13 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         processcommandhazard(sdSysData, tmeCurrentTime, Animations);
       }
 
+      // -------------------------------------------------------------------------------------
+      // Alert Test
+      if (check_command(cons, " alert", "Alert"))
+      {
+        sdSysData.ALERTS_2.add_generic_alert("Alert");
+      }
+
       /*
       // -------------------------------------------------------------------------------------
       // Debug Characters only active when debug mode is on

@@ -2,6 +2,9 @@
 #include <mcp_can.h>
 //#include <mcp_can_dfs.h>
 
+// -----------------------------------------------------
+
+#define Revision "2.090_231216"
 
 // -----------------------------------------------------
 // Definitions
@@ -161,11 +164,14 @@ class CONTROL
   public:
   int version = 0;
   
-  bool test = false;
+  bool test = false;                // Send (toggle) test data: t
   bool start = true;
-  bool filter = true;
+  bool filter = true;               // Filter (toggle) with known PIDs: f
+  bool wait_for_request = true;     // Only send data when "r" received (toggle): wait 
 
-  bool restart = false;
+  bool restart = false;             // Restart: q
+
+  unsigned long send_delay = 0;     // Delay after send: del0 del1 del3 del10
 
   // ---
 
@@ -200,7 +206,535 @@ class CONTROL
       return true;
     }
 
-    if (read_string == "p")
+    // version 3 and version == 4 and version == 5commands
+    // 00 - 0F
+    else if (read_string == "00")
+    {
+      command = PID_PIDS_SUPPORTED_01_20;
+      send_command = true;
+    }
+    else if (read_string == "01")
+    {
+      command = PID_MONITOR;
+      send_command = true;
+    }
+    else if (read_string == "03")
+    {
+      command = PID_FUEL_STATUS;
+      send_command = true;
+    }
+    else if (read_string == "04")
+    {
+      command = PID_CALC_ENGINE_LOAD;
+      send_command = true;
+    }
+    else if (read_string == "05" || read_string == "temp")
+    {
+      command = PID_COOLANT_TEMP;
+      send_command = true;
+    }
+    else if (read_string == "06")
+    {
+      command = PID_SHORT_TERM_FUEL_TRIM_1;
+      send_command = true;
+    }
+    else if (read_string == "07")
+    {
+      command = PID_LONG_TERM_FUEL_TRIM_1;
+      send_command = true;
+    }
+    else if (read_string == "08")
+    {
+      command = PID_SHORT_TERM_FUEL_TRIM_2;
+      send_command = true;
+    }
+    else if (read_string == "09")
+    {
+      command = PID_LONG_TERM_FUEL_TRIM_2;
+      send_command = true;
+    }
+    else if (read_string == "0A")
+    {
+      command = PID_FUEL_PRESSURE;
+      send_command = true;
+    }
+    else if (read_string == "0B")
+    {
+      command = PID_INTAKE_MANIFOLD_ABS_PRESSURE;
+      send_command = true;
+    }
+    else if (read_string == "0C" || read_string == "temp")
+    {
+      command = PID_ENGIN_PRM;
+      send_command = true;
+    }
+    else if (read_string == "0D" || read_string == "speed")
+    {
+      command = PID_VEHICLE_SPEED;
+      send_command = true;
+    }
+    else if (read_string == "0F")
+    {
+      command = PID_INTAKE_AIR_TEMP;
+      send_command = true;
+    }
+
+    // 10 - 1F
+    else if (read_string == "10")
+    {
+      command = PID_MASS_AIR_FLOW_RATE;
+      send_command = true;
+    }
+    else if (read_string == "11")
+    {
+      command = PID_THROTTLE_POSITION;
+      send_command = true;
+    }
+    else if (read_string == "1C")
+    {
+      command = PID_OBD_STANDARDS;
+      send_command = true;
+    }
+    else if (read_string == "1D")
+    {
+      command = PID_OXYGEN_SENSOR_PRESENT;
+      send_command = true;
+    }
+    else if (read_string == "1F")
+    {
+      command = PID_RUN_TIME_SINCE_START;
+      send_command = true;
+    }
+
+    // 20 - 2F
+    else if (read_string == "20")
+    {
+      command = PID_PIDS_SUPPORTED_21_40;
+      send_command = true;
+    }
+    else if (read_string == "21")
+    {
+      command = PID_DISTANCE_TRAVELED_MIL_ON;
+      send_command = true;
+    }
+    else if (read_string == "22")
+    {
+      command = PID_FUEL_RAIL_PRESSURE_MANIFOLD;
+      send_command = true;
+    }
+    else if (read_string == "23")
+    {
+      command = PID_FUEL_RAIL_PRESSURE_GAUGE;
+      send_command = true;
+    }
+    else if (read_string == "2C")
+    {
+      command = PID_COMMANDED_ERG;
+      send_command = true;
+    }
+    else if (read_string == "2F")
+    {
+      command = PID_FUEL_TANK_LEVEL;
+      send_command = true;
+    }
+
+    // 30 - 3F
+    else if (read_string == "31")
+    {
+      command = PID_DISTANCE_SINCE_CODES_CLEARED;
+      send_command = true;
+    }
+    else if (read_string == "32")
+    {
+      command = PID_EVAP_SYSTEM_VAPOR_PRESSURE;
+      send_command = true;
+    }
+    else if (read_string == "33")
+    {
+      command = PID_BARAMETRIC_PRESSURE;
+      send_command = true;
+    }
+    else if (read_string == "3C")
+    {
+      command = PID_CATALYST_TEMP_BANK_1_SENSOR_1;
+      send_command = true;
+    }
+    else if (read_string == "3D")
+    {
+      command = PID_CATALYST_TEMP_BANK_2_SENSOR_1;
+      send_command = true;
+    }
+    else if (read_string == "3E")
+    {
+      command = PID_CATALYST_TEMP_BANK_1_SENSOR_2;
+      send_command = true;
+    }
+    else if (read_string == "3F")
+    {
+      command = PID_CATALYST_TEMP_BANK_2_SENSOR_2;
+      send_command = true;
+    }
+
+    // 40 - 4F
+    else if (read_string == "40")
+    {
+      command = PID_PIDS_SUPPORTED_41_60;
+      send_command = true;
+    }
+    else if (read_string == "41")
+    {
+      command = PID_MONITOR_STATUS_DRIVE_CYCLE;
+      send_command = true;
+    }
+    else if (read_string == "42")
+    {
+      command = PID_CONTROL_VOLTAGE;
+      send_command = true;
+    }
+    else if (read_string == "43")
+    {
+      command = PID_ABSOLUTE_LOAD;
+      send_command = true;
+    }
+    else if (read_string == "44")
+    {
+      command = PID_COMMANDED_AIR_FUEL_RATIO;
+      send_command = true;
+    }
+    else if (read_string == "45")
+    {
+      command = PID_RELATIVE_TROTTLE_POS;
+      send_command = true;
+    }
+    else if (read_string == "46")
+    {
+      command = PID_AMBIENT_AIR_TEMPERATURE;
+      send_command = true;
+    }
+    else if (read_string == "47")
+    {
+      command = PID_ABSOLOUTE_TROTTLE_POSITION_B;
+      send_command = true;
+    }
+    else if (read_string == "48")
+    {
+      command = PID_ABSOLOUTE_TROTTLE_POSITION_C;
+      send_command = true;
+    }
+    else if (read_string == "49")
+    {
+      command = PID_ACCELERATORE_PEDAL_POSITION_D;
+      send_command = true;
+    }
+    else if (read_string == "4A")
+    {
+      command = PID_ACCELERATORE_PEDAL_POSITION_E;
+      send_command = true;
+    }
+    else if (read_string == "4B")
+    {
+      command = PID_ACCELERATORE_PEDAL_POSITION_F;
+      send_command = true;
+    }
+    else if (read_string == "4C")
+    {
+      command = PID_COMMANDED_THROTTLE_ACTUATOR_E;
+      send_command = true;
+    }
+    else if (read_string == "4D")
+    {
+      command = PID_TIME_RUN_WITH_MIL_ON;
+      send_command = true;
+    }
+    else if (read_string == "4E")
+    {
+      command = PID_TIME_SINCE_TROUBLE_CODES_CLEARED;
+      send_command = true;
+    }
+    else if (read_string == "4F")
+    {
+      command = PID_MAX_VAL_FUEL_AIR_RATIO_OV_OCUR_MAN_ABS_PRESS;
+      send_command = true;
+    }
+
+    // 50 - 5F
+    else if (read_string == "50")
+    {
+      command = PID_MAX_VAL_AIR_FLOW_RATE_SENSOR;
+      send_command = true;
+    }
+    else if (read_string == "53")
+    {
+      command = PID_ABS_EVAP_PRESSURE;
+      send_command = true;
+    }
+    else if (read_string == "54")
+    {
+      command = PID_EVAP_PRESSURE;
+      send_command = true;
+    }
+    else if (read_string == "59")
+    {
+      command = PID_FUEL_RAIL_ABS_PRESSURE;
+      send_command = true;
+    }
+    else if (read_string == "5A")
+    {
+      command = PID_REL_ACCELERATORE_PEDAL_POS;
+      send_command = true;
+    }
+    else if (read_string == "5C")
+    {
+      command = PID_ENGINE_OIL_TEMP;
+      send_command = true;
+    }
+    else if (read_string == "5E")
+    {
+      command = PID_ENGINE_FUEL_RATE;
+      send_command = true;
+    }
+
+    // 60 - 6F
+    else if (read_string == "60")
+    {
+      command = PID_PIDS_SUPPORTED_61_80;
+      send_command = true;
+    }
+    else if (read_string == "61")
+    {
+      command = PID_DRIVERS_DEMAND_ENGINE_TORQUE;
+      send_command = true;
+    }
+    else if (read_string == "62")
+    {
+      command = PID_ACTURAL_DEMAND_ENGINE_TORQUE;
+      send_command = true;
+    }
+    else if (read_string == "63")
+    {
+      command = PID_REFERENCE_ENGINE_TORQUE;
+      send_command = true;
+    }
+    else if (read_string == "64")
+    {
+      command = PID_ENGINE_PERCENT_TORQUE_DATA;
+      send_command = true;
+    }
+    else if (read_string == "66")
+    {
+      command = PID_MASS_AIR_FLOW_SENSOR;
+      send_command = true;
+    }
+    else if (read_string == "67")
+    {
+      command = PID_ENGINE_COOLANT_TEMPERATURE;
+      send_command = true;
+    }
+    else if (read_string == "68")
+    {
+      command = PID_INTAKE_AIR_TEMPERATURE_SENSOR;
+      send_command = true;
+    }
+    else if (read_string == "6B")
+    {
+      command = PID_EXHAST_GAS_RECIRC_TEMP;
+      send_command = true;
+    }
+
+    // 70 - 7F
+
+    // 80 - 8F
+    else if (read_string == "80")
+    {
+      command = PID_PIDS_SUPPORTED_81_A0;
+      send_command = true;
+    }
+    else if (read_string == "84")
+    {
+      command = PID_MANIFOLD_SURFACE_TEMP;
+      send_command = true;
+    }
+    
+    // 90 - 9F
+    else if (read_string == "9D")
+    {
+      command = PID_ENGINE_FUEL_RATE;
+      send_command = true;
+    }
+    else if (read_string == "9E")
+    {
+      command = PID_ENGINE_EXHAST_FLOW_RATE;
+      send_command = true;
+    }
+    else if (read_string == "9F")
+    {
+      command = PID_FUEL_SYSTEM_PERCENTAGE_USED;
+      send_command = true;
+    }
+
+    // A0 - AF
+    else if (read_string == "A0")
+    {
+      command = PID_PIDS_SUPPORTED_A1_C0;
+      send_command = true;
+    }
+    else if (read_string == "A4")
+    {
+      command = PID_TRANS_ACUTAL_GEAR;
+      send_command = true;
+    }
+    else if (read_string == "A6")
+    {
+      command = PID_ODOMETER;
+      send_command = true;
+    }
+    else if (read_string == "A9")
+    {
+      command = PID_ABS_DISABLE_SWITCH_STATE;
+      send_command = true;
+    }
+
+    // B0 - BF
+
+    // request mode 3 Show Diagnostic Codes
+    else if (read_string == "diags")
+    {
+      // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
+      // partially works. cant read responses
+
+      // Request pid list in mode 9?
+      service_command_2_data_00 = 0x02;
+      service_command_2_data_01 = 0x03;
+      service_command_2_data_02 = 0x00;
+      service_command_2_data_03 = 0x00;
+      service_command_2_data_04 = 0x00;
+      service_command_2_data_05 = 0x00;
+      service_command_2_data_06 = 0x00;
+      service_command_2_data_07 = 0x00;
+
+      send_service_command_2 = true;
+    }
+
+    // request mode 3 Clear Diagnostic Codes
+    else if (read_string == "diagc")
+    {
+      // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
+      // works - clears lamp and codes
+
+      // Request pid list in mode 9?
+      service_command_2_data_00 = 0x02;
+      service_command_2_data_01 = 0x04;
+      service_command_2_data_02 = 0x00;
+      service_command_2_data_03 = 0x00;
+      service_command_2_data_04 = 0x00;
+      service_command_2_data_05 = 0x00;
+      service_command_2_data_06 = 0x00;
+      service_command_2_data_07 = 0x00;
+
+      send_service_command_2 = true;
+    }
+
+    // request mode 9 supported list
+    else if (read_string == "ser")
+    {
+      // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
+      // works- returns list of supported mode 9 pids
+
+      // Request pid list in mode 9?
+      service_command_2_data_00 = 0x02;
+      service_command_2_data_01 = 0x09;
+      service_command_2_data_02 = 0x00;
+      service_command_2_data_03 = 0x00;
+      service_command_2_data_04 = 0x00;
+      service_command_2_data_05 = 0x00;
+      service_command_2_data_06 = 0x00;
+      service_command_2_data_07 = 0x00;
+
+      send_service_command_2 = true;
+    }
+
+    // request mode 9 vin list
+    else if (read_string == "vin")
+    {
+      // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
+      // doesnt work - may not be supported. returns nothing.
+      // Request pid list in mode 9?
+      service_command_2_data_00 = 0x02;
+      service_command_2_data_01 = 0x09;
+      service_command_2_data_02 = 0x02;
+      service_command_2_data_03 = 0x00;
+      service_command_2_data_04 = 0x00;
+      service_command_2_data_05 = 0x00;
+      service_command_2_data_06 = 0x00;
+      service_command_2_data_07 = 0x00;
+
+      send_service_command_2 = true;
+    }
+
+    // Tire Pressure
+    else if (read_string == "t1")
+    // doesnt work
+    {
+      service_command_2_data_00 = 0x02;
+      service_command_2_data_01 = 0x22;
+      service_command_2_data_02 = 0x00;
+      service_command_2_data_03 = 0x00;
+      service_command_2_data_04 = 0x00;
+      service_command_2_data_05 = 0x00;
+      service_command_2_data_06 = 0x00;
+      service_command_2_data_07 = 0x00;
+
+      send_service_command_2 = true;
+    }
+    else if (read_string == "t2")
+    // doesnt work
+    {
+      service_command_2_data_00 = 0x02;
+      service_command_2_data_01 = 0x22;
+      service_command_2_data_02 = 0x01;
+      service_command_2_data_03 = 0x00;
+      service_command_2_data_04 = 0x00;
+      service_command_2_data_05 = 0x00;
+      service_command_2_data_06 = 0x00;
+      service_command_2_data_07 = 0x00;
+
+      send_service_command_2 = true;
+    }
+    else if (read_string == "t3")
+    // doesnt work
+    {
+      service_command_2_data_00 = 0x02;
+      service_command_2_data_01 = 0x22;
+      service_command_2_data_02 = 0x02;
+      service_command_2_data_03 = 0x00;
+      service_command_2_data_04 = 0x00;
+      service_command_2_data_05 = 0x00;
+      service_command_2_data_06 = 0x00;
+      service_command_2_data_07 = 0x00;
+
+      send_service_command_2 = true;
+    }
+    else if (read_string == "t4")
+    // doesnt work
+    {
+      service_command_2_data_00 = 0x02;
+      service_command_2_data_01 = 0x22;
+      service_command_2_data_02 = 0x03;
+      service_command_2_data_03 = 0x00;
+      service_command_2_data_04 = 0x00;
+      service_command_2_data_05 = 0x00;
+      service_command_2_data_06 = 0x00;
+      service_command_2_data_07 = 0x00;
+
+      send_service_command_2 = true;
+    }
+
+    else if (read_string == "test")
+    {
+      send_test_response = true;
+    }
+    
+    else if (read_string == "p")
     {
       // Command to pause and unpause input
       if (start == false)
@@ -245,551 +779,46 @@ class CONTROL
       // Command to restart
       restart = true;
     }
-    else if (read_string == "v3")
-    {
-      version = 3;
-      restart = true;
-    }
-    else if (read_string == "v4")
-    {
-      version = 4;
-      restart = true;
-    }
     else if (read_string == "v5")
     {
       version = 5;
       restart = true;
     }
 
-    // version 3 and version == 4 and version == 5commands
-    if (version == 3 || version == 4 || version == 5)
+    // Delayed Response
+    else if (read_string == "del0")
     {
-      // 00 - 0F
-      if (read_string == "00")
-      {
-        command = PID_PIDS_SUPPORTED_01_20;
-        send_command = true;
-      }
-      else if (read_string == "01")
-      {
-        command = PID_MONITOR;
-        send_command = true;
-      }
-      else if (read_string == "03")
-      {
-        command = PID_FUEL_STATUS;
-        send_command = true;
-      }
-      else if (read_string == "04")
-      {
-        command = PID_CALC_ENGINE_LOAD;
-        send_command = true;
-      }
-      else if (read_string == "05" || read_string == "temp")
-      {
-        command = PID_COOLANT_TEMP;
-        send_command = true;
-      }
-      else if (read_string == "06")
-      {
-        command = PID_SHORT_TERM_FUEL_TRIM_1;
-        send_command = true;
-      }
-      else if (read_string == "07")
-      {
-        command = PID_LONG_TERM_FUEL_TRIM_1;
-        send_command = true;
-      }
-      else if (read_string == "08")
-      {
-        command = PID_SHORT_TERM_FUEL_TRIM_2;
-        send_command = true;
-      }
-      else if (read_string == "09")
-      {
-        command = PID_LONG_TERM_FUEL_TRIM_2;
-        send_command = true;
-      }
-      else if (read_string == "0A")
-      {
-        command = PID_FUEL_PRESSURE;
-        send_command = true;
-      }
-      else if (read_string == "0B")
-      {
-        command = PID_INTAKE_MANIFOLD_ABS_PRESSURE;
-        send_command = true;
-      }
-      else if (read_string == "0C" || read_string == "temp")
-      {
-        command = PID_ENGIN_PRM;
-        send_command = true;
-      }
-      else if (read_string == "0D" || read_string == "speed")
-      {
-        command = PID_VEHICLE_SPEED;
-        send_command = true;
-      }
-      else if (read_string == "0F")
-      {
-        command = PID_INTAKE_AIR_TEMP;
-        send_command = true;
-      }
+      send_delay = 0;
+      Serial.println("Delay set to: 0");
+    }
+    else if (read_string == "del1")
+    {
+      send_delay = 1;
+      Serial.println("Delay set to: 1");
+    }
+    else if (read_string == "del3")
+    {
+      send_delay = 3;
+      Serial.println("Delay set to: 3");
+    }
+    else if (read_string == "del10")
+    {
+      send_delay = 10;
+      Serial.println("Delay set to: 10");
+    }
 
-      // 10 - 1F
-      else if (read_string == "10")
+    // Wait for response
+    else if (read_string == "wait")
+    {
+      if (wait_for_request == true)
       {
-        command = PID_MASS_AIR_FLOW_RATE;
-        send_command = true;
+        wait_for_request = false;
+        Serial.println("Wait Off");
       }
-      else if (read_string == "11")
+      else
       {
-        command = PID_THROTTLE_POSITION;
-        send_command = true;
-      }
-      else if (read_string == "1C")
-      {
-        command = PID_OBD_STANDARDS;
-        send_command = true;
-      }
-      else if (read_string == "1D")
-      {
-        command = PID_OXYGEN_SENSOR_PRESENT;
-        send_command = true;
-      }
-      else if (read_string == "1F")
-      {
-        command = PID_RUN_TIME_SINCE_START;
-        send_command = true;
-      }
-
-      // 20 - 2F
-      else if (read_string == "20")
-      {
-        command = PID_PIDS_SUPPORTED_21_40;
-        send_command = true;
-      }
-      else if (read_string == "21")
-      {
-        command = PID_DISTANCE_TRAVELED_MIL_ON;
-        send_command = true;
-      }
-      else if (read_string == "22")
-      {
-        command = PID_FUEL_RAIL_PRESSURE_MANIFOLD;
-        send_command = true;
-      }
-      else if (read_string == "23")
-      {
-        command = PID_FUEL_RAIL_PRESSURE_GAUGE;
-        send_command = true;
-      }
-      else if (read_string == "2C")
-      {
-        command = PID_COMMANDED_ERG;
-        send_command = true;
-      }
-      else if (read_string == "2F")
-      {
-        command = PID_FUEL_TANK_LEVEL;
-        send_command = true;
-      }
-
-      // 30 - 3F
-      else if (read_string == "31")
-      {
-        command = PID_DISTANCE_SINCE_CODES_CLEARED;
-        send_command = true;
-      }
-      else if (read_string == "32")
-      {
-        command = PID_EVAP_SYSTEM_VAPOR_PRESSURE;
-        send_command = true;
-      }
-      else if (read_string == "33")
-      {
-        command = PID_BARAMETRIC_PRESSURE;
-        send_command = true;
-      }
-      else if (read_string == "3C")
-      {
-        command = PID_CATALYST_TEMP_BANK_1_SENSOR_1;
-        send_command = true;
-      }
-      else if (read_string == "3D")
-      {
-        command = PID_CATALYST_TEMP_BANK_2_SENSOR_1;
-        send_command = true;
-      }
-      else if (read_string == "3E")
-      {
-        command = PID_CATALYST_TEMP_BANK_1_SENSOR_2;
-        send_command = true;
-      }
-      else if (read_string == "3F")
-      {
-        command = PID_CATALYST_TEMP_BANK_2_SENSOR_2;
-        send_command = true;
-      }
-
-      // 40 - 4F
-      else if (read_string == "40")
-      {
-        command = PID_PIDS_SUPPORTED_41_60;
-        send_command = true;
-      }
-      else if (read_string == "41")
-      {
-        command = PID_MONITOR_STATUS_DRIVE_CYCLE;
-        send_command = true;
-      }
-      else if (read_string == "42")
-      {
-        command = PID_CONTROL_VOLTAGE;
-        send_command = true;
-      }
-      else if (read_string == "43")
-      {
-        command = PID_ABSOLUTE_LOAD;
-        send_command = true;
-      }
-      else if (read_string == "44")
-      {
-        command = PID_COMMANDED_AIR_FUEL_RATIO;
-        send_command = true;
-      }
-      else if (read_string == "45")
-      {
-        command = PID_RELATIVE_TROTTLE_POS;
-        send_command = true;
-      }
-      else if (read_string == "46")
-      {
-        command = PID_AMBIENT_AIR_TEMPERATURE;
-        send_command = true;
-      }
-      else if (read_string == "47")
-      {
-        command = PID_ABSOLOUTE_TROTTLE_POSITION_B;
-        send_command = true;
-      }
-      else if (read_string == "48")
-      {
-        command = PID_ABSOLOUTE_TROTTLE_POSITION_C;
-        send_command = true;
-      }
-      else if (read_string == "49")
-      {
-        command = PID_ACCELERATORE_PEDAL_POSITION_D;
-        send_command = true;
-      }
-      else if (read_string == "4A")
-      {
-        command = PID_ACCELERATORE_PEDAL_POSITION_E;
-        send_command = true;
-      }
-      else if (read_string == "4B")
-      {
-        command = PID_ACCELERATORE_PEDAL_POSITION_F;
-        send_command = true;
-      }
-      else if (read_string == "4C")
-      {
-        command = PID_COMMANDED_THROTTLE_ACTUATOR_E;
-        send_command = true;
-      }
-      else if (read_string == "4D")
-      {
-        command = PID_TIME_RUN_WITH_MIL_ON;
-        send_command = true;
-      }
-      else if (read_string == "4E")
-      {
-        command = PID_TIME_SINCE_TROUBLE_CODES_CLEARED;
-        send_command = true;
-      }
-      else if (read_string == "4F")
-      {
-        command = PID_MAX_VAL_FUEL_AIR_RATIO_OV_OCUR_MAN_ABS_PRESS;
-        send_command = true;
-      }
-
-      // 50 - 5F
-      else if (read_string == "50")
-      {
-        command = PID_MAX_VAL_AIR_FLOW_RATE_SENSOR;
-        send_command = true;
-      }
-      else if (read_string == "53")
-      {
-        command = PID_ABS_EVAP_PRESSURE;
-        send_command = true;
-      }
-      else if (read_string == "54")
-      {
-        command = PID_EVAP_PRESSURE;
-        send_command = true;
-      }
-      else if (read_string == "59")
-      {
-        command = PID_FUEL_RAIL_ABS_PRESSURE;
-        send_command = true;
-      }
-      else if (read_string == "5A")
-      {
-        command = PID_REL_ACCELERATORE_PEDAL_POS;
-        send_command = true;
-      }
-      else if (read_string == "5C")
-      {
-        command = PID_ENGINE_OIL_TEMP;
-        send_command = true;
-      }
-      else if (read_string == "5E")
-      {
-        command = PID_ENGINE_FUEL_RATE;
-        send_command = true;
-      }
-
-      // 60 - 6F
-      else if (read_string == "60")
-      {
-        command = PID_PIDS_SUPPORTED_61_80;
-        send_command = true;
-      }
-      else if (read_string == "61")
-      {
-        command = PID_DRIVERS_DEMAND_ENGINE_TORQUE;
-        send_command = true;
-      }
-      else if (read_string == "62")
-      {
-        command = PID_ACTURAL_DEMAND_ENGINE_TORQUE;
-        send_command = true;
-      }
-      else if (read_string == "63")
-      {
-        command = PID_REFERENCE_ENGINE_TORQUE;
-        send_command = true;
-      }
-      else if (read_string == "64")
-      {
-        command = PID_ENGINE_PERCENT_TORQUE_DATA;
-        send_command = true;
-      }
-      else if (read_string == "66")
-      {
-        command = PID_MASS_AIR_FLOW_SENSOR;
-        send_command = true;
-      }
-      else if (read_string == "67")
-      {
-        command = PID_ENGINE_COOLANT_TEMPERATURE;
-        send_command = true;
-      }
-      else if (read_string == "68")
-      {
-        command = PID_INTAKE_AIR_TEMPERATURE_SENSOR;
-        send_command = true;
-      }
-      else if (read_string == "6B")
-      {
-        command = PID_EXHAST_GAS_RECIRC_TEMP;
-        send_command = true;
-      }
-
-      // 70 - 7F
-
-      // 80 - 8F
-      else if (read_string == "80")
-      {
-        command = PID_PIDS_SUPPORTED_81_A0;
-        send_command = true;
-      }
-      else if (read_string == "84")
-      {
-        command = PID_MANIFOLD_SURFACE_TEMP;
-        send_command = true;
-      }
-      
-
-      // 90 - 9F
-      else if (read_string == "9D")
-      {
-        command = PID_ENGINE_FUEL_RATE;
-        send_command = true;
-      }
-      else if (read_string == "9E")
-      {
-        command = PID_ENGINE_EXHAST_FLOW_RATE;
-        send_command = true;
-      }
-      else if (read_string == "9F")
-      {
-        command = PID_FUEL_SYSTEM_PERCENTAGE_USED;
-        send_command = true;
-      }
-
-      // A0 - AF
-      else if (read_string == "A0")
-      {
-        command = PID_PIDS_SUPPORTED_A1_C0;
-        send_command = true;
-      }
-      else if (read_string == "A4")
-      {
-        command = PID_TRANS_ACUTAL_GEAR;
-        send_command = true;
-      }
-      else if (read_string == "A6")
-      {
-        command = PID_ODOMETER;
-        send_command = true;
-      }
-      else if (read_string == "A9")
-      {
-        command = PID_ABS_DISABLE_SWITCH_STATE;
-        send_command = true;
-      }
-
-      // B0 - BF
-
-      // request mode 3 Show Diagnostic Codes
-      else if (read_string == "diags")
-      {
-        // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
-        // partially works. cant read responses
-
-        // Request pid list in mode 9?
-        service_command_2_data_00 = 0x02;
-        service_command_2_data_01 = 0x03;
-        service_command_2_data_02 = 0x00;
-        service_command_2_data_03 = 0x00;
-        service_command_2_data_04 = 0x00;
-        service_command_2_data_05 = 0x00;
-        service_command_2_data_06 = 0x00;
-        service_command_2_data_07 = 0x00;
-
-        send_service_command_2 = true;
-      }
-
-      // request mode 3 Clear Diagnostic Codes
-      else if (read_string == "diagc")
-      {
-        // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
-        // works - clears lamp and codes
-
-        // Request pid list in mode 9?
-        service_command_2_data_00 = 0x02;
-        service_command_2_data_01 = 0x04;
-        service_command_2_data_02 = 0x00;
-        service_command_2_data_03 = 0x00;
-        service_command_2_data_04 = 0x00;
-        service_command_2_data_05 = 0x00;
-        service_command_2_data_06 = 0x00;
-        service_command_2_data_07 = 0x00;
-
-        send_service_command_2 = true;
-      }
-
-      // request mode 9 supported list
-      else if (read_string == "ser")
-      {
-        // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
-        // works- returns list of supported mode 9 pids
-
-        // Request pid list in mode 9?
-        service_command_2_data_00 = 0x02;
-        service_command_2_data_01 = 0x09;
-        service_command_2_data_02 = 0x00;
-        service_command_2_data_03 = 0x00;
-        service_command_2_data_04 = 0x00;
-        service_command_2_data_05 = 0x00;
-        service_command_2_data_06 = 0x00;
-        service_command_2_data_07 = 0x00;
-
-        send_service_command_2 = true;
-      }
-
-      // request mode 9 vin list
-      else if (read_string == "vin")
-      {
-        // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
-        // doesnt work - may not be supported. returns nothing.
-        // Request pid list in mode 9?
-        service_command_2_data_00 = 0x02;
-        service_command_2_data_01 = 0x09;
-        service_command_2_data_02 = 0x02;
-        service_command_2_data_03 = 0x00;
-        service_command_2_data_04 = 0x00;
-        service_command_2_data_05 = 0x00;
-        service_command_2_data_06 = 0x00;
-        service_command_2_data_07 = 0x00;
-
-        send_service_command_2 = true;
-      }
-
-      // Tire Pressure
-      else if (read_string == "t1")
-      // doesnt work
-      {
-        service_command_2_data_00 = 0x02;
-        service_command_2_data_01 = 0x22;
-        service_command_2_data_02 = 0x00;
-        service_command_2_data_03 = 0x00;
-        service_command_2_data_04 = 0x00;
-        service_command_2_data_05 = 0x00;
-        service_command_2_data_06 = 0x00;
-        service_command_2_data_07 = 0x00;
-
-        send_service_command_2 = true;
-      }
-      else if (read_string == "t2")
-      // doesnt work
-      {
-        service_command_2_data_00 = 0x02;
-        service_command_2_data_01 = 0x22;
-        service_command_2_data_02 = 0x01;
-        service_command_2_data_03 = 0x00;
-        service_command_2_data_04 = 0x00;
-        service_command_2_data_05 = 0x00;
-        service_command_2_data_06 = 0x00;
-        service_command_2_data_07 = 0x00;
-
-        send_service_command_2 = true;
-      }
-      else if (read_string == "t3")
-      // doesnt work
-      {
-        service_command_2_data_00 = 0x02;
-        service_command_2_data_01 = 0x22;
-        service_command_2_data_02 = 0x02;
-        service_command_2_data_03 = 0x00;
-        service_command_2_data_04 = 0x00;
-        service_command_2_data_05 = 0x00;
-        service_command_2_data_06 = 0x00;
-        service_command_2_data_07 = 0x00;
-
-        send_service_command_2 = true;
-      }
-      else if (read_string == "t4")
-      // doesnt work
-      {
-        service_command_2_data_00 = 0x02;
-        service_command_2_data_01 = 0x22;
-        service_command_2_data_02 = 0x03;
-        service_command_2_data_03 = 0x00;
-        service_command_2_data_04 = 0x00;
-        service_command_2_data_05 = 0x00;
-        service_command_2_data_06 = 0x00;
-        service_command_2_data_07 = 0x00;
-
-        send_service_command_2 = true;
-      }
-
-      else if (read_string == "test")
-      {
-        send_test_response = true;
+        wait_for_request = true;
+        Serial.println("Wait On");
       }
     }
 
@@ -1251,6 +1280,7 @@ void version_5()
   ctrl.reset();
   
   Serial.println("Version 5");
+  Serial.println(Revision);
 
   while (ctrl.restart == false)
   {
@@ -1324,19 +1354,20 @@ void version_5()
     }
     
     // Read from host
-    if(Serial.available() > 0)
+    if((Serial.available() > 0 && ctrl.read(read_com()) == true) || ctrl.wait_for_request == false)
     {
-      if (ctrl.read(read_com()) == true)
+      if (messages_to_send.message_count() > 0)
       {
-        if (messages_to_send.message_count() > 0)
+        for (int pos = 0; pos < messages_to_send.message_count(); pos++)
         {
-          for (int pos = 0; pos < messages_to_send.message_count(); pos++)
+          Serial.println(messages_to_send.get(pos));
+          if (ctrl.send_delay > 0)
           {
-            Serial.println(messages_to_send.get(pos));
+            delay(ctrl.send_delay);
           }
-
-          messages_to_send.clear();
         }
+
+        messages_to_send.clear();
       }
     }
 
