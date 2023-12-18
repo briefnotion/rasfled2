@@ -26,12 +26,14 @@ void SOUNDS::play_test()
 
 void SOUNDS::play_snd1()
 {
-  system(SND1.c_str());
+  Command_Thread.run_command(SND1.c_str());
+  //system(SND1.c_str());
 }
 
 void SOUNDS::play_snd2()
 {
-  system(SND2.c_str());
+  Command_Thread.run_command(SND2.c_str());
+  //system(SND2.c_str());
 }
 
 // -------------------------------------------------------------------------------------

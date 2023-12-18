@@ -1225,17 +1225,17 @@ void SCREEN4::draw(system_data &sdSysData)
       {
         //if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].active())
         //{
-          if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].display())
+          if (sdSysData.ALERTS_2.res_display(alert_num))
           {
             ImGui::SetNextWindowSize(ImVec2(300, 100));
 
-            if (sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].warning())
+            if (sdSysData.ALERTS_2.res_warning(alert_num))
             {
               ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
               ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
               ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
             }
-            else if(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].active())
+            else if(sdSysData.ALERTS_2.res_active(alert_num))
             {
               ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
               ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
@@ -1248,15 +1248,15 @@ void SCREEN4::draw(system_data &sdSysData)
               ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_green().STANDARD));
             }
             
-            if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+            if (ImGui::Begin(("ALERT " + to_string(alert_num)).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
             {
               ImVec2 screen_pos = ImGui::GetCursorScreenPos();
-              ImGui::Text(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].alert_text().c_str());
+              ImGui::Text(sdSysData.ALERTS_2.res_alert_text(alert_num).c_str());
 
               ImGui::SetCursorScreenPos(screen_pos);
-              if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].id())).c_str(), ImGui::GetContentRegionAvail()))
+              if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(alert_num)).c_str(), ImGui::GetContentRegionAvail()))
               {
-                sdSysData.ALERTS_2.ALERTS_RESERVE[alert_num].acknowlege();
+                sdSysData.ALERTS_2.res_acknowlege(alert_num);
               }
             }
             ImGui::End();
@@ -1267,15 +1267,15 @@ void SCREEN4::draw(system_data &sdSysData)
       }
     
       // Go through and display all generic alerts
-      if (sdSysData.ALERTS_2.ALERTS.size() > 0)
+      if (sdSysData.ALERTS_2.gen_size() > 0)
       {
-        for (int alert_num = 0; alert_num < (int)sdSysData.ALERTS_2.ALERTS.size(); alert_num++)
+        for (int alert_num = 0; alert_num < (int)sdSysData.ALERTS_2.gen_size(); alert_num++)
         {
           ImGui::SetNextWindowSize(ImVec2(300, 100));
           
-          if (sdSysData.ALERTS_2.ALERTS[alert_num].display())
+          if (sdSysData.ALERTS_2.gen_display(alert_num))
           {
-            if (sdSysData.ALERTS_2.ALERTS[alert_num].warning())
+            if (sdSysData.ALERTS_2.gen_warning(alert_num))
             {
               ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
               ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
@@ -1288,15 +1288,15 @@ void SCREEN4::draw(system_data &sdSysData)
               ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
             }
             
-            if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.ALERTS[alert_num].id())).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+            if (ImGui::Begin(("ALERT " + to_string(alert_num)).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
             {
               ImVec2 screen_pos = ImGui::GetCursorScreenPos();
-              ImGui::Text(sdSysData.ALERTS_2.ALERTS[alert_num].alert_text().c_str());
+              ImGui::Text(sdSysData.ALERTS_2.gen_alert_text(alert_num).c_str());
 
               ImGui::SetCursorScreenPos(screen_pos);
-              if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(sdSysData.ALERTS_2.ALERTS[alert_num].id())).c_str(), ImGui::GetContentRegionAvail()))
+              if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(alert_num)).c_str(), ImGui::GetContentRegionAvail()))
               {
-                sdSysData.ALERTS_2.ALERTS[alert_num].acknowlege();
+                sdSysData.ALERTS_2.gen_acknowlege(alert_num);
               }
             }
             ImGui::End();

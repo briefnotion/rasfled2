@@ -1617,9 +1617,9 @@ void AUTOMOBILE_CALCULATED::compute_low(ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRA
               Status.TEMPS.COOLANT_05.val_c() + 
               (Status.TEMPS.CATALYST_3C.val_c() / 20.0f)) / 4.0f) - 30.0f) * 3.0f;
 
-  if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_S_TEMP].alert_condition(RESERVE_ALERT_TEMP_S_TEMP, S_TEMP >= 60.0f, S_TEMP < 50.0f))
+  if (ALERTS_2.res_alert_condition(RESERVE_ALERT_TEMP_S_TEMP, S_TEMP >= 60.0f, S_TEMP < 50.0f))
   {
-    ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_S_TEMP].update_alert_text("S-Temp Value is " + to_string((int)S_TEMP));
+    ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)S_TEMP));
   }
 
 }
@@ -2384,11 +2384,11 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 // Dont send another request until wait delay is up
                 STATUS.SYSTEM.store_malfunction_indicator_light(bit_value(message.DATA[3], 7));
 
-                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_MIL].alert_condition(RESERVE_ALERT_MIL, 
+                if (ALERTS_2.res_alert_condition(RESERVE_ALERT_MIL, 
                                                   STATUS.SYSTEM.malfunction_indicator_light() == true , 
                                                   STATUS.SYSTEM.malfunction_indicator_light() == false))
                 {
-                  ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_MIL].update_alert_text("Malfunction Indicator Lamp is " + to_string(STATUS.SYSTEM.malfunction_indicator_light()));
+                  ALERTS_2.res_update_alert_text(RESERVE_ALERT_MIL, "Malfunction Indicator Lamp is " + to_string(STATUS.SYSTEM.malfunction_indicator_light()));
                 }
 
                 message_processed = true;
@@ -2399,11 +2399,11 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_coolant_05(message.DATA[3]);
 
-                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].alert_condition(RESERVE_ALERT_TEMP_COOLANT, 
+                if (ALERTS_2.res_alert_condition(RESERVE_ALERT_TEMP_COOLANT, 
                                                   STATUS.TEMPS.COOLANT_05.val_c() >= 100.0f, 
                                                   STATUS.TEMPS.COOLANT_05.val_c() < 80.0f))
                 {
-                  ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].update_alert_text("Coolant Temp Value is " + STATUS.TEMPS.COOLANT_05.c());
+                  ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_COOLANT, "Coolant Temp Value is " + STATUS.TEMPS.COOLANT_05.c());
                 }
 
                 message_processed = true;
@@ -2424,11 +2424,11 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_air_intake_0f(message.DATA[3]);
 
-                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_INTAKE].alert_condition(RESERVE_ALERT_TEMP_INTAKE, 
+                if (ALERTS_2.res_alert_condition(RESERVE_ALERT_TEMP_INTAKE, 
                                                   STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= 50.0f, 
                                                   STATUS.TEMPS.AIR_INTAKE_0f.val_c() < 40.0f))
                 {
-                  ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_INTAKE].update_alert_text("Intake Temp Value is " + STATUS.TEMPS.AIR_INTAKE_0f.c());
+                  ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_INTAKE, "Intake Temp Value is " + STATUS.TEMPS.AIR_INTAKE_0f.c());
                 }
 
                 message_processed = true;
@@ -2521,11 +2521,11 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 // Dont send another request until wait delay is up
                 STATUS.ELECTRICAL.store_control_voltage_42(message.DATA[3], message.DATA[4]);
 
-                if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].alert_condition(RESERVE_ALERT_ELEC_VOLTAGE, 
+                if (ALERTS_2.res_alert_condition(RESERVE_ALERT_ELEC_VOLTAGE, 
                                                   STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f, 
                                                   STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() >= 12.0f))
                 {
-                  ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].update_alert_text("Voltage Value is " + STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
+                  ALERTS_2.res_update_alert_text(RESERVE_ALERT_ELEC_VOLTAGE, "Voltage Value is " + STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
                 }
 
                 message_processed = true;
@@ -2535,7 +2535,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
             // Unkown message
             if (message_processed == false) 
             {
-              ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_UNKNOWN_MESSAGE].alert_no_condition(RESERVE_ALERT_UNKNOWN_MESSAGE, "Unparsed Message Received.");
+              ALERTS_2.res_alert_no_condition(RESERVE_ALERT_UNKNOWN_MESSAGE, "Unparsed Message Received.");
               cons.printw("Unparsed Message From Can Bus: " + message.ORIG);
             }
           }
@@ -2643,9 +2643,9 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     STATUS.FUEL.store_percentage(DATA.AD_C0.DATA[7]);
     STATUS.FUEL.store_level(DATA.AD_380.DATA[7]);
 
-    if (ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].alert_condition(RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 2.0f, STATUS.FUEL.val_level() > 4.0f))
+    if (ALERTS_2.res_alert_condition(RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 2.0f, STATUS.FUEL.val_level() > 4.0f))
     {
-      ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].update_alert_text("Fuel Level is " + STATUS.FUEL.level());
+      ALERTS_2.res_update_alert_text(RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + STATUS.FUEL.level());
     }
 
     // Guages

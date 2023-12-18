@@ -26,36 +26,69 @@ void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Alert_Text)
   ALERT_TEXT = Alert_Text;
 }
 
-bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_Alert)
+bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_Alert, int &Changes)
 {
   bool ret_description_request = false;
+  Changes = 0;
 
   if (Clear_Alert)
   {
+    // Alert has cleared below waring levels
     if (ACTIVE)
     {
+      // Alert was previously raised. 
+      //  Clear all status and leave display as is.
       ID = Id;
       ACTIVE = false;
       WARNING = false;
       ret_description_request = true;
+      
+      // Play clear sound
+      Changes = -1;
     }  
   }
   else if (Raise_Alert)
   {
-    WARNING = false;
+    // Alert is at active status
+    //  Remove warnings status if set.
     ret_description_request = true;
 
     if (ACTIVE == false)
     {
+      // Alert was previously at warning or cleared.
+      // Set alert active status.
       ID = Id;
       ACTIVE = true;
       ACKNOWLEGED = false;
       DISPLAY = true;
+
+      if (WARNING)
+      {
+        // If alert was at warning status then clear warning
+        WARNING = false;
+      }
+      else
+      {
+        // If alert was not at waring status when raised, this 
+        //  means this alert was recently raised from a cleared 
+        //  status.
+        Changes = 2;
+      }
     }
   }
   else if (ACTIVE)
   {
-    WARNING = true;
+    // Alert is in between cleared and raised alert status
+    // Set as warning.
+
+    if (WARNING == false)
+    {
+      // Newly waring
+      WARNING = true;
+      
+      Changes = 1;
+    }
+
     ret_description_request = true;
   }
 
@@ -125,9 +158,105 @@ bool ALERT_SYSTEM_2::changed()
   return CHANGED;
 }
 
+// reserve alerts
+void ALERT_SYSTEM_2::res_alert_no_condition(int Id, string Alert_Text)
+{
+  ALERTS_RESERVE[Id].alert_no_condition(Id, Alert_Text);
+}
+
+bool ALERT_SYSTEM_2::res_alert_condition(int Id, bool Raise_Alert, bool Clear_Alert)
+{
+  int alert_change = 0;
+  bool ret_description_request = ALERTS_RESERVE[Id].alert_condition(Id, Raise_Alert, Clear_Alert, alert_change);
+
+
+  if (alert_change  == 2)       // Alert
+  {
+    SOUND_SYSTEM.play_test();
+  }
+  else if (alert_change  == 1)  // Warning
+  {
+    SOUND_SYSTEM.play_snd2();
+  }
+  else if (alert_change  == -1)  // Cleared
+  {
+    SOUND_SYSTEM.play_snd1();
+  }
+
+  return ret_description_request;
+}
+
+void ALERT_SYSTEM_2::res_update_alert_text(int Id, string Text)
+{
+  ALERTS_RESERVE[Id].update_alert_text(Text);
+}
+
+bool ALERT_SYSTEM_2::res_active(int Id)
+{
+  return ALERTS_RESERVE[Id].active();
+}
+
+bool ALERT_SYSTEM_2::res_warning(int Id)
+{
+  return ALERTS_RESERVE[Id].warning();
+}
+
+bool ALERT_SYSTEM_2::res_display(int Id)
+{
+  return ALERTS_RESERVE[Id].display();
+}
+
+string ALERT_SYSTEM_2::res_alert_text(int Id)
+{
+  return ALERTS_RESERVE[Id].alert_text();
+}
+
+void ALERT_SYSTEM_2::res_acknowlege(int Id)
+{
+   ALERTS_RESERVE[Id].acknowlege();
+}
+
+bool ALERT_SYSTEM_2::res_is_clear(int Id)
+{
+  return ALERTS_RESERVE[Id].is_clear();
+}
+
+void ALERT_SYSTEM_2::res_clear(int Id)
+{
+  ALERTS_RESERVE[Id].clear();
+}
+
+// generic alerts
+int ALERT_SYSTEM_2::gen_size()
+{
+  return GENERIC_ALERTS.size();
+}
+
+bool ALERT_SYSTEM_2::gen_warning(int Id)
+{
+  return GENERIC_ALERTS[Id].warning();
+}
+
+bool ALERT_SYSTEM_2::gen_display(int Id)
+{
+  return  GENERIC_ALERTS[Id].display();
+}
+
+string ALERT_SYSTEM_2::gen_alert_text(int Id)
+{
+  return  GENERIC_ALERTS[Id].alert_text();
+}
+
+void ALERT_SYSTEM_2::gen_acknowlege(int Id)
+{
+  GENERIC_ALERTS[Id].acknowlege();
+}
+
+// all alerts
+
 int ALERT_SYSTEM_2::alert_count()
 {
-  return (ALERTS.size() + ALERTS_RESERVE_COUNT);
+  return (GENERIC_ALERTS.size() + ALERTS_RESERVE_COUNT);
 }
 
 void ALERT_SYSTEM_2::add_generic_alert(string Text)
@@ -136,7 +265,7 @@ void ALERT_SYSTEM_2::add_generic_alert(string Text)
 
   tmp_alert.alert_no_condition(LATEST_ID, Text);
 
-  ALERTS.push_back(tmp_alert);
+  GENERIC_ALERTS.push_back(tmp_alert);
 
   LATEST_ID++;
 
@@ -147,14 +276,14 @@ void ALERT_SYSTEM_2::add_generic_alert(string Text)
 
 void ALERT_SYSTEM_2::alert_list_clean()
 {
-  if (ALERTS.size() > 0)
+  if (GENERIC_ALERTS.size() > 0)
   {
     int alert_num = 0;
-    while (alert_num < (int)ALERTS.size())
+    while (alert_num < (int)GENERIC_ALERTS.size())
     {
-      if (ALERTS[alert_num].is_clear())
+      if (GENERIC_ALERTS[alert_num].is_clear())
       {
-        ALERTS.erase(ALERTS.begin() + alert_num);
+        GENERIC_ALERTS.erase(GENERIC_ALERTS.begin() + alert_num);
       }
       else
       {
@@ -183,9 +312,9 @@ void ALERT_SYSTEM_2::display_active_alerts()
     }
   }
 
-  for (int alert_pos = 0; alert_pos < (int)ALERTS.size(); alert_pos++)
+  for (int alert_pos = 0; alert_pos < (int)GENERIC_ALERTS.size(); alert_pos++)
   {
-    ALERTS_RESERVE[alert_pos].set_display_on();
+    GENERIC_ALERTS[alert_pos].set_display_on();
   }
 }
 

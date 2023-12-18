@@ -1,3 +1,7 @@
+2.091_231217
+  - Added audiable alerts for raise alert, warning, and 
+      cleared.
+  
 2.090_231216
   - Added commands: wait, del0, del1, del3, del10 to 
       RasCAN for testing.

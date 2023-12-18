@@ -64,8 +64,12 @@ class ALERT_2_TYPE_MONITOR
 
   void alert_no_condition(int Id, string Alert_Text);
 
-  bool alert_condition(int Id, bool Raise_Alert, bool Clear_Alert);
+  bool alert_condition(int Id, bool Raise_Alert, bool Clear_Alert, int &Changes);
   // returns true if requesting a description.
+  // Changes = 0  - no change
+  // Changes = 1  - changed to waring
+  // Changes = 2  - raised to alert active
+  // Changes = -1 - cleared
   
   bool active();        // Returns ACTIVE value
   bool warning();       // Returns WARNING value
@@ -103,21 +107,36 @@ class ALERT_SYSTEM_2
 
   SOUNDS SOUND_SYSTEM;  // Primitive sound system.
   
-  public:
-  
-  deque<ALERT_2_TYPE_MONITOR> ALERTS;
+  deque<ALERT_2_TYPE_MONITOR> GENERIC_ALERTS;
   ALERT_2_TYPE_MONITOR ALERTS_RESERVE[RESERVE_ALERT_LIST_SIZE];
 
+  public:
+
   bool changed();
-  // 
+  
+  // reserved alerts
+  void res_alert_no_condition(int Id, string Alert_Text);
+  bool res_alert_condition(int Id, bool Raise_Alert, bool Clear_Alert);
+  void res_update_alert_text(int Id, string Text);
+  bool res_active(int Id);        // Returns ACTIVE value
+  bool res_warning(int Id);       // Returns WARNING value
+  bool res_display(int Id);       // Returns DISPLAY value
+  string res_alert_text(int Id);  // Text value of alert
+  void res_acknowlege(int Id);
+  bool res_is_clear(int Id);
+  void res_clear(int Id);
 
+  // generic alerts
+  int gen_size();
+  bool gen_warning(int Id);       // Returns WARNING value
+  bool gen_display(int Id);       // Returns DISPLAY value
+  string gen_alert_text(int Id);  // Text value of alert
+  void gen_acknowlege(int Id);
+
+  // all alerts
   int alert_count();
-
   void add_generic_alert(string Text);
-  //
-
   void alert_list_clean();
-
   void display_active_alerts();
 
 };
