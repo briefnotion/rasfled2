@@ -162,6 +162,7 @@ bool ALERT_SYSTEM_2::changed()
 void ALERT_SYSTEM_2::res_alert_no_condition(int Id, string Alert_Text)
 {
   ALERTS_RESERVE[Id].alert_no_condition(Id, Alert_Text);
+  SOUND_SYSTEM.play_snd1();
 }
 
 bool ALERT_SYSTEM_2::res_alert_condition(int Id, bool Raise_Alert, bool Clear_Alert)

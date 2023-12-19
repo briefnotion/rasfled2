@@ -4,7 +4,7 @@
 
 // -----------------------------------------------------
 
-#define Revision "2.090_231216"
+#define Revision "2.092_231219"
 
 // -----------------------------------------------------
 // Definitions
@@ -104,15 +104,24 @@
 
 #define CAN_ID_PID                        0x7DF //  *
 
+struct CAM_MESSAGE
+{
+  public:
+
+  unsigned long Message_ID = 0;
+  byte Message_len = 0;
+  byte Message_buf[8] = {0};
+  unsigned long Message_timestamp = 0;
+};
 
 // -----------------------------------------------------
 class MESSAGE_STORAGE
 // Simple message storeage system
-//  20 messages
-//  38 chars per message + null terminator
+//  30 messages
 {
   private:
-  char MESSAGES[30][39];
+  //char MESSAGES[30][39];
+  CAM_MESSAGE MESSAGES[30];
   
   int MESSAGE_COUNT = 0;
 
@@ -123,25 +132,41 @@ class MESSAGE_STORAGE
     return MESSAGE_COUNT;
   }
 
-  void store(String Message)
+  void store(unsigned long Message_ID, byte Message_len, byte Message_buf[], unsigned long Message_timestamp)
   {
     if (MESSAGE_COUNT < 30)
     {
-      Message.toCharArray(MESSAGES[MESSAGE_COUNT], Message.length());
-      MESSAGES[MESSAGE_COUNT][38] = '\0';
+      //Message.toCharArray(MESSAGES[MESSAGE_COUNT], Message.length());
+      //MESSAGES[MESSAGE_COUNT][38] = '\0';
+      //MESSAGE_COUNT++;
+
+      MESSAGES[MESSAGE_COUNT].Message_ID = Message_ID;
+      MESSAGES[MESSAGE_COUNT].Message_len = Message_len;
+
+      MESSAGES[MESSAGE_COUNT].Message_buf[0] = Message_buf[0];
+      MESSAGES[MESSAGE_COUNT].Message_buf[1] = Message_buf[1];
+      MESSAGES[MESSAGE_COUNT].Message_buf[2] = Message_buf[2];
+      MESSAGES[MESSAGE_COUNT].Message_buf[3] = Message_buf[3];
+      MESSAGES[MESSAGE_COUNT].Message_buf[4] = Message_buf[4];
+      MESSAGES[MESSAGE_COUNT].Message_buf[5] = Message_buf[5];
+      MESSAGES[MESSAGE_COUNT].Message_buf[6] = Message_buf[6];
+      MESSAGES[MESSAGE_COUNT].Message_buf[7] = Message_buf[7];
+      
+      MESSAGES[MESSAGE_COUNT].Message_timestamp = Message_timestamp;
+      
       MESSAGE_COUNT++;
     }
   }
 
-  String get(int Position)
+  CAM_MESSAGE get(int Position)
   {
     if (Position < MESSAGE_COUNT)
     {
-      return String (MESSAGES[Position]);
+      return MESSAGES[Position];
     }
     else
     {
-      return "out of bounds";
+      //return "out of bounds";
     }
   }
 
@@ -752,12 +777,12 @@ class CONTROL
       if (test == true)
       {
         test = false;
-        Serial.println("Test Data Off");
+        Serial.println("CAN:Test Data Off");
       }
       else
       {
         test = true;
-        Serial.println("Test Data On");
+        Serial.println("CAN:Test Data On");
       }
     }
     else if (read_string == "f")
@@ -766,12 +791,12 @@ class CONTROL
       if (filter == true)
       {
         filter = false;
-        Serial.println("Filter Off");
+        Serial.println("CAN:Filter Off");
       }
       else
       {
         filter = true;
-        Serial.println("Filter On");
+        Serial.println("CAN:Filter On");
       }
     }
     else if (read_string == "q")
@@ -789,22 +814,22 @@ class CONTROL
     else if (read_string == "del0")
     {
       send_delay = 0;
-      Serial.println("Delay set to: 0");
+      Serial.println("CAN:Delay set to: 0");
     }
     else if (read_string == "del1")
     {
       send_delay = 1;
-      Serial.println("Delay set to: 1");
+      Serial.println("CAN:Delay set to: 1");
     }
     else if (read_string == "del3")
     {
       send_delay = 3;
-      Serial.println("Delay set to: 3");
+      Serial.println("CAN:Delay set to: 3");
     }
     else if (read_string == "del10")
     {
       send_delay = 10;
-      Serial.println("Delay set to: 10");
+      Serial.println("CAN:Delay set to: 10");
     }
 
     // Wait for response
@@ -813,12 +838,12 @@ class CONTROL
       if (wait_for_request == true)
       {
         wait_for_request = false;
-        Serial.println("Wait Off");
+        Serial.println("CAN:Wait Off");
       }
       else
       {
         wait_for_request = true;
-        Serial.println("Wait On");
+        Serial.println("CAN:Wait On");
       }
     }
 
@@ -862,7 +887,7 @@ void setup()
   
   while (!Serial) 
   {
-    Serial.print("I will wait for serial connect");
+    Serial.print("CAN:I will wait for serial connect");
     delay(1000);
   };
   
@@ -876,23 +901,23 @@ void setup()
   //digitalWrite(LED2, LOW);
     
   // Prep CAN Bus
-  Serial.println("CAN init:");
+  Serial.println("CAN:CAN init:");
 
   if (CAN0.begin(CAN_500KBPS) == CAN_OK) 
   {
-    Serial.println("Can Init Success");
+    Serial.println("CAN:Can Init Success");
   } 
   else 
   {
-    Serial.println("Can Init Failed");
+    Serial.println("CAN:Can Init Failed");
     while (1) 
     {
-      Serial.print("I will wait here forever...");
+      Serial.print("CAN:I will wait here forever...");
       delay(1000);
     }
   }
 
-  Serial.println("Good to go!");
+  Serial.println("CAN:Good to go!");
 
   digitalWrite(23, LOW); // led
 }
@@ -1150,25 +1175,27 @@ void serial_send_2(unsigned long Message_ID, byte Message_len, byte Message_buf[
 }
 
 
-String serial_send_format(unsigned long Message_ID, byte Message_len, byte Message_buf[], unsigned long Message_timestamp)
+String serial_send_format(CAM_MESSAGE Message)
 {
   String ret_send_string = "";
-  unsigned char IDl = Message_ID % 256;
-  unsigned char IDu = (Message_ID - IDl) / 256;
+  unsigned char IDl = Message.Message_ID % 256;
+  unsigned char IDu = (Message.Message_ID - IDl) / 256;
 
   ret_send_string = ret_send_string + format_hex(IDu);
   ret_send_string = ret_send_string + format_hex(IDl);
 
-  ret_send_string = ret_send_string + format_hex(Message_buf[0]);
-  ret_send_string = ret_send_string + format_hex(Message_buf[1]);
-  ret_send_string = ret_send_string + format_hex(Message_buf[2]);
-  ret_send_string = ret_send_string + format_hex(Message_buf[3]);
-  ret_send_string = ret_send_string + format_hex(Message_buf[4]);
-  ret_send_string = ret_send_string + format_hex(Message_buf[5]);
-  ret_send_string = ret_send_string + format_hex(Message_buf[6]);
-  ret_send_string = ret_send_string + format_hex(Message_buf[7]);
+  ret_send_string = ret_send_string + format_hex(Message.Message_buf[0]);
+  ret_send_string = ret_send_string + format_hex(Message.Message_buf[1]);
+  ret_send_string = ret_send_string + format_hex(Message.Message_buf[2]);
+  ret_send_string = ret_send_string + format_hex(Message.Message_buf[3]);
+  ret_send_string = ret_send_string + format_hex(Message.Message_buf[4]);
+  ret_send_string = ret_send_string + format_hex(Message.Message_buf[5]);
+  ret_send_string = ret_send_string + format_hex(Message.Message_buf[6]);
+  ret_send_string = ret_send_string + format_hex(Message.Message_buf[7]);
 
-  ret_send_string = ret_send_string + format_hex_UL(Message_timestamp);
+  ret_send_string = ret_send_string + format_hex_UL(Message.Message_timestamp);
+
+  ret_send_string = ret_send_string + "\0";
 
   return ret_send_string;
 }
@@ -1279,8 +1306,13 @@ void version_5()
 
   ctrl.reset();
   
-  Serial.println("Version 5");
+  Serial.println("CAN:Version 5");
+  Serial.print("CAN:Revision ");
   Serial.println(Revision);
+
+  // Statistics
+  unsigned long send_statistics_time = millis() + 1000;
+  unsigned int messages_received = 0;  // Messages received from CAN to send via serial.
 
   while (ctrl.restart == false)
   {
@@ -1338,21 +1370,44 @@ void version_5()
         {
           digitalWrite(23, HIGH); // LED ON
 
-          messages_to_send.store(serial_send_format(ID, len, buf, MESSAGE_TIME));
+          messages_to_send.store(ID, len, buf, MESSAGE_TIME);
 
           digitalWrite(23, LOW);  // LED OFF
+
+          messages_received++;    // Increase Message Received Counter
         }
       }
       else
       {
         digitalWrite(23, HIGH); // LED ON
 
-        messages_to_send.store(serial_send_format(ID, len, buf, MESSAGE_TIME));
+        messages_to_send.store(ID, len, buf, MESSAGE_TIME);
 
         digitalWrite(23, LOW);  // LED OFF
+
+        messages_received++;    // Increase Message Received Counter
       }
     }
-    
+
+    // Process Statistics
+    if ((messages_to_send.message_count() > 0) && (millis() > send_statistics_time))
+    {
+      send_statistics_time = millis() + 1000;
+
+      buf[0] = highByte(messages_received);
+      buf[1] = lowByte(messages_received);
+      buf[2] = 0;
+      buf[3] = 0;
+      buf[4] = 0;
+      buf[5] = 0;
+      buf[6] = 0;
+      buf[7] = 0;
+
+      messages_to_send.store(0xffff, 0x8, buf, millis());
+
+      messages_received = 0;
+    }
+
     // Read from host
     if((Serial.available() > 0 && ctrl.read(read_com()) == true) || ctrl.wait_for_request == false)
     {
@@ -1360,7 +1415,7 @@ void version_5()
       {
         for (int pos = 0; pos < messages_to_send.message_count(); pos++)
         {
-          Serial.println(messages_to_send.get(pos));
+          Serial.println(serial_send_format(messages_to_send.get(pos)));
           if (ctrl.send_delay > 0)
           {
             delay(ctrl.send_delay);
@@ -1442,8 +1497,8 @@ void loop()
     }
     else
     {
-      Serial.println("Version Not Supported");
-      Serial.println("Changing to Version 5");
+      Serial.println("CAN:Version Not Supported");
+      Serial.println("CAN:Changing to Version 5");
       ctrl.version = 5;
     }
 

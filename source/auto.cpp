@@ -1636,8 +1636,11 @@ float AUTOMOBILE_CALCULATED::s_temp()
 
 //-----------
 
-bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
+bool AUTOMOBILE::parse(string Line, int &PID_Recieved, bool &Identified)
 {
+  PID_Recieved = 0;
+  Identified = false;
+
   bool ret_message_recieved = false;
   
   string left = "";
@@ -1675,13 +1678,12 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
   valid.catch_false(string_hex_to_int(Line.substr(34, 2), time_byte_2));
   valid.catch_false(string_hex_to_int(Line.substr(36, 2), time_byte_3));
 
-  data.TIMESTAMP_MESSAGE_SENT = (time_byte_0 * (256 ^3)) + (time_byte_1 * (256 ^2)) + 
-                    (time_byte_2 * 256) + time_byte_3;
-
   if (valid.has_false() == false)
   {
     // Compute ID
     data.ID = upper *256 + lower;
+    data.TIMESTAMP_MESSAGE_SENT = (time_byte_0 * (256 ^3)) + (time_byte_1 * (256 ^2)) + 
+                    (time_byte_2 * 256) + time_byte_3;
 
     // Store into latest values
     LATEST_PID = data.ID;
@@ -1694,252 +1696,313 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
     LATEST_DATA[6] = data.DATA[6];
     LATEST_DATA[7] = data.DATA[7];
 
+    // NOTE:
+    //  Set PID_Recieved if message is to be computed immediatly.
+    //    PID_Recieved = data.ID;
+
     // Put value in pos
     if(data.ID == 0)
     {
       DATA.AD_0 = data;
+      Identified = true;
     }
     else if(data.ID == 16)
     {
       DATA.AD_10 = data;
       PID_Recieved = data.ID;
-      ret_message_recieved = true;
+      Identified = true;
     }
     else if(data.ID == 48)
     {
       DATA.AD_30 = data;
+      Identified = true;
     }
     else if(data.ID == 50)
     {
       DATA.AD_32 = data;
+      Identified = true;
     }
     else if(data.ID == 74)
     {
       DATA.AD_4A = data;
+      Identified = true;
     }
     else if(data.ID == 75)
     {
       DATA.AD_4B = data;
+      Identified = true;
     }
     else if(data.ID == 80)
     {
       DATA.AD_50 = data;
+      Identified = true;
     }
     else if(data.ID == 96)
     {
       DATA.AD_60 = data;
+      Identified = true;
     }
     else if(data.ID == 100)
     {
       DATA.AD_64 = data;
+      Identified = true;
     }
     else if(data.ID == 106)
     {
       DATA.AD_6A = data;
+      Identified = true;
     }
     else if(data.ID == 112)
     {
       DATA.AD_70 = data;
+      Identified = true;
     }
     else if(data.ID == 128)
     {
       DATA.AD_80 = data;
+      Identified = true;
     }
     else if(data.ID == 144)
     {
       DATA.AD_90 = data;
+      Identified = true;
     }
     else if(data.ID == 160)
     {
       DATA.AD_A0 = data;
+      Identified = true;
     }
     else if(data.ID == 176)
     {
       DATA.AD_B0 = data;
+      Identified = true;
     }
     else if(data.ID == 192)
     {
       DATA.AD_C0 = data;
+      Identified = true;
     }
     else if(data.ID == 200)
     {
       DATA.AD_C8 = data;
+      Identified = true;
     }
     else if(data.ID == 208)
     {
       DATA.AD_D0 = data;
+      Identified = true;
     }
     else if(data.ID == 224)
     {
       DATA.AD_E0 = data;
+      Identified = true;
     }
     else if(data.ID == 240)
     {
       DATA.AD_F0 = data;
       PID_Recieved = data.ID;
-      ret_message_recieved = true;
+      Identified = true;
     }
     else if(data.ID == 248)
     {
       DATA.AD_F8 = data;
+      Identified = true;
     }
     else if(data.ID == 256)
     {
       DATA.AD_100 = data;
+      Identified = true;
     }
     else if(data.ID == 258)
     {
       DATA.AD_102 = data;
+      Identified = true;
     }
     else if(data.ID == 416)
     {
       DATA.AD_1A0 = data;
+      Identified = true;
     }
     else if(data.ID == 448)
     {
       DATA.AD_1C0 = data;
+      Identified = true;
     }
     else if(data.ID == 288)
     {
       DATA.AD_120 = data;
+      Identified = true;
     }
     else if(data.ID == 296)
     {
       DATA.AD_128 = data;
+      Identified = true;
     }
     else if(data.ID == 304)
     {
       DATA.AD_130 = data;
+      Identified = true;
     }
     else if(data.ID == 312)
     {
       DATA.AD_138 = data;
+      Identified = true;
     }
     else if(data.ID == 320)
     {
       DATA.AD_140 = data;
+      Identified = true;
     }
     else if(data.ID == 336)
     {
       DATA.AD_150 = data;
+      Identified = true;
     }
     else if(data.ID == 352)
     {
       DATA.AD_160 = data;
+      Identified = true;
     }
     else if(data.ID == 382)
     {
       DATA.AD_17E = data;
+      Identified = true;
     }
     else if(data.ID == 384)
     {
       DATA.AD_180 = data;
+      Identified = true;
     }
     else if(data.ID == 400)
     {
       DATA.AD_190 = data;
       PID_Recieved = data.ID;
-      ret_message_recieved = true;
+      Identified = true;
     }
     else if(data.ID == 464)
     {
       DATA.AD_1D0 = data;
+      Identified = true;
     }
     else if(data.ID == 480)
     {
       DATA.AD_1E0 = data;
+      Identified = true;
     }
     else if(data.ID == 512)
     {
       DATA.AD_200 = data;
+      Identified = true;
     }
     else if(data.ID == 520)
     {
       DATA.AD_208 = data;
+      Identified = true;
     }
     else if(data.ID == 528)
     {
       DATA.AD_210 = data;
+      Identified = true;
     }
     else if(data.ID == 531)
     {
       DATA.AD_213 = data;
+      Identified = true;
     }
     else if(data.ID == 536)
     {
       DATA.AD_218 = data;
+      Identified = true;
     }
     else if(data.ID == 583)
     {
       DATA.AD_247 = data;
+      Identified = true;
     }
     else if(data.ID == 594)
     {
       DATA.AD_252 = data;
+      Identified = true;
     }
     else if(data.ID == 595)
     {
       DATA.AD_253 = data;
+      Identified = true;
     }
     else if(data.ID == 608)
     {
       DATA.AD_260 = data;
+      Identified = true;
     }
     else if(data.ID == 624)
     {
       DATA.AD_270 = data;
+      Identified = true;
     }
     else if(data.ID == 640)
     {
       DATA.AD_280 = data;
+      Identified = true;
     }
     else if(data.ID == 656)
     {
       DATA.AD_290 = data;
+      Identified = true;
     }
     else if(data.ID == 688)
     {
       DATA.AD_2B0 = data;
+      Identified = true;
     }
     else if(data.ID == 704)
     {
       DATA.AD_2C0 = data;
+      Identified = true;
     }
     else if(data.ID == 720)
     {
       DATA.AD_2D0 = data;
+      Identified = true;
     }
     else if(data.ID == 724)
     {
       DATA.AD_2D4 = data;
+      Identified = true;
     }
     else if(data.ID == 728)
     {
       DATA.AD_2D8 = data;
+      Identified = true;
     }
     else if(data.ID == 752)
     {
       DATA.AD_2F0 = data;
+      Identified = true;
     }
     else if(data.ID == 784)
     {
       DATA.AD_310 = data;
+      Identified = true;
     }
     else if(data.ID == 792)
     {
       DATA.AD_318 = data;
+      Identified = true;
     }
     else if(data.ID == 832)
     {
       DATA.AD_340 = data;
+      Identified = true;
     }
     else if(data.ID == 864)
     {
       DATA.AD_360 = data;
+      Identified = true;
     }
     else if(data.ID == 896)
     {
       DATA.AD_380 = data;
+      Identified = true;
     }
     else if(data.ID == 904)
     {
@@ -1948,10 +2011,12 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
     else if(data.ID == 912)
     {
       DATA.AD_390 = data;
+      Identified = true;
     }
     else if(data.ID == 920)
     {
       DATA.AD_398 = data;
+      Identified = true;
     }
     else if(data.ID == 948)
     {
@@ -1960,30 +2025,37 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
     else if(data.ID == 1024)
     {
       DATA.AD_400 = data;
+      Identified = true;
     }
     else if(data.ID == 1029)
     {
       DATA.AD_405 = data;
+      Identified = true;
     }
     else if(data.ID == 1034)
     {
       DATA.AD_40A = data;
+      Identified = true;
     }
     else if(data.ID == 1077)
     {
       DATA.AD_435 = data;
+      Identified = true;
     }
     else if(data.ID == 1109)
     {
       DATA.AD_455 = data;
+      Identified = true;
     }
     else if(data.ID == 1409)
     {
       DATA.AD_581 = data;
+      Identified = true;
     }
     else if(data.ID == 1506)
     {
       DATA.AD_5E2 = data;
+      Identified = true;
     }
 
     // Message Recieved Lines
@@ -1991,35 +2063,61 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved)
     {
       DATA.AD_7E8 = data;
       PID_Recieved = data.ID;
-      ret_message_recieved = true;
+      Identified = true;
     }
     else if(data.ID == 2025)
     {
       DATA.AD_7E9 = data;
       PID_Recieved = data.ID;
-      ret_message_recieved = true;
+      Identified = true;
     }
     else if(data.ID == 2026)
     {
       DATA.AD_7EA = data;
       PID_Recieved = data.ID;
-      ret_message_recieved = true;
+      Identified = true;
     }
     else if(data.ID == 2027)
     {
       DATA.AD_7EB = data;
       PID_Recieved = data.ID;
-      ret_message_recieved = true;
+      Identified = true;
+    }
+    
+    // RasFLED CAN Messages
+    else if(data.ID == 0xffff)
+    {
+      DATA.AD_FFFF = data;
+      PID_Recieved = data.ID;
+      Identified = true;
     }
     
     // Unknown
     else
     {
       DATA.AD_UNKNOWN = data;
+      Identified = false;
     }
+
+    ret_message_recieved = true;
   }
 
   return ret_message_recieved;
+}
+
+void COMMUNICATION_STATISTICS::process_received(int SentA, int SentB)
+{
+  CAN_SENT = (SentA * 256) + SentB;
+}
+
+int COMMUNICATION_STATISTICS::can_sent()
+{
+  return CAN_SENT;
+}
+
+int COMMUNICATION_STATISTICS::ras_recieved()
+{
+  return RAS_RECEIVED;
 }
 
 bool AUTOMOBILE_AVAILABILITY::check_for_live_data(unsigned long tmeFrame_Time)
@@ -2316,6 +2414,7 @@ bool AUTOMOBILE::active()
 void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time)
 {
   int pid_recieved = 0;
+  bool identified = false;
 
   if (AVAILABILITY.check_for_live_data(tmeFrame_Time) == false)
   {
@@ -2341,14 +2440,13 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
       {
         message_count++;
 
-        if (parse(input, pid_recieved) == true)
+        if (parse(input, pid_recieved, identified) == true)
         {
           AUTOMOBILE_DATA_LINE message;
           bool recieved_cam_message = false;
 
           // Check to see what was requested and put data in correct 
           //  spot.
-
           if (pid_recieved == 0x7E8)
           {
             message = DATA.AD_7E8;
@@ -2540,16 +2638,22 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
             }
           }
           
-          else  // Message was read passivly, perform immediate calculation on some.
-
+          else if (identified)  // Message was read passivly, perform immediate calculation on some.
+                                // Only if message was identified.
           {
             // High level Compute requiring calculation on all data.
             //  Compute on all data but can be processor intensive.
 
             // Only works if parse returns true as PID_RECIEVED.
             
+            // Statistics from RasCan
+            if (pid_recieved == 0xFFFF)
+            {
+              STATISTICS.process_received(DATA.AD_FFFF.DATA[0], DATA.AD_FFFF.DATA[1]);
+            }
+
             // Steering Wheel Angle
-            if (pid_recieved == 0x0010)
+            else if (pid_recieved == 0x0010)
             {
               STATUS.STEERING.store_steering_wheel_angle((DATA.AD_10.DATA[6] *256) + DATA.AD_10.DATA[7], 
                                                           DATA.AD_10.DATA[2]);
@@ -2579,11 +2683,30 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
             AVAILABILITY.set_active(STATUS, true, tmeFrame_Time);
             CHANGED = true;
           }
+
+          else    // Message was not identified
+
+          {
+            message = DATA.AD_UNKNOWN;
+            ALERTS_2.res_alert_no_condition(RESERVE_ALERT_UNKNOWN_MESSAGE, "Unidentfied Message Received.");
+            cons.printw("Unidentfied Message From Can Bus: " + message.ORIG);
+          }
         }
 
         // Process Nova Calculations
         NOVA.process(tmeFrame_Time, LATEST_PID, LATEST_DATA);
 
+      }
+      else  // Message was non standard size
+      {
+        // output it to the console.
+        if (input.size() > 4)
+        {
+          if (input.substr(0, 4) == "CAN:")
+          {
+            cons.printw(input);
+          }
+        }
       }
     }
   }
@@ -2643,7 +2766,7 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     STATUS.FUEL.store_percentage(DATA.AD_C0.DATA[7]);
     STATUS.FUEL.store_level(DATA.AD_380.DATA[7]);
 
-    if (ALERTS_2.res_alert_condition(RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 2.0f, STATUS.FUEL.val_level() > 4.0f))
+    if (ALERTS_2.res_alert_condition(RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 1.0f, STATUS.FUEL.val_level() > 2.0f))
     {
       ALERTS_2.res_update_alert_text(RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + STATUS.FUEL.level());
     }

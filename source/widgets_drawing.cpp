@@ -70,7 +70,7 @@ void MARKER_GADGET::draw(system_data &sdSysData, ImDrawList* draw_list, ImVec2 S
     if (PROPS.HORIZONTAL)
     {
       draw_list->AddRectFilled(ImVec2(Start_Pos.x, Start_Pos.y), 
-                    ImVec2(Start_Pos.x + Size.x, Start_Pos.y + PROPS.SIZE), sdSysData.COLOR_SELECT.color(PROPS.COLOR).DIM);
+                    ImVec2(Start_Pos.x + Size.x, Start_Pos.y + PROPS.SIZE), sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V);
       // No left side, relabel for bottom is not necessary.
     }
     else
@@ -78,12 +78,12 @@ void MARKER_GADGET::draw(system_data &sdSysData, ImDrawList* draw_list, ImVec2 S
       if (PROPS.LEFT_SIDE)
       {
         draw_list->AddRectFilled(ImVec2(Start_Pos.x, Start_Pos.y), 
-                      ImVec2(Start_Pos.x + PROPS.SIZE, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR).DIM);
+                      ImVec2(Start_Pos.x + PROPS.SIZE, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V);
       }
       else
       {
         draw_list->AddRectFilled(ImVec2(Start_Pos.x + Size.x - PROPS.SIZE , Start_Pos.y), 
-                      ImVec2(Start_Pos.x + Size.x, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR).DIM);
+                      ImVec2(Start_Pos.x + Size.x, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V);
       }
     }
   }

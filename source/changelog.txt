@@ -1,3 +1,8 @@
+2.092_231219
+  - Changed the way RasCAN stored its messages to send. 
+  - Added a simple RasCan statistics PID (0xFFFF).
+  - Changed a few other things.
+
 2.091_231217
   - Added audiable alerts for raise alert, warning, and 
       cleared.

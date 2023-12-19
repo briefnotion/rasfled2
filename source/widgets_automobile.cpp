@@ -640,6 +640,10 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
     }
 
     ImGui::Text("Size: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size());
+
+    ImGui::Text("CAN: %d", sdSysData.CAR_INFO.STATISTICS.can_sent());
+
+    ImGui::Text("RAS: %d", sdSysData.CAR_INFO.STATISTICS.ras_recieved());
   }
   ImGui::EndChild();
 

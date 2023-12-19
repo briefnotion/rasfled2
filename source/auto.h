@@ -165,6 +165,11 @@ class AUTOMOBILE_DATA
   AUTOMOBILE_DATA_LINE AD_7EA;  //* 2025 - 
   AUTOMOBILE_DATA_LINE AD_7EB;  //* 2025 - 
 
+  AUTOMOBILE_DATA_LINE AD_FFFF; // RasFLED CAN Message - Statistics
+                                //  A and B - 2 byte unsigned int
+                                //    Number of messages sent via serial over 1 second
+                                //    interval. message not sent if 0.
+
   AUTOMOBILE_DATA_LINE AD_UNKNOWN;
 };
 
@@ -840,6 +845,20 @@ class AUTOMOBILE_CALCULATED
   //  is handling
 };
 
+class COMMUNICATION_STATISTICS
+{
+  private:
+
+  int CAN_SENT = 0;
+  int RAS_RECEIVED = 0;
+
+  public:
+
+  void process_received(int SentA, int SentB);
+  int can_sent();
+  int ras_recieved();
+};
+
 class AUTOMOBILE_AVAILABILITY
 {
   private:
@@ -894,7 +913,7 @@ class AUTOMOBILE
   int LATEST_DATA[8] = {0};
   // Hoping to return to this because its hacky.
 
-  bool parse(string Line, int &PID_Recieved);
+  bool parse(string Line, int &PID_Recieved, bool &Identified);
   // Returns true if line is considered a message recieved.
   //  Message id will be in PID_Recieved
 
@@ -907,6 +926,7 @@ class AUTOMOBILE
   AUTOMOBILE_CALCULATED CALCULATED;
   AUTOMOBILE_PROPERTIES PROPS;
   AUTOMOBILE_NOVA NOVA;
+  COMMUNICATION_STATISTICS STATISTICS;
 
   int message_count = 0;
 
