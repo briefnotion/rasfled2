@@ -70,7 +70,7 @@ void MARKER_GADGET::draw(system_data &sdSysData, ImDrawList* draw_list, ImVec2 S
     if (PROPS.HORIZONTAL)
     {
       draw_list->AddRectFilled(ImVec2(Start_Pos.x, Start_Pos.y), 
-                    ImVec2(Start_Pos.x + Size.x, Start_Pos.y + PROPS.SIZE), sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V);
+                    ImVec2(Start_Pos.x + Size.x, Start_Pos.y + PROPS.SIZE), sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD);
       // No left side, relabel for bottom is not necessary.
     }
     else
@@ -78,12 +78,12 @@ void MARKER_GADGET::draw(system_data &sdSysData, ImDrawList* draw_list, ImVec2 S
       if (PROPS.LEFT_SIDE)
       {
         draw_list->AddRectFilled(ImVec2(Start_Pos.x, Start_Pos.y), 
-                      ImVec2(Start_Pos.x + PROPS.SIZE, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V);
+                      ImVec2(Start_Pos.x + PROPS.SIZE, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD);
       }
       else
       {
         draw_list->AddRectFilled(ImVec2(Start_Pos.x + Size.x - PROPS.SIZE , Start_Pos.y), 
-                      ImVec2(Start_Pos.x + Size.x, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V);
+                      ImVec2(Start_Pos.x + Size.x, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD);
       }
     }
   }
@@ -460,11 +460,19 @@ void DRAW_D2_PLOT::merge(unsigned long Time, int Sub_Graph, int Line_Number)
             }
 
             MIN_MAX_TIME_SLICE_SIMPLE tmp_slice;
-            
-            tmp_slice.MEAN_VALUE = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_TOTAL / SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_COUNT;
-            tmp_slice.MAX_VALUE = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_MAX;
-            tmp_slice.MIN_VALUE = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_MIN;
-            tmp_slice.TIME_CREATED = Time;
+
+            if (SUB_GRAPHS[Sub_Graph].LINE[Line_Number].SINGLE_VALUE)
+            {
+              tmp_slice.MEAN_VALUE = 1.0f;
+              tmp_slice.TIME_CREATED = Time;
+            }
+            else
+            {
+              tmp_slice.MEAN_VALUE = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_TOTAL / SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_COUNT;
+              tmp_slice.MAX_VALUE = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_MAX;
+              tmp_slice.MIN_VALUE = SUB_GRAPHS[Sub_Graph].LINE[Line_Number].HOLDOVER_MIN;
+              tmp_slice.TIME_CREATED = Time;
+            }
 
             if (point > 0)
             {
@@ -477,7 +485,7 @@ void DRAW_D2_PLOT::merge(unsigned long Time, int Sub_Graph, int Line_Number)
             {
               update(Time, Sub_Graph +1, Line_Number, tmp_slice);
             }
-            
+
             SUB_GRAPHS[Sub_Graph].LINE[Line_Number].holdover_clear();
           }
         }
@@ -578,7 +586,7 @@ void DRAW_D2_PLOT::create_subgraph(int Max_Data_Point_Count, unsigned long Durat
   SUB_GRAPHS.push_back(tmp_sub_graph);
 }
 
-void DRAW_D2_PLOT::create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor)
+void DRAW_D2_PLOT::create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor, bool Single_Value)
 {
   for (int graph = 0; graph < (int)SUB_GRAPHS.size(); graph++)
   {
@@ -594,10 +602,17 @@ void DRAW_D2_PLOT::create_line(int Color, bool Display_Mean, bool Display_Min_Ma
     tmp_line.RESERVE_SIZE_CUTOFF = (int)((float)SUB_GRAPHS[graph].DATA_POINTS_COUNT_MAX * (float)1.4);
     tmp_line.RESERVE_SIZE_TRIM_AMOUNT = (int)((float)SUB_GRAPHS[graph].DATA_POINTS_COUNT_MAX * (float).3);
 
+    tmp_line.SINGLE_VALUE = Single_Value;
+
     tmp_line.DATA_POINT.reserve(tmp_line.RESERVE_SIZE);
 
     SUB_GRAPHS[graph].LINE.push_back(tmp_line);
   }
+}
+
+void DRAW_D2_PLOT::create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor)
+{
+  create_line(Color, Display_Mean, Display_Min_Max, Point_Size, Min_Max_Overlap_Factor, false);
 }
 
 void DRAW_D2_PLOT::create(unsigned long Start_Plot_Time)
@@ -731,6 +746,7 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData)
 
     for (int line = 0; line < (int)SUB_GRAPHS[graph].LINE.size(); line++)
     {
+      bool single_value_out_of_bounds_x = false;
       bool min_max_out_of_bounds_x = false;
       bool mean_out_of_bounds_x_start = false;
       bool mean_out_of_bounds_x_end = false;
@@ -746,9 +762,32 @@ void DRAW_D2_PLOT::draw_graph(system_data &sdSysData)
 
       ImVec2 min;
       ImVec2 max;
+      ImVec2 top;
+      ImVec2 bottom;
 
       for (int point = 0; point < (int)SUB_GRAPHS[graph].LINE[line].DATA_POINT.size(); point++)
       {
+        // Draw Single Value Line
+        if (SUB_GRAPHS[graph].LINE[line].SINGLE_VALUE)
+        {
+          single_value_out_of_bounds_x = false;
+
+          if (SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].MEAN_VALUE > 0.0f)
+          {
+            top = position_on_plot(
+                  ((float)(sdSysData.PROGRAM_TIME.current_frame_time() - SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].TIME_CREATED) / SUB_GRAPHS[graph].TIME_PER_POINT_F), 
+                  PROPS.DATA_POINTS_VALUE_MAX, SUB_GRAPHS[graph], single_value_out_of_bounds_x);
+            bottom = position_on_plot(
+                  ((float)(sdSysData.PROGRAM_TIME.current_frame_time() - SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].TIME_CREATED) / SUB_GRAPHS[graph].TIME_PER_POINT_F), 
+                  0.0f, SUB_GRAPHS[graph], single_value_out_of_bounds_x);
+
+            if (single_value_out_of_bounds_x == false)
+            {
+              draw_list->AddLine(top, bottom, sdSysData.COLOR_SELECT.color(SUB_GRAPHS[graph].LINE[line].LINE_COLOR).STANDARD, SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
+            }
+          }
+        }
+
         // Draw Min Max
         if (SUB_GRAPHS[graph].LINE[line].DISPLAY_MIN_MAX)
         {

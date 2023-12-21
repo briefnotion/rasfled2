@@ -644,6 +644,8 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
     ImGui::Text("CAN: %d", sdSysData.CAR_INFO.STATISTICS.can_sent());
 
     ImGui::Text("RAS: %d", sdSysData.CAR_INFO.STATISTICS.ras_recieved());
+
+    ImGui::Text("ERR: %d", sdSysData.CAR_INFO.STATISTICS.errors());
   }
   ImGui::EndChild();
 
@@ -661,29 +663,33 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
       {
         button_adjust = ImGui::GetCursorScreenPos();
 
-        if(sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS)
-        {
-          if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,27.0f)))
+        // Rudimentry does it fit on screen comparison
+        if (button_adjust.y < 1024.0f)
+        {  
+          if(sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS)
           {
-            sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
+            if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,27.0f)))
+            {
+              sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
+            }
           }
-        }
-        else
-        {
-          if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,7.0f)))
+          else
           {
-            sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
+            if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,7.0f)))
+            {
+              sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
+            }
+          
+            if (ImGui::IsItemHovered())
+            {
+              ImGui::Text("%X", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.ID);
+            }
           }
-         
-          if (ImGui::IsItemHovered())
-          {
-            ImGui::Text("%X", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.ID);
-          }
-        }
 
-        ImGui::SetCursorScreenPos(button_adjust);
+          ImGui::SetCursorScreenPos(button_adjust);
 
-        nova_draw(sdSysData, draw_list, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
+          nova_draw(sdSysData, draw_list, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
+        }
       }
     }
   }    
@@ -937,6 +943,8 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.white(), true, true, 2.0f, 1.0f);
     SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.orange(), true, true, 2.0f, 1.0f);
     SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.cyan(), true, true, 2.0f, 1.0f);
+    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.red(), false, false, 2.0f, 1.0f, true);
+    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.green(), false, false, 2.0f, 1.0f, true);
     
     SDATA.PLOT_SLOW.create(sdSysData.PROGRAM_TIME.current_frame_time());
   }
@@ -1393,6 +1401,8 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     SDATA.CAM_COMM_ERR = SDATA.CAM_COMM_ERR / 10;
   }
 
+  SDATA.CAM_STAT_ERR = sdSysData.CAR_INFO.STATISTICS.errors();
+
   // Steering
 
   SDATA.STEERING_WHEEL_ANGLE_VAL = sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle();
@@ -1547,6 +1557,18 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, SDATA.SPEED_IMPRES);
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.TEMP_S_TEMP);
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
+
+    if (SDATA.CAM_COMM_ERR > SDATA.PREV_D_CAM_COMM_ERROR)
+    {
+      SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, 1.0f);
+      SDATA.PREV_D_CAM_COMM_ERROR = SDATA.CAM_COMM_ERR;
+    }
+
+    if (SDATA.CAM_STAT_ERR > SDATA.PREV_D_CAM_STAT_ERROR)
+    {
+      SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 5, 1.0f);
+      SDATA.PREV_D_CAM_STAT_ERROR = SDATA.CAM_STAT_ERR;
+    }
 
     SDATA.VB_SPEED.update_value(sdSysData, SDATA.SPEED);
     SDATA.VB_S_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);

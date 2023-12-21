@@ -247,6 +247,7 @@ class DISPLAY_DATA_AUTOMOBILE
   float BAROMETER_VAL = 0.0f;
 
   int CAM_COMM_ERR = 0;
+  int CAM_STAT_ERR = 0;
 
   // Steering
 
@@ -303,6 +304,10 @@ class DISPLAY_DATA_AUTOMOBILE
   float LB_TTL_VAL = 0.0f;
   string RB_TTL = "";
   float RB_TTL_VAL = 0.0f;
+
+  // Errors
+  int PREV_D_CAM_COMM_ERROR = 0;
+  int PREV_D_CAM_STAT_ERROR = 0;
 
   // Display Data
   T_DATA_DISPLAY D_FUEL_RAIL_PRESSURE;

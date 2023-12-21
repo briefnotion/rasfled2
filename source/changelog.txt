@@ -1,3 +1,6 @@
+2.093_231220
+  - Changed a few other things.
+
 2.092_231219
   - Changed the way RasCAN stored its messages to send. 
   - Added a simple RasCan statistics PID (0xFFFF).

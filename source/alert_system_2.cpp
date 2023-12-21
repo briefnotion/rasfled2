@@ -28,7 +28,6 @@ void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Alert_Text)
 
 bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_Alert, int &Changes)
 {
-  bool ret_description_request = false;
   Changes = 0;
 
   if (Clear_Alert)
@@ -41,7 +40,6 @@ bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_
       ID = Id;
       ACTIVE = false;
       WARNING = false;
-      ret_description_request = true;
       
       // Play clear sound
       Changes = -1;
@@ -51,8 +49,6 @@ bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_
   {
     // Alert is at active status
     //  Remove warnings status if set.
-    ret_description_request = true;
-
     if (ACTIVE == false)
     {
       // Alert was previously at warning or cleared.
@@ -88,11 +84,9 @@ bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_
       
       Changes = 1;
     }
-
-    ret_description_request = true;
   }
 
-  return ret_description_request;
+  return DISPLAY;
 }
 
 bool ALERT_2_TYPE_MONITOR::warning()

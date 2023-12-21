@@ -1110,7 +1110,7 @@ void SCREEN4::draw(system_data &sdSysData)
           DISPLAY_OVERHEAD_COLOR = false;
         }
         
-        if (button_simple_color(sdSysData, "Orange", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        if (button_simple_color(sdSysData, "Orange", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
           SCREEN_COMMS.command_text_set("on");
           DISPLAY_OVERHEAD_COLOR = false;
@@ -1177,7 +1177,7 @@ void SCREEN4::draw(system_data &sdSysData)
           DISPLAY_RUNNING_COLOR = false;
         }
         
-        if (button_simple_color(sdSysData, "Orange", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        if (button_simple_color(sdSysData, "Orange", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
           SCREEN_COMMS.command_text_set("rn");
           DISPLAY_RUNNING_COLOR = false;

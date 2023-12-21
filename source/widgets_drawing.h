@@ -215,11 +215,6 @@ class DRAW_GRID
 class D2_PLOT_LINE
 {
   public:
-
-  void holdover_clear();
-
-  void holdover_update(MIN_MAX_TIME_SLICE_SIMPLE Slice_Value);
-
   int RESERVE_SIZE = 0;
   int RESERVE_SIZE_CUTOFF = 0;
   int RESERVE_SIZE_TRIM_AMOUNT = 0;
@@ -240,7 +235,14 @@ class D2_PLOT_LINE
   float HOLDOVER_MIN = 0.0f;
   float HOLDOVER_COUNT = 0.0f;
 
+  bool SINGLE_VALUE = false;
+
   vector<MIN_MAX_TIME_SLICE_SIMPLE> DATA_POINT;
+
+  void holdover_clear();
+
+  void holdover_update(MIN_MAX_TIME_SLICE_SIMPLE Slice_Value);
+
 };
 
 class DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES
@@ -338,7 +340,7 @@ class DRAW_D2_PLOT
 
   void create_subgraph(int Max_Data_Point_Count, unsigned long Duration_Span_ms, string Label);
 
-  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor);
+  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor, bool Single_Value);
   // Prepare line for drawing
   //  Color of line
   //  Show Mean Value
@@ -347,6 +349,9 @@ class DRAW_D2_PLOT
   //  Min_Max_Overlap_Factor - Size of min_max is calculated. Value of 2.0f will double
   //                            the size and cause min_max lines to overlap.
   //                            Overlapped areas should be brighter.
+
+  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor);
+  // Same as before, without single value option.
 
   void create(unsigned long Start_Plot_Time);
 

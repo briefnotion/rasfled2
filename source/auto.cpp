@@ -2108,6 +2108,15 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved, bool &Identified)
 void COMMUNICATION_STATISTICS::process_received(int SentA, int SentB)
 {
   CAN_SENT = (SentA * 256) + SentB;
+  RAS_RECEIVED = RAS_RECIEVED_CURRENT_COUNT - 1;
+  RAS_RECIEVED_CURRENT_COUNT = 0;
+
+  ERRORS = ERRORS + abs(CAN_SENT - RAS_RECEIVED);
+}
+
+void COMMUNICATION_STATISTICS::RAS_RECIEVED_CURRENT_COUNT_INC()
+{
+  RAS_RECIEVED_CURRENT_COUNT++;
 }
 
 int COMMUNICATION_STATISTICS::can_sent()
@@ -2118,6 +2127,11 @@ int COMMUNICATION_STATISTICS::can_sent()
 int COMMUNICATION_STATISTICS::ras_recieved()
 {
   return RAS_RECEIVED;
+}
+
+int COMMUNICATION_STATISTICS::errors()
+{
+  return ERRORS;
 }
 
 bool AUTOMOBILE_AVAILABILITY::check_for_live_data(unsigned long tmeFrame_Time)
@@ -2439,6 +2453,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
       if(input.size() == 38)  // v3 and v4: 2b pid 8b data 4b time_elapse
       {
         message_count++;
+        STATISTICS.RAS_RECIEVED_CURRENT_COUNT_INC();
 
         if (parse(input, pid_recieved, identified) == true)
         {
