@@ -1288,7 +1288,7 @@ void SCREEN4::draw(system_data &sdSysData)
               ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
             }
             
-            if (ImGui::Begin(("ALERT " + to_string(alert_num)).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+            if (ImGui::Begin(("ALERT " + to_string(sdSysData.ALERTS_2.gen_alert_id(alert_num))).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
             {
               ImVec2 screen_pos = ImGui::GetCursorScreenPos();
               ImGui::Text(sdSysData.ALERTS_2.gen_alert_text(alert_num).c_str());

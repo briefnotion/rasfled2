@@ -4,7 +4,7 @@
 
 // -----------------------------------------------------
 
-#define Revision "2.092_231219"
+#define Revision "2.094_231221"
 
 // -----------------------------------------------------
 // Definitions
@@ -1313,6 +1313,7 @@ void version_5()
   // Statistics
   unsigned long send_statistics_time = millis() + 1000;
   unsigned int messages_received = 0;  // Messages received from CAN to send via serial.
+  unsigned int messages_max_queue = 0; // Max number of messages in one queue.
 
   while (ctrl.restart == false)
   {
@@ -1375,6 +1376,10 @@ void version_5()
           digitalWrite(23, LOW);  // LED OFF
 
           messages_received++;    // Increase Message Received Counter
+          if (messages_to_send.message_count() > messages_max_queue)
+          {
+            messages_max_queue = messages_to_send.message_count();
+          }
         }
       }
       else
@@ -1386,6 +1391,10 @@ void version_5()
         digitalWrite(23, LOW);  // LED OFF
 
         messages_received++;    // Increase Message Received Counter
+        if (messages_to_send.message_count() > messages_max_queue)
+        {
+          messages_max_queue = messages_to_send.message_count();
+        }
       }
     }
 
@@ -1396,7 +1405,7 @@ void version_5()
 
       buf[0] = highByte(messages_received);
       buf[1] = lowByte(messages_received);
-      buf[2] = 0;
+      buf[2] = lowByte(messages_max_queue);
       buf[3] = 0;
       buf[4] = 0;
       buf[5] = 0;
@@ -1406,6 +1415,7 @@ void version_5()
       messages_to_send.store(0xffff, 0x8, buf, millis());
 
       messages_received = 0;
+      messages_max_queue = 0;
     }
 
     // Read from host

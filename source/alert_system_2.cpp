@@ -49,7 +49,7 @@ bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_
   {
     // Alert is at active status
     //  Remove warnings status if set.
-    if (ACTIVE == false)
+    if (ACTIVE == false || WARNING == true)
     {
       // Alert was previously at warning or cleared.
       // Set alert active status.
@@ -57,19 +57,8 @@ bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_
       ACTIVE = true;
       ACKNOWLEGED = false;
       DISPLAY = true;
-
-      if (WARNING)
-      {
-        // If alert was at warning status then clear warning
-        WARNING = false;
-      }
-      else
-      {
-        // If alert was not at waring status when raised, this 
-        //  means this alert was recently raised from a cleared 
-        //  status.
-        Changes = 2;
-      }
+      WARNING = false;
+      Changes = 2;
     }
   }
   else if (ACTIVE)
@@ -240,6 +229,11 @@ bool ALERT_SYSTEM_2::gen_display(int Id)
 string ALERT_SYSTEM_2::gen_alert_text(int Id)
 {
   return  GENERIC_ALERTS[Id].alert_text();
+}
+
+int ALERT_SYSTEM_2::gen_alert_id(int Id)
+{
+  return  GENERIC_ALERTS[Id].id();
 }
 
 void ALERT_SYSTEM_2::gen_acknowlege(int Id)

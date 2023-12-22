@@ -1,3 +1,8 @@
+2.094_231221
+  - Added more can bus communications statistics.
+  - Changes to alert system.
+  - Moved ADS-B screen zoom buttons to right side.
+
 2.093_231220
   - Changed a few other things.
 

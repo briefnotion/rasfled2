@@ -167,6 +167,7 @@ class AUTOMOBILE_DATA
 
   AUTOMOBILE_DATA_LINE AD_FFFF; // RasFLED CAN Message - Statistics
                                 //  A and B - 2 byte unsigned int
+                                //  C Max number of messages stored in send queue
                                 //    Number of messages sent via serial over 1 second
                                 //    interval. message not sent if 0.
 
@@ -850,6 +851,7 @@ class COMMUNICATION_STATISTICS
   private:
 
   int CAN_SENT = 0;
+  int CAN_MAX_QUEUE = 0;
   int RAS_RECEIVED = 0;
   int RAS_RECIEVED_CURRENT_COUNT = 0;
 
@@ -857,10 +859,12 @@ class COMMUNICATION_STATISTICS
 
   public:
 
-  void process_received(int SentA, int SentB);
+  void process_received(int SentA, int SentB, int SentC);
   void RAS_RECIEVED_CURRENT_COUNT_INC();
 
   int can_sent();
+  int can_max_queue();
+
   int ras_recieved();
   int errors();
 };

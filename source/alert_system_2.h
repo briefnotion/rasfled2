@@ -131,6 +131,7 @@ class ALERT_SYSTEM_2
   bool gen_warning(int Id);       // Returns WARNING value
   bool gen_display(int Id);       // Returns DISPLAY value
   string gen_alert_text(int Id);  // Text value of alert
+  int gen_alert_id(int Id);
   void gen_acknowlege(int Id);
 
   // all alerts

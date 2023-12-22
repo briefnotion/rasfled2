@@ -2105,9 +2105,11 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved, bool &Identified)
   return ret_message_recieved;
 }
 
-void COMMUNICATION_STATISTICS::process_received(int SentA, int SentB)
+void COMMUNICATION_STATISTICS::process_received(int SentA, int SentB, int SentC)
 {
   CAN_SENT = (SentA * 256) + SentB;
+  CAN_MAX_QUEUE = SentC;
+
   RAS_RECEIVED = RAS_RECIEVED_CURRENT_COUNT - 1;
   RAS_RECIEVED_CURRENT_COUNT = 0;
 
@@ -2122,6 +2124,11 @@ void COMMUNICATION_STATISTICS::RAS_RECIEVED_CURRENT_COUNT_INC()
 int COMMUNICATION_STATISTICS::can_sent()
 {
   return CAN_SENT;
+}
+
+int COMMUNICATION_STATISTICS::can_max_queue()
+{
+  return CAN_MAX_QUEUE;
 }
 
 int COMMUNICATION_STATISTICS::ras_recieved()
@@ -2664,7 +2671,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
             // Statistics from RasCan
             if (pid_recieved == 0xFFFF)
             {
-              STATISTICS.process_received(DATA.AD_FFFF.DATA[0], DATA.AD_FFFF.DATA[1]);
+              STATISTICS.process_received(DATA.AD_FFFF.DATA[0], DATA.AD_FFFF.DATA[1], DATA.AD_FFFF.DATA[2]);
             }
 
             // Steering Wheel Angle
