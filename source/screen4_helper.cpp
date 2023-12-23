@@ -275,11 +275,22 @@ bool CONSOLE_COMMUNICATION::command_text_changed()
 void CONSOLE_COMMUNICATION::command_pending_set(string Text)
 {
   PENDING_CONFIRM_COMMAND = Text;
+  PENDING_CONFIRM_WITH_CR = false;
+}
+
+void CONSOLE_COMMUNICATION::command_pending_set_cr(string Text)
+{
+  PENDING_CONFIRM_COMMAND = Text;
+  PENDING_CONFIRM_WITH_CR = true;
 }
 
 void CONSOLE_COMMUNICATION::command_pending_send()
 {
   command_text_set(PENDING_CONFIRM_COMMAND);
+  if (PENDING_CONFIRM_WITH_CR)
+  {
+    carrage_return_set();
+  }
 }
 
 string CONSOLE_COMMUNICATION::command_text_get()

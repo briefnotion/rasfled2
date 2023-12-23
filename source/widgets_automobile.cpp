@@ -932,7 +932,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     SDATA.PLOT_SLOW.PROPS.DATA_POINTS_VALUE_MAX = 80;        // 80mph
     SDATA.PLOT_SLOW.PROPS.LEFT_TO_RIGHT = false;
     SDATA.PLOT_SLOW.PROPS.BOTTOM_TO_TOP = true;
-    
+
     SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 5;
     SDATA.PLOT_SLOW.create_subgraph(300,         10 * 1000, "10s");
     SDATA.PLOT_SLOW.create_subgraph(58,         290 * 1000, "5m (4:50m)");
@@ -940,13 +940,12 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     SDATA.PLOT_SLOW.create_subgraph(60,    140 * 60 * 1000, "3h (2:20m)");
     SDATA.PLOT_SLOW.create_subgraph(60, 5 * 60 * 60 * 1000, "8h (5h)"); 
 
-    //SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_GREEN, true, true, 2.0f, 1.0f);
+    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.green(), false, false, 2.0f, 1.0f, true);
+    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.orange(), false, false, 2.0f, 1.0f, true);
     SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.red(), true, true, 2.0f, 1.0f);
     SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.white(), true, true, 2.0f, 1.0f);
     SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.orange(), true, true, 2.0f, 1.0f);
     SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.cyan(), true, true, 2.0f, 1.0f);
-    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.red(), false, false, 2.0f, 1.0f, true);
-    SDATA.PLOT_SLOW.create_line(sdSysData.COLOR_SELECT.green(), false, false, 2.0f, 1.0f, true);
     
     SDATA.PLOT_SLOW.create(sdSysData.PROGRAM_TIME.current_frame_time());
   }
@@ -1555,22 +1554,22 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   // ------------------------------------------
   // Mid Top
   {
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, SDATA.SPEED_IMPRES);
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.TEMP_S_TEMP);
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
-
     if (SDATA.CAM_COMM_ERR > SDATA.PREV_D_CAM_COMM_ERROR)
     {
-      SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, 1.0f);
+      SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, 1.0f);
       SDATA.PREV_D_CAM_COMM_ERROR = SDATA.CAM_COMM_ERR;
     }
 
     if (SDATA.CAM_STAT_ERR > SDATA.PREV_D_CAM_STAT_ERROR)
     {
-      SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 5, 1.0f);
+      SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, 1.0f);
       SDATA.PREV_D_CAM_STAT_ERROR = SDATA.CAM_STAT_ERR;
     }
+
+    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
+    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, SDATA.SPEED_IMPRES);
+    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, SDATA.TEMP_S_TEMP);
+    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 5, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
 
     SDATA.VB_SPEED.update_value(sdSysData, SDATA.SPEED);
     SDATA.VB_S_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);
@@ -1789,7 +1788,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
           {
             if (button_simple_color(sdSysData, "CLEAR DIAG\nCODES", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              Screen_Comms.command_pending_set("qdiagc");
+              Screen_Comms.command_pending_set_cr("qdiagc");
               Display_Confirm = !Display_Confirm;
             }
 

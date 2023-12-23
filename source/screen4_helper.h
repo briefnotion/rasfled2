@@ -168,6 +168,7 @@ class CONSOLE_COMMUNICATION
   bool PRINT_Q_AVAIL = false;
 
   string PENDING_CONFIRM_COMMAND = "";
+  bool PENDING_CONFIRM_WITH_CR = false;
 
   public:
 
@@ -183,6 +184,7 @@ class CONSOLE_COMMUNICATION
   string command_text_get();
 
   void command_pending_set(string Text);
+  void command_pending_set_cr(string Text);
   void command_pending_send();
 
   void command_text_clear();

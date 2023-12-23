@@ -4,7 +4,7 @@
 
 // -----------------------------------------------------
 
-#define Revision "2.094_231221"
+#define Revision "2.095_231222"
 
 // -----------------------------------------------------
 // Definitions
@@ -112,6 +112,7 @@ struct CAM_MESSAGE
   byte Message_len = 0;
   byte Message_buf[8] = {0};
   unsigned long Message_timestamp = 0;
+  // 17 bytes?
 };
 
 // -----------------------------------------------------
@@ -121,7 +122,7 @@ class MESSAGE_STORAGE
 {
   private:
   //char MESSAGES[30][39];
-  CAM_MESSAGE MESSAGES[30];
+  CAM_MESSAGE MESSAGES[60];
   
   int MESSAGE_COUNT = 0;
 
@@ -638,13 +639,15 @@ class CONTROL
       service_command_2_data_07 = 0x00;
 
       send_service_command_2 = true;
+
+      Serial.println("CAN:Diagnostic List Code");
     }
 
     // request mode 3 Clear Diagnostic Codes
     else if (read_string == "diagc")
     {
       // 0x02, 0x01, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00
-      // works - clears lamp and codes
+      // worked once, cant get it to work again
 
       // Request pid list in mode 9?
       service_command_2_data_00 = 0x02;
@@ -657,6 +660,8 @@ class CONTROL
       service_command_2_data_07 = 0x00;
 
       send_service_command_2 = true;
+
+      Serial.println("CAN:Diagnostic Clear Code");
     }
 
     // request mode 9 supported list
@@ -676,6 +681,8 @@ class CONTROL
       service_command_2_data_07 = 0x00;
 
       send_service_command_2 = true;
+
+      Serial.println("CAN:Services List Code");
     }
 
     // request mode 9 vin list
@@ -694,6 +701,8 @@ class CONTROL
       service_command_2_data_07 = 0x00;
 
       send_service_command_2 = true;
+
+      Serial.println("CAN:VIN Request Code");
     }
 
     // Tire Pressure
@@ -710,6 +719,8 @@ class CONTROL
       service_command_2_data_07 = 0x00;
 
       send_service_command_2 = true;
+
+      Serial.println("CAN:Tire 1 Unknown");
     }
     else if (read_string == "t2")
     // doesnt work
@@ -724,6 +735,8 @@ class CONTROL
       service_command_2_data_07 = 0x00;
 
       send_service_command_2 = true;
+
+      Serial.println("CAN:Tire 2 Unknown");
     }
     else if (read_string == "t3")
     // doesnt work
@@ -738,6 +751,8 @@ class CONTROL
       service_command_2_data_07 = 0x00;
 
       send_service_command_2 = true;
+
+      Serial.println("CAN:Tire 3 Unknown");
     }
     else if (read_string == "t4")
     // doesnt work
@@ -752,6 +767,8 @@ class CONTROL
       service_command_2_data_07 = 0x00;
 
       send_service_command_2 = true;
+
+      Serial.println("CAN:Tire 4 Unknown");
     }
 
     else if (read_string == "test")
@@ -765,10 +782,12 @@ class CONTROL
       if (start == false)
       {
         start = true;
+        Serial.println("CAN:Pause Off");
       }
       else
       {
         start = false;
+        Serial.println("CAN:Pause On");
       }
     }
     else if (read_string == "t")
@@ -1306,8 +1325,8 @@ void version_5()
 
   ctrl.reset();
   
-  Serial.println("CAN:Version 5");
-  Serial.print("CAN:Revision ");
+  Serial.print("CAN:Version 5 - ");
+  Serial.print("Revision ");
   Serial.println(Revision);
 
   // Statistics
@@ -1514,5 +1533,5 @@ void loop()
 
     // pause if in main loop
     delay(delay_time);
-  }    
+  }
 }

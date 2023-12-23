@@ -2057,6 +2057,11 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved, bool &Identified)
       DATA.AD_5E2 = data;
       Identified = true;
     }
+    else if(data.ID == 0x73f)
+    {
+      DATA.AD_73F = data;
+      Identified = true;
+    }
 
     // Message Recieved Lines
     else if(data.ID == 2024)
@@ -2722,6 +2727,23 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
       else  // Message was non standard size
       {
         // output it to the console.
+        /*
+        if (input.size() > 4)
+        {
+          if (input.substr(0, 4) == "CAN:")
+          {
+            cons.printw(input);
+          }
+          else
+          {
+            cons.printw("Errored Message: " + input);
+          }
+        }
+        else
+        {
+          cons.printw("Errored Message: " + input);
+        }
+        */
         if (input.size() > 4)
         {
           if (input.substr(0, 4) == "CAN:")
