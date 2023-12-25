@@ -4,7 +4,7 @@
 
 // -----------------------------------------------------
 
-#define Revision "2.096_231223"
+#define Revision "2.097_231224"
 
 // -----------------------------------------------------
 // Definitions
@@ -15,9 +15,9 @@
 
 // Message
 
-#define MESSAGES_IMMEDIATE_SIZE           6
+#define MESSAGES_IMMEDIATE_SIZE           12
 #define MESSAGES_PRIORITY_SIZE            25
-#define MESSAGES_STANDARD_SIZE            25
+#define MESSAGES_STANDARD_SIZE            15
 
 // CAN
 #define PID_PIDS_SUPPORTED_01_20          0x00  //  
@@ -154,28 +154,46 @@ class MESSAGE_STORAGE
 //  30 messages
 {
   public:
+
+  int MESSAGES_RECEIVED_COUNT_TO_SEND = 0;
+
   CAM_MESSAGE MESSAGES_IMMEDIATE[MESSAGES_IMMEDIATE_SIZE];  // Dedicated Message Storage
-  // 0 - (AD_90)  - Tachometer
-  // 1 - (AD_C8)  - Lights, Ignition Switch
-  // 2 - (AD_F0)  - Transmission
-  // 3 - (AD_200) - Cruise Control
-  // 4 - (AD_260) - Signal Lights
-  // 5 - (AD_360) - Doors, High Beam
+  int MESSAGE_COUNT_IMMEDIATE = 0;
+  // 0  - (AD_80)  - Power
+  // 1  - (AD_90)  - Tachometer
+  // 2  - (AD_C0)  - Fuel Percentage
+  // 3  - (AD_C8)  - Lights, Ignition Switch
+  // 4  - (AD_D0)  - Gear Selection
+  // 5  - (AD_F0)  - Transmission
+  // 6  - (AD_130) - Dash Indicators
+  // 7  - (AD_200) - Cruise Control
+  // 8  - (AD_252) - Brake pos pressure
+  // 9  - (AD_260) - Signal Lights
+  // 10 - (AD_360) - Doors, High Beam
+  // 11 - (AD_380) - Fuel Level
 
   CAM_MESSAGE MESSAGES_PRIORITY[MESSAGES_PRIORITY_SIZE];
   int MESSAGE_COUNT_PRIORITY = 0;
   // (AD_10)  - Steering wheel angle
   // (AD_190) - Tire Speed
   // (AD_310) - Hazards
+  // (AD_3E8) - Requested PID
+  // (AD_3E9) - Requested PID
+  // (AD_3EA) - Requested PID
+  // (AD_3EB) - Requested PID
 
   CAM_MESSAGE MESSAGES_STANDARD[MESSAGES_STANDARD_SIZE];
   int MESSAGE_COUNT_STANDARD = 0;
   // Any other message type.
 
-  int MESSAGE_COUNT = 0;
+  int message_count()
+  {
+    return MESSAGE_COUNT_IMMEDIATE + MESSAGE_COUNT_PRIORITY + MESSAGE_COUNT_STANDARD;
+  }
 
   void message_clear()
   {
+    MESSAGE_COUNT_IMMEDIATE = 0;
     MESSAGE_COUNT_PRIORITY = 0;
     MESSAGE_COUNT_STANDARD = 0;
   }
@@ -184,9 +202,9 @@ class MESSAGE_STORAGE
   {
     switch (Message_ID)
     {
-      case (0x90):
+      case (0x80):
       {
-        // 0 - (AD_90)  - Tachometer
+        // 0  - (AD_80)  - Power
         MESSAGES_IMMEDIATE[0].Message_ID = Message_ID;
         MESSAGES_IMMEDIATE[0].Message_len = Message_len;
 
@@ -201,12 +219,19 @@ class MESSAGE_STORAGE
         
         MESSAGES_IMMEDIATE[0].Message_timestamp = Message_timestamp;
 
+        if (MESSAGES_IMMEDIATE[0].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+
         MESSAGES_IMMEDIATE[0].CHANGED = true;
+        
         break;
       }
-      case (0xc8):
+      case (0x90):
       {
-        // 1 - (AD_C8)  - Lights, Ignition Switch
+        // 1  - (AD_90)  - Tachometer
         MESSAGES_IMMEDIATE[1].Message_ID = Message_ID;
         MESSAGES_IMMEDIATE[1].Message_len = Message_len;
 
@@ -221,12 +246,19 @@ class MESSAGE_STORAGE
         
         MESSAGES_IMMEDIATE[1].Message_timestamp = Message_timestamp;
 
+        if (MESSAGES_IMMEDIATE[1].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+        
         MESSAGES_IMMEDIATE[1].CHANGED = true;
+
         break;
       }
-      case (0xf0):
+      case (0xc0):
       {
-        // 2 - (AD_F0)  - Transmission
+        // 2  - (AD_C0)  - Fuel Percentage
         MESSAGES_IMMEDIATE[2].Message_ID = Message_ID;
         MESSAGES_IMMEDIATE[2].Message_len = Message_len;
 
@@ -241,12 +273,19 @@ class MESSAGE_STORAGE
         
         MESSAGES_IMMEDIATE[2].Message_timestamp = Message_timestamp;
 
+        if (MESSAGES_IMMEDIATE[2].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+
         MESSAGES_IMMEDIATE[2].CHANGED = true;
+
         break;
       }
-      case (0x200):
+      case (0xc8):
       {
-        // 3 - (AD_200) - Cruise Control
+        // 3  - (AD_C8)  - Lights, Ignition Switch
         MESSAGES_IMMEDIATE[3].Message_ID = Message_ID;
         MESSAGES_IMMEDIATE[3].Message_len = Message_len;
 
@@ -261,12 +300,19 @@ class MESSAGE_STORAGE
         
         MESSAGES_IMMEDIATE[3].Message_timestamp = Message_timestamp;
 
+        if (MESSAGES_IMMEDIATE[3].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+        
         MESSAGES_IMMEDIATE[3].CHANGED = true;
+
         break;
       }
-      case (0x260):
+      case (0xD0):
       {
-        // 4 - (AD_260) - Signal Lights
+        // 4  - (AD_D0)  - Gear Selection
         MESSAGES_IMMEDIATE[4].Message_ID = Message_ID;
         MESSAGES_IMMEDIATE[4].Message_len = Message_len;
 
@@ -281,12 +327,19 @@ class MESSAGE_STORAGE
         
         MESSAGES_IMMEDIATE[4].Message_timestamp = Message_timestamp;
 
+        if (MESSAGES_IMMEDIATE[4].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+
         MESSAGES_IMMEDIATE[4].CHANGED = true;
+        
         break;
       }
-      case (0x360):
+      case (0xF0):
       {
-        // 5 - (AD_360) - Doors, High Beam
+        // 5  - (AD_F0)  - Transmission
         MESSAGES_IMMEDIATE[5].Message_ID = Message_ID;
         MESSAGES_IMMEDIATE[5].Message_len = Message_len;
 
@@ -301,13 +354,186 @@ class MESSAGE_STORAGE
         
         MESSAGES_IMMEDIATE[5].Message_timestamp = Message_timestamp;
 
+        if (MESSAGES_IMMEDIATE[5].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+
         MESSAGES_IMMEDIATE[5].CHANGED = true;
+        
+        break;
+      }
+      case (0x130):
+      {
+        // 6  - (AD_130) - Dash Indicators
+        MESSAGES_IMMEDIATE[6].Message_ID = Message_ID;
+        MESSAGES_IMMEDIATE[6].Message_len = Message_len;
+
+        MESSAGES_IMMEDIATE[6].Message_buf[0] = Message_buf[0];
+        MESSAGES_IMMEDIATE[6].Message_buf[1] = Message_buf[1];
+        MESSAGES_IMMEDIATE[6].Message_buf[2] = Message_buf[2];
+        MESSAGES_IMMEDIATE[6].Message_buf[3] = Message_buf[3];
+        MESSAGES_IMMEDIATE[6].Message_buf[4] = Message_buf[4];
+        MESSAGES_IMMEDIATE[6].Message_buf[5] = Message_buf[5];
+        MESSAGES_IMMEDIATE[6].Message_buf[6] = Message_buf[6];
+        MESSAGES_IMMEDIATE[6].Message_buf[7] = Message_buf[7];
+        
+        MESSAGES_IMMEDIATE[6].Message_timestamp = Message_timestamp;
+
+        if (MESSAGES_IMMEDIATE[6].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+        
+        MESSAGES_IMMEDIATE[6].CHANGED = true;
+
+        break;
+      }
+      case (0x200):
+      {
+        // 7  - (AD_200) - Cruise Control
+        MESSAGES_IMMEDIATE[7].Message_ID = Message_ID;
+        MESSAGES_IMMEDIATE[7].Message_len = Message_len;
+
+        MESSAGES_IMMEDIATE[7].Message_buf[0] = Message_buf[0];
+        MESSAGES_IMMEDIATE[7].Message_buf[1] = Message_buf[1];
+        MESSAGES_IMMEDIATE[7].Message_buf[2] = Message_buf[2];
+        MESSAGES_IMMEDIATE[7].Message_buf[3] = Message_buf[3];
+        MESSAGES_IMMEDIATE[7].Message_buf[4] = Message_buf[4];
+        MESSAGES_IMMEDIATE[7].Message_buf[5] = Message_buf[5];
+        MESSAGES_IMMEDIATE[7].Message_buf[6] = Message_buf[6];
+        MESSAGES_IMMEDIATE[7].Message_buf[7] = Message_buf[7];
+        
+        MESSAGES_IMMEDIATE[7].Message_timestamp = Message_timestamp;
+
+        if (MESSAGES_IMMEDIATE[7].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+        
+        MESSAGES_IMMEDIATE[7].CHANGED = true;
+
+        break;
+      }
+      case (0x252):
+      {
+        // 8  - (AD_252) - Brake pos pressure
+        MESSAGES_IMMEDIATE[8].Message_ID = Message_ID;
+        MESSAGES_IMMEDIATE[8].Message_len = Message_len;
+
+        MESSAGES_IMMEDIATE[8].Message_buf[0] = Message_buf[0];
+        MESSAGES_IMMEDIATE[8].Message_buf[1] = Message_buf[1];
+        MESSAGES_IMMEDIATE[8].Message_buf[2] = Message_buf[2];
+        MESSAGES_IMMEDIATE[8].Message_buf[3] = Message_buf[3];
+        MESSAGES_IMMEDIATE[8].Message_buf[4] = Message_buf[4];
+        MESSAGES_IMMEDIATE[8].Message_buf[5] = Message_buf[5];
+        MESSAGES_IMMEDIATE[8].Message_buf[6] = Message_buf[6];
+        MESSAGES_IMMEDIATE[8].Message_buf[7] = Message_buf[7];
+        
+        MESSAGES_IMMEDIATE[8].Message_timestamp = Message_timestamp;
+
+        if (MESSAGES_IMMEDIATE[8].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+        
+        MESSAGES_IMMEDIATE[8].CHANGED = true;
+
+        break;
+      }
+      case (0x260):
+      {
+        // 9  - (AD_260) - Signal Lights
+        MESSAGES_IMMEDIATE[9].Message_ID = Message_ID;
+        MESSAGES_IMMEDIATE[9].Message_len = Message_len;
+
+        MESSAGES_IMMEDIATE[9].Message_buf[0] = Message_buf[0];
+        MESSAGES_IMMEDIATE[9].Message_buf[1] = Message_buf[1];
+        MESSAGES_IMMEDIATE[9].Message_buf[2] = Message_buf[2];
+        MESSAGES_IMMEDIATE[9].Message_buf[3] = Message_buf[3];
+        MESSAGES_IMMEDIATE[9].Message_buf[4] = Message_buf[4];
+        MESSAGES_IMMEDIATE[9].Message_buf[5] = Message_buf[5];
+        MESSAGES_IMMEDIATE[9].Message_buf[6] = Message_buf[6];
+        MESSAGES_IMMEDIATE[9].Message_buf[7] = Message_buf[7];
+        
+        MESSAGES_IMMEDIATE[9].Message_timestamp = Message_timestamp;
+
+        if (MESSAGES_IMMEDIATE[9].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+        
+        MESSAGES_IMMEDIATE[9].CHANGED = true;
+
+        break;
+      }
+      case (0x360):
+      {
+        // 10 - (AD_360) - Doors, High Beam
+        MESSAGES_IMMEDIATE[10].Message_ID = Message_ID;
+        MESSAGES_IMMEDIATE[10].Message_len = Message_len;
+
+        MESSAGES_IMMEDIATE[10].Message_buf[0] = Message_buf[0];
+        MESSAGES_IMMEDIATE[10].Message_buf[1] = Message_buf[1];
+        MESSAGES_IMMEDIATE[10].Message_buf[2] = Message_buf[2];
+        MESSAGES_IMMEDIATE[10].Message_buf[3] = Message_buf[3];
+        MESSAGES_IMMEDIATE[10].Message_buf[4] = Message_buf[4];
+        MESSAGES_IMMEDIATE[10].Message_buf[5] = Message_buf[5];
+        MESSAGES_IMMEDIATE[10].Message_buf[6] = Message_buf[6];
+        MESSAGES_IMMEDIATE[10].Message_buf[7] = Message_buf[7];
+        
+        MESSAGES_IMMEDIATE[10].Message_timestamp = Message_timestamp;
+
+        if (MESSAGES_IMMEDIATE[10].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+        
+        MESSAGES_IMMEDIATE[10].CHANGED = true;
+
+        break;
+      }
+      case (0x380):
+      {
+        // 11 - (AD_380) - Fuel Level
+        MESSAGES_IMMEDIATE[11].Message_ID = Message_ID;
+        MESSAGES_IMMEDIATE[11].Message_len = Message_len;
+
+        MESSAGES_IMMEDIATE[11].Message_buf[0] = Message_buf[0];
+        MESSAGES_IMMEDIATE[11].Message_buf[1] = Message_buf[1];
+        MESSAGES_IMMEDIATE[11].Message_buf[2] = Message_buf[2];
+        MESSAGES_IMMEDIATE[11].Message_buf[3] = Message_buf[3];
+        MESSAGES_IMMEDIATE[11].Message_buf[4] = Message_buf[4];
+        MESSAGES_IMMEDIATE[11].Message_buf[5] = Message_buf[5];
+        MESSAGES_IMMEDIATE[11].Message_buf[6] = Message_buf[6];
+        MESSAGES_IMMEDIATE[11].Message_buf[7] = Message_buf[7];
+        
+        MESSAGES_IMMEDIATE[11].Message_timestamp = Message_timestamp;
+
+        if (MESSAGES_IMMEDIATE[11].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+        
+        MESSAGES_IMMEDIATE[11].CHANGED = true;
+        
         break;
       }
 
       case (0x10):
       case (0x190):
       case (0x310):
+      case (0x3E8):
+      case (0x3E9):
+      case (0x3EA):
+      case (0x3EB):
       {
         // (AD_10)  - Steering wheel angle
         // (AD_190) - Tire Speed
@@ -328,6 +554,7 @@ class MESSAGE_STORAGE
           
           MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_timestamp = Message_timestamp;
           
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
           MESSAGE_COUNT_PRIORITY++;
         }
         break;
@@ -354,6 +581,7 @@ class MESSAGE_STORAGE
           
           MESSAGES_STANDARD[MESSAGE_COUNT_STANDARD].Message_timestamp = Message_timestamp;
           
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
           MESSAGE_COUNT_STANDARD++;
         }
         break;
@@ -1060,6 +1288,8 @@ class CONTROL
     start = true;
     filter = true;
     restart = false;
+    wait_for_request = true;
+    send_delay = 0;
   }
 };
 
@@ -1450,15 +1680,15 @@ bool filter(unsigned long ID)
       ret_pass = true;
       break;
 
+    case (0x200):
+      ret_pass = true;
+      break;
+
     case (0x252):
       ret_pass = true;
       break;
 
     case (0x260):
-      ret_pass = true;
-      break;
-
-    case (0x200):
       ret_pass = true;
       break;
 
@@ -1516,7 +1746,6 @@ void version_5()
 
   // Statistics
   unsigned long send_statistics_time = millis() + 1000;
-  unsigned int messages_received = 0;  // Messages received from CAN to send via serial.
   unsigned int messages_max_queue = 0; // Max number of messages in one queue.
 
   while (ctrl.restart == false)
@@ -1579,10 +1808,9 @@ void version_5()
 
           digitalWrite(23, LOW);  // LED OFF
 
-          messages_received++;    // Increase Message Received Counter
-          if (messages_to_send.MESSAGE_COUNT_PRIORITY + messages_to_send.MESSAGE_COUNT_STANDARD > messages_max_queue)
+          if (messages_to_send.message_count() > messages_max_queue)
           {
-            messages_max_queue = messages_to_send.MESSAGE_COUNT_PRIORITY + messages_to_send.MESSAGE_COUNT_STANDARD;
+            messages_max_queue = messages_to_send.message_count();
           }
         }
       }
@@ -1594,21 +1822,20 @@ void version_5()
 
         digitalWrite(23, LOW);  // LED OFF
 
-        messages_received++;    // Increase Message Received Counter
-        if (messages_to_send.MESSAGE_COUNT_PRIORITY + messages_to_send.MESSAGE_COUNT_STANDARD > messages_max_queue)
+        if (messages_to_send.message_count() > messages_max_queue)
         {
-          messages_max_queue = messages_to_send.MESSAGE_COUNT_PRIORITY + messages_to_send.MESSAGE_COUNT_STANDARD;
+          messages_max_queue = messages_to_send.message_count();
         }
       }
     }
 
     // Process Statistics
-    if ((messages_received > 0) && (millis() > send_statistics_time))
+    if ((messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND > 0) && (millis() > send_statistics_time))
     {
       send_statistics_time = millis() + 1000;
 
-      buf[0] = highByte(messages_received);
-      buf[1] = lowByte(messages_received);
+      buf[0] = highByte(messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND);
+      buf[1] = lowByte(messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND);
       buf[2] = lowByte(messages_max_queue);
       buf[3] = 0;
       buf[4] = 0;
@@ -1618,7 +1845,7 @@ void version_5()
 
       messages_to_send.store(0xffff, 0x8, buf, millis());
 
-      messages_received = 0;
+      messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND = 0;
       messages_max_queue = 0;
     }
 
