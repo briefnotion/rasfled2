@@ -876,7 +876,7 @@ int loop_2(bool TTY_Only)
       while (watcher_daemon_log.line_avail() == true)
       {
         //cons.Screen.Log_Screen_TEXT_BOX.add_line(sdSystem.PROGRAM_TIME.current_frame_time(), watcher_daemon_log.get_next_line());
-        cons_2.update_daemon_log(sdSystem, watcher_daemon_log.get_next_line());
+        cons_2.update_daemon_log(sdSystem, watcher_daemon_log.get_next_line() + "\n");
       }
 
       // Read ADS-B Aircraft JSON

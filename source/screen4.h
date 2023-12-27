@@ -78,7 +78,6 @@ class SCREEN4
 
   string COMMAND_TEXT_TEMP = "";
   string COMMAND_TEXT = "";
-  string CONSOLE_TEXT = "";
   int PREV_FRAME_KEY_DOWN = 0;
 
   // ---

@@ -2442,6 +2442,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
   int pid_recieved = 0;
   bool identified = false;
 
+  // Activity Checks for other parts of the program to reference.
   if (AVAILABILITY.check_for_live_data(tmeFrame_Time) == false)
   {
     if (AVAILABILITY.set_active(STATUS, false, tmeFrame_Time) == true)
@@ -2461,7 +2462,6 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
         cons.printw(input);
       }
 
-      // if(input.size() == 29 || input.size() == 38) //  older v1
       if(input.size() == 38)  // v3 and v4: 2b pid 8b data 4b time_elapse
       {
         message_count++;

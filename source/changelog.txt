@@ -1,6 +1,14 @@
+2.098_231226
+  - Searching for Communications Errors.
+
 2.097_231224
+  - Searching for Communications Errors.
+
 2.096_231223
+  - Searching for Communications Errors.
+
 2.095_231222
+  - Searching for Communications Errors.
 
 2.094_231221
   - Added more can bus communications statistics.

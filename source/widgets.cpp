@@ -260,12 +260,16 @@ void W_TEXT_TF::draw(system_data &sdSysData)
 
 void TEXT_CONSOLE::add_line(string Text)
 {
-  CONSOLE_TEXT = CONSOLE_TEXT + "\n" + Text;
+  CONSOLE_TEXT = CONSOLE_TEXT + Text;
   CONSOLE_SCROLL_TO_BOTTOM = true;
 
   if (CONSOLE_TEXT.size() > 1024 * 10)
   {
-    CONSOLE_TEXT.erase(0, CONSOLE_TEXT.find_first_of("\n", 512 ) + 1);
+    size_t pos = CONSOLE_TEXT.find_first_of("\n", 512);
+    if (pos != std::string::npos)
+    {
+      CONSOLE_TEXT.erase(0, pos + 1);
+    }
   } 
 }
 

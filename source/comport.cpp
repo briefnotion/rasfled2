@@ -68,6 +68,7 @@ bool COMPORT::read_from_comm()
       }
 
       RESPONSE = "";
+      buf = '\0';
     }
   }
 
@@ -97,12 +98,12 @@ bool COMPORT::create()
   if (PROPS.PORT == "")
   {
     ret_success = false;
-    READ_FROM_COMM.push_back("Test file failed to load.");
+    READ_FROM_COMM.push_back("COM:Test file failed to load.");
   }
   if (PROPS.RECEIVE_TEST_DATA == true)
   {
     file_to_deque_string(PROPS.TEST_DATA_FILENAME, TEST_DATA);
-    READ_FROM_COMM.push_back("Test file loaded.");
+    READ_FROM_COMM.push_back("COM:Test file loaded.");
     ret_success = true;
   }
   else
@@ -319,7 +320,10 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
       // Dont send more than one command per cycle. Recieving side isn't checking 
       //  multiple commands yet.
       {
-        if (SAVE_TO_LOG == true && WRITE_TO_COMM.size() >0 && PROPS.RECEIVE_TEST_DATA == false)
+        if ((SAVE_TO_LOG_SENT_DATA == true) && 
+            (SAVE_TO_LOG == true) && 
+            (WRITE_TO_COMM.size() > 0) && 
+            (PROPS.RECEIVE_TEST_DATA == false))
         {
           WRITE_TO_COMM.push_front("- Send");
           deque_string_to_file(SAVE_TO_LOG_FILENAME, WRITE_TO_COMM, true);

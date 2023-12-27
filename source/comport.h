@@ -90,6 +90,7 @@ class COMPORT
   struct termios tty_old;
 
   bool SAVE_TO_LOG = false;
+  bool SAVE_TO_LOG_SENT_DATA = false;
   string SAVE_TO_LOG_FILENAME = "";
 
   int USB = 0;
@@ -99,7 +100,7 @@ class COMPORT
   deque<string> WRITE_TO_COMM;
   // List of text to be sent to com port on next cycle.
 
-  deque<string> READ_FROM_COMM;  
+  deque<string> READ_FROM_COMM;
   // list of received data from com port
   
   deque<string> TEST_DATA;

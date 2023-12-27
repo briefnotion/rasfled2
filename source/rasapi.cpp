@@ -373,6 +373,7 @@ bool deque_string_to_file(string Dir_Filename, deque<string> &qFile, bool Append
 
   bool booActive = false;
 
+  // Append or New File
   if (Append == true)
   {
     fsFile.open(Dir_Filename, ios::app);
@@ -382,6 +383,7 @@ bool deque_string_to_file(string Dir_Filename, deque<string> &qFile, bool Append
     fsFile.open(Dir_Filename, ios::out);
   }
 
+  // Check file for error.
   if (!fsFile)
   {
     booActive = false;
@@ -392,6 +394,7 @@ bool deque_string_to_file(string Dir_Filename, deque<string> &qFile, bool Append
     booActive = true;
   }
 
+  // File did not error, continue with writte.
   if (booActive == true)
   {
     if (Append == true)
@@ -399,7 +402,10 @@ bool deque_string_to_file(string Dir_Filename, deque<string> &qFile, bool Append
       for (int pos = 0; pos < (int)qFile.size(); pos++)
       {
         fsFile << qFile[pos];
-        fsFile << endl;
+        if (pos +1 < (int)qFile.size())
+        {
+          fsFile << endl;
+        }
       }
       fsFile << endl;
       fsFile.close();
@@ -410,10 +416,10 @@ bool deque_string_to_file(string Dir_Filename, deque<string> &qFile, bool Append
       while(qFile.empty() == false)
       {
         fsFile << qFile.front();
-        fsFile << endl;
+        fsFile << endl;   // Not sure if i should if this out, like the append block.
         qFile.pop_front();
       }
-      fsFile << endl;
+      fsFile << endl;     // Not sure if i should comment this out
       fsFile.close();
       booSuccess = true;
     }

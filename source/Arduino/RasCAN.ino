@@ -4,7 +4,7 @@
 
 // -----------------------------------------------------
 
-#define Revision "2.097_231224"
+#define Revision "2.098_231226"
 
 // -----------------------------------------------------
 // Definitions
@@ -16,8 +16,8 @@
 // Message
 
 #define MESSAGES_IMMEDIATE_SIZE           12
-#define MESSAGES_PRIORITY_SIZE            25
-#define MESSAGES_STANDARD_SIZE            15
+//#define MESSAGES_PRIORITY_SIZE            25
+#define MESSAGES_STANDARD_SIZE            35
 
 // CAN
 #define PID_PIDS_SUPPORTED_01_20          0x00  //  
@@ -172,8 +172,8 @@ class MESSAGE_STORAGE
   // 10 - (AD_360) - Doors, High Beam
   // 11 - (AD_380) - Fuel Level
 
-  CAM_MESSAGE MESSAGES_PRIORITY[MESSAGES_PRIORITY_SIZE];
-  int MESSAGE_COUNT_PRIORITY = 0;
+  //CAM_MESSAGE MESSAGES_PRIORITY[MESSAGES_PRIORITY_SIZE];
+  //int MESSAGE_COUNT_PRIORITY = 0;
   // (AD_10)  - Steering wheel angle
   // (AD_190) - Tire Speed
   // (AD_310) - Hazards
@@ -188,13 +188,14 @@ class MESSAGE_STORAGE
 
   int message_count()
   {
-    return MESSAGE_COUNT_IMMEDIATE + MESSAGE_COUNT_PRIORITY + MESSAGE_COUNT_STANDARD;
+    //return MESSAGE_COUNT_IMMEDIATE + MESSAGE_COUNT_PRIORITY + MESSAGE_COUNT_STANDARD;
+    return MESSAGE_COUNT_IMMEDIATE + MESSAGE_COUNT_STANDARD;
   }
 
   void message_clear()
   {
     MESSAGE_COUNT_IMMEDIATE = 0;
-    MESSAGE_COUNT_PRIORITY = 0;
+    //MESSAGE_COUNT_PRIORITY = 0;
     MESSAGE_COUNT_STANDARD = 0;
   }
 
@@ -527,6 +528,7 @@ class MESSAGE_STORAGE
         break;
       }
 
+      /*
       case (0x10):
       case (0x190):
       case (0x310):
@@ -559,6 +561,7 @@ class MESSAGE_STORAGE
         }
         break;
       }
+      */
 
       default:
       {
@@ -610,7 +613,7 @@ class CONTROL
 
   bool restart = false;             // Restart: q
 
-  unsigned long send_delay = 0;     // Delay after send: del0 del1 del3 del10
+  //unsigned long send_delay = 0;     // Delay after send: del0 del1 del3 del10
 
   // ---
 
@@ -1242,6 +1245,7 @@ class CONTROL
       restart = true;
     }
 
+    /*
     // Delayed Response
     else if (read_string == "del0")
     {
@@ -1263,6 +1267,7 @@ class CONTROL
       send_delay = 10;
       Serial.println("CAN:Delay set to: 10");
     }
+    */
 
     // Wait for response
     else if (read_string == "wait")
@@ -1289,7 +1294,7 @@ class CONTROL
     filter = true;
     restart = false;
     wait_for_request = true;
-    send_delay = 0;
+    //send_delay = 0;
   }
 };
 
@@ -1554,6 +1559,7 @@ void send_Service_Pid_2(  unsigned char data_0, unsigned char data_1, unsigned c
   // message should be recreived on 0x7E8
 }
 
+/*
 void serial_send(unsigned long ID, byte len, byte buf[])
 {
   if(ID >= 0)
@@ -1607,6 +1613,7 @@ void serial_send_2(unsigned long Message_ID, byte Message_len, byte Message_buf[
 
   Serial.println();
 }
+*/
 
 
 String serial_send_format(CAM_MESSAGE Message)
@@ -1795,7 +1802,7 @@ void version_5()
           fake_one_byte_counter = 0;                    
         }
 
-        delay (1);
+        delayMicroseconds(50);
       }
 
       if (ctrl.filter == true)
@@ -1861,31 +1868,40 @@ void version_5()
         {
           Serial.println(serial_send_format(messages_to_send.MESSAGES_IMMEDIATE[pos]));
           messages_to_send.MESSAGES_IMMEDIATE[pos].CHANGED = false;
+          
+          /*
           if (ctrl.send_delay > 0)
           {
             delay(ctrl.send_delay);
           }
+          */
         }
       }
 
+      /*
       //Priority Message
       for (int pos = 0; pos < messages_to_send.MESSAGE_COUNT_PRIORITY; pos++)
       {
         Serial.println(serial_send_format(messages_to_send.MESSAGES_PRIORITY[pos]));
-        if (ctrl.send_delay > 0)
-        {
-          delay(ctrl.send_delay);
-        }
+        
+        //if (ctrl.send_delay > 0)
+        //{
+        //  delay(ctrl.send_delay);
+        //}
       }
+      */
 
       //Standard Message
       for (int pos = 0; pos < messages_to_send.MESSAGE_COUNT_STANDARD; pos++)
       {
         Serial.println(serial_send_format(messages_to_send.MESSAGES_STANDARD[pos]));
+        
+        /*
         if (ctrl.send_delay > 0)
         {
           delay(ctrl.send_delay);
         }
+        */
       }
       
       messages_to_send.message_clear();
