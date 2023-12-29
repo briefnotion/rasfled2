@@ -647,7 +647,15 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 
     ImGui::Text("RAS: %d", sdSysData.CAR_INFO.STATISTICS.ras_recieved());
 
-    ImGui::Text("ERR: %d", sdSysData.CAR_INFO.STATISTICS.errors());
+    ImGui::Text("CAN_T:");
+    ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.can_sent_total_count());
+
+    ImGui::Text("RAS_T:");
+    ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.ras_recieved_total_count());
+
+    ImGui::Text("DIF_T:");
+    ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.can_sent_total_count() - 
+                        sdSysData.CAR_INFO.STATISTICS.ras_recieved_total_count());
   }
   ImGui::EndChild();
 

@@ -855,6 +855,8 @@ class COMMUNICATION_STATISTICS
   int RAS_RECEIVED = 0;
   int RAS_RECIEVED_CURRENT_COUNT = 0;
 
+  int CAN_SENT_TOTAL_COUNT = 0;
+  int RAS_RECIEVED_TOTAL_COUNT = 0;
   int ERRORS = 0;
 
   public:
@@ -866,6 +868,9 @@ class COMMUNICATION_STATISTICS
   int can_max_queue();
 
   int ras_recieved();
+  
+  int can_sent_total_count();
+  int ras_recieved_total_count();
   int errors();
 };
 

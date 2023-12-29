@@ -4,7 +4,7 @@
 
 // -----------------------------------------------------
 
-#define Revision "2.098_231226"
+#define Revision "2.099_231227"
 
 // -----------------------------------------------------
 // Definitions
@@ -16,7 +16,6 @@
 // Message
 
 #define MESSAGES_IMMEDIATE_SIZE           12
-//#define MESSAGES_PRIORITY_SIZE            25
 #define MESSAGES_STANDARD_SIZE            35
 
 // CAN
@@ -172,8 +171,8 @@ class MESSAGE_STORAGE
   // 10 - (AD_360) - Doors, High Beam
   // 11 - (AD_380) - Fuel Level
 
-  //CAM_MESSAGE MESSAGES_PRIORITY[MESSAGES_PRIORITY_SIZE];
-  //int MESSAGE_COUNT_PRIORITY = 0;
+  CAM_MESSAGE MESSAGES_STANDARD[MESSAGES_STANDARD_SIZE];
+  int MESSAGE_COUNT_STANDARD = 0;
   // (AD_10)  - Steering wheel angle
   // (AD_190) - Tire Speed
   // (AD_310) - Hazards
@@ -181,21 +180,16 @@ class MESSAGE_STORAGE
   // (AD_3E9) - Requested PID
   // (AD_3EA) - Requested PID
   // (AD_3EB) - Requested PID
-
-  CAM_MESSAGE MESSAGES_STANDARD[MESSAGES_STANDARD_SIZE];
-  int MESSAGE_COUNT_STANDARD = 0;
   // Any other message type.
 
   int message_count()
   {
-    //return MESSAGE_COUNT_IMMEDIATE + MESSAGE_COUNT_PRIORITY + MESSAGE_COUNT_STANDARD;
     return MESSAGE_COUNT_IMMEDIATE + MESSAGE_COUNT_STANDARD;
   }
 
   void message_clear()
   {
     MESSAGE_COUNT_IMMEDIATE = 0;
-    //MESSAGE_COUNT_PRIORITY = 0;
     MESSAGE_COUNT_STANDARD = 0;
   }
 
@@ -527,41 +521,6 @@ class MESSAGE_STORAGE
         
         break;
       }
-
-      /*
-      case (0x10):
-      case (0x190):
-      case (0x310):
-      case (0x3E8):
-      case (0x3E9):
-      case (0x3EA):
-      case (0x3EB):
-      {
-        // (AD_10)  - Steering wheel angle
-        // (AD_190) - Tire Speed
-        // (AD_310) - Hazards
-        if (MESSAGE_COUNT_PRIORITY < MESSAGES_PRIORITY_SIZE)
-        {
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_ID = Message_ID;
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_len = Message_len;
-
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_buf[0] = Message_buf[0];
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_buf[1] = Message_buf[1];
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_buf[2] = Message_buf[2];
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_buf[3] = Message_buf[3];
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_buf[4] = Message_buf[4];
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_buf[5] = Message_buf[5];
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_buf[6] = Message_buf[6];
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_buf[7] = Message_buf[7];
-          
-          MESSAGES_PRIORITY[MESSAGE_COUNT_PRIORITY].Message_timestamp = Message_timestamp;
-          
-          MESSAGES_RECEIVED_COUNT_TO_SEND++;
-          MESSAGE_COUNT_PRIORITY++;
-        }
-        break;
-      }
-      */
 
       default:
       {
@@ -1245,30 +1204,6 @@ class CONTROL
       restart = true;
     }
 
-    /*
-    // Delayed Response
-    else if (read_string == "del0")
-    {
-      send_delay = 0;
-      Serial.println("CAN:Delay set to: 0");
-    }
-    else if (read_string == "del1")
-    {
-      send_delay = 1;
-      Serial.println("CAN:Delay set to: 1");
-    }
-    else if (read_string == "del3")
-    {
-      send_delay = 3;
-      Serial.println("CAN:Delay set to: 3");
-    }
-    else if (read_string == "del10")
-    {
-      send_delay = 10;
-      Serial.println("CAN:Delay set to: 10");
-    }
-    */
-
     // Wait for response
     else if (read_string == "wait")
     {
@@ -1294,7 +1229,6 @@ class CONTROL
     filter = true;
     restart = false;
     wait_for_request = true;
-    //send_delay = 0;
   }
 };
 
@@ -1535,14 +1469,6 @@ void sendPid(unsigned char __pid)
   CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
 }
 
-/*
-void send_Service_Pid(unsigned char __pid, unsigned char data_0) 
-{
-    unsigned char tmp[8] = {0x02, 0x22, __pid, data_0, 0, 0, 0, 0};
-    CAN0.sendMsgBuf(CAN_ID_PID, 0, 8, tmp);
-}
-*/
-
 void send_Service_Pid_2(  unsigned char data_0, unsigned char data_1, unsigned char data_2, unsigned char data_3, 
                           unsigned char data_4, unsigned char data_5, unsigned char data_6, unsigned char data_7) 
 {
@@ -1558,63 +1484,6 @@ void send_Service_Pid_2(  unsigned char data_0, unsigned char data_1, unsigned c
 
   // message should be recreived on 0x7E8
 }
-
-/*
-void serial_send(unsigned long ID, byte len, byte buf[])
-{
-  if(ID >= 0)
-  {
-    unsigned char IDl = ID % 256;
-    unsigned char IDu = (ID - IDl) / 256;
-
-    print_hex(IDu);
-    print_hex(IDl);
-  }
-  else
-  {
-    Serial.print("-- -- ");
-  }
-  
-  for(int i = 0; i<8; i++) 
-  { 
-    // Output 8 Bytes of data regradless of size.
-    if(i<len)
-    {
-      print_hex(buf[i]);
-    }
-    else if(i>len)
-    {
-      print_hex(0);        
-    }      
-  }
-
-  Serial.println();
-}
-
-
-void serial_send_2(unsigned long Message_ID, byte Message_len, byte Message_buf[], unsigned long Message_timestamp)
-{
-  unsigned char IDl = Message_ID % 256;
-  unsigned char IDu = (Message_ID - IDl) / 256;
-
-  print_hex(IDu);
-  print_hex(IDl);
-
-  print_hex(Message_buf[0]);
-  print_hex(Message_buf[1]);
-  print_hex(Message_buf[2]);
-  print_hex(Message_buf[3]);
-  print_hex(Message_buf[4]);
-  print_hex(Message_buf[5]);
-  print_hex(Message_buf[6]);
-  print_hex(Message_buf[7]);
-
-  print_hex_UL(Message_timestamp);
-
-  Serial.println();
-}
-*/
-
 
 String serial_send_format(CAM_MESSAGE Message)
 {
@@ -1805,6 +1674,7 @@ void version_5()
         delayMicroseconds(50);
       }
 
+      // Store message to queue
       if (ctrl.filter == true)
       {
         if (filter(ID) == true)
@@ -1836,30 +1706,30 @@ void version_5()
       }
     }
 
-    // Process Statistics
-    if ((messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND > 0) && (millis() > send_statistics_time))
-    {
-      send_statistics_time = millis() + 1000;
-
-      buf[0] = highByte(messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND);
-      buf[1] = lowByte(messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND);
-      buf[2] = lowByte(messages_max_queue);
-      buf[3] = 0;
-      buf[4] = 0;
-      buf[5] = 0;
-      buf[6] = 0;
-      buf[7] = 0;
-
-      messages_to_send.store(0xffff, 0x8, buf, millis());
-
-      messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND = 0;
-      messages_max_queue = 0;
-    }
-
     // Read from host
     if((Serial.available() > 0 && ctrl.read(read_com()) == true) || ctrl.wait_for_request == false)
     {
       // Received "receive" message, send queue messages
+
+      // Process Statistics
+      if ((messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND > 0) && (millis() > send_statistics_time))
+      {
+        send_statistics_time = millis() + 1000;
+
+        buf[0] = highByte(messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND);
+        buf[1] = lowByte(messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND);
+        buf[2] = lowByte(messages_max_queue);
+        buf[3] = 0;
+        buf[4] = 0;
+        buf[5] = 0;
+        buf[6] = 0;
+        buf[7] = 0;
+
+        messages_to_send.store(0xffff, 0x8, buf, millis());
+
+        messages_to_send.MESSAGES_RECEIVED_COUNT_TO_SEND = 0;
+        messages_max_queue = 0;
+      }
 
       //Immediate Message
       for (int pos = 0; pos < MESSAGES_IMMEDIATE_SIZE; pos++)
@@ -1868,40 +1738,13 @@ void version_5()
         {
           Serial.println(serial_send_format(messages_to_send.MESSAGES_IMMEDIATE[pos]));
           messages_to_send.MESSAGES_IMMEDIATE[pos].CHANGED = false;
-          
-          /*
-          if (ctrl.send_delay > 0)
-          {
-            delay(ctrl.send_delay);
-          }
-          */
         }
       }
-
-      /*
-      //Priority Message
-      for (int pos = 0; pos < messages_to_send.MESSAGE_COUNT_PRIORITY; pos++)
-      {
-        Serial.println(serial_send_format(messages_to_send.MESSAGES_PRIORITY[pos]));
-        
-        //if (ctrl.send_delay > 0)
-        //{
-        //  delay(ctrl.send_delay);
-        //}
-      }
-      */
 
       //Standard Message
       for (int pos = 0; pos < messages_to_send.MESSAGE_COUNT_STANDARD; pos++)
       {
         Serial.println(serial_send_format(messages_to_send.MESSAGES_STANDARD[pos]));
-        
-        /*
-        if (ctrl.send_delay > 0)
-        {
-          delay(ctrl.send_delay);
-        }
-        */
       }
       
       messages_to_send.message_clear();
