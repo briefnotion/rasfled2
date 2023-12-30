@@ -147,6 +147,9 @@ class system_data
   COMPORT COMMS;
   AUTOMOBILE CAR_INFO;
 
+  // GPS
+  COMPORT COMMS_GPS;
+
   // Screen Settings
   bool TTY_ONLY = false;
   COLOR_COMBOS COLOR_SELECT;

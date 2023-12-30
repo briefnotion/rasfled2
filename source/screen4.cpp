@@ -696,6 +696,36 @@ void SCREEN4::draw(system_data &sdSysData)
             }
           }
 
+          else if (DISPLAY_SCREEN == 3)
+          {
+            if (sdSysData.CAR_INFO.active())
+            {
+              ImGui::BeginChild("GPS_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+              {
+                ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
+                ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+                GPS_CONSOLE.display(sdSysData, "GPS Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+            }
+              ImGui::EndChild();
+
+              ImGui::SameLine();
+
+              ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+              ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+              {
+                AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
+              }
+              ImGui::EndChild();
+              ImGui::PopStyleColor();
+            }
+            else
+            {
+              ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
+              ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+              GPS_CONSOLE.display(sdSysData, "GPS Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+            }
+          }
+
           else if (DISPLAY_SCREEN == 4)
           {
             if (sdSysData.CAR_INFO.active())
@@ -766,6 +796,13 @@ void SCREEN4::draw(system_data &sdSysData)
           if (button_simple_toggle_color(sdSysData, "ADSB", "ADSB", DISPLAY_SCREEN == 2, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
           {
             DISPLAY_SCREEN = 2;
+          }
+
+          ImGui::SameLine();
+
+          if (button_simple_toggle_color(sdSysData, "GPS", "GPS", DISPLAY_SCREEN == 3, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+          {
+            DISPLAY_SCREEN = 3;
           }
 
           ImGui::SameLine();
@@ -1361,6 +1398,14 @@ void SCREEN4::shutdown(system_data &sdSysData)
 
     glfwDestroyWindow(window);
     glfwTerminate();
+  }
+}
+
+void SCREEN4::update_gps_gadgets(system_data &sdSysData, string Text)
+{
+  if (sdSysData.TTY_ONLY == false)
+  {
+    GPS_CONSOLE.add_line(Text);
   }
 }
 

@@ -261,6 +261,7 @@ bool check_command(CONSOLE_COMMUNICATION &cons, string command, string descripti
 {
   if (cons.command_text_get() == command)
   {
+    cons.printw("");
     cons.printw(linemerge_left_justify("________________________________________________", 
                     "CMD: " + cons.command_text_get()));
 
@@ -954,6 +955,11 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       if (check_command(cons, " alert", "Alert"))
       {
         sdSysData.ALERTS_2.add_generic_alert("Alert");
+      }
+
+      if (check_command(cons, " sound", "Alert Sound"))
+      {
+        sdSysData.ALERTS_2.sound_alert(1);
       }
 
       /*

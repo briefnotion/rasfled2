@@ -299,9 +299,11 @@ int loop_2(bool TTY_Only)
   // Disposable Variables
   int count  = 0;
 
-  // Comm Port Setup
+  // ---------------------------------------------------------------------------------------
   comms_timer.set(2);
-  sdSystem.COMMS.PROPS.PORT = COMMS_PORT;
+  
+  // Can Bus Comm Port Setup
+  sdSystem.COMMS.PROPS.PORT = COMMS_PORT_CAN;
   sdSystem.COMMS.PROPS.BAUD_RATE = COMMS_BAUD;
   sdSystem.COMMS.PROPS.BIT_COUNT = COMMS_BIT_PARITY;
   sdSystem.COMMS.PROPS.PARITY = COMMS_BIT_PARITY;
@@ -321,6 +323,24 @@ int loop_2(bool TTY_Only)
 
   // Prep Automobile Send Messages
   sdSystem.CAR_INFO.set_default_request_pid_list();
+
+  // ---------------------------------------------------------------------------------------
+  // GPS Comm Port Setup
+  sdSystem.COMMS_GPS.PROPS.PORT = COMMS_PORT_GPS;
+  sdSystem.COMMS_GPS.PROPS.BAUD_RATE = COMMS_BAUD_GPS;
+  sdSystem.COMMS_GPS.PROPS.BIT_COUNT = COMMS_BIT_PARITY_GPS;
+  sdSystem.COMMS_GPS.PROPS.PARITY = COMMS_BIT_PARITY_GPS;
+  sdSystem.COMMS_GPS.PROPS.STOP_BITS = COMMS_STOP_BITS_GPS;
+  sdSystem.COMMS_GPS.PROPS.HARDWARE_FLOW_CONTROL = COMMS_HARDWARE_FLOW_CONTROL_GPS;
+  sdSystem.COMMS_GPS.PROPS.DISABLE_CANONICAL_MODE = COMMS_DISABLE_CANONICAL_MODE_GPS;
+  sdSystem.COMMS_GPS.PROPS.XONXOFF = COMMS_XONXOFF_GPS;
+
+  sdSystem.COMMS_GPS.PROPS.AUTOSTART = true;
+
+  sdSystem.COMMS_GPS.PROPS.SAVE_LOG_FILENAME = COMMS_SAVE_LOG_FILENAME_GPS;
+  
+  sdSystem.COMMS_GPS.PROPS.RECEIVE_TEST_DATA = COMMS_RECEIVE_TEST_DATA_GPS;
+  sdSystem.COMMS_GPS.PROPS.TEST_DATA_FILENAME = COMMS_TEST_DATA_FILENAME_GPS;
 
   // ---------------------------------------------------------------------------------------
   // Initialize the console
@@ -905,9 +925,16 @@ int loop_2(bool TTY_Only)
     if (comms_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       effi_timer_comms.start_timer(sdSystem.PROGRAM_TIME.now());
-      sdSystem.COMMS.cycle(sdSystem.PROGRAM_TIME.current_frame_time());
+      {
+        // CAN_Bus Serial Communications
+        sdSystem.COMMS.cycle(sdSystem.PROGRAM_TIME.current_frame_time());
+        // GPS Serial Communications
+        sdSystem.COMMS_GPS.cycle(sdSystem.PROGRAM_TIME.current_frame_time());
+      }
       sdSystem.dblCOMMS_TRANSFER_TIME.set_data(effi_timer_comms.simple_elapsed_time(sdSystem.PROGRAM_TIME.now()));
-
+      
+      // ---------------------------------------------------------------------------------------
+      // CAN Bus Process
       // Need to stop deleting this.
       //for (int pos = 0; pos < sdSystem.COMMS.READ_FROM_COMM.size(); pos++)
       //{
@@ -922,6 +949,17 @@ int loop_2(bool TTY_Only)
 
       // Comms flash data check and cleanup.
       sdSystem.COMMS.flash_data_check();
+
+      // ---------------------------------------------------------------------------------------
+      // GPS Process
+      sdSystem.COMMS_GPS.cycle(sdSystem.PROGRAM_TIME.current_frame_time());
+      if (sdSystem.COMMS_GPS.recieve_size() > 0)
+      {
+        while (sdSystem.COMMS_GPS.recieve_size() > 0)
+        {
+          cons_2.update_gps_gadgets(sdSystem, trim(sdSystem.COMMS_GPS.recieve()) + "\n");
+        }
+      }
     }
 
     // ---------------------------------------------------------------------------------------

@@ -140,6 +140,8 @@ class ALERT_SYSTEM_2
   void alert_list_clean();
   void display_active_alerts();
 
+  void sound_alert(int Value);
+
 };
 
 

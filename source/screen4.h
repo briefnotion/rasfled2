@@ -85,6 +85,7 @@ class SCREEN4
   TEXT_CONSOLE CONSOLE;
   AUTOMOBILE_SCREEN AUTOMOBILE;
   ADSB_SCREEN ADSB;
+  TEXT_CONSOLE GPS_CONSOLE;
   TEXT_CONSOLE DAEMON_LOG;
 
   // --- 
@@ -142,6 +143,8 @@ class SCREEN4
 
   // ----
   // Data Update Paths
+  void update_gps_gadgets(system_data &sdSysData, string Text);
+
   void update_daemon_log(system_data &sdSysData, string Text);
 
   void update_automobile_gadgets(system_data &sdSysData);

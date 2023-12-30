@@ -307,6 +307,22 @@ void ALERT_SYSTEM_2::display_active_alerts()
   }
 }
 
+void ALERT_SYSTEM_2::sound_alert(int Value)
+{
+  if (Value == 3)
+  {
+    SOUND_SYSTEM.play_test();
+  }
+  else if (Value == 2)
+  {
+    SOUND_SYSTEM.play_snd2();
+  }
+  else
+  {
+    SOUND_SYSTEM.play_snd1();
+  }
+}
+
 
 
 #endif

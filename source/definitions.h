@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.099_231227"
+#define Revision "2.300_231229"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -50,8 +50,8 @@
 
 #define ERROR_LOG_FILENAME       "/home/pi/auto/error_log.txt"
 
-// COMMS Settings
-#define COMMS_PORT        "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"
+// COMMS Settings CAN Bus
+#define COMMS_PORT_CAN     "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"
 //#define COMMS_BAUD        38400
 #define COMMS_BAUD        115200
 #define COMMS_BIT_COUNT   8
@@ -67,6 +67,24 @@
 #define COMMS_TEST_DATA_FILENAME      "/home/pi/auto/rascomms.txt"
 
 #define AUTOMOBILE_LOG_FILE_DIRECTORY "/home/pi/automobile_log/"
+
+// COMMS Settings CAN Bus
+#define COMMS_PORT_GPS     "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_B001JKAO-if00-port0"
+//#define COMMS_BAUD        38400
+#define COMMS_BAUD_GPS          9600
+#define COMMS_BIT_COUNT_GPS     8
+#define COMMS_BIT_PARITY_GPS    false
+#define COMMS_STOP_BITS_GPS     1
+#define COMMS_HARDWARE_FLOW_CONTROL_GPS     false
+#define COMMS_DISABLE_CANONICAL_MODE_GPS    false
+#define COMMS_XONXOFF_GPS                   false
+
+#define COMMS_SAVE_LOG_FILENAME_GPS         "/home/pi/gps/rascomms"
+
+#define COMMS_RECEIVE_TEST_DATA_GPS         false
+#define COMMS_TEST_DATA_FILENAME_GPS        "/home/pi/gps/gpscomms.txt"
+
+#define AUTOMOBILE_LOG_FILE_DIRECTORY_GPS   "/home/pi/gps_log/"
 
 // TTL Values - Individually adjust the TTL values of the auto.
 #define TTL_LF_Top_Percentage   100.15
