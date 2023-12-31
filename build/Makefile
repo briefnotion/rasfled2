@@ -520,6 +520,33 @@ fledcore.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/fledcore.cpp.s
 .PHONY : fledcore.cpp.s
 
+globe_helper.o: globe_helper.cpp.o
+
+.PHONY : globe_helper.o
+
+# target to build an object file
+globe_helper.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/globe_helper.cpp.o
+.PHONY : globe_helper.cpp.o
+
+globe_helper.i: globe_helper.cpp.i
+
+.PHONY : globe_helper.i
+
+# target to preprocess a source file
+globe_helper.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/globe_helper.cpp.i
+.PHONY : globe_helper.cpp.i
+
+globe_helper.s: globe_helper.cpp.s
+
+.PHONY : globe_helper.s
+
+# target to generate assembly for a file
+globe_helper.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/globe_helper.cpp.s
+.PHONY : globe_helper.cpp.s
+
 hardware_module_door.o: hardware_module_door.cpp.o
 
 .PHONY : hardware_module_door.o
@@ -871,6 +898,33 @@ main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/main.cpp.s
 .PHONY : main.cpp.s
 
+nmea.o: nmea.cpp.o
+
+.PHONY : nmea.o
+
+# target to build an object file
+nmea.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/nmea.cpp.o
+.PHONY : nmea.cpp.o
+
+nmea.i: nmea.cpp.i
+
+.PHONY : nmea.i
+
+# target to preprocess a source file
+nmea.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/nmea.cpp.i
+.PHONY : nmea.cpp.i
+
+nmea.s: nmea.cpp.s
+
+.PHONY : nmea.s
+
+# target to generate assembly for a file
+nmea.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/nmea.cpp.s
+.PHONY : nmea.cpp.s
+
 rasapi.o: rasapi.cpp.o
 
 .PHONY : rasapi.o
@@ -1192,6 +1246,9 @@ help:
 	@echo "... fledcore.o"
 	@echo "... fledcore.i"
 	@echo "... fledcore.s"
+	@echo "... globe_helper.o"
+	@echo "... globe_helper.i"
+	@echo "... globe_helper.s"
 	@echo "... hardware_module_door.o"
 	@echo "... hardware_module_door.i"
 	@echo "... hardware_module_door.s"
@@ -1231,6 +1288,9 @@ help:
 	@echo "... main.o"
 	@echo "... main.i"
 	@echo "... main.s"
+	@echo "... nmea.o"
+	@echo "... nmea.i"
+	@echo "... nmea.s"
 	@echo "... rasapi.o"
 	@echo "... rasapi.i"
 	@echo "... rasapi.s"
