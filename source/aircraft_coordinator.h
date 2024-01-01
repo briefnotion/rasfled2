@@ -17,6 +17,7 @@
 #include <cmath>
 
 // RASFled related header files
+#include "globe_helper.h"
 #include "stringthings.h"
 #include "fled_time.h"
 #include "json_interface.h"
@@ -48,15 +49,6 @@ class ALERT_ENTRY
   public:
   int ALERT_LEVEL;
   string ALERT;
-};
-
-class GLOBAL_POSITION
-{
-  public:
-  STRING_FLOAT LATITUDE;
-  STRING_FLOAT LONGITUDE;
-
-  bool GLOBAL_POSITION_FOUND = false;
 };
 
 class AIRCRAFT

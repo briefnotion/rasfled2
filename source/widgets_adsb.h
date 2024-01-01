@@ -27,6 +27,7 @@
 #include "system.h"
 #include "helper.h"
 #include "fled_time.h"
+#include "nmea.h"
 #include "aircraft_coordinator.h"
 #include "screen4_helper.h"
 #include "widgets.h"
@@ -56,6 +57,8 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 // Markers
 
 void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
+
+void draw_current_gps_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
@@ -228,7 +231,10 @@ class ADSB_RANGE
 
   ImVec4 PREV_WORKING_AREA;
 
-  ImVec2 CURRENT_LAT_LON;
+  ImVec2 CENTER_LAT_LON;
+
+  ImVec2 GPS_POS_LAT_LON;
+  bool GPS_DISPLAY_CURRENT_LOCATION = false;
 
   void calculate_lat_lon_to_point_scale();
 
@@ -240,7 +246,15 @@ class ADSB_RANGE
 
   ImVec2 ll_2_pt_scale();
 
-  ImVec2 current_lat_lon();
+  ImVec2 center_lat_lon();
+
+  void gps_display_current_location_toggle();
+
+  bool gps_display_current_location();
+
+  void set_gps_pos_lat_lon(ImVec2 Lat_Lon);
+
+  ImVec2 gps_pos_lat_lon();
 
   float range();
 
@@ -250,7 +264,7 @@ class ADSB_RANGE
 
   void zoom_out();
 
-  void set_current_global_position(ImVec2 Lat_Lon);
+  void set_current_center_position(ImVec2 Lat_Lon);
   
   void draw(system_data &sdSysData, ImVec4 Working_Area);
 
@@ -274,11 +288,16 @@ class ADSB_MAP
 
   bool DISPLAY_LOCATION = false;
 
+  // GPS
+  GLOBAL_POSITION_VALUE GPS_CURRENT_POSITION;
+
   void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
 
   public:
 
   void create(system_data &sdSysData);
+
+  void update_gps_location(GLOBAL_POSITION_VALUE GPS_Current_Location);
 
   void draw(system_data &sdSysData,   DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets);
 
@@ -317,6 +336,8 @@ class ADSB_SCREEN
   void create(system_data &sdSysData);
   
   void update(system_data &sdSysData);
+
+  void update_gps(system_data &sdSysData);
 
   //void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
   //              const char *name, bool *p_open, ImGuiWindowFlags flags);

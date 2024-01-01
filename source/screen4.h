@@ -151,6 +151,8 @@ class SCREEN4
 
   void update_ADS_B_gadgets(system_data &sdSysData);
 
+  void update_GPS_gadgets(system_data &sdSysData);
+
 };
 
 // ---------------------------------------------------------------------------------------

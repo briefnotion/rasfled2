@@ -124,6 +124,13 @@ void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
   draw_list->AddNgon(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
 }
 
+void draw_current_gps_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
+{
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+  draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 8.0f);
+}
+
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -586,13 +593,13 @@ void ADSB_RANGE::calculate_lat_lon_to_point_scale()
   float latitude_diff = 0;
   float longitude_diff = 0;
 
-  ImVec2 new_coords_east = get_coords_x_miles_from_coords(CURRENT_LAT_LON.x, CURRENT_LAT_LON.y,
+  ImVec2 new_coords_east = get_coords_x_miles_from_coords(CENTER_LAT_LON.x, CENTER_LAT_LON.y,
                                                           RANGE, 90.0f);
-  ImVec2 new_coords_south = get_coords_x_miles_from_coords(CURRENT_LAT_LON.x, CURRENT_LAT_LON.y,
+  ImVec2 new_coords_south = get_coords_x_miles_from_coords(CENTER_LAT_LON.x, CENTER_LAT_LON.y,
                                                           RANGE, 180.0f);
 
-  latitude_diff = abs(new_coords_south.x - CURRENT_LAT_LON.x);
-  longitude_diff = abs(new_coords_east.y - CURRENT_LAT_LON.y);
+  latitude_diff = abs(new_coords_south.x - CENTER_LAT_LON.x);
+  longitude_diff = abs(new_coords_east.y - CENTER_LAT_LON.y);
 
   LAT_LON_TO_POINT_SCALE.x =(RADIUS_CIRCLE_POINT_SIZE / latitude_diff);
   LAT_LON_TO_POINT_SCALE.y = (RADIUS_CIRCLE_POINT_SIZE / longitude_diff);
@@ -686,9 +693,29 @@ ImVec2 ADSB_RANGE::ll_2_pt_scale()
   return LAT_LON_TO_POINT_SCALE;
 }
 
-ImVec2 ADSB_RANGE::current_lat_lon()
+ImVec2 ADSB_RANGE::center_lat_lon()
 {
-  return CURRENT_LAT_LON;
+  return CENTER_LAT_LON;
+}
+
+void ADSB_RANGE::gps_display_current_location_toggle()
+{
+  GPS_DISPLAY_CURRENT_LOCATION = !GPS_DISPLAY_CURRENT_LOCATION;
+}
+
+bool ADSB_RANGE::gps_display_current_location()
+{
+  return GPS_DISPLAY_CURRENT_LOCATION;
+}
+
+void ADSB_RANGE::set_gps_pos_lat_lon(ImVec2 Lat_Lon)
+{
+  GPS_POS_LAT_LON = Lat_Lon;
+}
+
+ImVec2 ADSB_RANGE::gps_pos_lat_lon()
+{
+  return GPS_POS_LAT_LON;
 }
 
 float ADSB_RANGE::range()
@@ -719,9 +746,9 @@ void ADSB_RANGE::zoom_out()
   }
 }
 
-void ADSB_RANGE::set_current_global_position(ImVec2 Lat_Lon)
+void ADSB_RANGE::set_current_center_position(ImVec2 Lat_Lon)
 {
-  CURRENT_LAT_LON = Lat_Lon;
+  CENTER_LAT_LON = Lat_Lon;
 }
 
 void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
@@ -770,8 +797,8 @@ void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
 void ADSB_RANGE::draw_info(system_data &sdSysData)
 {
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_grey().TEXT));
-  ImGui::Text("lat: %f", CURRENT_LAT_LON.x);
-  ImGui::Text("lon: %f", CURRENT_LAT_LON.y);
+  ImGui::Text("lat: %f", CENTER_LAT_LON.x);
+  ImGui::Text("lon: %f", CENTER_LAT_LON.y);
   ImGui::Text("rng: %.0f", RANGE);
   ImGui::PopStyleColor();
 
@@ -839,7 +866,7 @@ void ADSB_MAP::create(system_data &sdSysData)
   // Degrees Decimal Minutes (DDM): N30°12.30'  / W91°59.27'
   // Decimal Degrees (DD):          30.205      / -91.987833
 
-  RANGE_INDICATOR.set_current_global_position(ImVec2(30.205f, -91.987833f));
+  RANGE_INDICATOR.set_current_center_position(ImVec2(30.205f, -91.987833f));
 
   // Add Landmarks
   MAP_MARKER tmp_map_marker;
@@ -1600,6 +1627,11 @@ void ADSB_MAP::create(system_data &sdSysData)
   //add_landmark(ImVec2(f, f), "", 0);  //
 }
 
+void ADSB_MAP::update_gps_location(GLOBAL_POSITION_VALUE GPS_Current_Location)
+{
+  GPS_CURRENT_POSITION = GPS_Current_Location;
+}
+
 void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets)
 {
   // working area, xy start position; zw, size.
@@ -1612,6 +1644,24 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   working_area.y = ImGui::GetCursorScreenPos().y;
   working_area.z = ImGui::GetContentRegionAvail().x;
   working_area.w = ImGui::GetContentRegionAvail().y;
+
+
+  // Check for GPS Current Location
+  if (GPS_CURRENT_POSITION.CHANGED && GPS_CURRENT_POSITION.VALID_COORDS)
+  {
+    RANGE_INDICATOR.set_gps_pos_lat_lon(ImVec2(GPS_CURRENT_POSITION.LATITUDE, GPS_CURRENT_POSITION.LONGITUDE));
+
+    GPS_CURRENT_POSITION.CHANGED = false;
+  }
+
+  // Set Center to GPS Location if on and valid.
+  if (RANGE_INDICATOR.gps_display_current_location())
+  {
+    if (GPS_CURRENT_POSITION.VALID_COORDS)
+    {
+      RANGE_INDICATOR.set_current_center_position(RANGE_INDICATOR.gps_pos_lat_lon());
+    }
+  }
 
   // -------------------------------------------------------------------------------------
   // All Text Below Here
@@ -1630,7 +1680,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   // Range Indicator
   RANGE_INDICATOR.draw_info(sdSysData);
 
-  // Buttons
+  // Range and Location Buttons
   ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                     working_area.y + working_area.w - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
@@ -1655,6 +1705,16 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     RANGE_INDICATOR.zoom_in();
   }
 
+  // Current Location Toggle
+  ImGui::SetCursorScreenPos(ImVec2(working_area.x, 
+                                    working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+  if (button_simple_toggle_color(sdSysData, "GPS\n(On)", "GPS\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
+                                  sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
+                                  sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  {
+    RANGE_INDICATOR.gps_display_current_location_toggle();
+  }
 
   // All Text Above Here
   // -------------------------------------------------------------------------------------
@@ -1665,7 +1725,19 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
   for (int landmark = 0; landmark < (int)LANDMARKS.size(); landmark++)
   {
-    LANDMARKS[landmark].draw(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.current_lat_lon(), RANGE_INDICATOR.range());
+    LANDMARKS[landmark].draw(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.range());
+  }
+
+  // Draw Current Position Marker
+  if (GPS_CURRENT_POSITION.VALID_COORDS)
+  {
+    bool draw = false;
+    ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.gps_pos_lat_lon() ,draw);
+    
+    if (draw)
+    {
+      draw_current_gps_marker(sdSysData, gps_pos, sdSysData.COLOR_SELECT.white());
+    }
   }
   
   // Draw Aircraft
@@ -1673,7 +1745,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   {
     if (ADSB_Widgets[aircraft].is_expired(sdSysData) == false)
     {
-      ADSB_Widgets[aircraft].draw_aircraft_map_marker(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.current_lat_lon());
+      ADSB_Widgets[aircraft].draw_aircraft_map_marker(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon());
     }
   }
 
@@ -1687,7 +1759,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       {
         if (button_simple_color(sdSysData, LANDMARKS[location].DISPLAY_NAME.c_str(), sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
         {
-          RANGE_INDICATOR.set_current_global_position(LANDMARKS[location].LAT_LON);
+          RANGE_INDICATOR.set_current_center_position(LANDMARKS[location].LAT_LON);
         }
       }
     }
@@ -1704,11 +1776,11 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   ImVec2 test_position;
   ImVec2 test_position2;
 
-  test_position = get_coords_x_miles_from_coords(RANGE_INDICATOR.current_lat_lon().x, RANGE_INDICATOR.current_lat_lon().y,
+  test_position = get_coords_x_miles_from_coords(RANGE_INDICATOR.center_lat_lon().x, RANGE_INDICATOR.center_lat_lon().y,
                                                   RANGE_INDICATOR.range(), 225);
 
   test_position2 = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), 
-                                  RANGE_INDICATOR.current_lat_lon(), test_position);
+                                  RANGE_INDICATOR.center_lat_lon(), test_position);
 
   draw_marker(sdSysData, test_position2);
 
@@ -1848,11 +1920,16 @@ void ADSB_SCREEN::update(system_data &sdSysData)
   sdSysData.AIRCRAFT_COORD.DATA.CHANGED = false;
 }
 
+void ADSB_SCREEN::update_gps(system_data &sdSysData)
+{
+  ADSB_MAP_DISPLAY.update_gps_location(sdSysData.GPS_SYSTEM.current_position());
+}
+
 void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms)
 { 
   ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    if (button_simple_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (button_simple_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       if (SDATA.ADSB_ACTIVE == true)
       {
@@ -1922,31 +1999,6 @@ void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_
         for (int pos = 0; pos < (int)ADSB_WIDGET_q.size(); pos++)
         {
           ADSB_WIDGET_q[pos].draw(sdSysData);
-          /*
-          ImGui::TableNextRow();
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].FLIGHT.get_str_value().c_str());
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].SQUAWK.get_str_value().c_str());
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].SPEED.get_str_value().c_str());
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].VERT_RATE.get_str_value().c_str());
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].ALTITUDE.get_str_value().c_str());
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].NAV_ALTITUDE_MCP.get_str_value().c_str());
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].TRACK.get_str_value().c_str());
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].NAV_HEADING.get_str_value().c_str());
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].SEEN_POS.get_str_value().c_str());
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].SEEN.get_str_value().c_str());
-          ImGui::TableNextColumn();
-          ImGui::Text("%s", SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos].RSSI.get_str_value().c_str());
-          */
         }
         ImGui::EndTable();
       }

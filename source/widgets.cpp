@@ -325,8 +325,9 @@ bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, Im
     ImGui::PushStyleColor(ImGuiCol_Button, ImU32(sdSysData.COLOR_SELECT.c_blue().BACKGROUND)); 
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(sdSysData.COLOR_SELECT.c_blue().BACKGROUND));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(sdSysData.COLOR_SELECT.c_blue().BACKGROUND));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_blue().STANDARD));
     ImGui::Button(Text.c_str(), ImVec2_Size);
-    ImGui::PopStyleColor(3);
+    ImGui::PopStyleColor(4);
   }
 
   ImGui::PopStyleColor();

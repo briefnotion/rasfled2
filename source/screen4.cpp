@@ -883,7 +883,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
           //button_simple_enabled(sdSysData, " ", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
-          if (button_simple_toggle_color(sdSysData, "LIGHTS\n(On)", "LIGHTS\n(Off)", sdSysData.Lights_On.value(), sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          if (button_simple_toggle_color(sdSysData, "LIGHTS\n(On)", "LIGHTS\n(Off)", sdSysData.Lights_On.value(), sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             if (sdSysData.Lights_On.value() == true)
             {
@@ -1437,6 +1437,23 @@ void SCREEN4::update_ADS_B_gadgets(system_data &sdSysData)
       ADSB.update(sdSysData);
     }
   }
+}
+
+void SCREEN4::update_GPS_gadgets(system_data &sdSysData)
+{
+  if (sdSysData.TTY_ONLY == false)
+  {
+    // Update GPS Console
+    for (int pos = 0; pos < (int)sdSysData.GPS_SYSTEM.RECIEVE_HISTORY.size(); pos++)
+    {
+      GPS_CONSOLE.add_line(sdSysData.GPS_SYSTEM.RECIEVE_HISTORY[pos] + "\n");
+    }
+
+    // Update ADSB Map with GPS Data.
+    ADSB.update_gps(sdSysData);
+  }
+  
+  sdSysData.GPS_SYSTEM.RECIEVE_HISTORY.clear();
 }
 
 // ---------------------------------------------------------------------------------------

@@ -41,6 +41,10 @@ target_sources(rasfled PRIVATE
   ../../imgui/misc/cpp/imgui_stdlib.cpp
   ../../imgui/backends/imgui_impl_glfw.cpp
   ../../imgui/backends/imgui_impl_opengl2.cpp
+  stringthings.cpp
+  helper.cpp
+  globe_helper.cpp
+  screen4_helper.cpp
   alert_system.cpp
   alert_system_2.cpp
   LEDstuff.cpp
@@ -48,8 +52,8 @@ target_sources(rasfled PRIVATE
   comport.cpp
   auto_nova.cpp
   auto.cpp
+  nmea.cpp
   configuration_storage.cpp
-  helper.cpp
   stringthings.cpp
   fled_time.cpp
   json_interface.cpp
@@ -66,7 +70,6 @@ target_sources(rasfled PRIVATE
   widgets_automobile.cpp
   widgets_adsb.cpp
   sounds.cpp
-  screen4_helper.cpp
   screen4.cpp
   system.cpp
   fledcore.cpp

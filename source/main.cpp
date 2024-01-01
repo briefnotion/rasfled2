@@ -955,10 +955,14 @@ int loop_2(bool TTY_Only)
       sdSystem.COMMS_GPS.cycle(sdSystem.PROGRAM_TIME.current_frame_time());
       if (sdSystem.COMMS_GPS.recieve_size() > 0)
       {
-        while (sdSystem.COMMS_GPS.recieve_size() > 0)
-        {
-          cons_2.update_gps_gadgets(sdSystem, trim(sdSystem.COMMS_GPS.recieve()) + "\n");
-        }
+        //sdSystem.GPS_SYSTEM.process(cons_2.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
+        sdSystem.GPS_SYSTEM.process(sdSystem.COMMS_GPS);
+
+        // Update system that access GPS data
+        cons_2.update_GPS_gadgets(sdSystem);
+
+        // clear all changes after updates are complete.  All var copies should be complete.
+        sdSystem.GPS_SYSTEM.clear_changes();
       }
     }
 
