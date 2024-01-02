@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.301_231230"
+#define Revision "2.302_240101"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -79,7 +79,7 @@
 #define COMMS_DISABLE_CANONICAL_MODE_GPS    false
 #define COMMS_XONXOFF_GPS                   false
 
-#define COMMS_SAVE_LOG_FILENAME_GPS         "/home/pi/gps/rascomms"
+#define COMMS_SAVE_LOG_FILENAME_GPS         "/home/pi/gps/gpscomms"
 
 #define COMMS_RECEIVE_TEST_DATA_GPS         false
 #define COMMS_TEST_DATA_FILENAME_GPS        "/home/pi/gps/gpscomms.txt"

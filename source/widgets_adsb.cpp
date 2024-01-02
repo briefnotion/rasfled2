@@ -124,11 +124,20 @@ void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
   draw_list->AddNgon(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
 }
 
-void draw_current_gps_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
+void draw_current_gps_marker(system_data &sdSysData, ImVec2 Screen_Position, GLOBAL_POSITION_DETAILED Details)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 8.0f);
+  if (Details.LIVE)
+  {
+    draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.c_white().STANDARD_V, 8.0f);
+    draw_list->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.c_white().STANDARD_V, 15.0f, 2.0f);
+  }
+  else
+  {
+    draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.c_yellow().STANDARD, 8.0f);
+    draw_list->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.c_yellow().STANDARD, 15.0f, 2.0f);
+  }
 }
 
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
@@ -763,33 +772,15 @@ void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
     set_zoom_level();
   }
 
-  /*
-  if (  PREV_WORKING_AREA.x != Working_Area.x || 
-      PREV_WORKING_AREA.y != Working_Area.y || 
-      PREV_WORKING_AREA.z != Working_Area.z || 
-      PREV_WORKING_AREA.w != Working_Area.w )
-  {
-    PREV_WORKING_AREA.x = Working_Area.x;
-    PREV_WORKING_AREA.y = Working_Area.y;
-    PREV_WORKING_AREA.z = Working_Area.z;
-    PREV_WORKING_AREA.w = Working_Area.w;
-    
-    
-    calculate_lat_lon_to_point_scale();
-  }
-  */
-
-  //const float spacing = 10.0f;
-
   ImVec2 center = point_position_center(Working_Area);
   
-  draw_list->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD), 32, 1.5f);
-  draw_list->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE * 2.0f, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD), 32, 1.5f);
+  draw_list->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V), 32, 1.5f);
+  draw_list->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE * 2.0f, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V), 32, 1.5f);
   
   ImGui::SetCursorScreenPos(ImVec2(center.x, center.y - RADIUS_CIRCLE_POINT_SIZE + 5));
   
   // Text Range
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V));
   ImGui::Text("%.0f", RANGE);
   ImGui::PopStyleColor();
 }
@@ -1627,7 +1618,7 @@ void ADSB_MAP::create(system_data &sdSysData)
   //add_landmark(ImVec2(f, f), "", 0);  //
 }
 
-void ADSB_MAP::update_gps_location(GLOBAL_POSITION_VALUE GPS_Current_Location)
+void ADSB_MAP::update_gps_location(GLOBAL_POSITION_DETAILED GPS_Current_Location)
 {
   GPS_CURRENT_POSITION = GPS_Current_Location;
 }
@@ -1736,7 +1727,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     
     if (draw)
     {
-      draw_current_gps_marker(sdSysData, gps_pos, sdSysData.COLOR_SELECT.white());
+      draw_current_gps_marker(sdSysData, gps_pos, GPS_CURRENT_POSITION);
     }
   }
   

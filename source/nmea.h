@@ -32,9 +32,30 @@ class NMEA
 {
   private:
 
-  GLOBAL_POSITION_VALUE CURRENT_POSITION;
+  // ALL CURRENT STATUSs
+  float LATITUDE = 0;
+  float LONGITUDE = 0;
+  DISTANCE ALTITUDE;     // M
+  DISTANCE GEOID_HEIGHT; // M (mean sea level above WGS84 ellipsoid)
 
-  void translate_gpgga(vector<string> &Input, GLOBAL_POSITION_VALUE &Position);
+  float TIME = 0;
+  
+  float TIME_SINCE_LAST_DGPS_UPDATE = 0;
+  int DGPS_STATION_ID;
+
+  int NUMBER_OF_SATILITES = 0;
+  float DILUTION_OF_POSITION = 0;
+
+  int QUALITY = 0;  // 0 - 8;
+
+  int CHECKSUM = 0;
+
+  bool VALID_COORDS = false;
+  bool CHANGED = false;
+
+  GLOBAL_POSITION_DETAILED CURRENT_POSITION;
+
+  void translate_gpgga(vector<string> &Input);
 
   public:
 
@@ -44,10 +65,9 @@ class NMEA
   void clear_changes();
 
   //void process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time);
-  //void process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time);
-  void process(COMPORT &Com_Port);
+  void process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time);
 
-  GLOBAL_POSITION_VALUE current_position();
+  GLOBAL_POSITION_DETAILED current_position();
 };
 
 // -------------------------------------------------------------------------------------

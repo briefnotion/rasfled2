@@ -42,9 +42,14 @@ class DISTANCE
 
 };
 
-class GLOBAL_POSITION_VALUE
+class GLOBAL_POSITION_DETAILED
 {
   public:
+
+  unsigned long SYSTTEM_UPDATE_TIME = 0;
+
+  bool LIVE = true;
+
   float LATITUDE = 0;
   float LONGITUDE = 0;
   DISTANCE ALTITUDE;     // M
@@ -52,15 +57,10 @@ class GLOBAL_POSITION_VALUE
 
   float TIME = 0;
   
-  float TIME_SINCE_LAST_DGPS_UPDATE = 0;
-  int DGPS_STATION_ID;
+  float HEADING = 0;
+  float SPEED = 0;
 
-  int NUMBER_OF_SATILITES = 0;
   float DILUTION_OF_POSITION = 0;
-
-  int QUALITY = 0;  // 0 - 8;
-
-  int CHECKSUM = 0;
 
   bool VALID_COORDS = false;
   bool CHANGED = false;

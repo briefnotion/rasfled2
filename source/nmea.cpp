@@ -18,58 +18,55 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
-void NMEA::translate_gpgga(vector<string> &Input, GLOBAL_POSITION_VALUE &Position)
+void NMEA::translate_gpgga(vector<string> &Input)
 {
   if (Input.size() == 15)
   {
-    Position.TIME = string_to_float(Input[1]);
+    TIME = string_to_float(Input[1]);
     
-    Position.LATITUDE = string_to_float(Input[2]);
+    LATITUDE = string_to_float(Input[2]);
     // Convert long degrees minutes to degrees decimal
-    Position.LATITUDE = (int)(Position.LATITUDE / 100.0f) + ( ((Position.LATITUDE / 100.0f) - (int)(Position.LATITUDE / 100.0f)) *100 / 60 );
+    LATITUDE = (int)(LATITUDE / 100.0f) + ( ((LATITUDE / 100.0f) - (int)(LATITUDE / 100.0f)) *100 / 60 );
     if (Input[3] == "S")
     {
-      Position.LATITUDE = Position.LATITUDE * -1;
+      LATITUDE = LATITUDE * -1;
     }
 
-    Position.LONGITUDE = string_to_float(Input[4]);
+    LONGITUDE = string_to_float(Input[4]);
     // Convert long degrees minutes to degrees decimal
-    Position.LONGITUDE = (int)(Position.LONGITUDE / 100.0f) + ( ((Position.LONGITUDE / 100.0f) - (int)(Position.LONGITUDE / 100.0f)) *100 / 60 );
+    LONGITUDE = (int)(LONGITUDE / 100.0f) + ( ((LONGITUDE / 100.0f) - (int)(LONGITUDE / 100.0f)) *100 / 60 );
     if (Input[5] == "W")
     {
-      Position.LONGITUDE = Position.LONGITUDE * -1;
+      LONGITUDE = LONGITUDE * -1;
     }
 
-    Position.QUALITY = string_to_int(Input[6]);
-    Position.NUMBER_OF_SATILITES = string_to_int(Input[7]);
-    Position.DILUTION_OF_POSITION = string_to_float(Input[8]);
+    QUALITY = string_to_int(Input[6]);
+    NUMBER_OF_SATILITES = string_to_int(Input[7]);
+    DILUTION_OF_POSITION = string_to_float(Input[8]);
 
     if (Input[10] == "M")
     {
-      Position.ALTITUDE.store_meters(string_to_float(Input[9]));
+      ALTITUDE.store_meters(string_to_float(Input[9]));
     }
 
     if (Input[12] == "M")
     {
-      Position.GEOID_HEIGHT.store_meters(string_to_float(Input[11]));
+      GEOID_HEIGHT.store_meters(string_to_float(Input[11]));
     }
 
-    Position.TIME_SINCE_LAST_DGPS_UPDATE = string_to_float(Input[13]);
+    TIME_SINCE_LAST_DGPS_UPDATE = string_to_float(Input[13]);
     
     string tmp_string = "";
 
     left_of_char(Input[14], '*', tmp_string);
-    Position.DGPS_STATION_ID = string_to_int(tmp_string);
+    DGPS_STATION_ID = string_to_int(tmp_string);
 
     right_of_char(Input[14], '*', tmp_string);
-    Position.CHECKSUM = string_to_int(tmp_string);
-
-    Position.VALID_COORDS = true;
-    Position.CHANGED = true;
+    CHECKSUM = string_to_int(tmp_string);
   }
   else
   {
-    Position.QUALITY = 0;
+    QUALITY = 0;
   }
 }
 
@@ -78,8 +75,7 @@ void NMEA::clear_changes()
   CURRENT_POSITION.CHANGED = false;
 }
 
-//void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time)
-void NMEA::process(COMPORT &Com_Port)
+void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time)
 {
   if (Com_Port.recieve_size() > 0)
   {
@@ -101,6 +97,11 @@ void NMEA::process(COMPORT &Com_Port)
     {
       // parse
       string working_line = trim(Com_Port.recieve());
+
+      if (Com_Port.PROPS.PRINT_RECEIVED_DATA)
+      {
+        cons.printw(working_line);
+      }
 
       RECIEVE_HISTORY.push_back(working_line);
 
@@ -126,7 +127,28 @@ void NMEA::process(COMPORT &Com_Port)
       {
         if (INPUT_LINE[0] == "$GPGGA" || INPUT_LINE[0] == "$GNGGA")
         {
-          translate_gpgga(INPUT_LINE, CURRENT_POSITION);
+          translate_gpgga(INPUT_LINE);
+
+          // Update Details
+          if (QUALITY > 0)
+          {
+            CURRENT_POSITION.SYSTTEM_UPDATE_TIME = tmeFrame_Time;
+            CURRENT_POSITION.LIVE = true;
+            CURRENT_POSITION.LATITUDE = LATITUDE;
+            CURRENT_POSITION.LONGITUDE = LONGITUDE;
+            CURRENT_POSITION.ALTITUDE = ALTITUDE;
+            CURRENT_POSITION.GEOID_HEIGHT = GEOID_HEIGHT;
+            CURRENT_POSITION.TIME = TIME;
+            CURRENT_POSITION.LATITUDE = LATITUDE;
+
+            CURRENT_POSITION.VALID_COORDS = true;
+          }
+          else
+          {
+            CURRENT_POSITION.LIVE = false;
+          }
+
+          CURRENT_POSITION.CHANGED = true;
         }
       }
 
@@ -136,7 +158,7 @@ void NMEA::process(COMPORT &Com_Port)
   }
 }
 
-GLOBAL_POSITION_VALUE NMEA::current_position()
+GLOBAL_POSITION_DETAILED NMEA::current_position()
 {
   return CURRENT_POSITION;
 }

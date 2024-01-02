@@ -955,8 +955,7 @@ int loop_2(bool TTY_Only)
       sdSystem.COMMS_GPS.cycle(sdSystem.PROGRAM_TIME.current_frame_time());
       if (sdSystem.COMMS_GPS.recieve_size() > 0)
       {
-        //sdSystem.GPS_SYSTEM.process(cons_2.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
-        sdSystem.GPS_SYSTEM.process(sdSystem.COMMS_GPS);
+        sdSystem.GPS_SYSTEM.process(cons_2.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
 
         // Update system that access GPS data
         cons_2.update_GPS_gadgets(sdSystem);

@@ -1,3 +1,10 @@
+2.302_240101
+  - Building GPS System.
+  - Changed older comms commands names, seperated to auto and gps.
+  - Added GPS Comms commands.
+  - Comms AUTOSTART will be set to false, for gps and auto, if stop comms 
+      command is sent.
+
 2.301_231230
   - Building GPS System.
 

@@ -58,7 +58,7 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 
 void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
-void draw_current_gps_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
+void draw_current_gps_marker(system_data &sdSysData, ImVec2 Screen_Position, GLOBAL_POSITION_DETAILED Details);
 
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
@@ -289,7 +289,7 @@ class ADSB_MAP
   bool DISPLAY_LOCATION = false;
 
   // GPS
-  GLOBAL_POSITION_VALUE GPS_CURRENT_POSITION;
+  GLOBAL_POSITION_DETAILED GPS_CURRENT_POSITION;
 
   void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
 
@@ -297,7 +297,7 @@ class ADSB_MAP
 
   void create(system_data &sdSysData);
 
-  void update_gps_location(GLOBAL_POSITION_VALUE GPS_Current_Location);
+  void update_gps_location(GLOBAL_POSITION_DETAILED GPS_Current_Location);
 
   void draw(system_data &sdSysData,   DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets);
 

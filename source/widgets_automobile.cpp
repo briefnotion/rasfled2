@@ -656,6 +656,9 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
     ImGui::Text("DIF_T:");
     ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.can_sent_total_count() - 
                         sdSysData.CAR_INFO.STATISTICS.ras_recieved_total_count());
+
+    ImGui::Text("ERR:");
+    ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.errors());
   }
   ImGui::EndChild();
 
@@ -1569,7 +1572,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
       sdSysData.ALERTS_2.sound_alert(2);
     }
 
-    if (SDATA.CAM_STAT_ERR > SDATA.PREV_D_CAM_STAT_ERROR)
+    if (SDATA.CAM_STAT_ERR != SDATA.PREV_D_CAM_STAT_ERROR)
     {
       SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, 1.0f);
       SDATA.PREV_D_CAM_STAT_ERROR = SDATA.CAM_STAT_ERR;
@@ -1809,11 +1812,11 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
             {
               if (sdSysData.COMMS.record_in_progress())
               {
-                Screen_Comms.command_text_set(" commf");
+                Screen_Comms.command_text_set(" autof");
               }
               else
               {
-                Screen_Comms.command_text_set(" commo");
+                Screen_Comms.command_text_set(" autoo");
               }
             }
 

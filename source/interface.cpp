@@ -56,7 +56,7 @@ void consoleprinthelp(CONSOLE_COMMUNICATION &cons)
   cons.printw("");
   cons.printw(" dd - Toggle Day/Night Mode");
   cons.printw("");
-  cons.printw("Colors:");
+  cons.printw("COLORS ------------------------------------");
   cons.printw(" r - Red    u - Purple  n - Orange");
   cons.printw(" g - Green  y - Yellow  w - White");
   cons.printw(" b - Blue   c - Cyan    ` - End");
@@ -69,20 +69,17 @@ void consoleprinthelp(CONSOLE_COMMUNICATION &cons)
   cons.printw("X`  - End Command (X is the Animation)");
   cons.printw("  Double animations will be with Running Color.");
   cons.printw("");
-  //cons.printw("  Not all colors implemented for all commands.");
-  //cons.printw("");
   cons.printw("'\' - Turn on and off diagnosis mode.");
   cons.printw("t - Cycle Strips  c - Test LEDs   a - not specified");
   cons.printw("");
-
-  cons.printw("SERIAL PORT COMMANDS ----------------------");
+  cons.printw("AUTOMOBILE SERIAL PORT COMMANDS -----------");
   cons.printw("");
-  cons.printw("' startcomm' - Start COM port");
-  cons.printw("' stopcomm'  - Stop COM port");
+  cons.printw("' startauto' - Start COM port");
+  cons.printw("' stopauto'  - Stop COM port");
   cons.printw("");
-  cons.printw("' commp' - Toggle Serial Print to Console");
-  cons.printw("' commo' - Start Serial Communications Recording");
-  cons.printw("' commf' - Start Serial Communications Recording");
+  cons.printw("' autop' - Toggle Serial Print to Console");
+  cons.printw("' autoo' - Start Serial Communications Recording");
+  cons.printw("' autof' - Start Serial Communications Recording");
   cons.printw("");
   cons.printw("' autoreq' - Toggle Serial Print to Console");
   cons.printw("");
@@ -100,6 +97,19 @@ void consoleprinthelp(CONSOLE_COMMUNICATION &cons)
   cons.printw("");
   cons.printw("PID are sent in same format if prepared");
   cons.printw("  e.g. 'q0B' for 'PID_INTAKE_MANIFOLD_ABS_PRESSURE request'");
+  cons.printw("");
+  cons.printw("GPS SERIAL PORT COMMANDS ------------------");
+  cons.printw("");
+  cons.printw("' startgps' - Start COM port");
+  cons.printw("' stopgps'  - Stop COM port");
+  cons.printw("");
+  cons.printw("' gpsp' - Toggle Serial Print to Console");
+  cons.printw("' gpso' - Start Serial Communications Recording");
+  cons.printw("' gpsf' - Start Serial Communications Recording");
+  cons.printw("");
+  cons.printw("Testing -----------------------------------");
+  cons.printw("' alert'  ' sound1'  ' sound2'  ' sound3'");
+  cons.printw("");
 }
 
 // Display all running events.
@@ -362,65 +372,121 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
 
       // Call routines that match the info on the command line.
 
-      // Start Comm Port
-      if (check_command(cons," startcomm", "Start Comms Port"))
+      // -------------------------------------------------------------------------------------
+      // Automobile Comms
+
+      // Start Automobile Comm Port
+      if (check_command(cons," startauto", "Start Automobile Comms Port"))
       {
 
         if (sdSysData.COMMS.create() == true)
         {
-          cons.printw("Comm Port Started.");
+          cons.printw("Automobile Comm Port Started.");
         }
         else
         {
-          cons.printw("Comm Port Failed To Start.");
+          cons.printw("Automobile Comm Port Failed To Start.");
         }
       }
       
-      // Stop Comm Port
-      
-      if (check_command(cons," commp", "Toggle Print Received Data"))
+      // Stop Automobile Comm Port
+      if (check_command(cons," stopauto", "Stop Automobile Comms Port"))
+      {
+        sdSysData.COMMS.PROPS.AUTOSTART = false;
+        sdSysData.COMMS.close_port();
+        cons.printw("Automobile Comm Port Stop Command Sent.");
+      }
+
+      // Stop Automobile Comm Port
+      if (check_command(cons," autop", "Toggle Print Automobile Received Data"))
       {
         sdSysData.COMMS.PROPS.PRINT_RECEIVED_DATA = !sdSysData.COMMS.PROPS.PRINT_RECEIVED_DATA;
         cons.printw("PRINT_RECEIVED_DATA set to " + to_string(sdSysData.COMMS.PROPS.PRINT_RECEIVED_DATA));
       }
       
-      if (check_command(cons," stopcomm", "Start Comms Port"))
-      {
-        sdSysData.COMMS.close_port();
-        cons.printw("Comm Port Stop Command Sent.");
-      }
-      
-      if (check_command(cons," commo", "Start Comms Log"))
+      // Automobile Log File On
+      if (check_command(cons," autoo", "Start Automobile Comms Log"))
       {
         sdSysData.COMMS.log_file_on();
-        sdSysData.COMMS.send("-- STARTING COMMS LOG --");
+        sdSysData.COMMS.send("-- STARTING AUTO COMMS LOG --");
       }
 
-      if (check_command(cons," commf", "Stop Comms Log"))
+      // Automobile Log File Off
+      if (check_command(cons," autof", "Stop Automobile Comms Log"))
       {
         sdSysData.COMMS.log_file_off();
-        sdSysData.COMMS.send("-- STOPPING COMMS LOG --");
+        sdSysData.COMMS.send("-- STOPPING AUTOMOBILE COMMS LOG --");
       }
 
+      // Automobile Data Request Toggle
       if (check_command(cons," autoreq", "Toggle Request Data from Automobile"))
       {
         sdSysData.CAR_INFO.PROPS.DATA_REQUEST_ENABLE = !sdSysData.CAR_INFO.PROPS.DATA_REQUEST_ENABLE;
         cons.printw("Automobile DATA_REQUEST_ENABLE set to " + to_string(sdSysData.CAR_INFO.PROPS.DATA_REQUEST_ENABLE));
       }
 
-      if (check_command(cons,"]]", "Store Comms Flash Data"))
+      // Automobile Flash Storage
+      if (check_command(cons,"]]", "Store Automobile Comms Flash Data"))
       {
         sdSysData.COMMS.write_flash_data();
       }
 
       // Test Routine
-      if(cons.command_text_get() == " test")
+      if(cons.command_text_get() == " autotest")
       {
         // Keep values below 128
         cons.printw("CMD: " + cons.command_text_get());
         run_test(cons);
         cons.command_text_clear();
       }
+
+      // -------------------------------------------------------------------------------------
+      // GPS Comms
+
+      // Start GPS Comm Port
+      if (check_command(cons," startgps", "Start GPS Comms Port"))
+      {
+
+        if (sdSysData.COMMS_GPS.create() == true)
+        {
+          cons.printw("GPS Comm Port Started.");
+        }
+        else
+        {
+          cons.printw("GPS Comm Port Failed To Start.");
+        }
+      }
+      
+      // Stop GPS Comm Port
+      if (check_command(cons," stopgps", "Stop GPS Comms Port"))
+      {
+        sdSysData.COMMS_GPS.PROPS.AUTOSTART = false;
+        sdSysData.COMMS_GPS.close_port();
+        cons.printw("GPS Comm Port Stop Command Sent.");
+      }
+
+      // Stop GPS Comm Port
+      if (check_command(cons," gpsp", "Toggle Print GPS Received Data"))
+      {
+        sdSysData.COMMS_GPS.PROPS.PRINT_RECEIVED_DATA = !sdSysData.COMMS_GPS.PROPS.PRINT_RECEIVED_DATA;
+        cons.printw("PRINT_RECEIVED_DATA set to " + to_string(sdSysData.COMMS_GPS.PROPS.PRINT_RECEIVED_DATA));
+      }
+      
+      // GPS Log File On
+      if (check_command(cons," gpso", "Start GPS Comms Log"))
+      {
+        sdSysData.COMMS_GPS.log_file_on();
+        sdSysData.COMMS_GPS.send("-- STARTING GPS COMMS LOG --");
+      }
+
+      // GPS Log File Off
+      if (check_command(cons," gpsf", "Stop GPS Comms Log"))
+      {
+        sdSysData.COMMS_GPS.log_file_off();
+        sdSysData.COMMS_GPS.send("-- STOPPING GPS COMMS LOG --");
+      }
+
+      // -------------------------------------------------------------------------------------
 
       if (check_command(cons," animt", "Event System 2 Test Animation"))
       {
@@ -957,9 +1023,26 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.ALERTS_2.add_generic_alert("Alert");
       }
 
-      if (check_command(cons, " sound", "Alert Sound"))
+      /*
+      if (check_command(cons, " sound0", "Alert Sound 0"))
+      {
+        sdSysData.ALERTS_2.sound_alert(0);
+      }
+      */
+
+      if (check_command(cons, " sound1", "Alert Sound 1"))
       {
         sdSysData.ALERTS_2.sound_alert(1);
+      }
+
+      if (check_command(cons, " sound2", "Alert Sound 2"))
+      {
+        sdSysData.ALERTS_2.sound_alert(2);
+      }
+
+      if (check_command(cons, " sound3", "Alert Sound 3"))
+      {
+        sdSysData.ALERTS_2.sound_alert(3);
       }
 
       /*
