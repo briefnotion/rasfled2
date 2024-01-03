@@ -18,11 +18,99 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
+/*
+In NMEA sentences, the first two letters after the $ denote the Talker ID, which 
+identifies the source of the information1.
+
+GP stands for GPS satellites only and is mostly used for integration with legacy 
+devices and software2.
+
+GN stands for Global Navigation Satellite System (GNSS), indicating that the data 
+comes from a combination of navigation systems3. This is the latest industry standard 
+and is required when you use data from multiple satellite systems2.
+
+So, the difference between GP and GN lies in the source of the satellite data they 
+represent. GP is specific to GPS, while GN represents a combination of different 
+satellite systems.
+*/
+
+//void NMEA::translate_gpgsv(vector<string> &Input)
+//{
+//}
+
+void NMEA::translate_gpvtg(vector<string> &Input, unsigned long tmeFrame_Time)
+{
+  //  The NMEA-0183 message $GNVTG is used for course over ground and ground speed.
+  //  $GNVTG,131.32,T,,M,6.353,N,11.766,K,D*10
+  if (Input.size() == 10)
+  {
+    TRUE_TRACK = string_to_float(Input[1]);
+    if (Input[2] == "T")
+    {
+      TRUE_TRACK_INDICATOR = true;
+    }
+    else
+    {
+      TRUE_TRACK_INDICATOR = false;
+    }
+
+    MAGENTIC_TRACK = string_to_float(Input[3]);
+    if (Input[4] == "M")
+    {
+      MAGENTIC_TRACK_INDICATOR = true;
+    }
+    else
+    {
+      MAGENTIC_TRACK_INDICATOR = false;
+    }
+
+    SPEED_KNOTS.store_knots(string_to_float(Input[5]), tmeFrame_Time, 0);
+    if (Input[6] == "N")
+    {
+      SPEED_KNOTS_INDICATOR = true;
+    }
+    else
+    {
+      SPEED_KNOTS_INDICATOR = false;
+    }
+
+    SPEED_KMPH.store_kmph(string_to_float(Input[7]), tmeFrame_Time, 0);
+    if (Input[8] == "K")
+    {
+      SPEED_KMPH_INDICATOR = true;
+    }
+    else
+    {
+      SPEED_KMPH_INDICATOR = false;
+    }
+
+    VELOCITY_TRACK_MODE = Input[9];
+
+    if (VELOCITY_TRACK_MODE == "N")
+    {
+      VALID_TRACK_INFO = false;
+    }
+    else
+    {
+      VALID_TRACK_INFO = true;
+    }
+  }
+  else
+  {
+    VALID_TRACK_INFO = false;
+  }
+}
+
+//void NMEA::translate_gpgsa(vector<string> &Input)
+//{
+  //  GPS DOP (Dilution of Precision)
+//}
+
 void NMEA::translate_gpgga(vector<string> &Input)
 {
   if (Input.size() == 15)
   {
-    TIME = string_to_float(Input[1]);
+    GGA_TIME = string_to_float(Input[1]);
     
     LATITUDE = string_to_float(Input[2]);
     // Convert long degrees minutes to degrees decimal
@@ -62,7 +150,7 @@ void NMEA::translate_gpgga(vector<string> &Input)
     DGPS_STATION_ID = string_to_int(tmp_string);
 
     right_of_char(Input[14], '*', tmp_string);
-    CHECKSUM = string_to_int(tmp_string);
+    //CHECKSUM = string_to_int(tmp_string);
   }
   else
   {
@@ -125,8 +213,22 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
       // translate
       if (INPUT_LINE.size() > 1)
       {
-        if (INPUT_LINE[0] == "$GPGGA" || INPUT_LINE[0] == "$GNGGA")
+        if (INPUT_LINE[0] == "$GPVTG" || INPUT_LINE[0] == "$GNVTG")
         {
+          // Ground Speed
+          translate_gpvtg(INPUT_LINE, tmeFrame_Time);
+
+          // Update Details
+          CURRENT_POSITION.TRUE_HEADING = TRUE_TRACK;
+          CURRENT_POSITION.SPEED = SPEED_KMPH;
+          CURRENT_POSITION.VALID_TRACK = VALID_TRACK_INFO;
+          
+          CURRENT_POSITION.CHANGED = true;
+        }
+
+        else if (INPUT_LINE[0] == "$GPGGA" || INPUT_LINE[0] == "$GNGGA")
+        {
+          // Global Position
           translate_gpgga(INPUT_LINE);
 
           // Update Details
@@ -138,7 +240,6 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
             CURRENT_POSITION.LONGITUDE = LONGITUDE;
             CURRENT_POSITION.ALTITUDE = ALTITUDE;
             CURRENT_POSITION.GEOID_HEIGHT = GEOID_HEIGHT;
-            CURRENT_POSITION.TIME = TIME;
             CURRENT_POSITION.LATITUDE = LATITUDE;
 
             CURRENT_POSITION.VALID_COORDS = true;

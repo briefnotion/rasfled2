@@ -100,10 +100,10 @@ class SCREEN4
   W_TEXT_TF HAZARD;
   W_TEXT_TF DAY_NIGHT;
   W_TEXT_TF TIMER;
-  W_TEXT_TF DOOR1;
-  W_TEXT_TF DOOR2;
-  W_TEXT_TF DOOR3;
-  W_TEXT_TF DOOR4;
+  //W_TEXT_TF DOOR1;
+  //W_TEXT_TF DOOR2;
+  //W_TEXT_TF DOOR3;
+  //W_TEXT_TF DOOR4;
   W_TEXT_TF AUTO;
   W_TEXT_TF ADSB_IND;
 
@@ -120,6 +120,8 @@ class SCREEN4
 
   bool CHANGED = false;
 
+  void door_lights(system_data &sdSysData, ImVec2 Window_Size);
+  void hazard_lights(system_data &sdSysData, ImVec2 Window_Size);
   void signal_lights(system_data &sdSysData, ImVec2 Window_Size);
 
   void set_screen_default_colors(system_data &sdSysData);

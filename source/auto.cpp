@@ -54,62 +54,6 @@ bool check_availability(bool Coded_Availability, bool Source_Availabilty)
 
 //-----------
 
-void VELOCITY::store(float kmph, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
-{
-  KMPH.set_value(tmeFrame_Time, kmph);  
-  TIME_STAMP_TIME_SENT = tmeFrame_Time_Sent;
-  TIME_STAMP = tmeFrame_Time;
-}
-
-void VELOCITY::store_meters_per_second(float mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
-{
-  KMPH.set_value(tmeFrame_Time, velocity_translate_meters_per_second_to_kmph(mps));
-  TIME_STAMP_TIME_SENT = tmeFrame_Time_Sent;
-  TIME_STAMP = tmeFrame_Time;
-}
-
-float VELOCITY::val_kmph()
-{
-  return KMPH.latest();
-}
-
-float VELOCITY::val_meters_per_second()
-{
-  return velocity_translate_kmph_to_meters_per_second(KMPH.latest());
-}
-
-float VELOCITY::val_mph()
-{
-  return velocity_translate_kmph_to_mph(KMPH.latest());
-}
-
-float VELOCITY::val_mph_impres(unsigned long tmeFrame_Time)
-{
-  return velocity_translate_kmph_to_mph(KMPH.impact(tmeFrame_Time));
-}
-
-string VELOCITY::kmph()
-{
-  return to_string_round_to_nth(KMPH.latest(), 2);
-}
-
-string VELOCITY::mph()
-{
-  return to_string_round_to_nth(val_mph(), 2);
-}
-
-unsigned long VELOCITY::time_stamp()
-{
-  return TIME_STAMP;
-}
-
-unsigned long VELOCITY::time_stamp_time_sent()
-{
-  return TIME_STAMP_TIME_SENT;
-}
-
-//-----------
-
 void TEMPERATURE::store_c(int Celsius)
 {
   C  = Celsius;
@@ -1015,12 +959,12 @@ void AUTOMOBILE_VELOCITY::set_source_availability(bool Available)
 {
   if (SOURCE_AVAILABILITY == true && Available == false)
   {
-    SPEED_TRANS.store(-1, 0, 0);
-    SPEED_DASH.store(-1, 0, 0);
-    SPEED_LF_TIRE.store(-1, 0, 0);
-    SPEED_RF_TIRE.store(-1, 0, 0);
-    SPEED_LB_TIRE.store(-1, 0, 0);
-    SPEED_RB_TIRE.store(-1, 0, 0);
+    SPEED_TRANS.store_kmph(-1, 0, 0);
+    SPEED_DASH.store_kmph(-1, 0, 0);
+    SPEED_LF_TIRE.store_kmph(-1, 0, 0);
+    SPEED_RF_TIRE.store_kmph(-1, 0, 0);
+    SPEED_LB_TIRE.store_kmph(-1, 0, 0);
+    SPEED_RB_TIRE.store_kmph(-1, 0, 0);
   }
   
   SOURCE_AVAILABILITY = Available;
@@ -1046,33 +990,33 @@ void AUTOMOBILE_VELOCITY::store_trans(int kmph, float Multiplier, unsigned long 
   
   if (compared_velocity_diff < 3.0)
   {
-    SPEED_TRANS.store(calculated_velocity, tmeFrame_Time, tmeFrame_Time_Sent);
+    SPEED_TRANS.store_kmph(calculated_velocity, tmeFrame_Time, tmeFrame_Time_Sent);
   }
 }
 
 void AUTOMOBILE_VELOCITY::store_dash(int Upper, int Lower, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  SPEED_DASH.store((float)Upper + ((float)Lower / 255), tmeFrame_Time, tmeFrame_Time_Sent);
+  SPEED_DASH.store_kmph((float)Upper + ((float)Lower / 255), tmeFrame_Time, tmeFrame_Time_Sent);
 }
 
 void AUTOMOBILE_VELOCITY::store_LF(int mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  SPEED_LF_TIRE.store(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
+  SPEED_LF_TIRE.store_kmph(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
 }
 
 void AUTOMOBILE_VELOCITY::store_RF(int mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  SPEED_RF_TIRE.store(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
+  SPEED_RF_TIRE.store_kmph(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
 }
 
 void AUTOMOBILE_VELOCITY::store_LB(int mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  SPEED_LB_TIRE.store(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
+  SPEED_LB_TIRE.store_kmph(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
 }
 
 void AUTOMOBILE_VELOCITY::store_RB(int mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  SPEED_RB_TIRE.store(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
+  SPEED_RB_TIRE.store_kmph(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
 }
 
 float AUTOMOBILE_VELOCITY::multiplier()

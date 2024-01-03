@@ -33,12 +33,37 @@ class NMEA
   private:
 
   // ALL CURRENT STATUSs
+
+  //  Ground Speed and Heading
+  float TRUE_TRACK = 0;
+  bool TRUE_TRACK_INDICATOR = false;
+
+  float MAGENTIC_TRACK = 0;
+  bool MAGENTIC_TRACK_INDICATOR = false;
+
+  VELOCITY SPEED_KNOTS;
+  bool SPEED_KNOTS_INDICATOR = false;
+
+  VELOCITY SPEED_KMPH;
+  bool SPEED_KMPH_INDICATOR = false;
+
+  string VELOCITY_TRACK_MODE = "N";
+  // Positioning system mode indicator. 
+  // A = Autonomous, 
+  // D = Differential, 
+  // E = Estimated (dead reckoning) mode, 
+  // M = Manual input, 
+  // N = Data not valid
+
+  bool VALID_TRACK_INFO = false;
+
+  //  Global Posion
   float LATITUDE = 0;
   float LONGITUDE = 0;
   DISTANCE ALTITUDE;     // M
   DISTANCE GEOID_HEIGHT; // M (mean sea level above WGS84 ellipsoid)
 
-  float TIME = 0;
+  float GGA_TIME = 0;
   
   float TIME_SINCE_LAST_DGPS_UPDATE = 0;
   int DGPS_STATION_ID;
@@ -48,13 +73,18 @@ class NMEA
 
   int QUALITY = 0;  // 0 - 8;
 
-  int CHECKSUM = 0;
+  // ---
+  // NO CONSOLIDATION OCCURS
+  // ---
 
   bool VALID_COORDS = false;
   bool CHANGED = false;
 
   GLOBAL_POSITION_DETAILED CURRENT_POSITION;
 
+  //void translate_gpgsv(vector<string> &Input);
+  void translate_gpvtg(vector<string> &Input, unsigned long tmeFrame_Time);
+  //void translate_gpgsa(vector<string> &Input);
   void translate_gpgga(vector<string> &Input);
 
   public:

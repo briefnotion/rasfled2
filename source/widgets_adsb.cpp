@@ -128,13 +128,45 @@ void draw_current_gps_marker(system_data &sdSysData, ImVec2 Screen_Position, GLO
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-  if (Details.LIVE)
+  if (Details.LIVE) /* lolz, likely to change to something more like /|\
+                                                                     \_/  */
   {
+    // Draw position
     draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.c_white().STANDARD_V, 8.0f);
-    draw_list->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.c_white().STANDARD_V, 15.0f, 2.0f);
+    draw_list->AddNgon(Screen_Position, 20.0f, (ImU32)sdSysData.COLOR_SELECT.c_white().STANDARD_V, 15.0f, 2.0f);
+
+
+    ImGui::SetCursorScreenPos(ImVec2(Screen_Position.x + 5.0f, Screen_Position.y + 25.0f));
+    ImGui::Text("S: %s", Details.SPEED.mph().c_str());
+
+    ImGui::SetCursorScreenPos(ImVec2(Screen_Position.x + 5.0f, Screen_Position.y + 41.0f));
+    ImGui::Text("A: %.1f", Details.ALTITUDE.feet_val());
+
+    // Heading
+    if (Details.VALID_TRACK)
+    {
+      // Adjust thhe degrees into heading.
+      float thickness = 4.0f;
+      float size = 20.0f;
+      float Heading = Details.TRUE_HEADING + 90.0f;
+
+      // Convert direction from degrees to radians
+      float rad = Heading * float_PI / 180.0f;
+
+      // Calculate the arrow points
+      ImVec2 arrow_p1 = ImVec2(Screen_Position.x + size * cos(rad + float_PI / 8.0f), Screen_Position.y + size * sin(rad + float_PI / 8.0f));
+      ImVec2 arrow_p2 = ImVec2(Screen_Position.x + size * cos(rad - float_PI / 8.0f), Screen_Position.y + size * sin(rad - float_PI / 8.0f));
+
+      // Draw the line and the arrow
+      //draw_list->AddLine(p1, p2, col, thickness);
+      draw_list->AddLine(Screen_Position, arrow_p1, sdSysData.COLOR_SELECT.c_white().STANDARD_V, thickness);
+      draw_list->AddLine(Screen_Position, arrow_p2, sdSysData.COLOR_SELECT.c_white().STANDARD_V, thickness);
+      draw_list->AddLine(arrow_p1, arrow_p2, sdSysData.COLOR_SELECT.c_white().STANDARD_V, thickness);
+    }
   }
   else
   {
+    // Draw position
     draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.c_yellow().STANDARD, 8.0f);
     draw_list->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.c_yellow().STANDARD, 15.0f, 2.0f);
   }

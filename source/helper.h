@@ -542,6 +542,8 @@ float velocity_translate_kmph_to_meters_per_second(float kmph);
 
 float velocity_translate_meters_per_second_to_kmph(float mps);
 
+float velocity_translate_knots_to_kmph(float knots);
+
 float pressure_translate_kPa_to_inHg(float kPa);
 
 int position_of_scale(int size, int scale, int value);

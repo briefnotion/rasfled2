@@ -1,3 +1,7 @@
+2.303_240102
+  - Building GPS System.
+  - Added Track info.
+
 2.302_240101
   - Building GPS System.
   - Changed older comms commands names, seperated to auto and gps.

@@ -971,27 +971,32 @@ int radio_translate_to_frequency_6(float Frequency)
 
 float velocity_translate_kmph_to_mph(float kmph)
 {
-  return kmph * 0.6213711922;
+  return kmph * 0.6213711922f;
 }
 
 float velocity_translate_Miph_to_mps(float Miph)
 {
-  return Miph * 0.447;
+  return Miph * 0.447f;
 }
 
 float velocity_translate_kmph_to_meters_per_second(float kmph)
 {
-  return kmph * 0.2777777778;
+  return kmph * 0.2777777778f;
 }
 
 float velocity_translate_meters_per_second_to_kmph(float mps)
 {
-  return mps * 3.6;
+  return mps * 3.6f;
+}
+
+float velocity_translate_knots_to_kmph(float knots)
+{
+  return knots * 1.852f;
 }
 
 float pressure_translate_kPa_to_inHg(float kPa)
 {
-  return kPa * (1 / 3.386389);
+  return kPa * (1.0f / 3.386389f);
 }
 
 int position_of_scale(int size, int scale, int value)

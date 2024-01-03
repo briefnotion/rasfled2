@@ -20,6 +20,7 @@
 #include "fled_time.h"
 #include "stringthings.h"
 #include "helper.h"
+#include "globe_helper.h"
 #include "alert_system_2.h"
 #include "screen4_helper.h"
 #include "auto_nova.h"
@@ -172,35 +173,6 @@ class AUTOMOBILE_DATA
                                 //    interval. message not sent if 0.
 
   AUTOMOBILE_DATA_LINE AD_UNKNOWN;
-};
-
-class VELOCITY
-{
-  private:
-
-  IMPACT_RESISTANCE_FLOAT KMPH;      // Base
-
-  unsigned long TIME_STAMP = -1;            // Miliseconds.  Fairly loose timings.
-  unsigned long TIME_STAMP_TIME_SENT = -1;  // Miliseconds.  Should be a more 
-                                            //  accurate timing because set on sending 
-                                            //  device. Latency of serial port send and 
-                                            //  receive and processing is not factored.
-                                            // May also be likely the latency is the same.
-                                            //  May only matter when Serial Comm is congested.
-
-  public:
-
-  void store(float kmph, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent);
-  void store_meters_per_second(float mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent);
-  float val_kmph();
-  float val_meters_per_second();
-  float val_mph();
-  float val_mph_impres(unsigned long tmeFrame_Time);
-  string kmph();
-  string mph();
-
-  unsigned long time_stamp();
-  unsigned long time_stamp_time_sent();
 };
 
 class TEMPERATURE

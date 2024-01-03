@@ -33,26 +33,68 @@ struct InputTextCallback_UserData
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 
-void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
+void SCREEN4::door_lights(system_data &sdSysData, ImVec2 Window_Size)
 {
-  if (sdSysData.CAR_INFO.active())
-  {
-    if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards())
-    {
-      if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
-      {
-        BLINKER_BLINK = !BLINKER_BLINK;
-        PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (790 / 2));
-      }
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-      if (BLINKER_BLINK)
-      {
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-  
-        draw_list->AddRectFilled(ImVec2(0.0f, 0.0f), Window_Size, sdSysData.COLOR_SELECT.c_yellow().STANDARD);
-      }
+  if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value)
+  {
+    draw_list->AddRectFilledMultiColor(ImVec2(0.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
+                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_white().STANDARD_V);
+  }
+
+  if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value)
+  {
+    draw_list->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), 
+                    sdSysData.COLOR_SELECT.c_white().STANDARD_V, sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+  }
+
+  if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value)
+  {
+    draw_list->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x, Window_Size.y), 
+                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                    sdSysData.COLOR_SELECT.c_white().STANDARD_V, sdSysData.COLOR_SELECT.c_black().STANDARD);
+  }
+
+  if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value)
+  {
+    draw_list->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y / 2.0f), 
+                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_white().STANDARD_V, 
+                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+  }
+}
+
+void SCREEN4::hazard_lights(system_data &sdSysData, ImVec2 Window_Size)
+{
+  if ((sdSysData.CAR_INFO.active() && sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards()) || sdSysData.booHazardRunning)
+  {
+    if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
+    {
+      BLINKER_BLINK = !BLINKER_BLINK;
+      PING_BLINKER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), (790 / 2));
     }
 
+    if (BLINKER_BLINK)
+    {
+      ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+      draw_list->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
+                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD, 
+                          sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+
+      draw_list->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
+                          sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD);
+    }
+  }
+}
+
+void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
+{
+  if (sdSysData.CAR_INFO.active() || sdSysData.booHazardRunning)
+  {
     if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left())
     {
       if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
@@ -281,6 +323,7 @@ int SCREEN4::create(system_data &sdSysData)
     TIMER.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
     TIMER.update_text(" TIMER ", " TIMER ");
 
+    /*
     DOOR1.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     DOOR1.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
     DOOR1.update_text(" DOOR1", " DOOR1");
@@ -296,6 +339,7 @@ int SCREEN4::create(system_data &sdSysData)
     DOOR4.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     DOOR4.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
     DOOR4.update_text("DOOR4 ", "DOOR4 ");
+    */
 
     AUTO.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     AUTO.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
@@ -553,6 +597,7 @@ void SCREEN4::draw(system_data &sdSysData)
             // Door Group
             ImGui::BeginGroup();
             {
+              /*
               DOOR2.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value);
               DOOR2.draw(sdSysData);
               
@@ -569,6 +614,7 @@ void SCREEN4::draw(system_data &sdSysData)
               
               DOOR3.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value);
               DOOR3.draw(sdSysData);
+              */
             }
             ImGui::EndGroup();
 
@@ -983,8 +1029,9 @@ void SCREEN4::draw(system_data &sdSysData)
       ImGui::EndChild();
 
       // Auto Signal Lights
+      hazard_lights(sdSysData, viewport->Size);
       signal_lights(sdSysData, viewport->Size);
-
+      door_lights(sdSysData, viewport->Size);
     }
     ImGui::End();
 
@@ -1446,7 +1493,7 @@ void SCREEN4::update_GPS_gadgets(system_data &sdSysData)
     // Update GPS Console
     for (int pos = 0; pos < (int)sdSysData.GPS_SYSTEM.RECIEVE_HISTORY.size(); pos++)
     {
-      GPS_CONSOLE.add_line(sdSysData.GPS_SYSTEM.RECIEVE_HISTORY[pos] + "\n");
+      GPS_CONSOLE.add_line(trim(sdSysData.GPS_SYSTEM.RECIEVE_HISTORY[pos]) + "\n");
     }
 
     // Update ADSB Map with GPS Data.
