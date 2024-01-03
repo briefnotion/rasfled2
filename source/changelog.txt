@@ -1,18 +1,21 @@
-2.303_240102
+2.103_240102B
+  - Corrected version number.
+
+2.103_240102
   - Building GPS System.
   - Added Track info.
 
-2.302_240101
+2.102_240101
   - Building GPS System.
   - Changed older comms commands names, seperated to auto and gps.
   - Added GPS Comms commands.
   - Comms AUTOSTART will be set to false, for gps and auto, if stop comms 
       command is sent.
 
-2.301_231230
+2.101_231230
   - Building GPS System.
 
-2.300_231229
+2.100_231229
   - Started building GPS System.
 
 2.099_231227
