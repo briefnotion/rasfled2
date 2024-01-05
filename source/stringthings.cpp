@@ -491,6 +491,23 @@ int color_scale(float Value, int Green, int Yellow, int Red, int Magenta, int Bl
   }
 }
 
+short xor_checksum(string Line, char Start_Char, char End_Char)
+{
+  int open = Line.find(Start_Char) + 1;
+  int close = Line.find_last_of(End_Char);
+  short checksum = 0;
+
+  if (open < close)
+  {
+    for (int pos = open; pos < close; pos ++)
+    {
+      checksum ^= Line[pos];
+    }
+  }
+
+  return checksum;
+}
+
 void STRING_STRING::store(string str_value)
 {
   STR_VALUE = str_value;

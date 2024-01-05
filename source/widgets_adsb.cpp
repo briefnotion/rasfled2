@@ -30,47 +30,6 @@ void BLANK::display(const char *name, bool *p_open, ImGuiWindowFlags flags)
 // ---------------------------------------------------------------------------------------
 // Map Tools
 
-float calculate_distance(float lat1, float lon1, float lat2, float lon2)
-{
-  // Convert latitude and longitude from degrees to radians
-  lat1 = lat1 * float_PI / 180.0f;
-  lon1 = lon1 * float_PI / 180.0f;
-  lat2 = lat2 * float_PI / 180.0f;
-  lon2 = lon2 * float_PI / 180.0f;
-
-  // Calculate the differences between the coordinates
-  double dlat = lat2 - lat1;
-  double dlon = lon2 - lon1;
-
-  // Calculate the great circle distance using the haversine formula
-  double a = pow(sin(dlat/2), 2) + cos(lat1) * cos(lat2) * pow(sin(dlon/2), 2);
-  double c = 2 * atan2(sqrt(a), sqrt(1-a));
-
-  double R = 3963.191;  // Radius of the Earth in miles
-  double distance = R * c;
-
-  return (float)distance;
-}
-
-
-ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees) 
-{
-  ImVec2 ret_coords;
-
-  float lat1Rad = Latitude * float_PI / 180.0f;
-  float lon1Rad = Longitude * float_PI / 180.0f;
-  float angularDistance = Distance_Miles / float_EARTH_RADIUS;
-
-  float lat2Rad = asin(sin(lat1Rad) * cos(angularDistance) + cos(lat1Rad) * sin(angularDistance) * cos(Bearing_Degrees * float_PI / 180.0f));
-  float lon2Rad = lon1Rad + atan2(sin(Bearing_Degrees * float_PI / 180.0f) * sin(angularDistance) * cos(lat1Rad),
-                                    cos(angularDistance) - sin(lat1Rad) * sin(lat2Rad));
-
-  ret_coords.x = (lat2Rad * 180.0f / float_PI);
-  ret_coords.y = (lon2Rad * 180.0f / float_PI);
-
-  return ret_coords;
-}
-
 ImVec2 point_position_center(ImVec4 Working_Area)
 {
   ImVec2 ret_center;
@@ -117,59 +76,98 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position)
 // ---------------------------------------------------------------------------------------
 // Markers
 
+void draw_moving_marker(system_data &sdSysData, ImVec2 Screen_Position, bool Main, bool Valid_Position, 
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2)
+{
+  // Heading 1 - Track or Aircraft Nav Heading
+  // Heading 2 - Compass or Aircraft Track Heading.
+
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+  float size = 15.0f;
+  int Color = sdSysData.COLOR_SELECT.white();
+
+  // Set Color
+  if (Valid_Position == false)
+  {
+    Color = sdSysData.COLOR_SELECT.yellow();
+  }
+
+  if (Valid_Position)
+  {
+    // Draw Location
+    draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 8.0f);
+    draw_list->AddNgon(Screen_Position, size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 15.0f, 3.0f);
+
+    // Draw Double Location
+    if (Main)
+    {
+      draw_list->AddNgon(Screen_Position, size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 15.0f, 2.0f);
+    }
+  }
+  else
+  {
+    // Draw Location
+    draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 8.0f);
+    draw_list->AddNgon(Screen_Position, size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 15.0f, 3.0f);
+
+    // Draw Double Location
+    if (Main)
+    {
+      draw_list->AddNgon(Screen_Position, 24.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 15.0f, 3.0f);
+    }
+  }
+
+  // Draw Heading 1
+  if (Valid_Heading_1)
+  {
+    float thickness = 4.0f;
+
+    // Adjust the degrees into heading. Convert direction from degrees to radians
+    float rad = (Heading_1 + 90.0f) * float_PI / 180.0f;
+
+    // Calculate
+    ImVec2 p2 = ImVec2(Screen_Position.x + size * cos(rad + float_PI), Screen_Position.y + size * sin(rad + float_PI));
+ 
+    // Draw the line
+    if (Valid_Position)
+    {
+      draw_list->AddLine(Screen_Position, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, thickness);
+    }
+    else
+    {
+      draw_list->AddLine(Screen_Position, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, thickness);
+    }
+  }
+
+  // Draw Heading 2
+  if (Valid_Heading_2)
+  {
+    float thickness = 4.0f;
+
+    // Adjust the degrees into heading. Convert direction from degrees to radians
+    float rad = (Heading_2 + 90.0f) * float_PI / 180.0f;
+
+    // Calculate
+    ImVec2 p1 = ImVec2(Screen_Position.x + size * cos(rad + float_PI), Screen_Position.y + size * sin(rad + float_PI));
+    ImVec2 p2 = ImVec2(Screen_Position.x + ( 2.0f * size) * cos(rad + float_PI), Screen_Position.y + ( 2.0f * size) * sin(rad + float_PI));
+ 
+    // Draw the line
+    if (Valid_Position)
+    {
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, thickness);
+    }
+    else
+    {
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, thickness);
+    }
+  }
+}
+
 void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
   draw_list->AddNgon(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
-}
-
-void draw_current_gps_marker(system_data &sdSysData, ImVec2 Screen_Position, GLOBAL_POSITION_DETAILED Details)
-{
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  if (Details.LIVE) /* lolz, likely to change to something more like /|\
-                                                                     \_/  */
-  {
-    // Draw position
-    draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.c_white().STANDARD_V, 8.0f);
-    draw_list->AddNgon(Screen_Position, 20.0f, (ImU32)sdSysData.COLOR_SELECT.c_white().STANDARD_V, 15.0f, 2.0f);
-
-
-    ImGui::SetCursorScreenPos(ImVec2(Screen_Position.x + 5.0f, Screen_Position.y + 25.0f));
-    ImGui::Text("S: %s", Details.SPEED.mph().c_str());
-
-    ImGui::SetCursorScreenPos(ImVec2(Screen_Position.x + 5.0f, Screen_Position.y + 41.0f));
-    ImGui::Text("A: %.1f", Details.ALTITUDE.feet_val());
-
-    // Heading
-    if (Details.VALID_TRACK)
-    {
-      // Adjust thhe degrees into heading.
-      float thickness = 4.0f;
-      float size = 20.0f;
-      float Heading = Details.TRUE_HEADING + 90.0f;
-
-      // Convert direction from degrees to radians
-      float rad = Heading * float_PI / 180.0f;
-
-      // Calculate the arrow points
-      ImVec2 arrow_p1 = ImVec2(Screen_Position.x + size * cos(rad + float_PI / 8.0f), Screen_Position.y + size * sin(rad + float_PI / 8.0f));
-      ImVec2 arrow_p2 = ImVec2(Screen_Position.x + size * cos(rad - float_PI / 8.0f), Screen_Position.y + size * sin(rad - float_PI / 8.0f));
-
-      // Draw the line and the arrow
-      //draw_list->AddLine(p1, p2, col, thickness);
-      draw_list->AddLine(Screen_Position, arrow_p1, sdSysData.COLOR_SELECT.c_white().STANDARD_V, thickness);
-      draw_list->AddLine(Screen_Position, arrow_p2, sdSysData.COLOR_SELECT.c_white().STANDARD_V, thickness);
-      draw_list->AddLine(arrow_p1, arrow_p2, sdSysData.COLOR_SELECT.c_white().STANDARD_V, thickness);
-    }
-  }
-  else
-  {
-    // Draw position
-    draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.c_yellow().STANDARD, 8.0f);
-    draw_list->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.c_yellow().STANDARD, 15.0f, 2.0f);
-  }
 }
 
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
@@ -184,36 +182,6 @@ void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size)
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
   draw_list->AddNgonFilled(Screen_Position, Size, Color, 4.0f);
-}
-
-void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color, float Size)
-{
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  draw_list->AddNgon(Screen_Position, Size, sdSysData.COLOR_SELECT.color(Color).TEXT, 6.0f, 2.0f);
-}
-
-void draw_aircraft_marker_direction(system_data &sdSysData, ImVec2 Screen_Position, int Color, float Size, float Heading)
-{
-  float thickness = 2.0f;
-
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  // Adjust thhe degrees into heading.
-  Heading = Heading + 90.0f;
-
-  // Convert direction from degrees to radians
-  float rad = Heading * float_PI / 180.0f;
-
-  // Calculate the arrow points
-  ImVec2 arrow_p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI / 8.0f), Screen_Position.y + Size * sin(rad + float_PI / 8.0f));
-  ImVec2 arrow_p2 = ImVec2(Screen_Position.x + Size * cos(rad - float_PI / 8.0f), Screen_Position.y + Size * sin(rad - float_PI / 8.0f));
-
-  // Draw the line and the arrow
-  //draw_list->AddLine(p1, p2, col, thickness);
-  draw_list->AddLine(Screen_Position, arrow_p1, sdSysData.COLOR_SELECT.color(Color).TEXT, thickness);
-  draw_list->AddLine(Screen_Position, arrow_p2, sdSysData.COLOR_SELECT.color(Color).TEXT, thickness);
-  draw_list->AddLine(arrow_p1, arrow_p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, thickness);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -538,92 +506,73 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
                                                   ImVec2( AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value(), 
                                                           AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value()), 
                                                           draw);
-    
-    //if (draw)
+
+    // Draw track first then overlay aircraft.
+    if (TRACK.size() > 1)
     {
-      // Draw track first then overlay aircraft.
-      if (TRACK.size() > 1)
-      {
-        bool draw_0 = false;
-        bool draw_1 = false;
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
+      bool draw_0 = false;
+      bool draw_1 = false;
+      ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
-        ImVec2 track_position_0;
-        ImVec2 track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[0].LAT_LON, draw_1);
-        
-        for(int position = 1; position < (int)TRACK.size(); position++)
-        {
-          track_position_0 = track_position_1;
-          draw_0 = draw_1;
-
-          track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[position].LAT_LON, draw_1);
-
-          if (draw_0 || draw_1)
-          {
-            ImColor point_color = sdSysData.COLOR_SELECT.color(ALTITUDE_COLOR_SCALE.get_color(TRACK[position].ALTITUDE)).TEXT;
-
-            point_color.Value.w = TRACK[position].RSSI_INTENSITY;
-
-            draw_point_marker(track_position_0, point_color, 3.0f);
-
-            draw_list->AddLine(track_position_0, track_position_1, 
-                                sdSysData.COLOR_SELECT.c_grey().TEXT, 2.0f);
-          }
-        }
-      }
-
-
-      // Draw Arrow of Aircraft nav heading on map at position
-      if (AIRCRAFT_DATA.NAV_HEADING.conversion_success())
-      {
-        draw_aircraft_marker_direction(sdSysData, draw_position, sdSysData.COLOR_SELECT.green(), 20.0f, AIRCRAFT_DATA.NAV_HEADING.get_float_value());
-      }
-
-      // Draw Arrow of Aircraft track heading on map at position, grey if old.
-      if (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5)
-      {
-        if (AIRCRAFT_DATA.TRACK.conversion_success())
-        {
-          draw_aircraft_marker_direction(sdSysData, draw_position, sdSysData.COLOR_SELECT.white(), 15.0f, AIRCRAFT_DATA.TRACK.get_float_value());
-        }
-        else
-        {
-          draw_aircraft_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.white(), 6.0f);
-        }
-      }
-      else
-      {
-        if (AIRCRAFT_DATA.TRACK.conversion_success())
-        {
-          draw_aircraft_marker_direction(sdSysData, draw_position, sdSysData.COLOR_SELECT.grey(), 12.0f, AIRCRAFT_DATA.TRACK.get_float_value());
-        }
-        else
-        {
-          draw_aircraft_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.grey(), 4.0f);
-        }
-      }
-
-      // Text describing Aircraft
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
-  
-      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5.0f, draw_position.y + 8.0f));
-      ImGui::Text("%d %s", AIRCRAFT_DATA.SEEN_POS.get_int_value(), AIRCRAFT_DATA.FLIGHT.get_str_value().c_str());
+      ImVec2 track_position_0;
+      ImVec2 track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[0].LAT_LON, draw_1);
       
-      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5.0f, draw_position.y + 25.0f));
-      ImGui::Text("S: %d", AIRCRAFT_DATA.SPEED.get_int_value());
-
-      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 5.0f, draw_position.y + 41.0f));
-      if (AIRCRAFT_DATA.ALTITUDE.conversion_success())
+      for(int position = 1; position < (int)TRACK.size(); position++)
       {
-        ImGui::Text("A: %.1f", float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f));
-      }
-      else
-      {
-        ImGui::Text("A: %s", AIRCRAFT_DATA.ALTITUDE.get_str_value().c_str());
-      }
+        track_position_0 = track_position_1;
+        draw_0 = draw_1;
 
-      ImGui::PopStyleColor();
+        track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[position].LAT_LON, draw_1);
+
+        if (draw_0 || draw_1)
+        {
+          ImColor point_color = sdSysData.COLOR_SELECT.color(ALTITUDE_COLOR_SCALE.get_color(TRACK[position].ALTITUDE)).TEXT;
+
+          point_color.Value.w = TRACK[position].RSSI_INTENSITY;
+
+          draw_point_marker(track_position_0, point_color, 3.0f);
+
+          draw_list->AddLine(track_position_0, track_position_1, 
+                              sdSysData.COLOR_SELECT.c_grey().TEXT, 2.0f);
+        }
+      }
     }
+
+    // Draw Aircraft Marker
+    if (AIRCRAFT_DATA.TRACK.conversion_success())
+    {
+      draw_moving_marker(sdSysData, draw_position, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
+                          AIRCRAFT_DATA.NAV_HEADING.conversion_success(), AIRCRAFT_DATA.NAV_HEADING.get_float_value(), 
+                          AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value());
+    }
+
+    // Text Describing Aircraft
+    if (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5)
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
+    }
+    else
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
+    }
+
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f));
+    ImGui::Text("%d %s", AIRCRAFT_DATA.SEEN_POS.get_int_value(), AIRCRAFT_DATA.FLIGHT.get_str_value().c_str());
+    
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f));
+    ImGui::Text("S: %d", AIRCRAFT_DATA.SPEED.get_int_value());
+
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f + 15.0f));
+    if (AIRCRAFT_DATA.ALTITUDE.conversion_success())
+    {
+      ImGui::Text("A: %.1f", float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f));
+    }
+    else
+    {
+      ImGui::Text("A: %s", AIRCRAFT_DATA.ALTITUDE.get_str_value().c_str());
+    }
+
+    ImGui::PopStyleColor();
   }
 }
 
@@ -817,13 +766,11 @@ void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
   ImGui::PopStyleColor();
 }
 
-void ADSB_RANGE::draw_info(system_data &sdSysData)
+void ADSB_RANGE::draw_info()
 {
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_grey().TEXT));
-  ImGui::Text("lat: %f", CENTER_LAT_LON.x);
-  ImGui::Text("lon: %f", CENTER_LAT_LON.y);
-  ImGui::Text("rng: %.0f", RANGE);
-  ImGui::PopStyleColor();
+  ImGui::Text("LAT: %f", CENTER_LAT_LON.x);
+  ImGui::Text("LON: %f", CENTER_LAT_LON.y);
+  ImGui::Text("RNG: %.0f", RANGE);
 
   // test
   /*
@@ -1690,18 +1637,27 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   // All Text Below Here
 
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_red().TEXT));
+
   ImGui::Text("WARNING: Information may be considered CONFIDENTIAL");
   ImGui::PopStyleColor();
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_grey().TEXT));
-  ImGui::Text("Time: %s", 
-                SDATA.TIME_OF_SIGNAL.c_str());
-  ImGui::Text("Count: %s  Pos: %s",
-                SDATA.POSITIONED_COUNT.c_str(), 
-                SDATA.POSITIONED_AIRCRAFT.c_str());
-  ImGui::PopStyleColor();
+  ImGui::Text("TIME: %s", SDATA.TIME_OF_SIGNAL.c_str());
+  ImGui::Text("COUNT: %s", SDATA.POSITIONED_COUNT.c_str());
+  ImGui::Text("  POS: %s", SDATA.POSITIONED_AIRCRAFT.c_str());
 
   // Range Indicator
-  RANGE_INDICATOR.draw_info(sdSysData);
+  RANGE_INDICATOR.draw_info();
+
+  if (GPS_CURRENT_POSITION.ACTIVITY_TIMER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()))
+  {
+    ImGui::NewLine();
+
+    ImGui::Text("GPS POSITION");
+    ImGui::Text("SPD: %f", GPS_CURRENT_POSITION.SPEED.val_mph());
+    ImGui::Text("ALT: %.0f", GPS_CURRENT_POSITION.ALTITUDE.feet_val());
+  }
+
+  ImGui::PopStyleColor();
 
   // Range and Location Buttons
   ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
@@ -1752,14 +1708,19 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   }
 
   // Draw Current Position Marker
-  if (GPS_CURRENT_POSITION.VALID_COORDS)
+  if (GPS_CURRENT_POSITION.ACTIVITY_TIMER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) &&
+      GPS_CURRENT_POSITION.VALID_COORDS)
   {
     bool draw = false;
     ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.gps_pos_lat_lon() ,draw);
     
     if (draw)
     {
-      draw_current_gps_marker(sdSysData, gps_pos, GPS_CURRENT_POSITION);
+      //draw_current_gps_marker(sdSysData, gps_pos, GPS_CURRENT_POSITION);
+      draw_moving_marker(sdSysData, gps_pos, true, GPS_CURRENT_POSITION.VALID_COORDS, 
+                          GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING, 
+                          //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
+                          false, 0.0f);
     }
   }
   

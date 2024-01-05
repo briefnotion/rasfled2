@@ -1,3 +1,14 @@
+2.104_240103
+  - Building GPS System.
+  - Added activity timers to check gps active status.
+  - Changed icons for moving objects on ADSB map.
+  - Changed commport:
+    - Can now start and initial baud rate,
+      Send a string to change connected device baud rate,
+      Disconnect and reconnect at target baud rate.
+    - Autoconnect should now be able to auto recover after 
+       5 seconds of inactivity, if autoconnect is true. 
+
 2.103_240102B
   - Corrected version number.
 

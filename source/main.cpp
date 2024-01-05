@@ -328,6 +328,8 @@ int loop_2(bool TTY_Only)
   // GPS Comm Port Setup
   sdSystem.COMMS_GPS.PROPS.PORT = COMMS_PORT_GPS;
   sdSystem.COMMS_GPS.PROPS.BAUD_RATE = COMMS_BAUD_GPS;
+  sdSystem.COMMS_GPS.PROPS.BAUD_RATE_CHANGE_TO = COMMS_BAUD_BAUD_RATE_CHANGE_TO_GPS;
+  sdSystem.COMMS_GPS.PROPS.BAUD_RATE_TARGET = COMMS_BAUD_TARGET_GPS;
   sdSystem.COMMS_GPS.PROPS.BIT_COUNT = COMMS_BIT_PARITY_GPS;
   sdSystem.COMMS_GPS.PROPS.PARITY = COMMS_BIT_PARITY_GPS;
   sdSystem.COMMS_GPS.PROPS.STOP_BITS = COMMS_STOP_BITS_GPS;
@@ -341,6 +343,9 @@ int loop_2(bool TTY_Only)
   
   sdSystem.COMMS_GPS.PROPS.RECEIVE_TEST_DATA = COMMS_RECEIVE_TEST_DATA_GPS;
   sdSystem.COMMS_GPS.PROPS.TEST_DATA_FILENAME = COMMS_TEST_DATA_FILENAME_GPS;
+
+  sdSystem.COMMS_GPS.device_baud_rate_change_to_target_string(
+        sdSystem.GPS_SYSTEM.device_change_baud_rate_string(COMMS_BAUD_TARGET_GPS));
 
   // ---------------------------------------------------------------------------------------
   // Initialize the console

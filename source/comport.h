@@ -80,6 +80,9 @@ class COMPORT_PROPERTIES
   // Simple property to for exteral routines to know if output should be sent
   //  to console
   bool PRINT_RECEIVED_DATA = false;
+
+  bool BAUD_RATE_CHANGE_TO = false;
+  int BAUD_RATE_TARGET = 115200;
 };
 
 class COMPORT
@@ -94,8 +97,6 @@ class COMPORT
   string SAVE_TO_LOG_FILENAME = "";
 
   int USB = 0;
-
-  TIMED_PING AUTOSTART_TIMER;
 
   deque<string> WRITE_TO_COMM;
   // List of text to be sent to com port on next cycle.
@@ -112,6 +113,17 @@ class COMPORT
   // Flash Data
   deque<string> FLASH_DATA;
   bool FLASH_DATA_WRITE = false;
+
+  int ACTIVE_BAUD_RATE = 0;
+
+  // BAUD Rate Change
+  bool BAUD_RATE_TARGET_ACHIEVED = false;
+  string BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING = "";
+
+  bool CYCLE_CLOSE = false;
+  bool CYCLE_AUTO_START = true;
+  bool CYCLE_CHANGE_BAUD = false;
+  TIMED_PING CYCLE_TIMER;
 
   public:
 
@@ -136,6 +148,8 @@ class COMPORT
 
   //bool CHANGED = false;
 
+  void restart_autoconnect();
+
   bool record_in_progress();
   // returns true if comms are being recored to file.
 
@@ -144,6 +158,10 @@ class COMPORT
   
   void log_file_off();
   // Stops logging to file
+
+  void device_baud_rate_change_to_target_string(string Device_Baud_Rate_Change_String);
+  // String to send to device to change baud rate to target.
+  //  Needs preloading.
 
   bool create();
   // Prepares communications.

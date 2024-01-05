@@ -16,6 +16,50 @@
 
 using namespace std;
 
+// ---------------------------------------------------------------------------------------
+// Map Tools
+
+float calculate_distance(float lat1, float lon1, float lat2, float lon2)
+{
+  // Convert latitude and longitude from degrees to radians
+  lat1 = lat1 * float_PI / 180.0f;
+  lon1 = lon1 * float_PI / 180.0f;
+  lat2 = lat2 * float_PI / 180.0f;
+  lon2 = lon2 * float_PI / 180.0f;
+
+  // Calculate the differences between the coordinates
+  double dlat = lat2 - lat1;
+  double dlon = lon2 - lon1;
+
+  // Calculate the great circle distance using the haversine formula
+  double a = pow(sin(dlat/2), 2) + cos(lat1) * cos(lat2) * pow(sin(dlon/2), 2);
+  double c = 2 * atan2(sqrt(a), sqrt(1-a));
+
+  double R = 3963.191;  // Radius of the Earth in miles
+  double distance = R * c;
+
+  return (float)distance;
+}
+
+
+ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees) 
+{
+  ImVec2 ret_coords;
+
+  float lat1Rad = Latitude * float_PI / 180.0f;
+  float lon1Rad = Longitude * float_PI / 180.0f;
+  float angularDistance = Distance_Miles / float_EARTH_RADIUS;
+
+  float lat2Rad = asin(sin(lat1Rad) * cos(angularDistance) + cos(lat1Rad) * sin(angularDistance) * cos(Bearing_Degrees * float_PI / 180.0f));
+  float lon2Rad = lon1Rad + atan2(sin(Bearing_Degrees * float_PI / 180.0f) * sin(angularDistance) * cos(lat1Rad),
+                                    cos(angularDistance) - sin(lat1Rad) * sin(lat2Rad));
+
+  ret_coords.x = (lat2Rad * 180.0f / float_PI);
+  ret_coords.y = (lon2Rad * 180.0f / float_PI);
+
+  return ret_coords;
+}
+
 // -------------------------------------------------------------------------------------
 
 void DISTANCE::store_meters(float Meters)

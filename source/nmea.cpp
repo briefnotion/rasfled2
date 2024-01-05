@@ -34,36 +34,13 @@ represent. GP is specific to GPS, while GN represents a combination of different
 satellite systems.
 */
 
-//void NMEA::translate_gpgsv(vector<string> &Input)
-//{
-//}
-
-void NMEA::translate_gpvtg(vector<string> &Input, unsigned long tmeFrame_Time)
+void NMEA::translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time)
 {
+  // Track made good and ground speed
   //  The NMEA-0183 message $GNVTG is used for course over ground and ground speed.
-  //  $GNVTG,131.32,T,,M,6.353,N,11.766,K,D*10
+
   if (Input.size() == 10)
   {
-    TRUE_TRACK = string_to_float(Input[1]);
-    if (Input[2] == "T")
-    {
-      TRUE_TRACK_INDICATOR = true;
-    }
-    else
-    {
-      TRUE_TRACK_INDICATOR = false;
-    }
-
-    MAGENTIC_TRACK = string_to_float(Input[3]);
-    if (Input[4] == "M")
-    {
-      MAGENTIC_TRACK_INDICATOR = true;
-    }
-    else
-    {
-      MAGENTIC_TRACK_INDICATOR = false;
-    }
-
     SPEED_KNOTS.store_knots(string_to_float(Input[5]), tmeFrame_Time, 0);
     if (Input[6] == "N")
     {
@@ -92,7 +69,34 @@ void NMEA::translate_gpvtg(vector<string> &Input, unsigned long tmeFrame_Time)
     }
     else
     {
-      VALID_TRACK_INFO = true;
+      // Only store new track info if vel is or equal to 1 kmph
+      //  Filters out zero heading track during coodinate drif.
+      //  Retains last accurate heading when stopped.
+
+      if (SPEED_KMPH.val_kmph() >= 1.0f)
+      {
+        VALID_TRACK_INFO = true;
+
+        TRUE_TRACK = string_to_float(Input[1]);
+        if (Input[2] == "T")
+        {
+          TRUE_TRACK_INDICATOR = true;
+        }
+        else
+        {
+          TRUE_TRACK_INDICATOR = false;
+        }
+
+        MAGENTIC_TRACK = string_to_float(Input[3]);
+        if (Input[4] == "M")
+        {
+          MAGENTIC_TRACK_INDICATOR = true;
+        }
+        else
+        {
+          MAGENTIC_TRACK_INDICATOR = false;
+        }
+      }
     }
   }
   else
@@ -101,12 +105,35 @@ void NMEA::translate_gpvtg(vector<string> &Input, unsigned long tmeFrame_Time)
   }
 }
 
-//void NMEA::translate_gpgsa(vector<string> &Input)
-//{
-  //  GPS DOP (Dilution of Precision)
-//}
+void NMEA::translate_gngsa(vector<string> &Input)
+{
+  // GPS DOP and active satellites
+  
+  if (Input.size() == 18)
+  {
+    MANUAL_AUTOMATIC = Input[1];
+    GSA_MODE = string_to_int(Input[2]);
 
-void NMEA::translate_gpgga(vector<string> &Input)
+    PRNNUMBER_01 = string_to_int(Input[3]);
+    PRNNUMBER_02 = string_to_int(Input[4]);
+    PRNNUMBER_03 = string_to_int(Input[5]);
+    PRNNUMBER_04 = string_to_int(Input[6]);
+    PRNNUMBER_05 = string_to_int(Input[7]);
+    PRNNUMBER_06 = string_to_int(Input[8]);
+    PRNNUMBER_07 = string_to_int(Input[9]);
+    PRNNUMBER_08 = string_to_int(Input[10]);
+    PRNNUMBER_09 = string_to_int(Input[11]);
+    PRNNUMBER_10 = string_to_int(Input[12]);
+    PRNNUMBER_11 = string_to_int(Input[13]);
+    PRNNUMBER_12 = string_to_int(Input[14]);
+
+    PDOP = string_to_float(Input[15]);
+    HDOP = string_to_float(Input[16]);
+    VDOP = string_to_float(Input[17]);
+  }
+}
+
+void NMEA::translate_gngga(vector<string> &Input)
 {
   if (Input.size() == 15)
   {
@@ -150,12 +177,22 @@ void NMEA::translate_gpgga(vector<string> &Input)
     DGPS_STATION_ID = string_to_int(tmp_string);
 
     right_of_char(Input[14], '*', tmp_string);
-    //CHECKSUM = string_to_int(tmp_string);
+
+    // CHECKSUM
+    //printf(" %d\n", string_to_int(tmp_string));
+
   }
   else
   {
     QUALITY = 0;
   }
+}
+
+string NMEA::device_change_baud_rate_string(int Baud_Rate)
+{
+  // Unknown what will happen if wrong baud rate entered
+  string send_string = "$PUBX,41,1,0007,0003," + to_string(Baud_Rate) + ",0*";
+  return (send_string + to_string_hex(xor_checksum(send_string, '$', '*')).c_str());
 }
 
 void NMEA::clear_changes()
@@ -165,19 +202,9 @@ void NMEA::clear_changes()
 
 void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time)
 {
+  // Read New Data
   if (Com_Port.recieve_size() > 0)
   {
-    /*
-    // Activity Checks for other parts of the program to reference.
-    if (AVAILABILITY.check_for_live_data(tmeFrame_Time) == false)
-    {
-      if (AVAILABILITY.set_active(STATUS, false, tmeFrame_Time) == true)
-      {
-        CHANGED = true;
-      }
-    }
-    */
-
     // Working Variables
     vector<string> INPUT_LINE;
 
@@ -185,6 +212,10 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
     {
       // parse
       string working_line = trim(Com_Port.recieve());
+
+      //CHECKSUM
+      //printf(" %s\n", working_line.c_str());
+      //printf("cs - %s ", to_string_hex(xor_checksum(working_line, '$', '*')).c_str());
 
       if (Com_Port.PROPS.PRINT_RECEIVED_DATA)
       {
@@ -213,23 +244,33 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
       // translate
       if (INPUT_LINE.size() > 1)
       {
+        ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
+
         if (INPUT_LINE[0] == "$GPVTG" || INPUT_LINE[0] == "$GNVTG")
         {
-          // Ground Speed
-          translate_gpvtg(INPUT_LINE, tmeFrame_Time);
+          // Track made good and ground speed
+          translate_gnvtg(INPUT_LINE, tmeFrame_Time);
 
           // Update Details
           CURRENT_POSITION.TRUE_HEADING = TRUE_TRACK;
           CURRENT_POSITION.SPEED = SPEED_KMPH;
           CURRENT_POSITION.VALID_TRACK = VALID_TRACK_INFO;
+
+          CURRENT_POSITION.ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
           
           CURRENT_POSITION.CHANGED = true;
         }
 
+        else if (INPUT_LINE[0] == "$GPGSA" || INPUT_LINE[0] == "$GNGSA")
+        {
+          // GPS DOP and active satellites
+          translate_gngsa(INPUT_LINE);
+        }
+
         else if (INPUT_LINE[0] == "$GPGGA" || INPUT_LINE[0] == "$GNGGA")
         {
-          // Global Position
-          translate_gpgga(INPUT_LINE);
+          // Global Positioning System Fix Data
+          translate_gngga(INPUT_LINE);
 
           // Update Details
           if (QUALITY > 0)
@@ -249,11 +290,13 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
             CURRENT_POSITION.LIVE = false;
           }
 
+          CURRENT_POSITION.ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
+
           CURRENT_POSITION.CHANGED = true;
         }
       }
 
-      // clear woring vector
+      // clear working vector
       INPUT_LINE.clear();
     }
   }
@@ -262,6 +305,11 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
 GLOBAL_POSITION_DETAILED NMEA::current_position()
 {
   return CURRENT_POSITION;
+}
+
+bool NMEA::active(unsigned long tmeFrame_Time)
+{
+  return ACTIVITY_TIMER.ping_down(tmeFrame_Time);
 }
 
 // -------------------------------------------------------------------------------------

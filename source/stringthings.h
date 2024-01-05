@@ -150,6 +150,9 @@ int color_scale(float Value, int Green, int Yellow, int Red, int Magenta, int Bl
 // eg (12, 5, 10, 15, 20, 25) returns color red
 // zero level green.
 
+short xor_checksum(string Line, char Start_Char, char End_Char);
+// Short CHECKSUM
+
 class STRING_STRING
 // Variable stores original string number and converted value.
 // Sets error if conversion unsucessful.

@@ -42,10 +42,6 @@ using namespace std;
 // ---------------------------------------------------------------------------------------
 // Map Tools
 
-float calculate_distance(float lat1, float long1, float lat2, float long2);
-
-ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees);
-
 ImVec2 point_position_center(ImVec4 Working_Area);
 
 ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
@@ -56,17 +52,14 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 // ---------------------------------------------------------------------------------------
 // Markers
 
-void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
+void draw_moving_marker(system_data &sdSysData, ImVec2 Screen_Position, bool Main, bool Valid_Position, 
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2);
 
-void draw_current_gps_marker(system_data &sdSysData, ImVec2 Screen_Position, GLOBAL_POSITION_DETAILED Details);
+void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
 void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size);
-
-void draw_aircraft_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color, float Size);
-
-void draw_aircraft_marker_direction(system_data &sdSysData, ImVec2 Screen_Position, int Color, float Size, float Heading);
 
 // ---------------------------------------------------------------------------------------
 
@@ -268,7 +261,7 @@ class ADSB_RANGE
   
   void draw(system_data &sdSysData, ImVec4 Working_Area);
 
-  void draw_info(system_data &sdSysData);
+  void draw_info();
 };
 
 // ---------------------------------------------------------------------------------------

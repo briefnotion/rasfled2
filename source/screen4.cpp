@@ -323,10 +323,11 @@ int SCREEN4::create(system_data &sdSysData)
     TIMER.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
     TIMER.update_text(" TIMER ", " TIMER ");
 
+    GPS.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
+    GPS.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
+    GPS.update_text("  GPS ", "  GPS ");
+
     /*
-    DOOR1.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
-    DOOR1.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    DOOR1.update_text(" DOOR1", " DOOR1");
 
     DOOR2.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     DOOR2.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
@@ -594,13 +595,13 @@ void SCREEN4::draw(system_data &sdSysData)
 
             ImGui::SameLine();
             
-            // Door Group
+            // Group
             ImGui::BeginGroup();
             {
-              /*
-              DOOR2.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value);
-              DOOR2.draw(sdSysData);
+              GPS.update_tf(sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()));
+              GPS.draw(sdSysData);
               
+              /*
               ImGui::SameLine();
               
               DOOR4.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value);
@@ -1029,9 +1030,9 @@ void SCREEN4::draw(system_data &sdSysData)
       ImGui::EndChild();
 
       // Auto Signal Lights
-      hazard_lights(sdSysData, viewport->Size);
-      signal_lights(sdSysData, viewport->Size);
       door_lights(sdSysData, viewport->Size);
+      signal_lights(sdSysData, viewport->Size);
+      hazard_lights(sdSysData, viewport->Size);
     }
     ImGui::End();
 

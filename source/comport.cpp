@@ -75,6 +75,11 @@ bool COMPORT::read_from_comm()
   return ret_data_read;
 }
 
+void COMPORT::restart_autoconnect()
+{
+  CYCLE_CLOSE = true;
+}
+
 bool COMPORT::record_in_progress()
 {
   return SAVE_TO_LOG;
@@ -91,9 +96,20 @@ void COMPORT::log_file_off()
   SAVE_TO_LOG = false;
 }
 
+void COMPORT::device_baud_rate_change_to_target_string(string Device_Baud_Rate_Change_String)
+{
+  BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING = Device_Baud_Rate_Change_String;
+}
+
 bool COMPORT::create()
 {
   bool ret_success = true;
+
+  // for BAUD rate target cycle changing
+  if (ACTIVE_BAUD_RATE == 0)
+  {
+    ACTIVE_BAUD_RATE = PROPS.BAUD_RATE;
+  }
 
   if (PROPS.PORT == "")
   {
@@ -133,52 +149,52 @@ bool COMPORT::create()
     /* Set Baud Rate */
     // Choices: B0,  B50,  B75,  B110,  B134,  B150,  B200, B300, B600, B1200, B1800, B2400, 
     //          B4800, B9600, B19200, B38400, B57600, B115200, B230400, B460800
-    if (PROPS.BAUD_RATE == 300)
+    if (ACTIVE_BAUD_RATE == 300)
     {
       cfsetospeed (&tty, (speed_t)B300);
       cfsetispeed (&tty, (speed_t)B300);
     }
-    else if (PROPS.BAUD_RATE == 2400)
+    else if (ACTIVE_BAUD_RATE == 2400)
     {
       cfsetospeed (&tty, (speed_t)B2400);
       cfsetispeed (&tty, (speed_t)B2400);
     }
-    else if (PROPS.BAUD_RATE == 4800)
+    else if (ACTIVE_BAUD_RATE == 4800)
     {
       cfsetospeed (&tty, (speed_t)B4800);
       cfsetispeed (&tty, (speed_t)B4800);
     }
-    else if (PROPS.BAUD_RATE == 9600)
+    else if (ACTIVE_BAUD_RATE == 9600)
     {
       cfsetospeed (&tty, (speed_t)B9600);
       cfsetispeed (&tty, (speed_t)B9600);
     }
-    else if (PROPS.BAUD_RATE == 19200)
+    else if (ACTIVE_BAUD_RATE == 19200)
     {
       cfsetospeed (&tty, (speed_t)B19200);
       cfsetispeed (&tty, (speed_t)B19200);
     }
-    else if (PROPS.BAUD_RATE == 38400)
+    else if (ACTIVE_BAUD_RATE == 38400)
     {
       cfsetospeed (&tty, (speed_t)B38400);
       cfsetispeed (&tty, (speed_t)B38400);
     }
-    else if (PROPS.BAUD_RATE == 57600)
+    else if (ACTIVE_BAUD_RATE == 57600)
     {
       cfsetospeed (&tty, (speed_t)B57600);
       cfsetispeed (&tty, (speed_t)B57600);
     }
-    else if (PROPS.BAUD_RATE == 115200)
+    else if (ACTIVE_BAUD_RATE == 115200)
     {
       cfsetospeed (&tty, (speed_t)B115200);
       cfsetispeed (&tty, (speed_t)B115200);
     }
-    else if (PROPS.BAUD_RATE == 230400)
+    else if (ACTIVE_BAUD_RATE == 230400)
     {
       cfsetospeed (&tty, (speed_t)B230400);
       cfsetispeed (&tty, (speed_t)B230400);
     }
-    else if (PROPS.BAUD_RATE == 460800)
+    else if (ACTIVE_BAUD_RATE == 460800)
     {
       cfsetospeed (&tty, (speed_t)B460800);
       cfsetispeed (&tty, (speed_t)B460800);
@@ -298,15 +314,91 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
 {
   bool data_received = true;
 
-  // Check auto start
-  if (ACTIVE == false && PROPS.AUTOSTART == true && AUTOSTART_TIMER.ping_down(tmeFrame_Time) == false)
+  // live data in 5 seconds check.
+  if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false &&
+      CYCLE_CLOSE == false && CYCLE_AUTO_START == false && CYCLE_CHANGE_BAUD == false)
   {
-    if (AUTOSTART_TIMER.enabled() == false)
+    if (PROPS.AUTOSTART == true)
     {
-      AUTOSTART_TIMER.ping_up(tmeFrame_Time, 5000);
+      CYCLE_TIMER.ping_up(tmeFrame_Time, 1000);
+      CYCLE_CLOSE = true;
+      
+      BAUD_RATE_TARGET_ACHIEVED = false;
     }
+  }
+
+  // Check for cycle close. Need to ensure all comm sent before closing connection and reconnecting
+  if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false &&
+      CYCLE_CLOSE == true && CYCLE_AUTO_START == false && CYCLE_CHANGE_BAUD == false)
+  {
+    CYCLE_TIMER.ping_up(tmeFrame_Time, 1000);
+    CYCLE_CLOSE = false;
+    CYCLE_AUTO_START = true;
+
+    close_port();
+  }
+
+  // Check auto start
+  if (ACTIVE == false && CYCLE_TIMER.ping_down(tmeFrame_Time) == false &&
+      PROPS.AUTOSTART == true && 
+      CYCLE_CLOSE == false && CYCLE_AUTO_START == true && CYCLE_CHANGE_BAUD == false)
+  {
+    CYCLE_TIMER.ping_up(tmeFrame_Time, 5000);
+    CYCLE_AUTO_START = false;
+    CYCLE_CHANGE_BAUD = true;
 
     create();
+
+    // Start a timer for possibly changing rate.
+    CYCLE_TIMER.ping_up(tmeFrame_Time, 5000);
+  }
+
+  // Target Baud Rate
+  if (PROPS.BAUD_RATE_CHANGE_TO == true && BAUD_RATE_TARGET_ACHIEVED == false && 
+      CYCLE_TIMER.ping_down(tmeFrame_Time) == false &&
+      CYCLE_CLOSE == false && CYCLE_AUTO_START == false && CYCLE_CHANGE_BAUD == true)
+  {
+    CYCLE_TIMER.ping_up(tmeFrame_Time, 1000);
+    CYCLE_CHANGE_BAUD = false;
+    CYCLE_CLOSE = true;
+
+    if (ACTIVE)
+    {
+      if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE_TARGET)
+      {
+        BAUD_RATE_TARGET_ACHIEVED = true;
+        CYCLE_CLOSE = false;
+      }
+      else 
+      {
+        // Are we receiving data on current, non target, baud rate
+        // Send command to device to change its rate. Then change rate.
+        send(BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING.c_str());
+
+        // Cycle Original and Target
+        if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE)
+        {
+          ACTIVE_BAUD_RATE = PROPS.BAUD_RATE_TARGET;
+        }
+        else
+        {
+          ACTIVE_BAUD_RATE = PROPS.BAUD_RATE;
+        }
+      }
+    }
+    else
+    {
+      // Not recieving anything, try changing rate.
+      // Cycle Original and Target
+      if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE)
+      {
+        ACTIVE_BAUD_RATE = PROPS.BAUD_RATE_TARGET;
+      }
+      else
+      {
+        ACTIVE_BAUD_RATE = PROPS.BAUD_RATE;
+      }
+    }
   }
 
   // Do not access comm port if it is shut down.
@@ -351,6 +443,7 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
       if (SAVE_TO_LOG == true && READ_FROM_COMM.size() >0)
       {
         deque_string_to_file(SAVE_TO_LOG_FILENAME, READ_FROM_COMM, true);
+        CYCLE_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
       }
     }
     else

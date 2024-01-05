@@ -32,9 +32,13 @@ class NMEA
 {
   private:
 
+  TIMED_PING ACTIVITY_TIMER;
+
   // ALL CURRENT STATUSs
 
-  //  Ground Speed and Heading
+  // -------------------------------------------------------------------------------------
+  // Track made good and ground speed
+
   float TRUE_TRACK = 0;
   bool TRUE_TRACK_INDICATOR = false;
 
@@ -57,7 +61,41 @@ class NMEA
 
   bool VALID_TRACK_INFO = false;
 
-  //  Global Posion
+  // -------------------------------------------------------------------------------------
+  // GPS DOP and active satellites
+  // Dilution of Precision
+  // $GNGSA
+
+  string MANUAL_AUTOMATIC = "";
+  
+  int GSA_MODE = 0;
+    //  Fix type: 1 = not available, 2 = 2D, 3 = 3D
+
+    //  01 to 32 for GPS, 33 to 64 for SBAS, 64+ for GLONASS
+  int PRNNUMBER_01 = 0;
+  int PRNNUMBER_02 = 0;
+  int PRNNUMBER_03 = 0;
+  int PRNNUMBER_04 = 0;
+  int PRNNUMBER_05 = 0;
+  int PRNNUMBER_06 = 0;
+  int PRNNUMBER_07 = 0;
+  int PRNNUMBER_08 = 0;
+  int PRNNUMBER_09 = 0;
+  int PRNNUMBER_10 = 0;
+  int PRNNUMBER_11 = 0;
+  int PRNNUMBER_12 = 0;
+
+  float PDOP = 0.0f;  // .5 - 99.9
+  float HDOP = 0.0f;  // .5 - 99.9
+  float VDOP = 0.0f;  // .5 - 99.9
+
+  // if NMEA-0183 version 4.10, 7th and 8th fields:
+  //int SYSTEM_ID = 0;
+    //  GPS 1, GLONASS 2, Galileo 3, BeiDou 4, QZSS 0
+
+  // -------------------------------------------------------------------------------------
+  // Global Positioning System Fix Data
+
   float LATITUDE = 0;
   float LONGITUDE = 0;
   DISTANCE ALTITUDE;     // M
@@ -73,24 +111,28 @@ class NMEA
 
   int QUALITY = 0;  // 0 - 8;
 
-  // ---
+  // -------------------------------------------------------------------------------------
   // NO CONSOLIDATION OCCURS
-  // ---
+  // -------------------------------------------------------------------------------------
 
   bool VALID_COORDS = false;
   bool CHANGED = false;
 
   GLOBAL_POSITION_DETAILED CURRENT_POSITION;
 
-  //void translate_gpgsv(vector<string> &Input);
-  void translate_gpvtg(vector<string> &Input, unsigned long tmeFrame_Time);
-  //void translate_gpgsa(vector<string> &Input);
-  void translate_gpgga(vector<string> &Input);
+  void translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time);   //  Track made good and ground speed
+  void translate_gngsa(vector<string> &Input);    //  GPS DOP and active satellites 
+  void translate_gngga(vector<string> &Input);    //  Global Positioning System Fix Data
+  //void translate_gpgsv(vector<string> &Input);  //  GPS Satellites in view
+  //void translate_gngll(vector<string> &Input);  //  Geographic Position, Latitude/Longitude
+  //void translate_gnrmc(vector<string> &Input);  //  Recommended minimum specific GPS/Transit data
 
   public:
 
   // TEMPORARY _ ERASE AS SOON AS CONSOLE IS GONE.
   vector<string> RECIEVE_HISTORY;
+
+  string device_change_baud_rate_string(int Baud_Rate);
 
   void clear_changes();
 
@@ -98,6 +140,8 @@ class NMEA
   void process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time);
 
   GLOBAL_POSITION_DETAILED current_position();
+
+  bool active(unsigned long tmeFrame_Time);
 };
 
 // -------------------------------------------------------------------------------------

@@ -25,6 +25,13 @@
 #include "screen4_helper.h"
 #include "comport.h"
 
+// ---------------------------------------------------------------------------------------
+// Map Tools
+
+float calculate_distance(float lat1, float long1, float lat2, float long2);
+
+ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees);
+
 // -------------------------------------------------------------------------------------
 
 class DISTANCE
@@ -77,6 +84,8 @@ class VELOCITY
 
 class GLOBAL_POSITION_DETAILED
 {
+  private:
+  
   public:
 
   unsigned long SYSTTEM_UPDATE_TIME = 0;
@@ -95,6 +104,9 @@ class GLOBAL_POSITION_DETAILED
 
   bool VALID_COORDS = false;
   bool VALID_TRACK = false;
+
+  TIMED_PING ACTIVITY_TIMER;
+
   bool CHANGED = false;
 };
 

@@ -107,6 +107,9 @@ void consoleprinthelp(CONSOLE_COMMUNICATION &cons)
   cons.printw("' gpso' - Start Serial Communications Recording");
   cons.printw("' gpsf' - Start Serial Communications Recording");
   cons.printw("");
+  cons.printw("Request Baud Rate Change to GPS Device:");
+  cons.printw(" ' gpsbaud96'  ' gpsbaud119'  ' gpsbaud1152'");
+  cons.printw("");
   cons.printw("Testing -----------------------------------");
   cons.printw("' alert'  ' sound1'  ' sound2'  ' sound3'");
   cons.printw("");
@@ -485,6 +488,32 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.COMMS_GPS.log_file_off();
         sdSysData.COMMS_GPS.send("-- STOPPING GPS COMMS LOG --");
       }
+
+      // Baud Rates
+      if (check_command(cons," gpsbaud192", "Set GPS baud rate to 9600"))
+      {
+        sdSysData.COMMS_GPS.send(sdSysData.GPS_SYSTEM.device_change_baud_rate_string(9600).c_str());
+      }
+
+      if (check_command(cons," gpsbaud192", "Set GPS baud rate to 19200"))
+      {
+        sdSysData.COMMS_GPS.send(sdSysData.GPS_SYSTEM.device_change_baud_rate_string(19200).c_str());
+      }
+
+      if (check_command(cons," gpsbaud1152", "Set GPS baud rate to 115200"))
+      {
+        sdSysData.COMMS_GPS.send(sdSysData.GPS_SYSTEM.device_change_baud_rate_string(115200).c_str());
+      }
+
+      // Doesnt Work
+      //if (check_command(cons," gpsfreq", "Change update frequency"))
+      //{
+        //string send_string = "$PCAS02,100*";
+        //sdSysData.COMMS_GPS.send(send_string + to_string_hex(xor_checksum(send_string, '$', '*')).c_str());
+        
+        //string send_string = "$PCAS02,100*1E";
+        //sdSysData.COMMS_GPS.send(send_string.c_str());
+      //}
 
       // -------------------------------------------------------------------------------------
 
