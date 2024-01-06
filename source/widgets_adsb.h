@@ -141,10 +141,6 @@ class ADSB_WIDGET
   TIMED_PING EXPIREED;
   bool WIDGET_ACTIVE = false;
 
-  //string compass_mini_top(float Heading);
-
-  //string compass_mini_bottom(float Heading);
-
   // Directional varables
   MIN_MAX_TIME ALTITUDE_DIRECION;
   MIN_MAX_TIME SPEED_DIRECION;
@@ -281,16 +277,11 @@ class ADSB_MAP
 
   bool DISPLAY_LOCATION = false;
 
-  // GPS
-  GLOBAL_POSITION_DETAILED GPS_CURRENT_POSITION;
-
   void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
 
   public:
 
   void create(system_data &sdSysData);
-
-  void update_gps_location(GLOBAL_POSITION_DETAILED GPS_Current_Location);
 
   void draw(system_data &sdSysData,   DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets);
 
@@ -322,15 +313,11 @@ class ADSB_SCREEN
   // Gadget Internal:
   //  returns gadget position of aircraft with time expired.
 
-  //void draw_adsb_map(system_data &sdSysData);
-  
   public:
 
   void create(system_data &sdSysData);
   
   void update(system_data &sdSysData);
-
-  void update_gps(system_data &sdSysData);
 
   //void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
   //              const char *name, bool *p_open, ImGuiWindowFlags flags);

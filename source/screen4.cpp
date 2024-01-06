@@ -1496,9 +1496,6 @@ void SCREEN4::update_GPS_gadgets(system_data &sdSysData)
     {
       GPS_CONSOLE.add_line(trim(sdSysData.GPS_SYSTEM.RECIEVE_HISTORY[pos]) + "\n");
     }
-
-    // Update ADSB Map with GPS Data.
-    ADSB.update_gps(sdSysData);
   }
   
   sdSysData.GPS_SYSTEM.RECIEVE_HISTORY.clear();

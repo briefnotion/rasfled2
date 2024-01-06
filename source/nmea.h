@@ -134,12 +134,11 @@ class NMEA
 
   string device_change_baud_rate_string(int Baud_Rate);
 
-  void clear_changes();
-
   //void process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time);
   void process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time);
 
   GLOBAL_POSITION_DETAILED current_position();
+  void current_position_change_acknowleged();
 
   bool active(unsigned long tmeFrame_Time);
 };

@@ -54,7 +54,10 @@ bool COMPORT::read_from_comm()
     }
     else
     {
+      
       RESPONSE = trim(RESPONSE);
+      //RESPONSE = filter_non_printable(RESPONSE);
+
       if (RESPONSE.size() > 0)
       {
         READ_FROM_COMM.push_back(RESPONSE);
@@ -77,7 +80,7 @@ bool COMPORT::read_from_comm()
 
 void COMPORT::restart_autoconnect()
 {
-  CYCLE_CLOSE = true;
+  CYCLE = 1;
 }
 
 bool COMPORT::record_in_progress()
@@ -110,6 +113,14 @@ bool COMPORT::create()
   {
     ACTIVE_BAUD_RATE = PROPS.BAUD_RATE;
   }
+
+  if (PROPS.AUTOSTART == false)
+  {
+    // Disable Cycles
+    CYCLE = -1;
+  }
+
+  // Needs Restart an autostart cycle.
 
   if (PROPS.PORT == "")
   {
@@ -275,7 +286,7 @@ bool COMPORT::create()
     }
   }
 
-  ACTIVE = ret_success;
+  CONNECTED = ret_success;
   return ret_success;
 }
 
@@ -304,7 +315,7 @@ int COMPORT::recieve_size()
 
 void COMPORT::request_to_send()
 {
-  if (ACTIVE == true)
+  if (CONNECTED == true)
   {
     write_to_comm("r");
   }
@@ -314,66 +325,111 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
 {
   bool data_received = true;
 
-  // live data in 5 seconds check.
-  if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false &&
-      CYCLE_CLOSE == false && CYCLE_AUTO_START == false && CYCLE_CHANGE_BAUD == false)
+  if (CYCLE == -1)
   {
-    if (PROPS.AUTOSTART == true)
+    // Ignore all cycles if Cycle is -1.
+  }
+  else if (CYCLE == 0)
+  {
+    // live data in 5 seconds check.
+    if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false)
     {
-      CYCLE_TIMER.ping_up(tmeFrame_Time, 1000);
-      CYCLE_CLOSE = true;
-      
-      BAUD_RATE_TARGET_ACHIEVED = false;
+      // If data stops and autoconnect on shutdown and restart
+      //  Dont shutdown if autoconnect is not on.
+      if (PROPS.AUTOSTART == true)
+      {
+        CYCLE_TIMER.ping_up(tmeFrame_Time, 1000); // Wait before starting next cycle.
+        CYCLE = 1;
+      }
+      else
+      {
+        CYCLE = -1;
+      }
     }
   }
-
-  // Check for cycle close. Need to ensure all comm sent before closing connection and reconnecting
-  if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false &&
-      CYCLE_CLOSE == true && CYCLE_AUTO_START == false && CYCLE_CHANGE_BAUD == false)
+  else if (CYCLE == 1)
   {
-    CYCLE_TIMER.ping_up(tmeFrame_Time, 1000);
-    CYCLE_CLOSE = false;
-    CYCLE_AUTO_START = true;
-
-    close_port();
-  }
-
-  // Check auto start
-  if (ACTIVE == false && CYCLE_TIMER.ping_down(tmeFrame_Time) == false &&
-      PROPS.AUTOSTART == true && 
-      CYCLE_CLOSE == false && CYCLE_AUTO_START == true && CYCLE_CHANGE_BAUD == false)
-  {
-    CYCLE_TIMER.ping_up(tmeFrame_Time, 5000);
-    CYCLE_AUTO_START = false;
-    CYCLE_CHANGE_BAUD = true;
-
-    create();
-
-    // Start a timer for possibly changing rate.
-    CYCLE_TIMER.ping_up(tmeFrame_Time, 5000);
-  }
-
-  // Target Baud Rate
-  if (PROPS.BAUD_RATE_CHANGE_TO == true && BAUD_RATE_TARGET_ACHIEVED == false && 
-      CYCLE_TIMER.ping_down(tmeFrame_Time) == false &&
-      CYCLE_CLOSE == false && CYCLE_AUTO_START == false && CYCLE_CHANGE_BAUD == true)
-  {
-    CYCLE_TIMER.ping_up(tmeFrame_Time, 1000);
-    CYCLE_CHANGE_BAUD = false;
-    CYCLE_CLOSE = true;
-
-    if (ACTIVE)
+    // Check for cycle close. Need to ensure all comm sent before closing connection and reconnecting
+    if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false)
     {
-      if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE_TARGET)
+      // Close the connection.
+      //  Don't start reconnect if autoconnect if not on
+      if (PROPS.AUTOSTART == true)
       {
-        BAUD_RATE_TARGET_ACHIEVED = true;
-        CYCLE_CLOSE = false;
+        CYCLE_TIMER.ping_up(tmeFrame_Time, 1000); // Wait before starting next cycle.
+        CYCLE = 2;
+        close_port();
       }
-      else 
+      else
       {
-        // Are we receiving data on current, non target, baud rate
-        // Send command to device to change its rate. Then change rate.
-        send(BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING.c_str());
+        CYCLE = -1;
+      }
+    }
+  }
+  else if (CYCLE == 2)
+  {
+    if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false)
+    {
+      //  Open a new connection at current baud rate.
+      //  Don't prepare check baud rate if autoconnect if not on
+      if (PROPS.AUTOSTART == true)
+      {
+        CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Wait before starting next cycle.
+
+        // Dont go into cycle 3 if BAUD_RATE_CHANGE_TO is off
+        if (PROPS.BAUD_RATE_CHANGE_TO)
+        {
+          CYCLE = 3; // Prepare to check for proper baud rate
+        }
+        else
+        {
+          CYCLE = 0; // Go into normal cycle.
+        }
+
+        create();
+      }
+      else
+      {
+        CYCLE = -1;
+      }
+    }
+  }
+  else if (CYCLE == 3)
+  {
+    // Target Baud Rate
+    if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false)
+    {
+      if (CONNECTED)
+      {
+        if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE_TARGET)
+        {
+          CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to check for live data.
+          CYCLE = 0;
+        }
+        else 
+        {
+          // Connected on non target, baud rate
+          // Send command to device to change its rate. Then change rate.
+          send(BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING.c_str());
+
+          CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to disconnect
+          CYCLE = 1;
+
+          // Cycle Original and Target
+          if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE)
+          {
+            ACTIVE_BAUD_RATE = PROPS.BAUD_RATE_TARGET;
+          }
+          else
+          {
+            ACTIVE_BAUD_RATE = PROPS.BAUD_RATE;
+          }
+        }
+      }
+      else  // Failed to connect
+      {
+        CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to disconnect
+        CYCLE = 1;
 
         // Cycle Original and Target
         if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE)
@@ -386,23 +442,16 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
         }
       }
     }
-    else
-    {
-      // Not recieving anything, try changing rate.
-      // Cycle Original and Target
-      if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE)
-      {
-        ACTIVE_BAUD_RATE = PROPS.BAUD_RATE_TARGET;
-      }
-      else
-      {
-        ACTIVE_BAUD_RATE = PROPS.BAUD_RATE;
-      }
-    }
+  }
+  else
+  {
+    // Unknown Cycle Number
+    CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to disconnect
+    CYCLE = 1;
   }
 
   // Do not access comm port if it is shut down.
-  if (ACTIVE == true)
+  if (CONNECTED == true)
   {
     // Send Data
     if (WRITE_TO_COMM.size() > 0)
@@ -453,12 +502,14 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
       {                                         //  sent per cycle.
         if (TEST_DATA.size() > 0)
         {
+          
           READ_FROM_COMM.push_back(TEST_DATA.front());
+          //READ_FROM_COMM.push_back(filter_non_printable(TEST_DATA.front()));
+          
           TEST_DATA.pop_front();
         }
       }
     }
-
   }
 }
 
@@ -486,7 +537,7 @@ void COMPORT::close_port()
 {
   // i dont know how to close this thing.
   tty = tty_old;
-  ACTIVE = false;
+  CONNECTED = false;
 }
 
 

@@ -105,8 +105,6 @@ class GLOBAL_POSITION_DETAILED
   bool VALID_COORDS = false;
   bool VALID_TRACK = false;
 
-  TIMED_PING ACTIVITY_TIMER;
-
   bool CHANGED = false;
 };
 

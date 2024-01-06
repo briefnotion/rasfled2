@@ -1,3 +1,10 @@
+2.105_240105
+  - Bug found associated to Comms. ADSB and GPS comm 
+      halts after 3 - 3 hours.  Searching.
+  - Building GPS System.
+  - Rewrote some commport code.
+  - Added filter to Console Addline routine.
+
 2.104_240103
   - Building GPS System.
   - Added activity timers to check gps active status.

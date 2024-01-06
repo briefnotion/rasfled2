@@ -940,11 +940,6 @@ int loop_2(bool TTY_Only)
       
       // ---------------------------------------------------------------------------------------
       // CAN Bus Process
-      // Need to stop deleting this.
-      //for (int pos = 0; pos < sdSystem.COMMS.READ_FROM_COMM.size(); pos++)
-      //{
-      //  cons.printwait(sdSystem.COMMS.READ_FROM_COMM[pos]);
-      //}
 
       // Process info from comm port int automobile system.
       sdSystem.CAR_INFO.process(cons_2.SCREEN_COMMS, sdSystem.ALERTS_2, sdSystem.COMMS, sdSystem.PROGRAM_TIME.current_frame_time());
@@ -957,17 +952,9 @@ int loop_2(bool TTY_Only)
 
       // ---------------------------------------------------------------------------------------
       // GPS Process
-      sdSystem.COMMS_GPS.cycle(sdSystem.PROGRAM_TIME.current_frame_time());
-      if (sdSystem.COMMS_GPS.recieve_size() > 0)
-      {
-        sdSystem.GPS_SYSTEM.process(cons_2.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
-
-        // Update system that access GPS data
-        cons_2.update_GPS_gadgets(sdSystem);
-
-        // clear all changes after updates are complete.  All var copies should be complete.
-        sdSystem.GPS_SYSTEM.clear_changes();
-      }
+      
+      sdSystem.GPS_SYSTEM.process(cons_2.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
+      cons_2.update_GPS_gadgets(sdSystem);
     }
 
     // ---------------------------------------------------------------------------------------

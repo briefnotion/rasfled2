@@ -69,35 +69,36 @@ void NMEA::translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time)
     }
     else
     {
-      // Only store new track info if vel is or equal to 1 kmph
-      //  Filters out zero heading track during coodinate drif.
-      //  Retains last accurate heading when stopped.
-
-      if (SPEED_KMPH.val_kmph() >= 1.0f)
-      {
-        VALID_TRACK_INFO = true;
-
-        TRUE_TRACK = string_to_float(Input[1]);
-        if (Input[2] == "T")
-        {
-          TRUE_TRACK_INDICATOR = true;
-        }
-        else
-        {
-          TRUE_TRACK_INDICATOR = false;
-        }
-
-        MAGENTIC_TRACK = string_to_float(Input[3]);
-        if (Input[4] == "M")
-        {
-          MAGENTIC_TRACK_INDICATOR = true;
-        }
-        else
-        {
-          MAGENTIC_TRACK_INDICATOR = false;
-        }
-      }
+      VALID_TRACK_INFO = true;
     }
+
+    TRUE_TRACK = string_to_float(Input[1]);
+    if (Input[2] == "T")
+    {
+      TRUE_TRACK_INDICATOR = true;
+    }
+    else
+    {
+      TRUE_TRACK_INDICATOR = false;
+    }
+
+    MAGENTIC_TRACK = string_to_float(Input[3]);
+    if (Input[4] == "M")
+    {
+      MAGENTIC_TRACK_INDICATOR = true;
+    }
+    else
+    {
+      MAGENTIC_TRACK_INDICATOR = false;
+    }
+
+    // Valid track only if v > 1kmph
+    //  Filters out zero heading track during coodinate drif.
+    if (SPEED_KMPH.val_kmph() < 1.0f)
+    {
+      VALID_TRACK_INFO = false;
+    }
+
   }
   else
   {
@@ -195,11 +196,6 @@ string NMEA::device_change_baud_rate_string(int Baud_Rate)
   return (send_string + to_string_hex(xor_checksum(send_string, '$', '*')).c_str());
 }
 
-void NMEA::clear_changes()
-{
-  CURRENT_POSITION.CHANGED = false;
-}
-
 void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time)
 {
   // Read New Data
@@ -256,8 +252,7 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
           CURRENT_POSITION.SPEED = SPEED_KMPH;
           CURRENT_POSITION.VALID_TRACK = VALID_TRACK_INFO;
 
-          CURRENT_POSITION.ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
-          
+          ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
           CURRENT_POSITION.CHANGED = true;
         }
 
@@ -290,8 +285,7 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
             CURRENT_POSITION.LIVE = false;
           }
 
-          CURRENT_POSITION.ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
-
+          ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
           CURRENT_POSITION.CHANGED = true;
         }
       }
@@ -305,6 +299,11 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
 GLOBAL_POSITION_DETAILED NMEA::current_position()
 {
   return CURRENT_POSITION;
+}
+
+void NMEA::current_position_change_acknowleged()
+{
+  CURRENT_POSITION.CHANGED = false;
 }
 
 bool NMEA::active(unsigned long tmeFrame_Time)

@@ -27,6 +27,40 @@ string char_buf_to_string(char Buf[], int Buf_Len)
   return ret_str;
 }
 
+string filter_non_printable(const std::string& input)
+{
+  string result = "";
+
+  for (char c : input) 
+  {
+    if (isprint(static_cast<unsigned char>(c)) || c == '\n')
+    {
+      result += c;
+    }
+    else
+    {
+      result += '.';
+    }
+  }
+
+  return result;
+}
+
+string filter_all_non_printable(const std::string& input)
+{
+  string result = "";
+
+  for (char c : input) 
+  {
+    if (isprint(static_cast<unsigned char>(c)))
+    {
+      result += c;
+    }
+  }
+
+  return result;
+}
+
 string line_create(int Size, char Character)
 {
   string line = "";

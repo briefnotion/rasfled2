@@ -1597,11 +1597,6 @@ void ADSB_MAP::create(system_data &sdSysData)
   //add_landmark(ImVec2(f, f), "", 0);  //
 }
 
-void ADSB_MAP::update_gps_location(GLOBAL_POSITION_DETAILED GPS_Current_Location)
-{
-  GPS_CURRENT_POSITION = GPS_Current_Location;
-}
-
 void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets)
 {
   // working area, xy start position; zw, size.
@@ -1615,22 +1610,20 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   working_area.z = ImGui::GetContentRegionAvail().x;
   working_area.w = ImGui::GetContentRegionAvail().y;
 
-
-  // Check for GPS Current Location
-  if (GPS_CURRENT_POSITION.CHANGED && GPS_CURRENT_POSITION.VALID_COORDS)
+  if (sdSysData.GPS_SYSTEM.current_position().VALID_COORDS && sdSysData.GPS_SYSTEM.current_position().CHANGED)
   {
-    RANGE_INDICATOR.set_gps_pos_lat_lon(ImVec2(GPS_CURRENT_POSITION.LATITUDE, GPS_CURRENT_POSITION.LONGITUDE));
+    // Check and store GPS Current Location
+    RANGE_INDICATOR.set_gps_pos_lat_lon(ImVec2(sdSysData.GPS_SYSTEM.current_position().LATITUDE, 
+                                                sdSysData.GPS_SYSTEM.current_position().LONGITUDE));
 
-    GPS_CURRENT_POSITION.CHANGED = false;
-  }
-
-  // Set Center to GPS Location if on and valid.
-  if (RANGE_INDICATOR.gps_display_current_location())
-  {
-    if (GPS_CURRENT_POSITION.VALID_COORDS)
+    // Set Center to GPS Location.
+    if (RANGE_INDICATOR.gps_display_current_location())
     {
       RANGE_INDICATOR.set_current_center_position(RANGE_INDICATOR.gps_pos_lat_lon());
     }
+
+    // Mark Changes as seen.
+    sdSysData.GPS_SYSTEM.current_position_change_acknowleged();
   }
 
   // -------------------------------------------------------------------------------------
@@ -1644,20 +1637,23 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   ImGui::Text("TIME: %s", SDATA.TIME_OF_SIGNAL.c_str());
   ImGui::Text("COUNT: %s", SDATA.POSITIONED_COUNT.c_str());
   ImGui::Text("  POS: %s", SDATA.POSITIONED_AIRCRAFT.c_str());
+  ImGui::PopStyleColor();
 
   // Range Indicator
   RANGE_INDICATOR.draw_info();
 
-  if (GPS_CURRENT_POSITION.ACTIVITY_TIMER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()))
+  if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
   {
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_grey().TEXT));
+
     ImGui::NewLine();
 
     ImGui::Text("GPS POSITION");
-    ImGui::Text("SPD: %f", GPS_CURRENT_POSITION.SPEED.val_mph());
-    ImGui::Text("ALT: %.0f", GPS_CURRENT_POSITION.ALTITUDE.feet_val());
-  }
+    ImGui::Text("SPD: %f", sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph());
+    ImGui::Text("ALT: %.0f", sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val());
 
-  ImGui::PopStyleColor();
+    ImGui::PopStyleColor();
+  }
 
   // Range and Location Buttons
   ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
@@ -1685,14 +1681,21 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   }
 
   // Current Location Toggle
-  ImGui::SetCursorScreenPos(ImVec2(working_area.x, 
-                                    working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+  ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                    working_area.y));
 
-  if (button_simple_toggle_color(sdSysData, "GPS\n(On)", "GPS\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
-                                  sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
-                                  sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
   {
-    RANGE_INDICATOR.gps_display_current_location_toggle();
+    if (button_simple_toggle_color(sdSysData, "GPS\n(On)", "GPS\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
+                                    sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
+                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      RANGE_INDICATOR.gps_display_current_location_toggle();
+    }
+  }
+  else
+  {
+    button_simple_enabled(sdSysData, "GPS\n", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
   }
 
   // All Text Above Here
@@ -1708,8 +1711,8 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   }
 
   // Draw Current Position Marker
-  if (GPS_CURRENT_POSITION.ACTIVITY_TIMER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) &&
-      GPS_CURRENT_POSITION.VALID_COORDS)
+  if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()) &&
+      sdSysData.GPS_SYSTEM.current_position().VALID_COORDS)
   {
     bool draw = false;
     ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.gps_pos_lat_lon() ,draw);
@@ -1717,8 +1720,8 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     if (draw)
     {
       //draw_current_gps_marker(sdSysData, gps_pos, GPS_CURRENT_POSITION);
-      draw_moving_marker(sdSysData, gps_pos, true, GPS_CURRENT_POSITION.VALID_COORDS, 
-                          GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING, 
+      draw_moving_marker(sdSysData, gps_pos, true, sdSysData.GPS_SYSTEM.current_position().VALID_COORDS, 
+                          sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                           //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
                           false, 0.0f);
     }
@@ -1902,11 +1905,6 @@ void ADSB_SCREEN::update(system_data &sdSysData)
   //---
 
   sdSysData.AIRCRAFT_COORD.DATA.CHANGED = false;
-}
-
-void ADSB_SCREEN::update_gps(system_data &sdSysData)
-{
-  ADSB_MAP_DISPLAY.update_gps_location(sdSysData.GPS_SYSTEM.current_position());
 }
 
 void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms)

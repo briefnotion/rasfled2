@@ -117,13 +117,19 @@ class COMPORT
   int ACTIVE_BAUD_RATE = 0;
 
   // BAUD Rate Change
-  bool BAUD_RATE_TARGET_ACHIEVED = false;
   string BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING = "";
 
-  bool CYCLE_CLOSE = false;
-  bool CYCLE_AUTO_START = true;
-  bool CYCLE_CHANGE_BAUD = false;
+  //bool CYCLE_CLOSE = false;
+  //bool CYCLE_AUTO_START = true;
+  //bool CYCLE_CHANGE_BAUD = false;
+
   TIMED_PING CYCLE_TIMER;
+  int CYCLE = 0;    // Connection cycles, independent of io
+    // -1 - Ignore Cycles, autoconnect is off.
+    //  0 - Normal connected read write cycle mode
+    //  1 - Shutdown Cycle
+    //  2 - Starting Up Cycle
+    //  3 - Changing Baud Speed Cycle
 
   public:
 
@@ -141,7 +147,7 @@ class COMPORT
 
   public:
 
-  bool ACTIVE = false;
+  bool CONNECTED = false;
   // Error detection not implemented. Comm can be disabled
   //  by setting ACTIVE TO FALSE.
   //  Queue stacks will remain available.

@@ -260,7 +260,7 @@ void W_TEXT_TF::draw(system_data &sdSysData)
 
 void TEXT_CONSOLE::add_line(string Text)
 {
-  CONSOLE_TEXT = CONSOLE_TEXT + Text;
+  CONSOLE_TEXT = CONSOLE_TEXT + filter_non_printable(Text);
   CONSOLE_SCROLL_TO_BOTTOM = true;
 
   if (CONSOLE_TEXT.size() > 1024 * 10)
@@ -269,6 +269,10 @@ void TEXT_CONSOLE::add_line(string Text)
     if (pos != std::string::npos)
     {
       CONSOLE_TEXT.erase(0, pos + 1);
+    }
+    else
+    {
+      CONSOLE_TEXT.erase(0, 512);
     }
   } 
 }

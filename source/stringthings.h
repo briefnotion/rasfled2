@@ -26,6 +26,14 @@ using namespace std;
 
 string char_buf_to_string(char* Buf, int Buf_Len);
 
+string filter_non_printable(const string& input);
+// Filter out non printable characters from string by replacing 
+//  them with '.'.
+
+string filter_all_non_printable(const string& input);
+// Filter out non printable characters from string by replacing 
+//  them with '.'.
+
 string line_create(int Size, char Character);
 // Returns an character filled line of Size.
 
