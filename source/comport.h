@@ -131,6 +131,8 @@ class COMPORT
     //  2 - Starting Up Cycle
     //  3 - Changing Baud Speed Cycle
 
+  bool LATEST_CYCLE_CHANGE = 99;
+
   public:
 
   COMPORT_PROPERTIES PROPS;
@@ -169,6 +171,14 @@ class COMPORT
   // String to send to device to change baud rate to target.
   //  Needs preloading.
 
+  void write_flash_data();
+  // Sets Flash data to be written on next flash data check.
+
+  void flash_data_check();
+  // Maintains Flash Data size.
+  // Writes Flash Data if FLASH_DATA_WRITE is set to true,
+  //  then sets FLASH_DATA_WRITE to false.
+
   bool create();
   // Prepares communications.
 
@@ -188,17 +198,16 @@ class COMPORT
   //  isnt working, then maybe introducing a time delay.
   //  Timing is essential for flow of info.
  
-  void cycle(unsigned long tmeFrame_Time);
+  bool cycle(unsigned long tmeFrame_Time);
   // Writes and Reads data to comm port to send and
   //  recieve queues.
 
-  void write_flash_data();
-  // Sets Flash data to be written on next flash data check.
-
-  void flash_data_check();
-  // Maintains Flash Data size.
-  // Writes Flash Data if FLASH_DATA_WRITE is set to true,
-  //  then sets FLASH_DATA_WRITE to false.
+  int latest_cycle_change();
+  // returns true on cycle change
+  // -1 - Ignore Cycles, autoconnect is off.
+  //  1 - Shutdown Cycle
+  //  2 - Starting Up Cycle
+  //  3 - Changing Baud Speed Cycle
 
   void close_port();
 

@@ -104,6 +104,26 @@ void COMPORT::device_baud_rate_change_to_target_string(string Device_Baud_Rate_C
   BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING = Device_Baud_Rate_Change_String;
 }
 
+void COMPORT::write_flash_data()
+{
+  FLASH_DATA_WRITE = true;
+}
+
+void COMPORT::flash_data_check()
+{
+  if (PROPS.FLASH_DATA_RECORDER_ACTIVE == true && FLASH_DATA_WRITE == true)
+  {
+    // write flash data to disk
+    deque_string_to_file(PROPS.SAVE_LOG_FILENAME + "_flash_" + file_format_system_time() + ".txt", FLASH_DATA, true);
+    FLASH_DATA_WRITE = false;
+  }
+
+  if ((int)FLASH_DATA.size() > PROPS.FLASH_DATA_SIZE + 500)
+  {
+    FLASH_DATA.erase(FLASH_DATA.begin(), FLASH_DATA.begin() + FLASH_DATA.size() - PROPS.FLASH_DATA_SIZE);
+  }
+}
+
 bool COMPORT::create()
 {
   bool ret_success = true;
@@ -321,9 +341,10 @@ void COMPORT::request_to_send()
   }
 }
 
-void COMPORT::cycle(unsigned long tmeFrame_Time)
+bool COMPORT::cycle(unsigned long tmeFrame_Time)
 {
   bool data_received = true;
+  bool ret_cycle_changed = false;
 
   if (CYCLE == -1)
   {
@@ -340,10 +361,14 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
       {
         CYCLE_TIMER.ping_up(tmeFrame_Time, 1000); // Wait before starting next cycle.
         CYCLE = 1;
+        LATEST_CYCLE_CHANGE = 1;
+        ret_cycle_changed = true;
       }
       else
       {
         CYCLE = -1;
+        LATEST_CYCLE_CHANGE = -1;
+        ret_cycle_changed = true;
       }
     }
   }
@@ -358,11 +383,15 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
       {
         CYCLE_TIMER.ping_up(tmeFrame_Time, 1000); // Wait before starting next cycle.
         CYCLE = 2;
+        LATEST_CYCLE_CHANGE = 2;
+        ret_cycle_changed = true;
         close_port();
       }
       else
       {
         CYCLE = -1;
+        LATEST_CYCLE_CHANGE = -1;
+        ret_cycle_changed = true;
       }
     }
   }
@@ -380,10 +409,14 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
         if (PROPS.BAUD_RATE_CHANGE_TO)
         {
           CYCLE = 3; // Prepare to check for proper baud rate
-        }
+          LATEST_CYCLE_CHANGE = 3;
+          ret_cycle_changed = true;
+          }
         else
         {
           CYCLE = 0; // Go into normal cycle.
+          LATEST_CYCLE_CHANGE = 0;
+          ret_cycle_changed = true;
         }
 
         create();
@@ -391,6 +424,8 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
       else
       {
         CYCLE = -1;
+        LATEST_CYCLE_CHANGE = -1;
+        ret_cycle_changed = true;
       }
     }
   }
@@ -405,6 +440,8 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
         {
           CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to check for live data.
           CYCLE = 0;
+          LATEST_CYCLE_CHANGE = 0;
+          ret_cycle_changed = true;
         }
         else 
         {
@@ -414,6 +451,8 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
 
           CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to disconnect
           CYCLE = 1;
+          LATEST_CYCLE_CHANGE = 1;
+          ret_cycle_changed = true;
 
           // Cycle Original and Target
           if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE)
@@ -430,6 +469,8 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
       {
         CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to disconnect
         CYCLE = 1;
+        LATEST_CYCLE_CHANGE = 1;
+        ret_cycle_changed = true;
 
         // Cycle Original and Target
         if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE)
@@ -446,8 +487,10 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
   else
   {
     // Unknown Cycle Number
-    CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to disconnect
-    CYCLE = 1;
+    CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Shutdown no autoconnect
+    CYCLE = -1;
+    LATEST_CYCLE_CHANGE = -1;
+    ret_cycle_changed = true;
   }
 
   // Do not access comm port if it is shut down.
@@ -489,10 +532,14 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
         data_received = read_from_comm();
       }
 
-      if (SAVE_TO_LOG == true && READ_FROM_COMM.size() >0)
+      if (READ_FROM_COMM.size() >0)
       {
-        deque_string_to_file(SAVE_TO_LOG_FILENAME, READ_FROM_COMM, true);
         CYCLE_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
+        
+        if (SAVE_TO_LOG == true && READ_FROM_COMM.size() >0)
+        {
+          deque_string_to_file(SAVE_TO_LOG_FILENAME, READ_FROM_COMM, true);
+        }
       }
     }
     else
@@ -502,7 +549,8 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
       {                                         //  sent per cycle.
         if (TEST_DATA.size() > 0)
         {
-          
+          CYCLE_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
+        
           READ_FROM_COMM.push_back(TEST_DATA.front());
           //READ_FROM_COMM.push_back(filter_non_printable(TEST_DATA.front()));
           
@@ -511,26 +559,16 @@ void COMPORT::cycle(unsigned long tmeFrame_Time)
       }
     }
   }
+
+  // Comms flash data check and cleanup.
+  flash_data_check();
+
+  return ret_cycle_changed;
 }
 
-void COMPORT::write_flash_data()
+int COMPORT::latest_cycle_change()
 {
-  FLASH_DATA_WRITE = true;
-}
-
-void COMPORT::flash_data_check()
-{
-  if (PROPS.FLASH_DATA_RECORDER_ACTIVE == true && FLASH_DATA_WRITE == true)
-  {
-    // write flash data to disk
-    deque_string_to_file(PROPS.SAVE_LOG_FILENAME + "_flash_" + file_format_system_time() + ".txt", FLASH_DATA, true);
-    FLASH_DATA_WRITE = false;
-  }
-
-  if ((int)FLASH_DATA.size() > PROPS.FLASH_DATA_SIZE + 500)
-  {
-    FLASH_DATA.erase(FLASH_DATA.begin(), FLASH_DATA.begin() + FLASH_DATA.size() - PROPS.FLASH_DATA_SIZE);
-  }
+  return LATEST_CYCLE_CHANGE;
 }
 
 void COMPORT::close_port()

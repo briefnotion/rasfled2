@@ -1807,10 +1807,10 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
             ImGui::SameLine();
 
-            if (button_simple_toggle_color(sdSysData, "RECORD\n(On)", "RECORD", sdSysData.COMMS.record_in_progress(), 
+            if (button_simple_toggle_color(sdSysData, "RECORD\n(On)", "RECORD", sdSysData.COMMS_AUTO.record_in_progress(), 
                                   sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              if (sdSysData.COMMS.record_in_progress())
+              if (sdSysData.COMMS_AUTO.record_in_progress())
               {
                 Screen_Comms.command_text_set(" autof");
               }

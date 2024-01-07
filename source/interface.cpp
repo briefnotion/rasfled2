@@ -336,7 +336,7 @@ void process_slow_commands(CONSOLE_COMMUNICATION &cons, system_data &sdSysData)
       if (cons.command_text_get()[0] == 'q')
       {
         string comm_command = cons.command_text_get().substr(1, cons.command_text_get().size()-1);
-        sdSysData.COMMS.send(comm_command);
+        sdSysData.COMMS_AUTO.send(comm_command);
       }
     }
   }
@@ -382,7 +382,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       if (check_command(cons," startauto", "Start Automobile Comms Port"))
       {
 
-        if (sdSysData.COMMS.create() == true)
+        if (sdSysData.COMMS_AUTO.create() == true)
         {
           cons.printw("Automobile Comm Port Started.");
         }
@@ -395,30 +395,30 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       // Stop Automobile Comm Port
       if (check_command(cons," stopauto", "Stop Automobile Comms Port"))
       {
-        sdSysData.COMMS.PROPS.AUTOSTART = false;
-        sdSysData.COMMS.close_port();
+        sdSysData.COMMS_AUTO.PROPS.AUTOSTART = false;
+        sdSysData.COMMS_AUTO.close_port();
         cons.printw("Automobile Comm Port Stop Command Sent.");
       }
 
       // Stop Automobile Comm Port
       if (check_command(cons," autop", "Toggle Print Automobile Received Data"))
       {
-        sdSysData.COMMS.PROPS.PRINT_RECEIVED_DATA = !sdSysData.COMMS.PROPS.PRINT_RECEIVED_DATA;
-        cons.printw("PRINT_RECEIVED_DATA set to " + to_string(sdSysData.COMMS.PROPS.PRINT_RECEIVED_DATA));
+        sdSysData.COMMS_AUTO.PROPS.PRINT_RECEIVED_DATA = !sdSysData.COMMS_AUTO.PROPS.PRINT_RECEIVED_DATA;
+        cons.printw("PRINT_RECEIVED_DATA set to " + to_string(sdSysData.COMMS_AUTO.PROPS.PRINT_RECEIVED_DATA));
       }
       
       // Automobile Log File On
       if (check_command(cons," autoo", "Start Automobile Comms Log"))
       {
-        sdSysData.COMMS.log_file_on();
-        sdSysData.COMMS.send("-- STARTING AUTO COMMS LOG --");
+        sdSysData.COMMS_AUTO.log_file_on();
+        sdSysData.COMMS_AUTO.send("-- STARTING AUTO COMMS LOG --");
       }
 
       // Automobile Log File Off
       if (check_command(cons," autof", "Stop Automobile Comms Log"))
       {
-        sdSysData.COMMS.log_file_off();
-        sdSysData.COMMS.send("-- STOPPING AUTOMOBILE COMMS LOG --");
+        sdSysData.COMMS_AUTO.log_file_off();
+        sdSysData.COMMS_AUTO.send("-- STOPPING AUTOMOBILE COMMS LOG --");
       }
 
       // Automobile Data Request Toggle
@@ -431,7 +431,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       // Automobile Flash Storage
       if (check_command(cons,"]]", "Store Automobile Comms Flash Data"))
       {
-        sdSysData.COMMS.write_flash_data();
+        sdSysData.COMMS_AUTO.write_flash_data();
       }
 
       // Test Routine

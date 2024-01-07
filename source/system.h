@@ -145,7 +145,7 @@ class system_data
   int t_strip = 0;
 
   // Communications Port
-  COMPORT COMMS;
+  COMPORT COMMS_AUTO;
   AUTOMOBILE CAR_INFO;
 
   // GPS

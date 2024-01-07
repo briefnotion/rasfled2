@@ -1,3 +1,6 @@
+2.106_240107
+  - Searching for and debugging serial comms errors.
+
 2.105_240105
   - Bug found associated to Comms. ADSB and GPS comm 
       halts after 3 - 3 hours.  Searching.
