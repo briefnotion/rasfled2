@@ -381,21 +381,12 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       // Start Automobile Comm Port
       if (check_command(cons," startauto", "Start Automobile Comms Port"))
       {
-
-        if (sdSysData.COMMS_AUTO.create() == true)
-        {
-          cons.printw("Automobile Comm Port Started.");
-        }
-        else
-        {
-          cons.printw("Automobile Comm Port Failed To Start.");
-        }
+        sdSysData.COMMS_AUTO.open_port();
       }
       
       // Stop Automobile Comm Port
       if (check_command(cons," stopauto", "Stop Automobile Comms Port"))
       {
-        sdSysData.COMMS_AUTO.PROPS.AUTOSTART = false;
         sdSysData.COMMS_AUTO.close_port();
         cons.printw("Automobile Comm Port Stop Command Sent.");
       }
@@ -449,21 +440,12 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       // Start GPS Comm Port
       if (check_command(cons," startgps", "Start GPS Comms Port"))
       {
-
-        if (sdSysData.COMMS_GPS.create() == true)
-        {
-          cons.printw("GPS Comm Port Started.");
-        }
-        else
-        {
-          cons.printw("GPS Comm Port Failed To Start.");
-        }
+        sdSysData.COMMS_GPS.open_port();
       }
       
       // Stop GPS Comm Port
       if (check_command(cons," stopgps", "Stop GPS Comms Port"))
       {
-        sdSysData.COMMS_GPS.PROPS.AUTOSTART = false;
         sdSysData.COMMS_GPS.close_port();
         cons.printw("GPS Comm Port Stop Command Sent.");
       }

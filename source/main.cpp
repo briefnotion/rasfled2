@@ -338,6 +338,7 @@ int loop_2(bool TTY_Only)
   sdSystem.COMMS_GPS.PROPS.XONXOFF = COMMS_XONXOFF_GPS;
 
   sdSystem.COMMS_GPS.PROPS.AUTOSTART = true;
+  sdSystem.COMMS_GPS.PROPS.CONTINUOUS_DATA = CONTINUOUS_DATA_GPS;
 
   sdSystem.COMMS_GPS.PROPS.SAVE_LOG_FILENAME = COMMS_SAVE_LOG_FILENAME_GPS;
   
@@ -934,23 +935,30 @@ int loop_2(bool TTY_Only)
         // CAN_Bus Serial Communications
         if (sdSystem.COMMS_AUTO.cycle(sdSystem.PROGRAM_TIME.current_frame_time()))
         {
-          if (sdSystem.COMMS_AUTO.latest_cycle_change() == -1)
+          if (sdSystem.COMMS_AUTO.cycle_change() == 99)
+            {
+              cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: INITIALIZE");
+            }
+          else if (sdSystem.COMMS_AUTO.cycle_change() == -1)
             {
               cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: NO AUTOCONNECT MODE");
             }
-          else if (sdSystem.COMMS_AUTO.latest_cycle_change() == 0)
+          else if (sdSystem.COMMS_AUTO.cycle_change() == 0)
             {
               cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: NORMAL READ MODE");
+              sdSystem.ALERTS_2.sound_alert(1);
             }
-          else if (sdSystem.COMMS_AUTO.latest_cycle_change() == 1)
+          else if (sdSystem.COMMS_AUTO.cycle_change() == 1)
             {
               cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: SHUTTING DOWN CYCLE");
+              sdSystem.ALERTS_2.sound_alert(3);
             }
-          else if (sdSystem.COMMS_AUTO.latest_cycle_change() == 2)
+          else if (sdSystem.COMMS_AUTO.cycle_change() == 2)
             {
               cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: CONNECT START");
+              sdSystem.ALERTS_2.sound_alert(2);
             }
-          else if (sdSystem.COMMS_AUTO.latest_cycle_change() == 3)
+          else if (sdSystem.COMMS_AUTO.cycle_change() == 3)
             {
               cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: BAUD RATE CHECK");
             }
@@ -959,23 +967,30 @@ int loop_2(bool TTY_Only)
         // GPS Serial Communications
         if (sdSystem.COMMS_GPS.cycle(sdSystem.PROGRAM_TIME.current_frame_time()))
         {
-          if (sdSystem.COMMS_AUTO.latest_cycle_change() == -1)
+          if (sdSystem.COMMS_GPS.cycle_change() == 99)
+            {
+              cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: INITIALIZE");
+            }
+          else if (sdSystem.COMMS_GPS.cycle_change() == -1)
             {
               cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: NO AUTOCONNECT MODE");
             }
-          else if (sdSystem.COMMS_AUTO.latest_cycle_change() == 0)
+          else if (sdSystem.COMMS_GPS.cycle_change() == 0)
             {
               cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: NORMAL READ MODE");
+              sdSystem.ALERTS_2.sound_alert(1);
             }
-          else if (sdSystem.COMMS_AUTO.latest_cycle_change() == 1)
+          else if (sdSystem.COMMS_GPS.cycle_change() == 1)
             {
               cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: SHUTTING DOWN CYCLE");
+              sdSystem.ALERTS_2.sound_alert(3);
             }
-          else if (sdSystem.COMMS_AUTO.latest_cycle_change() == 2)
+          else if (sdSystem.COMMS_GPS.cycle_change() == 2)
             {
               cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: CONNECT START");
+              sdSystem.ALERTS_2.sound_alert(2);
             }
-          else if (sdSystem.COMMS_AUTO.latest_cycle_change() == 3)
+          else if (sdSystem.COMMS_GPS.cycle_change() == 3)
             {
               cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: BAUD RATE CHECK");
             }

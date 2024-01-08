@@ -94,7 +94,7 @@ void NMEA::translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time)
 
     // Valid track only if v > 1kmph
     //  Filters out zero heading track during coodinate drif.
-    if (SPEED_KMPH.val_kmph() < 1.0f)
+    if (SPEED_KMPH.val_kmph() < 2.0f)
     {
       VALID_TRACK_INFO = false;
     }
@@ -271,7 +271,7 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
           if (QUALITY > 0)
           {
             CURRENT_POSITION.SYSTTEM_UPDATE_TIME = tmeFrame_Time;
-            CURRENT_POSITION.LIVE = true;
+            CURRENT_POSITION.VALID_GPS_FIX = true;
             CURRENT_POSITION.LATITUDE = LATITUDE;
             CURRENT_POSITION.LONGITUDE = LONGITUDE;
             CURRENT_POSITION.ALTITUDE = ALTITUDE;
@@ -279,10 +279,30 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
             CURRENT_POSITION.LATITUDE = LATITUDE;
 
             CURRENT_POSITION.VALID_COORDS = true;
+
+            // Add new track point if conditions are correct.
+            if (ADD_TRACK_POINT_TIMER.ping_down(tmeFrame_Time) == false)
+            {
+              ADD_TRACK_POINT_TIMER.ping_up(tmeFrame_Time, 60000);
+
+              DETAILED_TRACK_POINT tmp_track_point;
+
+              tmp_track_point.LAT_LON.x = LATITUDE;
+              tmp_track_point.LAT_LON.y = LONGITUDE;
+
+              // Velocity color instead of altitude color
+              //tmp_track_point.ALTITUDE = ALTITUDE.feet_val();
+              tmp_track_point.ALTITUDE = SPEED_KMPH.val_mph();
+              
+              //(32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
+              tmp_track_point.RSSI_INTENSITY = 0.1f; // Sat sig str?
+
+              TRACK.store(tmp_track_point);
+            }
           }
           else
           {
-            CURRENT_POSITION.LIVE = false;
+            CURRENT_POSITION.VALID_GPS_FIX = false;
           }
 
           ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);

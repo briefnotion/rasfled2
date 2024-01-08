@@ -127,7 +127,11 @@ class NMEA
   //void translate_gngll(vector<string> &Input);  //  Geographic Position, Latitude/Longitude
   //void translate_gnrmc(vector<string> &Input);  //  Recommended minimum specific GPS/Transit data
 
+  TIMED_PING ADD_TRACK_POINT_TIMER;
+  
   public:
+
+  DETAILED_TRACK TRACK;
 
   // TEMPORARY _ ERASE AS SOON AS CONSOLE IS GONE.
   vector<string> RECIEVE_HISTORY;

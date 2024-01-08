@@ -145,7 +145,22 @@ unsigned long VELOCITY::time_stamp_time_sent()
   return TIME_STAMP_TIME_SENT;
 }
 
-//-----------
+// ---------------------------------------------------------------------------------------
+
+int DETAILED_TRACK::size()
+{
+  return TRACK_POINTS.size();
+}
+
+void DETAILED_TRACK::clear()
+{
+  TRACK_POINTS.clear();
+}
+
+void DETAILED_TRACK::store(DETAILED_TRACK_POINT New_Track_Point)
+{
+  TRACK_POINTS.push_back(New_Track_Point);
+}
 
 
 #endif

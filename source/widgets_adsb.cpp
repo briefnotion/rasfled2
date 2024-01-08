@@ -184,6 +184,42 @@ void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size)
   draw_list->AddNgonFilled(Screen_Position, Size, Color, 4.0f);
 }
 
+void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+                NEW_COLOR_SCALE &Color_Scale, ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track)
+{
+
+
+  bool draw_0 = false;
+  bool draw_1 = false;
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+  ImVec2 track_position_0;
+  ImVec2 track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, Track.TRACK_POINTS[0].LAT_LON, draw_1);
+  
+  for(int position = 1; position < (int)Track.size(); position++)
+  {
+    track_position_0 = track_position_1;
+    draw_0 = draw_1;
+
+    track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, Track.TRACK_POINTS[position].LAT_LON, draw_1);
+
+    if (draw_0 || draw_1)
+    {
+      ImColor point_color = sdSysData.COLOR_SELECT.color(Color_Scale.get_color(Track.TRACK_POINTS[position].ALTITUDE)).TEXT;
+
+      point_color.Value.w = Track.TRACK_POINTS[position].RSSI_INTENSITY;
+
+      draw_point_marker(track_position_0, point_color, 3.0f);
+
+      draw_list->AddLine(track_position_0, track_position_1, 
+                          sdSysData.COLOR_SELECT.c_grey().TEXT, 2.0f);
+    }
+  }
+
+
+
+}
+
 // ---------------------------------------------------------------------------------------
 
 void MAP_MARKER::clear()
@@ -386,7 +422,7 @@ void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long tmeCurrentMil
     if (TRACK.size() == 0)
     {
       {
-        AIRCRAFT_TRACK_POINT new_lat_lon;
+        DETAILED_TRACK_POINT new_lat_lon;
         new_lat_lon.LAT_LON = ImVec2(Aircraft.POSITION.LATITUDE.get_float_value(), Aircraft.POSITION.LONGITUDE.get_float_value());
         new_lat_lon.ALTITUDE = (float)AIRCRAFT_DATA.ALTITUDE.get_int_value();
 
@@ -399,13 +435,13 @@ void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long tmeCurrentMil
         
         new_lat_lon.RSSI_INTENSITY = intensity;
 
-        TRACK.push_back(new_lat_lon);
+        TRACK.store(new_lat_lon);
       }
     }
-    else if (AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value() != TRACK[TRACK.size() -1].LAT_LON.x || 
-              AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value() != TRACK[TRACK.size() -1].LAT_LON.y)
+    else if (AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value() != TRACK.TRACK_POINTS[TRACK.TRACK_POINTS.size() -1].LAT_LON.x || 
+              AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value() != TRACK.TRACK_POINTS[TRACK.TRACK_POINTS.size() -1].LAT_LON.y)
     {
-      AIRCRAFT_TRACK_POINT new_lat_lon;
+      DETAILED_TRACK_POINT new_lat_lon;
       new_lat_lon.LAT_LON = ImVec2(Aircraft.POSITION.LATITUDE.get_float_value(), Aircraft.POSITION.LONGITUDE.get_float_value());
       new_lat_lon.ALTITUDE = (float)AIRCRAFT_DATA.ALTITUDE.get_int_value();
 
@@ -418,7 +454,7 @@ void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long tmeCurrentMil
       
       new_lat_lon.RSSI_INTENSITY = intensity;
 
-      TRACK.push_back(new_lat_lon);
+      TRACK.store(new_lat_lon);
     }
   }
 
@@ -510,32 +546,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
     // Draw track first then overlay aircraft.
     if (TRACK.size() > 1)
     {
-      bool draw_0 = false;
-      bool draw_1 = false;
-      ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-      ImVec2 track_position_0;
-      ImVec2 track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[0].LAT_LON, draw_1);
-      
-      for(int position = 1; position < (int)TRACK.size(); position++)
-      {
-        track_position_0 = track_position_1;
-        draw_0 = draw_1;
-
-        track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, TRACK[position].LAT_LON, draw_1);
-
-        if (draw_0 || draw_1)
-        {
-          ImColor point_color = sdSysData.COLOR_SELECT.color(ALTITUDE_COLOR_SCALE.get_color(TRACK[position].ALTITUDE)).TEXT;
-
-          point_color.Value.w = TRACK[position].RSSI_INTENSITY;
-
-          draw_point_marker(track_position_0, point_color, 3.0f);
-
-          draw_list->AddLine(track_position_0, track_position_1, 
-                              sdSysData.COLOR_SELECT.c_grey().TEXT, 2.0f);
-        }
-      }
+      draw_track(sdSysData, Working_Area, Scale, ALTITUDE_COLOR_SCALE, Center_Lat_Lon, TRACK);
     }
 
     // Draw Aircraft Marker
@@ -829,6 +840,18 @@ void ADSB_MAP::create(system_data &sdSysData)
 {
   RANGE_INDICATOR.PROPS.COLOR = sdSysData.COLOR_SELECT.orange();
   RANGE_INDICATOR.set_range(25.0f);
+
+  if (GPS_ALTITUDE_COLOR_SCALE.active() == false)
+  {
+    // This is not representing altitude. It is representing speed in mph.
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(10.0f, sdSysData.COLOR_SELECT.red());
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(15.0f, sdSysData.COLOR_SELECT.yellow());
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(35.0f, sdSysData.COLOR_SELECT.orange());
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(45.0f, sdSysData.COLOR_SELECT.green());
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(55.0f, sdSysData.COLOR_SELECT.blue());
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(75.0f, sdSysData.COLOR_SELECT.purple());
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.white());
+  }
 
   // KLFT - Lafayette Regional/Paul Fournet Field Airport
   // Coordinates: 
@@ -1637,15 +1660,12 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   ImGui::Text("TIME: %s", SDATA.TIME_OF_SIGNAL.c_str());
   ImGui::Text("COUNT: %s", SDATA.POSITIONED_COUNT.c_str());
   ImGui::Text("  POS: %s", SDATA.POSITIONED_AIRCRAFT.c_str());
-  ImGui::PopStyleColor();
 
   // Range Indicator
   RANGE_INDICATOR.draw_info();
 
   if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_grey().TEXT));
-
     ImGui::NewLine();
 
     ImGui::Text("GPS POSITION");
@@ -1714,13 +1734,18 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()) &&
       sdSysData.GPS_SYSTEM.current_position().VALID_COORDS)
   {
+    // Draw track of GPS Position.
+    if (sdSysData.GPS_SYSTEM.TRACK.size() > 1)
+    {
+      draw_track(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.center_lat_lon(), sdSysData.GPS_SYSTEM.TRACK);
+    }
+
     bool draw = false;
     ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.gps_pos_lat_lon() ,draw);
     
     if (draw)
     {
-      //draw_current_gps_marker(sdSysData, gps_pos, GPS_CURRENT_POSITION);
-      draw_moving_marker(sdSysData, gps_pos, true, sdSysData.GPS_SYSTEM.current_position().VALID_COORDS, 
+      draw_moving_marker(sdSysData, gps_pos, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                           sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                           //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
                           false, 0.0f);

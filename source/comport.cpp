@@ -50,14 +50,21 @@ bool COMPORT::read_from_comm()
   {
     if (buf != PROPS.ENDING_CHAR)
     {
-      RESPONSE = RESPONSE + buf;
+      if (PROPS.PRINTABLE_CHARACTERS_ONLY)
+      {
+        if (isprint(static_cast<unsigned char>(buf)))
+        {
+          RESPONSE = RESPONSE + buf;
+        }
+      }
+      else
+      {
+        RESPONSE = RESPONSE + buf;
+      }
     }
     else
     {
       
-      RESPONSE = trim(RESPONSE);
-      //RESPONSE = filter_non_printable(RESPONSE);
-
       if (RESPONSE.size() > 0)
       {
         READ_FROM_COMM.push_back(RESPONSE);
@@ -76,52 +83,6 @@ bool COMPORT::read_from_comm()
   }
 
   return ret_data_read;
-}
-
-void COMPORT::restart_autoconnect()
-{
-  CYCLE = 1;
-}
-
-bool COMPORT::record_in_progress()
-{
-  return SAVE_TO_LOG;
-}
-
-void COMPORT::log_file_on()
-{
-  SAVE_TO_LOG_FILENAME = PROPS.SAVE_LOG_FILENAME + "_data_" + file_format_system_time() + ".txt";
-  SAVE_TO_LOG = true;
-}
-
-void COMPORT::log_file_off()
-{
-  SAVE_TO_LOG = false;
-}
-
-void COMPORT::device_baud_rate_change_to_target_string(string Device_Baud_Rate_Change_String)
-{
-  BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING = Device_Baud_Rate_Change_String;
-}
-
-void COMPORT::write_flash_data()
-{
-  FLASH_DATA_WRITE = true;
-}
-
-void COMPORT::flash_data_check()
-{
-  if (PROPS.FLASH_DATA_RECORDER_ACTIVE == true && FLASH_DATA_WRITE == true)
-  {
-    // write flash data to disk
-    deque_string_to_file(PROPS.SAVE_LOG_FILENAME + "_flash_" + file_format_system_time() + ".txt", FLASH_DATA, true);
-    FLASH_DATA_WRITE = false;
-  }
-
-  if ((int)FLASH_DATA.size() > PROPS.FLASH_DATA_SIZE + 500)
-  {
-    FLASH_DATA.erase(FLASH_DATA.begin(), FLASH_DATA.begin() + FLASH_DATA.size() - PROPS.FLASH_DATA_SIZE);
-  }
 }
 
 bool COMPORT::create()
@@ -310,6 +271,54 @@ bool COMPORT::create()
   return ret_success;
 }
 
+void COMPORT::stop()
+{
+  // i dont know how to close this thing.
+  tty = tty_old;
+  CONNECTED = false;
+}
+
+bool COMPORT::record_in_progress()
+{
+  return SAVE_TO_LOG;
+}
+
+void COMPORT::log_file_on()
+{
+  SAVE_TO_LOG_FILENAME = PROPS.SAVE_LOG_FILENAME + "_data_" + file_format_system_time() + ".txt";
+  SAVE_TO_LOG = true;
+}
+
+void COMPORT::log_file_off()
+{
+  SAVE_TO_LOG = false;
+}
+
+void COMPORT::device_baud_rate_change_to_target_string(string Device_Baud_Rate_Change_String)
+{
+  BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING = Device_Baud_Rate_Change_String;
+}
+
+void COMPORT::write_flash_data()
+{
+  FLASH_DATA_WRITE = true;
+}
+
+void COMPORT::flash_data_check()
+{
+  if (PROPS.FLASH_DATA_RECORDER_ACTIVE == true && FLASH_DATA_WRITE == true)
+  {
+    // write flash data to disk
+    deque_string_to_file(PROPS.SAVE_LOG_FILENAME + "_flash_" + file_format_system_time() + ".txt", FLASH_DATA, true);
+    FLASH_DATA_WRITE = false;
+  }
+
+  if ((int)FLASH_DATA.size() > PROPS.FLASH_DATA_SIZE + 500)
+  {
+    FLASH_DATA.erase(FLASH_DATA.begin(), FLASH_DATA.begin() + FLASH_DATA.size() - PROPS.FLASH_DATA_SIZE);
+  }
+}
+
 void COMPORT::send(string Text)
 {
   WRITE_TO_COMM.push_back(Text);
@@ -346,29 +355,38 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
   bool data_received = true;
   bool ret_cycle_changed = false;
 
-  if (CYCLE == -1)
+  if (CYCLE == 99)
+  {
+    // First Run
+    DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 2000);
+
+    CYCLE_CHANGE = 99;
+    ret_cycle_changed = true;
+
+    if (PROPS.AUTOSTART)
+    {
+      CYCLE = 2;  // Start connection cycle.
+    }
+    else
+    {
+      CYCLE = -1; // Read as if connected
+    }
+  }
+  else if (CYCLE == -1)
   {
     // Ignore all cycles if Cycle is -1.
   }
   else if (CYCLE == 0)
   {
-    // live data in 5 seconds check.
-    if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false)
+    // Keep active with checking for live data
+    if (PROPS.AUTOSTART && PROPS.CONTINUOUS_DATA)
     {
-      // If data stops and autoconnect on shutdown and restart
-      //  Dont shutdown if autoconnect is not on.
-      if (PROPS.AUTOSTART == true)
+      if (DATA_RECIEVED_TIMER.ping_down(tmeFrame_Time) == false)
       {
-        CYCLE_TIMER.ping_up(tmeFrame_Time, 1000); // Wait before starting next cycle.
+        // Start shutdown cycle
+        ACTIVE_BAUD_RATE = PROPS.BAUD_RATE;
+
         CYCLE = 1;
-        LATEST_CYCLE_CHANGE = 1;
-        ret_cycle_changed = true;
-      }
-      else
-      {
-        CYCLE = -1;
-        LATEST_CYCLE_CHANGE = -1;
-        ret_cycle_changed = true;
       }
     }
   }
@@ -377,21 +395,21 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
     // Check for cycle close. Need to ensure all comm sent before closing connection and reconnecting
     if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false)
     {
+      CYCLE_CHANGE = 1;
+      ret_cycle_changed = true;
+
       // Close the connection.
       //  Don't start reconnect if autoconnect if not on
       if (PROPS.AUTOSTART == true)
       {
         CYCLE_TIMER.ping_up(tmeFrame_Time, 1000); // Wait before starting next cycle.
         CYCLE = 2;
-        LATEST_CYCLE_CHANGE = 2;
-        ret_cycle_changed = true;
-        close_port();
+
+        stop();
       }
       else
       {
         CYCLE = -1;
-        LATEST_CYCLE_CHANGE = -1;
-        ret_cycle_changed = true;
       }
     }
   }
@@ -399,24 +417,24 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
   {
     if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false)
     {
+      CYCLE_CHANGE = 2;
+      ret_cycle_changed = true;
+
       //  Open a new connection at current baud rate.
       //  Don't prepare check baud rate if autoconnect if not on
       if (PROPS.AUTOSTART == true)
       {
-        CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Wait before starting next cycle.
+        DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 2000);   // Refresh the data recieve timer.
 
         // Dont go into cycle 3 if BAUD_RATE_CHANGE_TO is off
         if (PROPS.BAUD_RATE_CHANGE_TO)
         {
+          CYCLE_TIMER.ping_up(tmeFrame_Time, 2000);           // Wait before starting next cycle.
           CYCLE = 3; // Prepare to check for proper baud rate
-          LATEST_CYCLE_CHANGE = 3;
-          ret_cycle_changed = true;
           }
         else
         {
           CYCLE = 0; // Go into normal cycle.
-          LATEST_CYCLE_CHANGE = 0;
-          ret_cycle_changed = true;
         }
 
         create();
@@ -424,8 +442,6 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
       else
       {
         CYCLE = -1;
-        LATEST_CYCLE_CHANGE = -1;
-        ret_cycle_changed = true;
       }
     }
   }
@@ -434,25 +450,43 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
     // Target Baud Rate
     if (CYCLE_TIMER.ping_down(tmeFrame_Time) == false)
     {
-      if (CONNECTED)
-      {
-        if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE_TARGET)
-        {
-          CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to check for live data.
-          CYCLE = 0;
-          LATEST_CYCLE_CHANGE = 0;
-          ret_cycle_changed = true;
-        }
-        else 
-        {
-          // Connected on non target, baud rate
-          // Send command to device to change its rate. Then change rate.
-          send(BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING.c_str());
+      CYCLE_CHANGE = 3;
+      ret_cycle_changed = true;
 
-          CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to disconnect
+      if (PROPS.BAUD_RATE_CHANGE_TO)
+      {
+        if (CONNECTED)
+        {
+          if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE_TARGET)
+          {
+            CYCLE_CHANGE = 0;
+            ret_cycle_changed = true;
+            CYCLE = 0;
+          }
+          else
+          {
+            // Connected on non target, baud rate
+            // Send command to device to change its rate. Then change rate.
+            send(BAUD_RATE_TARGET_DEVICE_CHANGE_BAUD_RATE_STRING.c_str());
+
+            CYCLE_TIMER.ping_up(tmeFrame_Time, 2000); // Start timer to disconnect
+            CYCLE = 1;
+
+            // Cycle Original and Target
+            if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE)
+            {
+              ACTIVE_BAUD_RATE = PROPS.BAUD_RATE_TARGET;
+            }
+            else
+            {
+              ACTIVE_BAUD_RATE = PROPS.BAUD_RATE;
+            }
+          }
+        }
+        else
+        {
+          CYCLE_TIMER.ping_up(tmeFrame_Time, 2000); // Start timer to disconnect
           CYCLE = 1;
-          LATEST_CYCLE_CHANGE = 1;
-          ret_cycle_changed = true;
 
           // Cycle Original and Target
           if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE)
@@ -465,21 +499,18 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
           }
         }
       }
-      else  // Failed to connect
+      else
       {
-        CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Start timer to disconnect
-        CYCLE = 1;
-        LATEST_CYCLE_CHANGE = 1;
-        ret_cycle_changed = true;
-
-        // Cycle Original and Target
-        if (ACTIVE_BAUD_RATE == PROPS.BAUD_RATE)
-        {
-          ACTIVE_BAUD_RATE = PROPS.BAUD_RATE_TARGET;
+        if (CONNECTED)
+        {            
+          CYCLE_CHANGE = 0;
+          ret_cycle_changed = true;
+          CYCLE = 0;
         }
         else
         {
-          ACTIVE_BAUD_RATE = PROPS.BAUD_RATE;
+          CYCLE_TIMER.ping_up(tmeFrame_Time, 2000); // Start timer to disconnect
+          CYCLE = 1;
         }
       }
     }
@@ -487,10 +518,8 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
   else
   {
     // Unknown Cycle Number
-    CYCLE_TIMER.ping_up(tmeFrame_Time, 5000); // Shutdown no autoconnect
+    CYCLE_TIMER.ping_up(tmeFrame_Time, 2000); // Shutdown no autoconnect
     CYCLE = -1;
-    LATEST_CYCLE_CHANGE = -1;
-    ret_cycle_changed = true;
   }
 
   // Do not access comm port if it is shut down.
@@ -532,9 +561,9 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
         data_received = read_from_comm();
       }
 
-      if (READ_FROM_COMM.size() >0)
+      if (READ_FROM_COMM.size() > 0)
       {
-        CYCLE_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
+        DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
         
         if (SAVE_TO_LOG == true && READ_FROM_COMM.size() >0)
         {
@@ -544,15 +573,14 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
     }
     else
     {
-      // send test data
+      // get test data from file
       for (int count = 0; count < 6; count++)   // Count is the number of messages
       {                                         //  sent per cycle.
         if (TEST_DATA.size() > 0)
         {
-          CYCLE_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
+          DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
         
           READ_FROM_COMM.push_back(TEST_DATA.front());
-          //READ_FROM_COMM.push_back(filter_non_printable(TEST_DATA.front()));
           
           TEST_DATA.pop_front();
         }
@@ -566,16 +594,21 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
   return ret_cycle_changed;
 }
 
-int COMPORT::latest_cycle_change()
+int COMPORT::cycle_change()
 {
-  return LATEST_CYCLE_CHANGE;
+  return CYCLE_CHANGE;
+}
+
+void COMPORT::open_port()
+{
+  ACTIVE_BAUD_RATE = 0;
+  CYCLE = 99;
 }
 
 void COMPORT::close_port()
 {
-  // i dont know how to close this thing.
-  tty = tty_old;
-  CONNECTED = false;
+  CYCLE = -1;
+  stop();
 }
 
 

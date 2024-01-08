@@ -1,3 +1,8 @@
+2.107_240107
+  - Searching for and debugging serial comms errors.
+  - Add track to gps coords. Only adding a point once per 
+      minute because details not important.
+
 2.106_240107
   - Searching for and debugging serial comms errors.
 

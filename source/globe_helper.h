@@ -51,6 +51,8 @@ class DISTANCE
 
 };
 
+// -------------------------------------------------------------------------------------
+
 class VELOCITY
 {
   private:
@@ -82,6 +84,8 @@ class VELOCITY
   unsigned long time_stamp_time_sent();
 };
 
+// -------------------------------------------------------------------------------------
+
 class GLOBAL_POSITION_DETAILED
 {
   private:
@@ -89,8 +93,6 @@ class GLOBAL_POSITION_DETAILED
   public:
 
   unsigned long SYSTTEM_UPDATE_TIME = 0;
-
-  bool LIVE = true;
 
   float LATITUDE = 0;
   float LONGITUDE = 0;
@@ -102,6 +104,8 @@ class GLOBAL_POSITION_DETAILED
 
   float DILUTION_OF_POSITION = 0;
 
+  // Post Processing
+  bool VALID_GPS_FIX = false;
   bool VALID_COORDS = false;
   bool VALID_TRACK = false;
 
@@ -115,6 +119,31 @@ class GLOBAL_POSITION
   STRING_FLOAT LONGITUDE;
 
   bool GLOBAL_POSITION_FOUND = false;
+};
+
+// -------------------------------------------------------------------------------------
+
+class DETAILED_TRACK_POINT
+{
+  public:
+  
+  ImVec2 LAT_LON;
+  float RSSI_INTENSITY = 0.0f;
+  float ALTITUDE = 0.0f;
+};
+
+class DETAILED_TRACK
+{
+  private:
+  
+  public:
+
+  vector<DETAILED_TRACK_POINT> TRACK_POINTS;
+  
+  int size();
+  void clear();
+
+  void store(DETAILED_TRACK_POINT New_Track_Point);
 };
 
 // -------------------------------------------------------------------------------------

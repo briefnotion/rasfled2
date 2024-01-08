@@ -61,6 +61,9 @@ void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Col
 
 void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size);
 
+void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+                NEW_COLOR_SCALE &Color_Scale, ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track);
+
 // ---------------------------------------------------------------------------------------
 
 class MAP_MARKER
@@ -88,15 +91,6 @@ class MAP_MARKER
 };
 
 // ---------------------------------------------------------------------------------------
-
-class AIRCRAFT_TRACK_POINT
-{
-  public:
-  
-  ImVec2 LAT_LON;
-  float RSSI_INTENSITY = 0.0f;
-  float ALTITUDE = 0.0f;
-};
 
 class ADSB_WIDGET_Properties
 // Properties (duh)
@@ -150,7 +144,7 @@ class ADSB_WIDGET
   float LATITUDE = 0.0f;
   float LONGITUDE = 0.0f;
 
-  vector<AIRCRAFT_TRACK_POINT> TRACK;
+  DETAILED_TRACK TRACK;
   NEW_COLOR_SCALE ALTITUDE_COLOR_SCALE;
 
   public:
@@ -274,6 +268,8 @@ class ADSB_MAP
   
   ADSB_RANGE RANGE_INDICATOR;
   deque<MAP_MARKER> LANDMARKS;
+
+  NEW_COLOR_SCALE GPS_ALTITUDE_COLOR_SCALE;
 
   bool DISPLAY_LOCATION = false;
 
