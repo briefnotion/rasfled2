@@ -92,7 +92,7 @@ class GLOBAL_POSITION_DETAILED
   
   public:
 
-  unsigned long SYSTTEM_UPDATE_TIME = 0;
+  unsigned long SYSTEM_UPDATE_TIME = 0;
 
   float LATITUDE = 0;
   float LONGITUDE = 0;
@@ -135,6 +135,8 @@ class DETAILED_TRACK_POINT
 class DETAILED_TRACK
 {
   private:
+  
+  int max_size = 1024;
   
   public:
 

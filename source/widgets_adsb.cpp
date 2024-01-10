@@ -120,7 +120,7 @@ void draw_moving_marker(system_data &sdSysData, ImVec2 Screen_Position, bool Mai
   // Draw Heading 1
   if (Valid_Heading_1)
   {
-    float thickness = 4.0f;
+    float thickness = 8.0f;
 
     // Adjust the degrees into heading. Convert direction from degrees to radians
     float rad = (Heading_1 + 90.0f) * float_PI / 180.0f;
@@ -142,7 +142,7 @@ void draw_moving_marker(system_data &sdSysData, ImVec2 Screen_Position, bool Mai
   // Draw Heading 2
   if (Valid_Heading_2)
   {
-    float thickness = 4.0f;
+    float thickness = 8.0f;
 
     // Adjust the degrees into heading. Convert direction from degrees to radians
     float rad = (Heading_2 + 90.0f) * float_PI / 180.0f;
@@ -187,8 +187,6 @@ void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size)
 void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
                 NEW_COLOR_SCALE &Color_Scale, ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track)
 {
-
-
   bool draw_0 = false;
   bool draw_1 = false;
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -215,9 +213,6 @@ void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
                           sdSysData.COLOR_SELECT.c_grey().TEXT, 2.0f);
     }
   }
-
-
-
 }
 
 // ---------------------------------------------------------------------------------------
@@ -1669,11 +1664,12 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::NewLine();
 
     ImGui::Text("GPS POSITION");
-    ImGui::Text("SPD: %f", sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph());
-    ImGui::Text("ALT: %.0f", sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val());
-
-    ImGui::PopStyleColor();
+    ImGui::Text("P:%.1f H:%.1f V:%.1f", sdSysData.GPS_SYSTEM.pdop(), sdSysData.GPS_SYSTEM.hdop(), sdSysData.GPS_SYSTEM.vdop());
+    ImGui::Text("SPD: %.1f", sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph());
+    ImGui::Text("ALT: %.1f", sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val());
   }
+
+  ImGui::PopStyleColor();
 
   // Range and Location Buttons
   ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 

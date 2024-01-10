@@ -140,6 +140,12 @@ void NMEA::translate_gngga(vector<string> &Input)
   {
     GGA_TIME = string_to_float(Input[1]);
     
+    // primarily for file access reloading file (bug, not a feature)
+    if (GGA_TIME_PREV > GGA_TIME)
+    {
+      GGA_TIME_PREV = GGA_TIME;
+    }
+    
     LATITUDE = string_to_float(Input[2]);
     // Convert long degrees minutes to degrees decimal
     LATITUDE = (int)(LATITUDE / 100.0f) + ( ((LATITUDE / 100.0f) - (int)(LATITUDE / 100.0f)) *100 / 60 );
@@ -188,6 +194,23 @@ void NMEA::translate_gngga(vector<string> &Input)
     QUALITY = 0;
   }
 }
+// Data:
+float NMEA::pdop()
+{
+  return PDOP;
+}
+
+float NMEA::hdop()
+{
+  return HDOP;
+}
+
+float NMEA::vdop()
+{
+  return VDOP;
+}
+
+// Routines:
 
 string NMEA::device_change_baud_rate_string(int Baud_Rate)
 {
@@ -270,7 +293,7 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
           // Update Details
           if (QUALITY > 0)
           {
-            CURRENT_POSITION.SYSTTEM_UPDATE_TIME = tmeFrame_Time;
+            CURRENT_POSITION.SYSTEM_UPDATE_TIME = tmeFrame_Time;
             CURRENT_POSITION.VALID_GPS_FIX = true;
             CURRENT_POSITION.LATITUDE = LATITUDE;
             CURRENT_POSITION.LONGITUDE = LONGITUDE;
@@ -281,8 +304,11 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
             CURRENT_POSITION.VALID_COORDS = true;
 
             // Add new track point if conditions are correct.
-            if (ADD_TRACK_POINT_TIMER.ping_down(tmeFrame_Time) == false)
+            //if (ADD_TRACK_POINT_TIMER.ping_down(tmeFrame_Time) == false)
+            if (GGA_TIME - GGA_TIME_PREV >= 1.0f && SPEED_KMPH.val_kmph() >= 2.0f)
             {
+              GGA_TIME_PREV = GGA_TIME;
+
               ADD_TRACK_POINT_TIMER.ping_up(tmeFrame_Time, 60000);
 
               DETAILED_TRACK_POINT tmp_track_point;
@@ -295,9 +321,14 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
               tmp_track_point.ALTITUDE = SPEED_KMPH.val_mph();
               
               //(32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
-              tmp_track_point.RSSI_INTENSITY = 0.1f; // Sat sig str?
+              tmp_track_point.RSSI_INTENSITY = 0.5f; // Sat sig str?
 
               TRACK.store(tmp_track_point);
+
+              if ((int)TRACK.size() % 100 == 0)
+              {
+                printf("size %d\n", TRACK.size());
+              }
             }
           }
           else

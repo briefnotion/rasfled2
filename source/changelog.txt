@@ -1,3 +1,13 @@
+2.108_240109
+  - Seemed to have resolved the "Bug found associated to 
+      Comms with halt." problem with the last large "comport"
+      revision.
+  - Track to gps coords will record every second of data. 
+  - All tracks, including aircraft, will scale back  
+      precision with time.
+  - Added "Dilution of Precision" to GPS Info on ADS-B screen.
+  - Building GPS System.
+
 2.107_240107
   - Searching for and debugging serial comms errors.
   - Add track to gps coords. Only adding a point once per 

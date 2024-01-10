@@ -159,6 +159,31 @@ void DETAILED_TRACK::clear()
 
 void DETAILED_TRACK::store(DETAILED_TRACK_POINT New_Track_Point)
 {
+  if (TRACK_POINTS.size() == 0)
+  {
+    TRACK_POINTS.reserve(max_size);
+  }
+
+  if ((int)TRACK_POINTS.size() > (max_size - 10))
+  {
+    vector<DETAILED_TRACK_POINT> temp_track_points;
+    temp_track_points.reserve(max_size);
+
+    for (int pos = 0; pos < (int)TRACK_POINTS.size(); pos++)
+    {
+      if ((pos > ((float)max_size * 0.95f)) || (pos % 2 == 0))
+      {
+        temp_track_points.push_back(TRACK_POINTS[pos]);
+      }
+    }
+
+    TRACK_POINTS.swap(temp_track_points);
+
+    // should destruct itself, if noticed its not try
+    //temp_track_points.clear();
+    //temp_track_points.shrink_to_fit();
+  }
+
   TRACK_POINTS.push_back(New_Track_Point);
 }
 

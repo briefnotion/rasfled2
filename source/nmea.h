@@ -102,6 +102,7 @@ class NMEA
   DISTANCE GEOID_HEIGHT; // M (mean sea level above WGS84 ellipsoid)
 
   float GGA_TIME = 0;
+  float GGA_TIME_PREV = 0;
   
   float TIME_SINCE_LAST_DGPS_UPDATE = 0;
   int DGPS_STATION_ID;
@@ -120,6 +121,7 @@ class NMEA
 
   GLOBAL_POSITION_DETAILED CURRENT_POSITION;
 
+  // Routines:
   void translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time);   //  Track made good and ground speed
   void translate_gngsa(vector<string> &Input);    //  GPS DOP and active satellites 
   void translate_gngga(vector<string> &Input);    //  Global Positioning System Fix Data
@@ -136,6 +138,12 @@ class NMEA
   // TEMPORARY _ ERASE AS SOON AS CONSOLE IS GONE.
   vector<string> RECIEVE_HISTORY;
 
+  // Data:
+  float pdop();
+  float hdop();
+  float vdop();
+
+  // Routines:
   string device_change_baud_rate_string(int Baud_Rate);
 
   //void process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time);
