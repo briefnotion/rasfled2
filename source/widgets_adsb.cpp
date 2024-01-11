@@ -76,15 +76,20 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position)
 // ---------------------------------------------------------------------------------------
 // Markers
 
-void draw_moving_marker(system_data &sdSysData, ImVec2 Screen_Position, bool Main, bool Valid_Position, 
+void draw_compass(system_data &sdSysData, ImVec2 Screen_Position, float Size, float Size_Needle, float Size_Outline, 
+                        bool Main, bool Valid_Position, 
                         bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2)
 {
   // Heading 1 - Track or Aircraft Nav Heading
   // Heading 2 - Compass or Aircraft Track Heading.
 
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
-  float size = 15.0f;
   int Color = sdSysData.COLOR_SELECT.white();
+
+  // standards small
+  // size 15
+  // needle size 15 / 2 = 7.5
+  // size_outline 15 / 5 = 3
 
   // Set Color
   if (Valid_Position == false)
@@ -95,70 +100,66 @@ void draw_moving_marker(system_data &sdSysData, ImVec2 Screen_Position, bool Mai
   if (Valid_Position)
   {
     // Draw Location
-    draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 8.0f);
-    draw_list->AddNgon(Screen_Position, size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 15.0f, 3.0f);
+    draw_list->AddNgonFilled(Screen_Position, Size_Needle / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f);
+    draw_list->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, Size, Size_Outline);
 
     // Draw Double Location
     if (Main)
     {
-      draw_list->AddNgon(Screen_Position, size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 15.0f, 2.0f);
+      draw_list->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, Size, 2.0f);
     }
   }
   else
   {
     // Draw Location
-    draw_list->AddNgonFilled(Screen_Position, 5.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 8.0f);
-    draw_list->AddNgon(Screen_Position, size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 15.0f, 3.0f);
+    draw_list->AddNgonFilled(Screen_Position, Size_Needle / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f);
+    draw_list->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, Size, Size_Outline);
 
     // Draw Double Location
     if (Main)
     {
-      draw_list->AddNgon(Screen_Position, 24.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 15.0f, 3.0f);
+      draw_list->AddNgon(Screen_Position, 24.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, Size, Size_Outline);
     }
   }
 
   // Draw Heading 1
   if (Valid_Heading_1)
   {
-    float thickness = 8.0f;
-
     // Adjust the degrees into heading. Convert direction from degrees to radians
     float rad = (Heading_1 + 90.0f) * float_PI / 180.0f;
 
     // Calculate
-    ImVec2 p2 = ImVec2(Screen_Position.x + size * cos(rad + float_PI), Screen_Position.y + size * sin(rad + float_PI));
+    ImVec2 p2 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
  
     // Draw the line
     if (Valid_Position)
     {
-      draw_list->AddLine(Screen_Position, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, thickness);
+      draw_list->AddLine(Screen_Position, p2, sdSysData.COLOR_SELECT.color(Color).TEXT, Size_Needle);
     }
     else
     {
-      draw_list->AddLine(Screen_Position, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, thickness);
+      draw_list->AddLine(Screen_Position, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, Size_Needle);
     }
   }
 
   // Draw Heading 2
   if (Valid_Heading_2)
   {
-    float thickness = 8.0f;
-
     // Adjust the degrees into heading. Convert direction from degrees to radians
     float rad = (Heading_2 + 90.0f) * float_PI / 180.0f;
 
     // Calculate
-    ImVec2 p1 = ImVec2(Screen_Position.x + size * cos(rad + float_PI), Screen_Position.y + size * sin(rad + float_PI));
-    ImVec2 p2 = ImVec2(Screen_Position.x + ( 2.0f * size) * cos(rad + float_PI), Screen_Position.y + ( 2.0f * size) * sin(rad + float_PI));
+    ImVec2 p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
+    ImVec2 p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
  
     // Draw the line
     if (Valid_Position)
     {
-      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, thickness);
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).TEXT, Size_Needle);
     }
     else
     {
-      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, thickness);
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, Size_Needle);
     }
   }
 }
@@ -184,7 +185,7 @@ void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size)
   draw_list->AddNgonFilled(Screen_Position, Size, Color, 4.0f);
 }
 
-void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, float Strength_Point_Size,  
                 NEW_COLOR_SCALE &Color_Scale, ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track)
 {
   bool draw_0 = false;
@@ -192,22 +193,49 @@ void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
   ImVec2 track_position_0;
-  ImVec2 track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, Track.TRACK_POINTS[0].LAT_LON, draw_1);
-  
-  for(int position = 1; position < (int)Track.size(); position++)
+  ImVec2 track_position_1;
+
+  // Set First Point
+  if ((int)Track.TRACK_POINTS_SIMPLE.size() > 0)
+  {
+    track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                      ImVec2(Track.TRACK_POINTS_SIMPLE[0].LATITUDE, Track.TRACK_POINTS_SIMPLE[0].LONGITUDE), draw_1);
+  }
+  else
+  {
+    track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                      ImVec2(Track.TRACK_POINTS_DETAILED[0].LATITUDE, Track.TRACK_POINTS_DETAILED[0].LONGITUDE), draw_1);
+  }
+
+  // Draw Simple Track
+  for(int position = 1; position < (int)Track.TRACK_POINTS_SIMPLE.size(); position++)
   {
     track_position_0 = track_position_1;
     draw_0 = draw_1;
 
-    track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, Track.TRACK_POINTS[position].LAT_LON, draw_1);
+    track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                    ImVec2(Track.TRACK_POINTS_SIMPLE[position].LATITUDE, Track.TRACK_POINTS_SIMPLE[position].LONGITUDE), draw_1);
+
+    draw_list->AddLine(track_position_0, track_position_1, 
+                        sdSysData.COLOR_SELECT.c_grey().TEXT, 1.0f);
+  }
+
+  // Draw Detailed Track
+  for(int position = 1; position < (int)Track.TRACK_POINTS_DETAILED.size(); position++)
+  {
+    track_position_0 = track_position_1;
+    draw_0 = draw_1;
+
+    track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                    ImVec2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, Track.TRACK_POINTS_DETAILED[position].LONGITUDE), draw_1);
 
     if (draw_0 || draw_1)
     {
-      ImColor point_color = sdSysData.COLOR_SELECT.color(Color_Scale.get_color(Track.TRACK_POINTS[position].ALTITUDE)).TEXT;
+      ImColor point_color = sdSysData.COLOR_SELECT.color(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position].ALTITUDE)).TEXT;
 
-      point_color.Value.w = Track.TRACK_POINTS[position].RSSI_INTENSITY;
+      point_color.Value.w = Track.TRACK_POINTS_DETAILED[position].RSSI_INTENSITY;
 
-      draw_point_marker(track_position_0, point_color, 3.0f);
+      draw_point_marker(track_position_0, point_color, Strength_Point_Size);
 
       draw_list->AddLine(track_position_0, track_position_1, 
                           sdSysData.COLOR_SELECT.c_grey().TEXT, 2.0f);
@@ -414,12 +442,14 @@ void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long tmeCurrentMil
   if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND)
   {
     // Add only if new value not the same as prev, or no other values exist.
-    if (TRACK.size() == 0)
+    if (TRACK.TRACK_POINTS_DETAILED.size() == 0)
     {
       {
         DETAILED_TRACK_POINT new_lat_lon;
-        new_lat_lon.LAT_LON = ImVec2(Aircraft.POSITION.LATITUDE.get_float_value(), Aircraft.POSITION.LONGITUDE.get_float_value());
+        new_lat_lon.LATITUDE = Aircraft.POSITION.LATITUDE.get_float_value();
+        new_lat_lon.LONGITUDE = Aircraft.POSITION.LONGITUDE.get_float_value();
         new_lat_lon.ALTITUDE = (float)AIRCRAFT_DATA.ALTITUDE.get_int_value();
+        new_lat_lon.TIME = (float)tmeCurrentMillis;
 
         float intensity = (32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
 
@@ -433,12 +463,14 @@ void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long tmeCurrentMil
         TRACK.store(new_lat_lon);
       }
     }
-    else if (AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value() != TRACK.TRACK_POINTS[TRACK.TRACK_POINTS.size() -1].LAT_LON.x || 
-              AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value() != TRACK.TRACK_POINTS[TRACK.TRACK_POINTS.size() -1].LAT_LON.y)
+    else if (AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value() != TRACK.TRACK_POINTS_DETAILED[TRACK.TRACK_POINTS_DETAILED.size() -1].LATITUDE || 
+              AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value() != TRACK.TRACK_POINTS_DETAILED[TRACK.TRACK_POINTS_DETAILED.size() -1].LONGITUDE)
     {
       DETAILED_TRACK_POINT new_lat_lon;
-      new_lat_lon.LAT_LON = ImVec2(Aircraft.POSITION.LATITUDE.get_float_value(), Aircraft.POSITION.LONGITUDE.get_float_value());
+      new_lat_lon.LATITUDE = Aircraft.POSITION.LATITUDE.get_float_value();
+      new_lat_lon.LONGITUDE = Aircraft.POSITION.LONGITUDE.get_float_value();
       new_lat_lon.ALTITUDE = (float)AIRCRAFT_DATA.ALTITUDE.get_int_value();
+      new_lat_lon.TIME = (float)tmeCurrentMillis;
 
       float intensity = (32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
 
@@ -530,7 +562,7 @@ bool ADSB_WIDGET::active()
 // Draw all aircraft onto the maps.
 void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon)
 {
-  if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.size() > 1)
+  if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.TRACK_POINTS_DETAILED.size() > 1)
   {
     bool draw = false;
     ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon,
@@ -539,15 +571,15 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
                                                           draw);
 
     // Draw track first then overlay aircraft.
-    if (TRACK.size() > 1)
+    if (TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(sdSysData, Working_Area, Scale, ALTITUDE_COLOR_SCALE, Center_Lat_Lon, TRACK);
+      draw_track(sdSysData, Working_Area, Scale, 3.0f, ALTITUDE_COLOR_SCALE, Center_Lat_Lon, TRACK);
     }
 
     // Draw Aircraft Marker
     if (AIRCRAFT_DATA.TRACK.conversion_success())
     {
-      draw_moving_marker(sdSysData, draw_position, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
+      draw_compass(sdSysData, draw_position, 15.0f, 8.0f, 3.0f, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
                           AIRCRAFT_DATA.NAV_HEADING.conversion_success(), AIRCRAFT_DATA.NAV_HEADING.get_float_value(), 
                           AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value());
     }
@@ -1731,21 +1763,30 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       sdSysData.GPS_SYSTEM.current_position().VALID_COORDS)
   {
     // Draw track of GPS Position.
-    if (sdSysData.GPS_SYSTEM.TRACK.size() > 1)
+    if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.center_lat_lon(), sdSysData.GPS_SYSTEM.TRACK);
+      draw_track(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), 2.5f, GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.center_lat_lon(), sdSysData.GPS_SYSTEM.TRACK);
     }
 
     bool draw = false;
     ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.gps_pos_lat_lon() ,draw);
     
+    // Draw point position compass
     if (draw)
     {
-      draw_moving_marker(sdSysData, gps_pos, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+      draw_compass(sdSysData, gps_pos, 15.0f, 8.0f, 3.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                           sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                           //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
                           false, 0.0f);
     }
+
+    // Draw North Direction Compass
+    draw_compass(sdSysData, ImVec2(working_area.x + working_area.z - 60.0f, working_area.y + 150.0f), 
+                        40.0f, 8.0f, 3.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                        sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, 
+                        (-sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING), 
+                        //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
+                        false, 0.0f);
   }
   
   // Draw Aircraft

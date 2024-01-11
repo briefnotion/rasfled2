@@ -313,22 +313,19 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
 
               DETAILED_TRACK_POINT tmp_track_point;
 
-              tmp_track_point.LAT_LON.x = LATITUDE;
-              tmp_track_point.LAT_LON.y = LONGITUDE;
+              tmp_track_point.LATITUDE = LATITUDE;
+              tmp_track_point.LONGITUDE = LONGITUDE;
+              tmp_track_point.TIME = GGA_TIME * 1000.0f;
 
               // Velocity color instead of altitude color
               //tmp_track_point.ALTITUDE = ALTITUDE.feet_val();
               tmp_track_point.ALTITUDE = SPEED_KMPH.val_mph();
               
-              //(32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
-              tmp_track_point.RSSI_INTENSITY = 0.5f; // Sat sig str?
+              //DILUTION_OF_POSITION ranges 0 - 100.
+              // 0.5 to 2.5 is good to bad.
+              tmp_track_point.RSSI_INTENSITY = (((PDOP + HDOP + VDOP) / 3.0f) - 0.5f) / 2.0f; // Sat sig str?
 
               TRACK.store(tmp_track_point);
-
-              if ((int)TRACK.size() % 100 == 0)
-              {
-                printf("size %d\n", TRACK.size());
-              }
             }
           }
           else

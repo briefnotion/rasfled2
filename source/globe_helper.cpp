@@ -147,44 +147,78 @@ unsigned long VELOCITY::time_stamp_time_sent()
 
 // ---------------------------------------------------------------------------------------
 
-int DETAILED_TRACK::size()
-{
-  return TRACK_POINTS.size();
-}
-
 void DETAILED_TRACK::clear()
 {
-  TRACK_POINTS.clear();
+  TRACK_POINTS_DETAILED.clear();
+  TRACK_POINTS_SIMPLE.clear();
 }
 
 void DETAILED_TRACK::store(DETAILED_TRACK_POINT New_Track_Point)
 {
-  if (TRACK_POINTS.size() == 0)
+  if (TRACK_POINTS_DETAILED.size() == 0)
   {
-    TRACK_POINTS.reserve(max_size);
+    TRACK_POINTS_DETAILED.reserve(MAX_SIZE_DETAILED);
+    TRACK_POINTS_SIMPLE.reserve(MAX_SISE_SIMPLE);
   }
 
-  if ((int)TRACK_POINTS.size() > (max_size - 10))
+  // TRACK_POINTS_DETAILED needs resizing if too large.
+  if ((int)TRACK_POINTS_DETAILED.size() > (MAX_SIZE_DETAILED - 10))
   {
     vector<DETAILED_TRACK_POINT> temp_track_points;
-    temp_track_points.reserve(max_size);
+    temp_track_points.reserve(MAX_SIZE_DETAILED);
 
-    for (int pos = 0; pos < (int)TRACK_POINTS.size(); pos++)
+    SIMPLE_TRACK_POINT temp_track_point_simple;
+
+    // start by moving only large time values
+    bool large_time = true;
+
+    for (int pos = 0; pos < (int)TRACK_POINTS_DETAILED.size(); pos++)
     {
-      if ((pos > ((float)max_size * 0.95f)) || (pos % 2 == 0))
+      // if point is within resize range
+      if (pos <= ((float)MAX_SIZE_DETAILED * 0.95f))
       {
-        temp_track_points.push_back(TRACK_POINTS[pos]);
+        if (large_time)
+        {
+          // if point time and next point time diff is more than 15 seconds, move it to the 
+          //  simple vector.
+          if (TRACK_POINTS_DETAILED[pos +1].TIME - TRACK_POINTS_DETAILED[pos].TIME > 15000.0f)
+          {
+            temp_track_point_simple.LATITUDE = TRACK_POINTS_DETAILED[pos].LATITUDE;
+            temp_track_point_simple.LONGITUDE = TRACK_POINTS_DETAILED[pos].LONGITUDE;
+
+            TRACK_POINTS_SIMPLE.push_back(temp_track_point_simple);
+          }
+          else 
+          {
+            // time iteration size getting small, divide from here till size limit reached.
+            large_time = false;
+          }
+        }
+        else
+        // only copy it to the tmp new track if its an even position.
+        {
+          if (pos % 2 == 0)
+          {
+            temp_track_points.push_back(TRACK_POINTS_DETAILED[pos]);
+          }
+        }
+      }
+      else
+      {
+        // copy remaining points to the tmp new track.
+        temp_track_points.push_back(TRACK_POINTS_DETAILED[pos]);
       }
     }
 
-    TRACK_POINTS.swap(temp_track_points);
+    // swap tmp new track to the old track position. 
+    TRACK_POINTS_DETAILED.swap(temp_track_points);
 
     // should destruct itself, if noticed its not try
     //temp_track_points.clear();
     //temp_track_points.shrink_to_fit();
   }
 
-  TRACK_POINTS.push_back(New_Track_Point);
+  TRACK_POINTS_DETAILED.push_back(New_Track_Point);
 }
 
 

@@ -1,3 +1,8 @@
+2.109_240110
+  - Building GPS System.
+  - Track paths are now persistant.
+  - Added north pointing compass. Location TBD.
+
 2.108_240109
   - Seemed to have resolved the "Bug found associated to 
       Comms with halt." problem with the last large "comport"

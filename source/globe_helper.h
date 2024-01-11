@@ -123,11 +123,25 @@ class GLOBAL_POSITION
 
 // -------------------------------------------------------------------------------------
 
+class SIMPLE_TRACK_POINT
+{
+  public:
+  
+  float LATITUDE = 0.0f;
+  float LONGITUDE = 0.0f;
+};
+
 class DETAILED_TRACK_POINT
 {
   public:
   
-  ImVec2 LAT_LON;
+  float LATITUDE = 0.0f;
+  float LONGITUDE = 0.0f;
+
+  float TIME = 0.0f;            // Time im ms:
+                                //  Represeting either
+                                //  frame time of message received 
+                                //  or from nmea source gga time.
   float RSSI_INTENSITY = 0.0f;
   float ALTITUDE = 0.0f;
 };
@@ -136,16 +150,20 @@ class DETAILED_TRACK
 {
   private:
   
-  int max_size = 1024;
+  int MAX_SIZE_DETAILED = 1024;
+  int MAX_SISE_SIMPLE = 1024;
   
   public:
 
-  vector<DETAILED_TRACK_POINT> TRACK_POINTS;
+  vector<DETAILED_TRACK_POINT> TRACK_POINTS_DETAILED;
+  vector<SIMPLE_TRACK_POINT> TRACK_POINTS_SIMPLE;
   
-  int size();
   void clear();
 
   void store(DETAILED_TRACK_POINT New_Track_Point);
+  // Points are stored in TRACK_POINTS_DETAILED.
+  // When TRACK_POINTS_DETAILED gets too big, points are 
+  //  transfed to TRACK_POINTS_SIMPLE.
 };
 
 // -------------------------------------------------------------------------------------
