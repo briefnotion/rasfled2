@@ -76,94 +76,6 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position)
 // ---------------------------------------------------------------------------------------
 // Markers
 
-void draw_compass(system_data &sdSysData, ImVec2 Screen_Position, float Size, float Size_Needle, float Size_Outline, 
-                        bool Main, bool Valid_Position, 
-                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2)
-{
-  // Heading 1 - Track or Aircraft Nav Heading
-  // Heading 2 - Compass or Aircraft Track Heading.
-
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-  int Color = sdSysData.COLOR_SELECT.white();
-
-  // standards small
-  // size 15
-  // needle size 15 / 2 = 7.5
-  // size_outline 15 / 5 = 3
-
-  // Set Color
-  if (Valid_Position == false)
-  {
-    Color = sdSysData.COLOR_SELECT.yellow();
-  }
-
-  if (Valid_Position)
-  {
-    // Draw Location
-    draw_list->AddNgonFilled(Screen_Position, Size_Needle / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f);
-    draw_list->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, Size, Size_Outline);
-
-    // Draw Double Location
-    if (Main)
-    {
-      draw_list->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, Size, 2.0f);
-    }
-  }
-  else
-  {
-    // Draw Location
-    draw_list->AddNgonFilled(Screen_Position, Size_Needle / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f);
-    draw_list->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, Size, Size_Outline);
-
-    // Draw Double Location
-    if (Main)
-    {
-      draw_list->AddNgon(Screen_Position, 24.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, Size, Size_Outline);
-    }
-  }
-
-  // Draw Heading 1
-  if (Valid_Heading_1)
-  {
-    // Adjust the degrees into heading. Convert direction from degrees to radians
-    float rad = (Heading_1 + 90.0f) * float_PI / 180.0f;
-
-    // Calculate
-    ImVec2 p2 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
- 
-    // Draw the line
-    if (Valid_Position)
-    {
-      draw_list->AddLine(Screen_Position, p2, sdSysData.COLOR_SELECT.color(Color).TEXT, Size_Needle);
-    }
-    else
-    {
-      draw_list->AddLine(Screen_Position, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, Size_Needle);
-    }
-  }
-
-  // Draw Heading 2
-  if (Valid_Heading_2)
-  {
-    // Adjust the degrees into heading. Convert direction from degrees to radians
-    float rad = (Heading_2 + 90.0f) * float_PI / 180.0f;
-
-    // Calculate
-    ImVec2 p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
-    ImVec2 p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
- 
-    // Draw the line
-    if (Valid_Position)
-    {
-      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).TEXT, Size_Needle);
-    }
-    else
-    {
-      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, Size_Needle);
-    }
-  }
-}
-
 void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -579,7 +491,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
     // Draw Aircraft Marker
     if (AIRCRAFT_DATA.TRACK.conversion_success())
     {
-      draw_compass(sdSysData, draw_position, 15.0f, 8.0f, 3.0f, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
+      draw_compass(sdSysData, 1, draw_position, 15.0f, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
                           AIRCRAFT_DATA.NAV_HEADING.conversion_success(), AIRCRAFT_DATA.NAV_HEADING.get_float_value(), 
                           AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value());
     }
@@ -1774,19 +1686,21 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     // Draw point position compass
     if (draw)
     {
-      draw_compass(sdSysData, gps_pos, 15.0f, 8.0f, 3.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                          sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                          //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
-                          false, 0.0f);
+      if (RANGE_INDICATOR.gps_display_current_location())
+      {
+        draw_compass(sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                            sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
+                            //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
+                            false, 0.0f);
+      }
+      else
+      {
+        draw_compass(sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                            sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
+                            //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
+                            false, 0.0f); 
+      }
     }
-
-    // Draw North Direction Compass
-    draw_compass(sdSysData, ImVec2(working_area.x + working_area.z - 60.0f, working_area.y + 150.0f), 
-                        40.0f, 8.0f, 3.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                        sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, 
-                        (-sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING), 
-                        //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
-                        false, 0.0f);
   }
   
   // Draw Aircraft

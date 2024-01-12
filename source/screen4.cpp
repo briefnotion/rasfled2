@@ -81,12 +81,12 @@ void SCREEN4::hazard_lights(system_data &sdSysData, ImVec2 Window_Size)
       ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
       draw_list->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
-                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD, 
-                          sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_red().STANDARD, 
+                          sdSysData.COLOR_SELECT.c_red().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
 
       draw_list->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
-                          sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
-                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD);
+                          sdSysData.COLOR_SELECT.c_red().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_red().STANDARD);
     }
   }
 }
@@ -549,7 +549,7 @@ void SCREEN4::draw(system_data &sdSysData)
           // Mid
           ImGui::SameLine();
 
-          ImGui::BeginChild("Status Mid", ImVec2(region_div_4 * 2.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          ImGui::BeginChild("Status Mid", ImVec2((region_div_4 * 2.0f) - 45.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
             // Display Lights Off mode toggle.
             ImGui::BeginGroup();
@@ -638,7 +638,7 @@ void SCREEN4::draw(system_data &sdSysData)
           // Mid Right
           ImGui::SameLine();
 
-          ImGui::BeginChild("Status Right", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          ImGui::BeginChild("Status Right", ImVec2(ImGui::GetContentRegionAvail().x - 90.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
             ImVec2 start_position = ImGui::GetCursorScreenPos();
             VERSION.draw(sdSysData);
@@ -656,10 +656,34 @@ void SCREEN4::draw(system_data &sdSysData)
               CHANGED = true;
             }
           }
-          ImGui::EndChild();        
+          ImGui::EndChild();
+
+          // Mid Right
+          ImGui::SameLine();
+
+          ImGui::BeginChild("Status Compass", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          {
+            if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
+            {
+              ImVec4 working_area;
+
+              working_area.x = ImGui::GetCursorScreenPos().x;
+              working_area.y = ImGui::GetCursorScreenPos().y;
+              working_area.z = ImGui::GetContentRegionAvail().x;
+              working_area.w = ImGui::GetContentRegionAvail().y;
+
+              // Draw North Direction Compass
+              draw_compass(sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
+                                  (working_area.z / 2.0f) + 4.0f, false, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                                  sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, 
+                                  (-sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING), 
+                                  //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
+                                  false, 0.0f);
+            }
+          }
+          ImGui::EndChild();
         }
         ImGui::EndChild();
-        //ImGui::PopStyleColor();
 
         // ---------------------------------------------------------------------------------------
         // Console Sub Window
@@ -896,7 +920,7 @@ void SCREEN4::draw(system_data &sdSysData)
             }
           }
 
-          button_simple_enabled(sdSysData, " ", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
+          ImGui::InvisibleButton("noshow2", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
           if (button_simple_toggle_color(sdSysData, "OVER\nHEAD\nLIGHTS", "OVER\nHEAD\nLIGHTS", sdSysData.booOverheadRunning, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
@@ -927,8 +951,6 @@ void SCREEN4::draw(system_data &sdSysData)
           {
             DISPLAY_QR_CODE = !DISPLAY_QR_CODE;
           } 
-
-          //button_simple_enabled(sdSysData, " ", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
           if (button_simple_toggle_color(sdSysData, "LIGHTS\n(On)", "LIGHTS\n(Off)", sdSysData.Lights_On.value(), sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
@@ -961,7 +983,7 @@ void SCREEN4::draw(system_data &sdSysData)
             }
           }
 
-          button_simple_enabled(sdSysData, " ", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
+          ImGui::InvisibleButton("noshow2", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
           if (button_simple_toggle_color(sdSysData, "NIGHT\nMODE", "DAY\nMODE", sdSysData.Day_On_With_Override.value(), sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
@@ -996,7 +1018,7 @@ void SCREEN4::draw(system_data &sdSysData)
             DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
           }
 
-          button_simple_enabled(sdSysData, " ", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
+          ImGui::InvisibleButton("noshow2", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
           if (button_simple_color(sdSysData, "SYSTEM\nSHUT\nDOWN", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
@@ -1010,7 +1032,7 @@ void SCREEN4::draw(system_data &sdSysData)
             DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
           }
 
-          button_simple_enabled(sdSysData, " ", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
+          ImGui::InvisibleButton("noshow5", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
           if (button_simple_color(sdSysData, "DEBUG", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {

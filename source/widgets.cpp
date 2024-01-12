@@ -391,6 +391,125 @@ bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, 
   return ret_value;
 }
 
+void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2)
+{
+  // Heading 1 - Track or Aircraft Nav Heading
+  // Heading 2 - Compass or Aircraft Track Heading.
+
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+  int Color = sdSysData.COLOR_SELECT.white();
+
+  // standards small
+  // size 15
+  float needle_size = 7.5f; // Size / 2
+  if (Version == 2)
+  {
+    needle_size = Size / 5.0f; // Size / 2
+  }
+
+  float size_outline = 3.0f;  // Size / 5
+
+  // Set Color
+  if (Valid_Position == false)
+  {
+    Color = sdSysData.COLOR_SELECT.yellow();
+  }
+
+  if (Valid_Position)
+  {
+    if (Version == 1)
+    {
+      // Draw Location
+      draw_list->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f);
+      draw_list->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f);
+      draw_list->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f, size_outline);
+
+      // Draw Double Location
+      if (Main)
+      {
+        draw_list->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f, 2.0f);
+      }
+    }
+    else
+    {
+      draw_list->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f);
+      draw_list->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f, size_outline);
+    }
+  }
+  else
+  {
+    if (Version == 1)
+    {
+      // Draw Location
+      draw_list->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f);
+      draw_list->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f);
+      draw_list->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f, size_outline);
+
+      // Draw Double Location
+      if (Main)
+      {
+        draw_list->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f, 2.0f);
+      }
+    }
+    else
+    {
+      draw_list->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f);
+      draw_list->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f, size_outline);
+    }
+  }
+
+  // Draw Heading 1
+  if (Valid_Heading_1)
+  {
+    // Adjust the degrees into heading. Convert direction from degrees to radians
+    float rad = (Heading_1 + 90.0f) * float_PI / 180.0f;
+
+    // Calculate
+    ImVec2 p1 = Screen_Position;
+    if (Version == 2)
+    {
+      p1 = ImVec2(Screen_Position.x + (Size - 10.0f) * cos(rad + float_PI), Screen_Position.y + (Size - 10.0f) * sin(rad + float_PI));
+    }
+    ImVec2 p2 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
+ 
+    // Draw the line
+    if (Valid_Position)
+    {
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).TEXT, needle_size);
+    }
+    else
+    {
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
+    }
+  }
+
+  // Draw Heading 2
+  if (Valid_Heading_2)
+  {
+    // Adjust the degrees into heading. Convert direction from degrees to radians
+    float rad = (Heading_2 + 90.0f) * float_PI / 180.0f;
+
+    // Calculate
+    ImVec2 p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
+    ImVec2 p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
+ 
+    // Draw the line
+    if (Valid_Position)
+    {
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).TEXT, needle_size);
+    }
+    else
+    {
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
+    }
+  }
+}
+
 bool confirm_dialog(system_data &sdSysData, bool &Choice)
 {
   bool ret_choice_clicked = false;

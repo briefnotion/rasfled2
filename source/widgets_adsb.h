@@ -52,10 +52,6 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 // ---------------------------------------------------------------------------------------
 // Markers
 
-void draw_compass(system_data &sdSysData, ImVec2 Screen_Position, float Size, float Size_Needle, float Size_Outline, 
-                        bool Main, bool Valid_Position, 
-                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2);
-
 void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);

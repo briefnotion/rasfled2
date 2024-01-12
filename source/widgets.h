@@ -205,6 +205,9 @@ bool confirm_dialog(system_data &sdSysData, bool &Choice);
 //  true if clicked
 //  Choice returned when clicked is true or false
 
+void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2);
+
 // ---------------------------------------------------------------------------------------
 
 class BAR_TECH_PROPERTIES
