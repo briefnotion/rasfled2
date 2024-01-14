@@ -1,3 +1,8 @@
+2.111_240113
+  - Changes made to GPS System.
+  - Started building system for 
+      HMC5883L 3-Axis Compass.
+
 2.110_240111
   - Building GPS System.
 

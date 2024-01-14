@@ -405,7 +405,7 @@ void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, f
   float needle_size = 7.5f; // Size / 2
   if (Version == 2)
   {
-    needle_size = Size / 5.0f; // Size / 2
+    needle_size = Size / 4.0f; // Size / 2
   }
 
   float size_outline = 3.0f;  // Size / 5
@@ -420,12 +420,12 @@ void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, f
   {
     if (Version == 1)
     {
-      // Draw Location
+      // Draw Location (Circle)
       draw_list->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f);
       draw_list->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f);
       draw_list->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f, size_outline);
 
-      // Draw Double Location
+      // Draw Double Location (Second Circle)
       if (Main)
       {
         draw_list->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f, 2.0f);
@@ -433,6 +433,8 @@ void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, f
     }
     else
     {
+      // Draw Center Location (Solid Circle)
+      draw_list->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f + 4.0f);
       draw_list->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f);
       draw_list->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f, size_outline);
     }
@@ -441,12 +443,12 @@ void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, f
   {
     if (Version == 1)
     {
-      // Draw Location
+      // Draw Location (Circle)
       draw_list->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f);
       draw_list->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f);
       draw_list->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f, size_outline);
 
-      // Draw Double Location
+      // Draw Double Location (Second Circle)
       if (Main)
       {
         draw_list->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f, 2.0f);
@@ -454,6 +456,8 @@ void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, f
     }
     else
     {
+      // Draw Center Location (Solid Circle)
+      draw_list->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f + 4.0f);
       draw_list->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f);
       draw_list->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f, size_outline);
     }
@@ -469,7 +473,7 @@ void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, f
     ImVec2 p1 = Screen_Position;
     if (Version == 2)
     {
-      p1 = ImVec2(Screen_Position.x + (Size - 10.0f) * cos(rad + float_PI), Screen_Position.y + (Size - 10.0f) * sin(rad + float_PI));
+      p1 = ImVec2(Screen_Position.x + (Size - (needle_size / 2.0f)) * cos(rad + float_PI), Screen_Position.y + (Size - (needle_size / 2.0f)) * sin(rad + float_PI));
     }
     ImVec2 p2 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
  
