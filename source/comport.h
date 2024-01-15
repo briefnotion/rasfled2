@@ -21,7 +21,7 @@
 
 #include <stdio.h>      // standard input / output functions
 #include <stdlib.h>
-#include <string.h>     // string function definitions
+//#include <string.h>     // old c style string function definitions
 #include <unistd.h>     // UNIX standard function definitions
 #include <fcntl.h>      // File control definitions
 #include <errno.h>      // Error number definitions
@@ -32,6 +32,7 @@
 #include "helper.h"
 #include "stringthings.h"
 #include "rasapi.h"
+#include "fled_time.h"
 
 using namespace std;
 

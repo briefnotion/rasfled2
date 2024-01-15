@@ -28,6 +28,7 @@
 #include "comport.h"
 #include "auto.h"
 #include "nmea.h"
+#include "hmc5883l.h"
 
 #include "screen4_helper.h"
 
@@ -151,6 +152,9 @@ class system_data
   // GPS
   COMPORT COMMS_GPS;
   NMEA GPS_SYSTEM;
+
+  // Compass
+  HMC5883L COMMS_COMPASS;
 
   // Screen Settings
   bool TTY_ONLY = false;

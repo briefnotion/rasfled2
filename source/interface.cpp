@@ -498,6 +498,22 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       //}
 
       // -------------------------------------------------------------------------------------
+      // Compass Comms
+
+      // Start GPS Comm Port
+      if (check_command(cons," startcomp", "Start Compass Comms Port"))
+      {
+        sdSysData.COMMS_COMPASS.open_port();
+      }
+      
+      // Stop GPS Comm Port
+      if (check_command(cons," stopcomp", "Stop Compass Comms Port"))
+      {
+        sdSysData.COMMS_COMPASS.close_port();
+        cons.printw("Compass Comm Port Stop Command Sent.");
+      }
+
+      // -------------------------------------------------------------------------------------
 
       if (check_command(cons," animt", "Event System 2 Test Animation"))
       {

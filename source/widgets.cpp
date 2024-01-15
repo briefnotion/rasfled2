@@ -481,7 +481,7 @@ void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, f
     if (Valid_Position)
     {
       draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).TEXT, needle_size);
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
     }
     else
     {
@@ -498,13 +498,23 @@ void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, f
 
     // Calculate
     ImVec2 p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
-    ImVec2 p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
+    
+    ImVec2 p2;
+
+    if (Version == 1)
+    {
+      p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
+    }
+    else
+    {
+      p2 = ImVec2(Screen_Position.x + (Size + (needle_size / 2.0f)) * cos(rad + float_PI), Screen_Position.y + (Size + (needle_size / 2.0f)) * sin(rad + float_PI));
+    }
  
     // Draw the line
     if (Valid_Position)
     {
       draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).TEXT, needle_size);
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
     }
     else
     {

@@ -28,6 +28,7 @@
 #include "helper.h"
 #include "fled_time.h"
 #include "nmea.h"
+#include "hmc5883l.h"
 #include "aircraft_coordinator.h"
 #include "screen4_helper.h"
 #include "widgets.h"
@@ -51,6 +52,7 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 
 // ---------------------------------------------------------------------------------------
 // Markers
+void draw_line(system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size);
 
 void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
@@ -60,6 +62,18 @@ void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size);
 
 void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, float Strength_Point_Size, 
                 NEW_COLOR_SCALE &Color_Scale, ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track);
+
+// ---------------------------------------------------------------------------------------
+
+/*
+class COMPASS_CALIBRATION
+{
+  private:
+
+  public:
+
+};
+*/
 
 // ---------------------------------------------------------------------------------------
 

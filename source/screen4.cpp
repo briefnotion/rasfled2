@@ -415,6 +415,9 @@ void SCREEN4::draw(system_data &sdSysData)
     // Handle Console Outputs
     ImGuiIO &io = ImGui::GetIO();
     ImGuiStyle& style = ImGui::GetStyle();
+
+    // reduce call backs.
+    unsigned long current_frame_time = sdSysData.PROGRAM_TIME.current_frame_time();
     
     glfwPollEvents();
 
@@ -598,7 +601,7 @@ void SCREEN4::draw(system_data &sdSysData)
             // Group
             ImGui::BeginGroup();
             {
-              GPS.update_tf(sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()));
+              GPS.update_tf(sdSysData.GPS_SYSTEM.active(current_frame_time));
               GPS.draw(sdSysData);
               
               /*
@@ -652,7 +655,7 @@ void SCREEN4::draw(system_data &sdSysData)
             ImGui::SetCursorScreenPos(start_position);
             if (ImGui::InvisibleButton("CORPO VOID", ImGui::GetContentRegionAvail()))
             {
-              sdSysData.COLOR_SELECT.toggle_void_color(sdSysData.PROGRAM_TIME.current_frame_time());
+              sdSysData.COLOR_SELECT.toggle_void_color(current_frame_time);
               CHANGED = true;
             }
           }
@@ -663,7 +666,8 @@ void SCREEN4::draw(system_data &sdSysData)
 
           ImGui::BeginChild("Status Compass", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
-            if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
+            if (sdSysData.GPS_SYSTEM.active(current_frame_time) ||
+                sdSysData.COMMS_COMPASS.connected())
             {
               ImVec4 working_area;
 
@@ -673,12 +677,25 @@ void SCREEN4::draw(system_data &sdSysData)
               working_area.w = ImGui::GetContentRegionAvail().y;
 
               // Draw North Direction Compass
-              draw_compass(sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
-                                  (working_area.z / 2.0f) + 4.0f, false, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                                  sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, 
-                                  (-sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING), 
-                                  //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
-                                  false, 0.0f);
+              if (sdSysData.COMMS_COMPASS.connected())
+              {
+                // temporary code to show compass direction from compass until widget is changed.
+                draw_compass(sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
+                                    (working_area.z / 2.0f) + 4.0f, false, true, 
+                                    true, 
+                                    (-sdSysData.COMMS_COMPASS.bearing()), 
+                                    //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
+                                    false, 0.0f);
+              }
+              else
+              {
+                draw_compass(sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
+                                    (working_area.z / 2.0f) + 4.0f, false, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                                    sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, 
+                                    (-sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING), 
+                                    //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
+                                    false, 0.0f);
+              }
             }
           }
           ImGui::EndChild();
@@ -1151,7 +1168,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
         // Calculate
         duration_time = (float)sdSysData.cdTIMER.duration();
-        elaped_time = sdSysData.cdTIMER.elapsed_time(sdSysData.PROGRAM_TIME.current_frame_time());
+        elaped_time = sdSysData.cdTIMER.elapsed_time(current_frame_time);
         remaining_time = (float)duration_time - (float)elaped_time;
 
 

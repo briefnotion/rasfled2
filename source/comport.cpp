@@ -441,6 +441,8 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
       }
       else
       {
+        create();
+
         CYCLE = -1;
       }
     }
@@ -602,7 +604,7 @@ int COMPORT::cycle_change()
 void COMPORT::open_port()
 {
   ACTIVE_BAUD_RATE = 0;
-  CYCLE = 99;
+  CYCLE = 2;
 }
 
 void COMPORT::close_port()

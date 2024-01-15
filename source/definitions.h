@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.111_240113"
+#define Revision "2.112_240114"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -52,6 +52,7 @@
 
 // COMMS Settings CAN Bus
 #define COMMS_PORT_CAN     "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"
+#define COMMS_AUTOSTART                       true
 #define COMMS_BAUD                            115200
 #define COMMS_BIT_COUNT                       8
 #define COMMS_BIT_PARITY                      false
@@ -69,6 +70,7 @@
 
 // COMMS Settings GPS
 #define COMMS_PORT_GPS     "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_B001JKAO-if00-port0"
+#define COMMS_AUTOSTART_GPS                   true
 #define COMMS_BAUD_GPS                        9600
 #define COMMS_BAUD_BAUD_RATE_CHANGE_TO_GPS    true
 #define COMMS_BAUD_TARGET_GPS                 115200
@@ -86,6 +88,12 @@
 #define COMMS_TEST_DATA_FILENAME_GPS          "/home/pi/gps/gpscomms.txt"
 
 #define AUTOMOBILE_LOG_FILE_DIRECTORY_GPS     "/home/pi/gps_log/"
+
+// COMMS Settings HMC5883L 3-Axis Compass
+#define COMMS_PORT_COMPASS                    "/dev/i2c-1"
+#define COMMS_ID_COMPASS                      0x1E
+#define COMMS_AUTOSTART_COMPASS               true
+#define CONTINUOUS_DATA_COMPASS               true
 
 // TTL Values - Individually adjust the TTL values of the auto.
 #define TTL_LF_Top_Percentage   100.15

@@ -1,3 +1,26 @@
+2.112_240114
+  - Completed testable verison of the HMC5883L for HMC5883L 
+      3-Axis Compass system.
+
+      - Manual calibration via "CALI" button on ADS-B screen is required 
+          before data apears valid.
+      - Calibration can be toggled on or off at anytime and 
+          calibration data will be retained.
+      - Calibration data can be reset via "CALI RESET" button. 
+      - Get compass direction currently set to 10/sec. 
+      - Data is unfiltered.
+      - Only less than 1000 data points will be retained and only provide 
+          visual reference at this time.
+      - Only one version of calibration is available and it is the Min Max 
+          iteration.
+      - KNOWN_DEVICE_DEGREE_OFFSET is hard coded to 23 degrees because device 
+          is currently mounted as such.
+      - Compass will autostart, but, at this time, will not reconnect after 
+          disconnected or power cycle.
+      - Command " startcomp" will start or restart the compass, recalibration 
+          will be necessary.
+      - Command " stopcomp" will stop compass communications.
+
 2.111_240113
   - Changes made to GPS System.
   - Started building system for 

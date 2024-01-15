@@ -50,6 +50,7 @@ target_sources(rasfled PRIVATE
   LEDstuff.cpp
   commands.cpp
   comport.cpp
+  hmc5883l.cpp
   auto_nova.cpp
   auto.cpp
   nmea.cpp
