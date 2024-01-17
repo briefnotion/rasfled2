@@ -18,6 +18,83 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 // 
+bool HMC5883L::calibration_level_1_check()
+{
+  bool ret_needs_calibration = false;
+
+  if (RAW_POINTS.size() >=5)
+  {
+    for (int pos = RAW_POINTS.size() - 5; 
+          pos < (int)RAW_POINTS.size() && ret_needs_calibration == false; 
+          pos++)
+    {
+      if (RAW_POINTS[pos].X < X_MIN || RAW_POINTS[pos].X > X_MAX)
+      {
+        ret_needs_calibration = true;
+      }
+      if (RAW_POINTS[pos].Y < Y_MIN || RAW_POINTS[pos].Y > Y_MAX)
+      {
+        ret_needs_calibration = true;
+      }
+      if (RAW_POINTS[pos].Z < Z_MIN || RAW_POINTS[pos].Z > Z_MAX)
+      {
+        ret_needs_calibration = true;
+      }
+    }
+  }
+  else
+  {
+    ret_needs_calibration = true;
+  }
+
+  return ret_needs_calibration;
+}
+
+void HMC5883L::calibration_level_1()
+{
+  if (MIN_MAX_HAS_DATA == false)
+  {
+    X_MIN = (float)RAW_XYZ.X;
+    X_MAX = (float)RAW_XYZ.X;
+    Y_MIN = (float)RAW_XYZ.Y;
+    Y_MAX = (float)RAW_XYZ.Y;
+    Z_MIN = (float)RAW_XYZ.Z;
+    Z_MAX = (float)RAW_XYZ.Z;
+
+    MIN_MAX_HAS_DATA = true;
+  }
+  else
+  {
+    if (RAW_XYZ.X < X_MIN)
+    {
+      X_MIN = RAW_XYZ.X;
+    }
+    if (RAW_XYZ.X > X_MAX)
+    {
+        X_MAX = RAW_XYZ.X;
+    }
+    if (RAW_XYZ.Y < Y_MIN)
+    {
+        Y_MIN = RAW_XYZ.Y;
+    }
+    if (RAW_XYZ.Y > Y_MAX)
+    {
+        Y_MAX = RAW_XYZ.Y;
+    }
+    if (RAW_XYZ.Z < Z_MIN)
+    {
+        Z_MIN = RAW_XYZ.Z;
+    }
+    if (RAW_XYZ.Z > Z_MAX)
+    {
+        Z_MAX = RAW_XYZ.Z;
+    }
+
+    X_OFFSET = (X_MAX + X_MIN) / 2.0f;
+    Y_OFFSET = (Y_MAX + Y_MIN) / 2.0f;
+    Z_OFFSET = (Z_MAX + Z_MIN) / 2.0f;
+  }
+}
 
 bool HMC5883L::register_write(char Register, char Value)
 {
@@ -41,6 +118,8 @@ bool HMC5883L::create()
 
   RAW_POINTS.clear();
   RAW_POINTS.reserve(1000);  
+  CALIBRATED_BEARINGS.clear();
+  CALIBRATED_BEARINGS.reserve(1000);  
   MIN_MAX_HAS_DATA = false;
   X_OFFSET = 0;
   Y_OFFSET = 0;
@@ -76,65 +155,85 @@ void HMC5883L::stop()
   CONNECTED = false;
 }
 
-void HMC5883L::process()
+void HMC5883L::process(unsigned long tmeFrame_Time)
 {
   RAW_POINTS.push_back(RAW_XYZ);
+  CALIBRATED_BEARINGS.push_back((atan2(calibrated_xyz().Y, calibrated_xyz().X) * 180 / M_PI) + 
+                                  90.0f - KNOWN_DEVICE_DEGREE_OFFSET);
 
   // Maintain point history size
   if (RAW_POINTS.size() > 990)
   {
     RAW_POINTS.erase(RAW_POINTS.begin(), RAW_POINTS.begin() + 190);
   }
+  if (CALIBRATED_BEARINGS.size() > 990)
+  {
+    CALIBRATED_BEARINGS.erase(CALIBRATED_BEARINGS.begin(), CALIBRATED_BEARINGS.begin() + 190);
+  }
 
   // Spot check Calibration
-  //  code not yet written.
+  //  Spot check calibration if not in current callibration check.
+  if (CALIBRATE == false && CALIBRATION_SPOT_CHECK.ping_down(tmeFrame_Time) == false)
+  {
+    // Check Level 1
+    if (calibration_level_1_check())
+    {
+      // Start 1 minute timer to calibrate
+      CALIBRATION_TIMER_LEVEL_1.ping_up(tmeFrame_Time, 1 * 60000);
 
+      // Turn on Level 1 Calibration
+      CALIBRATE = true;
+    }
+    else
+    {
+      // Wait 5 minutes for next calibration check
+      CALIBRATION_SPOT_CHECK.ping_up(tmeFrame_Time, 5 * 60000);
+    }
+  }
 
   // Run Calibration Routines if necessary.
   if (CALIBRATE)
   {
-    if (MIN_MAX_HAS_DATA == false)
+    // If level 1 calibration timer is on
+    if (CALIBRATION_TIMER_LEVEL_1.ping_down(tmeFrame_Time))
     {
-      X_MIN = (float)RAW_XYZ.X;
-      X_MAX = (float)RAW_XYZ.X;
-      Y_MIN = (float)RAW_XYZ.Y;
-      Y_MAX = (float)RAW_XYZ.Y;
-      Z_MIN = (float)RAW_XYZ.Z;
-      Z_MAX = (float)RAW_XYZ.Z;
-
-      MIN_MAX_HAS_DATA = true;
+      calibration_level_1();
     }
     else
     {
-      if (RAW_XYZ.X < X_MIN)
-      {
-        X_MIN = RAW_XYZ.X;
-      }
-      if (RAW_XYZ.X > X_MAX)
-      {
-         X_MAX = RAW_XYZ.X;
-      }
-      if (RAW_XYZ.Y < Y_MIN)
-      {
-         Y_MIN = RAW_XYZ.Y;
-      }
-      if (RAW_XYZ.Y > Y_MAX)
-      {
-         Y_MAX = RAW_XYZ.Y;
-      }
-      if (RAW_XYZ.Z < Z_MIN)
-      {
-         Z_MIN = RAW_XYZ.Z;
-      }
-      if (RAW_XYZ.Z > Z_MAX)
-      {
-         Z_MAX = RAW_XYZ.Z;
-      }
+      // Level 1 calibration is done
+      CALIBRATE = false;
 
-      X_OFFSET = (X_MAX + X_MIN) / 2.0f;
-      Y_OFFSET = (Y_MAX + Y_MIN) / 2.0f;
-      Z_OFFSET = (Z_MAX + Z_MIN) / 2.0f;
+      // Check again in 1 minute
+      CALIBRATION_SPOT_CHECK.ping_up(tmeFrame_Time, 1 * 60000);
     }
+  }
+
+  // Calclulate Bearing
+
+  // Simple Filter
+  if (RAW_POINTS.size() >= 5)
+  {
+    BEARING_JITTER_MIN = CALIBRATED_BEARINGS[CALIBRATED_BEARINGS.size() - 5];
+    BEARING_JITTER_MAX = CALIBRATED_BEARINGS[CALIBRATED_BEARINGS.size() - 5];
+
+    int bearing_total = 0;
+    for (int pos = CALIBRATED_BEARINGS.size() - 5; pos < (int)CALIBRATED_BEARINGS.size(); pos++)
+    {
+      bearing_total = bearing_total + CALIBRATED_BEARINGS[pos];
+      
+      // Determine Jitter
+      if (CALIBRATED_BEARINGS[pos] < BEARING_JITTER_MIN)
+      {
+        BEARING_JITTER_MIN = CALIBRATED_BEARINGS[pos];
+      }
+      if (CALIBRATED_BEARINGS[pos] > BEARING_JITTER_MAX)
+      {
+        BEARING_JITTER_MAX = CALIBRATED_BEARINGS[pos];
+      }
+    }
+
+    BEARING = bearing_total / 5.0f;
   }
 }
 
@@ -192,15 +291,25 @@ COMPASS_XYZ HMC5883L::calibrated_xyz(int Position)
 void HMC5883L::calibrateion_reset()
 {
   RAW_POINTS.clear();
+  CALIBRATED_BEARINGS.clear();
   MIN_MAX_HAS_DATA = false;
   X_OFFSET = 0;
   Y_OFFSET = 0;
   Z_OFFSET = 0;
 }
 
-void HMC5883L::calibrate_toggle()
+void HMC5883L::calibrate_toggle(unsigned long tmeFrame_Time)
 {
   CALIBRATE = !CALIBRATE;
+
+  if (CALIBRATE)
+  {
+    CALIBRATION_TIMER_LEVEL_1.ping_up(tmeFrame_Time, 1 * 60000);
+  }
+  else
+  {
+    CALIBRATION_SPOT_CHECK.ping_up(tmeFrame_Time, 1 * 60000);
+  }
 }
 
 bool HMC5883L::calibrate_on()
@@ -337,7 +446,7 @@ bool HMC5883L::cycle(unsigned long tmeFrame_Time)
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
 
         // Process
-        process();
+        process(tmeFrame_Time);
       }
     }
   }
@@ -368,14 +477,13 @@ void HMC5883L::close_port()
 
 float HMC5883L::bearing()
 {
-  float ret_bearing = (atan2(calibrated_xyz().Y, calibrated_xyz().X) * 180 / M_PI) + 90.0f - KNOWN_DEVICE_DEGREE_OFFSET;
-  if (ret_bearing < -0.0f)
+  if (BEARING < -0.0f)
   {
-    return 360.0f + ret_bearing;
+    return 360.0f + BEARING;
   }
   else
   {
-    return ret_bearing;
+    return BEARING;
   }
 }
 

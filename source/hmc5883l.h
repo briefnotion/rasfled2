@@ -81,9 +81,16 @@ class HMC5883L
 
   unsigned char BUFFER[16];
 
+  // Data
+
   COMPASS_XYZ RAW_XYZ;            // Temporary storage of XYZ before process;
 
-  vector<COMPASS_XYZ> RAW_POINTS; // History of data received.
+  vector<COMPASS_XYZ> RAW_POINTS;     // History of data received.
+  vector<float> CALIBRATED_BEARINGS;  // History of calculated bearings
+
+  float BEARING = 0;              // Recent Bearing
+  float BEARING_JITTER_MIN = 0;
+  float BEARING_JITTER_MAX = 0;
 
   // Calibration
   void add_point(COMPASS_XYZ Point);
@@ -121,6 +128,15 @@ class HMC5883L
 
   bool CONNECTED = false;                     // Set to true if connected.
 
+  // Calibration Variables and Routines
+  TIMED_PING CALIBRATION_SPOT_CHECK;
+
+  TIMED_PING CALIBRATION_TIMER_LEVEL_1;
+  bool calibration_level_1_check(); // Checks most recent RAW_POINTS
+                                    //  Returns true if outside max min
+  void calibration_level_1();       // Run Level 1 cal routines.
+
+  // Comms Routines
   bool register_write(char Register, char Value);
     // Internal: Change chip settings.
 
@@ -129,7 +145,8 @@ class HMC5883L
   void stop();        // Internal: Closes port for access.
                       //  Not yet fully implemented.
 
-  void process();     // Internal: Processes most recent received data. 
+  // Process
+  void process(unsigned long tmeFrame_Time);     // Internal: Processes most recent received data. 
                       // Performs Calibration Routines
 
   public:
@@ -152,7 +169,7 @@ class HMC5883L
   void calibrateion_reset();
   // Removes all calibration data
 
-  void calibrate_toggle();
+  void calibrate_toggle(unsigned long tmeFrame_Time);
   // Start / Stop Calibration
 
   bool calibrate_on();

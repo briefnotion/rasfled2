@@ -628,6 +628,33 @@ helper.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/helper.cpp.s
 .PHONY : helper.cpp.s
 
+hmc5883l.o: hmc5883l.cpp.o
+
+.PHONY : hmc5883l.o
+
+# target to build an object file
+hmc5883l.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/hmc5883l.cpp.o
+.PHONY : hmc5883l.cpp.o
+
+hmc5883l.i: hmc5883l.cpp.i
+
+.PHONY : hmc5883l.i
+
+# target to preprocess a source file
+hmc5883l.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/hmc5883l.cpp.i
+.PHONY : hmc5883l.cpp.i
+
+hmc5883l.s: hmc5883l.cpp.s
+
+.PHONY : hmc5883l.s
+
+# target to generate assembly for a file
+hmc5883l.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/rasfled.dir/build.make CMakeFiles/rasfled.dir/hmc5883l.cpp.s
+.PHONY : hmc5883l.cpp.s
+
 home/pi/source/imgui/backends/imgui_impl_glfw.o: home/pi/source/imgui/backends/imgui_impl_glfw.cpp.o
 
 .PHONY : home/pi/source/imgui/backends/imgui_impl_glfw.o
@@ -1258,6 +1285,9 @@ help:
 	@echo "... helper.o"
 	@echo "... helper.i"
 	@echo "... helper.s"
+	@echo "... hmc5883l.o"
+	@echo "... hmc5883l.i"
+	@echo "... hmc5883l.s"
 	@echo "... home/pi/source/imgui/backends/imgui_impl_glfw.o"
 	@echo "... home/pi/source/imgui/backends/imgui_impl_glfw.i"
 	@echo "... home/pi/source/imgui/backends/imgui_impl_glfw.s"

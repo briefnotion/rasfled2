@@ -1,3 +1,8 @@
+2.113_240116
+  - Continued building system for HMC5883L 3-Axis Compass.
+  - Created a simple bearing filter for averaged bearing angle.
+  - Created routine to automatically start and stop level 1 calibration.
+
 2.112_240114
   - Completed testable verison of the HMC5883L for HMC5883L 
       3-Axis Compass system.
