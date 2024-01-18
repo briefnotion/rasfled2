@@ -677,25 +677,10 @@ void SCREEN4::draw(system_data &sdSysData)
               working_area.w = ImGui::GetContentRegionAvail().y;
 
               // Draw North Direction Compass
-              if (sdSysData.COMMS_COMPASS.connected())
-              {
-                // temporary code to show compass direction from compass until widget is changed.
                 draw_compass(sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
-                                    (working_area.z / 2.0f) + 4.0f, false, true, 
-                                    true, 
-                                    (-sdSysData.COMMS_COMPASS.bearing()), 
-                                    //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
-                                    false, 0.0f);
-              }
-              else
-              {
-                draw_compass(sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
-                                    (working_area.z / 2.0f) + 4.0f, false, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                                    sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, 
-                                    (-sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING), 
-                                    //GPS_CURRENT_POSITION.VALID_TRACK, GPS_CURRENT_POSITION.TRUE_HEADING);
-                                    false, 0.0f);
-              }
+                                    (working_area.z / 6.0f), false, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                                    sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, (sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING), 
+                                    sdSysData.COMMS_COMPASS.connected(), (sdSysData.COMMS_COMPASS.bearing()), true);
             }
           }
           ImGui::EndChild();

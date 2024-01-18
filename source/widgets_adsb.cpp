@@ -70,6 +70,14 @@ void draw_line(system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_P
   draw_list->AddLine(Screen_Position_1, Screen_Position_2, sdSysData.COLOR_SELECT.color(Color).STANDARD, Size);
 }
 
+void draw_box(system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size)
+{
+  // simple draw line
+  ImDrawList* draw_list = ImGui::GetWindowDrawList();
+
+  draw_list->AddRect(Screen_Position_1, Screen_Position_2, sdSysData.COLOR_SELECT.color(Color).STANDARD, 0.0f, 0, Size);
+}
+
 void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -487,7 +495,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
     {
       draw_compass(sdSysData, 1, draw_position, 15.0f, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
                           AIRCRAFT_DATA.NAV_HEADING.conversion_success(), AIRCRAFT_DATA.NAV_HEADING.get_float_value(), 
-                          AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value());
+                          AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value(), false);
     }
 
     // Text Describing Aircraft
@@ -1582,8 +1590,36 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     sdSysData.GPS_SYSTEM.current_position_change_acknowleged();
   }
 
+  // Hide buttons if on screen for time
+  if (SHOW_BUTTONS && SHOW_BUTTONS_TIMER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
+  {
+    SHOW_BUTTONS = false;
+  }
+
   // -------------------------------------------------------------------------------------
+  // Screen Draw Start
+
+  // Button for Hide Buttons
+  //Put cursor in upper left
+  ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y));
+
+  if (SHOW_BUTTONS == false)
+  {
+    if (ImGui::InvisibleButton("Hide Buttons", ImVec2(working_area.z, working_area.w)))
+    {
+      SHOW_BUTTONS = !SHOW_BUTTONS;
+
+      if (SHOW_BUTTONS)
+      {
+        SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+      }
+    }
+  }
+
   // All Text Below Here
+
+  //Put cursor in upper left
+  ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y));
 
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_red().TEXT));
 
@@ -1603,7 +1639,10 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::NewLine();
 
     ImGui::Text("GPS POSITION");
-    ImGui::Text("P:%.1f H:%.1f V:%.1f", sdSysData.GPS_SYSTEM.pdop(), sdSysData.GPS_SYSTEM.hdop(), sdSysData.GPS_SYSTEM.vdop());
+    if (SHOW_BUTTONS)
+    {
+      ImGui::Text("P:%.1f H:%.1f V:%.1f", sdSysData.GPS_SYSTEM.pdop(), sdSysData.GPS_SYSTEM.hdop(), sdSysData.GPS_SYSTEM.vdop());
+    }
     ImGui::Text("SPD: %.1f", sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph());
     ImGui::Text("ALT: %.1f", sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val());
   }
@@ -1614,77 +1653,85 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::NewLine();
 
     ImGui::Text("COMPASS");
-    //ImGui::Text("X:%f Y:%f Z:%f", sdSysData.COMMS_COMPASS.raw_xyz().X, sdSysData.COMMS_COMPASS.raw_xyz().Y, sdSysData.COMMS_COMPASS.raw_xyz().Z);
-    //ImGui::Text("X:%f Y:%f Z:%f", sdSysData.COMMS_COMPASS.X_OFFSET, sdSysData.COMMS_COMPASS.Y_OFFSET, sdSysData.COMMS_COMPASS.Z_OFFSET);
+    if (sdSysData.COMMS_COMPASS.calibrate_on())
+    {
+      ImGui::Text("X:%.0f Y:%.0f Z:%.0f", sdSysData.COMMS_COMPASS.raw_xyz().X, sdSysData.COMMS_COMPASS.raw_xyz().Y, sdSysData.COMMS_COMPASS.raw_xyz().Z);
+      ImGui::Text("X:%.0f Y:%.0f Z:%.0f", sdSysData.COMMS_COMPASS.cal_l1_x_offset(), sdSysData.COMMS_COMPASS.cal_l1_y_offset(), sdSysData.COMMS_COMPASS.cal_l1_z_offset());
+    }
+
     ImGui::Text("Bearing: %.1f", sdSysData.COMMS_COMPASS.bearing());
   }
 
   ImGui::PopStyleColor();
 
-  // Range and Location Buttons
-  ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                    working_area.y + working_area.w - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
-
-  if (button_simple_color(sdSysData, "+", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  // All Buttons
+  if (SHOW_BUTTONS)
   {
-    RANGE_INDICATOR.zoom_out();
-  }
-  
-  ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                    working_area.y + working_area.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
-
-  if (button_simple_color(sdSysData, "LOC", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-  {
-    DISPLAY_LOCATION = !DISPLAY_LOCATION;
-  }
-
-  ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                    working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
-
-  if (button_simple_color(sdSysData, "-", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-  {
-    RANGE_INDICATOR.zoom_in();
-  }
-
-  // Current Location Toggle
-  ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                    working_area.y));
-
-  if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
-  {
-    if (button_simple_toggle_color(sdSysData, "CENT\n(On)", "CENT\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
-                                    sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
-                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      RANGE_INDICATOR.gps_display_current_location_toggle();
-    }
-  }
-  else
-  {
-    button_simple_enabled(sdSysData, "GPS\n", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
-  }
-
-  // Compass Calibration
-  if (sdSysData.COMMS_COMPASS.connected())
-  {
+    // Range and Location Buttons
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                  working_area.y + sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f));
+                                      working_area.y + working_area.w - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    if (button_simple_toggle_color(sdSysData, "CALI\n(On)", "CALI\n(Off)", sdSysData.COMMS_COMPASS.calibrate_on(),
-                                    sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
-                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    if (button_simple_color(sdSysData, "+", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
-      sdSysData.COMMS_COMPASS.calibrate_toggle(sdSysData.PROGRAM_TIME.current_frame_time());
+      RANGE_INDICATOR.zoom_out();
+    }
+    
+    ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                      working_area.y + working_area.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+    if (button_simple_color(sdSysData, "LOC", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      DISPLAY_LOCATION = !DISPLAY_LOCATION;
     }
 
-    if (sdSysData.COMMS_COMPASS.calibrate_on())
+    ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                      working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+    if (button_simple_color(sdSysData, "-", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      RANGE_INDICATOR.zoom_in();
+    }
+
+    // Current Location Toggle
+    ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                      working_area.y));
+
+    if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
+    {
+      if (button_simple_toggle_color(sdSysData, "CENT\n(On)", "CENT\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
+                                      sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
+                                      sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        RANGE_INDICATOR.gps_display_current_location_toggle();
+      }
+    }
+    else
+    {
+      button_simple_enabled(sdSysData, "GPS\n", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
+    }
+
+    // Compass Calibration
+    if (sdSysData.COMMS_COMPASS.connected())
     {
       ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                              working_area.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
+                                    working_area.y + sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f));
 
-      if (button_simple_color(sdSysData, "CALI\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+      if (button_simple_toggle_color(sdSysData, "CALI\n(On)", "CALI\n(Off)", sdSysData.COMMS_COMPASS.calibrate_on(),
+                                      sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
+                                      sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
-        sdSysData.COMMS_COMPASS.calibrateion_reset();
+        sdSysData.COMMS_COMPASS.calibrate_toggle(sdSysData.PROGRAM_TIME.current_frame_time());
+      }
+
+      if (sdSysData.COMMS_COMPASS.calibrate_on())
+      {
+        ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                working_area.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
+
+        if (button_simple_color(sdSysData, "CALI\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.COMMS_COMPASS.calibrateion_reset();
+        }
       }
     }
   }
@@ -1701,8 +1748,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     {
       ImVec2 center = point_position_center(working_area);
 
-      //ImGui::Text("%d", sdSysData.COMMS_COMPASS.CALIBRATION_RAW_POINTS.size());
-
+      //draw points
       for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.raw_points_size(); pos++)
       {
         ImVec2 p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.raw_xyz(pos).X / 4.0f), 
@@ -1720,6 +1766,22 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
         draw_marker(sdSysData, p2, sdSysData.COLOR_SELECT.white());
       }
+
+      // draw outlining box
+      ImVec2 r1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.cal_l1_x_min() / 4.0f), center.y + (sdSysData.COMMS_COMPASS.cal_l1_y_min() / 4.0f));
+      ImVec2 r2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.cal_l1_x_max() / 4.0f), center.y + (sdSysData.COMMS_COMPASS.cal_l1_y_max() / 4.0f));
+      
+      draw_box(sdSysData, r1, r2, sdSysData.COLOR_SELECT.orange(), 2.0f);
+
+      ImVec2 c1 = ImVec2(center.x + ((sdSysData.COMMS_COMPASS.cal_l1_x_min() - sdSysData.COMMS_COMPASS.cal_l1_x_offset()) / 4.0f), 
+                          center.y + ((sdSysData.COMMS_COMPASS.cal_l1_y_min() - sdSysData.COMMS_COMPASS.cal_l1_y_offset()) / 4.0f));
+      ImVec2 c2 = ImVec2(center.x + ((sdSysData.COMMS_COMPASS.cal_l1_x_max() - sdSysData.COMMS_COMPASS.cal_l1_x_offset()) / 4.0f), 
+                          center.y + ((sdSysData.COMMS_COMPASS.cal_l1_y_max() - sdSysData.COMMS_COMPASS.cal_l1_y_offset()) / 4.0f));
+      
+      draw_box(sdSysData, c1, c2, sdSysData.COLOR_SELECT.white(), 2.0f);
+
+      draw_line(sdSysData, r1, c1, sdSysData.COLOR_SELECT.white(), 2.0f);
+      draw_line(sdSysData, r2, c2, sdSysData.COLOR_SELECT.white(), 2.0f);
     }
   }
 
@@ -1749,13 +1811,13 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       {
         draw_compass(sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                            sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing());
+                            sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false);
       }
       else
       {
         draw_compass(sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                            sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing());
+                            sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false);
       }
     }
   }
@@ -1787,7 +1849,6 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
   }
   
-
   // -------------------------------------------------------------------------------------
   // test for point position accuracy by getting geo from range, then putting geo marker 
   //  on range indicator.

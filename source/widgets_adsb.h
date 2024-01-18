@@ -54,6 +54,8 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 // Markers
 void draw_line(system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size);
 
+void draw_box(system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size);
+
 void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
@@ -283,6 +285,8 @@ class ADSB_MAP
   NEW_COLOR_SCALE GPS_ALTITUDE_COLOR_SCALE;
 
   bool DISPLAY_LOCATION = false;
+  bool SHOW_BUTTONS = true;
+  TIMED_PING SHOW_BUTTONS_TIMER;
 
   void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
 

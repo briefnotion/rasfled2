@@ -392,7 +392,7 @@ bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, 
 }
 
 void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
-                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2)
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer)
 {
   // Heading 1 - Track or Aircraft Nav Heading
   // Heading 2 - Compass or Aircraft Track Heading.
@@ -481,7 +481,7 @@ void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, f
     if (Valid_Position)
     {
       draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, needle_size);
     }
     else
     {
@@ -514,12 +514,33 @@ void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, f
     if (Valid_Position)
     {
       draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
+      draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, needle_size);
     }
     else
     {
       draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
       draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
+    }
+
+
+    // North pointer drawn only if heading provided.
+    if (Draw_North_Pointer)
+    {
+      rad = ((-Heading_2) + 90.0f) * float_PI / 180.0f;
+
+      p1 = Screen_Position;
+      p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
+
+      if (Valid_Position)
+      {
+        draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, needle_size);
+        draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size - 4.0f);
+      }
+      else
+      {
+        draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
+        draw_list->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size - 4.0f);
+      }
     }
   }
 }

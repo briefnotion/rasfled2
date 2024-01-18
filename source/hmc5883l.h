@@ -134,7 +134,7 @@ class HMC5883L
   TIMED_PING CALIBRATION_TIMER_LEVEL_1;
   bool calibration_level_1_check(); // Checks most recent RAW_POINTS
                                     //  Returns true if outside max min
-  void calibration_level_1();       // Run Level 1 cal routines.
+  void calibration_level_1(unsigned long tmeFrame_Time);       // Run Level 1 cal routines.
 
   // Comms Routines
   bool register_write(char Register, char Value);
@@ -174,6 +174,14 @@ class HMC5883L
 
   bool calibrate_on();
   // Returns true if calibration in progress.
+
+  float cal_l1_x_min();
+  float cal_l1_x_max();
+  float cal_l1_y_min();
+  float cal_l1_y_max();
+  float cal_l1_x_offset();
+  float cal_l1_y_offset();
+  float cal_l1_z_offset();
 
   bool connected();
   // Returns true if hmc5883l is successfully connected.

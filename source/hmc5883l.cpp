@@ -50,7 +50,7 @@ bool HMC5883L::calibration_level_1_check()
   return ret_needs_calibration;
 }
 
-void HMC5883L::calibration_level_1()
+void HMC5883L::calibration_level_1(unsigned long tmeFrame_Time)
 {
   if (MIN_MAX_HAS_DATA == false)
   {
@@ -65,34 +65,46 @@ void HMC5883L::calibration_level_1()
   }
   else
   {
+    bool changed = false;
+
     if (RAW_XYZ.X < X_MIN)
     {
       X_MIN = RAW_XYZ.X;
+      changed = true;
     }
     if (RAW_XYZ.X > X_MAX)
     {
-        X_MAX = RAW_XYZ.X;
+      X_MAX = RAW_XYZ.X;
+      changed = true;
     }
     if (RAW_XYZ.Y < Y_MIN)
     {
-        Y_MIN = RAW_XYZ.Y;
+      Y_MIN = RAW_XYZ.Y;
+      changed = true;
     }
     if (RAW_XYZ.Y > Y_MAX)
     {
-        Y_MAX = RAW_XYZ.Y;
+      Y_MAX = RAW_XYZ.Y;
+      changed = true;
     }
     if (RAW_XYZ.Z < Z_MIN)
     {
-        Z_MIN = RAW_XYZ.Z;
+      Z_MIN = RAW_XYZ.Z;
+      changed = true;
     }
     if (RAW_XYZ.Z > Z_MAX)
     {
-        Z_MAX = RAW_XYZ.Z;
+      Z_MAX = RAW_XYZ.Z;
+      changed = true;
     }
 
-    X_OFFSET = (X_MAX + X_MIN) / 2.0f;
-    Y_OFFSET = (Y_MAX + Y_MIN) / 2.0f;
-    Z_OFFSET = (Z_MAX + Z_MIN) / 2.0f;
+    if (changed)
+    {
+      CALIBRATION_TIMER_LEVEL_1.ping_up(tmeFrame_Time, 1 * 60000);
+      X_OFFSET = (X_MAX + X_MIN) / 2.0f;
+      Y_OFFSET = (Y_MAX + Y_MIN) / 2.0f;
+      Z_OFFSET = (Z_MAX + Z_MIN) / 2.0f;
+    }
   }
 }
 
@@ -189,6 +201,10 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
       // Wait 5 minutes for next calibration check
       CALIBRATION_SPOT_CHECK.ping_up(tmeFrame_Time, 5 * 60000);
     }
+
+    // Level 2
+    // Check Bearing with GPS Heading
+    
   }
 
   // Run Calibration Routines if necessary.
@@ -197,7 +213,7 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
     // If level 1 calibration timer is on
     if (CALIBRATION_TIMER_LEVEL_1.ping_down(tmeFrame_Time))
     {
-      calibration_level_1();
+      calibration_level_1(tmeFrame_Time);
     }
     else
     {
@@ -214,26 +230,33 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
   // Simple Filter
   if (RAW_POINTS.size() >= 5)
   {
-    BEARING_JITTER_MIN = CALIBRATED_BEARINGS[CALIBRATED_BEARINGS.size() - 5];
-    BEARING_JITTER_MAX = CALIBRATED_BEARINGS[CALIBRATED_BEARINGS.size() - 5];
+    int pos_start = CALIBRATED_BEARINGS.size() - 5;
 
     int bearing_total = 0;
-    for (int pos = CALIBRATED_BEARINGS.size() - 5; pos < (int)CALIBRATED_BEARINGS.size(); pos++)
+    for (int pos = pos_start; pos < (int)CALIBRATED_BEARINGS.size(); pos++)
     {
-      bearing_total = bearing_total + CALIBRATED_BEARINGS[pos];
+      bearing_total = bearing_total + CALIBRATED_BEARINGS[pos] + 360.0f;
       
-      // Determine Jitter
-      if (CALIBRATED_BEARINGS[pos] < BEARING_JITTER_MIN)
+      if (pos == pos_start)
       {
-        BEARING_JITTER_MIN = CALIBRATED_BEARINGS[pos];
+        BEARING_JITTER_MIN = CALIBRATED_BEARINGS[pos_start] + 360.0f;
+        BEARING_JITTER_MAX = CALIBRATED_BEARINGS[pos_start] + 360.0f;
       }
-      if (CALIBRATED_BEARINGS[pos] > BEARING_JITTER_MAX)
+
+      // Determine Jitter
+      if (CALIBRATED_BEARINGS[pos] + 360.0f < BEARING_JITTER_MIN + 360.0f)
       {
-        BEARING_JITTER_MAX = CALIBRATED_BEARINGS[pos];
+        BEARING_JITTER_MIN = CALIBRATED_BEARINGS[pos] + 360.0f;
+      }
+      if (CALIBRATED_BEARINGS[pos] + 360.0f > BEARING_JITTER_MAX + 360.0f)
+      {
+        BEARING_JITTER_MAX = CALIBRATED_BEARINGS[pos] + 360.0f;
       }
     }
 
-    BEARING = bearing_total / 5.0f;
+    BEARING = (bearing_total / 5.0f) - 360.0f;
+    BEARING_JITTER_MIN = BEARING_JITTER_MIN - 360.0f;
+    BEARING_JITTER_MAX = BEARING_JITTER_MAX - 360.0f;
   }
 }
 
@@ -310,6 +333,35 @@ void HMC5883L::calibrate_toggle(unsigned long tmeFrame_Time)
   {
     CALIBRATION_SPOT_CHECK.ping_up(tmeFrame_Time, 1 * 60000);
   }
+}
+
+float HMC5883L::cal_l1_x_min()
+{
+  return X_MIN;
+}
+float HMC5883L::cal_l1_x_max()
+{
+  return X_MAX;
+}
+float HMC5883L::cal_l1_y_min()
+{
+  return Y_MIN;
+}
+float HMC5883L::cal_l1_y_max()
+{
+  return Y_MAX;
+}
+float HMC5883L::cal_l1_x_offset()
+{
+  return X_OFFSET;
+}
+float HMC5883L::cal_l1_y_offset()
+{
+  return Y_OFFSET;
+}
+float HMC5883L::cal_l1_z_offset()
+{
+  return Z_OFFSET;
 }
 
 bool HMC5883L::calibrate_on()
