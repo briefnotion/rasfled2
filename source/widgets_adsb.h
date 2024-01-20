@@ -58,6 +58,8 @@ void draw_box(system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Po
 
 void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
+void draw_marker_filled(system_data &sdSysData, ImVec2 Screen_Position, int Color);
+
 void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
 void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size);

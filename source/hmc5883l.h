@@ -15,7 +15,7 @@
 #define HMC5883L_H
 
 // Standard Header Files
-//#include <stdio.h>      // standard input / output functions
+#include <stdio.h>      // standard input / output functions
 #include <string>
 #include <vector>
 
@@ -23,28 +23,153 @@
 #include <sys/ioctl.h>
 #include <fcntl.h>
 #include <linux/i2c-dev.h>  // LINUX i2c device libraries.
+#include <cmath>
 
 // RASFled related header files
-
 #include "fled_time.h"
+#include "helper.h"
+//#include "stringthings.h"
+//#include "rasapi.h"
 
 //#include <stdlib.h>
-//#include <string.h>     // string function definitions
-//#include <unistd.h>     // UNIX standard function definitions
 //#include <fcntl.h>      // File control definitions
 //#include <errno.h>      // Error number definitions
 //#include <termios.h>    // POSIX terminal control definitions
 
-// RASFled related header files
-
-//#include "helper.h"
-//#include "stringthings.h"
-//#include "rasapi.h"
-
 using namespace std;
 
 // -------------------------------------------------------------------------------------
-// 
+
+float dist(float X, float Y);
+
+// -------------------------------------------------------------------------------------
+
+class COMPASS_XYZ
+{
+  public:
+
+  float X = 0;
+  float Y = 0;
+  float Z = 0;
+};
+
+// -------------------------------------------------------------------------------------
+
+class COMPASS_XY
+{
+  public:
+
+  float X = 0;
+  float Y = 0;
+};
+
+// -------------------------------------------------------------------------------------
+
+bool XYZ_MIN_MAX(COMPASS_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_MAX_SIMPLE &Ymm, MIN_MAX_SIMPLE &Zmm);
+
+// -------------------------------------------------------------------------------------
+
+class CALIBRATION_DATA
+{
+  public:
+
+  COMPASS_XY COORD;
+  
+  bool HAS_DATA = false;
+};
+
+// -------------------------------------------------------------------------------------
+
+class CAL_LEVEL_1
+{
+  private:
+
+  // Simple calibration
+  bool MIN_MAX_HAS_DATA = false;
+
+  MIN_MAX_SIMPLE X_MIN_MAX;
+  MIN_MAX_SIMPLE Y_MIN_MAX;
+  MIN_MAX_SIMPLE Z_MIN_MAX;
+
+  COMPASS_XYZ OFFSET;
+  bool OFFSET_CHANGED = false;
+
+  public:
+
+  TIMED_PING CALIBRATION_TIMER_LEVEL_1;
+
+  void clear();
+
+  COMPASS_XYZ offset();
+
+  MIN_MAX_SIMPLE x_min_max();
+  MIN_MAX_SIMPLE y_min_max();
+  MIN_MAX_SIMPLE z_min_max();
+
+  bool calibration_level_1_check(vector<COMPASS_XYZ> &Raw_Points); // Checks most recent RAW_POINTS
+
+                                    //  Returns true if outside max min
+  void calibration_level_1(unsigned long tmeFrame_Time, COMPASS_XYZ &RAW_XYZ);       // Run Level 1 cal routines.
+
+};
+
+// -------------------------------------------------------------------------------------
+
+class CAL_LEVEL_2
+{
+  private:
+  
+  // Simple calibration
+  bool MIN_MAX_HAS_DATA = false;
+  
+  MIN_MAX_SIMPLE X_MIN_MAX;
+  COMPASS_XYZ X_MIN_POINT;
+  COMPASS_XYZ X_MAX_POINT;
+  
+  MIN_MAX_SIMPLE Y_MIN_MAX;
+  COMPASS_XYZ Y_MIN_POINT;
+  COMPASS_XYZ Y_MAX_POINT;
+
+  MIN_MAX_SIMPLE Z_MIN_MAX;
+  COMPASS_XYZ Z_MIN_POINT;
+  COMPASS_XYZ Z_MAX_POINT;
+
+  COMPASS_XYZ OFFSET;
+  //bool OFFSET_CHANGED = false;
+  
+  //       A
+  //    AC   AD
+  //  C         D
+  //    BC   BD
+  //       B
+
+  CALIBRATION_DATA A;
+  CALIBRATION_DATA AC;
+  CALIBRATION_DATA AD;
+  CALIBRATION_DATA C;
+  CALIBRATION_DATA D;
+  CALIBRATION_DATA BC;
+  CALIBRATION_DATA BD;
+  CALIBRATION_DATA B;
+
+  public:
+
+  CALIBRATION_DATA a();
+  CALIBRATION_DATA ac();
+  CALIBRATION_DATA ad();
+  CALIBRATION_DATA c();
+  CALIBRATION_DATA d();
+  CALIBRATION_DATA bc();
+  CALIBRATION_DATA bd();
+  CALIBRATION_DATA b();
+
+  void calibration_level_2(COMPASS_XYZ &Raw_XYZ);
+  // Run Level 2 cal routines.
+
+};
+
+// -------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------
 
 class HMC5883L_PROPERTIES
 {
@@ -62,15 +187,6 @@ class HMC5883L_PROPERTIES
   //  a disconnect, resulting in autoconnet starting again. 
   // If false, port will stay open even if no data is being seen.
   //  No checks for hardware disconnects.
-};
-
-class COMPASS_XYZ
-{
-  public:
-
-  float X = 0;
-  float Y = 0;
-  float Z = 0;
 };
 
 class HMC5883L
@@ -97,18 +213,6 @@ class HMC5883L
   bool CALIBRATE = false;
   int CURRENT_CALIBRATION_LEVEL = 0;
 
-  // Simple calibration
-  bool MIN_MAX_HAS_DATA = false;
-  float X_MIN = 0;
-  float X_MAX = 0;
-  float Y_MIN = 0;
-  float Y_MAX = 0;
-  float Z_MIN = 0;
-  float Z_MAX = 0;
-
-  float X_OFFSET = 0;
-  float Y_OFFSET = 0;
-  float Z_OFFSET = 0;
 
   //
 
@@ -131,10 +235,8 @@ class HMC5883L
   // Calibration Variables and Routines
   TIMED_PING CALIBRATION_SPOT_CHECK;
 
-  TIMED_PING CALIBRATION_TIMER_LEVEL_1;
-  bool calibration_level_1_check(); // Checks most recent RAW_POINTS
-                                    //  Returns true if outside max min
-  void calibration_level_1(unsigned long tmeFrame_Time);       // Run Level 1 cal routines.
+  CAL_LEVEL_1 LEVEL_1;
+  CAL_LEVEL_2 LEVEL_2;
 
   // Comms Routines
   bool register_write(char Register, char Value);
@@ -175,13 +277,20 @@ class HMC5883L
   bool calibrate_on();
   // Returns true if calibration in progress.
 
-  float cal_l1_x_min();
-  float cal_l1_x_max();
-  float cal_l1_y_min();
-  float cal_l1_y_max();
-  float cal_l1_x_offset();
-  float cal_l1_y_offset();
-  float cal_l1_z_offset();
+  // calibration 1
+  MIN_MAX_SIMPLE level_1_min_max_x();
+  MIN_MAX_SIMPLE level_1_min_max_y();
+  MIN_MAX_SIMPLE level_1_min_max_z();
+  COMPASS_XYZ level_1_offset();
+
+  CALIBRATION_DATA level_2_a();
+  CALIBRATION_DATA level_2_ac();
+  CALIBRATION_DATA level_2_ad();
+  CALIBRATION_DATA level_2_c();
+  CALIBRATION_DATA level_2_d();
+  CALIBRATION_DATA level_2_bc();
+  CALIBRATION_DATA level_2_bd();
+  CALIBRATION_DATA level_2_b();
 
   bool connected();
   // Returns true if hmc5883l is successfully connected.

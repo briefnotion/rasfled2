@@ -17,26 +17,112 @@
 using namespace std;
 
 // -------------------------------------------------------------------------------------
-// 
-bool HMC5883L::calibration_level_1_check()
+
+float dist(float X, float Y)
+{
+  return sqrtf((X * X) + (Y * Y));
+}
+
+bool XYZ_MIN_MAX(COMPASS_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_MAX_SIMPLE &Ymm, MIN_MAX_SIMPLE &Zmm)
+{
+  bool ret_changed = false;
+
+  if (Has_Data == false)
+  {
+    Xmm.MIN_VALUE = (float)Raw_XYZ.X;
+    Xmm.MAX_VALUE = (float)Raw_XYZ.X;
+    Ymm.MIN_VALUE = (float)Raw_XYZ.Y;
+    Ymm.MAX_VALUE = (float)Raw_XYZ.Y;
+    Zmm.MIN_VALUE = (float)Raw_XYZ.Z;
+    Zmm.MAX_VALUE = (float)Raw_XYZ.Z;
+
+    Has_Data = true;
+    ret_changed = true;
+  }
+  else
+  {
+    if (Raw_XYZ.X < Xmm.MIN_VALUE)
+    {
+      Xmm.MIN_VALUE = Raw_XYZ.X;
+      ret_changed = true;
+    }
+    if (Raw_XYZ.X > Xmm.MAX_VALUE)
+    {
+      Xmm.MAX_VALUE = Raw_XYZ.X;
+      ret_changed = true;
+    }
+    if (Raw_XYZ.Y < Ymm.MIN_VALUE)
+    {
+      Ymm.MIN_VALUE = Raw_XYZ.Y;
+      ret_changed = true;
+    }
+    if (Raw_XYZ.Y > Ymm.MAX_VALUE)
+    {
+      Ymm.MAX_VALUE = Raw_XYZ.Y;
+      ret_changed = true;
+    }
+    if (Raw_XYZ.Z < Zmm.MIN_VALUE)
+    {
+      Zmm.MIN_VALUE = Raw_XYZ.Z;
+      ret_changed = true;
+    }
+    if (Raw_XYZ.Z > Zmm.MAX_VALUE)
+    {
+      Zmm.MAX_VALUE = Raw_XYZ.Z;
+      ret_changed = true;
+    }
+  }
+
+  return ret_changed;
+}
+
+// -------------------------------------------------------------------------------------
+
+void CAL_LEVEL_1::clear()
+{  
+  MIN_MAX_HAS_DATA = false;
+  OFFSET.X = 0;
+  OFFSET.Y = 0;
+  OFFSET.Z = 0;
+}
+
+COMPASS_XYZ CAL_LEVEL_1::offset()
+{
+  return OFFSET;
+}
+
+MIN_MAX_SIMPLE CAL_LEVEL_1::x_min_max()
+{
+  return X_MIN_MAX;
+}
+MIN_MAX_SIMPLE CAL_LEVEL_1::y_min_max()
+{
+  return Y_MIN_MAX;
+}
+MIN_MAX_SIMPLE CAL_LEVEL_1::z_min_max()
+{
+  return Z_MIN_MAX;
+}
+
+bool CAL_LEVEL_1::calibration_level_1_check(vector<COMPASS_XYZ> &Raw_Points)
 {
   bool ret_needs_calibration = false;
 
-  if (RAW_POINTS.size() >=5)
+  if (Raw_Points.size() >=5)
   {
-    for (int pos = RAW_POINTS.size() - 5; 
-          pos < (int)RAW_POINTS.size() && ret_needs_calibration == false; 
+    for (int pos = Raw_Points.size() - 5; 
+          pos < (int)Raw_Points.size() && ret_needs_calibration == false; 
           pos++)
     {
-      if (RAW_POINTS[pos].X < X_MIN || RAW_POINTS[pos].X > X_MAX)
+      if (Raw_Points[pos].X < X_MIN_MAX.MIN_VALUE || Raw_Points[pos].X > X_MIN_MAX.MAX_VALUE)
       {
         ret_needs_calibration = true;
       }
-      if (RAW_POINTS[pos].Y < Y_MIN || RAW_POINTS[pos].Y > Y_MAX)
+      if (Raw_Points[pos].Y < Y_MIN_MAX.MIN_VALUE || Raw_Points[pos].Y > Y_MIN_MAX.MAX_VALUE)
       {
         ret_needs_calibration = true;
       }
-      if (RAW_POINTS[pos].Z < Z_MIN || RAW_POINTS[pos].Z > Z_MAX)
+      if (Raw_Points[pos].Z < Z_MIN_MAX.MIN_VALUE || Raw_Points[pos].Z > Z_MIN_MAX.MAX_VALUE)
       {
         ret_needs_calibration = true;
       }
@@ -50,62 +136,142 @@ bool HMC5883L::calibration_level_1_check()
   return ret_needs_calibration;
 }
 
-void HMC5883L::calibration_level_1(unsigned long tmeFrame_Time)
+void CAL_LEVEL_1::calibration_level_1(unsigned long tmeFrame_Time, COMPASS_XYZ &Raw_XYZ)
 {
-  if (MIN_MAX_HAS_DATA == false)
+  OFFSET_CHANGED = false;
+
+  if (XYZ_MIN_MAX(Raw_XYZ, MIN_MAX_HAS_DATA, X_MIN_MAX, Y_MIN_MAX, Z_MIN_MAX))
   {
-    X_MIN = (float)RAW_XYZ.X;
-    X_MAX = (float)RAW_XYZ.X;
-    Y_MIN = (float)RAW_XYZ.Y;
-    Y_MAX = (float)RAW_XYZ.Y;
-    Z_MIN = (float)RAW_XYZ.Z;
-    Z_MAX = (float)RAW_XYZ.Z;
-
-    MIN_MAX_HAS_DATA = true;
-  }
-  else
-  {
-    bool changed = false;
-
-    if (RAW_XYZ.X < X_MIN)
-    {
-      X_MIN = RAW_XYZ.X;
-      changed = true;
-    }
-    if (RAW_XYZ.X > X_MAX)
-    {
-      X_MAX = RAW_XYZ.X;
-      changed = true;
-    }
-    if (RAW_XYZ.Y < Y_MIN)
-    {
-      Y_MIN = RAW_XYZ.Y;
-      changed = true;
-    }
-    if (RAW_XYZ.Y > Y_MAX)
-    {
-      Y_MAX = RAW_XYZ.Y;
-      changed = true;
-    }
-    if (RAW_XYZ.Z < Z_MIN)
-    {
-      Z_MIN = RAW_XYZ.Z;
-      changed = true;
-    }
-    if (RAW_XYZ.Z > Z_MAX)
-    {
-      Z_MAX = RAW_XYZ.Z;
-      changed = true;
-    }
-
-    if (changed)
     {
       CALIBRATION_TIMER_LEVEL_1.ping_up(tmeFrame_Time, 1 * 60000);
-      X_OFFSET = (X_MAX + X_MIN) / 2.0f;
-      Y_OFFSET = (Y_MAX + Y_MIN) / 2.0f;
-      Z_OFFSET = (Z_MAX + Z_MIN) / 2.0f;
+      OFFSET.X = (X_MIN_MAX.MAX_VALUE + X_MIN_MAX.MIN_VALUE) / 2.0f;
+      OFFSET.Y = (Y_MIN_MAX.MAX_VALUE + Y_MIN_MAX.MIN_VALUE) / 2.0f;
+      OFFSET.Z = (Z_MIN_MAX.MAX_VALUE + Z_MIN_MAX.MIN_VALUE) / 2.0f;
+
+      OFFSET_CHANGED = true;
     }
   }
+}
+
+// -------------------------------------------------------------------------------------
+
+CALIBRATION_DATA CAL_LEVEL_2::a()
+{
+  return A;
+}
+CALIBRATION_DATA CAL_LEVEL_2::ac()
+{
+  return AC;
+}
+CALIBRATION_DATA CAL_LEVEL_2::ad()
+{
+  return AD;
+}
+CALIBRATION_DATA CAL_LEVEL_2::c()
+{
+  return C;
+}
+CALIBRATION_DATA CAL_LEVEL_2::d()
+{
+  return D;
+}
+CALIBRATION_DATA CAL_LEVEL_2::bc()
+{
+  return BC;
+}
+CALIBRATION_DATA CAL_LEVEL_2::bd()
+{
+  return BD;
+}
+CALIBRATION_DATA CAL_LEVEL_2::b()
+{
+  return B;
+}
+
+void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
+{ 
+
+  if (XYZ_MIN_MAX(Raw_XYZ, MIN_MAX_HAS_DATA, X_MIN_MAX, Y_MIN_MAX, Z_MIN_MAX))
+  {
+    {
+      OFFSET.X = (X_MIN_MAX.MAX_VALUE + X_MIN_MAX.MIN_VALUE) / 2.0f;
+      OFFSET.Y = (Y_MIN_MAX.MAX_VALUE + Y_MIN_MAX.MIN_VALUE) / 2.0f;
+      OFFSET.Z = (Z_MIN_MAX.MAX_VALUE + Z_MIN_MAX.MIN_VALUE) / 2.0f;
+
+      //OFFSET_CHANGED = true;
+
+      A.COORD.X = Y_MIN_POINT.X - OFFSET.X;
+      A.COORD.Y = Y_MIN_POINT.Y - OFFSET.Y;
+
+      C.COORD.X = X_MIN_POINT.X - OFFSET.X;
+      C.COORD.Y = X_MIN_POINT.Y - OFFSET.Y;
+
+      D.COORD.X = X_MAX_POINT.X - OFFSET.X;
+      D.COORD.Y = X_MAX_POINT.Y - OFFSET.Y;
+
+      B.COORD.X = Y_MAX_POINT.X - OFFSET.X;
+      B.COORD.Y = Y_MAX_POINT.Y - OFFSET.Y;
+    }
+  }
+
+  float distance = dist(Raw_XYZ.X - OFFSET.X, Raw_XYZ.Y - OFFSET.Y);
+
+  if (distance > 100.0f)
+  {
+
+    // Find A C D B
+    // A
+    if (Raw_XYZ.Y == Y_MIN_MAX.MIN_VALUE)
+    {
+      Y_MIN_POINT = Raw_XYZ;
+
+      A.COORD.X = Raw_XYZ.X - OFFSET.X;
+      A.COORD.Y = Raw_XYZ.Y - OFFSET.Y;
+
+      A.HAS_DATA = true;
+    }
+    // C
+    else if (Raw_XYZ.X == X_MIN_MAX.MIN_VALUE)
+    {
+      X_MIN_POINT = Raw_XYZ;
+
+      C.COORD.X = Raw_XYZ.X - OFFSET.X;
+      C.COORD.Y = Raw_XYZ.Y - OFFSET.Y;
+
+      C.HAS_DATA = true;
+    }
+    // D
+    else if (Raw_XYZ.X == X_MIN_MAX.MAX_VALUE)
+    {
+      X_MAX_POINT = Raw_XYZ;
+
+      D.COORD.X = Raw_XYZ.X - OFFSET.X;
+      D.COORD.Y = Raw_XYZ.Y - OFFSET.Y;
+
+      D.HAS_DATA = true;
+    }
+    // B
+    else if (Raw_XYZ.Y == Y_MIN_MAX.MAX_VALUE)
+    {
+      Y_MAX_POINT = Raw_XYZ;
+
+      B.COORD.X = Raw_XYZ.X - OFFSET.X;
+      B.COORD.Y = Raw_XYZ.Y - OFFSET.Y;
+
+      B.HAS_DATA = true;
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
 }
 
 bool HMC5883L::register_write(char Register, char Value)
@@ -131,11 +297,9 @@ bool HMC5883L::create()
   RAW_POINTS.clear();
   RAW_POINTS.reserve(1000);  
   CALIBRATED_BEARINGS.clear();
-  CALIBRATED_BEARINGS.reserve(1000);  
-  MIN_MAX_HAS_DATA = false;
-  X_OFFSET = 0;
-  Y_OFFSET = 0;
-  Z_OFFSET = 0;
+  CALIBRATED_BEARINGS.reserve(1000);
+  
+  LEVEL_1.clear();
 
   CONNECTED = false;
 
@@ -188,10 +352,10 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
   if (CALIBRATE == false && CALIBRATION_SPOT_CHECK.ping_down(tmeFrame_Time) == false)
   {
     // Check Level 1
-    if (calibration_level_1_check())
+    if (LEVEL_1.calibration_level_1_check(RAW_POINTS))
     {
       // Start 1 minute timer to calibrate
-      CALIBRATION_TIMER_LEVEL_1.ping_up(tmeFrame_Time, 1 * 60000);
+      LEVEL_1.CALIBRATION_TIMER_LEVEL_1.ping_up(tmeFrame_Time, 1 * 60000);
 
       // Turn on Level 1 Calibration
       CALIBRATE = true;
@@ -210,10 +374,11 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
   // Run Calibration Routines if necessary.
   if (CALIBRATE)
   {
+    //Level 1
     // If level 1 calibration timer is on
-    if (CALIBRATION_TIMER_LEVEL_1.ping_down(tmeFrame_Time))
+    if (LEVEL_1.CALIBRATION_TIMER_LEVEL_1.ping_down(tmeFrame_Time))
     {
-      calibration_level_1(tmeFrame_Time);
+      LEVEL_1.calibration_level_1(tmeFrame_Time, RAW_XYZ);
     }
     else
     {
@@ -223,6 +388,9 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
       // Check again in 1 minute
       CALIBRATION_SPOT_CHECK.ping_up(tmeFrame_Time, 1 * 60000);
     }
+
+    // Level 2
+    LEVEL_2.calibration_level_2(RAW_XYZ);
   }
 
   // Calclulate Bearing
@@ -288,9 +456,9 @@ COMPASS_XYZ HMC5883L::calibrated_xyz()
   if (RAW_POINTS.size() >0)
   {
     COMPASS_XYZ tmp_point;
-    tmp_point.X = RAW_POINTS[RAW_POINTS.size() -1].X - X_OFFSET;
-    tmp_point.Y = RAW_POINTS[RAW_POINTS.size() -1].Y - Y_OFFSET;
-    tmp_point.Z = RAW_POINTS[RAW_POINTS.size() -1].Z - Z_OFFSET;
+    tmp_point.X = RAW_POINTS[RAW_POINTS.size() -1].X - LEVEL_1.offset().X;
+    tmp_point.Y = RAW_POINTS[RAW_POINTS.size() -1].Y - LEVEL_1.offset().Y;
+    tmp_point.Z = RAW_POINTS[RAW_POINTS.size() -1].Z - LEVEL_1.offset().Z;
     return tmp_point;
   }
   else
@@ -304,9 +472,9 @@ COMPASS_XYZ HMC5883L::calibrated_xyz(int Position)
 {
   COMPASS_XYZ tmp_point;
 
-  tmp_point.X = RAW_POINTS[Position].X - X_OFFSET;
-  tmp_point.Y = RAW_POINTS[Position].Y - Y_OFFSET;
-  tmp_point.Z = RAW_POINTS[Position].Z - Z_OFFSET;
+  tmp_point.X = RAW_POINTS[Position].X - LEVEL_1.offset().X;
+  tmp_point.Y = RAW_POINTS[Position].Y - LEVEL_1.offset().Y;
+  tmp_point.Z = RAW_POINTS[Position].Z - LEVEL_1.offset().Z;
 
   return tmp_point;
 }
@@ -315,10 +483,8 @@ void HMC5883L::calibrateion_reset()
 {
   RAW_POINTS.clear();
   CALIBRATED_BEARINGS.clear();
-  MIN_MAX_HAS_DATA = false;
-  X_OFFSET = 0;
-  Y_OFFSET = 0;
-  Z_OFFSET = 0;
+
+  LEVEL_1.clear();
 }
 
 void HMC5883L::calibrate_toggle(unsigned long tmeFrame_Time)
@@ -327,7 +493,7 @@ void HMC5883L::calibrate_toggle(unsigned long tmeFrame_Time)
 
   if (CALIBRATE)
   {
-    CALIBRATION_TIMER_LEVEL_1.ping_up(tmeFrame_Time, 1 * 60000);
+    LEVEL_1.CALIBRATION_TIMER_LEVEL_1.ping_up(tmeFrame_Time, 1 * 60000);
   }
   else
   {
@@ -335,33 +501,55 @@ void HMC5883L::calibrate_toggle(unsigned long tmeFrame_Time)
   }
 }
 
-float HMC5883L::cal_l1_x_min()
+MIN_MAX_SIMPLE HMC5883L::level_1_min_max_x()
 {
-  return X_MIN;
+  return LEVEL_1.x_min_max();
 }
-float HMC5883L::cal_l1_x_max()
+MIN_MAX_SIMPLE HMC5883L::level_1_min_max_y()
 {
-  return X_MAX;
+  return LEVEL_1.y_min_max();
 }
-float HMC5883L::cal_l1_y_min()
+MIN_MAX_SIMPLE HMC5883L::level_1_min_max_z()
 {
-  return Y_MIN;
+  return LEVEL_1.z_min_max();
 }
-float HMC5883L::cal_l1_y_max()
+
+COMPASS_XYZ HMC5883L::level_1_offset()
 {
-  return Y_MAX;
+  return LEVEL_1.offset();
 }
-float HMC5883L::cal_l1_x_offset()
+
+CALIBRATION_DATA HMC5883L::level_2_a()
 {
-  return X_OFFSET;
+  return LEVEL_2.a();
 }
-float HMC5883L::cal_l1_y_offset()
+CALIBRATION_DATA HMC5883L::level_2_ac()
 {
-  return Y_OFFSET;
+  return LEVEL_2.ac();
 }
-float HMC5883L::cal_l1_z_offset()
+CALIBRATION_DATA HMC5883L::level_2_ad()
 {
-  return Z_OFFSET;
+  return LEVEL_2.ad();
+}
+CALIBRATION_DATA HMC5883L::level_2_c()
+{
+  return LEVEL_2.c();
+}
+CALIBRATION_DATA HMC5883L::level_2_d()
+{
+  return LEVEL_2.d();
+}
+CALIBRATION_DATA HMC5883L::level_2_bc()
+{
+  return LEVEL_2.bc();
+}
+CALIBRATION_DATA HMC5883L::level_2_bd()
+{
+  return LEVEL_2.bd();
+}
+CALIBRATION_DATA HMC5883L::level_2_b()
+{
+  return LEVEL_2.b();
 }
 
 bool HMC5883L::calibrate_on()
