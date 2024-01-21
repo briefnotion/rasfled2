@@ -73,13 +73,14 @@ class CALIBRATION_DATA
 {
   public:
 
-  COMPASS_XY COORD;
+  COMPASS_XYZ COORD;
   
   bool HAS_DATA = false;
 };
 
 // -------------------------------------------------------------------------------------
 
+/*
 class CAL_LEVEL_1
 {
   private:
@@ -112,8 +113,27 @@ class CAL_LEVEL_1
   void calibration_level_1(unsigned long tmeFrame_Time, COMPASS_XYZ &RAW_XYZ);       // Run Level 1 cal routines.
 
 };
+*/
 
 // -------------------------------------------------------------------------------------
+
+class CAL_LEVEL_2_QUAD_RECORD
+{
+  private:
+
+  int SIZE = 500;
+
+  public:
+
+  bool OVERFLOW = false;
+
+  vector<COMPASS_XYZ> DATA_POINTS;
+
+  void add_point(COMPASS_XYZ &Raw_XYZ);
+
+  void clear();
+
+};
 
 class CAL_LEVEL_2
 {
@@ -121,6 +141,9 @@ class CAL_LEVEL_2
   
   // Simple calibration
   bool MIN_MAX_HAS_DATA = false;
+
+  bool FIRST_RUN = true;
+  bool SIMPLE_CALIBRATION = true;
   
   MIN_MAX_SIMPLE X_MIN_MAX;
   COMPASS_XYZ X_MIN_POINT;
@@ -135,7 +158,8 @@ class CAL_LEVEL_2
   COMPASS_XYZ Z_MAX_POINT;
 
   COMPASS_XYZ OFFSET;
-  //bool OFFSET_CHANGED = false;
+  
+  CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
   
   //       A
   //    AC   AD
@@ -143,25 +167,34 @@ class CAL_LEVEL_2
   //    BC   BD
   //       B
 
+  int QUAD      = -1;
+  int QUAD_PREV = -1;
+  // 0 = A
+  // 1 = D
+  // 2 = B
+  // 3 = C
+
   CALIBRATION_DATA A;
-  CALIBRATION_DATA AC;
-  CALIBRATION_DATA AD;
   CALIBRATION_DATA C;
   CALIBRATION_DATA D;
-  CALIBRATION_DATA BC;
-  CALIBRATION_DATA BD;
   CALIBRATION_DATA B;
+
+  int get_quad(COMPASS_XYZ &Raw_XYZ, float Distance);
 
   public:
 
   CALIBRATION_DATA a();
-  CALIBRATION_DATA ac();
-  CALIBRATION_DATA ad();
   CALIBRATION_DATA c();
   CALIBRATION_DATA d();
-  CALIBRATION_DATA bc();
-  CALIBRATION_DATA bd();
   CALIBRATION_DATA b();
+
+  void clear();
+
+  COMPASS_XYZ offset();
+
+  MIN_MAX_SIMPLE x_min_max();
+  MIN_MAX_SIMPLE y_min_max();
+  MIN_MAX_SIMPLE z_min_max();
 
   void calibration_level_2(COMPASS_XYZ &Raw_XYZ);
   // Run Level 2 cal routines.
@@ -235,7 +268,7 @@ class HMC5883L
   // Calibration Variables and Routines
   TIMED_PING CALIBRATION_SPOT_CHECK;
 
-  CAL_LEVEL_1 LEVEL_1;
+  //CAL_LEVEL_1 LEVEL_1;
   CAL_LEVEL_2 LEVEL_2;
 
   // Comms Routines
@@ -248,7 +281,7 @@ class HMC5883L
                       //  Not yet fully implemented.
 
   // Process
-  void process(unsigned long tmeFrame_Time);     // Internal: Processes most recent received data. 
+  void process();     // Internal: Processes most recent received data. 
                       // Performs Calibration Routines
 
   public:
@@ -271,7 +304,7 @@ class HMC5883L
   void calibrateion_reset();
   // Removes all calibration data
 
-  void calibrate_toggle(unsigned long tmeFrame_Time);
+  void calibrate_toggle();
   // Start / Stop Calibration
 
   bool calibrate_on();
@@ -284,12 +317,8 @@ class HMC5883L
   COMPASS_XYZ level_1_offset();
 
   CALIBRATION_DATA level_2_a();
-  CALIBRATION_DATA level_2_ac();
-  CALIBRATION_DATA level_2_ad();
   CALIBRATION_DATA level_2_c();
   CALIBRATION_DATA level_2_d();
-  CALIBRATION_DATA level_2_bc();
-  CALIBRATION_DATA level_2_bd();
   CALIBRATION_DATA level_2_b();
 
   bool connected();

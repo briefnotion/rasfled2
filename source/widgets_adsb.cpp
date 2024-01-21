@@ -1727,7 +1727,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
                                       sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
-        sdSysData.COMMS_COMPASS.calibrate_toggle(sdSysData.PROGRAM_TIME.current_frame_time());
+        sdSysData.COMMS_COMPASS.calibrate_toggle();
       }
 
       if (sdSysData.COMMS_COMPASS.calibrate_on())
