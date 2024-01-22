@@ -142,7 +142,6 @@ class CAL_LEVEL_2
   // Simple calibration
   bool MIN_MAX_HAS_DATA = false;
 
-  bool FIRST_RUN = true;
   bool SIMPLE_CALIBRATION = true;
   
   MIN_MAX_SIMPLE X_MIN_MAX;
@@ -157,15 +156,18 @@ class CAL_LEVEL_2
   COMPASS_XYZ Z_MIN_POINT;
   COMPASS_XYZ Z_MAX_POINT;
 
+  float SKEW_X = 0;
+  float SKEW_Y = 0;
+
   COMPASS_XYZ OFFSET;
   
   CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
   
-  //       A
-  //    AC   AD
-  //  C         D
-  //    BC   BD
-  //       B
+  //       A              |skew y
+  //    AC   AD           |
+  //  C         D   ------|------ skew x
+  //    BC   BD           |
+  //       B              |
 
   int QUAD      = -1;
   int QUAD_PREV = -1;
@@ -189,6 +191,9 @@ class CAL_LEVEL_2
   CALIBRATION_DATA b();
 
   void clear();
+
+  float skew_x();
+  float skew_y();
 
   COMPASS_XYZ offset();
 
@@ -246,9 +251,6 @@ class HMC5883L
   bool CALIBRATE = false;
   int CURRENT_CALIBRATION_LEVEL = 0;
 
-
-  //
-
   TIMED_PING DATA_RECIEVED_TIMER;
   TIMED_PING CYCLE_TIMER;
   int CYCLE = 99;     // Connection cycles, independent of io
@@ -279,6 +281,8 @@ class HMC5883L
 
   void stop();        // Internal: Closes port for access.
                       //  Not yet fully implemented.
+
+  COMPASS_XYZ calculate_calibrated_xyz(COMPASS_XYZ &Raw_XYZ);
 
   // Process
   void process();     // Internal: Processes most recent received data. 
@@ -352,6 +356,8 @@ class HMC5883L
   // check to see if data recieved recently.
   // Not needed at this point. Instead, access 
   // connected.
+
+  void bearing_known_offset_calibration(float Known_Bearing);
 
   float bearing();
   // Direction Facing.

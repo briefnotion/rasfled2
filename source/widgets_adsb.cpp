@@ -1739,6 +1739,14 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
         {
           sdSysData.COMMS_COMPASS.calibrateion_reset();
         }
+
+        ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                working_area.y + 3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
+
+        if (button_simple_color(sdSysData, "BEAR\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+        }
       }
     }
   }
@@ -1775,7 +1783,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
         if (pos == sdSysData.COMMS_COMPASS.raw_points_size() -1)
         {
-          draw_line(sdSysData, p1, p2, sdSysData.COLOR_SELECT.blue(), 2.0f);
+          draw_line(sdSysData, p1, p2, sdSysData.COLOR_SELECT.white(), 2.0f);
         }
 
         draw_marker(sdSysData, p2, sdSysData.COLOR_SELECT.blue());

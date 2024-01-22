@@ -1,3 +1,10 @@
+2.117_240121
+  - Added calibration routines for testing skew adjustment.
+  - Added button on ASDB Calib section to set gps compass bearing to 
+      current gps heading. 
+  - Added simple filters to Level 2 calibration because bridges are 
+      full of electro magnetic interference. 
+
 2.116_240120
   - Turned of Calibration Level 1 routines to test Level 2 routines.
 

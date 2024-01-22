@@ -29,9 +29,9 @@ class SOUNDS
 
   COMMAND_THREAD Command_Thread;
 
-  string TEST = "aplay /etc/RasFLED/test.wav";
-  string SND1 = "aplay /etc/RasFLED/snd1_up.wav";
-  string SND2 = "aplay /etc/RasFLED/snd1_up_2.wav";
+  string TEST = "aplay -q /etc/RasFLED/test.wav";
+  string SND1 = "aplay -q /etc/RasFLED/snd1_up.wav";
+  string SND2 = "aplay -q /etc/RasFLED/snd1_up_2.wav";
 
   public:
 
