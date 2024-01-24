@@ -562,6 +562,11 @@ bool is_within(int Value, int Number_1, int Number_2);
 //  or equal to Num 1 and Num 2, regardless if Number 1 
 //  is less than or greater than Number 2.
 
+bool is_within(float Value, float Number_1, float Number_2);
+// Comarison opperator returns true if Value is in between  
+//  or equal to Num 1 and Num 2, regardless if Number 1 
+//  is less than or greater than Number 2.
+
 bool set_bool_with_change_notify(bool Set_Value, bool &Bool_Variable);
 // Set or copy Set_Value to Bool_Variable
 // Returns true if value changed

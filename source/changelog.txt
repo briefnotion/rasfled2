@@ -1,3 +1,18 @@
+2.118_240122
+  - Added ability to preload compass calibration settings, because the 
+      world is chaotic and, even things like a car passing can throw 
+      everything out of whack. Also, compass heading is far from being 
+      a critical component, when GPS is heading is incredibly accurate. 
+      Bearing is primarily useful when not in motion, however I will 
+      still continute on  
+  - Makeing another attempt to improve active calibration.
+  - Corrected Compass autoconnect after disconnect. Did not correct 
+      assoiciated message.
+  - Set Compass calibration to my specific settings.  Has to be baked 
+      in until a JSON configuration file is created.
+  - Still havent addressed the 270 degree rotate problem.
+  - Default is compass calibration lock on.
+
 2.117_240121
   - Added calibration routines for testing skew adjustment.
   - Added button on ASDB Calib section to set gps compass bearing to 

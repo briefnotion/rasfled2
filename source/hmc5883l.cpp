@@ -202,7 +202,66 @@ int CAL_LEVEL_2::get_quad(COMPASS_XYZ &Raw_XYZ, float Distance)
   {
     return -1;
   }
+}
 
+void CAL_LEVEL_2::calibration_preload(CALIBRATION_DATA A_Cal_Pt, CALIBRATION_DATA B_Cal_Pt, 
+                                      CALIBRATION_DATA C_Cal_Pt, CALIBRATION_DATA D_Cal_Pt)
+{
+  A_Cal_Pt_PRELOAD = A_Cal_Pt;
+  A_Cal_Pt_PRELOAD.DISTANCE_VARIANCE_HAS_DATA = true;
+  A_Cal_Pt_PRELOAD.HAS_DATA = true;
+
+  B_Cal_Pt_PRELOAD = B_Cal_Pt;
+  B_Cal_Pt_PRELOAD.DISTANCE_VARIANCE_HAS_DATA = true;
+  B_Cal_Pt_PRELOAD.HAS_DATA = true;
+
+  C_Cal_Pt_PRELOAD = C_Cal_Pt;
+  C_Cal_Pt_PRELOAD.DISTANCE_VARIANCE_HAS_DATA = true;
+  C_Cal_Pt_PRELOAD.HAS_DATA = true;
+
+  D_Cal_Pt_PRELOAD = D_Cal_Pt;
+  D_Cal_Pt_PRELOAD.DISTANCE_VARIANCE_HAS_DATA = true;
+  D_Cal_Pt_PRELOAD.HAS_DATA = true;
+
+  PRELOAD_DATA_LOADED = true;
+}
+
+void CAL_LEVEL_2::calibration_preload_set()
+{
+  if (PRELOAD_DATA_LOADED)
+  {
+    A = A_Cal_Pt_PRELOAD;
+    B = B_Cal_Pt_PRELOAD;
+    C = C_Cal_Pt_PRELOAD;
+    D = D_Cal_Pt_PRELOAD;
+
+    // Prep:
+    
+    SIMPLE_CALIBRATION = false;
+
+    // Adjust new offset
+    Y_MIN_MAX.MIN_VALUE = A.COORD.Y;
+    Y_MIN_MAX.MAX_VALUE = B.COORD.Y;
+    X_MIN_MAX.MIN_VALUE = C.COORD.X;
+    X_MIN_MAX.MAX_VALUE = D.COORD.X;
+
+    OFFSET.X = (X_MIN_MAX.MAX_VALUE + X_MIN_MAX.MIN_VALUE) / 2.0f;
+    OFFSET.Y = (Y_MIN_MAX.MAX_VALUE + Y_MIN_MAX.MIN_VALUE) / 2.0f;
+    OFFSET.Z = (Z_MIN_MAX.MAX_VALUE + Z_MIN_MAX.MIN_VALUE) / 2.0f;
+  }
+}
+
+MIN_MAX_SIMPLE CAL_LEVEL_2::x_min_max()
+{
+  return X_MIN_MAX;
+}
+MIN_MAX_SIMPLE CAL_LEVEL_2::y_min_max()
+{
+  return Y_MIN_MAX;
+}
+MIN_MAX_SIMPLE CAL_LEVEL_2::z_min_max()
+{
+  return Z_MIN_MAX;
 }
 
 CALIBRATION_DATA CAL_LEVEL_2::a()
@@ -222,6 +281,11 @@ CALIBRATION_DATA CAL_LEVEL_2::b()
   return B;
 }
 
+COMPASS_XYZ CAL_LEVEL_2::offset()
+{
+  return OFFSET;
+}
+
 void CAL_LEVEL_2::clear()
 {
   MIN_MAX_HAS_DATA = false;
@@ -232,16 +296,10 @@ void CAL_LEVEL_2::clear()
   COMPASS_XYZ t_MIN_POINT;
 
   X_MIN_MAX = t_MIN_MAX;
-  X_MIN_POINT = t_MIN_POINT;
-  X_MAX_POINT = t_MIN_POINT;
 
   Y_MIN_MAX = t_MIN_MAX;
-  Y_MIN_POINT = t_MIN_POINT;
-  Y_MAX_POINT = t_MIN_POINT;
 
   Z_MIN_MAX = t_MIN_MAX;
-  Z_MIN_POINT = t_MIN_POINT;
-  Z_MAX_POINT = t_MIN_POINT;
 
   OFFSET = t_MIN_POINT;
 
@@ -256,11 +314,6 @@ void CAL_LEVEL_2::clear()
   C = t;
   D = t;
   B = t;
-}
-
-COMPASS_XYZ CAL_LEVEL_2::offset()
-{
-  return OFFSET;
 }
 
 
@@ -287,22 +340,8 @@ float CAL_LEVEL_2::skew_y()
   }
 }
 
-MIN_MAX_SIMPLE CAL_LEVEL_2::x_min_max()
-{
-  return X_MIN_MAX;
-}
-MIN_MAX_SIMPLE CAL_LEVEL_2::y_min_max()
-{
-  return Y_MIN_MAX;
-}
-MIN_MAX_SIMPLE CAL_LEVEL_2::z_min_max()
-{
-  return Z_MIN_MAX;
-}
-
 void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
 { 
-
   // Inititialization of Offset, to be ignored after second set.
 
   if (SIMPLE_CALIBRATION)
@@ -336,8 +375,13 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
       {
         if (quad_current != QUAD_PREV && QUAD_DATA.OVERFLOW == false)
         {
+          bool changed = false;
+
           // Calculate new offset
           COMPASS_XYZ outstanding_point;
+          float minimum_distance = 0;
+          float maximum_distance = 0;
+          float r_dist = 0;
 
           // filter outliers in future.
 
@@ -347,9 +391,13 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
             // get min y
             for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
             {
+              r_dist = dist(QUAD_DATA.DATA_POINTS[pos].X - OFFSET.X, QUAD_DATA.DATA_POINTS[pos].Y - OFFSET.Y);
+
               if (pos == 0)
               {
                 outstanding_point = QUAD_DATA.DATA_POINTS[0];
+                minimum_distance = r_dist;
+                maximum_distance = r_dist;
               }
               else
               {
@@ -357,13 +405,39 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                 {
                   outstanding_point = QUAD_DATA.DATA_POINTS[pos];
                 }
+
+                if (r_dist < minimum_distance)
+                {
+                  minimum_distance = r_dist;
+                }
+
+                if (r_dist > maximum_distance)
+                {
+                  maximum_distance = r_dist;
+                }
               }
             }
 
-            A.COORD = outstanding_point;
-            A.HAS_DATA = true;
+            if ((maximum_distance - minimum_distance) < (A.DISTANCE_VARIANCE * 1.1f) || A.DISTANCE_VARIANCE_HAS_DATA == false)
+            {
+              // validate positions
+              if (SIMPLE_CALIBRATION || 
+                  (is_within(outstanding_point.X, C.COORD.X,  D.COORD.X) &&  
+                  outstanding_point.Y < C.COORD.Y && 
+                  outstanding_point.Y < D.COORD.Y && 
+                  outstanding_point.Y < B.COORD.Y))
+              {
+                A.COORD = outstanding_point;
 
-            Y_MIN_MAX.MIN_VALUE = outstanding_point.Y;
+                A.DISTANCE_VARIANCE = (maximum_distance - minimum_distance);
+                A.DISTANCE_VARIANCE_HAS_DATA = true;
+
+                A.HAS_DATA = true;
+                Y_MIN_MAX.MIN_VALUE = outstanding_point.Y;
+                
+                changed = true;
+              }
+            }
           }
 
           // B
@@ -372,9 +446,13 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
             // get max y
             for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
             {
+              r_dist = dist(QUAD_DATA.DATA_POINTS[pos].X - OFFSET.X, QUAD_DATA.DATA_POINTS[pos].Y - OFFSET.Y);
+
               if (pos == 0)
               {
                 outstanding_point = QUAD_DATA.DATA_POINTS[0];
+                minimum_distance = r_dist;
+                maximum_distance = r_dist;
               }
               else
               {
@@ -382,13 +460,39 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                 {
                   outstanding_point = QUAD_DATA.DATA_POINTS[pos];
                 }
+
+                if (r_dist < minimum_distance)
+                {
+                  minimum_distance = r_dist;
+                }
+
+                if (r_dist > maximum_distance)
+                {
+                  maximum_distance = r_dist;
+                }
               }
             }
 
-            B.COORD = outstanding_point;
-            B.HAS_DATA = true;
+            if ((maximum_distance - minimum_distance) < (B.DISTANCE_VARIANCE * 1.1f) || B.DISTANCE_VARIANCE_HAS_DATA == false)
+            {
+              // validate positions
+              if (SIMPLE_CALIBRATION || 
+                  (is_within(outstanding_point.X, C.COORD.X, D.COORD.X) &&  
+                  outstanding_point.Y > C.COORD.Y && 
+                  outstanding_point.Y > D.COORD.Y && 
+                  outstanding_point.Y > A.COORD.Y))
+              {
+                B.COORD = outstanding_point;
 
-            Y_MIN_MAX.MAX_VALUE = outstanding_point.Y;
+                B.DISTANCE_VARIANCE = (maximum_distance - minimum_distance);
+                B.DISTANCE_VARIANCE_HAS_DATA = true;
+
+                B.HAS_DATA = true;
+                Y_MIN_MAX.MAX_VALUE = outstanding_point.Y;
+                
+                changed = true;
+              }
+            }
           }
 
           // C
@@ -397,9 +501,13 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
             // get min x
             for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
             {
+              r_dist = dist(QUAD_DATA.DATA_POINTS[pos].X - OFFSET.X,QUAD_DATA.DATA_POINTS[pos].Y - OFFSET.Y);
+              
               if (pos == 0)
               {
                 outstanding_point = QUAD_DATA.DATA_POINTS[0];
+                minimum_distance = r_dist;
+                maximum_distance = r_dist;
               }
               else
               {
@@ -407,13 +515,39 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                 {
                   outstanding_point = QUAD_DATA.DATA_POINTS[pos];
                 }
+
+                if (r_dist < minimum_distance)
+                {
+                  minimum_distance = r_dist;
+                }
+
+                if (r_dist > maximum_distance)
+                {
+                  maximum_distance = r_dist;
+                }
               }
             }
 
-            C.COORD = outstanding_point;
-            C.HAS_DATA = true;
+            if ((maximum_distance - minimum_distance) < (C.DISTANCE_VARIANCE * 1.1f) || C.DISTANCE_VARIANCE_HAS_DATA == false)
+            {
+              // validate positions
+              if (SIMPLE_CALIBRATION || 
+                  (is_within(outstanding_point.Y, A.COORD.Y, B.COORD.Y) &&  
+                  outstanding_point.X < A.COORD.X && 
+                  outstanding_point.X < D.COORD.X && 
+                  outstanding_point.X < B.COORD.X))
+              {
+                C.COORD = outstanding_point;
 
-            X_MIN_MAX.MIN_VALUE = outstanding_point.X;
+                C.DISTANCE_VARIANCE = (maximum_distance - minimum_distance);
+                C.DISTANCE_VARIANCE_HAS_DATA = true;
+
+                C.HAS_DATA = true;
+                X_MIN_MAX.MIN_VALUE = outstanding_point.X;
+                
+                changed = true;
+              }
+            }
           }
 
           // D
@@ -422,9 +556,13 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
             // get max x
             for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
             {
+              r_dist = dist(QUAD_DATA.DATA_POINTS[pos].X - OFFSET.X,QUAD_DATA.DATA_POINTS[pos].Y - OFFSET.Y);
+              
               if (pos == 0)
               {
                 outstanding_point = QUAD_DATA.DATA_POINTS[0];
+                minimum_distance = r_dist;
+                maximum_distance = r_dist;
               }
               else
               {
@@ -432,28 +570,55 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                 {
                   outstanding_point = QUAD_DATA.DATA_POINTS[pos];
                 }
+
+                if (r_dist < minimum_distance)
+                {
+                  minimum_distance = r_dist;
+                }
+
+                if (r_dist > maximum_distance)
+                {
+                  maximum_distance = r_dist;
+                }
               }
             }
 
-            D.COORD = outstanding_point;
-            D.HAS_DATA = true;
+            if ((maximum_distance - minimum_distance) < (D.DISTANCE_VARIANCE * 1.1f) || D.DISTANCE_VARIANCE_HAS_DATA == false)
+            {
+              // validate positions
+              if (SIMPLE_CALIBRATION || 
+                  (is_within(outstanding_point.Y, A.COORD.Y, B.COORD.Y) &&  
+                  outstanding_point.X > A.COORD.X && 
+                  outstanding_point.X > C.COORD.X && 
+                  outstanding_point.X > B.COORD.X))
+              {
+                D.COORD = outstanding_point;
+                D.DISTANCE_VARIANCE = (maximum_distance - minimum_distance);
+                D.DISTANCE_VARIANCE_HAS_DATA = true;
 
-            X_MIN_MAX.MAX_VALUE = outstanding_point.X;
+                D.HAS_DATA = true;
+                X_MIN_MAX.MAX_VALUE = outstanding_point.X;
+                
+                changed = true;
+              }
+            }
           }
 
-          // Adjust new offset
-          OFFSET.X = (X_MIN_MAX.MAX_VALUE + X_MIN_MAX.MIN_VALUE) / 2.0f;
-          OFFSET.Y = (Y_MIN_MAX.MAX_VALUE + Y_MIN_MAX.MIN_VALUE) / 2.0f;
-          OFFSET.Z = (Z_MIN_MAX.MAX_VALUE + Z_MIN_MAX.MIN_VALUE) / 2.0f;
-
-          // Adjust offset skew
-
-          if (SIMPLE_CALIBRATION == false)
+          if (changed)
           {
-            SKEW_X = (abs(A.COORD.X - B.COORD.X)) / 2.0f;
-            SKEW_Y = (abs(C.COORD.Y - D.COORD.Y)) / 2.0f;
-          }
+            // Adjust new offset
+            OFFSET.X = (X_MIN_MAX.MAX_VALUE + X_MIN_MAX.MIN_VALUE) / 2.0f;
+            OFFSET.Y = (Y_MIN_MAX.MAX_VALUE + Y_MIN_MAX.MIN_VALUE) / 2.0f;
+            OFFSET.Z = (Z_MIN_MAX.MAX_VALUE + Z_MIN_MAX.MIN_VALUE) / 2.0f;
 
+            // Adjust offset skew
+
+            if (SIMPLE_CALIBRATION == false)
+            {
+              SKEW_X = (abs(A.COORD.X - B.COORD.X)) / 2.0f;
+              SKEW_Y = (abs(C.COORD.Y - D.COORD.Y)) / 2.0f;
+            }
+          }
         }
 
         // Clear old record
@@ -513,6 +678,8 @@ bool HMC5883L::create()
       
       ret_success = true;
       CONNECTED = true;
+
+      LEVEL_2.calibration_preload_set();
     }
   }
 
@@ -521,6 +688,7 @@ bool HMC5883L::create()
 
 void HMC5883L::stop()
 {
+  close(DEVICE);
   CONNECTED = false;
 }
 
@@ -582,31 +750,13 @@ void HMC5883L::process()
     // Check Bearing with GPS Heading
     
   }
-
-  // Run Calibration Routines if necessary.
-  if (CALIBRATE)
-  {
-    //Level 1
-    // If level 1 calibration timer is on
-    if (LEVEL_1.CALIBRATION_TIMER_LEVEL_1.ping_down(tmeFrame_Time))
-    {
-      LEVEL_1.calibration_level_1(tmeFrame_Time, RAW_XYZ);
-    }
-    else
-    {
-      // Level 1 calibration is done
-      CALIBRATE = false;
-
-      // Check again in 1 minute
-      CALIBRATION_SPOT_CHECK.ping_up(tmeFrame_Time, 1 * 60000);
-    }
-
-
-  }
   */
 
   // Level 2 - Calibration (Always Active.)
-  LEVEL_2.calibration_level_2(RAW_XYZ);
+  if (CALIBRATE_LOCK == false)
+  {
+    LEVEL_2.calibration_level_2(RAW_XYZ);
+  }
 
   // Calclulate Bearing
 
@@ -695,57 +845,62 @@ void HMC5883L::calibrateion_reset()
 void HMC5883L::calibrate_toggle()
 {
   CALIBRATE = !CALIBRATE;
-
-  /*
-  if (CALIBRATE)
-  {
-    LEVEL_1.CALIBRATION_TIMER_LEVEL_1.ping_up(tmeFrame_Time, 1 * 60000);
-  }
-  else
-  {
-    CALIBRATION_SPOT_CHECK.ping_up(tmeFrame_Time, 1 * 60000);
-  }
-  */
 }
 
-MIN_MAX_SIMPLE HMC5883L::level_1_min_max_x()
+void HMC5883L::calibrate_lock_toggle()
 {
-  return LEVEL_2.x_min_max();
-}
-MIN_MAX_SIMPLE HMC5883L::level_1_min_max_y()
-{
-  return LEVEL_2.y_min_max();
-}
-MIN_MAX_SIMPLE HMC5883L::level_1_min_max_z()
-{
-  return LEVEL_2.z_min_max();
-}
-
-COMPASS_XYZ HMC5883L::level_1_offset()
-{
-  return LEVEL_2.offset();
-}
-
-CALIBRATION_DATA HMC5883L::level_2_a()
-{
-  return LEVEL_2.a();
-}
-CALIBRATION_DATA HMC5883L::level_2_c()
-{
-  return LEVEL_2.c();
-}
-CALIBRATION_DATA HMC5883L::level_2_d()
-{
-  return LEVEL_2.d();
-}
-CALIBRATION_DATA HMC5883L::level_2_b()
-{
-  return LEVEL_2.b();
+  CALIBRATE_LOCK = !CALIBRATE_LOCK;
 }
 
 bool HMC5883L::calibrate_on()
 {
   return CALIBRATE;
+}
+
+bool HMC5883L::calibrate_lock_on()
+{
+  return CALIBRATE_LOCK;
+}
+
+MIN_MAX_SIMPLE HMC5883L::calibration_min_max_x()
+{
+  return LEVEL_2.x_min_max();
+}
+MIN_MAX_SIMPLE HMC5883L::calibration_min_max_y()
+{
+  return LEVEL_2.y_min_max();
+}
+MIN_MAX_SIMPLE HMC5883L::calibration_min_max_z()
+{
+  return LEVEL_2.z_min_max();
+}
+
+COMPASS_XYZ HMC5883L::calibration_offset()
+{
+  return LEVEL_2.offset();
+}
+
+CALIBRATION_DATA HMC5883L::calibration_point_a()
+{
+  return LEVEL_2.a();
+}
+CALIBRATION_DATA HMC5883L::calibration_point_b()
+{
+  return LEVEL_2.b();
+}
+CALIBRATION_DATA HMC5883L::calibration_point_c()
+{
+  return LEVEL_2.c();
+}
+CALIBRATION_DATA HMC5883L::calibration_point_d()
+{
+  return LEVEL_2.d();
+}
+
+void HMC5883L::calibration_preload(CALIBRATION_DATA A_Cal_Pt, CALIBRATION_DATA B_Cal_Pt, 
+                                    CALIBRATION_DATA C_Cal_Pt, CALIBRATION_DATA D_Cal_Pt)
+{
+  LEVEL_2.calibration_preload(A_Cal_Pt, B_Cal_Pt, C_Cal_Pt, D_Cal_Pt);
 }
 
 bool HMC5883L::connected()
@@ -824,6 +979,8 @@ bool HMC5883L::cycle(unsigned long tmeFrame_Time)
       //  Don't prepare check baud rate if autoconnect if not on
       if (PROPS.AUTOSTART == true)
       {
+        DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 2000);   // Refresh the data recieve timer.
+
         CYCLE = 0; // Go into normal cycle.
         create();
       }
@@ -843,22 +1000,40 @@ bool HMC5883L::cycle(unsigned long tmeFrame_Time)
     // Write buffer
     if ((write(DEVICE, BUFFER, 1)) != 1)
     {
-      // stop comms.
-      CYCLE_CHANGE = -1;
+      // Write Failed
+      if (PROPS.AUTOSTART)
+      {
+        // set to stop
+        CYCLE_CHANGE = -1;
+        stop();
+      }
+      else
+      {
+        // Set to disconnect and restart
+        CYCLE_CHANGE = 1;
+      }
+
       ret_cycle_changed = true;
-      CYCLE = -1;
-      stop();
     }
     else
     {
       // Read buffer
       if (read(DEVICE, BUFFER, 6) != 6)
       {
-        // stop comms.
-        CYCLE_CHANGE = -1;
+        // Read Failed
+        if (PROPS.AUTOSTART)
+        {
+          // set to stop
+          CYCLE_CHANGE = -1;
+          stop();
+        }
+        else
+        {
+          // Set to disconnect and restart
+          CYCLE_CHANGE = 1;
+        }
+
         ret_cycle_changed = true;
-        CYCLE = -1;
-        stop();
       }
       else
       {

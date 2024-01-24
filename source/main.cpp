@@ -364,11 +364,30 @@ int loop_2(bool TTY_Only)
 
   sdSystem.COMMS_COMPASS.PROPS.AUTOSTART = COMMS_AUTOSTART_COMPASS;
   sdSystem.COMMS_COMPASS.PROPS.CONTINUOUS_DATA = CONTINUOUS_DATA_GPS;
-
-  //sdSystem.COMMS_GPS.PROPS.SAVE_LOG_FILENAME = COMMS_SAVE_LOG_FILENAME_GPS;
   
-  //sdSystem.COMMS_GPS.PROPS.RECEIVE_TEST_DATA = COMMS_RECEIVE_TEST_DATA_GPS;
-  //sdSystem.COMMS_GPS.PROPS.TEST_DATA_FILENAME = COMMS_TEST_DATA_FILENAME_GPS;
+  // Preload Calibration Data
+  CALIBRATION_DATA A_Cal_Pt;
+  CALIBRATION_DATA B_Cal_Pt;
+  CALIBRATION_DATA C_Cal_Pt;
+  CALIBRATION_DATA D_Cal_Pt;
+
+  A_Cal_Pt.COORD.X = 504.0f;
+  A_Cal_Pt.COORD.Y = -27.0f;
+  A_Cal_Pt.DISTANCE_VARIANCE = 44.0f;
+
+  B_Cal_Pt.COORD.X = 421.0f;
+  B_Cal_Pt.COORD.Y = 469.0f;
+  B_Cal_Pt.DISTANCE_VARIANCE = 46.0f;
+
+  C_Cal_Pt.COORD.X = 206.0f;
+  C_Cal_Pt.COORD.Y = 243.0f;
+  C_Cal_Pt.DISTANCE_VARIANCE = 56.0f;
+
+  D_Cal_Pt.COORD.X = 652.0f;
+  D_Cal_Pt.COORD.Y = 135.0f;
+  D_Cal_Pt.DISTANCE_VARIANCE = 16.0f;
+
+  sdSystem.COMMS_COMPASS.calibration_preload(A_Cal_Pt, B_Cal_Pt, C_Cal_Pt, D_Cal_Pt);
 
   // ---------------------------------------------------------------------------------------
   // Initialize the console

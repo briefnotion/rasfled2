@@ -74,46 +74,12 @@ class CALIBRATION_DATA
   public:
 
   COMPASS_XYZ COORD;
+
+  float DISTANCE_VARIANCE = 0.0f;
+  bool DISTANCE_VARIANCE_HAS_DATA = false;
   
   bool HAS_DATA = false;
 };
-
-// -------------------------------------------------------------------------------------
-
-/*
-class CAL_LEVEL_1
-{
-  private:
-
-  // Simple calibration
-  bool MIN_MAX_HAS_DATA = false;
-
-  MIN_MAX_SIMPLE X_MIN_MAX;
-  MIN_MAX_SIMPLE Y_MIN_MAX;
-  MIN_MAX_SIMPLE Z_MIN_MAX;
-
-  COMPASS_XYZ OFFSET;
-  bool OFFSET_CHANGED = false;
-
-  public:
-
-  TIMED_PING CALIBRATION_TIMER_LEVEL_1;
-
-  void clear();
-
-  COMPASS_XYZ offset();
-
-  MIN_MAX_SIMPLE x_min_max();
-  MIN_MAX_SIMPLE y_min_max();
-  MIN_MAX_SIMPLE z_min_max();
-
-  bool calibration_level_1_check(vector<COMPASS_XYZ> &Raw_Points); // Checks most recent RAW_POINTS
-
-                                    //  Returns true if outside max min
-  void calibration_level_1(unsigned long tmeFrame_Time, COMPASS_XYZ &RAW_XYZ);       // Run Level 1 cal routines.
-
-};
-*/
 
 // -------------------------------------------------------------------------------------
 
@@ -145,16 +111,10 @@ class CAL_LEVEL_2
   bool SIMPLE_CALIBRATION = true;
   
   MIN_MAX_SIMPLE X_MIN_MAX;
-  COMPASS_XYZ X_MIN_POINT;
-  COMPASS_XYZ X_MAX_POINT;
   
   MIN_MAX_SIMPLE Y_MIN_MAX;
-  COMPASS_XYZ Y_MIN_POINT;
-  COMPASS_XYZ Y_MAX_POINT;
 
   MIN_MAX_SIMPLE Z_MIN_MAX;
-  COMPASS_XYZ Z_MIN_POINT;
-  COMPASS_XYZ Z_MAX_POINT;
 
   float SKEW_X = 0;
   float SKEW_Y = 0;
@@ -181,25 +141,39 @@ class CAL_LEVEL_2
   CALIBRATION_DATA D;
   CALIBRATION_DATA B;
 
+  // Preload Calibration Data
+  bool PRELOAD_DATA_LOADED = false;
+  CALIBRATION_DATA A_Cal_Pt_PRELOAD;
+  CALIBRATION_DATA B_Cal_Pt_PRELOAD;
+  CALIBRATION_DATA C_Cal_Pt_PRELOAD;
+  CALIBRATION_DATA D_Cal_Pt_PRELOAD;
+
   int get_quad(COMPASS_XYZ &Raw_XYZ, float Distance);
 
   public:
+
+
+
+  void calibration_preload(CALIBRATION_DATA A_Cal_Pt, CALIBRATION_DATA B_Cal_Pt, 
+                            CALIBRATION_DATA C_Cal_Pt, CALIBRATION_DATA D_Cal_Pt);
+
+  void calibration_preload_set();
+
+  MIN_MAX_SIMPLE x_min_max();
+  MIN_MAX_SIMPLE y_min_max();
+  MIN_MAX_SIMPLE z_min_max();
 
   CALIBRATION_DATA a();
   CALIBRATION_DATA c();
   CALIBRATION_DATA d();
   CALIBRATION_DATA b();
 
-  void clear();
+  COMPASS_XYZ offset();
 
   float skew_x();
   float skew_y();
-
-  COMPASS_XYZ offset();
-
-  MIN_MAX_SIMPLE x_min_max();
-  MIN_MAX_SIMPLE y_min_max();
-  MIN_MAX_SIMPLE z_min_max();
+  
+  void clear();
 
   void calibration_level_2(COMPASS_XYZ &Raw_XYZ);
   // Run Level 2 cal routines.
@@ -249,6 +223,7 @@ class HMC5883L
   // Calibration
   void add_point(COMPASS_XYZ Point);
   bool CALIBRATE = false;
+  bool CALIBRATE_LOCK = true;
   int CURRENT_CALIBRATION_LEVEL = 0;
 
   TIMED_PING DATA_RECIEVED_TIMER;
@@ -300,6 +275,8 @@ class HMC5883L
   COMPASS_XYZ calibrated_xyz();             // Return most recent xyz data with the current calibratons.
   COMPASS_XYZ calibrated_xyz(int Position); // Returns xyz data from history with the current calibratons.
 
+  void calibration_preload();
+
   int current_calibration_level();
   // Not yet implemented
   //  0 - No calibration Done
@@ -309,21 +286,31 @@ class HMC5883L
   // Removes all calibration data
 
   void calibrate_toggle();
+  // Start / Stop Display Calibration
+
+  void calibrate_lock_toggle();
   // Start / Stop Calibration
 
   bool calibrate_on();
+  // Returns true if calibration is displayed.
+
+  bool calibrate_lock_on();
   // Returns true if calibration in progress.
 
-  // calibration 1
-  MIN_MAX_SIMPLE level_1_min_max_x();
-  MIN_MAX_SIMPLE level_1_min_max_y();
-  MIN_MAX_SIMPLE level_1_min_max_z();
-  COMPASS_XYZ level_1_offset();
+  // calibration
 
-  CALIBRATION_DATA level_2_a();
-  CALIBRATION_DATA level_2_c();
-  CALIBRATION_DATA level_2_d();
-  CALIBRATION_DATA level_2_b();
+  MIN_MAX_SIMPLE calibration_min_max_x();
+  MIN_MAX_SIMPLE calibration_min_max_y();
+  MIN_MAX_SIMPLE calibration_min_max_z();
+  COMPASS_XYZ calibration_offset();
+
+  CALIBRATION_DATA calibration_point_a();
+  CALIBRATION_DATA calibration_point_b();
+  CALIBRATION_DATA calibration_point_c();
+  CALIBRATION_DATA calibration_point_d();
+
+  void calibration_preload(CALIBRATION_DATA A_Cal_Pt, CALIBRATION_DATA B_Cal_Pt, 
+                            CALIBRATION_DATA C_Cal_Pt, CALIBRATION_DATA D_Cal_Pt);
 
   bool connected();
   // Returns true if hmc5883l is successfully connected.
