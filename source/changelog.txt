@@ -1,3 +1,14 @@
+2.119_240124
+  - No longer determining circleness by only scanning the radius variance
+      of just the active quadrant.  That method caused one axis to 
+      constantly improve its flatness, while the other axis was unable 
+      to improve its flatness from what it had before, causing the 
+      calibration circle to just increase in ovelness. Now, measuring 
+      the radian variance for all four quadrants.  Calibration adjustment 
+      is only saved if calibration is measurments is more circular, or 
+      just a little worste.
+  - Preloaded calibration isn't working anymore.
+
 2.118_240122
   - Added ability to preload compass calibration settings, because the 
       world is chaotic and, even things like a car passing can throw 

@@ -1669,10 +1669,10 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     {
       ImGui::Text(" RAW XYZ: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.raw_xyz().X, sdSysData.COMMS_COMPASS.raw_xyz().Y, sdSysData.COMMS_COMPASS.raw_xyz().Z);
       ImGui::Text("CAL OFFS: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, sdSysData.COMMS_COMPASS.calibration_offset().Z);
-      ImGui::Text("CAL PT A: %.0f, %.0f, %.0f :%.0f", sdSysData.COMMS_COMPASS.calibration_point_a().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_a().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_a().COORD.Z, sdSysData.COMMS_COMPASS.calibration_point_a().DISTANCE_VARIANCE);
-      ImGui::Text("CAL PT B: %.0f, %.0f, %.0f :%.0f", sdSysData.COMMS_COMPASS.calibration_point_b().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_b().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_b().COORD.Z, sdSysData.COMMS_COMPASS.calibration_point_b().DISTANCE_VARIANCE);
-      ImGui::Text("CAL PT C: %.0f, %.0f, %.0f :%.0f", sdSysData.COMMS_COMPASS.calibration_point_c().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_c().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_c().COORD.Z, sdSysData.COMMS_COMPASS.calibration_point_c().DISTANCE_VARIANCE);
-      ImGui::Text("CAL PT D: %.0f, %.0f, %.0f :%.0f", sdSysData.COMMS_COMPASS.calibration_point_d().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_d().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_d().COORD.Z, sdSysData.COMMS_COMPASS.calibration_point_d().DISTANCE_VARIANCE);
+      ImGui::Text("CAL PT A: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_point_a().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_a().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_a().COORD.Z);
+      ImGui::Text("CAL PT B: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_point_b().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_b().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_b().COORD.Z);
+      ImGui::Text("CAL PT C: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_point_c().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_c().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_c().COORD.Z);
+      ImGui::Text("CAL PT D: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_point_d().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_d().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_d().COORD.Z);
     }
   }
 

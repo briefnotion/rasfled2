@@ -69,17 +69,8 @@ bool XYZ_MIN_MAX(COMPASS_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_
 
 // -------------------------------------------------------------------------------------
 
-class CALIBRATION_DATA
-{
-  public:
-
-  COMPASS_XYZ COORD;
-
-  float DISTANCE_VARIANCE = 0.0f;
-  bool DISTANCE_VARIANCE_HAS_DATA = false;
-  
-  bool HAS_DATA = false;
-};
+bool four_point_check(COMPASS_XYZ Top, COMPASS_XYZ Bottom, 
+                      COMPASS_XYZ Left, COMPASS_XYZ Right);
 
 // -------------------------------------------------------------------------------------
 
@@ -87,7 +78,7 @@ class CAL_LEVEL_2_QUAD_RECORD
 {
   private:
 
-  int SIZE = 500;
+  int SIZE = 250;
 
   public:
 
@@ -101,6 +92,36 @@ class CAL_LEVEL_2_QUAD_RECORD
 
 };
 
+class CALIBRATION_DATA
+{
+  private:
+
+  // For calculation
+  COMPASS_XYZ CALC_Y_MIN_PT;
+  COMPASS_XYZ CALC_Y_MAX_PT;
+  COMPASS_XYZ CALC_X_MIN_PT;
+  COMPASS_XYZ CALC_X_MAX_PT;
+
+  public:
+
+  CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
+
+  COMPASS_XYZ COORD;
+
+  //float DISTANCE_VARIANCE = 0.0f;
+  //bool DISTANCE_VARIANCE_HAS_DATA = false;
+  
+  bool HAS_DATA = false;
+
+  float variance_from_offset(COMPASS_XYZ Offset);
+
+  void stick_the_landing_point(int Quadrant);
+
+  void clear();
+};
+
+// -------------------------------------------------------------------------------------
+
 class CAL_LEVEL_2
 {
   private:
@@ -111,17 +132,13 @@ class CAL_LEVEL_2
   bool SIMPLE_CALIBRATION = true;
   
   MIN_MAX_SIMPLE X_MIN_MAX;
-  
   MIN_MAX_SIMPLE Y_MIN_MAX;
-
   MIN_MAX_SIMPLE Z_MIN_MAX;
 
   float SKEW_X = 0;
   float SKEW_Y = 0;
 
   COMPASS_XYZ OFFSET;
-  
-  CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
   
   //       A              |skew y
   //    AC   AD           |
@@ -141,21 +158,25 @@ class CAL_LEVEL_2
   CALIBRATION_DATA D;
   CALIBRATION_DATA B;
 
+  CALIBRATION_DATA ACTIVE_QUAD_DATA;
+
+  bool COMPLETE_QUAD_DATA_SET = false;
+  float DISTANCE_VARIANCE_FULL = -1;
+
   // Preload Calibration Data
   bool PRELOAD_DATA_LOADED = false;
-  CALIBRATION_DATA A_Cal_Pt_PRELOAD;
-  CALIBRATION_DATA B_Cal_Pt_PRELOAD;
-  CALIBRATION_DATA C_Cal_Pt_PRELOAD;
-  CALIBRATION_DATA D_Cal_Pt_PRELOAD;
+
+  COMPASS_XYZ A_Cal_Pt_PRELOAD;
+  COMPASS_XYZ B_Cal_Pt_PRELOAD;
+  COMPASS_XYZ C_Cal_Pt_PRELOAD;
+  COMPASS_XYZ D_Cal_Pt_PRELOAD;
 
   int get_quad(COMPASS_XYZ &Raw_XYZ, float Distance);
 
   public:
 
-
-
-  void calibration_preload(CALIBRATION_DATA A_Cal_Pt, CALIBRATION_DATA B_Cal_Pt, 
-                            CALIBRATION_DATA C_Cal_Pt, CALIBRATION_DATA D_Cal_Pt);
+  void calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
+                            COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt);
 
   void calibration_preload_set();
 
@@ -223,7 +244,7 @@ class HMC5883L
   // Calibration
   void add_point(COMPASS_XYZ Point);
   bool CALIBRATE = false;
-  bool CALIBRATE_LOCK = true;
+  bool CALIBRATE_LOCK = false;
   int CURRENT_CALIBRATION_LEVEL = 0;
 
   TIMED_PING DATA_RECIEVED_TIMER;
@@ -309,8 +330,8 @@ class HMC5883L
   CALIBRATION_DATA calibration_point_c();
   CALIBRATION_DATA calibration_point_d();
 
-  void calibration_preload(CALIBRATION_DATA A_Cal_Pt, CALIBRATION_DATA B_Cal_Pt, 
-                            CALIBRATION_DATA C_Cal_Pt, CALIBRATION_DATA D_Cal_Pt);
+  void calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
+                            COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt);
 
   bool connected();
   // Returns true if hmc5883l is successfully connected.
