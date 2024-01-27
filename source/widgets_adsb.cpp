@@ -1668,11 +1668,11 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     if (sdSysData.COMMS_COMPASS.calibrate_on())
     {
       ImGui::Text(" RAW XYZ: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.raw_xyz().X, sdSysData.COMMS_COMPASS.raw_xyz().Y, sdSysData.COMMS_COMPASS.raw_xyz().Z);
-      ImGui::Text("CAL OFFS: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, sdSysData.COMMS_COMPASS.calibration_offset().Z);
-      ImGui::Text("CAL PT A: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_point_a().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_a().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_a().COORD.Z);
-      ImGui::Text("CAL PT B: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_point_b().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_b().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_b().COORD.Z);
-      ImGui::Text("CAL PT C: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_point_c().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_c().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_c().COORD.Z);
-      ImGui::Text("CAL PT D: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_point_d().COORD.X, sdSysData.COMMS_COMPASS.calibration_point_d().COORD.Y, sdSysData.COMMS_COMPASS.calibration_point_d().COORD.Z);
+      ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance());
+      ImGui::Text("CAL PT A: %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_a().X, sdSysData.COMMS_COMPASS.calibration_max_coord_a().Y);
+      ImGui::Text("CAL PT B: %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_b().X, sdSysData.COMMS_COMPASS.calibration_max_coord_b().Y);
+      ImGui::Text("CAL PT C: %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_c().X, sdSysData.COMMS_COMPASS.calibration_max_coord_c().Y);
+      ImGui::Text("CAL PT D: %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_d().X, sdSysData.COMMS_COMPASS.calibration_max_coord_d().Y);
     }
   }
 
@@ -1778,13 +1778,16 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       ImVec2 center = point_position_center(working_area);
       ImVec2 p1;
       ImVec2 p2;
+      ImVec2 p3;
+      ImVec2 p4;
+
       ImVec2 r1;
       ImVec2 r2;
       ImVec2 c1;
       ImVec2 c2;
       
       // level 0 and level 1
-      //draw points - 
+      //draw compass points - 
       for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.raw_points_size(); pos++)
       {
         p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.raw_xyz(pos).X / 4.0f), 
@@ -1801,6 +1804,18 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
         }
 
         draw_marker(sdSysData, p2, sdSysData.COLOR_SELECT.blue());
+      }
+
+      // draw quad calibration
+      if (sdSysData.COMMS_COMPASS.calibration_points_active_quad_overflow() == false)
+      {
+        for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS.size(); pos++)
+        {
+          p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS[pos].X / 4.0f), 
+                              center.y + (sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS[pos].Y / 4.0f));
+
+          draw_marker(sdSysData, p1, sdSysData.COLOR_SELECT.green());
+        }
       }
 
       // draw outlining box
@@ -1827,36 +1842,26 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
       // level 2
       // A
-      if (sdSysData.COMMS_COMPASS.calibration_point_a().HAS_DATA)
+      if (sdSysData.COMMS_COMPASS.calibration_simple() == false)
       {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_point_a().COORD.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.calibration_point_a().COORD.Y / 4.0f));
-        
+        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_max_coord_a().X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.calibration_max_coord_a().Y / 4.0f));
+        p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_max_coord_b().X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.calibration_max_coord_b().Y / 4.0f));
+        p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_max_coord_c().X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.calibration_max_coord_c().Y / 4.0f));
+        p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_max_coord_d().X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.calibration_max_coord_d().Y / 4.0f));
+
+        draw_line(sdSysData, p1, p4, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(sdSysData, p4, p2, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(sdSysData, p2, p3, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(sdSysData, p3, p1, sdSysData.COLOR_SELECT.green(), 2.0f);
+
         draw_marker_filled(sdSysData, p1, sdSysData.COLOR_SELECT.white());
-      }
-      // C
-      if (sdSysData.COMMS_COMPASS.calibration_point_c().HAS_DATA)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_point_c().COORD.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.calibration_point_c().COORD.Y / 4.0f));
-        
-        draw_marker_filled(sdSysData, p1, sdSysData.COLOR_SELECT.white());
-      }
-      // D
-      if (sdSysData.COMMS_COMPASS.calibration_point_d().HAS_DATA)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_point_d().COORD.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.calibration_point_d().COORD.Y / 4.0f));
-        
-        draw_marker_filled(sdSysData, p1, sdSysData.COLOR_SELECT.white());
-      }
-      // B
-      if (sdSysData.COMMS_COMPASS.calibration_point_b().HAS_DATA)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_point_b().COORD.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.calibration_point_b().COORD.Y / 4.0f));
-        
-        draw_marker_filled(sdSysData, p1, sdSysData.COLOR_SELECT.white());
+        draw_marker_filled(sdSysData, p2, sdSysData.COLOR_SELECT.white());
+        draw_marker_filled(sdSysData, p3, sdSysData.COLOR_SELECT.white());
+        draw_marker_filled(sdSysData, p4, sdSysData.COLOR_SELECT.white());
       }
     }
   }
@@ -1929,43 +1934,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   // test for point position accuracy by getting geo from range, then putting geo marker 
   //  on range indicator.
 
-  /*
-  ImVec2 test_position;
-  ImVec2 test_position2;
-
-  test_position = get_coords_x_miles_from_coords(RANGE_INDICATOR.center_lat_lon().x, RANGE_INDICATOR.center_lat_lon().y,
-                                                  RANGE_INDICATOR.range(), 225);
-
-  test_position2 = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), 
-                                  RANGE_INDICATOR.center_lat_lon(), test_position);
-
-  draw_marker(sdSysData, test_position2);
-
-  ImGui::Text("ll: %f %f", test_position.x, test_position.y);
-  ImGui::Text("pt: %f %f", test_position2.x, test_position2.y);
-  */
-
-  /*
-  test_position.x = 323;
-  test_position.y = 323;
-  draw_marker(sdSysData, point_position(working_area, test_position));
-
-  test_position.x = 360;
-  test_position.y = 400;
-  draw_marker(sdSysData, point_position(working_area, test_position));
-
-  test_position.x = 500;
-  test_position.y = 580;
-  draw_marker(sdSysData, point_position(working_area, test_position));
-
-  test_position.x = 700;
-  test_position.y = 500;
-  draw_marker(sdSysData, point_position(working_area, test_position));
-
-  test_position.x = 653;
-  test_position.y = 223;
-  draw_marker(sdSysData, point_position(working_area, test_position));
-  */
+  // Not Implemented.
 }
 
 // -------------------------------------------------------------------------------------

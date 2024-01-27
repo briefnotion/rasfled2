@@ -1,3 +1,16 @@
+2.120_240126
+  - I thought this would be easy. 
+  - Preloaded calibration still isn't implemented.
+  - Improved the calibration circle routines.
+  - Improved the Min Max detection Routines.
+  - Calibration data discarded after 50 seconds, not 25.
+  - Improved bug preventing calibrtion data from full clear().
+  - Calibration routines will generate and compare circleness with fresh 
+      offset values, instead of current active offset values.
+  - Calibration data will be saved if more cicular than previous circle 
+      at 105% instead of 110%. The save at 5% worste, hopefully, allow 
+      change to morph.
+
 2.119_240124
   - No longer determining circleness by only scanning the radius variance
       of just the active quadrant.  That method caused one axis to 

@@ -67,6 +67,8 @@ class COMPASS_XY
 
 bool XYZ_MIN_MAX(COMPASS_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_MAX_SIMPLE &Ymm, MIN_MAX_SIMPLE &Zmm);
 
+COMPASS_XYZ calc_offset(COMPASS_XYZ Y_Min,  COMPASS_XYZ Y_Max, COMPASS_XYZ X_Min, COMPASS_XYZ X_Max);
+
 // -------------------------------------------------------------------------------------
 
 bool four_point_check(COMPASS_XYZ Top, COMPASS_XYZ Bottom, 
@@ -78,7 +80,7 @@ class CAL_LEVEL_2_QUAD_RECORD
 {
   private:
 
-  int SIZE = 250;
+  int SIZE = 500;
 
   public:
 
@@ -96,21 +98,12 @@ class CALIBRATION_DATA
 {
   private:
 
-  // For calculation
-  COMPASS_XYZ CALC_Y_MIN_PT;
-  COMPASS_XYZ CALC_Y_MAX_PT;
-  COMPASS_XYZ CALC_X_MIN_PT;
-  COMPASS_XYZ CALC_X_MAX_PT;
-
   public:
 
   CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
 
   COMPASS_XYZ COORD;
 
-  //float DISTANCE_VARIANCE = 0.0f;
-  //bool DISTANCE_VARIANCE_HAS_DATA = false;
-  
   bool HAS_DATA = false;
 
   float variance_from_offset(COMPASS_XYZ Offset);
@@ -153,13 +146,6 @@ class CAL_LEVEL_2
   // 2 = B
   // 3 = C
 
-  CALIBRATION_DATA A;
-  CALIBRATION_DATA C;
-  CALIBRATION_DATA D;
-  CALIBRATION_DATA B;
-
-  CALIBRATION_DATA ACTIVE_QUAD_DATA;
-
   bool COMPLETE_QUAD_DATA_SET = false;
   float DISTANCE_VARIANCE_FULL = -1;
 
@@ -175,6 +161,12 @@ class CAL_LEVEL_2
 
   public:
 
+  CALIBRATION_DATA A;
+  CALIBRATION_DATA C;
+  CALIBRATION_DATA D;
+  CALIBRATION_DATA B;
+  CALIBRATION_DATA ACTIVE_QUAD_DATA;
+
   void calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
                             COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt);
 
@@ -184,15 +176,13 @@ class CAL_LEVEL_2
   MIN_MAX_SIMPLE y_min_max();
   MIN_MAX_SIMPLE z_min_max();
 
-  CALIBRATION_DATA a();
-  CALIBRATION_DATA c();
-  CALIBRATION_DATA d();
-  CALIBRATION_DATA b();
-
   COMPASS_XYZ offset();
 
   float skew_x();
   float skew_y();
+
+  float variance();
+  bool simple_calibration();
   
   void clear();
 
@@ -325,10 +315,18 @@ class HMC5883L
   MIN_MAX_SIMPLE calibration_min_max_z();
   COMPASS_XYZ calibration_offset();
 
-  CALIBRATION_DATA calibration_point_a();
-  CALIBRATION_DATA calibration_point_b();
-  CALIBRATION_DATA calibration_point_c();
-  CALIBRATION_DATA calibration_point_d();
+  CAL_LEVEL_2_QUAD_RECORD calibration_points_a();
+  CAL_LEVEL_2_QUAD_RECORD calibration_points_b();
+  CAL_LEVEL_2_QUAD_RECORD calibration_points_c();
+  CAL_LEVEL_2_QUAD_RECORD calibration_points_d();
+  CAL_LEVEL_2_QUAD_RECORD calibration_points_active_quad_data();
+  bool calibration_points_active_quad_overflow();
+  COMPASS_XYZ calibration_max_coord_a();
+  COMPASS_XYZ calibration_max_coord_b();
+  COMPASS_XYZ calibration_max_coord_c();
+  COMPASS_XYZ calibration_max_coord_d();
+  float calibration_variance();
+  bool calibration_simple();
 
   void calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
                             COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt);
