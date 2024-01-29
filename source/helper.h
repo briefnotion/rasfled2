@@ -553,6 +553,14 @@ float velocity_translate_knots_to_kmph(float knots);
 
 float pressure_translate_kPa_to_inHg(float kPa);
 
+float emperical_mean(vector<float> &Number_List, float Deviations);
+// Imperical Rule Mean of Vector
+//
+// Deviations:
+//  1 - 68% of the data falls within one standard deviation of the mean.
+//  2 - 95% of the data falls within two standard deviations of the mean.
+//  3 - 99.7% of the data falls within three standard deviations of the mean.
+
 int position_of_scale(int size, int scale, int value);
 // Calculate position of value on scale (eg 100%) with size.
 //  Will not return anything larger than size.

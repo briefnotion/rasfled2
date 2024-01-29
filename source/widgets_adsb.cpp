@@ -106,8 +106,9 @@ void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size)
   draw_list->AddNgonFilled(Screen_Position, Size, Color, 4.0f);
 }
 
-void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, float Strength_Point_Size,  
-                NEW_COLOR_SCALE &Color_Scale, ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track)
+void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
+                float Strength_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
+                ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track)
 {
   bool draw_0 = false;
   bool draw_1 = false;
@@ -142,7 +143,12 @@ void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, float
   }
 
   // Draw Detailed Track
-  for(int position = 1; position < (int)Track.TRACK_POINTS_DETAILED.size(); position++)
+  if (Draw_Level_Of_Detail < 1)
+  {
+    Draw_Level_Of_Detail = 1;
+  }
+
+  for(int position = 1; position < (int)Track.TRACK_POINTS_DETAILED.size(); position = position + Draw_Level_Of_Detail)
   {
     track_position_0 = track_position_1;
     draw_0 = draw_1;
@@ -481,7 +487,7 @@ bool ADSB_WIDGET::active()
 }
 
 // Draw all aircraft onto the maps.
-void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon)
+void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon)
 {
   if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.TRACK_POINTS_DETAILED.size() > 1)
   {
@@ -494,7 +500,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
     // Draw track first then overlay aircraft.
     if (TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(sdSysData, Working_Area, Scale, 3.0f, ALTITUDE_COLOR_SCALE, Center_Lat_Lon, TRACK);
+      draw_track(sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 3.0f, ALTITUDE_COLOR_SCALE, Center_Lat_Lon, TRACK);
     }
 
     // Draw Aircraft Marker
@@ -1879,7 +1885,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     // Draw track of GPS Position.
     if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), 2.5f, GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.center_lat_lon(), sdSysData.GPS_SYSTEM.TRACK);
+      draw_track(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 2.5f, GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.center_lat_lon(), sdSysData.GPS_SYSTEM.TRACK);
     }
 
     bool draw = false;
@@ -1908,7 +1914,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   {
     if (ADSB_Widgets[aircraft].is_expired(sdSysData) == false)
     {
-      ADSB_Widgets[aircraft].draw_aircraft_map_marker(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon());
+      ADSB_Widgets[aircraft].draw_aircraft_map_marker(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), RANGE_INDICATOR.center_lat_lon());
     }
   }
 

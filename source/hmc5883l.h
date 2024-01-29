@@ -87,6 +87,7 @@ class CAL_LEVEL_2_QUAD_RECORD
   bool OVERFLOW = false;
 
   vector<COMPASS_XYZ> DATA_POINTS;
+  vector<float> VARIANCE_COLLECTION;
 
   void add_point(COMPASS_XYZ &Raw_XYZ);
 
@@ -149,13 +150,11 @@ class CAL_LEVEL_2
   bool COMPLETE_QUAD_DATA_SET = false;
   float DISTANCE_VARIANCE_FULL = -1;
 
-  // Preload Calibration Data
-  bool PRELOAD_DATA_LOADED = false;
-
   COMPASS_XYZ A_Cal_Pt_PRELOAD;
   COMPASS_XYZ B_Cal_Pt_PRELOAD;
   COMPASS_XYZ C_Cal_Pt_PRELOAD;
   COMPASS_XYZ D_Cal_Pt_PRELOAD;
+  float CAL_VARIANCE_PRELOAD = 0.0f;
 
   int get_quad(COMPASS_XYZ &Raw_XYZ, float Distance);
 
@@ -168,7 +167,8 @@ class CAL_LEVEL_2
   CALIBRATION_DATA ACTIVE_QUAD_DATA;
 
   void calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
-                            COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt);
+                            COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt, 
+                            float Cal_Variance);
 
   void calibration_preload_set();
 
@@ -247,9 +247,13 @@ class HMC5883L
 
   int CYCLE_CHANGE = 99;  // Internal: for controling start stop and autostart.
 
-  float KNOWN_DEVICE_DEGREE_OFFSET = 23.0f;   // If device is mounted offset to  
+  float KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD = 0.0f;
+  float KNOWN_DEVICE_DEGREE_OFFSET = 0.0f;   // If device is mounted offset to  
                                               //  true forward facing, adjust compass 
                                               //  bearing to reflect
+
+  // Preload Calibration Data
+  bool PRELOAD_DATA_LOADED = false;
 
   bool CONNECTED = false;                     // Set to true if connected.
 
@@ -286,7 +290,11 @@ class HMC5883L
   COMPASS_XYZ calibrated_xyz();             // Return most recent xyz data with the current calibratons.
   COMPASS_XYZ calibrated_xyz(int Position); // Returns xyz data from history with the current calibratons.
 
-  void calibration_preload();
+  void calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
+                            COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt, 
+                            float Cal_Variance, float Cal_Offset);
+
+  void calibration_preload_set();
 
   int current_calibration_level();
   // Not yet implemented
@@ -315,10 +323,6 @@ class HMC5883L
   MIN_MAX_SIMPLE calibration_min_max_z();
   COMPASS_XYZ calibration_offset();
 
-  CAL_LEVEL_2_QUAD_RECORD calibration_points_a();
-  CAL_LEVEL_2_QUAD_RECORD calibration_points_b();
-  CAL_LEVEL_2_QUAD_RECORD calibration_points_c();
-  CAL_LEVEL_2_QUAD_RECORD calibration_points_d();
   CAL_LEVEL_2_QUAD_RECORD calibration_points_active_quad_data();
   bool calibration_points_active_quad_overflow();
   COMPASS_XYZ calibration_max_coord_a();

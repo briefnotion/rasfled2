@@ -1,3 +1,13 @@
+2.121_240128
+  - Added a "level of detail" parameter to the draw_track() function, 
+      to reduce the number of lines drawn, in relationship to the number 
+      of miles the range is set too.
+  - Calculating variance of calibration data with emperical rule, to 
+      hopefully, allow larger data set a chance at contributing 
+      calibration quadrant A B C D point data. As was now, have not 
+      yet achieved a calibration score less than 242 variance. 
+  - Restored calibration preload routines.
+
 2.120_240126
   - I thought this would be easy. 
   - Preloaded calibration still isn't implemented.

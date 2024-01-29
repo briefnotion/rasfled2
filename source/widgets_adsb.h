@@ -64,8 +64,9 @@ void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Col
 
 void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size);
 
-void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, float Strength_Point_Size, 
-                NEW_COLOR_SCALE &Color_Scale, ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track);
+void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
+                float Strength_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
+                ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track);
 
 // ---------------------------------------------------------------------------------------
 
@@ -191,7 +192,7 @@ class ADSB_WIDGET
 
   bool active();
 
-  void draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon);
+  void draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -255,12 +256,18 @@ class ADSB_RANGE
   ImVec2 gps_pos_lat_lon();
 
   float range();
+  // Distance in miles, the range is set at for viewing.
 
   void set_range(float Range_Miles);
+  // Set the distance in miles, the range is set at for viewing.
 
   void zoom_in();
+  // Decrease the distance in miles, the range is set at for viewing, 
+  //  by one.
 
   void zoom_out();
+  // Increase the distance in miles, the range is set at for viewing, 
+  //  by one.
 
   void set_current_center_position(ImVec2 Lat_Lon);
   

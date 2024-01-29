@@ -365,27 +365,28 @@ int loop_2(bool TTY_Only)
   sdSystem.COMMS_COMPASS.PROPS.AUTOSTART = COMMS_AUTOSTART_COMPASS;
   sdSystem.COMMS_COMPASS.PROPS.CONTINUOUS_DATA = CONTINUOUS_DATA_GPS;
   
-  /*
   // Preload Calibration Data
   COMPASS_XYZ A_Cal_Pt;
   COMPASS_XYZ B_Cal_Pt;
   COMPASS_XYZ C_Cal_Pt;
   COMPASS_XYZ D_Cal_Pt;
 
-  A_Cal_Pt.X = 504.0f;
-  A_Cal_Pt.Y = -27.0f;
+  A_Cal_Pt.X = 386.0f;
+  A_Cal_Pt.Y = 68.0f;
 
-  B_Cal_Pt.X = 421.0f;
-  B_Cal_Pt.Y = 469.0f;
+  B_Cal_Pt.X = 270.0f;
+  B_Cal_Pt.Y = 532.0f;
 
-  C_Cal_Pt.X = 206.0f;
-  C_Cal_Pt.Y = 243.0f;
+  C_Cal_Pt.X = 120.0f;
+  C_Cal_Pt.Y = 384.0f;
 
-  D_Cal_Pt.X = 652.0f;
-  D_Cal_Pt.Y = 135.0f;
+  D_Cal_Pt.X = 572.0f;
+  D_Cal_Pt.Y = 194.0f;
 
-  sdSystem.COMMS_COMPASS.calibration_preload(A_Cal_Pt, B_Cal_Pt, C_Cal_Pt, D_Cal_Pt);
-  */
+  float Cal_Variance = 242.0f;
+  float Cal_Offset = 90.0f - 23.0f;
+
+  sdSystem.COMMS_COMPASS.calibration_preload(A_Cal_Pt, B_Cal_Pt, C_Cal_Pt, D_Cal_Pt, Cal_Variance, Cal_Offset);
 
   // ---------------------------------------------------------------------------------------
   // Initialize the console

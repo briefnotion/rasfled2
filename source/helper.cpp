@@ -999,6 +999,65 @@ float pressure_translate_kPa_to_inHg(float kPa)
   return kPa * (1.0f / 3.386389f);
 }
 
+float emperical_mean(vector<float> &Number_List, float Deviations)
+{
+  float mean = 0.0f;
+
+  // Get Normal Mean
+  if (Number_List.size())
+  {
+    // Vars Used.
+    float total = 0.0f;
+    int count = 0;
+
+    for (int pos = 0; pos < (int)Number_List.size(); pos++)
+    {
+      total = total + Number_List[pos];
+    }
+        
+    // Calculate mean.
+    mean = (total / (float)Number_List.size());
+
+
+    // Calculate mean without outliers.
+
+    // Reset vars to 0
+    total = 0.0f;
+
+    // Calculate Standard Deviation
+    float stdev = 0.0f;
+
+    for (int pos = 0; pos < (int)Number_List.size(); pos++)
+    {
+      stdev += pow(Number_List[pos] - mean, 2.0f);
+    }
+
+    stdev = sqrt(stdev / Number_List.size());
+
+    // Calculate Emperical Rule
+    for (int pos = 0; pos < (int)Number_List.size(); pos++)
+    {
+      if(abs(Number_List[pos] - mean) <= Deviations * stdev)
+      {
+        count++;
+        total = total + Number_List[pos];
+      }
+    }
+                
+    // Calculate mean if count is > 0.
+    if (count > 0)
+    {
+      mean = (total / (float)count);
+    }
+    else
+    {
+      mean = 0;
+    }
+  }
+
+  return mean;
+}
+
 int position_of_scale(int size, int scale, int value)
 // Calculate position of value on scale (eg 100%) with size.
 //  Will not return anything larger than size.

@@ -122,58 +122,40 @@ void CAL_LEVEL_2_QUAD_RECORD::clear()
 {
   DATA_POINTS.clear();
   DATA_POINTS.reserve(SIZE);
+
+  VARIANCE_COLLECTION.clear();
+  VARIANCE_COLLECTION.reserve(SIZE);
+
   OVERFLOW = false;
 }
 
 float CALIBRATION_DATA::variance_from_offset(COMPASS_XYZ Offset)
 {
-  // Calculate new offset
-  float minimum_distance = 0;
-  float maximum_distance = 0;
-  float r_dist = 0;
-
   // get min y
   if (QUAD_DATA.DATA_POINTS.size() == 0)
   {
     HAS_DATA = false;
+    return 0;
   }
   else
   {
     HAS_DATA = true;
 
+    // Load VARIANCE_COLLECTION
+    QUAD_DATA.VARIANCE_COLLECTION.clear();
+
     for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
     {
-      r_dist = dist(QUAD_DATA.DATA_POINTS[pos].X - Offset.X, QUAD_DATA.DATA_POINTS[pos].Y - Offset.Y);
-
-      if (pos == 0)
-      {
-        minimum_distance = r_dist;
-        maximum_distance = r_dist;
-      }
-      else
-      {
-        // Check Min Distance
-        if (r_dist < minimum_distance)
-        {
-          minimum_distance = r_dist;
-        }
-
-        // Check Max Distance
-        if (r_dist > maximum_distance)
-        {
-          maximum_distance = r_dist;
-        }
-      }
+      QUAD_DATA.VARIANCE_COLLECTION.push_back(dist(QUAD_DATA.DATA_POINTS[pos].X - Offset.X, QUAD_DATA.DATA_POINTS[pos].Y - Offset.Y));
     }
-  }
-  
-  return maximum_distance - minimum_distance;
-}
 
+    // return mean
+    return emperical_mean(QUAD_DATA.VARIANCE_COLLECTION, 2.0);
+  }
+}
 
 void CALIBRATION_DATA::stick_the_landing_point(int Quadrant)
 {
-
   if (QUAD_DATA.DATA_POINTS.size() > 0)
   {
 
@@ -281,40 +263,48 @@ int CAL_LEVEL_2::get_quad(COMPASS_XYZ &Raw_XYZ, float Distance)
 }
 
 void CAL_LEVEL_2::calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
-                                      COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt)
+                            COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt, 
+                            float Cal_Variance)
 {
   A_Cal_Pt_PRELOAD = A_Cal_Pt;
-
   B_Cal_Pt_PRELOAD = B_Cal_Pt;
-
   C_Cal_Pt_PRELOAD = C_Cal_Pt;
-
   D_Cal_Pt_PRELOAD = D_Cal_Pt;
-
-  PRELOAD_DATA_LOADED = true;
+  CAL_VARIANCE_PRELOAD = Cal_Variance;
 }
 
 void CAL_LEVEL_2::calibration_preload_set()
 {
-  if (PRELOAD_DATA_LOADED)
-  {
-    SIMPLE_CALIBRATION = true;
+  SIMPLE_CALIBRATION = false;
 
-    // Adjust new offset
+  // Load Data
+  A.COORD = A_Cal_Pt_PRELOAD;
+  A.HAS_DATA = true;
 
-    X_MIN_MAX.MIN_VALUE = C_Cal_Pt_PRELOAD.X;
-    X_MIN_MAX.MAX_VALUE = D_Cal_Pt_PRELOAD.X;
-    Y_MIN_MAX.MIN_VALUE = A_Cal_Pt_PRELOAD.Y;
-    Y_MIN_MAX.MAX_VALUE = B_Cal_Pt_PRELOAD.Y;
+  B.COORD = B_Cal_Pt_PRELOAD;
+  B.HAS_DATA = true;
 
-    // Adjust new offset
-    OFFSET.X = (C_Cal_Pt_PRELOAD.X + D_Cal_Pt_PRELOAD.X) / 2.0f;
-    OFFSET.Y = (A_Cal_Pt_PRELOAD.Y + B_Cal_Pt_PRELOAD.Y) / 2.0f;
+  C.COORD = C_Cal_Pt_PRELOAD;
+  C.HAS_DATA = true;
 
-    // Adjust offset skew
-    SKEW_X = (abs(A_Cal_Pt_PRELOAD.X - B_Cal_Pt_PRELOAD.X)) / 2.0f;
-    SKEW_Y = (abs(C_Cal_Pt_PRELOAD.Y - D_Cal_Pt_PRELOAD.Y)) / 2.0f;
-  }
+  D.COORD = D_Cal_Pt_PRELOAD;
+  D.HAS_DATA = true;
+
+  DISTANCE_VARIANCE_FULL = CAL_VARIANCE_PRELOAD;
+
+  // Adjust new offset
+  X_MIN_MAX.MIN_VALUE = C.COORD.X;
+  X_MIN_MAX.MAX_VALUE = D.COORD.X;
+  Y_MIN_MAX.MIN_VALUE = A.COORD.Y;
+  Y_MIN_MAX.MAX_VALUE = B.COORD.Y;
+
+  // Adjust new offset
+  OFFSET.X = (C.COORD.X + D.COORD.X) / 2.0f;
+  OFFSET.Y = (A.COORD.Y + B.COORD.Y) / 2.0f;
+
+  // Adjust offset skew
+  SKEW_X = (abs(A.COORD.X - B.COORD.X)) / 2.0f;
+  SKEW_Y = (abs(C.COORD.Y - D.COORD.Y)) / 2.0f;
 }
 
 MIN_MAX_SIMPLE CAL_LEVEL_2::x_min_max()
@@ -656,7 +646,7 @@ bool HMC5883L::create()
       ret_success = true;
       CONNECTED = true;
 
-      LEVEL_2.calibration_preload_set();
+      calibration_preload_set();
     }
   }
 
@@ -690,7 +680,7 @@ void HMC5883L::process()
 {
   RAW_POINTS.push_back(RAW_XYZ);
   
-  float bearing = (atan2(calibrated_xyz().Y, calibrated_xyz().X) * 180 / M_PI) + 90.0f - KNOWN_DEVICE_DEGREE_OFFSET;
+  float bearing = (atan2(calibrated_xyz().Y, calibrated_xyz().X) * 180 / M_PI) + KNOWN_DEVICE_DEGREE_OFFSET;
 
   while (bearing <= 0.0f)
   {
@@ -894,22 +884,6 @@ COMPASS_XYZ HMC5883L::calibration_offset()
   return LEVEL_2.offset();
 }
 
-CAL_LEVEL_2_QUAD_RECORD HMC5883L::calibration_points_a()
-{
-  return LEVEL_2.A.QUAD_DATA;
-}
-CAL_LEVEL_2_QUAD_RECORD HMC5883L::calibration_points_b()
-{
-  return LEVEL_2.B.QUAD_DATA;
-}
-CAL_LEVEL_2_QUAD_RECORD HMC5883L::calibration_points_c()
-{
-  return LEVEL_2.C.QUAD_DATA;
-}
-CAL_LEVEL_2_QUAD_RECORD HMC5883L::calibration_points_d()
-{
-  return LEVEL_2.D.QUAD_DATA;
-}
 CAL_LEVEL_2_QUAD_RECORD HMC5883L::calibration_points_active_quad_data()
 {
   return LEVEL_2.ACTIVE_QUAD_DATA.QUAD_DATA;
@@ -945,9 +919,21 @@ bool HMC5883L::calibration_simple()
 }
 
 void HMC5883L::calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
-                                    COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt)
+                                    COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt, 
+                                    float Cal_Variance, float Cal_Offset)
 {
-  LEVEL_2.calibration_preload(A_Cal_Pt, B_Cal_Pt, C_Cal_Pt, D_Cal_Pt);
+  PRELOAD_DATA_LOADED = true;
+  KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD = Cal_Offset;
+  LEVEL_2.calibration_preload(A_Cal_Pt, B_Cal_Pt, C_Cal_Pt, D_Cal_Pt, Cal_Variance);
+}
+
+void HMC5883L::calibration_preload_set()
+{
+  if (PRELOAD_DATA_LOADED)
+  {
+    KNOWN_DEVICE_DEGREE_OFFSET = KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD;
+    LEVEL_2.calibration_preload_set();
+  }
 }
 
 bool HMC5883L::connected()
