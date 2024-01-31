@@ -1675,10 +1675,10 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     {
       ImGui::Text(" RAW XYZ: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.raw_xyz().X, sdSysData.COMMS_COMPASS.raw_xyz().Y, sdSysData.COMMS_COMPASS.raw_xyz().Z);
       ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance());
-      ImGui::Text("CAL PT A: %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_a().X, sdSysData.COMMS_COMPASS.calibration_max_coord_a().Y);
-      ImGui::Text("CAL PT B: %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_b().X, sdSysData.COMMS_COMPASS.calibration_max_coord_b().Y);
-      ImGui::Text("CAL PT C: %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_c().X, sdSysData.COMMS_COMPASS.calibration_max_coord_c().Y);
-      ImGui::Text("CAL PT D: %.0f, %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_d().X, sdSysData.COMMS_COMPASS.calibration_max_coord_d().Y);
+      ImGui::Text("CAL PT A: %.0f, %.0f: %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_a().X, sdSysData.COMMS_COMPASS.calibration_max_coord_a().Y, sdSysData.COMMS_COMPASS.calibration_known_var_a());
+      ImGui::Text("CAL PT B: %.0f, %.0f: %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_b().X, sdSysData.COMMS_COMPASS.calibration_max_coord_b().Y, sdSysData.COMMS_COMPASS.calibration_known_var_b());
+      ImGui::Text("CAL PT C: %.0f, %.0f: %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_c().X, sdSysData.COMMS_COMPASS.calibration_max_coord_c().Y, sdSysData.COMMS_COMPASS.calibration_known_var_c());
+      ImGui::Text("CAL PT D: %.0f, %.0f: %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_d().X, sdSysData.COMMS_COMPASS.calibration_max_coord_d().Y, sdSysData.COMMS_COMPASS.calibration_known_var_d());
     }
   }
 
@@ -1758,7 +1758,14 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
                                 working_area.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
         if (button_simple_color(sdSysData, "BEAR\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
-          sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+          if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
+          {
+            sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+          }
+          else
+          {
+            sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(0.0f);
+          }
         }
 
         ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
@@ -1898,7 +1905,8 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       {
         draw_compass(sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                            sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false);
+                            sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, 
+                            true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max());
       }
       else
       {

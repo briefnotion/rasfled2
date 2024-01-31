@@ -999,16 +999,21 @@ float pressure_translate_kPa_to_inHg(float kPa)
   return kPa * (1.0f / 3.386389f);
 }
 
-float emperical_mean(vector<float> &Number_List, float Deviations)
+bool emperical_mean(vector<float> &Number_List, float Deviations, 
+                          int Qualifying_Count, float &Ret_Mean, 
+                          float &Qualifying_Value)
 {
-  float mean = 0.0f;
+  // Return variable reset.
+  Ret_Mean = 0; 
+  Qualifying_Value = 0;
+
+  int count = 0;
+  float total = 0.0f;
 
   // Get Normal Mean
   if (Number_List.size())
   {
     // Vars Used.
-    float total = 0.0f;
-    int count = 0;
 
     for (int pos = 0; pos < (int)Number_List.size(); pos++)
     {
@@ -1016,7 +1021,7 @@ float emperical_mean(vector<float> &Number_List, float Deviations)
     }
         
     // Calculate mean.
-    mean = (total / (float)Number_List.size());
+    Ret_Mean = (total / (float)Number_List.size());
 
 
     // Calculate mean without outliers.
@@ -1029,32 +1034,41 @@ float emperical_mean(vector<float> &Number_List, float Deviations)
 
     for (int pos = 0; pos < (int)Number_List.size(); pos++)
     {
-      stdev += pow(Number_List[pos] - mean, 2.0f);
+      stdev += pow(Number_List[pos] - Ret_Mean, 2.0f);
     }
 
     stdev = sqrt(stdev / Number_List.size());
+    Qualifying_Value = Deviations * stdev;
 
     // Calculate Emperical Rule
     for (int pos = 0; pos < (int)Number_List.size(); pos++)
     {
-      if(abs(Number_List[pos] - mean) <= Deviations * stdev)
+      if(abs(Number_List[pos] - Ret_Mean) <= Qualifying_Value)
       {
         count++;
         total = total + Number_List[pos];
       }
     }
-                
-    // Calculate mean if count is > 0.
-    if (count > 0)
-    {
-      mean = (total / (float)count);
-    }
-    else
-    {
-      mean = 0;
-    }
   }
+                
+  // Calculate mean if count is > 0.
+  if (count >= Qualifying_Count)
+  {
+    Ret_Mean = (total / (float)count);
+    return true;
+  }
+  else
+  {
+    Ret_Mean = 0;
+    return false;
+  }
+}
 
+float emperical_mean(vector<float> &Number_List, float Deviations)
+{
+  float mean = 0;
+  float qualifying_value = 0;
+  emperical_mean(Number_List, Deviations, 0, mean, qualifying_value);
   return mean;
 }
 

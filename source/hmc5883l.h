@@ -102,14 +102,14 @@ class CALIBRATION_DATA
   public:
 
   CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
-
   COMPASS_XYZ COORD;
-
+  float LAST_KNOWN_VARIANCE = -1;
   bool HAS_DATA = false;
 
-  float variance_from_offset(COMPASS_XYZ Offset);
+  float variance_from_offset(COMPASS_XYZ Offset, bool &Good_Data_Count);
+  // If Quadrant = -1 then no stick the landing is performed.
 
-  void stick_the_landing_point(int Quadrant);
+  bool stick_the_landing(COMPASS_XYZ Current_Offset, int Quadrant);
 
   void clear();
 };
@@ -154,7 +154,10 @@ class CAL_LEVEL_2
   COMPASS_XYZ B_Cal_Pt_PRELOAD;
   COMPASS_XYZ C_Cal_Pt_PRELOAD;
   COMPASS_XYZ D_Cal_Pt_PRELOAD;
-  float CAL_VARIANCE_PRELOAD = 0.0f;
+  float A_Cal_Var_PRELOAD;
+  float B_Cal_Var_PRELOAD;
+  float C_Cal_Var_PRELOAD;
+  float D_Cal_Var_PRELOAD;
 
   int get_quad(COMPASS_XYZ &Raw_XYZ, float Distance);
 
@@ -166,9 +169,10 @@ class CAL_LEVEL_2
   CALIBRATION_DATA B;
   CALIBRATION_DATA ACTIVE_QUAD_DATA;
 
-  void calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
-                            COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt, 
-                            float Cal_Variance);
+  void calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var, 
+                            COMPASS_XYZ B_Cal_Pt, float B_Cal_Var, 
+                            COMPASS_XYZ C_Cal_Pt, float C_Cal_Var, 
+                            COMPASS_XYZ D_Cal_Pt, float D_Cal_Var);
 
   void calibration_preload_set();
 
@@ -227,7 +231,8 @@ class HMC5883L
   vector<COMPASS_XYZ> RAW_POINTS;     // History of data received.
   vector<float> CALIBRATED_BEARINGS;  // History of calculated bearings
 
-  float BEARING = 0;              // Recent Bearing
+  float RAW_BEARING = 0;              // Recent Bearing
+  float BEARING = 0;
   float BEARING_JITTER_MIN = 0;
   float BEARING_JITTER_MAX = 0;
 
@@ -290,9 +295,11 @@ class HMC5883L
   COMPASS_XYZ calibrated_xyz();             // Return most recent xyz data with the current calibratons.
   COMPASS_XYZ calibrated_xyz(int Position); // Returns xyz data from history with the current calibratons.
 
-  void calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
-                            COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt, 
-                            float Cal_Variance, float Cal_Offset);
+  void calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var, 
+                            COMPASS_XYZ B_Cal_Pt, float B_Cal_Var, 
+                            COMPASS_XYZ C_Cal_Pt, float C_Cal_Var, 
+                            COMPASS_XYZ D_Cal_Pt, float D_Cal_Var, 
+                            float Cal_Offset);
 
   void calibration_preload_set();
 
@@ -329,11 +336,17 @@ class HMC5883L
   COMPASS_XYZ calibration_max_coord_b();
   COMPASS_XYZ calibration_max_coord_c();
   COMPASS_XYZ calibration_max_coord_d();
+  float calibration_known_var_a();
+  float calibration_known_var_b();
+  float calibration_known_var_c();
+  float calibration_known_var_d();
   float calibration_variance();
   bool calibration_simple();
 
-  void calibration_preload(COMPASS_XYZ A_Cal_Pt, COMPASS_XYZ B_Cal_Pt, 
-                            COMPASS_XYZ C_Cal_Pt, COMPASS_XYZ D_Cal_Pt);
+  void calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var, 
+                            COMPASS_XYZ B_Cal_Pt, float B_Cal_Var, 
+                            COMPASS_XYZ C_Cal_Pt, float C_Cal_Var, 
+                            COMPASS_XYZ D_Cal_Pt, float D_Cal_Var);
 
   bool connected();
   // Returns true if hmc5883l is successfully connected.
@@ -371,6 +384,9 @@ class HMC5883L
 
   float bearing();
   // Direction Facing.
+
+  float bearing_jitter_min();
+  float bearing_jitter_max();
 };
 
 

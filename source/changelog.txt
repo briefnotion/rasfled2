@@ -1,3 +1,12 @@
+2.122_240130
+  - Changed the calibration variance to only return a valid calibration 
+      Number if 20 or more samples are calculated through the Emperical 
+      Mean.
+  - Calibration preload doesn't submit enough data to work properly. 
+      Changed to preload function.  Required parameters is now being 
+      printed.  Code not yet finished.
+  - Jitter information is being displayed on the large compass. 
+
 2.121_240128
   - Added a "level of detail" parameter to the draw_track() function, 
       to reduce the number of lines drawn, in relationship to the number 

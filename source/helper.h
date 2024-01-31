@@ -553,6 +553,12 @@ float velocity_translate_knots_to_kmph(float knots);
 
 float pressure_translate_kPa_to_inHg(float kPa);
 
+bool emperical_mean(vector<float> &Number_List, float Deviations, 
+                          int Qualifying_Count, float &Ret_Mean, 
+                          float &Qualifying_Value);
+// Sets Pass_Qualify to false if count of valid data points is 
+//  less than Qualifying_Limit.
+
 float emperical_mean(vector<float> &Number_List, float Deviations);
 // Imperical Rule Mean of Vector
 //

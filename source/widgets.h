@@ -206,6 +206,10 @@ bool confirm_dialog(system_data &sdSysData, bool &Choice);
 //  Choice returned when clicked is true or false
 
 void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
+                        bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max);
+
+void draw_compass(system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                         bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer);
 
 // ---------------------------------------------------------------------------------------

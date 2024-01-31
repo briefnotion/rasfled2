@@ -373,20 +373,23 @@ int loop_2(bool TTY_Only)
 
   A_Cal_Pt.X = 386.0f;
   A_Cal_Pt.Y = 68.0f;
+  float A_Cal_Var = 300.0f;
 
   B_Cal_Pt.X = 270.0f;
   B_Cal_Pt.Y = 532.0f;
+  float B_Cal_Var = 300.0f;
 
   C_Cal_Pt.X = 120.0f;
   C_Cal_Pt.Y = 384.0f;
+  float C_Cal_Var = 300.0f;
 
   D_Cal_Pt.X = 572.0f;
   D_Cal_Pt.Y = 194.0f;
+  float D_Cal_Var = 300.0f;
 
-  float Cal_Variance = 242.0f;
   float Cal_Offset = 90.0f - 23.0f;
 
-  sdSystem.COMMS_COMPASS.calibration_preload(A_Cal_Pt, B_Cal_Pt, C_Cal_Pt, D_Cal_Pt, Cal_Variance, Cal_Offset);
+  sdSystem.COMMS_COMPASS.calibration_preload(A_Cal_Pt, A_Cal_Var, B_Cal_Pt, B_Cal_Var, C_Cal_Pt, C_Cal_Var, D_Cal_Pt, D_Cal_Var, Cal_Offset);
 
   // ---------------------------------------------------------------------------------------
   // Initialize the console
