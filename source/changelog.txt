@@ -1,3 +1,11 @@
+2.123_240131
+  - Added option to set poll rate (polls per second) to Compass in 
+      definitions.  Scaled the vectors to whatever the poll rate  is 
+      set too. 
+  - Preloaded calibration routines may be working.  If calibration 
+      lock is off and preloaded variance is loose enough, the 
+      calibration point will update if considered better. 
+
 2.122_240130
   - Changed the calibration variance to only return a valid calibration 
       Number if 20 or more samples are calculated through the Emperical 
