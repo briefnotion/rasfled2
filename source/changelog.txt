@@ -1,3 +1,11 @@
+2.124_240202
+  - Changes in previous update didn't post to github, so including 
+      those changes in this update. 
+  - Small changes to draw_list variables. 
+  - Added, not not implemented, Definitions in the hmc5883l.h for 
+      chip configuration.
+  - Added some numbers to the large compass.
+
 2.123_240131
   - Added option to set poll rate (polls per second) to Compass in 
       definitions.  Scaled the vectors to whatever the poll rate  is 

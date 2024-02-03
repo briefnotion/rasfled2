@@ -34,10 +34,10 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 //  Nova Widget
-void draw_bit(system_data &sdSysData, ImDrawList* draw_list, 
+void draw_bit(ImDrawList* Draw_List, system_data &sdSysData, 
               ImVec2 Start_Pos, bool Value, bool Ping, bool Details);
 
-void nova_draw(system_data &sdSysData, ImDrawList* draw_list, 
+void nova_draw(ImDrawList *Draw_List, system_data &sdSysData,  
                 NOVA_BITS_VALUE &Value);
 
 // ---------------------------------------------------------------------------------------
@@ -102,7 +102,7 @@ class T_LARGE_NUMBER_DISPLAY
 
   bool CHANGED = false;
 
-  void draw_scroll_num(float Value, float Y_Height, ImVec2 Start_Pos, ImVec2 Zero_Font_Size);
+  void draw_scroll_num(ImDrawList *Draw_List, float Value, float Y_Height, ImVec2 Start_Pos, ImVec2 Zero_Font_Size);
   // only for 2 digit numbers
 
   public:
@@ -203,8 +203,8 @@ class T_DATA_DISPLAY
   void update_value(system_data &sdSysData, string String_Value, float Float_Value);
   void update_value(system_data &sdSysData, string String_Value);
 
-  void draw(system_data &sdSysData, bool Draw_Marker);
-  void draw(system_data &sdSysData);
+  void draw(ImDrawList *Draw_List, system_data &sdSysData, bool Draw_Marker);
+  void draw(ImDrawList *Draw_List, system_data &sdSysData);
 };
 
 // ---------------------------------------------------------------------------------------

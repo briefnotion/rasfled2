@@ -17,7 +17,7 @@
 // -------------------------------------------------------------------------------------
 //  Nova Widget Class
 
-void draw_bit(system_data &sdSysData, ImDrawList* draw_list, 
+void draw_bit(ImDrawList* Draw_List, system_data &sdSysData,  
               ImVec2 Start_Pos, bool Value, bool Ping, bool Details)
 {
   if (Details)
@@ -26,22 +26,22 @@ void draw_bit(system_data &sdSysData, ImDrawList* draw_list,
     {
       if (Value)
       {
-        draw_list->AddRectFilled(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 15.0f), sdSysData.COLOR_SELECT.c_white().STANDARD_V);
+        Draw_List->AddRectFilled(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 15.0f), sdSysData.COLOR_SELECT.c_white().STANDARD_V);
       }
       else
       {
-        draw_list->AddRect(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 7.0f), sdSysData.COLOR_SELECT.c_white().STANDARD_V);
+        Draw_List->AddRect(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 7.0f), sdSysData.COLOR_SELECT.c_white().STANDARD_V);
       }
     }
     else
     {
       if (Value)
       {
-        draw_list->AddRectFilled(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 15.0f), sdSysData.COLOR_SELECT.c_blue().STANDARD);
+        Draw_List->AddRectFilled(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 15.0f), sdSysData.COLOR_SELECT.c_blue().STANDARD);
       }
       else
       {
-        draw_list->AddRect(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 7.0f), sdSysData.COLOR_SELECT.c_blue().STANDARD);
+        Draw_List->AddRect(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 7.0f), sdSysData.COLOR_SELECT.c_blue().STANDARD);
       }
     }
   }
@@ -51,12 +51,12 @@ void draw_bit(system_data &sdSysData, ImDrawList* draw_list,
     {
       if (Value)
       {
-        draw_list->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
+        Draw_List->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
                             sdSysData.COLOR_SELECT.c_white().STANDARD_V, 5.0f);
       }
       else
       {
-        draw_list->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
+        Draw_List->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
                             sdSysData.COLOR_SELECT.c_white().STANDARD_V, 1.0f);
       }
     }
@@ -64,19 +64,19 @@ void draw_bit(system_data &sdSysData, ImDrawList* draw_list,
     {
       if (Value)
       {
-        draw_list->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
+        Draw_List->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
                             sdSysData.COLOR_SELECT.c_blue().STANDARD, 5.0f);
       }
       else
       {
-        draw_list->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
+        Draw_List->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
                             sdSysData.COLOR_SELECT.c_blue().STANDARD, 1.0f);
       }
     }
   }
 }
 
-void nova_draw(system_data &sdSysData, ImDrawList* draw_list, NOVA_BITS_VALUE &Value)
+void nova_draw(ImDrawList *Draw_List, system_data &sdSysData, NOVA_BITS_VALUE &Value)
 {
   ImVec2 current_position = ImGui::GetCursorScreenPos();
   unsigned long current_time_frame = sdSysData.PROGRAM_TIME.current_frame_time();
@@ -88,13 +88,13 @@ void nova_draw(system_data &sdSysData, ImDrawList* draw_list, NOVA_BITS_VALUE &V
 
   for (int bit = 0; bit < 64; bit++)
   {
-    draw_bit(sdSysData, draw_list, ImVec2(current_position.x + 40.0f + (9.5f * (float)bit), current_position.y + 5.0f),
+    draw_bit(Draw_List, sdSysData, ImVec2(current_position.x + 40.0f + (9.5f * (float)bit), current_position.y + 5.0f),
               Value.NOVA_BITS[bit], Value.HILIGHT[bit].ping_down(current_time_frame), Value.DETAILS);
 
     // draw lines
     if (bit % 8 == 0)
     {
-      draw_list->AddLine(ImVec2(current_position.x + 38.0f + (9.5f * (float)bit), current_position.y + 1.0f), 
+      Draw_List->AddLine(ImVec2(current_position.x + 38.0f + (9.5f * (float)bit), current_position.y + 1.0f), 
                           ImVec2(current_position.x + 38.0f + (9.5f * (float)bit), current_position.y + 4.0f), 
                           sdSysData.COLOR_SELECT.c_white().STANDARD_V, 2.0f);
     }
@@ -112,7 +112,7 @@ void nova_draw(system_data &sdSysData, ImDrawList* draw_list, NOVA_BITS_VALUE &V
 
 // -------------------------------------------------------------------------------------
 
-void T_LARGE_NUMBER_DISPLAY::draw_scroll_num(float Value, float Y_Height, ImVec2 Start_Pos, ImVec2 Zero_Font_Size)
+void T_LARGE_NUMBER_DISPLAY::draw_scroll_num(ImDrawList *Draw_List, float Value, float Y_Height, ImVec2 Start_Pos, ImVec2 Zero_Font_Size)
 {
   Value = abs(Value);
 
@@ -236,12 +236,11 @@ void T_LARGE_NUMBER_DISPLAY::draw_scroll_num(float Value, float Y_Height, ImVec2
   ImGui::Text("%d", value_ones_m1);
 
   // Mask Top Bot
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
   ImU32 col_a = ImGui::GetColorU32(IM_COL32(0, 0, 0, 255));
   ImU32 col_b = ImGui::GetColorU32(IM_COL32(0, 0, 0, 0));
   
-  draw_list->AddRectFilledMultiColor(POS_GRAD_TOP_1, POS_GRAD_TOP_2, col_a, col_a, col_b, col_b);
-  draw_list->AddRectFilledMultiColor(POS_GRAD_BOT_1, POS_GRAD_BOT_2, col_b, col_b, col_a, col_a);
+  Draw_List->AddRectFilledMultiColor(POS_GRAD_TOP_1, POS_GRAD_TOP_2, col_a, col_a, col_b, col_b);
+  Draw_List->AddRectFilledMultiColor(POS_GRAD_BOT_1, POS_GRAD_BOT_2, col_b, col_b, col_a, col_a);
 }
 
 void T_LARGE_NUMBER_DISPLAY::create()
@@ -281,7 +280,6 @@ void T_LARGE_NUMBER_DISPLAY::update_value(string Text)
 bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Height)
 {
   bool ret_clicked = false;
-
   ImVec2 start_position = ImGui::GetCursorScreenPos();
 
   if (Y_Height != PREV_Y_HEIGHT || 
@@ -309,10 +307,12 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
 
   if (Draw)
   {
-    ImGuiIO &io = ImGui::GetIO();
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    // draw list
+    ImDrawList* draw_list_large_number = ImGui::GetWindowDrawList();
 
-    MARKER.draw(sdSysData, draw_list, start_position, DISPLAY_SIZE, true);
+    ImGuiIO &io = ImGui::GetIO();
+
+    MARKER.draw(draw_list_large_number, sdSysData, start_position, DISPLAY_SIZE, true);
 
     ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
 
@@ -373,7 +373,7 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
           ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_yellow().TEXT));
         }
 
-        draw_scroll_num(VALUE_WHEEL.value(), Y_Height, ImVec2(start_position.x + pos_offset.x, start_position.y) ,ZERO_SIZE);
+        draw_scroll_num(draw_list_large_number, VALUE_WHEEL.value(), Y_Height, ImVec2(start_position.x + pos_offset.x, start_position.y) ,ZERO_SIZE);
 
         ImGui::PopStyleColor();
       }
@@ -391,7 +391,7 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
                                 sdSysData.COLOR_SELECT.c_yellow().TEXT)));
         }
 
-        draw_scroll_num(VALUE_WHEEL.value(), Y_Height, ImVec2(start_position.x + pos_offset.x, start_position.y), ZERO_SIZE);
+        draw_scroll_num(draw_list_large_number, VALUE_WHEEL.value(), Y_Height, ImVec2(start_position.x + pos_offset.x, start_position.y), ZERO_SIZE);
         ImGui::PopStyleColor();
       }
     }
@@ -594,11 +594,11 @@ void T_DATA_DISPLAY::update_value(system_data &sdSysData, string String_Value)
   update_value(sdSysData, String_Value, 0.0f);
 }
 
-void T_DATA_DISPLAY::draw(system_data &sdSysData, bool Draw_Marker)
+void T_DATA_DISPLAY::draw(ImDrawList *Draw_List, system_data &sdSysData, bool Draw_Marker)
 {
   ImVec2 pos = ImGui::GetCursorScreenPos();
 
-  MARKER.draw(sdSysData, ImGui::GetWindowDrawList(), pos, ImVec2(50.0f, 20.0f), Draw_Marker);
+  MARKER.draw(Draw_List, sdSysData, pos, ImVec2(50.0f, 20.0f), Draw_Marker);
 
   LABEL.draw(sdSysData);
   ImGui::SameLine();
@@ -617,9 +617,9 @@ void T_DATA_DISPLAY::draw(system_data &sdSysData, bool Draw_Marker)
   }
 }
 
-void T_DATA_DISPLAY::draw(system_data &sdSysData)
+void T_DATA_DISPLAY::draw(ImDrawList *Draw_List, system_data &sdSysData)
 {
-  draw(sdSysData, false);
+  draw(Draw_List, sdSysData, false);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -666,7 +666,7 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 
   ImGui::BeginChild("Nova Display Bit View", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
+    ImDrawList* draw_list_nova = ImGui::GetWindowDrawList();
 
     ImVec2 button_adjust;
 
@@ -701,7 +701,7 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 
           ImGui::SetCursorScreenPos(button_adjust);
 
-          nova_draw(sdSysData, draw_list, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
+          nova_draw(draw_list_nova, sdSysData, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
         }
       }
     }
@@ -1661,55 +1661,58 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
   {
     ImGui::BeginChild("Auto All Data", ImVec2(ImGui::GetContentRegionAvail().x * 7/32, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
+      // draw list for All_Data_Window
+      ImDrawList* draw_list_all_data = ImGui::GetWindowDrawList();
+
       ImVec2 frame_start_pos = ImGui::GetCursorScreenPos();
       ImVec2 frame_size = ImGui::GetContentRegionAvail();
 
       {
-        SDATA.D_LIGHTS.draw(sdSysData);
-        SDATA.D_FUEL_LEVEL.draw(sdSysData, true);
-        SDATA.D_VOLTAGE.draw(sdSysData, true);
-        SDATA.D_PARKING_BRAKE.draw(sdSysData);
-        SDATA.D_CRUISE_ON.draw(sdSysData);
-        SDATA.D_CRUISE_SPEED.draw(sdSysData);
+        SDATA.D_LIGHTS.draw(draw_list_all_data, sdSysData);
+        SDATA.D_FUEL_LEVEL.draw(draw_list_all_data, sdSysData, true);
+        SDATA.D_VOLTAGE.draw(draw_list_all_data, sdSysData, true);
+        SDATA.D_PARKING_BRAKE.draw(draw_list_all_data, sdSysData);
+        SDATA.D_CRUISE_ON.draw(draw_list_all_data, sdSysData);
+        SDATA.D_CRUISE_SPEED.draw(draw_list_all_data, sdSysData);
       }
       
       ImGui::Separator();
 
       {
-        SDATA.D_TEMP_COOLANT.draw(sdSysData, DISPLAY_MID_BOTTOM == 2);
-        SDATA.D_TEMP_INTAKE.draw(sdSysData, DISPLAY_MID_BOTTOM == 2);
-        SDATA.D_TEMP_AMBIANT.draw(sdSysData, DISPLAY_MID_BOTTOM == 2);
-        SDATA.D_TEMP_CATALYST.draw(sdSysData, DISPLAY_MID_BOTTOM == 2);
-        SDATA.D_TEMP_SUPER_TEMP.draw(sdSysData, true);
+        SDATA.D_TEMP_COOLANT.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_INTAKE.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_AMBIANT.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_CATALYST.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_SUPER_TEMP.draw(draw_list_all_data, sdSysData, true);
       }
 
       ImGui::Separator();
 
       {
-        SDATA.D_FUEL_RAIL_PRESSURE.draw(sdSysData, DISPLAY_MID_BOTTOM == 3);
-        SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(sdSysData, DISPLAY_MID_BOTTOM == 3);
-        SDATA.D_BAROMETER.draw(sdSysData);
-        SDATA.D_CAM_COMM_ERROR.draw(sdSysData);
+        SDATA.D_FUEL_RAIL_PRESSURE.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 3);
+        SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 3);
+        SDATA.D_BAROMETER.draw(draw_list_all_data, sdSysData);
+        SDATA.D_CAM_COMM_ERROR.draw(draw_list_all_data, sdSysData);
       }
       
       ImGui::Separator();
 
       {
-        SDATA.OC_LF_TTL.draw(sdSysData);
+        SDATA.OC_LF_TTL.draw(draw_list_all_data, sdSysData);
         ImGui::SameLine();
-        SDATA.D_LF_TTL.draw(sdSysData);
+        SDATA.D_LF_TTL.draw(draw_list_all_data, sdSysData);
 
-        SDATA.OC_RF_TTL.draw(sdSysData);
+        SDATA.OC_RF_TTL.draw(draw_list_all_data, sdSysData);
         ImGui::SameLine();
-        SDATA.D_RF_TTL.draw(sdSysData);
+        SDATA.D_RF_TTL.draw(draw_list_all_data, sdSysData);
 
-        SDATA.OC_LB_TTL.draw(sdSysData);
+        SDATA.OC_LB_TTL.draw(draw_list_all_data, sdSysData);
         ImGui::SameLine();
-        SDATA.D_LB_TTL.draw(sdSysData);
+        SDATA.D_LB_TTL.draw(draw_list_all_data, sdSysData);
 
-        SDATA.OC_RB_TTL.draw(sdSysData);
+        SDATA.OC_RB_TTL.draw(draw_list_all_data, sdSysData);
         ImGui::SameLine();
-        SDATA.D_RB_TTL.draw(sdSysData);
+        SDATA.D_RB_TTL.draw(draw_list_all_data, sdSysData);
       }
 
       ImGui::SetCursorScreenPos(frame_start_pos);
@@ -1750,6 +1753,8 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
       // Show Upper Center Region
       ImGui::BeginChild("Data 1", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y * 8.0f / 16.0f), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
+        ImDrawList* draw_list_data_1 = ImGui::GetWindowDrawList();
+
         float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
         ImVec2 pos1 = ImGui::GetCursorScreenPos();
         ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
@@ -1761,29 +1766,31 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
         ImGui::SameLine();
 
-        SDATA.VB_SPEED.draw(sdSysData);
-        SDATA.VB_S_FUEL.draw(sdSysData);
-        SDATA.VB_S_TEMP.draw(sdSysData);
-        SDATA.VB_S_VOLTAGE.draw(sdSysData);
+        SDATA.VB_SPEED.draw(draw_list_data_1, sdSysData);
+        SDATA.VB_S_FUEL.draw(draw_list_data_1, sdSysData);
+        SDATA.VB_S_TEMP.draw(draw_list_data_1, sdSysData);
+        SDATA.VB_S_VOLTAGE.draw(draw_list_data_1, sdSysData);
       }
       ImGui::EndChild();
 
       // Show Alt Data
       ImGui::BeginChild("Auto Data Long Bars", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
+        ImDrawList* draw_list_data_auto_data = ImGui::GetWindowDrawList();
+
         if (DISPLAY_MID_BOTTOM == 0)
         // Show bars
         {
           ImVec2 pos1 = ImGui::GetCursorScreenPos();
 
-          SDATA.TB_STEERING.draw(sdSysData);
-          SDATA.TB_TORQUE.draw(sdSysData);
-          SDATA.TB_RPM.draw(sdSysData);
+          SDATA.TB_STEERING.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.TB_TORQUE.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.TB_RPM.draw(draw_list_data_auto_data, sdSysData);
 
           ImGui::Separator();
 
-          SDATA.TB_SPEED.draw(sdSysData);
-          SDATA.TB_ACCELERATION.draw(sdSysData);
+          SDATA.TB_SPEED.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.TB_ACCELERATION.draw(draw_list_data_auto_data, sdSysData);
 
           // DISPLAY_MID_BOTTOM - Buttons
           ImGui::BeginChild("Record Buttons Left", ImVec2(ImGui::GetContentRegionAvail().x - 322.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
@@ -1859,11 +1866,11 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
           ImGui::SameLine();
 
-          SDATA.VB_TEMPERATURE_COOLANT.draw(sdSysData);
-          SDATA.VB_TEMPERATURE_INTAKE.draw(sdSysData);
-          SDATA.VB_TEMPERATURE_AMBIANT.draw(sdSysData);
-          SDATA.VB_TEMPERATURE_CATALYST.draw(sdSysData);
-          SDATA.VB_TEMPERATURE_S_TEMP.draw(sdSysData);
+          SDATA.VB_TEMPERATURE_COOLANT.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.VB_TEMPERATURE_INTAKE.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.VB_TEMPERATURE_AMBIANT.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.VB_TEMPERATURE_CATALYST.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.VB_TEMPERATURE_S_TEMP.draw(draw_list_data_auto_data, sdSysData);
 
         }
 
@@ -1882,11 +1889,11 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
           ImGui::SameLine();
 
-          SDATA.VB_POWER_TACH.draw(sdSysData);
-          SDATA.VB_POWER_ACCELERATION.draw(sdSysData);
-          SDATA.VB_POWER_TORQE.draw(sdSysData);
-          SDATA.VB_POWER_FUEL_RAIL_P.draw(sdSysData);
-          SDATA.VB_POWER_SYSTEM_VAPER_P.draw(sdSysData);
+          SDATA.VB_POWER_TACH.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.VB_POWER_ACCELERATION.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.VB_POWER_TORQE.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.VB_POWER_FUEL_RAIL_P.draw(draw_list_data_auto_data, sdSysData);
+          SDATA.VB_POWER_SYSTEM_VAPER_P.draw(draw_list_data_auto_data, sdSysData);
         }
 
         else
@@ -1935,7 +1942,7 @@ void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData, bool Automobile_
 
   if (SDATA.L_SPEED_OUTSIDE_DRAW && Restack_Windows == false)
   {
-    ImGui::SetNextWindowSize(ImVec2(140, 250));
+    ImGui::SetNextWindowSize(ImVec2(140, 210));
 
     if (ImGui::Begin("SPEED", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
     {

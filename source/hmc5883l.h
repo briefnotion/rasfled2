@@ -28,13 +28,105 @@
 // RASFled related header files
 #include "fled_time.h"
 #include "helper.h"
-//#include "stringthings.h"
-//#include "rasapi.h"
 
-//#include <stdlib.h>
-//#include <fcntl.h>      // File control definitions
-//#include <errno.h>      // Error number definitions
-//#include <termios.h>    // POSIX terminal control definitions
+// -------------------------------------------------------------------------------------
+
+// Definitions
+
+/*
+Address   Name  
+    00    Configuration Register A    Read/Write
+    01    Configuration Register B    Read/Write
+    02    Mode Register               Read/Write
+    03    Data Output X MSB Register  Read
+    04    Data Output X LSB Register  Read
+    05    Data Output Z MSB Register  Read
+    06    Data Output Z LSB Register  Read
+    07    Data Output Y MSB Register  Read
+    08    Data Output Y LSB Register  Read
+    09    Status Register Read
+    10    Identification Register A   Read
+    11    Identification Register B   Read
+    12    Identification Register C   Read
+*/
+
+// Register A (CR A)
+ 
+// Sample Average
+// CRA6-CRA5
+//  MA1-MA0
+//  00 = 1(Default); 01 = 2; 10 = 4; 11 = 8
+#define   HMC_MA_1          0x00  // Sample of 1  (default)
+#define   HMC_MA_2          0x01  // Sample average of 2
+#define   HMC_MA_4          0x02  // Sample average of 4
+#define   HMC_MA_8          0x03  // Sample average of 8
+
+// Data Rates (hertz)
+// CRA4-CRA2
+//  DO2-DO0
+#define   HMC_DO_0_75       0x00  // Output rate of 0.75 Hz
+#define   HMC_DO_1_5        0x01  // Output rate of 1.5 Hz
+#define   HMC_DO_3          0x02  // Output rate of 3 Hz
+#define   HMC_DO_7_5        0x03  // Output rate of 7.5 Hz
+#define   HMC_DO_15         0x04  // Output rate of 15 Hz  (default)
+#define   HMC_DO_30         0x05  // Output rate of 30 Hz
+#define   HMC_DO_75         0x06  // Output rate of 75 Hz
+
+// Measurement Bias
+// CRA1-CRA0
+//  MS1-MS0
+#define   HMC_MS_NORM       0x00  // Normal Measurtement configuration  (default)
+#define   HMC_MS_POS_BIAS   0x01  // Positive current fored across sisistive loads of all axis.
+#define   HMC_MS_NEG_BIAS   0x02  // Negative current fored across sisistive loads of all axis.
+
+
+// Register B (CR B)
+
+// Gain (GAUSS) - Choose lower gain when field streangth causes overflow.
+//                Range: -2048 – 2047
+// CRB7-CRB5
+//  GN2-GN0
+#define   HMC_GN_1370       0x00  // 1370 Gauss
+#define   HMC_GN_1090       0x01  // 1090 Gauss  (default)
+#define   HMC_GN_820        0x02  // 820 Gauss
+#define   HMC_GN_660        0x03  // 660 Gauss
+#define   HMC_GN_440        0x04  // 440 Gauss
+#define   HMC_GN_390        0x05  // 390 Gauss
+#define   HMC_GN_330        0x06  // 330 Gauss
+#define   HMC_GN_230        0x07  // 230 Gauss
+
+// Keep clear for correct operation
+// CRB4-CRB0
+
+
+// Mode Register (MR)
+
+// High Speed I2C, 3400kHz
+// MR7-MR2
+//  HS
+
+// Mode Select
+// MR1-MR0
+//  MD1-MD0
+#define   HMC_MD_CONT_MEAS  0x00  // Continuous Measurement Mode
+#define   HMC_MD_SING_MEAS  0x01  // Single Measurement Mode
+#define   HMC_MD_IDLE_1     0x02  // Devgice is placed in idle mode
+#define   HMC_MD_IDLE_2     0x03  // Devgice is placed in idle mode
+
+
+// Status Register
+// SR1-SR0
+
+// SR1 - Lock
+// SR0 - Ready
+
+
+// Identfication Register
+// IRA, IRB, IRC
+// ASCII Chip MANUF ID
+
+
+// -------------------------------------------------------------------------------------
 
 using namespace std;
 
@@ -80,7 +172,8 @@ class CAL_LEVEL_2_QUAD_RECORD
 {
   private:
 
-  int SIZE = 500;
+  // Size of 50 seconds
+  int VARIANCE_COLLECTION_SIZE = 50 * COMMS_COMPASS_POLLING_RATE_FPS;
 
   public:
 
@@ -103,6 +196,7 @@ class CALIBRATION_DATA
 
   CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
   COMPASS_XYZ COORD;
+  float VARIANCE = -1;
   float LAST_KNOWN_VARIANCE = -1;
   bool HAS_DATA = false;
 
@@ -228,6 +322,7 @@ class HMC5883L
 
   COMPASS_XYZ RAW_XYZ;            // Temporary storage of XYZ before process;
 
+  int RAW_POINTS_SIZE = 100 * COMMS_COMPASS_POLLING_RATE_FPS;
   vector<COMPASS_XYZ> RAW_POINTS;     // History of data received.
   vector<float> CALIBRATED_BEARINGS;  // History of calculated bearings
 
@@ -265,7 +360,6 @@ class HMC5883L
   // Calibration Variables and Routines
   TIMED_PING CALIBRATION_SPOT_CHECK;
 
-  //CAL_LEVEL_1 LEVEL_1;
   CAL_LEVEL_2 LEVEL_2;
 
   // Comms Routines

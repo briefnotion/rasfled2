@@ -62,57 +62,44 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position)
 // ---------------------------------------------------------------------------------------
 // Markers
 
-void draw_line(system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size)
+void draw_line(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size)
 {
   // simple draw line
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  draw_list->AddLine(Screen_Position_1, Screen_Position_2, sdSysData.COLOR_SELECT.color(Color).STANDARD, Size);
+  Draw_List->AddLine(Screen_Position_1, Screen_Position_2, sdSysData.COLOR_SELECT.color(Color).STANDARD, Size);
 }
 
-void draw_box(system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size)
+void draw_box(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size)
 {
   // simple draw line
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  draw_list->AddRect(Screen_Position_1, Screen_Position_2, sdSysData.COLOR_SELECT.color(Color).STANDARD, 0.0f, 0, Size);
+  Draw_List->AddRect(Screen_Position_1, Screen_Position_2, sdSysData.COLOR_SELECT.color(Color).STANDARD, 0.0f, 0, Size);
 }
 
-void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
+void draw_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  draw_list->AddNgon(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
+  Draw_List->AddNgon(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
 }
 
-void draw_marker_filled(system_data &sdSysData, ImVec2 Screen_Position, int Color)
+void draw_marker_filled(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  draw_list->AddNgonFilled(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f);
+  Draw_List->AddNgonFilled(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f);
 }
 
-void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color)
+void draw_airport_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  draw_list->AddNgon(Screen_Position, 4.0f, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
+  Draw_List->AddNgon(Screen_Position, 4.0f, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
 }
 
-void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size)
+void draw_point_marker(ImDrawList *Draw_List, ImVec2 Screen_Position, ImColor Color, float Size)
 {
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-  draw_list->AddNgonFilled(Screen_Position, Size, Color, 4.0f);
+  Draw_List->AddNgonFilled(Screen_Position, Size, Color, 4.0f);
 }
 
-void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
+void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
                 float Strength_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
                 ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track)
 {
   bool draw_0 = false;
   bool draw_1 = false;
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
 
   ImVec2 track_position_0;
   ImVec2 track_position_1;
@@ -130,7 +117,12 @@ void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int D
   }
 
   // Draw Simple Track
-  for(int position = 1; position < (int)Track.TRACK_POINTS_SIMPLE.size(); position++)
+  if (Draw_Level_Of_Detail < 1)
+  {
+    Draw_Level_Of_Detail = 1;
+  }
+
+  for(int position = 1; position < (int)Track.TRACK_POINTS_SIMPLE.size(); position = position + Draw_Level_Of_Detail)
   {
     track_position_0 = track_position_1;
     draw_0 = draw_1;
@@ -138,17 +130,12 @@ void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int D
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
                                                     ImVec2(Track.TRACK_POINTS_SIMPLE[position].LATITUDE, Track.TRACK_POINTS_SIMPLE[position].LONGITUDE), draw_1);
 
-    draw_list->AddLine(track_position_0, track_position_1, 
+    Draw_List->AddLine(track_position_0, track_position_1, 
                         sdSysData.COLOR_SELECT.c_grey().TEXT, 1.0f);
   }
 
   // Draw Detailed Track
-  if (Draw_Level_Of_Detail < 1)
-  {
-    Draw_Level_Of_Detail = 1;
-  }
-
-  for(int position = 1; position < (int)Track.TRACK_POINTS_DETAILED.size(); position = position + Draw_Level_Of_Detail)
+  for(int position = 1; position < (int)Track.TRACK_POINTS_DETAILED.size(); position++)
   {
     track_position_0 = track_position_1;
     draw_0 = draw_1;
@@ -162,9 +149,9 @@ void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int D
 
       point_color.Value.w = Track.TRACK_POINTS_DETAILED[position].RSSI_INTENSITY;
 
-      draw_point_marker(track_position_0, point_color, Strength_Point_Size);
+      draw_point_marker(Draw_List, track_position_0, point_color, Strength_Point_Size);
 
-      draw_list->AddLine(track_position_0, track_position_1, 
+      Draw_List->AddLine(track_position_0, track_position_1, 
                           sdSysData.COLOR_SELECT.c_grey().TEXT, 2.0f);
     }
   }
@@ -182,7 +169,7 @@ void MAP_MARKER::clear()
   REGION_GPS_COORDS.clear();
 }
 
-void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon, float Range)
+void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon, float Range)
 {
   bool draw = false;
   ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, LAT_LON, draw);
@@ -197,7 +184,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
     {
       case 0: //  0 - Generic
       {
-        draw_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.yellow());
+        draw_marker(Draw_List, sdSysData, draw_position, sdSysData.COLOR_SELECT.yellow());
         ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5.0f));
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
@@ -211,7 +198,6 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
         if (AIRPORT_LANDING_VECTORS.size() > 1)
         {
           bool on_screen = false;
-          ImDrawList* draw_list = ImGui::GetWindowDrawList();
           
           for(int vector = 0; vector < (int)AIRPORT_LANDING_VECTORS.size(); vector++)
           {
@@ -220,12 +206,12 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
                                                       get_coords_x_miles_from_coords(LAT_LON.x, LAT_LON.y, 5.0f, AIRPORT_LANDING_VECTORS[vector]), 
                                                       on_screen);
 
-            draw_list->AddLine(draw_position, landing_vector_end, 
+            Draw_List->AddLine(draw_position, landing_vector_end, 
                                 sdSysData.COLOR_SELECT.c_yellow().STANDARD, 2);
           }
         }
         
-        draw_airport_marker(sdSysData, draw_position, sdSysData.COLOR_SELECT.yellow());
+        draw_airport_marker(Draw_List, sdSysData, draw_position, sdSysData.COLOR_SELECT.yellow());
         ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5.0f));
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_yellow().STANDARD));
@@ -240,18 +226,17 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
         if (REGION_GPS_COORDS.size() > 1.0f)
         {
           //bool on_screen = false;
-          ImDrawList* draw_list = ImGui::GetWindowDrawList();
           
           ImVec2 landing_vector_start = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[REGION_GPS_COORDS.size() -1.0f], draw);
           ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[0], draw);
-          draw_list->AddLine(landing_vector_start, landing_vector_end, Color, 2.0f);
+          Draw_List->AddLine(landing_vector_start, landing_vector_end, Color, 2.0f);
 
           for(int pos = 1; pos < (int)REGION_GPS_COORDS.size(); pos++)
           {
             landing_vector_start = landing_vector_end;
             landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[pos], draw);
 
-            draw_list->AddLine(landing_vector_start, landing_vector_end, 
+            Draw_List->AddLine(landing_vector_start, landing_vector_end, 
                                 Color, 2.0f);
           }
         }
@@ -273,10 +258,8 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
         ImColor Color = sdSysData.COLOR_SELECT.c_cyan().STANDARD;
         if (REGION_GPS_COORDS.size() > 1)
         {
-          
           bool on_screen_1 = false;
           bool on_screen_2 = false;
-          ImDrawList* draw_list = ImGui::GetWindowDrawList();
   
           ImVec2 landing_vector_start; 
           ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[0], on_screen_2);
@@ -290,7 +273,7 @@ void MAP_MARKER::draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale,
 
             if (on_screen_1 == true || on_screen_2 == true)
             {
-              draw_list->AddLine(landing_vector_start, landing_vector_end, 
+              Draw_List->AddLine(landing_vector_start, landing_vector_end, 
                                   Color, 2.0f);
             }
           }
@@ -487,7 +470,7 @@ bool ADSB_WIDGET::active()
 }
 
 // Draw all aircraft onto the maps.
-void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon)
+void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon)
 {
   if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.TRACK_POINTS_DETAILED.size() > 1)
   {
@@ -500,13 +483,13 @@ void ADSB_WIDGET::draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Workin
     // Draw track first then overlay aircraft.
     if (TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 3.0f, ALTITUDE_COLOR_SCALE, Center_Lat_Lon, TRACK);
+      draw_track(Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 3.0f, ALTITUDE_COLOR_SCALE, Center_Lat_Lon, TRACK);
     }
 
     // Draw Aircraft Marker
     if (AIRCRAFT_DATA.TRACK.conversion_success())
     {
-      draw_compass(sdSysData, 1, draw_position, 15.0f, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
+      draw_compass(Draw_List, sdSysData, 1, draw_position, 15.0f, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
                           AIRCRAFT_DATA.NAV_HEADING.conversion_success(), AIRCRAFT_DATA.NAV_HEADING.get_float_value(), 
                           AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value(), false);
     }
@@ -706,10 +689,8 @@ void ADSB_RANGE::set_current_center_position(ImVec2 Lat_Lon)
   CENTER_LAT_LON = Lat_Lon;
 }
 
-void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
+void ADSB_RANGE::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area)
 {
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
   if (ZOOM_LEVEL == -1)
   {
     RADIUS_CIRCLE_POINT_SIZE = Working_Area.w / 2.0f * 0.6f;
@@ -720,8 +701,8 @@ void ADSB_RANGE::draw(system_data &sdSysData, ImVec4 Working_Area)
 
   ImVec2 center = point_position_center(Working_Area);
   
-  draw_list->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V), 32, 1.5f);
-  draw_list->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE * 2.0f, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V), 32, 1.5f);
+  Draw_List->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V), 32, 1.5f);
+  Draw_List->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE * 2.0f, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V), 32, 1.5f);
   
   ImGui::SetCursorScreenPos(ImVec2(center.x, center.y - RADIUS_CIRCLE_POINT_SIZE + 5));
   
@@ -1576,6 +1557,9 @@ void ADSB_MAP::create(system_data &sdSysData)
 
 void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets)
 {
+  // ADSB Draw List
+  ImDrawList* draw_list_map = ImGui::GetWindowDrawList();
+
   // working area, xy start position; zw, size.
   //    or
   //  xy is offset
@@ -1781,7 +1765,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   // All Text Above Here
   // -------------------------------------------------------------------------------------
 
-  RANGE_INDICATOR.draw(sdSysData, working_area);
+  RANGE_INDICATOR.draw(draw_list_map, sdSysData, working_area);
 
   // Draw Compass Calibration
   if (sdSysData.COMMS_COMPASS.connected())
@@ -1809,14 +1793,14 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
         p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibrated_xyz(pos).X / 4.0f), 
                             center.y + (sdSysData.COMMS_COMPASS.calibrated_xyz(pos).Y / 4.0f));
 
-        draw_marker(sdSysData, p1, sdSysData.COLOR_SELECT.orange());
+        draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.orange());
 
         if (pos == sdSysData.COMMS_COMPASS.raw_points_size() -1)
         {
-          draw_line(sdSysData, p1, p2, sdSysData.COLOR_SELECT.white(), 2.0f);
+          draw_line(draw_list_map, sdSysData, p1, p2, sdSysData.COLOR_SELECT.white(), 2.0f);
         }
 
-        draw_marker(sdSysData, p2, sdSysData.COLOR_SELECT.blue());
+        draw_marker(draw_list_map, sdSysData, p2, sdSysData.COLOR_SELECT.blue());
       }
 
       // draw quad calibration
@@ -1827,7 +1811,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
           p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS[pos].X / 4.0f), 
                               center.y + (sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS[pos].Y / 4.0f));
 
-          draw_marker(sdSysData, p1, sdSysData.COLOR_SELECT.green());
+          draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.green());
         }
       }
 
@@ -1837,7 +1821,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       r2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_min_max_x().MAX_VALUE / 4.0f), 
                                       center.y + (sdSysData.COMMS_COMPASS.calibration_min_max_y().MAX_VALUE / 4.0f));
       
-      draw_box(sdSysData, r1, r2, sdSysData.COLOR_SELECT.orange(), 2.0f);
+      draw_box(draw_list_map, sdSysData, r1, r2, sdSysData.COLOR_SELECT.orange(), 2.0f);
 
       c1 = ImVec2(center.x + ((sdSysData.COMMS_COMPASS.calibration_min_max_x().MIN_VALUE - 
                                       sdSysData.COMMS_COMPASS.calibration_offset().X) / 4.0f), 
@@ -1848,10 +1832,10 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
                           center.y + ((sdSysData.COMMS_COMPASS.calibration_min_max_y().MAX_VALUE - 
                                       sdSysData.COMMS_COMPASS.calibration_offset().Y) / 4.0f));
 
-      draw_box(sdSysData, c1, c2, sdSysData.COLOR_SELECT.white(), 2.0f);
+      draw_box(draw_list_map, sdSysData, c1, c2, sdSysData.COLOR_SELECT.white(), 2.0f);
 
-      draw_line(sdSysData, r1, c1, sdSysData.COLOR_SELECT.white(), 2.0f);
-      draw_line(sdSysData, r2, c2, sdSysData.COLOR_SELECT.white(), 2.0f);
+      draw_line(draw_list_map, sdSysData, r1, c1, sdSysData.COLOR_SELECT.white(), 2.0f);
+      draw_line(draw_list_map, sdSysData, r2, c2, sdSysData.COLOR_SELECT.white(), 2.0f);
 
       // level 2
       // A
@@ -1866,15 +1850,15 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
         p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_max_coord_d().X / 4.0f), 
                       center.y + (sdSysData.COMMS_COMPASS.calibration_max_coord_d().Y / 4.0f));
 
-        draw_line(sdSysData, p1, p4, sdSysData.COLOR_SELECT.green(), 2.0f);
-        draw_line(sdSysData, p4, p2, sdSysData.COLOR_SELECT.green(), 2.0f);
-        draw_line(sdSysData, p2, p3, sdSysData.COLOR_SELECT.green(), 2.0f);
-        draw_line(sdSysData, p3, p1, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(draw_list_map, sdSysData, p1, p4, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(draw_list_map, sdSysData, p4, p2, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(draw_list_map, sdSysData, p2, p3, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(draw_list_map, sdSysData, p3, p1, sdSysData.COLOR_SELECT.green(), 2.0f);
 
-        draw_marker_filled(sdSysData, p1, sdSysData.COLOR_SELECT.white());
-        draw_marker_filled(sdSysData, p2, sdSysData.COLOR_SELECT.white());
-        draw_marker_filled(sdSysData, p3, sdSysData.COLOR_SELECT.white());
-        draw_marker_filled(sdSysData, p4, sdSysData.COLOR_SELECT.white());
+        draw_marker_filled(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.white());
+        draw_marker_filled(draw_list_map, sdSysData, p2, sdSysData.COLOR_SELECT.white());
+        draw_marker_filled(draw_list_map, sdSysData, p3, sdSysData.COLOR_SELECT.white());
+        draw_marker_filled(draw_list_map, sdSysData, p4, sdSysData.COLOR_SELECT.white());
       }
     }
   }
@@ -1882,7 +1866,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   // Draw Landmarks
   for (int landmark = 0; landmark < (int)LANDMARKS.size(); landmark++)
   {
-    LANDMARKS[landmark].draw(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.range());
+    LANDMARKS[landmark].draw(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.range());
   }
 
   // Draw Current Position Marker
@@ -1892,7 +1876,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     // Draw track of GPS Position.
     if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 2.5f, GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.center_lat_lon(), sdSysData.GPS_SYSTEM.TRACK);
+      draw_track(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 2.5f, GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.center_lat_lon(), sdSysData.GPS_SYSTEM.TRACK);
     }
 
     bool draw = false;
@@ -1903,14 +1887,14 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     {
       if (RANGE_INDICATOR.gps_display_current_location())
       {
-        draw_compass(sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+        draw_compass(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                             sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, 
                             true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max());
       }
       else
       {
-        draw_compass(sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+        draw_compass(draw_list_map, sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                             sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false);
       }
@@ -1922,7 +1906,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   {
     if (ADSB_Widgets[aircraft].is_expired(sdSysData) == false)
     {
-      ADSB_Widgets[aircraft].draw_aircraft_map_marker(sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), RANGE_INDICATOR.center_lat_lon());
+      ADSB_Widgets[aircraft].draw_aircraft_map_marker(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), RANGE_INDICATOR.center_lat_lon());
     }
   }
 

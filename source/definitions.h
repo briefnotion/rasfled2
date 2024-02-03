@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.122_240130"
+#define Revision "2.124_240202"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -94,6 +94,26 @@
 #define COMMS_ID_COMPASS                      0x1E
 #define COMMS_AUTOSTART_COMPASS               true
 #define CONTINUOUS_DATA_COMPASS               true
+
+#define COMMS_COMPASS_POLLING_RATE_FPS        15
+
+#define COMMS_COMPASS_CAL_PT_A_X              465.0f
+#define COMMS_COMPASS_CAL_PT_A_Y              72.0f
+#define COMMS_COMPASS_CAL_PT_A_VAR            270.0f
+
+#define COMMS_COMPASS_CAL_PT_B_X              359.0f
+#define COMMS_COMPASS_CAL_PT_B_Y              538.0f
+#define COMMS_COMPASS_CAL_PT_B_VAR            260.0f
+
+#define COMMS_COMPASS_CAL_PT_C_X              195.0f
+#define COMMS_COMPASS_CAL_PT_C_Y              481.0f
+#define COMMS_COMPASS_CAL_PT_C_VAR            268.0f
+
+#define COMMS_COMPASS_CAL_PT_D_X              602.0f
+#define COMMS_COMPASS_CAL_PT_D_Y              241.0f
+#define COMMS_COMPASS_CAL_PT_D_VAR            258.0f
+
+#define COMMS_COMPASS_CAL_OFFSET              90.0f - 23.0f
 
 // TTL Values - Individually adjust the TTL values of the auto.
 #define TTL_LF_Top_Percentage   100.15

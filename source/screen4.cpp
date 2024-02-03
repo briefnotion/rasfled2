@@ -33,40 +33,38 @@ struct InputTextCallback_UserData
 // ---------------------------------------------------------------------------------------
 // ---------------------------------------------------------------------------------------
 
-void SCREEN4::door_lights(system_data &sdSysData, ImVec2 Window_Size)
+void SCREEN4::door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size)
 {
-  ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value)
   {
-    draw_list->AddRectFilledMultiColor(ImVec2(0.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
+    Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
                     sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
                     sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_white().STANDARD_V);
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value)
   {
-    draw_list->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), 
+    Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), 
                     sdSysData.COLOR_SELECT.c_white().STANDARD_V, sdSysData.COLOR_SELECT.c_black().STANDARD, 
                     sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value)
   {
-    draw_list->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x, Window_Size.y), 
+    Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x, Window_Size.y), 
                     sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
                     sdSysData.COLOR_SELECT.c_white().STANDARD_V, sdSysData.COLOR_SELECT.c_black().STANDARD);
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value)
   {
-    draw_list->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y / 2.0f), 
+    Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y / 2.0f), 
                     sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_white().STANDARD_V, 
                     sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
   }
 }
 
-void SCREEN4::hazard_lights(system_data &sdSysData, ImVec2 Window_Size)
+void SCREEN4::hazard_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size)
 {
   if ((sdSysData.CAR_INFO.active() && sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards()) || sdSysData.booHazardRunning)
   {
@@ -78,20 +76,18 @@ void SCREEN4::hazard_lights(system_data &sdSysData, ImVec2 Window_Size)
 
     if (BLINKER_BLINK)
     {
-      ImDrawList* draw_list = ImGui::GetWindowDrawList();
-
-      draw_list->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
+      Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
                           sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_red().STANDARD, 
                           sdSysData.COLOR_SELECT.c_red().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
 
-      draw_list->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
+      Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
                           sdSysData.COLOR_SELECT.c_red().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
                           sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_red().STANDARD);
     }
   }
 }
 
-void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
+void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size)
 {
   if (sdSysData.CAR_INFO.active() || sdSysData.booHazardRunning)
   {
@@ -105,9 +101,7 @@ void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
 
       if (BLINKER_BLINK)
       {
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-  
-        draw_list->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
+        Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
                       sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
                       sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD);
       }
@@ -122,9 +116,7 @@ void SCREEN4::signal_lights(system_data &sdSysData, ImVec2 Window_Size)
 
       if (BLINKER_BLINK)
       {
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-  
-        draw_list->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
+        Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
                       sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD, 
                       sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
       }
@@ -514,7 +506,10 @@ void SCREEN4::draw(system_data &sdSysData)
     ImGui::SetNextWindowSize(use_work_area ? viewport->WorkSize : viewport->Size);
 
     if (ImGui::Begin("Window", &show_test_window, sdSysData.SCREEN_DEFAULTS.flags)) // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
-    {      
+    {
+      // draw list
+      ImDrawList* draw_list_window_background = ImGui::GetWindowDrawList();
+
       ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 85.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         // ---------------------------------------------------------------------------------------
@@ -529,6 +524,9 @@ void SCREEN4::draw(system_data &sdSysData)
           // Left
           ImGui::BeginChild("Status Left", ImVec2(region_div_4, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
+            // Assign Draw List
+            ImDrawList* draw_list_status_left = ImGui::GetWindowDrawList();
+
             if (RESET_KEYBOARD_FOCUS == true)
             {
               ImGui::SetKeyboardFocusHere();
@@ -542,7 +540,7 @@ void SCREEN4::draw(system_data &sdSysData)
             ImGui::SameLine();
 
             ImGui::Text(COMMAND_TEXT.c_str());
-            simple_wrap_text_box(sdSysData);
+            simple_wrap_text_box(draw_list_status_left, sdSysData);
 
             ImGui::PopFont();
             ImGui::PopStyleColor();
@@ -666,6 +664,9 @@ void SCREEN4::draw(system_data &sdSysData)
 
           ImGui::BeginChild("Status Compass", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
+            // Assign Draw List
+            ImDrawList* draw_list_status_compass = ImGui::GetWindowDrawList();
+
             if (sdSysData.GPS_SYSTEM.active(current_frame_time) ||
                 sdSysData.COMMS_COMPASS.connected())
             {
@@ -677,7 +678,7 @@ void SCREEN4::draw(system_data &sdSysData)
               working_area.w = ImGui::GetContentRegionAvail().y;
 
               // Draw North Direction Compass
-                draw_compass(sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
+                draw_compass(draw_list_status_compass, sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
                                     (working_area.z / 6.0f), false, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                                     sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, (sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING), 
                                     sdSysData.COMMS_COMPASS.connected(), (sdSysData.COMMS_COMPASS.bearing()), true);
@@ -1054,9 +1055,9 @@ void SCREEN4::draw(system_data &sdSysData)
       ImGui::EndChild();
 
       // Auto Signal Lights
-      door_lights(sdSysData, viewport->Size);
-      signal_lights(sdSysData, viewport->Size);
-      hazard_lights(sdSysData, viewport->Size);
+      door_lights(draw_list_window_background, sdSysData, viewport->Size);
+      signal_lights(draw_list_window_background, sdSysData, viewport->Size);
+      hazard_lights(draw_list_window_background, sdSysData, viewport->Size);
     }
     ImGui::End();
 
@@ -1147,6 +1148,8 @@ void SCREEN4::draw(system_data &sdSysData)
       ImGui::SetNextWindowSize(ImVec2(250, 90));
       if (ImGui::Begin("Timer", &DISPLAY_TIMER, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
       {
+        ImDrawList* draw_list_timer = ImGui::GetWindowDrawList();
+
         long elaped_time = 0;
         float duration_time = 0.0f;
         float remaining_time = 0.0f;
@@ -1164,7 +1167,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
         ImGui::Text("Remaining Time: %s", timer_dsp.c_str());
         BAR_TIMER.update_value(sdSysData, remaining_time / duration_time);
-        BAR_TIMER.draw(sdSysData);
+        BAR_TIMER.draw(draw_list_timer, sdSysData);
       }
       ImGui::End();
     }

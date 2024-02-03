@@ -49,7 +49,7 @@ class THING
 
 // ---------------------------------------------------------------------------------------
 
-void simple_wrap_text_box(system_data &sdSysData);
+void simple_wrap_text_box(ImDrawList *Draw_List, system_data &sdSysData);
 
 // ---------------------------------------------------------------------------------------
 
@@ -78,7 +78,7 @@ class MARKER_GADGET
 
   MARKER_GADGET_PROPERTIES PROPS;
 
-  void draw(system_data &sdSysData, ImDrawList* draw_list, ImVec2 Start_Pos, ImVec2 Size, bool Display);
+  void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Start_Pos, ImVec2 Size, bool Display);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ class ONE_CHAR_LINE_GRAPH
   void update_value(float Value, float Max_Value);
   // Value 0.0 - 1.0
 
-  void draw(system_data &sdSysData);
+  void draw(ImDrawList *Draw_List, system_data &sdSysData);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ class DRAW_RULER
 
   DRAW_RULER_PROPERTIES PROPS;
 
-  void draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
+  void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 
 };
 
@@ -208,7 +208,7 @@ class DRAW_GRID
 
   DRAW_GRID_PROPERTIES PROPS;
 
-  void draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
+  void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -363,7 +363,7 @@ class DRAW_D2_PLOT
 
   void update_timed(unsigned long Time, int Line_Number, float Value);
 
-  void draw_graph(system_data &sdSysData);
+  void draw_graph(ImDrawList *Draw_List, system_data &sdSysData);
 
   bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };

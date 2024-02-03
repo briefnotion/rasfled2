@@ -108,7 +108,7 @@ bool four_point_check(COMPASS_XYZ Top, COMPASS_XYZ Bottom,
 
 void CAL_LEVEL_2_QUAD_RECORD::add_point(COMPASS_XYZ &Raw_XYZ)
 {
-  if ((int)DATA_POINTS.size() < SIZE)
+  if ((int)DATA_POINTS.size() <= VARIANCE_COLLECTION_SIZE)
   {
     DATA_POINTS.push_back(Raw_XYZ);
   }
@@ -121,10 +121,10 @@ void CAL_LEVEL_2_QUAD_RECORD::add_point(COMPASS_XYZ &Raw_XYZ)
 void CAL_LEVEL_2_QUAD_RECORD::clear()
 {
   DATA_POINTS.clear();
-  DATA_POINTS.reserve(SIZE);
+  DATA_POINTS.reserve(VARIANCE_COLLECTION_SIZE);
 
   VARIANCE_COLLECTION.clear();
-  VARIANCE_COLLECTION.reserve(SIZE);
+  VARIANCE_COLLECTION.reserve(VARIANCE_COLLECTION_SIZE);
 
   OVERFLOW = false;
 }
@@ -134,8 +134,15 @@ float CALIBRATION_DATA::variance_from_offset(COMPASS_XYZ Offset, bool &Good_Data
   // get min y
   if (QUAD_DATA.DATA_POINTS.size() == 0)
   {
-    Good_Data_Count_Pass = false;
-    return 0;
+    if (HAS_DATA)
+    {
+      return VARIANCE;
+    }
+    else
+    {
+      Good_Data_Count_Pass = false;
+      return 0;
+    }
   }
   else
   {
@@ -154,7 +161,8 @@ float CALIBRATION_DATA::variance_from_offset(COMPASS_XYZ Offset, bool &Good_Data
     // Set to false if fail, keep same (false or true) if true.
     bool good_data = false;
 
-    good_data = emperical_mean(QUAD_DATA.VARIANCE_COLLECTION, 2.0, 20, mean, qualifying_value_for_variance);
+    good_data = emperical_mean(QUAD_DATA.VARIANCE_COLLECTION, 2.0, 2 * COMMS_COMPASS_POLLING_RATE_FPS, mean, qualifying_value_for_variance);
+    // Good data count of 2 seconds worth of valid points.
 
     if (good_data == false)
     {
@@ -194,7 +202,8 @@ bool CALIBRATION_DATA::stick_the_landing(COMPASS_XYZ Current_Offset, int Quadran
   // Set to false if fail, keep same (false or true) if true.
   bool good_data = false;
 
-  good_data = emperical_mean(QUAD_DATA.VARIANCE_COLLECTION, 2.0, 20, mean, qualifying_value_for_variance);
+  good_data = emperical_mean(QUAD_DATA.VARIANCE_COLLECTION, 2.0, 2 * COMMS_COMPASS_POLLING_RATE_FPS, mean, qualifying_value_for_variance);
+  // Good data count of 2 seconds worth of valid points.
 
   if (good_data)
   {
@@ -338,16 +347,23 @@ void CAL_LEVEL_2::calibration_preload_set()
 
   // Load Data
   A.COORD = A_Cal_Pt_PRELOAD;
+  A.VARIANCE = A_Cal_Var_PRELOAD;
   A.HAS_DATA = true;
 
   B.COORD = B_Cal_Pt_PRELOAD;
+  B.VARIANCE = B_Cal_Var_PRELOAD;
   B.HAS_DATA = true;
 
   C.COORD = C_Cal_Pt_PRELOAD;
+  C.VARIANCE = C_Cal_Var_PRELOAD;
   C.HAS_DATA = true;
 
   D.COORD = D_Cal_Pt_PRELOAD;
+  D.VARIANCE = D_Cal_Var_PRELOAD;
   D.HAS_DATA = true;
+
+  // Set Variance
+  DISTANCE_VARIANCE_FULL = A.VARIANCE + B.VARIANCE + C.VARIANCE + D.VARIANCE;
 
   // Adjust new offset
   X_MIN_MAX.MIN_VALUE = C.COORD.X;
@@ -479,7 +495,7 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
       ACTIVE_QUAD_DATA.QUAD_DATA.add_point(Raw_XYZ);
 
       // Simple Filter
-      if (distance > 100.0f && (int)ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS.size() > 10)
+      if (distance > 100.0f)
       {
         // Check for quadrant changes
         if (quad_current != QUAD)
@@ -615,6 +631,7 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                       A.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
                       A.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
                       A.COORD = ACTIVE_QUAD_DATA.COORD;
+                      A.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
                       A.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
                     }
                     else if (QUAD == 1)
@@ -622,6 +639,7 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                       D.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
                       D.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
                       D.COORD = ACTIVE_QUAD_DATA.COORD;
+                      D.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
                       D.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
                     }
                     else if (QUAD == 2)
@@ -629,6 +647,7 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                       B.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
                       B.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
                       B.COORD = ACTIVE_QUAD_DATA.COORD;
+                      B.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
                       B.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
                     }
                     else if (QUAD == 3)
@@ -636,6 +655,7 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                       C.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
                       C.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
                       C.COORD = ACTIVE_QUAD_DATA.COORD;
+                      C.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
                       C.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
                     }
                   }
@@ -695,7 +715,7 @@ bool HMC5883L::create()
   bool ret_success = false;
 
   RAW_POINTS.clear();
-  RAW_POINTS.reserve(1000);  
+  RAW_POINTS.reserve(RAW_POINTS_SIZE);  
   CALIBRATED_BEARINGS.clear();
   CALIBRATED_BEARINGS.reserve(1000);
   
@@ -714,9 +734,16 @@ bool HMC5883L::create()
   {
     if (ioctl(DEVICE, I2C_SLAVE, PROPS.I2C_ID) >= 0)
     {
-      // default settings
-      register_write(0x01, 0x20); // Still figuring out register writes
-      register_write(0x02, 0x00); // Still figuring out register writes
+      //register_write(0x00, 0x20); // Register A
+      //                            // Sample of 1  (default)
+      //                            // Output rate of 15 Hz  (default)
+      //                            // Normal Measurtement configuration  (default)
+
+      register_write(0x01, 0x20);   // Register B  (00100000)
+                                    // 1090 Gauss  (default)
+
+      register_write(0x02, 0x00);   // Mode Register
+                                    // Continuous Measurement Mode
       
       ret_success = true;
       CONNECTED = true;
@@ -771,13 +798,13 @@ void HMC5883L::process()
   CALIBRATED_BEARINGS.push_back(bearing);
 
   // Maintain point history size
-  if (RAW_POINTS.size() > 990)
+  if (RAW_POINTS.size() > (RAW_POINTS_SIZE * .9))
   {
-    RAW_POINTS.erase(RAW_POINTS.begin(), RAW_POINTS.begin() + 190);
+    RAW_POINTS.erase(RAW_POINTS.begin(), RAW_POINTS.begin() + (RAW_POINTS_SIZE * .1));
   }
-  if (CALIBRATED_BEARINGS.size() > 990)
+  if (CALIBRATED_BEARINGS.size() > (RAW_POINTS_SIZE * .9))
   {
-    CALIBRATED_BEARINGS.erase(CALIBRATED_BEARINGS.begin(), CALIBRATED_BEARINGS.begin() + 190);
+    CALIBRATED_BEARINGS.erase(CALIBRATED_BEARINGS.begin(), CALIBRATED_BEARINGS.begin() + (RAW_POINTS_SIZE * .1));
   }
 
   /*
@@ -991,19 +1018,19 @@ COMPASS_XYZ HMC5883L::calibration_max_coord_d()
 }
 float HMC5883L::calibration_known_var_a()
 {
-  return LEVEL_2.A.LAST_KNOWN_VARIANCE;
+  return LEVEL_2.A.VARIANCE;
 }
 float HMC5883L::calibration_known_var_b()
 {
-  return LEVEL_2.B.LAST_KNOWN_VARIANCE;
+  return LEVEL_2.B.VARIANCE;
 }
 float HMC5883L::calibration_known_var_c()
 {
-  return LEVEL_2.C.LAST_KNOWN_VARIANCE;
+  return LEVEL_2.C.VARIANCE;
 }
 float HMC5883L::calibration_known_var_d()
 {
-  return LEVEL_2.D.LAST_KNOWN_VARIANCE;
+  return LEVEL_2.D.VARIANCE;
 }
 
 

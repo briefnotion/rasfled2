@@ -52,19 +52,19 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 
 // ---------------------------------------------------------------------------------------
 // Markers
-void draw_line(system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size);
+void draw_line(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size);
 
-void draw_box(system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size);
+void draw_box(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size);
 
-void draw_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
+void draw_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
-void draw_marker_filled(system_data &sdSysData, ImVec2 Screen_Position, int Color);
+void draw_marker_filled(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
-void draw_airport_marker(system_data &sdSysData, ImVec2 Screen_Position, int Color);
+void draw_airport_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color);
 
-void draw_point_marker(ImVec2 Screen_Position, ImColor Color, float Size);
+void draw_point_marker(ImDrawList *Draw_List, ImVec2 Screen_Position, ImColor Color, float Size);
 
-void draw_track(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
+void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
                 float Strength_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
                 ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track);
 
@@ -103,7 +103,7 @@ class MAP_MARKER
 
   void clear();
 
-  void draw(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon, float Range);
+  void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon, float Range);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -192,7 +192,7 @@ class ADSB_WIDGET
 
   bool active();
 
-  void draw_aircraft_map_marker(system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon);
+  void draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -271,7 +271,7 @@ class ADSB_RANGE
 
   void set_current_center_position(ImVec2 Lat_Lon);
   
-  void draw(system_data &sdSysData, ImVec4 Working_Area);
+  void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area);
 
   void draw_info();
 };
@@ -303,7 +303,7 @@ class ADSB_MAP
 
   void create(system_data &sdSysData);
 
-  void draw(system_data &sdSysData,   DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets);
+  void draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets);
 
 };
 

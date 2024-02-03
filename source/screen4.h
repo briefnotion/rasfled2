@@ -121,9 +121,9 @@ class SCREEN4
 
   bool CHANGED = false;
 
-  void door_lights(system_data &sdSysData, ImVec2 Window_Size);
-  void hazard_lights(system_data &sdSysData, ImVec2 Window_Size);
-  void signal_lights(system_data &sdSysData, ImVec2 Window_Size);
+  void door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size);
+  void hazard_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size);
+  void signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size);
 
   void set_screen_default_colors(system_data &sdSysData);
 

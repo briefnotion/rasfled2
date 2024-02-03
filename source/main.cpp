@@ -330,7 +330,7 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   // GPS Comm Port Setup
-  compass_timer.set(100);
+  compass_timer.set( 1000 / COMMS_COMPASS_POLLING_RATE_FPS );
 
   sdSystem.COMMS_GPS.PROPS.PORT = COMMS_PORT_GPS;
 
@@ -371,23 +371,23 @@ int loop_2(bool TTY_Only)
   COMPASS_XYZ C_Cal_Pt;
   COMPASS_XYZ D_Cal_Pt;
 
-  A_Cal_Pt.X = 386.0f;
-  A_Cal_Pt.Y = 68.0f;
-  float A_Cal_Var = 300.0f;
+  A_Cal_Pt.X = COMMS_COMPASS_CAL_PT_A_X;
+  A_Cal_Pt.Y = COMMS_COMPASS_CAL_PT_A_Y;
+  float A_Cal_Var = COMMS_COMPASS_CAL_PT_A_VAR;
 
-  B_Cal_Pt.X = 270.0f;
-  B_Cal_Pt.Y = 532.0f;
-  float B_Cal_Var = 300.0f;
+  B_Cal_Pt.X = COMMS_COMPASS_CAL_PT_B_X;
+  B_Cal_Pt.Y = COMMS_COMPASS_CAL_PT_B_Y;
+  float B_Cal_Var = COMMS_COMPASS_CAL_PT_B_VAR;
 
-  C_Cal_Pt.X = 120.0f;
-  C_Cal_Pt.Y = 384.0f;
-  float C_Cal_Var = 300.0f;
+  C_Cal_Pt.X = COMMS_COMPASS_CAL_PT_C_X;
+  C_Cal_Pt.Y = COMMS_COMPASS_CAL_PT_C_Y;
+  float C_Cal_Var = COMMS_COMPASS_CAL_PT_C_VAR;
 
-  D_Cal_Pt.X = 572.0f;
-  D_Cal_Pt.Y = 194.0f;
-  float D_Cal_Var = 300.0f;
+  D_Cal_Pt.X = COMMS_COMPASS_CAL_PT_D_X;
+  D_Cal_Pt.Y = COMMS_COMPASS_CAL_PT_D_Y;
+  float D_Cal_Var = COMMS_COMPASS_CAL_PT_D_VAR;
 
-  float Cal_Offset = 90.0f - 23.0f;
+  float Cal_Offset = COMMS_COMPASS_CAL_OFFSET;
 
   sdSystem.COMMS_COMPASS.calibration_preload(A_Cal_Pt, A_Cal_Var, B_Cal_Pt, B_Cal_Var, C_Cal_Pt, C_Cal_Var, D_Cal_Pt, D_Cal_Var, Cal_Offset);
 
