@@ -1658,11 +1658,11 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     if (sdSysData.COMMS_COMPASS.calibrate_on())
     {
       ImGui::Text(" RAW XYZ: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.raw_xyz().X, sdSysData.COMMS_COMPASS.raw_xyz().Y, sdSysData.COMMS_COMPASS.raw_xyz().Z);
-      ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance());
-      ImGui::Text("CAL PT A: %.0f, %.0f: %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_a().X, sdSysData.COMMS_COMPASS.calibration_max_coord_a().Y, sdSysData.COMMS_COMPASS.calibration_known_var_a());
-      ImGui::Text("CAL PT B: %.0f, %.0f: %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_b().X, sdSysData.COMMS_COMPASS.calibration_max_coord_b().Y, sdSysData.COMMS_COMPASS.calibration_known_var_b());
-      ImGui::Text("CAL PT C: %.0f, %.0f: %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_c().X, sdSysData.COMMS_COMPASS.calibration_max_coord_c().Y, sdSysData.COMMS_COMPASS.calibration_known_var_c());
-      ImGui::Text("CAL PT D: %.0f, %.0f: %.0f", sdSysData.COMMS_COMPASS.calibration_max_coord_d().X, sdSysData.COMMS_COMPASS.calibration_max_coord_d().Y, sdSysData.COMMS_COMPASS.calibration_known_var_d());
+      ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.3f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance());
+      ImGui::Text("CAL PT A: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.calibration_max_coord_a().X, sdSysData.COMMS_COMPASS.calibration_max_coord_a().Y, sdSysData.COMMS_COMPASS.calibration_known_var_a());
+      ImGui::Text("CAL PT B: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.calibration_max_coord_b().X, sdSysData.COMMS_COMPASS.calibration_max_coord_b().Y, sdSysData.COMMS_COMPASS.calibration_known_var_b());
+      ImGui::Text("CAL PT C: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.calibration_max_coord_c().X, sdSysData.COMMS_COMPASS.calibration_max_coord_c().Y, sdSysData.COMMS_COMPASS.calibration_known_var_c());
+      ImGui::Text("CAL PT D: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.calibration_max_coord_d().X, sdSysData.COMMS_COMPASS.calibration_max_coord_d().Y, sdSysData.COMMS_COMPASS.calibration_known_var_d());
     }
   }
 
@@ -1881,7 +1881,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
     bool draw = false;
     ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.gps_pos_lat_lon() ,draw);
-    
+
     // Draw point position compass
     if (draw)
     {

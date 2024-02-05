@@ -32,6 +32,7 @@
 #include "aircraft_coordinator.h"
 #include "screen4_helper.h"
 #include "widgets.h"
+#include "widgets_drawing.h"
 
 // IMGui Includes
 #include "../../imgui/imgui.h"

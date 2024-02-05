@@ -1,3 +1,10 @@
+2.125_240203
+  - Variance in variance_from_offset() wasn't returning the correct 
+      value.  Made some changes and now computing variance 
+      relative to distance so the offsets will not continue to 
+      get smaller. 
+  - Large compass prints heading and bearing on compass indicators. 
+
 2.124_240202
   - Changes in previous update didn't post to github, so including 
       those changes in this update. 

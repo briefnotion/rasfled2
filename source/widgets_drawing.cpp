@@ -18,6 +18,135 @@
 
 // ---------------------------------------------------------------------------------------
 
+ImVec2 operator+(ImVec2 V1, ImVec2 V2)
+{
+  return ImVec2(V1.x + V2.x, V1.y + V2.y);
+}
+
+ImVec2 operator-(ImVec2 V1, ImVec2 V2)
+{
+  return ImVec2(V1.x - V2.x, V1.y - V2.y);
+}
+
+ImVec2 operator*(ImVec2 V1, ImVec2 V2)
+{
+  return ImVec2(V1.x * V2.x, V1.y * V2.y);
+}
+
+ImVec2 operator*(ImVec2 V1, float Number)
+{
+  return ImVec2(V1.x * Number, V1.y * Number);
+}
+
+// ---------------------------------------------------------------------------------------
+
+// Rotate Text
+
+//Initial code for this comes from: https://gist.github.com/carasuca/e72aacadcf6cf8139de46f97158f790f
+//  It doesn't seem to have a license statement, so I'm assuming it's public domain
+
+//internal bounding boxes
+// BB = outermost 'true' bounding box (including bounding box for handles)
+// DR = bounding box for drawing
+// IN = inner (ie inside bufferzone for boundaries handles
+// CE = centron (prob central 10%)
+// TL...B = bb for handles for grabbing the various edges/corners
+
+int ImRotateStart()
+{
+    //rotation_start_index = ImGui::GetWindowDrawList()->VtxBuffer.Size;
+    return ImGui::GetWindowDrawList()->VtxBuffer.Size;
+}
+
+ImVec2 ImRotationCenter(int rotation_start_index)
+{
+  ImVec2 l(FLT_MAX, FLT_MAX), u(-FLT_MAX, -FLT_MAX); // bounds
+
+  const auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
+  for (int i = rotation_start_index; i < buf.Size; i++)
+  {
+    l = ImMin(l, buf[i].pos), u = ImMax(u, buf[i].pos);
+  }
+
+  return ImVec2((l.x + u.x) / 2, (l.y + u.y) / 2); // or use _ClipRectStack?
+}
+
+void ImRotateEnd(int rotation_start_index, float rad, ImVec2 center)
+{
+  // Adjust the angle to match the standard horizontal orientation
+  rad -= float_PI / 2.0f; // Subtract 90 degrees (PI/2 radians)
+
+  float s = sin(rad), c = cos(rad);
+  center = ImRotate(center, s, c) - center;
+
+  auto& buf = ImGui::GetWindowDrawList()->VtxBuffer;
+  for (int i = rotation_start_index; i < buf.Size; i++)
+  {
+    buf[i].pos = ImRotate(buf[i].pos, s, c) - center;
+  }
+}
+
+void drawRotatedText(std::string textToRotate, float angleToRotate, bbEnum rotationCentre)
+{
+  // Calculate rotation angle in radians
+  float rad = angleToRotate;
+  rad = rad * float_PI / 180.0f;
+
+  ImVec2 textStartPosition = ImGui::GetWindowPos() + ImGui::GetCursorPos();
+  // ImRotateEnd uses GetWindowDrawList which is based on position of the screen
+
+  // Calculate text size to determine bounding box
+  ImVec2 textSize = ImGui::CalcTextSize(textToRotate.c_str());
+
+  ImVec2 rotationCenter;
+
+  // Calculate rotation center based on bbEnum value
+  switch (rotationCentre)
+  {
+  case BB_CE:
+      rotationCenter = ImVec2(textStartPosition.x + textSize.x * 0.5f, textStartPosition.y + textSize.y * 0.5f);
+      break;
+  case BB_TL:
+      rotationCenter = textStartPosition;
+      break;
+  case BB_TR:
+      rotationCenter = ImVec2(textStartPosition.x + textSize.x, textStartPosition.y);
+      break;
+  case BB_BL:
+      rotationCenter = ImVec2(textStartPosition.x, textStartPosition.y + textSize.y);
+      break;
+  case BB_BR:
+      rotationCenter = ImVec2(textStartPosition.x + textSize.x, textStartPosition.y + textSize.y);
+      break;
+  case BB_L:
+      rotationCenter = ImVec2(textStartPosition.x, textStartPosition.y + textSize.y / 2);
+      break;
+  case BB_R:
+      rotationCenter = ImVec2(textStartPosition.x + textSize.x, textStartPosition.y + textSize.y / 2);
+      break;
+  case BB_T:
+      rotationCenter = ImVec2(textStartPosition.x + textSize.x / 2, textStartPosition.y);
+      break;
+  case BB_B:
+      rotationCenter = ImVec2(textStartPosition.x + textSize.x / 2, textStartPosition.y + textSize.y);
+      break;
+  default:
+      std::cout << "ERROR: invalid rotationCentre in drawRotatedText\n";
+      return;
+  }
+
+  // Start rotation
+  int rotation_start_index = ImRotateStart();
+
+  // Render the text
+  ImGui::Text(textToRotate.c_str());
+
+  // Apply the rotation
+  ImRotateEnd(rotation_start_index, rad, rotationCenter);
+}
+
+// ---------------------------------------------------------------------------------------
+
 void simple_wrap_text_box(ImDrawList *Draw_List, system_data &sdSysData)
 {
   Draw_List->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), sdSysData.COLOR_SELECT.c_yellow().ACTIVE);

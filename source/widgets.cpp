@@ -477,9 +477,12 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     ImVec2 p1 = Screen_Position;
     if (Version == 2)
     {
-      p1 = ImVec2(Screen_Position.x + (Size - (needle_size / 2.0f)) * cos(rad + float_PI), Screen_Position.y + (Size - (needle_size / 2.0f)) * sin(rad + float_PI));
+      p1 = ImVec2(Screen_Position.x + (Size - (needle_size / 2.0f)) * cos(rad + float_PI), 
+                  Screen_Position.y + (Size - (needle_size / 2.0f)) * sin(rad + float_PI));
     }
-    ImVec2 p2 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
+
+    ImVec2 p2 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
+                        Screen_Position.y + Size * sin(rad + float_PI));
  
     // Draw the line
     if (Valid_Position)
@@ -496,25 +499,18 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     // Text Descriptor for version 2
     if (Version == 2)
     {
-      if (Valid_Position)
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(Color).TEXT));
-      }
-      else
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(Color).TEXT));
-      }
+      // Nothing written yet to handle other sized version 2 compass rotated heading text.
+      float rad2 = 0.0f;
+      ImVec2 p3;
 
-      if (Heading_1 < 157.0f)
-      {
-        ImGui::SetCursorScreenPos(ImVec2(p1.x - needle_size, p1.y));
-      }
-      else
-      {
-        ImGui::SetCursorScreenPos(ImVec2(p1.x + needle_size - 10.0f, p1.y));
-      }
+      rad2 = (Heading_1 + 90.0f - 5.0f) * float_PI / 180.0f;
+      p3 = ImVec2(Screen_Position.x + Size * cos(rad2 + float_PI), 
+                        Screen_Position.y + Size * sin(rad2 + float_PI));
       
-      ImGui::Text("%.0f", Heading_1);
+      ImGui::SetCursorScreenPos(p3);
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
+      drawRotatedText(to_string((int)Heading_1), 180.0f - Heading_1, BB_TL);
+      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
       ImGui::PopStyleColor();
     }
   }
@@ -522,7 +518,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
   // Draw Heading 2
   if (Valid_Heading_2)
   {
-    float rad = 0;
+    float rad = 0.0f;
     ImVec2 p1;
     ImVec2 p2;
 
@@ -533,8 +529,10 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         // Jitter 1
         rad = ((Jitter_Heading_Min) + 90.0f) * float_PI / 180.0f;
 
-        p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
-        p2 = ImVec2(Screen_Position.x + (Size + needle_size) * cos(rad + float_PI), Screen_Position.y + (Size + needle_size) * sin(rad + float_PI));
+        p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
+                    Screen_Position.y + Size * sin(rad + float_PI));
+        p2 = ImVec2(Screen_Position.x + (Size + needle_size) * cos(rad + float_PI), 
+                    Screen_Position.y + (Size + needle_size) * sin(rad + float_PI));
         
         // Draw the line
         if (Valid_Position)
@@ -551,8 +549,10 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         // Jitter 2
         rad = ((Jitter_Heading_Max) + 90.0f) * float_PI / 180.0f;
 
-        p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
-        p2 = ImVec2(Screen_Position.x + (Size + needle_size) * cos(rad + float_PI), Screen_Position.y + (Size + needle_size) * sin(rad + float_PI));
+        p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
+                    Screen_Position.y + Size * sin(rad + float_PI));
+        p2 = ImVec2(Screen_Position.x + (Size + needle_size) * cos(rad + float_PI), 
+                    Screen_Position.y + (Size + needle_size) * sin(rad + float_PI));
         
         // Draw the line
         if (Valid_Position)
@@ -572,17 +572,20 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     rad = (Heading_2 + 90.0f) * float_PI / 180.0f;
 
     // Calculate
-    p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), Screen_Position.y + Size * sin(rad + float_PI));
+    p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
+                Screen_Position.y + Size * sin(rad + float_PI));
 
     if (Version == 1)
     {
       // Version 1
-      p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
+      p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), 
+                  Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
     }
     else
     {
       // Version 2
-      p2 = ImVec2(Screen_Position.x + (Size + (needle_size / 2.0f)) * cos(rad + float_PI), Screen_Position.y + (Size + (needle_size / 2.0f)) * sin(rad + float_PI));
+      p2 = ImVec2(Screen_Position.x + (Size + (needle_size / 2.0f)) * cos(rad + float_PI), 
+                  Screen_Position.y + (Size + (needle_size / 2.0f)) * sin(rad + float_PI));
     }
  
     // Draw the line
@@ -599,26 +602,19 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 
     // Text Descriptor for version 2
     if (Version == 2)
-    {
-      if (Valid_Position)
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(Color).TEXT));
-      }
-      else
-      {
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(Color).TEXT));
-      }
+    { 
+      // Nothing written yet to handle other sized version 2 compass rotated heading text.
+      float rad2 = 0.0f;
+      ImVec2 p3;
 
-      if (Heading_2 < 180.0f)
-      {
-        ImGui::SetCursorScreenPos(ImVec2(p1.x + needle_size + 5.0f, p1.y));
-      }
-      else
-      {
-        ImGui::SetCursorScreenPos(ImVec2(p1.x - needle_size - 20.0f, p1.y));
-      }
+      rad2 = (Heading_2 + 90.0f - 5.0f) * float_PI / 180.0f;
+      p3 = ImVec2(Screen_Position.x + (Size + (needle_size / 2.0f)) * cos(rad2 + float_PI), 
+                  Screen_Position.y + (Size + (needle_size / 2.0f)) * sin(rad2 + float_PI));
       
-      ImGui::Text("%.0f", Heading_2);
+      ImGui::SetCursorScreenPos(p3);
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
+      drawRotatedText(to_string((int)Heading_2), 180.0f - Heading_2, BB_TL);
+      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
       ImGui::PopStyleColor();
     }
 
@@ -628,7 +624,8 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       rad = ((-Heading_2) + 90.0f) * float_PI / 180.0f;
 
       p1 = Screen_Position;
-      p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
+      p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), 
+                  Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
 
       if (Valid_Position)
       {

@@ -24,6 +24,8 @@
 #include "../../imgui/backends/imgui_impl_glfw.h"
 #include <GLFW/glfw3.h>
 
+#include "imgui_internal.h"
+
 // STB Includes
 #include "../../stb/stb_image.h"
 
@@ -35,17 +37,21 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
-/*
-class THING
-{
-  private:
+ImVec2 operator+(ImVec2 V1, ImVec2 V2);
+ImVec2 operator-(ImVec2 V1, ImVec2 V2);
+ImVec2 operator*(ImVec2 V1, ImVec2 V2);
+ImVec2 operator*(ImVec2 V1, float Number);
 
-  public:
+// ---------------------------------------------------------------------------------------
 
-  void draw(system_data &sdSysData);
-};
+// Rotate Text
 
-*/
+enum bbEnum { BB_BB, BB_DR, BB_IN, BB_CE, BB_TL, BB_TR, BB_BL, BB_BR, BB_L, BB_R, BB_T, BB_B };
+
+int ImRotateStart();
+ImVec2 ImRotationCenter(int rotation_start_index);
+void ImRotateEnd(int rotation_start_index, float rad, ImVec2 center);
+void drawRotatedText(std::string textToRotate, float angleToRotate, bbEnum rotationCentre);
 
 // ---------------------------------------------------------------------------------------
 

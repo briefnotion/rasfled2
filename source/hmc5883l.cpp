@@ -131,6 +131,8 @@ void CAL_LEVEL_2_QUAD_RECORD::clear()
 
 float CALIBRATION_DATA::variance_from_offset(COMPASS_XYZ Offset, bool &Good_Data_Count_Pass)
 {
+  float max_variance = 0;
+
   // get min y
   if (QUAD_DATA.DATA_POINTS.size() == 0)
   {
@@ -170,10 +172,31 @@ float CALIBRATION_DATA::variance_from_offset(COMPASS_XYZ Offset, bool &Good_Data
     }
     else
     {
-      LAST_KNOWN_VARIANCE = mean;
+      float tmp_variance = 0;
+
+      for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
+      {
+        // Check to see if the distance measured is passed its qualifying value to store
+        //  only valid points as an extreme max.  Not liking that this loop is ran twice, 
+        //  but i like the idea of changing emperical_mean() even less.
+        // This is only to ensure that only a value that has been considered in the mean 
+        //  value will be checked for a qualifying stick the landing value.
+        //  Also, the landing should have already been stuck.
+        if(abs(QUAD_DATA.VARIANCE_COLLECTION[pos] - mean) <= qualifying_value_for_variance)
+        {
+          tmp_variance = ((abs(QUAD_DATA.VARIANCE_COLLECTION[pos] - mean)) / mean);
+
+          if (tmp_variance > max_variance)
+          {
+            max_variance = tmp_variance;
+          }
+        }
+      }
+
+      LAST_KNOWN_VARIANCE = max_variance;
     }
 
-    return mean;
+    return max_variance;
   }
 }
 
