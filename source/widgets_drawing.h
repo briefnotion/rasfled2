@@ -37,21 +37,11 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
-ImVec2 operator+(ImVec2 V1, ImVec2 V2);
-ImVec2 operator-(ImVec2 V1, ImVec2 V2);
-ImVec2 operator*(ImVec2 V1, ImVec2 V2);
-ImVec2 operator*(ImVec2 V1, float Number);
-
-// ---------------------------------------------------------------------------------------
-
 // Rotate Text
 
 enum bbEnum { BB_BB, BB_DR, BB_IN, BB_CE, BB_TL, BB_TR, BB_BL, BB_BR, BB_L, BB_R, BB_T, BB_B };
 
-int ImRotateStart();
-ImVec2 ImRotationCenter(int rotation_start_index);
-void ImRotateEnd(int rotation_start_index, float rad, ImVec2 center);
-void drawRotatedText(std::string textToRotate, float angleToRotate, bbEnum rotationCentre);
+void Text_Rotate(std::string textToRotate, float angleToRotate, bbEnum rotationCentre);
 
 // ---------------------------------------------------------------------------------------
 

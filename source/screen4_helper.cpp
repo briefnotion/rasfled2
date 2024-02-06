@@ -16,6 +16,28 @@
 
 // ---------------------------------------------------------------------------------------
 
+ImVec2 operator+(ImVec2 V1, ImVec2 V2)
+{
+  return ImVec2(V1.x + V2.x, V1.y + V2.y);
+}
+
+ImVec2 operator-(ImVec2 V1, ImVec2 V2)
+{
+  return ImVec2(V1.x - V2.x, V1.y - V2.y);
+}
+
+ImVec2 operator*(ImVec2 V1, ImVec2 V2)
+{
+  return ImVec2(V1.x * V2.x, V1.y * V2.y);
+}
+
+ImVec2 operator*(ImVec2 V1, float Number)
+{
+  return ImVec2(V1.x * Number, V1.y * Number);
+}
+
+// ---------------------------------------------------------------------------------------
+
 void COLOR_COMBO::set_rgb(float R, float G, float B, float A, float Intensity)
 {
   TEXT = ImColor((R *0.8f + 0.5f) * Intensity, (G *0.8f + 0.5f) * Intensity, (B *0.8f + 0.5f) * Intensity, A);

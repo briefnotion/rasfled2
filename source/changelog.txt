@@ -1,3 +1,8 @@
+2.126_240205
+  - Hammered the Text_Rotate() down to a single function call.
+  - Adjusted calibration settings to my default calibration and set 
+      to start with calibration lock.
+
 2.125_240203
   - Variance in variance_from_offset() wasn't returning the correct 
       value.  Made some changes and now computing variance 

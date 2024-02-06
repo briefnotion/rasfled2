@@ -26,6 +26,13 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
+ImVec2 operator+(ImVec2 V1, ImVec2 V2);
+ImVec2 operator-(ImVec2 V1, ImVec2 V2);
+ImVec2 operator*(ImVec2 V1, ImVec2 V2);
+ImVec2 operator*(ImVec2 V1, float Number);
+
+// ---------------------------------------------------------------------------------------
+
 class WIDGET_DEFAULTS
 {
   public:

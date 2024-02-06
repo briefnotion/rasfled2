@@ -503,14 +503,31 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       float rad2 = 0.0f;
       ImVec2 p3;
 
-      rad2 = (Heading_1 + 90.0f - 5.0f) * float_PI / 180.0f;
-      p3 = ImVec2(Screen_Position.x + Size * cos(rad2 + float_PI), 
-                        Screen_Position.y + Size * sin(rad2 + float_PI));
-      
-      ImGui::SetCursorScreenPos(p3);
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
-      drawRotatedText(to_string((int)Heading_1), 180.0f - Heading_1, BB_TL);
+
+      if (Heading_1 < 90.0f || Heading_1 > 270.0f)
+      {
+        rad2 = (Heading_1 + 90.0f - 5.0f) * float_PI / 180.0f;
+
+        p3 = ImVec2(Screen_Position.x + Size * cos(rad2 + float_PI), 
+                          Screen_Position.y + Size * sin(rad2 + float_PI));
+        ImGui::SetCursorScreenPos(p3);
+
+        Text_Rotate(to_string((int)Heading_1), 180.0f - Heading_1, BB_TL);
+      }
+      else
+      {
+        rad2 = (Heading_1 + 90.0f + 5.0f) * float_PI / 180.0f;
+
+        p3 = ImVec2(Screen_Position.x + (Size - (needle_size / 2.0f)) * cos(rad2 + float_PI), 
+                    Screen_Position.y + (Size - (needle_size / 2.0f)) * sin(rad2 + float_PI));
+        ImGui::SetCursorScreenPos(p3);
+
+        Text_Rotate(to_string((int)Heading_1), -Heading_1, BB_TL);
+      }
+      
       //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
+
       ImGui::PopStyleColor();
     }
   }
@@ -607,14 +624,33 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       float rad2 = 0.0f;
       ImVec2 p3;
 
-      rad2 = (Heading_2 + 90.0f - 5.0f) * float_PI / 180.0f;
-      p3 = ImVec2(Screen_Position.x + (Size + (needle_size / 2.0f)) * cos(rad2 + float_PI), 
-                  Screen_Position.y + (Size + (needle_size / 2.0f)) * sin(rad2 + float_PI));
-      
-      ImGui::SetCursorScreenPos(p3);
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
-      drawRotatedText(to_string((int)Heading_2), 180.0f - Heading_2, BB_TL);
+
+      if (Heading_2 < 90.0f || Heading_2 > 270.0f)
+      {
+        rad2 = (Heading_2 + 90.0f - 5.0f) * float_PI / 180.0f;
+
+        p3 = ImVec2(Screen_Position.x + (Size + (needle_size / 2.0f)) * cos(rad2 + float_PI), 
+                    Screen_Position.y + (Size + (needle_size / 2.0f)) * sin(rad2 + float_PI));
+
+        ImGui::SetCursorScreenPos(p3);
+
+        Text_Rotate(to_string((int)Heading_2), 180.0f - Heading_2, BB_TL);
+      }
+      else
+      {
+        rad2 = (Heading_2 + 90.0f + 5.0f) * float_PI / 180.0f;
+
+        p3 = ImVec2(Screen_Position.x + (Size) * cos(rad2 + float_PI), 
+                    Screen_Position.y + (Size) * sin(rad2 + float_PI));
+
+        ImGui::SetCursorScreenPos(p3);
+
+        Text_Rotate(to_string((int)Heading_2), -Heading_2, BB_TL);
+      }
+
       //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
+      
       ImGui::PopStyleColor();
     }
 

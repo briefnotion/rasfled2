@@ -76,7 +76,7 @@ void draw_box(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Posit
 
 void draw_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
-  Draw_List->AddNgon(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f, 1.5f);
+  Draw_List->AddNgonFilled(Screen_Position, 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f);
 }
 
 void draw_marker_filled(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color)
@@ -1653,16 +1653,18 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
     ImGui::Text("COMPASS");
 
-    ImGui::Text("Bearing: %.1f", sdSysData.COMMS_COMPASS.bearing());
+    ImGui::Text("BEARING: %.1f", sdSysData.COMMS_COMPASS.bearing());
 
     if (sdSysData.COMMS_COMPASS.calibrate_on())
     {
-      ImGui::Text(" RAW XYZ: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.raw_xyz().X, sdSysData.COMMS_COMPASS.raw_xyz().Y, sdSysData.COMMS_COMPASS.raw_xyz().Z);
-      ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.3f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance());
-      ImGui::Text("CAL PT A: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.calibration_max_coord_a().X, sdSysData.COMMS_COMPASS.calibration_max_coord_a().Y, sdSysData.COMMS_COMPASS.calibration_known_var_a());
-      ImGui::Text("CAL PT B: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.calibration_max_coord_b().X, sdSysData.COMMS_COMPASS.calibration_max_coord_b().Y, sdSysData.COMMS_COMPASS.calibration_known_var_b());
-      ImGui::Text("CAL PT C: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.calibration_max_coord_c().X, sdSysData.COMMS_COMPASS.calibration_max_coord_c().Y, sdSysData.COMMS_COMPASS.calibration_known_var_c());
-      ImGui::Text("CAL PT D: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.calibration_max_coord_d().X, sdSysData.COMMS_COMPASS.calibration_max_coord_d().Y, sdSysData.COMMS_COMPASS.calibration_known_var_d());
+      //ImGui::Text(" RAW XYZ: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.raw_xyz().X, sdSysData.COMMS_COMPASS.raw_xyz().Y, sdSysData.COMMS_COMPASS.raw_xyz().Z);
+      ImGui::Text("CAL PT A: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.LEVEL_2.A.COORD.X, sdSysData.COMMS_COMPASS.LEVEL_2.A.COORD.Y, sdSysData.COMMS_COMPASS.LEVEL_2.A.VARIANCE);
+      ImGui::Text("CAL PT B: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.LEVEL_2.B.COORD.X, sdSysData.COMMS_COMPASS.LEVEL_2.B.COORD.Y, sdSysData.COMMS_COMPASS.LEVEL_2.B.VARIANCE);
+      ImGui::Text("CAL PT C: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.LEVEL_2.C.COORD.X, sdSysData.COMMS_COMPASS.LEVEL_2.C.COORD.Y, sdSysData.COMMS_COMPASS.LEVEL_2.C.VARIANCE);
+      ImGui::Text("CAL PT D: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.LEVEL_2.D.COORD.X, sdSysData.COMMS_COMPASS.LEVEL_2.D.COORD.Y, sdSysData.COMMS_COMPASS.LEVEL_2.D.VARIANCE);
+      ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.3f  OFFSET: %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, 
+                                                                        sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance(), 
+                                                                        sdSysData.COMMS_COMPASS.bearing_known_offset());
     }
   }
 
@@ -1803,6 +1805,15 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
         draw_marker(draw_list_map, sdSysData, p2, sdSysData.COLOR_SELECT.blue());
       }
 
+
+
+
+
+
+
+
+
+
       // draw quad calibration
       if (sdSysData.COMMS_COMPASS.calibration_points_active_quad_overflow() == false)
       {
@@ -1841,14 +1852,14 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       // A
       if (sdSysData.COMMS_COMPASS.calibration_simple() == false)
       {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_max_coord_a().X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.calibration_max_coord_a().Y / 4.0f));
-        p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_max_coord_b().X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.calibration_max_coord_b().Y / 4.0f));
-        p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_max_coord_c().X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.calibration_max_coord_c().Y / 4.0f));
-        p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_max_coord_d().X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.calibration_max_coord_d().Y / 4.0f));
+        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.A.COORD.X/ 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.A.COORD.Y / 4.0f));
+        p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.B.COORD.X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.B.COORD.Y / 4.0f));
+        p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.C.COORD.X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.C.COORD.Y / 4.0f));
+        p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.D.COORD.X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.D.COORD.Y / 4.0f));
 
         draw_line(draw_list_map, sdSysData, p1, p4, sdSysData.COLOR_SELECT.green(), 2.0f);
         draw_line(draw_list_map, sdSysData, p4, p2, sdSysData.COLOR_SELECT.green(), 2.0f);

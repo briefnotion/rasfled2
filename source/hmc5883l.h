@@ -298,6 +298,8 @@ class HMC5883L_PROPERTIES
 
   bool AUTOSTART =  false;
 
+  bool CALIBRATION_LOCK_AT_START = false;
+
   // Comm port settings
   string PORT = "";
   unsigned char I2C_ID;
@@ -360,8 +362,6 @@ class HMC5883L
   // Calibration Variables and Routines
   TIMED_PING CALIBRATION_SPOT_CHECK;
 
-  CAL_LEVEL_2 LEVEL_2;
-
   // Comms Routines
   bool register_write(char Register, char Value);
     // Internal: Change chip settings.
@@ -380,6 +380,8 @@ class HMC5883L
   public:
 
   HMC5883L_PROPERTIES PROPS;
+
+  CAL_LEVEL_2 LEVEL_2;
 
   int raw_points_size();              // Returns size of xyz history.
 
@@ -408,11 +410,11 @@ class HMC5883L
   void calibrate_toggle();
   // Start / Stop Display Calibration
 
-  void calibrate_lock_toggle();
-  // Start / Stop Calibration
-
   bool calibrate_on();
   // Returns true if calibration is displayed.
+
+  void calibrate_lock_toggle();
+  // Start / Stop Calibration
 
   bool calibrate_lock_on();
   // Returns true if calibration in progress.
@@ -426,14 +428,7 @@ class HMC5883L
 
   CAL_LEVEL_2_QUAD_RECORD calibration_points_active_quad_data();
   bool calibration_points_active_quad_overflow();
-  COMPASS_XYZ calibration_max_coord_a();
-  COMPASS_XYZ calibration_max_coord_b();
-  COMPASS_XYZ calibration_max_coord_c();
-  COMPASS_XYZ calibration_max_coord_d();
-  float calibration_known_var_a();
-  float calibration_known_var_b();
-  float calibration_known_var_c();
-  float calibration_known_var_d();
+
   float calibration_variance();
   bool calibration_simple();
 
@@ -475,6 +470,7 @@ class HMC5883L
   // connected.
 
   void bearing_known_offset_calibration(float Known_Bearing);
+  float bearing_known_offset();
 
   float bearing();
   // Direction Facing.

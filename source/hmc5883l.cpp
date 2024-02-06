@@ -746,6 +746,8 @@ bool HMC5883L::create()
 
   CONNECTED = false;
 
+  CALIBRATE_LOCK = PROPS.CALIBRATION_LOCK_AT_START;
+
   if (PROPS.AUTOSTART == false)
   {
     // Disable Cycles
@@ -981,14 +983,14 @@ void HMC5883L::calibrate_toggle()
   CALIBRATE = !CALIBRATE;
 }
 
-void HMC5883L::calibrate_lock_toggle()
-{
-  CALIBRATE_LOCK = !CALIBRATE_LOCK;
-}
-
 bool HMC5883L::calibrate_on()
 {
   return CALIBRATE;
+}
+
+void HMC5883L::calibrate_lock_toggle()
+{
+  CALIBRATE_LOCK = !CALIBRATE_LOCK;
 }
 
 bool HMC5883L::calibrate_lock_on()
@@ -1022,40 +1024,6 @@ bool HMC5883L::calibration_points_active_quad_overflow()
 {
   return LEVEL_2.ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
 }
-
-COMPASS_XYZ HMC5883L::calibration_max_coord_a()
-{
-  return LEVEL_2.A.COORD;
-}
-COMPASS_XYZ HMC5883L::calibration_max_coord_b()
-{
-  return LEVEL_2.B.COORD;
-}
-COMPASS_XYZ HMC5883L::calibration_max_coord_c()
-{
-  return LEVEL_2.C.COORD;
-}
-COMPASS_XYZ HMC5883L::calibration_max_coord_d()
-{
-  return LEVEL_2.D.COORD;
-}
-float HMC5883L::calibration_known_var_a()
-{
-  return LEVEL_2.A.VARIANCE;
-}
-float HMC5883L::calibration_known_var_b()
-{
-  return LEVEL_2.B.VARIANCE;
-}
-float HMC5883L::calibration_known_var_c()
-{
-  return LEVEL_2.C.VARIANCE;
-}
-float HMC5883L::calibration_known_var_d()
-{
-  return LEVEL_2.D.VARIANCE;
-}
-
 
 float HMC5883L::calibration_variance()
 {
@@ -1273,6 +1241,11 @@ void HMC5883L::bearing_known_offset_calibration(float Known_Bearing)
   {
     KNOWN_DEVICE_DEGREE_OFFSET = KNOWN_DEVICE_DEGREE_OFFSET + 360.0f;
   }
+}
+
+float HMC5883L::bearing_known_offset()
+{
+  return KNOWN_DEVICE_DEGREE_OFFSET;
 }
 
 float HMC5883L::bearing()
