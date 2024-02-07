@@ -173,13 +173,15 @@ class CAL_LEVEL_2_QUAD_RECORD
   private:
 
   // Size of 50 seconds
-  int VARIANCE_COLLECTION_SIZE = 50 * COMMS_COMPASS_POLLING_RATE_FPS;
+  int VARIANCE_COLLECTION_SIZE = 30 * COMMS_COMPASS_POLLING_RATE_FPS;
 
   public:
 
   bool OVERFLOW = false;
 
   vector<COMPASS_XYZ> DATA_POINTS;
+  vector<COMPASS_XYZ> DATA_POINTS_CALIBRATED;
+
   vector<float> VARIANCE_COLLECTION;
 
   void add_point(COMPASS_XYZ &Raw_XYZ);
@@ -263,6 +265,10 @@ class CAL_LEVEL_2
   CALIBRATION_DATA B;
   CALIBRATION_DATA ACTIVE_QUAD_DATA;
 
+  COMPASS_XYZ calculate_calibrated_xyz(COMPASS_XYZ &Raw_XYZ);
+
+  void build_calibration_display_data();
+
   void calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var, 
                             COMPASS_XYZ B_Cal_Pt, float B_Cal_Var, 
                             COMPASS_XYZ C_Cal_Pt, float C_Cal_Var, 
@@ -275,14 +281,14 @@ class CAL_LEVEL_2
   MIN_MAX_SIMPLE z_min_max();
 
   COMPASS_XYZ offset();
+  
+  void clear();
 
   float skew_x();
   float skew_y();
 
   float variance();
   bool simple_calibration();
-  
-  void clear();
 
   void calibration_level_2(COMPASS_XYZ &Raw_XYZ);
   // Run Level 2 cal routines.
@@ -324,8 +330,9 @@ class HMC5883L
 
   COMPASS_XYZ RAW_XYZ;            // Temporary storage of XYZ before process;
 
-  int RAW_POINTS_SIZE = 100 * COMMS_COMPASS_POLLING_RATE_FPS;
-  vector<COMPASS_XYZ> RAW_POINTS;     // History of data received.
+  int CALIBRATED_BEARINGS_SIZE = COMMS_COMPASS_POLLING_RATE_FPS / 2; 
+  // Half a second of data.
+
   vector<float> CALIBRATED_BEARINGS;  // History of calculated bearings
 
   float RAW_BEARING = 0;              // Recent Bearing
@@ -371,8 +378,6 @@ class HMC5883L
   void stop();        // Internal: Closes port for access.
                       //  Not yet fully implemented.
 
-  COMPASS_XYZ calculate_calibrated_xyz(COMPASS_XYZ &Raw_XYZ);
-
   // Process
   void process();     // Internal: Processes most recent received data. 
                       // Performs Calibration Routines
@@ -382,14 +387,6 @@ class HMC5883L
   HMC5883L_PROPERTIES PROPS;
 
   CAL_LEVEL_2 LEVEL_2;
-
-  int raw_points_size();              // Returns size of xyz history.
-
-  COMPASS_XYZ raw_xyz();              // Return most recent raw xyz;
-  COMPASS_XYZ raw_xyz(int Position);  // Returns raw xyz data from history
-
-  COMPASS_XYZ calibrated_xyz();             // Return most recent xyz data with the current calibratons.
-  COMPASS_XYZ calibrated_xyz(int Position); // Returns xyz data from history with the current calibratons.
 
   void calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var, 
                             COMPASS_XYZ B_Cal_Pt, float B_Cal_Var, 

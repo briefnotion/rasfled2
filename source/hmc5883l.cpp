@@ -123,6 +123,9 @@ void CAL_LEVEL_2_QUAD_RECORD::clear()
   DATA_POINTS.clear();
   DATA_POINTS.reserve(VARIANCE_COLLECTION_SIZE);
 
+  DATA_POINTS_CALIBRATED.clear();
+  DATA_POINTS_CALIBRATED.reserve(VARIANCE_COLLECTION_SIZE);
+
   VARIANCE_COLLECTION.clear();
   VARIANCE_COLLECTION.reserve(VARIANCE_COLLECTION_SIZE);
 
@@ -307,11 +310,13 @@ bool CALIBRATION_DATA::stick_the_landing(COMPASS_XYZ Current_Offset, int Quadran
 
 void CALIBRATION_DATA::clear()
 {
-  COMPASS_XYZ t_coord;
+  QUAD_DATA.clear();
 
+  COMPASS_XYZ t_coord;
   COORD = t_coord;
 
-  QUAD_DATA.clear();
+  VARIANCE = -1;
+  LAST_KNOWN_VARIANCE = -1;
 
   HAS_DATA = false;
 }
@@ -362,6 +367,49 @@ void CAL_LEVEL_2::calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var,
 
   D_Cal_Pt_PRELOAD = D_Cal_Pt;
   D_Cal_Var_PRELOAD = D_Cal_Var;
+}
+
+COMPASS_XYZ CAL_LEVEL_2::calculate_calibrated_xyz(COMPASS_XYZ &Raw_XYZ)
+{
+  COMPASS_XYZ tmp_point;
+
+  //  x = x - ( x skew extreme * ( y / y val extreme) )
+  //  y = y - ( y skew extreme * ( x / x val extreme) )
+
+  tmp_point.X = (Raw_XYZ.X - offset().X) - (skew_x() * ((Raw_XYZ.Y - offset().Y) / (-offset().Y)));
+  tmp_point.Y = (Raw_XYZ.Y - offset().Y) - (skew_y() * ((Raw_XYZ.X - offset().X) / (-offset().X)));
+  tmp_point.Z = Raw_XYZ.Z - offset().Z;
+
+  return tmp_point;
+}
+
+void CAL_LEVEL_2::build_calibration_display_data()
+{
+  // Build Calibrated List for display only
+
+  A.QUAD_DATA.DATA_POINTS_CALIBRATED.clear();
+  for (int pos = 0; pos < (int)A.QUAD_DATA.DATA_POINTS.size(); pos++)
+  {
+    A.QUAD_DATA.DATA_POINTS_CALIBRATED.push_back(calculate_calibrated_xyz(A.QUAD_DATA.DATA_POINTS[pos]));
+  }
+
+  B.QUAD_DATA.DATA_POINTS_CALIBRATED.clear();
+  for (int pos = 0; pos < (int)B.QUAD_DATA.DATA_POINTS.size(); pos++)
+  {
+    B.QUAD_DATA.DATA_POINTS_CALIBRATED.push_back(calculate_calibrated_xyz(B.QUAD_DATA.DATA_POINTS[pos]));
+  }
+
+  C.QUAD_DATA.DATA_POINTS_CALIBRATED.clear();
+  for (int pos = 0; pos < (int)C.QUAD_DATA.DATA_POINTS.size(); pos++)
+  {
+    C.QUAD_DATA.DATA_POINTS_CALIBRATED.push_back(calculate_calibrated_xyz(C.QUAD_DATA.DATA_POINTS[pos]));
+  }
+
+  D.QUAD_DATA.DATA_POINTS_CALIBRATED.clear();
+  for (int pos = 0; pos < (int)D.QUAD_DATA.DATA_POINTS.size(); pos++)
+  {
+    D.QUAD_DATA.DATA_POINTS_CALIBRATED.push_back(calculate_calibrated_xyz(D.QUAD_DATA.DATA_POINTS[pos]));
+  }
 }
 
 void CAL_LEVEL_2::calibration_preload_set()
@@ -428,8 +476,6 @@ void CAL_LEVEL_2::clear()
   SIMPLE_CALIBRATION = true;
 
   MIN_MAX_SIMPLE t_MIN_MAX;
-  COMPASS_XYZ t_MIN_POINT;
-
   X_MIN_MAX = t_MIN_MAX;
   Y_MIN_MAX = t_MIN_MAX;
   Z_MIN_MAX = t_MIN_MAX;
@@ -437,26 +483,27 @@ void CAL_LEVEL_2::clear()
   SKEW_X = 0;
   SKEW_Y = 0;
 
+  COMPASS_XYZ t_MIN_POINT;
   OFFSET = t_MIN_POINT;
 
   QUAD      = -1;
   QUAD_PREV = -1;
+
+  COMPLETE_QUAD_DATA_SET = false;
+  DISTANCE_VARIANCE_FULL = -1;
 
   A.clear();
   B.clear();
   C.clear();
   D.clear();
   ACTIVE_QUAD_DATA.clear();
-
-  COMPLETE_QUAD_DATA_SET = false;
-  DISTANCE_VARIANCE_FULL = -1;
 }
 
 float CAL_LEVEL_2::skew_x()
 {
   if (SIMPLE_CALIBRATION)
   {
-    return 0.0f;
+    return 1.0f;
   }
   else
   {
@@ -468,7 +515,7 @@ float CAL_LEVEL_2::skew_y()
 {
   if (SIMPLE_CALIBRATION)
   {
-    return 0.0f;
+    return 1.0f;
   }
   else
   {
@@ -505,7 +552,6 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
     }
   }
   
-
   {
     // Complex Calibration
 
@@ -645,60 +691,67 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                       changed = true;
                     }
                   }
+                }
 
-                  // Store info if data set incomplete or successfully changed DISTANCE_VARIANCE_FULL.
-                  if (SIMPLE_CALIBRATION || changed == true)
+                // Store info if data set incomplete or successfully changed DISTANCE_VARIANCE_FULL.
+                if (SIMPLE_CALIBRATION || changed == true)
+                {
+                  // Copy Active Quad
+                  if (QUAD == 0)
                   {
-                    if (QUAD == 0)
-                    {
-                      A.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
-                      A.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
-                      A.COORD = ACTIVE_QUAD_DATA.COORD;
-                      A.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
-                      A.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
-                    }
-                    else if (QUAD == 1)
-                    {
-                      D.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
-                      D.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
-                      D.COORD = ACTIVE_QUAD_DATA.COORD;
-                      D.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
-                      D.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
-                    }
-                    else if (QUAD == 2)
-                    {
-                      B.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
-                      B.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
-                      B.COORD = ACTIVE_QUAD_DATA.COORD;
-                      B.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
-                      B.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
-                    }
-                    else if (QUAD == 3)
-                    {
-                      C.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
-                      C.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
-                      C.COORD = ACTIVE_QUAD_DATA.COORD;
-                      C.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
-                      C.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
-                    }
+                    A.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
+                    A.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
+                    A.COORD = ACTIVE_QUAD_DATA.COORD;
+                    A.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
+                    A.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
                   }
-
-                  // calculate new offsets if successfully changed DISTANCE_VARIANCE_FULL
-                  if (changed)
+                  else if (QUAD == 1)
                   {
-                    X_MIN_MAX.MIN_VALUE = C.COORD.X;
-                    X_MIN_MAX.MAX_VALUE = D.COORD.X;
-                    Y_MIN_MAX.MIN_VALUE = A.COORD.Y;
-                    Y_MIN_MAX.MAX_VALUE = B.COORD.Y;
-
-                    // Adjust new offset
-                    OFFSET = calc_offset(A.COORD, B.COORD, C.COORD, D.COORD);
-                    //OFFSET.Z = no idea;
-
-                    // Adjust offset skew
-                    SKEW_X = (abs(A.COORD.X - B.COORD.X)) / 2.0f;
-                    SKEW_Y = (abs(C.COORD.Y - D.COORD.Y)) / 2.0f;
+                    D.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
+                    D.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
+                    D.COORD = ACTIVE_QUAD_DATA.COORD;
+                    D.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
+                    D.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
                   }
+                  else if (QUAD == 2)
+                  {
+                    B.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
+                    B.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
+                    B.COORD = ACTIVE_QUAD_DATA.COORD;
+                    B.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
+                    B.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
+                  }
+                  else if (QUAD == 3)
+                  {
+                    C.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
+                    C.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
+                    C.COORD = ACTIVE_QUAD_DATA.COORD;
+                    C.VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
+                    C.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
+                  }
+                }
+
+                // calculate new offsets if successfully changed DISTANCE_VARIANCE_FULL
+                if (changed)
+                {
+                  X_MIN_MAX.MIN_VALUE = C.COORD.X;
+                  X_MIN_MAX.MAX_VALUE = D.COORD.X;
+                  Y_MIN_MAX.MIN_VALUE = A.COORD.Y;
+                  Y_MIN_MAX.MAX_VALUE = B.COORD.Y;
+
+                  // Adjust new offset
+                  OFFSET = calc_offset(A.COORD, B.COORD, C.COORD, D.COORD);
+                  //OFFSET.Z = no idea;
+
+                  // Adjust offset skew
+                  SKEW_X = (abs(A.COORD.X - B.COORD.X)) / 2.0f;
+                  SKEW_Y = (abs(C.COORD.Y - D.COORD.Y)) / 2.0f;
+                }
+
+                if (SIMPLE_CALIBRATION || changed == true)
+                {
+                  // Rebuild the display data points with new skews.
+                  build_calibration_display_data();
                 }
 
               }   // Landing Stuck
@@ -737,10 +790,8 @@ bool HMC5883L::create()
 {
   bool ret_success = false;
 
-  RAW_POINTS.clear();
-  RAW_POINTS.reserve(RAW_POINTS_SIZE);  
   CALIBRATED_BEARINGS.clear();
-  CALIBRATED_BEARINGS.reserve(1000);
+  CALIBRATED_BEARINGS.reserve(CALIBRATED_BEARINGS_SIZE + 1);
   
   LEVEL_2.clear();
 
@@ -786,28 +837,11 @@ void HMC5883L::stop()
   CONNECTED = false;
 }
 
-COMPASS_XYZ HMC5883L::calculate_calibrated_xyz(COMPASS_XYZ &Raw_XYZ)
-{
-  COMPASS_XYZ tmp_point;
-
-  //  x = x - ( x skew extreme * ( y / y val extreme) )
-  //  y = y - ( y skew extreme * ( x / x val extreme) )
-
-  tmp_point.X = (Raw_XYZ.X - LEVEL_2.offset().X) - (LEVEL_2.skew_x() * ((Raw_XYZ.Y - LEVEL_2.offset().Y) / (-LEVEL_2.offset().Y)));
-  
-  //tmp_point.Y = Raw_XYZ.Y - LEVEL_2.offset().Y;
-  tmp_point.Y = (Raw_XYZ.Y - LEVEL_2.offset().Y) - (LEVEL_2.skew_y() * ((Raw_XYZ.X - LEVEL_2.offset().X) / (-LEVEL_2.offset().X)));
-  
-  tmp_point.Z = Raw_XYZ.Z - LEVEL_2.offset().Z;
-
-  return tmp_point;
-}
-
 void HMC5883L::process()
 {
-  RAW_POINTS.push_back(RAW_XYZ);
+  COMPASS_XYZ calibrated_bearing_xyz = LEVEL_2.calculate_calibrated_xyz(RAW_XYZ);
+  RAW_BEARING = (atan2(calibrated_bearing_xyz.Y, calibrated_bearing_xyz.X) * 180 / M_PI);
   
-  RAW_BEARING = (atan2(calibrated_xyz().Y, calibrated_xyz().X) * 180 / M_PI);
   float bearing = RAW_BEARING + KNOWN_DEVICE_DEGREE_OFFSET;
 
   while (bearing <= 0.0f)
@@ -823,13 +857,9 @@ void HMC5883L::process()
   CALIBRATED_BEARINGS.push_back(bearing);
 
   // Maintain point history size
-  if (RAW_POINTS.size() > (RAW_POINTS_SIZE * .9))
+  while ((int)CALIBRATED_BEARINGS.size() > (CALIBRATED_BEARINGS_SIZE))
   {
-    RAW_POINTS.erase(RAW_POINTS.begin(), RAW_POINTS.begin() + (RAW_POINTS_SIZE * .1));
-  }
-  if (CALIBRATED_BEARINGS.size() > (RAW_POINTS_SIZE * .9))
-  {
-    CALIBRATED_BEARINGS.erase(CALIBRATED_BEARINGS.begin(), CALIBRATED_BEARINGS.begin() + (RAW_POINTS_SIZE * .1));
+    CALIBRATED_BEARINGS.erase(CALIBRATED_BEARINGS.begin());
   }
 
   /*
@@ -867,18 +897,15 @@ void HMC5883L::process()
   // Calclulate Bearing
 
   // Simple Filter
-  if (RAW_POINTS.size() >= 5)
   {
-    int pos_start = CALIBRATED_BEARINGS.size() - 5;
-
-    float bearing_start_value = CALIBRATED_BEARINGS[pos_start];
+    float bearing_start_value = CALIBRATED_BEARINGS[0];
 
     int bearing_total = bearing_start_value;
     float bearing_value = 0.0f;
-    float bearing_min = 0.0f;
-    float bearing_max = 0.0f;
+    float bearing_min = CALIBRATED_BEARINGS[0];
+    float bearing_max = CALIBRATED_BEARINGS[0];
 
-    for (int pos = (pos_start + 1); pos < (int)CALIBRATED_BEARINGS.size(); pos++)
+    for (int pos = 1; pos < (int)CALIBRATED_BEARINGS.size(); pos++)
     {
       bearing_value = CALIBRATED_BEARINGS[pos];
 
@@ -894,12 +921,7 @@ void HMC5883L::process()
       bearing_total = bearing_total + bearing_value;
       
       // Determine Jitter
-      if (pos == pos_start + 1)
-      {
-        bearing_min = bearing_value;
-        bearing_max = bearing_value;
-      }
-      else
+      if (pos > 0)
       {
         if (bearing_value < bearing_min)
         {
@@ -912,7 +934,7 @@ void HMC5883L::process()
       }
     }
 
-    BEARING = (bearing_total / 5.0f);
+    BEARING = (bearing_total / (float)CALIBRATED_BEARINGS.size());
 
     if (BEARING <= 0.0f)
     {
@@ -929,51 +951,11 @@ void HMC5883L::process()
   }
 }
 
-int HMC5883L::raw_points_size()
-{
-  return RAW_POINTS.size();
-}
-
-COMPASS_XYZ HMC5883L::raw_xyz()
-{
-  if (RAW_POINTS.size() >0)
-  {
-    return RAW_POINTS[RAW_POINTS.size() -1];
-  }
-  else
-  {
-    COMPASS_XYZ tmp_point;
-    return tmp_point;
-  }
-}
-
-COMPASS_XYZ HMC5883L::raw_xyz(int Position)
-{
-  return RAW_POINTS[Position];
-}
-
-COMPASS_XYZ HMC5883L::calibrated_xyz()
-{
-  if (RAW_POINTS.size() >0)
-  {
-    return calculate_calibrated_xyz(RAW_POINTS[RAW_POINTS.size() -1]);
-  }
-  else
-  {
-    COMPASS_XYZ tmp_point;
-    return tmp_point;
-  }
-}
-
-COMPASS_XYZ HMC5883L::calibrated_xyz(int Position)
-{
-  return calculate_calibrated_xyz(RAW_POINTS[Position]);
-}
-
 void HMC5883L::calibrateion_reset()
 {
-  RAW_POINTS.clear();
   CALIBRATED_BEARINGS.clear();
+
+  CALIBRATE_LOCK = false;
 
   LEVEL_2.clear();
 }
