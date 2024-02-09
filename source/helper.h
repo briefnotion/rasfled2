@@ -477,12 +477,12 @@ class IMPACT_RESISTANCE_FLOAT_PROPERTIES
   unsigned long ALIVE_TIME = 150;   // Measured in ms
   
   // With Standard Deviations
-  // About 68% of the data falls within one standard deviation from the mean.
-  // About 95% falls within two standard deviations.
-  // About 99.7% falls within three standard deviations.
+  // 1 - About 68% of the data falls within one standard deviation from the mean.
+  // 2 - About 95% falls within two standard deviations.
+  // 3 - About 99.7% falls within three standard deviations.
+  
   float EMPERICAL_RULE_ENABLE = false;
   int EMPERICAL_RULE_DEVIATIONS = 2;
-
 };
 
 class IMPACT_RESISTANCE_FLOAT

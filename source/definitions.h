@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.127_240206"
+#define Revision "2.128_240208"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -98,21 +98,21 @@
 
 #define COMMS_COMPASS_POLLING_RATE_FPS        15
 
-#define COMMS_COMPASS_CAL_PT_A_X              435.0f
-#define COMMS_COMPASS_CAL_PT_A_Y              92.0f
-#define COMMS_COMPASS_CAL_PT_A_VAR            0.124f
+#define COMMS_COMPASS_CAL_PT_A_X              365.0f
+#define COMMS_COMPASS_CAL_PT_A_Y              100.0f
+#define COMMS_COMPASS_CAL_PT_A_VAR            0.117
 
-#define COMMS_COMPASS_CAL_PT_B_X              404.0f
-#define COMMS_COMPASS_CAL_PT_B_Y              552.0f
-#define COMMS_COMPASS_CAL_PT_B_VAR            0.136f
+#define COMMS_COMPASS_CAL_PT_B_X              268.0f
+#define COMMS_COMPASS_CAL_PT_B_Y              621.0f
+#define COMMS_COMPASS_CAL_PT_B_VAR            0.111
 
-#define COMMS_COMPASS_CAL_PT_C_X              212.0f
-#define COMMS_COMPASS_CAL_PT_C_Y              354.0f
-#define COMMS_COMPASS_CAL_PT_C_VAR            0.177f
+#define COMMS_COMPASS_CAL_PT_C_X              113.0f
+#define COMMS_COMPASS_CAL_PT_C_Y              414.0f
+#define COMMS_COMPASS_CAL_PT_C_VAR            0.177
 
-#define COMMS_COMPASS_CAL_PT_D_X              635.0f
-#define COMMS_COMPASS_CAL_PT_D_Y              328.0f
-#define COMMS_COMPASS_CAL_PT_D_VAR            0.098f
+#define COMMS_COMPASS_CAL_PT_D_X              576.0f
+#define COMMS_COMPASS_CAL_PT_D_Y              301.0f
+#define COMMS_COMPASS_CAL_PT_D_VAR            0.135
 
 #define COMMS_COMPASS_CAL_OFFSET              90.0f - 23.0f
 

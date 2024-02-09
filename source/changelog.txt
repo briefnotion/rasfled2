@@ -1,3 +1,7 @@
+2.128_240208
+ - Made some changes to hmc5883l to hopefully improve accuracy. 
+ - Removed the GPS screen.
+
 2.127_240206
   - Changed the way the compass calibration is stored and displayed
       to assist on future improved calibration methods.

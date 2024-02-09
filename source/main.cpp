@@ -1055,7 +1055,7 @@ int loop_2(bool TTY_Only)
       // GPS Process
       
       sdSystem.GPS_SYSTEM.process(cons_2.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
-      cons_2.update_GPS_gadgets(sdSystem);
+      //cons_2.update_GPS_gadgets(sdSystem);
     }
 
     if (compass_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)

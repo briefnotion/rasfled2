@@ -172,8 +172,10 @@ class CAL_LEVEL_2_QUAD_RECORD
 {
   private:
 
-  // Size of 50 seconds
-  int VARIANCE_COLLECTION_SIZE = 30 * COMMS_COMPASS_POLLING_RATE_FPS;
+  // Size of 5 seconds
+  int VARIANCE_COLLECTION_SIZE = 10 * COMMS_COMPASS_POLLING_RATE_FPS;
+  // Restriting calibration to occur only if 180 degree turned happened
+  //  within 10 seconds
 
   public:
 
@@ -187,7 +189,6 @@ class CAL_LEVEL_2_QUAD_RECORD
   void add_point(COMPASS_XYZ &Raw_XYZ);
 
   void clear();
-
 };
 
 class CALIBRATION_DATA
@@ -198,8 +199,10 @@ class CALIBRATION_DATA
 
   CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
   COMPASS_XYZ COORD;
-  float VARIANCE = -1;
-  float LAST_KNOWN_VARIANCE = -1;
+  float VARIANCE = 1000;            // The Good Variance value. Copied from 
+                                  //  LAST_KNOWN_VARIANCE when copy made.
+  float LAST_KNOWN_VARIANCE = 1000; // Stores Variance from the previous 
+                                  //  variance_from_offset() pass
   bool HAS_DATA = false;
 
   float variance_from_offset(COMPASS_XYZ Offset, bool &Good_Data_Count);
@@ -289,6 +292,8 @@ class CAL_LEVEL_2
 
   float variance();
   bool simple_calibration();
+
+  void build_non_simple_offsets();
 
   void calibration_level_2(COMPASS_XYZ &Raw_XYZ);
   // Run Level 2 cal routines.

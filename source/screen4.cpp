@@ -317,7 +317,11 @@ int SCREEN4::create(system_data &sdSysData)
 
     GPS.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
     GPS.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
-    GPS.update_text("  GPS ", "  GPS ");
+    GPS.update_text("  GPS  ", "  GPS  ");
+
+    COMPASS.PROPS.COLOR_TRUE = sdSysData.COLOR_SELECT.white();
+    COMPASS.PROPS.COLOR_FALSE = sdSysData.COLOR_SELECT.blue();
+    COMPASS.update_text("COMPASS", "COMPASS");
 
     /*
 
@@ -601,22 +605,9 @@ void SCREEN4::draw(system_data &sdSysData)
             {
               GPS.update_tf(sdSysData.GPS_SYSTEM.active(current_frame_time));
               GPS.draw(sdSysData);
-              
-              /*
-              ImGui::SameLine();
-              
-              DOOR4.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value);
-              DOOR4.draw(sdSysData);
 
-
-              DOOR1.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value);
-              DOOR1.draw(sdSysData);
-              
-              ImGui::SameLine();
-              
-              DOOR3.update_tf(sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value);
-              DOOR3.draw(sdSysData);
-              */
+              COMPASS.update_tf(sdSysData.COMMS_COMPASS.connected());
+              COMPASS.draw(sdSysData);
             }
             ImGui::EndGroup();
 
@@ -770,6 +761,7 @@ void SCREEN4::draw(system_data &sdSysData)
             }
           }
 
+          /*
           else if (DISPLAY_SCREEN == 3)
           {
             if (sdSysData.CAR_INFO.active())
@@ -799,6 +791,7 @@ void SCREEN4::draw(system_data &sdSysData)
               GPS_CONSOLE.display(sdSysData, "GPS Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
             }
           }
+          */
 
           else if (DISPLAY_SCREEN == 4)
           {
@@ -874,12 +867,14 @@ void SCREEN4::draw(system_data &sdSysData)
 
           ImGui::SameLine();
 
+          /*
           if (button_simple_toggle_color(sdSysData, "GPS", "GPS", DISPLAY_SCREEN == 3, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
           {
             DISPLAY_SCREEN = 3;
           }
 
           ImGui::SameLine();
+          */
 
           if (button_simple_toggle_color(sdSysData, "LOGS", "LOGS", DISPLAY_SCREEN == 4, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
           {
@@ -1476,6 +1471,7 @@ void SCREEN4::shutdown(system_data &sdSysData)
   }
 }
 
+/*
 void SCREEN4::update_gps_gadgets(system_data &sdSysData, string Text)
 {
   if (sdSysData.TTY_ONLY == false)
@@ -1483,6 +1479,7 @@ void SCREEN4::update_gps_gadgets(system_data &sdSysData, string Text)
     GPS_CONSOLE.add_line(Text);
   }
 }
+*/
 
 void SCREEN4::update_daemon_log(system_data &sdSysData, string Text)
 {
@@ -1514,6 +1511,7 @@ void SCREEN4::update_ADS_B_gadgets(system_data &sdSysData)
   }
 }
 
+/*
 void SCREEN4::update_GPS_gadgets(system_data &sdSysData)
 {
   if (sdSysData.TTY_ONLY == false)
@@ -1527,6 +1525,7 @@ void SCREEN4::update_GPS_gadgets(system_data &sdSysData)
   
   sdSysData.GPS_SYSTEM.RECIEVE_HISTORY.clear();
 }
+*/
 
 // ---------------------------------------------------------------------------------------
 #endif
