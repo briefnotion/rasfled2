@@ -97,7 +97,7 @@ class TEXTURE_IMAGE
 
   int height();
 
-  void draw();
+  void draw(float Resize_Scale);
 
 };
 

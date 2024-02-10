@@ -1,6 +1,19 @@
+2.129_240209
+  - Changed the fonts to bold to make the text, on the screen, 
+      easier to read.  Would've done it a long time ago if I 
+      knew it was so easy.
+  - Doubled the size of the QR Code.
+  - Corrected error preventing preloaded calibration settings from 
+      updating. 
+  - Made some change to allow compass callibration to move out of 
+      simple calibration quicker. Starting off, the 180 degree 
+      turn can be made within a minute, instead of 10 seconds. 
+      Not yet sure if this will inhibit the 10 second calibrations 
+      in any way. Settings are in "class CAL_LEVEL_2_QUAD_RECORD". 
+
 2.128_240208
- - Made some changes to hmc5883l to hopefully improve accuracy. 
- - Removed the GPS screen.
+  - Made some changes to hmc5883l to hopefully improve accuracy. 
+  - Removed the GPS screen.
 
 2.127_240206
   - Changed the way the compass calibration is stored and displayed

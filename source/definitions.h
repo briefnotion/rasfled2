@@ -98,21 +98,21 @@
 
 #define COMMS_COMPASS_POLLING_RATE_FPS        15
 
-#define COMMS_COMPASS_CAL_PT_A_X              365.0f
-#define COMMS_COMPASS_CAL_PT_A_Y              100.0f
-#define COMMS_COMPASS_CAL_PT_A_VAR            0.117
+#define COMMS_COMPASS_CAL_PT_A_X              354.0f
+#define COMMS_COMPASS_CAL_PT_A_Y              113.0f
+#define COMMS_COMPASS_CAL_PT_A_VAR            0.090f * 1.5f
 
-#define COMMS_COMPASS_CAL_PT_B_X              268.0f
-#define COMMS_COMPASS_CAL_PT_B_Y              621.0f
-#define COMMS_COMPASS_CAL_PT_B_VAR            0.111
+#define COMMS_COMPASS_CAL_PT_B_X              185.0f
+#define COMMS_COMPASS_CAL_PT_B_Y              596.0f
+#define COMMS_COMPASS_CAL_PT_B_VAR            0.098f * 1.5f
 
-#define COMMS_COMPASS_CAL_PT_C_X              113.0f
-#define COMMS_COMPASS_CAL_PT_C_Y              414.0f
-#define COMMS_COMPASS_CAL_PT_C_VAR            0.177
+#define COMMS_COMPASS_CAL_PT_C_X              49.0f
+#define COMMS_COMPASS_CAL_PT_C_Y              435.0f
+#define COMMS_COMPASS_CAL_PT_C_VAR            0.103f * 1.5f
 
-#define COMMS_COMPASS_CAL_PT_D_X              576.0f
-#define COMMS_COMPASS_CAL_PT_D_Y              301.0f
-#define COMMS_COMPASS_CAL_PT_D_VAR            0.135
+#define COMMS_COMPASS_CAL_PT_D_X              509.0f
+#define COMMS_COMPASS_CAL_PT_D_Y              243.0f
+#define COMMS_COMPASS_CAL_PT_D_VAR            0.143f * 1.5f
 
 #define COMMS_COMPASS_CAL_OFFSET              90.0f - 23.0f
 

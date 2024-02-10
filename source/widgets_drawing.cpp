@@ -198,9 +198,9 @@ int TEXTURE_IMAGE::height()
   return IMAGE_HEIGHT;
 }
 
-void TEXTURE_IMAGE::draw()
+void TEXTURE_IMAGE::draw(float Resize_Scale)
 {
-  ImGui::Image((void*)(intptr_t)IMAGE_TEXTURE, ImVec2(IMAGE_WIDTH, IMAGE_HEIGHT));
+  ImGui::Image((void*)(intptr_t)IMAGE_TEXTURE, ImVec2(IMAGE_WIDTH * Resize_Scale, IMAGE_HEIGHT * Resize_Scale));
 }
 
 // ---------------------------------------------------------------------------------------

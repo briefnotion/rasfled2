@@ -118,8 +118,17 @@ void CAL_LEVEL_2_QUAD_RECORD::add_point(COMPASS_XYZ &Raw_XYZ)
   }
 }
 
-void CAL_LEVEL_2_QUAD_RECORD::clear()
+void CAL_LEVEL_2_QUAD_RECORD::clear(bool Simple_Calibration)
 {
+  if (Simple_Calibration)
+  {
+    VARIANCE_COLLECTION_SIZE = VARIANCE_COLLECTION_SIZE_SIMPLE;
+  }
+  else
+  {
+    VARIANCE_COLLECTION_SIZE = VARIANCE_COLLECTION_SIZE_COMPLEX;
+  }
+
   DATA_POINTS.clear();
   DATA_POINTS.reserve(VARIANCE_COLLECTION_SIZE);
 
@@ -141,10 +150,13 @@ float CALIBRATION_DATA::variance_from_offset(COMPASS_XYZ Offset, bool &Good_Data
   {
     if (HAS_DATA)
     {
+      // Situation to handle preloaded data
+      LAST_KNOWN_VARIANCE = VARIANCE;
       return VARIANCE;
     }
     else
     {
+      // Startup blank state.
       Good_Data_Count_Pass = false;
       return 0;
     }
@@ -308,9 +320,9 @@ bool CALIBRATION_DATA::stick_the_landing(COMPASS_XYZ Current_Offset, int Quadran
   return ret_landing_stuck;
 }
 
-void CALIBRATION_DATA::clear()
+void CALIBRATION_DATA::clear(bool Simple_Calibration)
 {
-  QUAD_DATA.clear();
+  QUAD_DATA.clear(Simple_Calibration);
 
   COMPASS_XYZ t_coord;
   COORD = t_coord;
@@ -492,11 +504,11 @@ void CAL_LEVEL_2::clear()
   COMPLETE_QUAD_DATA_SET = false;
   DISTANCE_VARIANCE_FULL = -1;
 
-  A.clear();
-  B.clear();
-  C.clear();
-  D.clear();
-  ACTIVE_QUAD_DATA.clear();
+  A.clear(SIMPLE_CALIBRATION);
+  B.clear(SIMPLE_CALIBRATION);
+  C.clear(SIMPLE_CALIBRATION);
+  D.clear(SIMPLE_CALIBRATION);
+  ACTIVE_QUAD_DATA.clear(SIMPLE_CALIBRATION);
 }
 
 float CAL_LEVEL_2::skew_x()
@@ -758,7 +770,6 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                     }
                     else
                     {
-                      if (ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE)
                       A.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
                       A.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
                       A.COORD = ACTIVE_QUAD_DATA.COORD;
@@ -813,7 +824,7 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                       B.LAST_KNOWN_VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
                       B.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
                       DISTANCE_VARIANCE_FULL = variance;
-
+                      
                       // Update variance values.
                       A.VARIANCE = A.LAST_KNOWN_VARIANCE;
                       B.VARIANCE = B.LAST_KNOWN_VARIANCE;
@@ -865,7 +876,7 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
           }   // Quadrant Changed
 
           // Quad rotate full
-          ACTIVE_QUAD_DATA.clear();
+          ACTIVE_QUAD_DATA.clear(SIMPLE_CALIBRATION);
           QUAD_PREV = QUAD;
           QUAD = quad_current;
 

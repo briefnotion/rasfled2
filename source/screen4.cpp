@@ -269,10 +269,15 @@ int SCREEN4::create(system_data &sdSysData)
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL2_Init();
 
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 100.0f);
+    //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
+    //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
+    //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
+    //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 100.0f);
+
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 18.0f);
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 57.0f);
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 28.0f);
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 100.0f);
     // Will track as "io.Fonts->Fonts.Data[1]" manually, for now.
 
     // Start the Dear ImGui frame
@@ -1419,9 +1424,9 @@ void SCREEN4::draw(system_data &sdSysData)
     if (DISPLAY_QR_CODE == true)
     {
       //style.ScrollbarSize + style.WindowPadding.y * 2.0f and fontsize for titlebar
-      ImGui::SetNextWindowSize(ImVec2(QR_CODE.widtht() + style.WindowPadding.x * 2.0f, QR_CODE.height() + 18.0f + style.WindowPadding.y * 2.0f));
+      ImGui::SetNextWindowSize(ImVec2((QR_CODE.widtht() * 2.0f) + style.WindowPadding.x * 2.0f, (QR_CODE.height() * 2.0f) + 18.0f + style.WindowPadding.y * 2.0f));
       ImGui::Begin("About", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
-      QR_CODE.draw();
+      QR_CODE.draw(2.0f);
       ImGui::End();
     }
 

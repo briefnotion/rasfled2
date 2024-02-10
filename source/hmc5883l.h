@@ -172,10 +172,19 @@ class CAL_LEVEL_2_QUAD_RECORD
 {
   private:
 
-  // Size of 5 seconds
-  int VARIANCE_COLLECTION_SIZE = 10 * COMMS_COMPASS_POLLING_RATE_FPS;
+  int VARIANCE_COLLECTION_SIZE_SIMPLE = 60 * COMMS_COMPASS_POLLING_RATE_FPS;
+  int VARIANCE_COLLECTION_SIZE_COMPLEX = 10 * COMMS_COMPASS_POLLING_RATE_FPS;
+  // To assist with first round calibration times, the larger 
+  //  VARIANCE_COLLECTION_SIZE_SIMPLE will be the collection size, 
+  //  and the system will return to VARIANCE_COLLECTION_SIZE_COMPLEX 
+  //  collection size, for a greater refined, accuracy after simple 
+  //  calibration isn't active.
+
+  int VARIANCE_COLLECTION_SIZE = 0.0f;
   // Restriting calibration to occur only if 180 degree turned happened
-  //  within 10 seconds
+  //  within the numeber multiplied of seconds, as default.
+  // Whatever this value is, will be replaced with either 
+  // 
 
   public:
 
@@ -188,7 +197,7 @@ class CAL_LEVEL_2_QUAD_RECORD
 
   void add_point(COMPASS_XYZ &Raw_XYZ);
 
-  void clear();
+  void clear(bool Simple_Calibration);
 };
 
 class CALIBRATION_DATA
@@ -210,7 +219,7 @@ class CALIBRATION_DATA
 
   bool stick_the_landing(COMPASS_XYZ Current_Offset, int Quadrant);
 
-  void clear();
+  void clear(bool Simple_Calibration);
 };
 
 // -------------------------------------------------------------------------------------
@@ -337,6 +346,8 @@ class HMC5883L
 
   int CALIBRATED_BEARINGS_SIZE = COMMS_COMPASS_POLLING_RATE_FPS / 2; 
   // Half a second of data.
+  // CALIBRATED_BEARINGS_SIZE stores a history of calculated bearing, to 
+  //  be average to return the indicated bearing.
 
   vector<float> CALIBRATED_BEARINGS;  // History of calculated bearings
 
