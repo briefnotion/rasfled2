@@ -368,10 +368,10 @@ int loop_2(bool TTY_Only)
   sdSystem.COMMS_COMPASS.PROPS.CALIBRATION_LOCK_AT_START = COMMS_COMPASS_CAL_LOCK_AT_START;
   
   // Preload Calibration Data
-  COMPASS_XYZ A_Cal_Pt;
-  COMPASS_XYZ B_Cal_Pt;
-  COMPASS_XYZ C_Cal_Pt;
-  COMPASS_XYZ D_Cal_Pt;
+  FLOAT_XYZ A_Cal_Pt;
+  FLOAT_XYZ B_Cal_Pt;
+  FLOAT_XYZ C_Cal_Pt;
+  FLOAT_XYZ D_Cal_Pt;
 
   A_Cal_Pt.X = COMMS_COMPASS_CAL_PT_A_X;
   A_Cal_Pt.Y = COMMS_COMPASS_CAL_PT_A_Y;

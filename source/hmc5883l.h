@@ -136,17 +136,6 @@ float dist(float X, float Y);
 
 // -------------------------------------------------------------------------------------
 
-class COMPASS_XYZ
-{
-  public:
-
-  float X = 0;
-  float Y = 0;
-  float Z = 0;
-};
-
-// -------------------------------------------------------------------------------------
-
 class COMPASS_XY
 {
   public:
@@ -157,14 +146,10 @@ class COMPASS_XY
 
 // -------------------------------------------------------------------------------------
 
-bool XYZ_MIN_MAX(COMPASS_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_MAX_SIMPLE &Ymm, MIN_MAX_SIMPLE &Zmm);
-
-COMPASS_XYZ calc_offset(COMPASS_XYZ Y_Min,  COMPASS_XYZ Y_Max, COMPASS_XYZ X_Min, COMPASS_XYZ X_Max);
-
 // -------------------------------------------------------------------------------------
 
-bool four_point_check(COMPASS_XYZ Top, COMPASS_XYZ Bottom, 
-                      COMPASS_XYZ Left, COMPASS_XYZ Right);
+bool four_point_check(FLOAT_XYZ Top, FLOAT_XYZ Bottom, 
+                      FLOAT_XYZ Left, FLOAT_XYZ Right);
 
 // -------------------------------------------------------------------------------------
 
@@ -190,12 +175,10 @@ class CAL_LEVEL_2_QUAD_RECORD
 
   bool OVERFLOW = false;
 
-  vector<COMPASS_XYZ> DATA_POINTS;
-  vector<COMPASS_XYZ> DATA_POINTS_CALIBRATED;
+  vector<FLOAT_XYZ> DATA_POINTS;
+  vector<FLOAT_XYZ> DATA_POINTS_CALIBRATED;
 
-  vector<float> VARIANCE_COLLECTION;
-
-  void add_point(COMPASS_XYZ &Raw_XYZ);
+  void add_point(FLOAT_XYZ &Raw_XYZ);
 
   void clear(bool Simple_Calibration);
 };
@@ -207,17 +190,23 @@ class CALIBRATION_DATA
   public:
 
   CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
-  COMPASS_XYZ COORD;
+  FLOAT_XYZ COORD;
+
+  FLOAT_XYZ OFFSET_POINT;               // Stores Offset point value after ER 
+                                        //  cycle. Refer to OFFSET_POINT when 
+                                        //  building skew and boundaries. 
+  vector<FLOAT_XYZ> OFFSET_POINT_LIST;  // Stores a list of previous Offset point
+
   float VARIANCE = 1000;            // The Good Variance value. Copied from 
-                                  //  LAST_KNOWN_VARIANCE when copy made.
+                                    //  LAST_KNOWN_VARIANCE when copy made.
   float LAST_KNOWN_VARIANCE = 1000; // Stores Variance from the previous 
-                                  //  variance_from_offset() pass
+                                    //  variance_from_offset() pass
   bool HAS_DATA = false;
 
-  float variance_from_offset(COMPASS_XYZ Offset, bool &Good_Data_Count);
+  float variance_from_offset(FLOAT_XYZ Offset, bool &Good_Data_Count);
   // If Quadrant = -1 then no stick the landing is performed.
 
-  bool stick_the_landing(COMPASS_XYZ Current_Offset, int Quadrant);
+  bool stick_the_landing(FLOAT_XYZ Current_Offset, int Quadrant);
 
   void clear(bool Simple_Calibration);
 };
@@ -237,16 +226,14 @@ class CAL_LEVEL_2
   MIN_MAX_SIMPLE Y_MIN_MAX;
   MIN_MAX_SIMPLE Z_MIN_MAX;
 
-  float SKEW_X = 0;
-  float SKEW_Y = 0;
-
-  COMPASS_XYZ OFFSET;
+  FLOAT_XYZ OFFSET;
+  FLOAT_XYZ SKEW;
   
-  //       A              |skew y
-  //    AC   AD           |
-  //  C         D   ------|------ skew x
-  //    BC   BD           |
-  //       B              |
+  //           |skew y
+  //           |
+  //     ------|------ skew x
+  //           |
+  //           |
 
   int QUAD      = -1;
   int QUAD_PREV = -1;
@@ -258,33 +245,55 @@ class CAL_LEVEL_2
   bool COMPLETE_QUAD_DATA_SET = false;
   float DISTANCE_VARIANCE_FULL = -1;
 
-  COMPASS_XYZ A_Cal_Pt_PRELOAD;
-  COMPASS_XYZ B_Cal_Pt_PRELOAD;
-  COMPASS_XYZ C_Cal_Pt_PRELOAD;
-  COMPASS_XYZ D_Cal_Pt_PRELOAD;
+  FLOAT_XYZ A_Cal_Pt_PRELOAD;
+  FLOAT_XYZ B_Cal_Pt_PRELOAD;
+  FLOAT_XYZ C_Cal_Pt_PRELOAD;
+  FLOAT_XYZ D_Cal_Pt_PRELOAD;
   float A_Cal_Var_PRELOAD;
   float B_Cal_Var_PRELOAD;
   float C_Cal_Var_PRELOAD;
   float D_Cal_Var_PRELOAD;
 
-  int get_quad(COMPASS_XYZ &Raw_XYZ, float Distance);
-
   public:
 
-  CALIBRATION_DATA A;
-  CALIBRATION_DATA C;
-  CALIBRATION_DATA D;
-  CALIBRATION_DATA B;
-  CALIBRATION_DATA ACTIVE_QUAD_DATA;
+  vector<CALIBRATION_DATA> CALIBRATION_QUADS;
 
-  COMPASS_XYZ calculate_calibrated_xyz(COMPASS_XYZ &Raw_XYZ);
+  //       1                |skew y
+  //    --   --             |
+  //  4         2     ------|------ skew x
+  //    --   --             |
+  //       3    0 - Active  |
+
+  // CALIBRATION_DATA A;
+  // CALIBRATION_DATA C;
+  // CALIBRATION_DATA D;
+  // CALIBRATION_DATA B;
+  // CALIBRATION_DATA ACTIVE_QUAD_DATA;
+
+  private:
+
+  int get_quad(FLOAT_XYZ &Raw_XYZ, float Distance);
+
+  bool XYZ_MIN_MAX(FLOAT_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_MAX_SIMPLE &Ymm, MIN_MAX_SIMPLE &Zmm);
+
+  FLOAT_XYZ calc_offset(int Swap_0_Quad_With);
+
+  FLOAT_XYZ calc_skew();
+
+  float calc_all_quad_variance(int Swap_0_Quad_With, bool &Ret_Good_Data_Count_Pass);
 
   void build_calibration_display_data();
 
-  void calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var, 
-                            COMPASS_XYZ B_Cal_Pt, float B_Cal_Var, 
-                            COMPASS_XYZ C_Cal_Pt, float C_Cal_Var, 
-                            COMPASS_XYZ D_Cal_Pt, float D_Cal_Var);
+  void build_non_simple_offsets();
+
+  public:
+
+  FLOAT_XYZ calculate_calibrated_xyz(FLOAT_XYZ &Raw_XYZ);
+
+  void calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
+                            FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
+                            FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
+                            FLOAT_XYZ D_Cal_Pt, float D_Cal_Var);
 
   void calibration_preload_set();
 
@@ -292,19 +301,14 @@ class CAL_LEVEL_2
   MIN_MAX_SIMPLE y_min_max();
   MIN_MAX_SIMPLE z_min_max();
 
-  COMPASS_XYZ offset();
+  FLOAT_XYZ offset();
   
   void clear();
-
-  float skew_x();
-  float skew_y();
 
   float variance();
   bool simple_calibration();
 
-  void build_non_simple_offsets();
-
-  void calibration_level_2(COMPASS_XYZ &Raw_XYZ);
+  void calibration_level_2(FLOAT_XYZ &Raw_XYZ);
   // Run Level 2 cal routines.
 
 };
@@ -342,7 +346,7 @@ class HMC5883L
 
   // Data
 
-  COMPASS_XYZ RAW_XYZ;            // Temporary storage of XYZ before process;
+  FLOAT_XYZ RAW_XYZ;            // Temporary storage of XYZ before process;
 
   int CALIBRATED_BEARINGS_SIZE = COMMS_COMPASS_POLLING_RATE_FPS / 2; 
   // Half a second of data.
@@ -357,7 +361,7 @@ class HMC5883L
   float BEARING_JITTER_MAX = 0;
 
   // Calibration
-  void add_point(COMPASS_XYZ Point);
+  void add_point(FLOAT_XYZ Point);
   bool CALIBRATE = false;
   bool CALIBRATE_LOCK = false;
   int CURRENT_CALIBRATION_LEVEL = 0;
@@ -382,9 +386,6 @@ class HMC5883L
 
   bool CONNECTED = false;                     // Set to true if connected.
 
-  // Calibration Variables and Routines
-  TIMED_PING CALIBRATION_SPOT_CHECK;
-
   // Comms Routines
   bool register_write(char Register, char Value);
     // Internal: Change chip settings.
@@ -404,10 +405,10 @@ class HMC5883L
 
   CAL_LEVEL_2 LEVEL_2;
 
-  void calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var, 
-                            COMPASS_XYZ B_Cal_Pt, float B_Cal_Var, 
-                            COMPASS_XYZ C_Cal_Pt, float C_Cal_Var, 
-                            COMPASS_XYZ D_Cal_Pt, float D_Cal_Var, 
+  void calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
+                            FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
+                            FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
+                            FLOAT_XYZ D_Cal_Pt, float D_Cal_Var, 
                             float Cal_Offset);
 
   void calibration_preload_set();
@@ -437,7 +438,7 @@ class HMC5883L
   MIN_MAX_SIMPLE calibration_min_max_x();
   MIN_MAX_SIMPLE calibration_min_max_y();
   MIN_MAX_SIMPLE calibration_min_max_z();
-  COMPASS_XYZ calibration_offset();
+  FLOAT_XYZ calibration_offset();
 
   CAL_LEVEL_2_QUAD_RECORD calibration_points_active_quad_data();
   bool calibration_points_active_quad_overflow();
@@ -445,10 +446,10 @@ class HMC5883L
   float calibration_variance();
   bool calibration_simple();
 
-  void calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var, 
-                            COMPASS_XYZ B_Cal_Pt, float B_Cal_Var, 
-                            COMPASS_XYZ C_Cal_Pt, float C_Cal_Var, 
-                            COMPASS_XYZ D_Cal_Pt, float D_Cal_Var);
+  void calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
+                            FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
+                            FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
+                            FLOAT_XYZ D_Cal_Pt, float D_Cal_Var);
 
   bool connected();
   // Returns true if hmc5883l is successfully connected.

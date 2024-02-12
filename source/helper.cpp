@@ -1072,6 +1072,48 @@ float emperical_mean(vector<float> &Number_List, float Deviations)
   return mean;
 }
 
+FLOAT_XYZ emperical_mean_zyz(vector<FLOAT_XYZ> &Number_List, float Deviations)
+{
+  FLOAT_XYZ ret_mean_xyz;
+
+  vector<float> float_number_list;
+
+  // X
+  for (int pos = 0; pos < (int)Number_List.size(); pos++)
+  {
+    float_number_list.push_back(Number_List[pos].X);
+  }
+
+  float X = emperical_mean(float_number_list, Deviations);
+
+  // Y
+  float_number_list.clear();
+
+  for (int pos = 0; pos < (int)Number_List.size(); pos++)
+  {
+    float_number_list.push_back(Number_List[pos].Y);
+  }
+
+  float Y = emperical_mean(float_number_list, Deviations);
+
+  // Z
+  float_number_list.clear();
+
+  for (int pos = 0; pos < (int)Number_List.size(); pos++)
+  {
+    float_number_list.push_back(Number_List[pos].Z);
+  }
+
+  float Z = emperical_mean(float_number_list, Deviations);
+
+  // Return 
+  ret_mean_xyz.X = X;
+  ret_mean_xyz.Y = Y;
+  ret_mean_xyz.Z = Z;
+
+  return ret_mean_xyz;
+}
+
 int position_of_scale(int size, int scale, int value)
 // Calculate position of value on scale (eg 100%) with size.
 //  Will not return anything larger than size.

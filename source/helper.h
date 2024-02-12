@@ -39,6 +39,17 @@ using namespace std;
 // ***************************************************************************************
 
 // -------------------------------------------------------------------------------------
+
+class FLOAT_XYZ
+{
+  public:
+
+  float X = 0;
+  float Y = 0;
+  float Z = 0;
+};
+
+// -------------------------------------------------------------------------------------
 // Simple 2D Ref Map
 
 class stupid_2d
@@ -566,6 +577,10 @@ float emperical_mean(vector<float> &Number_List, float Deviations);
 //  1 - 68% of the data falls within one standard deviation of the mean.
 //  2 - 95% of the data falls within two standard deviations of the mean.
 //  3 - 99.7% of the data falls within three standard deviations of the mean.
+
+FLOAT_XYZ emperical_mean_zyz(vector<FLOAT_XYZ> &Number_List, float Deviations);
+// Simple XYZ Meam
+// Does not filter out outliers on x y z passes.
 
 int position_of_scale(int size, int scale, int value);
 // Calculate position of value on scale (eg 100%) with size.

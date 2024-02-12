@@ -23,7 +23,284 @@ float dist(float X, float Y)
   return sqrtf((X * X) + (Y * Y));
 }
 
-bool XYZ_MIN_MAX(COMPASS_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_MAX_SIMPLE &Ymm, MIN_MAX_SIMPLE &Zmm)
+// -------------------------------------------------------------------------------------
+
+bool four_point_check(FLOAT_XYZ Top, FLOAT_XYZ Bottom, 
+                      FLOAT_XYZ Left, FLOAT_XYZ Right)
+{
+  if (is_within(Top.X, Left.X,  Right.X)    && 
+      is_within(Bottom.X, Left.X,  Right.X) &&
+      is_within(Left.Y, Top.Y,  Bottom.Y)   &&
+      is_within(Right.Y, Top.Y,  Bottom.Y))
+  {
+    return true;
+  }
+  else 
+  {
+    return false;
+  }
+}
+
+// -------------------------------------------------------------------------------------
+
+void CAL_LEVEL_2_QUAD_RECORD::add_point(FLOAT_XYZ &Raw_XYZ)
+{
+  if ((int)DATA_POINTS.size() <= VARIANCE_COLLECTION_SIZE)
+  {
+    DATA_POINTS.push_back(Raw_XYZ);
+  }
+  else
+  {
+    OVERFLOW = true;
+  }
+}
+
+void CAL_LEVEL_2_QUAD_RECORD::clear(bool Simple_Calibration)
+{
+  if (Simple_Calibration)
+  {
+    VARIANCE_COLLECTION_SIZE = VARIANCE_COLLECTION_SIZE_SIMPLE;
+  }
+  else
+  {
+    VARIANCE_COLLECTION_SIZE = VARIANCE_COLLECTION_SIZE_COMPLEX;
+  }
+
+  DATA_POINTS.clear();
+  DATA_POINTS.reserve(VARIANCE_COLLECTION_SIZE);
+
+  DATA_POINTS_CALIBRATED.clear();
+  DATA_POINTS_CALIBRATED.reserve(VARIANCE_COLLECTION_SIZE);
+
+  OVERFLOW = false;
+}
+
+float CALIBRATION_DATA::variance_from_offset(FLOAT_XYZ Offset, bool &Good_Data_Count_Pass)
+{
+  float max_variance = 0;
+
+  // get min y
+  if (QUAD_DATA.DATA_POINTS.size() == 0)
+  {
+    if (HAS_DATA)
+    {
+      // Situation to handle preloaded data
+      LAST_KNOWN_VARIANCE = VARIANCE;
+      return VARIANCE;
+    }
+    else
+    {
+      // Startup blank state.
+      Good_Data_Count_Pass = false;
+      return 0;
+    }
+  }
+  else
+  {
+    // Load VARIANCE_COLLECTION
+    vector<float> variance_collection;
+
+    for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
+    {
+      variance_collection.push_back(dist(QUAD_DATA.DATA_POINTS[pos].X - Offset.X, QUAD_DATA.DATA_POINTS[pos].Y - Offset.Y));
+    }
+
+    // return mean
+    float mean = 0;
+    float qualifying_value_for_variance = 0;
+
+    // Set to false if fail, keep same (false or true) if true.
+    bool good_data = false;
+
+    good_data = emperical_mean(variance_collection, 1.0, 1 * COMMS_COMPASS_POLLING_RATE_FPS, mean, qualifying_value_for_variance);
+    // X * COMMS_COMPASS_POLLING_RATE_FPS - refers to how much good data is the bottom limit - X is X seconds of good data
+
+    if (good_data == false)
+    {
+      Good_Data_Count_Pass = false;
+    }
+    else
+    {
+      float tmp_variance = 0;
+
+      for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
+      {
+        // Check to see if the distance measured is passed its qualifying value to store
+        //  only valid points as an extreme max.  Not liking that this loop is ran twice, 
+        //  but i like the idea of changing emperical_mean() even less.
+        // This is only to ensure that only a value that has been considered in the mean 
+        //  value will be checked for a qualifying stick the landing value.
+        //  Also, the landing should have already been stuck.
+        if (pos < (int)variance_collection.size())
+        {
+          if(abs(variance_collection[pos] - mean) <= qualifying_value_for_variance)
+          {
+            tmp_variance = ((abs(variance_collection[pos] - mean)) / mean);
+
+            if (tmp_variance > max_variance)
+            {
+              max_variance = tmp_variance;
+            }
+          }
+        }
+      }
+
+      LAST_KNOWN_VARIANCE = max_variance;
+    }
+
+    return max_variance;
+  }
+}
+
+bool CALIBRATION_DATA::stick_the_landing(FLOAT_XYZ Current_Offset, int Quadrant)
+{
+  bool ret_landing_stuck = false;
+
+  // Stick the landing
+  FLOAT_XYZ calc_Y_min_pt;
+  FLOAT_XYZ calc_Y_max_pt;
+  FLOAT_XYZ calc_X_min_pt;
+  FLOAT_XYZ calc_X_max_pt;
+
+  // Load VARIANCE_COLLECTION    
+  vector<float> variance_collection;
+
+  for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
+  {
+    variance_collection.push_back(dist(QUAD_DATA.DATA_POINTS[pos].X - Current_Offset.X, QUAD_DATA.DATA_POINTS[pos].Y - Current_Offset.Y));
+  }
+
+  // return mean
+  float mean = 0;
+  float qualifying_value_for_variance = 0;
+
+  // Set to false if fail, keep same (false or true) if true.
+  bool good_data = false;
+
+  good_data = emperical_mean(variance_collection, 1.0, 1 * COMMS_COMPASS_POLLING_RATE_FPS, mean, qualifying_value_for_variance);
+  // Good data count of 2 seconds worth of valid points.
+
+  if (good_data)
+  {
+    // Proceed with sticking the landing with good data points
+    bool just_started = true;
+
+    for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
+    {
+      // Check to see if the distance measured is passed its qualifying value to store
+      //  only valid points as an extreme max.  Not liking that this loop is ran twice, 
+      //  but i like the idea of changing emperical_mean() even less.
+      // This is only to ensure that only a value that has been considered in the mean 
+      //  value will be checked for a qualifying stick the landing value.
+      //  Also, the landing should have already been stuck.
+      if(abs(variance_collection[pos] - mean) <= qualifying_value_for_variance)
+      {
+        if (just_started)
+        {
+          // Set first point.
+          calc_Y_min_pt = QUAD_DATA.DATA_POINTS[pos];
+          calc_Y_max_pt = QUAD_DATA.DATA_POINTS[pos];
+          calc_X_min_pt = QUAD_DATA.DATA_POINTS[pos];
+          calc_X_max_pt = QUAD_DATA.DATA_POINTS[pos];
+          just_started = false;
+        }
+        else
+        {
+          // Check Min Y
+          if (QUAD_DATA.DATA_POINTS[pos].Y < calc_Y_min_pt.Y)
+          {
+            calc_Y_min_pt = QUAD_DATA.DATA_POINTS[pos];
+          }
+
+          // Check Max Y
+          if (QUAD_DATA.DATA_POINTS[pos].Y > calc_Y_max_pt.Y)
+          {
+            calc_Y_max_pt = QUAD_DATA.DATA_POINTS[pos];
+          }
+
+          // Check Min X
+          if (QUAD_DATA.DATA_POINTS[pos].X < calc_X_min_pt.X)
+          {
+            calc_X_min_pt = QUAD_DATA.DATA_POINTS[pos];
+          }
+
+          // Check Max X
+          if (QUAD_DATA.DATA_POINTS[pos].X > calc_X_max_pt.X)
+          {
+            calc_X_max_pt = QUAD_DATA.DATA_POINTS[pos];
+          }
+        }
+      }
+
+      if (Quadrant == 1)
+      {
+        COORD = calc_Y_min_pt;
+      }
+      else if (Quadrant == 2)
+      {
+        COORD = calc_X_max_pt;
+      }
+      else if (Quadrant == 3)
+      {
+        COORD = calc_Y_max_pt;
+      }
+      else if (Quadrant == 4)
+      {
+        COORD = calc_X_min_pt;
+      }
+
+      HAS_DATA = true;
+      ret_landing_stuck = true;
+    }
+  }
+
+  return ret_landing_stuck;
+}
+
+void CALIBRATION_DATA::clear(bool Simple_Calibration)
+{
+  QUAD_DATA.clear(Simple_Calibration);
+
+  FLOAT_XYZ t_coord;
+  COORD = t_coord;
+
+  VARIANCE = 1000;
+  LAST_KNOWN_VARIANCE = 1000;
+
+  HAS_DATA = false;
+}
+
+// -------------------------------------------------------------------------------------
+
+int CAL_LEVEL_2::get_quad(FLOAT_XYZ &Raw_XYZ, float Distance)
+{
+  // A
+  if ((Raw_XYZ.Y - OFFSET.Y) < -(Distance * 2.0f / 3.0f))
+  {
+    return 1;
+  }
+  // C
+  else if ((Raw_XYZ.X - OFFSET.X) < -(Distance * 2.0f  / 3.0f))
+  {
+    return 4;
+  }
+  // D
+  else if ((Raw_XYZ.X - OFFSET.X) > (Distance * 2.0f  / 3.0f))
+  {
+    return 2;
+  }
+  // B
+  else if ((Raw_XYZ.Y - OFFSET.Y) > (Distance * 2.0f  / 3.0f))
+  {
+    return 3;
+  }
+  else
+  {
+    return -1;
+  }
+}
+
+bool CAL_LEVEL_2::XYZ_MIN_MAX(FLOAT_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_MAX_SIMPLE &Ymm, MIN_MAX_SIMPLE &Zmm)
 {
   bool ret_changed = false;
 
@@ -76,297 +353,127 @@ bool XYZ_MIN_MAX(COMPASS_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_
   return ret_changed;
 }
 
-COMPASS_XYZ calc_offset(COMPASS_XYZ Y_Min,  COMPASS_XYZ Y_Max, COMPASS_XYZ X_Min, COMPASS_XYZ X_Max)
+FLOAT_XYZ CAL_LEVEL_2::calc_offset(int Swap_0_Quad_With)
 {
-  COMPASS_XYZ ret_offset;
+  FLOAT_XYZ ret_offset;
 
-  ret_offset.X = (X_Min.X + X_Max.X) / 2.0f;
-  ret_offset.Y = (Y_Min.Y + Y_Max.Y) / 2.0f;
+  int quad_1 = 1;
+  int quad_2 = 2;
+  int quad_3 = 3;
+  int quad_4 = 4;
+
+  if (Swap_0_Quad_With > 0)
+  {
+    if (Swap_0_Quad_With == 1)
+    {
+      quad_1 = 0;
+    }
+    else if (Swap_0_Quad_With == 2)
+    {
+      quad_2 = 0;
+    }
+    else if (Swap_0_Quad_With == 3)
+    {
+      quad_3 = 0;
+    }
+    else if (Swap_0_Quad_With == 4)
+    {
+      quad_4 = 0;
+    }
+  }
+  
+  if (CALIBRATION_QUADS.size() == 5)
+  {
+    ret_offset.Y = (CALIBRATION_QUADS[quad_1].COORD.Y + CALIBRATION_QUADS[quad_3].COORD.Y) / 2.0f;
+    ret_offset.X = (CALIBRATION_QUADS[quad_4].COORD.X + CALIBRATION_QUADS[quad_2].COORD.X) / 2.0f;
+  }
 
   return ret_offset;
 }
 
-// -------------------------------------------------------------------------------------
-
-bool four_point_check(COMPASS_XYZ Top, COMPASS_XYZ Bottom, 
-                      COMPASS_XYZ Left, COMPASS_XYZ Right)
+FLOAT_XYZ CAL_LEVEL_2::calc_skew()
 {
-  if (is_within(Top.X, Left.X,  Right.X)    && 
-      is_within(Bottom.X, Left.X,  Right.X) &&
-      is_within(Left.Y, Top.Y,  Bottom.Y)   &&
-      is_within(Right.Y, Top.Y,  Bottom.Y))
+  FLOAT_XYZ ret_skew;
+
+  if (CALIBRATION_QUADS.size() == 5)
   {
-    return true;
+    ret_skew.Y = (abs(CALIBRATION_QUADS[2].COORD.Y - CALIBRATION_QUADS[4].COORD.Y)) / 2.0f;
+    ret_skew.X = (abs(CALIBRATION_QUADS[3].COORD.X - CALIBRATION_QUADS[1].COORD.X)) / 2.0f;
   }
-  else 
-  {
-    return false;
-  }
+
+  return ret_skew;
 }
 
-// -------------------------------------------------------------------------------------
-
-void CAL_LEVEL_2_QUAD_RECORD::add_point(COMPASS_XYZ &Raw_XYZ)
+float CAL_LEVEL_2::calc_all_quad_variance(int Swap_0_Quad_With, bool &Ret_Good_Data_Count_Pass)
 {
-  if ((int)DATA_POINTS.size() <= VARIANCE_COLLECTION_SIZE)
+  float ret_variance = 0.0f;
+
+  bool tmp_good_data_count_pass = true; // Only down sets for fogotten reasons, start true.
+
+  FLOAT_XYZ tmp_offset = calc_offset(Swap_0_Quad_With);
+  
+  for (int quad = 1; quad < (int)CALIBRATION_QUADS.size(); quad++)
   {
-    DATA_POINTS.push_back(Raw_XYZ);
-  }
-  else
-  {
-    OVERFLOW = true;
-  }
-}
-
-void CAL_LEVEL_2_QUAD_RECORD::clear(bool Simple_Calibration)
-{
-  if (Simple_Calibration)
-  {
-    VARIANCE_COLLECTION_SIZE = VARIANCE_COLLECTION_SIZE_SIMPLE;
-  }
-  else
-  {
-    VARIANCE_COLLECTION_SIZE = VARIANCE_COLLECTION_SIZE_COMPLEX;
-  }
-
-  DATA_POINTS.clear();
-  DATA_POINTS.reserve(VARIANCE_COLLECTION_SIZE);
-
-  DATA_POINTS_CALIBRATED.clear();
-  DATA_POINTS_CALIBRATED.reserve(VARIANCE_COLLECTION_SIZE);
-
-  VARIANCE_COLLECTION.clear();
-  VARIANCE_COLLECTION.reserve(VARIANCE_COLLECTION_SIZE);
-
-  OVERFLOW = false;
-}
-
-float CALIBRATION_DATA::variance_from_offset(COMPASS_XYZ Offset, bool &Good_Data_Count_Pass)
-{
-  float max_variance = 0;
-
-  // get min y
-  if (QUAD_DATA.DATA_POINTS.size() == 0)
-  {
-    if (HAS_DATA)
+    if (quad == Swap_0_Quad_With)
     {
-      // Situation to handle preloaded data
-      LAST_KNOWN_VARIANCE = VARIANCE;
-      return VARIANCE;
+      ret_variance = ret_variance + CALIBRATION_QUADS[0].variance_from_offset(tmp_offset, tmp_good_data_count_pass);
+      Ret_Good_Data_Count_Pass = tmp_good_data_count_pass;
     }
-    else
+    else 
     {
-      // Startup blank state.
-      Good_Data_Count_Pass = false;
-      return 0;
-    }
-  }
-  else
-  {
-    // Load VARIANCE_COLLECTION
-    QUAD_DATA.VARIANCE_COLLECTION.clear();
-
-    for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
-    {
-      QUAD_DATA.VARIANCE_COLLECTION.push_back(dist(QUAD_DATA.DATA_POINTS[pos].X - Offset.X, QUAD_DATA.DATA_POINTS[pos].Y - Offset.Y));
-    }
-
-    // return mean
-    float mean = 0;
-    float qualifying_value_for_variance = 0;
-
-    // Set to false if fail, keep same (false or true) if true.
-    bool good_data = false;
-
-    good_data = emperical_mean(QUAD_DATA.VARIANCE_COLLECTION, 1.0, 1 * COMMS_COMPASS_POLLING_RATE_FPS, mean, qualifying_value_for_variance);
-    // X * COMMS_COMPASS_POLLING_RATE_FPS - refers to how much good data is the bottom limit - X is X seconds of good data
-
-    if (good_data == false)
-    {
-      Good_Data_Count_Pass = false;
-    }
-    else
-    {
-      float tmp_variance = 0;
-
-      for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
-      {
-        // Check to see if the distance measured is passed its qualifying value to store
-        //  only valid points as an extreme max.  Not liking that this loop is ran twice, 
-        //  but i like the idea of changing emperical_mean() even less.
-        // This is only to ensure that only a value that has been considered in the mean 
-        //  value will be checked for a qualifying stick the landing value.
-        //  Also, the landing should have already been stuck.
-        if(abs(QUAD_DATA.VARIANCE_COLLECTION[pos] - mean) <= qualifying_value_for_variance)
-        {
-          tmp_variance = ((abs(QUAD_DATA.VARIANCE_COLLECTION[pos] - mean)) / mean);
-
-          if (tmp_variance > max_variance)
-          {
-            max_variance = tmp_variance;
-          }
-        }
-      }
-
-      LAST_KNOWN_VARIANCE = max_variance;
-    }
-
-    return max_variance;
-  }
-}
-
-bool CALIBRATION_DATA::stick_the_landing(COMPASS_XYZ Current_Offset, int Quadrant)
-{
-  bool ret_landing_stuck = false;
-
-  // Stick the landing
-  COMPASS_XYZ calc_Y_min_pt;
-  COMPASS_XYZ calc_Y_max_pt;
-  COMPASS_XYZ calc_X_min_pt;
-  COMPASS_XYZ calc_X_max_pt;
-
-  // Load VARIANCE_COLLECTION
-  QUAD_DATA.VARIANCE_COLLECTION.clear();
-
-  for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
-  {
-    QUAD_DATA.VARIANCE_COLLECTION.push_back(dist(QUAD_DATA.DATA_POINTS[pos].X - Current_Offset.X, QUAD_DATA.DATA_POINTS[pos].Y - Current_Offset.Y));
-  }
-
-  // return mean
-  float mean = 0;
-  float qualifying_value_for_variance = 0;
-
-  // Set to false if fail, keep same (false or true) if true.
-  bool good_data = false;
-
-  good_data = emperical_mean(QUAD_DATA.VARIANCE_COLLECTION, 1.0, 1 * COMMS_COMPASS_POLLING_RATE_FPS, mean, qualifying_value_for_variance);
-  // Good data count of 2 seconds worth of valid points.
-
-  if (good_data)
-  {
-    // Proceed with sticking the landing with good data points
-    bool just_started = true;
-
-    for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
-    {
-      // Check to see if the distance measured is passed its qualifying value to store
-      //  only valid points as an extreme max.  Not liking that this loop is ran twice, 
-      //  but i like the idea of changing emperical_mean() even less.
-      // This is only to ensure that only a value that has been considered in the mean 
-      //  value will be checked for a qualifying stick the landing value.
-      //  Also, the landing should have already been stuck.
-      if(abs(QUAD_DATA.VARIANCE_COLLECTION[pos] - mean) <= qualifying_value_for_variance)
-      {
-        if (just_started)
-        {
-          // Set first point.
-          calc_Y_min_pt = QUAD_DATA.DATA_POINTS[pos];
-          calc_Y_max_pt = QUAD_DATA.DATA_POINTS[pos];
-          calc_X_min_pt = QUAD_DATA.DATA_POINTS[pos];
-          calc_X_max_pt = QUAD_DATA.DATA_POINTS[pos];
-          just_started = false;
-        }
-        else
-        {
-          // Check Min Y
-          if (QUAD_DATA.DATA_POINTS[pos].Y < calc_Y_min_pt.Y)
-          {
-            calc_Y_min_pt = QUAD_DATA.DATA_POINTS[pos];
-          }
-
-          // Check Max Y
-          if (QUAD_DATA.DATA_POINTS[pos].Y > calc_Y_max_pt.Y)
-          {
-            calc_Y_max_pt = QUAD_DATA.DATA_POINTS[pos];
-          }
-
-          // Check Min X
-          if (QUAD_DATA.DATA_POINTS[pos].X < calc_X_min_pt.X)
-          {
-            calc_X_min_pt = QUAD_DATA.DATA_POINTS[pos];
-          }
-
-          // Check Max X
-          if (QUAD_DATA.DATA_POINTS[pos].X > calc_X_max_pt.X)
-          {
-            calc_X_max_pt = QUAD_DATA.DATA_POINTS[pos];
-          }
-        }
-      }
-
-      if (Quadrant == 0)
-      {
-        COORD = calc_Y_min_pt;
-      }
-      else if (Quadrant == 1)
-      {
-        COORD = calc_X_max_pt;
-      }
-      else if (Quadrant == 2)
-      {
-        COORD = calc_Y_max_pt;
-      }
-      else if (Quadrant == 3)
-      {
-        COORD = calc_X_min_pt;
-      }
-
-      HAS_DATA = true;
-      ret_landing_stuck = true;
+      ret_variance = ret_variance + CALIBRATION_QUADS[quad].variance_from_offset(tmp_offset, tmp_good_data_count_pass);
     }
   }
 
-  return ret_landing_stuck;
+  return ret_variance;
 }
 
-void CALIBRATION_DATA::clear(bool Simple_Calibration)
+void CAL_LEVEL_2::build_calibration_display_data()
 {
-  QUAD_DATA.clear(Simple_Calibration);
+  // Build Calibrated List for display only
 
-  COMPASS_XYZ t_coord;
-  COORD = t_coord;
-
-  VARIANCE = 1000;
-  LAST_KNOWN_VARIANCE = 1000;
-
-  HAS_DATA = false;
+  for (int quad = 1; quad < (int)CALIBRATION_QUADS.size(); quad++)
+  {
+    CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED.clear();
+    for (int pos = 0; pos < (int)CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS.size(); pos++)
+    {
+      CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED.push_back(calculate_calibrated_xyz(CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS[pos]));
+    }
+  }
 }
 
-// -------------------------------------------------------------------------------------
-
-int CAL_LEVEL_2::get_quad(COMPASS_XYZ &Raw_XYZ, float Distance)
+void CAL_LEVEL_2::build_non_simple_offsets()
 {
-  // A
-  if ((Raw_XYZ.Y - OFFSET.Y) < -(Distance * 2.0f / 3.0f))
+  if (CALIBRATION_QUADS.size() == 5)
   {
-    return 0;
-  }
-  // C
-  else if ((Raw_XYZ.X - OFFSET.X) < -(Distance * 2.0f  / 3.0f))
-  {
-    return 3;
-  }
-  // D
-  else if ((Raw_XYZ.X - OFFSET.X) > (Distance * 2.0f  / 3.0f))
-  {
-    return 1;
-  }
-  // B
-  else if ((Raw_XYZ.Y - OFFSET.Y) > (Distance * 2.0f  / 3.0f))
-  {
-    return 2;
-  }
-  else
-  {
-    return -1;
+    Y_MIN_MAX.MIN_VALUE = CALIBRATION_QUADS[1].COORD.Y;
+    X_MIN_MAX.MAX_VALUE = CALIBRATION_QUADS[2].COORD.X;
+    Y_MIN_MAX.MAX_VALUE = CALIBRATION_QUADS[3].COORD.Y;
+    X_MIN_MAX.MIN_VALUE = CALIBRATION_QUADS[4].COORD.X;
+
+    OFFSET = calc_offset(0);
+    SKEW = calc_skew();
   }
 }
 
-void CAL_LEVEL_2::calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var, 
-                                      COMPASS_XYZ B_Cal_Pt, float B_Cal_Var, 
-                                      COMPASS_XYZ C_Cal_Pt, float C_Cal_Var, 
-                                      COMPASS_XYZ D_Cal_Pt, float D_Cal_Var)
+FLOAT_XYZ CAL_LEVEL_2::calculate_calibrated_xyz(FLOAT_XYZ &Raw_XYZ)
+{
+  FLOAT_XYZ tmp_point;
+
+  //  x = x - ( x skew extreme * ( y / y val extreme) )
+  //  y = y - ( y skew extreme * ( x / x val extreme) )
+
+  tmp_point.X = (Raw_XYZ.X - OFFSET.X) - (SKEW.X * ((Raw_XYZ.Y - OFFSET.Y) / (-OFFSET.Y)));
+  tmp_point.Y = (Raw_XYZ.Y - OFFSET.Y) - (SKEW.Y * ((Raw_XYZ.X - OFFSET.X) / (-OFFSET.X)));
+  tmp_point.Z = Raw_XYZ.Z - OFFSET.Z;
+
+  return tmp_point;
+}
+
+void CAL_LEVEL_2::calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
+                                      FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
+                                      FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
+                                      FLOAT_XYZ D_Cal_Pt, float D_Cal_Var)
 {
   A_Cal_Pt_PRELOAD = A_Cal_Pt;
   A_Cal_Var_PRELOAD = A_Cal_Var;
@@ -381,86 +488,36 @@ void CAL_LEVEL_2::calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var,
   D_Cal_Var_PRELOAD = D_Cal_Var;
 }
 
-COMPASS_XYZ CAL_LEVEL_2::calculate_calibrated_xyz(COMPASS_XYZ &Raw_XYZ)
-{
-  COMPASS_XYZ tmp_point;
-
-  //  x = x - ( x skew extreme * ( y / y val extreme) )
-  //  y = y - ( y skew extreme * ( x / x val extreme) )
-
-  tmp_point.X = (Raw_XYZ.X - offset().X) - (skew_x() * ((Raw_XYZ.Y - offset().Y) / (-offset().Y)));
-  tmp_point.Y = (Raw_XYZ.Y - offset().Y) - (skew_y() * ((Raw_XYZ.X - offset().X) / (-offset().X)));
-  tmp_point.Z = Raw_XYZ.Z - offset().Z;
-
-  return tmp_point;
-}
-
-void CAL_LEVEL_2::build_calibration_display_data()
-{
-  // Build Calibrated List for display only
-
-  A.QUAD_DATA.DATA_POINTS_CALIBRATED.clear();
-  for (int pos = 0; pos < (int)A.QUAD_DATA.DATA_POINTS.size(); pos++)
-  {
-    A.QUAD_DATA.DATA_POINTS_CALIBRATED.push_back(calculate_calibrated_xyz(A.QUAD_DATA.DATA_POINTS[pos]));
-  }
-
-  B.QUAD_DATA.DATA_POINTS_CALIBRATED.clear();
-  for (int pos = 0; pos < (int)B.QUAD_DATA.DATA_POINTS.size(); pos++)
-  {
-    B.QUAD_DATA.DATA_POINTS_CALIBRATED.push_back(calculate_calibrated_xyz(B.QUAD_DATA.DATA_POINTS[pos]));
-  }
-
-  C.QUAD_DATA.DATA_POINTS_CALIBRATED.clear();
-  for (int pos = 0; pos < (int)C.QUAD_DATA.DATA_POINTS.size(); pos++)
-  {
-    C.QUAD_DATA.DATA_POINTS_CALIBRATED.push_back(calculate_calibrated_xyz(C.QUAD_DATA.DATA_POINTS[pos]));
-  }
-
-  D.QUAD_DATA.DATA_POINTS_CALIBRATED.clear();
-  for (int pos = 0; pos < (int)D.QUAD_DATA.DATA_POINTS.size(); pos++)
-  {
-    D.QUAD_DATA.DATA_POINTS_CALIBRATED.push_back(calculate_calibrated_xyz(D.QUAD_DATA.DATA_POINTS[pos]));
-  }
-}
-
 void CAL_LEVEL_2::calibration_preload_set()
 {
-  SIMPLE_CALIBRATION = false;
+  if (CALIBRATION_QUADS.size() == 5)
+  {
+    SIMPLE_CALIBRATION = false;
 
-  // Load Data
-  A.COORD = A_Cal_Pt_PRELOAD;
-  A.VARIANCE = A_Cal_Var_PRELOAD;
-  A.HAS_DATA = true;
+    // Load Data
+    CALIBRATION_QUADS[1].COORD = A_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[1].VARIANCE = A_Cal_Var_PRELOAD;
+    CALIBRATION_QUADS[1].HAS_DATA = true;
 
-  B.COORD = B_Cal_Pt_PRELOAD;
-  B.VARIANCE = B_Cal_Var_PRELOAD;
-  B.HAS_DATA = true;
+    CALIBRATION_QUADS[2].COORD = D_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[2].VARIANCE = D_Cal_Var_PRELOAD;
+    CALIBRATION_QUADS[2].HAS_DATA = true;
 
-  C.COORD = C_Cal_Pt_PRELOAD;
-  C.VARIANCE = C_Cal_Var_PRELOAD;
-  C.HAS_DATA = true;
+    CALIBRATION_QUADS[3].COORD = B_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[3].VARIANCE = B_Cal_Var_PRELOAD;
+    CALIBRATION_QUADS[3].HAS_DATA = true;
 
-  D.COORD = D_Cal_Pt_PRELOAD;
-  D.VARIANCE = D_Cal_Var_PRELOAD;
-  D.HAS_DATA = true;
+    CALIBRATION_QUADS[4].COORD = C_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[4].VARIANCE = C_Cal_Var_PRELOAD;
+    CALIBRATION_QUADS[4].HAS_DATA = true;
 
-  // Set Variance
-  DISTANCE_VARIANCE_FULL = A.VARIANCE + B.VARIANCE + C.VARIANCE + D.VARIANCE;
+    // Set Variance
+    DISTANCE_VARIANCE_FULL = CALIBRATION_QUADS[1].VARIANCE + CALIBRATION_QUADS[2].VARIANCE + 
+                              CALIBRATION_QUADS[3].VARIANCE + CALIBRATION_QUADS[4].VARIANCE;
 
-  // Adjust new offset
-  X_MIN_MAX.MIN_VALUE = C.COORD.X;
-  X_MIN_MAX.MAX_VALUE = D.COORD.X;
-  Y_MIN_MAX.MIN_VALUE = A.COORD.Y;
-  Y_MIN_MAX.MAX_VALUE = B.COORD.Y;
-
-  // Adjust new offset
-  OFFSET.X = (C.COORD.X + D.COORD.X) / 2.0f;
-  OFFSET.Y = (A.COORD.Y + B.COORD.Y) / 2.0f;
-
-  // Adjust offset skew
-  SKEW_X = (abs(A.COORD.X - B.COORD.X)) / 2.0f;
-  SKEW_Y = (abs(C.COORD.Y - D.COORD.Y)) / 2.0f;
+    // Adjust new offset
+    build_non_simple_offsets();
+  }
 }
 
 MIN_MAX_SIMPLE CAL_LEVEL_2::x_min_max()
@@ -476,7 +533,7 @@ MIN_MAX_SIMPLE CAL_LEVEL_2::z_min_max()
   return Z_MIN_MAX;
 }
 
-COMPASS_XYZ CAL_LEVEL_2::offset()
+FLOAT_XYZ CAL_LEVEL_2::offset()
 {
   return OFFSET;
 }
@@ -492,11 +549,13 @@ void CAL_LEVEL_2::clear()
   Y_MIN_MAX = t_MIN_MAX;
   Z_MIN_MAX = t_MIN_MAX;
 
-  SKEW_X = 0;
-  SKEW_Y = 0;
+  FLOAT_XYZ tmp_xyz_blank;
+  OFFSET = tmp_xyz_blank;
 
-  COMPASS_XYZ t_MIN_POINT;
-  OFFSET = t_MIN_POINT;
+  // Set Skew values to 1 for simple unset state.
+  SKEW.X = 1.0f;
+  SKEW.Y = 1.0f;
+  SKEW.Z = 1.0f;
 
   QUAD      = -1;
   QUAD_PREV = -1;
@@ -504,34 +563,23 @@ void CAL_LEVEL_2::clear()
   COMPLETE_QUAD_DATA_SET = false;
   DISTANCE_VARIANCE_FULL = -1;
 
-  A.clear(SIMPLE_CALIBRATION);
-  B.clear(SIMPLE_CALIBRATION);
-  C.clear(SIMPLE_CALIBRATION);
-  D.clear(SIMPLE_CALIBRATION);
-  ACTIVE_QUAD_DATA.clear(SIMPLE_CALIBRATION);
-}
+  CALIBRATION_DATA tmp_calibration_data;
 
-float CAL_LEVEL_2::skew_x()
-{
-  if (SIMPLE_CALIBRATION)
-  {
-    return 1.0f;
-  }
-  else
-  {
-    return SKEW_X;
-  }
-}
+  CALIBRATION_QUADS.clear();
 
-float CAL_LEVEL_2::skew_y()
-{
-  if (SIMPLE_CALIBRATION)
+  CALIBRATION_QUADS.push_back(tmp_calibration_data);
+  CALIBRATION_QUADS.push_back(tmp_calibration_data);
+  CALIBRATION_QUADS.push_back(tmp_calibration_data);
+  CALIBRATION_QUADS.push_back(tmp_calibration_data);
+  CALIBRATION_QUADS.push_back(tmp_calibration_data);
+
+  if (CALIBRATION_QUADS.size() == 5)
   {
-    return 1.0f;
-  }
-  else
-  {
-    return SKEW_Y;
+    CALIBRATION_QUADS[0].clear(SIMPLE_CALIBRATION);
+    CALIBRATION_QUADS[1].clear(SIMPLE_CALIBRATION);
+    CALIBRATION_QUADS[2].clear(SIMPLE_CALIBRATION);
+    CALIBRATION_QUADS[3].clear(SIMPLE_CALIBRATION);
+    CALIBRATION_QUADS[4].clear(SIMPLE_CALIBRATION);
   }
 }
 
@@ -545,23 +593,7 @@ bool CAL_LEVEL_2::simple_calibration()
   return SIMPLE_CALIBRATION;
 }
 
-void CAL_LEVEL_2::build_non_simple_offsets()
-{
-  X_MIN_MAX.MIN_VALUE = C.COORD.X;
-  X_MIN_MAX.MAX_VALUE = D.COORD.X;
-  Y_MIN_MAX.MIN_VALUE = A.COORD.Y;
-  Y_MIN_MAX.MAX_VALUE = B.COORD.Y;
-
-  // Adjust new offset
-  OFFSET = calc_offset(A.COORD, B.COORD, C.COORD, D.COORD);
-  //OFFSET.Z = no idea;
-
-  // Adjust offset skew
-  SKEW_X = (abs(A.COORD.X - B.COORD.X)) / 2.0f;
-  SKEW_Y = (abs(C.COORD.Y - D.COORD.Y)) / 2.0f;
-}
-
-void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
+void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
 { 
   // Inititialization of Offset, to be ignored after second set.
 
@@ -574,15 +606,19 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
       OFFSET.Z = (Z_MIN_MAX.MAX_VALUE + Z_MIN_MAX.MIN_VALUE) / 2.0f;
     }
 
-    if (A.HAS_DATA && B.HAS_DATA && C.HAS_DATA && D.HAS_DATA)
+    if (CALIBRATION_QUADS.size() == 5)
     {
-      SIMPLE_CALIBRATION = false;
+      if (CALIBRATION_QUADS[1].HAS_DATA && CALIBRATION_QUADS[2].HAS_DATA && CALIBRATION_QUADS[3].HAS_DATA && CALIBRATION_QUADS[4].HAS_DATA)
+      {
+        SIMPLE_CALIBRATION = false;
 
-      build_non_simple_offsets();
-      build_calibration_display_data();
+        build_non_simple_offsets();
+        build_calibration_display_data();
+      }
     }
   }
   
+  if (CALIBRATION_QUADS.size() == 5)
   {
     // Complex Calibration
 
@@ -592,7 +628,7 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
     if (quad_current != -1)
     {
       // Store point
-      ACTIVE_QUAD_DATA.QUAD_DATA.add_point(Raw_XYZ);
+      CALIBRATION_QUADS[0].QUAD_DATA.add_point(Raw_XYZ);
 
       // Simple Filter
       if (distance > 100.0f)
@@ -602,64 +638,30 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
         {
           if (quad_current != QUAD_PREV)
           {
-            if (ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW == false)
+            if (CALIBRATION_QUADS[0].QUAD_DATA.OVERFLOW == false)
             {
               bool changed = false;
               float variance = 0;
 
               // Need to stick the landing of point ACTIVE_QUAD_DATA first with current offsets
-              if (ACTIVE_QUAD_DATA.stick_the_landing(OFFSET, QUAD))
+              if (CALIBRATION_QUADS[0].stick_the_landing(OFFSET, QUAD))
               {
-                COMPASS_XYZ tmp_offset;
-
                 // Get variance in with new quad data set, with temporary offset.
                 //  and stick the landing.
 
-                bool pass_good_data_count = true;
-                bool pass_good_data_count_dum = true;
-
-                if (QUAD == 0)
-                {
-                  tmp_offset = calc_offset(ACTIVE_QUAD_DATA.COORD, B.COORD, C.COORD, D.COORD);
-                  variance = ACTIVE_QUAD_DATA.variance_from_offset(tmp_offset, pass_good_data_count) + 
-                              B.variance_from_offset(tmp_offset, pass_good_data_count_dum) +
-                              C.variance_from_offset(tmp_offset, pass_good_data_count_dum) + 
-                              D.variance_from_offset(tmp_offset, pass_good_data_count_dum);
-                }
-                else if (QUAD == 1)
-                {
-                  tmp_offset = calc_offset(A.COORD, B.COORD, C.COORD, ACTIVE_QUAD_DATA.COORD);
-                  variance = A.variance_from_offset(tmp_offset, pass_good_data_count_dum) + 
-                              B.variance_from_offset(tmp_offset, pass_good_data_count_dum) +
-                              C.variance_from_offset(tmp_offset, pass_good_data_count_dum) + 
-                              ACTIVE_QUAD_DATA.variance_from_offset(tmp_offset, pass_good_data_count);
-                }
-                else if (QUAD == 2)
-                {
-                  tmp_offset = calc_offset(A.COORD, ACTIVE_QUAD_DATA.COORD, C.COORD, D.COORD);
-                  variance = A.variance_from_offset(tmp_offset, pass_good_data_count_dum) + 
-                              ACTIVE_QUAD_DATA.variance_from_offset(tmp_offset, pass_good_data_count) +
-                              C.variance_from_offset(tmp_offset, pass_good_data_count_dum) + 
-                              D.variance_from_offset(tmp_offset, pass_good_data_count_dum);
-                }
-                else if (QUAD == 3)
-                {
-                  tmp_offset = calc_offset(A.COORD, B.COORD, ACTIVE_QUAD_DATA.COORD, D.COORD);
-                  variance = A.variance_from_offset(tmp_offset, pass_good_data_count_dum) + 
-                              B.variance_from_offset(tmp_offset, pass_good_data_count_dum) +
-                              ACTIVE_QUAD_DATA.variance_from_offset(tmp_offset, pass_good_data_count) + 
-                              D.variance_from_offset(tmp_offset, pass_good_data_count_dum);
-                }
+                bool pass_good_data_count = true; // Only down sets for fogotten reasons, start true.
+            
+                variance = calc_all_quad_variance(QUAD, pass_good_data_count);
 
                 // validate positions
                 bool pass_four_point_check = false;
 
                 if (SIMPLE_CALIBRATION)
                 {
-                  COMPASS_XYZ a_tmp;
-                  COMPASS_XYZ b_tmp;
-                  COMPASS_XYZ c_tmp;
-                  COMPASS_XYZ d_tmp;
+                  FLOAT_XYZ a_tmp;
+                  FLOAT_XYZ b_tmp;
+                  FLOAT_XYZ c_tmp;
+                  FLOAT_XYZ d_tmp;
 
                   a_tmp.X = (X_MIN_MAX.MIN_VALUE + X_MIN_MAX.MAX_VALUE) / 2.0f;
                   a_tmp.Y = Y_MIN_MAX.MIN_VALUE;
@@ -673,43 +675,43 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                   d_tmp.X = X_MIN_MAX.MAX_VALUE;
                   d_tmp.Y = (Y_MIN_MAX.MIN_VALUE + Y_MIN_MAX.MAX_VALUE) / 2.0f;
                   
-                  if (QUAD == 0)
+                  if (QUAD == 1)
                   {
-                    pass_four_point_check = four_point_check(ACTIVE_QUAD_DATA.COORD, b_tmp, c_tmp, d_tmp);
-                  }
-                  else if (QUAD == 1)
-                  {
-                    pass_four_point_check = four_point_check(a_tmp, b_tmp, c_tmp, ACTIVE_QUAD_DATA.COORD);
+                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[0].COORD, b_tmp, c_tmp, d_tmp);
                   }
                   else if (QUAD == 2)
                   {
-                    pass_four_point_check = four_point_check(a_tmp, ACTIVE_QUAD_DATA.COORD, c_tmp, d_tmp);
+                    pass_four_point_check = four_point_check(a_tmp, b_tmp, c_tmp, CALIBRATION_QUADS[0].COORD);
                   }
                   else if (QUAD == 3)
                   {
-                    pass_four_point_check = four_point_check(a_tmp, b_tmp, ACTIVE_QUAD_DATA.COORD, d_tmp);
+                    pass_four_point_check = four_point_check(a_tmp, CALIBRATION_QUADS[0].COORD, c_tmp, d_tmp);
+                  }
+                  else if (QUAD == 4)
+                  {
+                    pass_four_point_check = four_point_check(a_tmp, b_tmp, CALIBRATION_QUADS[0].COORD, d_tmp);
                   }
                 }
                 else
                 {
-                  if (QUAD == 0)
+                  if (QUAD == 1)
                   {
-                    pass_four_point_check = four_point_check(ACTIVE_QUAD_DATA.COORD, B.COORD, C.COORD, D.COORD);
-                  }
-                  else if (QUAD == 1)
-                  {
-                    pass_four_point_check = four_point_check(A.COORD, B.COORD, C.COORD, ACTIVE_QUAD_DATA.COORD);
+                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[0].COORD, CALIBRATION_QUADS[3].COORD, CALIBRATION_QUADS[4].COORD, CALIBRATION_QUADS[2].COORD);
                   }
                   else if (QUAD == 2)
                   {
-                    pass_four_point_check = four_point_check(A.COORD, ACTIVE_QUAD_DATA.COORD, C.COORD, D.COORD);
+                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[1].COORD, CALIBRATION_QUADS[3].COORD, CALIBRATION_QUADS[4].COORD, CALIBRATION_QUADS[0].COORD);
                   }
                   else if (QUAD == 3)
                   {
-                    pass_four_point_check = four_point_check(A.COORD, B.COORD, ACTIVE_QUAD_DATA.COORD, D.COORD);
+                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[1].COORD, CALIBRATION_QUADS[0].COORD, CALIBRATION_QUADS[4].COORD, CALIBRATION_QUADS[2].COORD);
+                  }
+                  else if (QUAD == 4)
+                  {
+                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[1].COORD, CALIBRATION_QUADS[3].COORD, CALIBRATION_QUADS[0].COORD, CALIBRATION_QUADS[2].COORD);
                   }
                 }
-
+ 
                 // Store all passing and calc new Min Max and Offsets
                 if ((pass_four_point_check || SIMPLE_CALIBRATION) && pass_good_data_count)
                 {
@@ -728,132 +730,43 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
                 {
                   // Find best and worste variance values and only update values improved if 
                   //  not best and not improved if not worste. (quads should be queueed)
-                  float best_variance = A.LAST_KNOWN_VARIANCE;;
-                  float worst_variance = A.LAST_KNOWN_VARIANCE;;
+                  float best_variance = CALIBRATION_QUADS[1].LAST_KNOWN_VARIANCE;
+                  float worst_variance = CALIBRATION_QUADS[1].LAST_KNOWN_VARIANCE;
 
-                  //find best
-                  if (B.LAST_KNOWN_VARIANCE < best_variance)
+                  for (int quad = 2; quad < (int)CALIBRATION_QUADS.size(); quad++)
                   {
-                    best_variance = B.LAST_KNOWN_VARIANCE;
-                  }
-                  if (C.LAST_KNOWN_VARIANCE < best_variance)
-                  {
-                    best_variance = C.LAST_KNOWN_VARIANCE;
-                  }
-                  if (D.LAST_KNOWN_VARIANCE < best_variance)
-                  {
-                    best_variance = D.LAST_KNOWN_VARIANCE;
-                  }
+                    if (CALIBRATION_QUADS[quad].LAST_KNOWN_VARIANCE < best_variance)
+                    {
+                      best_variance = CALIBRATION_QUADS[quad].LAST_KNOWN_VARIANCE;
+                    }
 
-                  //find worste
-                  if (B.LAST_KNOWN_VARIANCE > worst_variance)
-                  {
-                    best_variance = B.LAST_KNOWN_VARIANCE;
-                  }
-                  if (C.LAST_KNOWN_VARIANCE > worst_variance)
-                  {
-                    best_variance = C.LAST_KNOWN_VARIANCE;
-                  }
-                  if (D.LAST_KNOWN_VARIANCE > worst_variance)
-                  {
-                    best_variance = D.LAST_KNOWN_VARIANCE;
+                    if (CALIBRATION_QUADS[quad].LAST_KNOWN_VARIANCE > worst_variance)
+                    {
+                      worst_variance = CALIBRATION_QUADS[quad].LAST_KNOWN_VARIANCE;
+                    }
                   }
 
-                  // Copy Active Quad
-                  if (QUAD == 0)
+                  // Do not copy if working quad is better than the best or worse than the worst.
+                  if (SIMPLE_CALIBRATION == false && 
+                      ((CALIBRATION_QUADS[QUAD].LAST_KNOWN_VARIANCE == best_variance && CALIBRATION_QUADS[0].LAST_KNOWN_VARIANCE < best_variance) || 
+                      (CALIBRATION_QUADS[QUAD].LAST_KNOWN_VARIANCE == worst_variance && CALIBRATION_QUADS[0].LAST_KNOWN_VARIANCE > worst_variance)))
                   {
-                    if (SIMPLE_CALIBRATION == false && 
-                        ((A.LAST_KNOWN_VARIANCE == best_variance && ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE < best_variance) || 
-                        (A.LAST_KNOWN_VARIANCE == worst_variance && ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE > worst_variance)))
-                    {
-                      // do nothing
-                    }
-                    else
-                    {
-                      A.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
-                      A.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
-                      A.COORD = ACTIVE_QUAD_DATA.COORD;
-                      A.LAST_KNOWN_VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
-                      A.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
-                      DISTANCE_VARIANCE_FULL = variance;
-
-                      // Update variance values.
-                      A.VARIANCE = A.LAST_KNOWN_VARIANCE;
-                      B.VARIANCE = B.LAST_KNOWN_VARIANCE;
-                      C.VARIANCE = C.LAST_KNOWN_VARIANCE;
-                      D.VARIANCE = D.LAST_KNOWN_VARIANCE;
-                    }
+                    // do nothing
                   }
-                  else if (QUAD == 1)
-                  {
-                    if (SIMPLE_CALIBRATION == false && 
-                        ((D.LAST_KNOWN_VARIANCE == best_variance && ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE < best_variance) || 
-                        (D.LAST_KNOWN_VARIANCE == worst_variance && ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE > worst_variance)))
-                    {
-                      // do nothing
-                    }
-                    else
-                    {
-                      D.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
-                      D.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
-                      D.COORD = ACTIVE_QUAD_DATA.COORD;
-                      D.LAST_KNOWN_VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
-                      D.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
-                      DISTANCE_VARIANCE_FULL = variance;
+                  else
+                  { 
+                    // Copy Active Quad
+                    CALIBRATION_QUADS[QUAD].QUAD_DATA.DATA_POINTS.swap(CALIBRATION_QUADS[0].QUAD_DATA.DATA_POINTS);
+                    CALIBRATION_QUADS[QUAD].QUAD_DATA.OVERFLOW = CALIBRATION_QUADS[0].QUAD_DATA.OVERFLOW;
+                    CALIBRATION_QUADS[QUAD].COORD = CALIBRATION_QUADS[0].COORD;
+                    CALIBRATION_QUADS[QUAD].LAST_KNOWN_VARIANCE = CALIBRATION_QUADS[0].LAST_KNOWN_VARIANCE;
+                    CALIBRATION_QUADS[QUAD].HAS_DATA = CALIBRATION_QUADS[0].HAS_DATA;
+                    DISTANCE_VARIANCE_FULL = variance;
 
-                      // Update variance values.
-                      A.VARIANCE = A.LAST_KNOWN_VARIANCE;
-                      B.VARIANCE = B.LAST_KNOWN_VARIANCE;
-                      C.VARIANCE = C.LAST_KNOWN_VARIANCE;
-                      D.VARIANCE = D.LAST_KNOWN_VARIANCE;
-                    }
-                  }
-                  else if (QUAD == 2)
-                  {
-                    if (SIMPLE_CALIBRATION == false && 
-                        ((B.LAST_KNOWN_VARIANCE == best_variance && ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE < best_variance) || 
-                        (B.LAST_KNOWN_VARIANCE == worst_variance && ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE > worst_variance)))
+                    // update all variance last know values as referenced good variance values from last variance scan.
+                    for (int quad = 1; quad < (int)CALIBRATION_QUADS.size(); quad++)
                     {
-                      // do nothing
-                    }
-                    else
-                    {
-                      B.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
-                      B.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
-                      B.COORD = ACTIVE_QUAD_DATA.COORD;
-                      B.LAST_KNOWN_VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
-                      B.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
-                      DISTANCE_VARIANCE_FULL = variance;
-                      
-                      // Update variance values.
-                      A.VARIANCE = A.LAST_KNOWN_VARIANCE;
-                      B.VARIANCE = B.LAST_KNOWN_VARIANCE;
-                      C.VARIANCE = C.LAST_KNOWN_VARIANCE;
-                      D.VARIANCE = D.LAST_KNOWN_VARIANCE;
-                    }
-                  }
-                  else if (QUAD == 3)
-                  {
-                    if (SIMPLE_CALIBRATION == false && 
-                        ((C.LAST_KNOWN_VARIANCE == best_variance && ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE < best_variance) || 
-                        (C.LAST_KNOWN_VARIANCE == worst_variance && ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE > worst_variance)))
-                    {
-                      // do nothing
-                    }
-                    else
-                    {
-                      C.QUAD_DATA.DATA_POINTS.swap(ACTIVE_QUAD_DATA.QUAD_DATA.DATA_POINTS);
-                      C.QUAD_DATA.OVERFLOW = ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
-                      C.COORD = ACTIVE_QUAD_DATA.COORD;
-                      C.LAST_KNOWN_VARIANCE = ACTIVE_QUAD_DATA.LAST_KNOWN_VARIANCE;
-                      C.HAS_DATA = ACTIVE_QUAD_DATA.HAS_DATA;
-                      DISTANCE_VARIANCE_FULL = variance;
-
-                      // Update variance values.
-                      A.VARIANCE = A.LAST_KNOWN_VARIANCE;
-                      B.VARIANCE = B.LAST_KNOWN_VARIANCE;
-                      C.VARIANCE = C.LAST_KNOWN_VARIANCE;
-                      D.VARIANCE = D.LAST_KNOWN_VARIANCE;
+                      CALIBRATION_QUADS[quad].VARIANCE = CALIBRATION_QUADS[quad].LAST_KNOWN_VARIANCE;
                     }
                   }
                 }
@@ -876,7 +789,8 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
           }   // Quadrant Changed
 
           // Quad rotate full
-          ACTIVE_QUAD_DATA.clear(SIMPLE_CALIBRATION);
+          
+          CALIBRATION_QUADS[0].clear(SIMPLE_CALIBRATION);
           QUAD_PREV = QUAD;
           QUAD = quad_current;
 
@@ -884,6 +798,7 @@ void CAL_LEVEL_2::calibration_level_2(COMPASS_XYZ &Raw_XYZ)
       }
     } // Simple Filter
   }
+  
 }
 
 bool HMC5883L::register_write(char Register, char Value)
@@ -955,7 +870,7 @@ void HMC5883L::stop()
 
 void HMC5883L::process()
 {
-  COMPASS_XYZ calibrated_bearing_xyz = LEVEL_2.calculate_calibrated_xyz(RAW_XYZ);
+  FLOAT_XYZ calibrated_bearing_xyz = LEVEL_2.calculate_calibrated_xyz(RAW_XYZ);
   RAW_BEARING = (atan2(calibrated_bearing_xyz.Y, calibrated_bearing_xyz.X) * 180 / M_PI);
   
   float bearing = RAW_BEARING + KNOWN_DEVICE_DEGREE_OFFSET;
@@ -978,32 +893,6 @@ void HMC5883L::process()
     CALIBRATED_BEARINGS.erase(CALIBRATED_BEARINGS.begin());
   }
 
-  /*
-  // Spot check Calibration
-  //  Spot check calibration if not in current callibration check.
-  if (CALIBRATE == false && CALIBRATION_SPOT_CHECK.ping_down(tmeFrame_Time) == false)
-  {
-    // Check Level 1
-    if (LEVEL_1.calibration_level_1_check(RAW_POINTS))
-    {
-      // Start 1 minute timer to calibrate
-      LEVEL_1.CALIBRATION_TIMER_LEVEL_1.ping_up(tmeFrame_Time, 1 * 60000);
-
-      // Turn on Level 1 Calibration
-      CALIBRATE = true;
-    }
-    else
-    {
-      // Wait 5 minutes for next calibration check
-      CALIBRATION_SPOT_CHECK.ping_up(tmeFrame_Time, 5 * 60000);
-    }
-
-    // Level 2
-    // Check Bearing with GPS Heading
-    
-  }
-  */
-
   // Level 2 - Calibration (Always Active.)
   if (CALIBRATE_LOCK == false)
   {
@@ -1013,6 +902,7 @@ void HMC5883L::process()
   // Calclulate Bearing
 
   // Simple Filter
+  if (CALIBRATED_BEARINGS.size() > 0)
   {
     float bearing_start_value = CALIBRATED_BEARINGS[0];
 
@@ -1050,20 +940,23 @@ void HMC5883L::process()
       }
     }
 
-    BEARING = (bearing_total / (float)CALIBRATED_BEARINGS.size());
-
-    if (BEARING <= 0.0f)
+    if (CALIBRATED_BEARINGS.size() > 0)
     {
-      BEARING = BEARING + 360.0f;
-    }
-    else if (BEARING > 360.0f)
-    {
-      BEARING = BEARING - 360.0f;
-    }
-    else
+      BEARING = (bearing_total / (float)CALIBRATED_BEARINGS.size());
 
-    BEARING_JITTER_MIN = bearing_min;
-    BEARING_JITTER_MAX = bearing_max;
+      if (BEARING <= 0.0f)
+      {
+        BEARING = BEARING + 360.0f;
+      }
+      else if (BEARING > 360.0f)
+      {
+        BEARING = BEARING - 360.0f;
+      }
+      else
+
+      BEARING_JITTER_MIN = bearing_min;
+      BEARING_JITTER_MAX = bearing_max;
+    }
   }
 }
 
@@ -1109,18 +1002,18 @@ MIN_MAX_SIMPLE HMC5883L::calibration_min_max_z()
   return LEVEL_2.z_min_max();
 }
 
-COMPASS_XYZ HMC5883L::calibration_offset()
+FLOAT_XYZ HMC5883L::calibration_offset()
 {
   return LEVEL_2.offset();
 }
 
 CAL_LEVEL_2_QUAD_RECORD HMC5883L::calibration_points_active_quad_data()
 {
-  return LEVEL_2.ACTIVE_QUAD_DATA.QUAD_DATA;
+  return LEVEL_2.CALIBRATION_QUADS[0].QUAD_DATA;
 }
 bool HMC5883L::calibration_points_active_quad_overflow()
 {
-  return LEVEL_2.ACTIVE_QUAD_DATA.QUAD_DATA.OVERFLOW;
+  return LEVEL_2.CALIBRATION_QUADS[0].QUAD_DATA.OVERFLOW;
 }
 
 float HMC5883L::calibration_variance()
@@ -1132,10 +1025,10 @@ bool HMC5883L::calibration_simple()
   return LEVEL_2.simple_calibration();
 }
 
-void HMC5883L::calibration_preload(COMPASS_XYZ A_Cal_Pt, float A_Cal_Var, 
-                                    COMPASS_XYZ B_Cal_Pt, float B_Cal_Var, 
-                                    COMPASS_XYZ C_Cal_Pt, float C_Cal_Var, 
-                                    COMPASS_XYZ D_Cal_Pt, float D_Cal_Var, 
+void HMC5883L::calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
+                                    FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
+                                    FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
+                                    FLOAT_XYZ D_Cal_Pt, float D_Cal_Var, 
                                     float Cal_Offset)
 {
   PRELOAD_DATA_LOADED = true;

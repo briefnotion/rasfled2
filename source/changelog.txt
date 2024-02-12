@@ -1,3 +1,8 @@
+2.130_240210
+  - Revised some code in hmc5883l to hopefully reduce stray bugs. 
+  - Unfound segmentation fault after clearing calibration settings 
+      still exist.
+
 2.129_240209
   - Changed the fonts to bold to make the text, on the screen, 
       easier to read.  Would've done it a long time ago if I 

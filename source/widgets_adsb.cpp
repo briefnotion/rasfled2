@@ -1657,11 +1657,13 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
     if (sdSysData.COMMS_COMPASS.calibrate_on())
     {
-      //ImGui::Text(" RAW XYZ: %.0f, %.0f, %.0f", sdSysData.COMMS_COMPASS.raw_xyz().X, sdSysData.COMMS_COMPASS.raw_xyz().Y, sdSysData.COMMS_COMPASS.raw_xyz().Z);
-      ImGui::Text("CAL PT A: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.LEVEL_2.A.COORD.X, sdSysData.COMMS_COMPASS.LEVEL_2.A.COORD.Y, sdSysData.COMMS_COMPASS.LEVEL_2.A.VARIANCE);
-      ImGui::Text("CAL PT B: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.LEVEL_2.B.COORD.X, sdSysData.COMMS_COMPASS.LEVEL_2.B.COORD.Y, sdSysData.COMMS_COMPASS.LEVEL_2.B.VARIANCE);
-      ImGui::Text("CAL PT C: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.LEVEL_2.C.COORD.X, sdSysData.COMMS_COMPASS.LEVEL_2.C.COORD.Y, sdSysData.COMMS_COMPASS.LEVEL_2.C.VARIANCE);
-      ImGui::Text("CAL PT D: %.0f, %.0f: %.3f", sdSysData.COMMS_COMPASS.LEVEL_2.D.COORD.X, sdSysData.COMMS_COMPASS.LEVEL_2.D.COORD.Y, sdSysData.COMMS_COMPASS.LEVEL_2.D.VARIANCE);
+      for (int quads = 1; quads < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quads++)
+      {
+        ImGui::Text("CAL PT %d: %.0f, %.0f: %.3f", quads, sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].COORD.X, 
+                                                          sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].COORD.Y, 
+                                                          sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].VARIANCE);
+      }
+
       ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.3f  OFFSET: %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, 
                                                                         sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance(), 
                                                                         sdSysData.COMMS_COMPASS.bearing_known_offset());
@@ -1766,7 +1768,6 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
   // All Text Above Here
   // -------------------------------------------------------------------------------------
-
   RANGE_INDICATOR.draw(draw_list_map, sdSysData, working_area);
 
   // Draw Compass Calibration
@@ -1787,94 +1788,24 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       ImVec2 c2;
       
       // level 0 and level 1
-      //draw compass points - 
 
-      /*
-      for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.raw_points_size(); pos++)
+      for (int quad = 1; quad < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quad++)
       {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.raw_xyz(pos).X / 4.0f), 
-                            center.y + (sdSysData.COMMS_COMPASS.raw_xyz(pos).Y / 4.0f));
-
-        p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibrated_xyz(pos).X / 4.0f), 
-                            center.y + (sdSysData.COMMS_COMPASS.calibrated_xyz(pos).Y / 4.0f));
-
-        draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.orange());
-
-        if (pos == sdSysData.COMMS_COMPASS.raw_points_size() -1)
+        for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS.size(); pos++)
         {
-          draw_line(draw_list_map, sdSysData, p1, p2, sdSysData.COLOR_SELECT.white(), 2.0f);
+          p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS[pos].X / 4.0f), 
+                              center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS[pos].Y / 4.0f));
+
+          draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.orange());
         }
 
-        draw_marker(draw_list_map, sdSysData, p2, sdSysData.COLOR_SELECT.blue());
-      }
-      */
+        for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED.size(); pos++)
+        {
+          p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED[pos].X / 4.0f), 
+                              center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED[pos].Y / 4.0f));
 
-      // A --------------
-      for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.A.QUAD_DATA.DATA_POINTS.size(); pos++)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.A.QUAD_DATA.DATA_POINTS[pos].X / 4.0f), 
-                            center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.A.QUAD_DATA.DATA_POINTS[pos].Y / 4.0f));
-
-        draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.orange());
-      }
-
-      for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.A.QUAD_DATA.DATA_POINTS_CALIBRATED.size(); pos++)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.A.QUAD_DATA.DATA_POINTS_CALIBRATED[pos].X / 4.0f), 
-                            center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.A.QUAD_DATA.DATA_POINTS_CALIBRATED[pos].Y / 4.0f));
-
-        draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.blue());
-      }
-
-      // B --------------
-      for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.B.QUAD_DATA.DATA_POINTS.size(); pos++)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.B.QUAD_DATA.DATA_POINTS[pos].X / 4.0f), 
-                            center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.B.QUAD_DATA.DATA_POINTS[pos].Y / 4.0f));
-
-        draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.orange());
-      }
-
-      for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.B.QUAD_DATA.DATA_POINTS_CALIBRATED.size(); pos++)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.B.QUAD_DATA.DATA_POINTS_CALIBRATED[pos].X / 4.0f), 
-                            center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.B.QUAD_DATA.DATA_POINTS_CALIBRATED[pos].Y / 4.0f));
-
-        draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.blue());
-      }
-
-      // C --------------
-      for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.C.QUAD_DATA.DATA_POINTS.size(); pos++)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.C.QUAD_DATA.DATA_POINTS[pos].X / 4.0f), 
-                            center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.C.QUAD_DATA.DATA_POINTS[pos].Y / 4.0f));
-
-        draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.orange());
-      }
-
-      for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.C.QUAD_DATA.DATA_POINTS_CALIBRATED.size(); pos++)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.C.QUAD_DATA.DATA_POINTS_CALIBRATED[pos].X / 4.0f), 
-                            center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.C.QUAD_DATA.DATA_POINTS_CALIBRATED[pos].Y / 4.0f));
-
-        draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.blue());
-      }
-
-      // D --------------
-      for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.D.QUAD_DATA.DATA_POINTS.size(); pos++)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.D.QUAD_DATA.DATA_POINTS[pos].X / 4.0f), 
-                            center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.D.QUAD_DATA.DATA_POINTS[pos].Y / 4.0f));
-
-        draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.orange());
-      }
-
-      for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.D.QUAD_DATA.DATA_POINTS_CALIBRATED.size(); pos++)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.D.QUAD_DATA.DATA_POINTS_CALIBRATED[pos].X / 4.0f), 
-                            center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.D.QUAD_DATA.DATA_POINTS_CALIBRATED[pos].Y / 4.0f));
-
-        draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.blue());
+          draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.blue());
+        }
       }
 
       // draw quad calibration
@@ -1915,19 +1846,19 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       // A
       if (sdSysData.COMMS_COMPASS.calibration_simple() == false)
       {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.A.COORD.X/ 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.A.COORD.Y / 4.0f));
-        p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.B.COORD.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.B.COORD.Y / 4.0f));
-        p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.C.COORD.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.C.COORD.Y / 4.0f));
-        p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.D.COORD.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.D.COORD.Y / 4.0f));
+        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[1].COORD.X/ 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[1].COORD.Y / 4.0f));
+        p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[2].COORD.X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[2].COORD.Y / 4.0f));
+        p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[3].COORD.X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[3].COORD.Y / 4.0f));
+        p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].COORD.X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].COORD.Y / 4.0f));
 
-        draw_line(draw_list_map, sdSysData, p1, p4, sdSysData.COLOR_SELECT.green(), 2.0f);
-        draw_line(draw_list_map, sdSysData, p4, p2, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(draw_list_map, sdSysData, p1, p2, sdSysData.COLOR_SELECT.green(), 2.0f);
         draw_line(draw_list_map, sdSysData, p2, p3, sdSysData.COLOR_SELECT.green(), 2.0f);
-        draw_line(draw_list_map, sdSysData, p3, p1, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(draw_list_map, sdSysData, p3, p4, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(draw_list_map, sdSysData, p4, p1, sdSysData.COLOR_SELECT.green(), 2.0f);
 
         draw_marker_filled(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.white());
         draw_marker_filled(draw_list_map, sdSysData, p2, sdSysData.COLOR_SELECT.white());
@@ -2001,7 +1932,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::End();
 
   }
-  
+
   // -------------------------------------------------------------------------------------
   // test for point position accuracy by getting geo from range, then putting geo marker 
   //  on range indicator.
