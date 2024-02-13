@@ -75,6 +75,29 @@ void CAL_LEVEL_2_QUAD_RECORD::clear(bool Simple_Calibration)
   OVERFLOW = false;
 }
 
+void CALIBRATION_DATA::add_last_known_offset_point()
+{
+  if (OFFSET_POINT_LIST.size() == 0)
+  {
+    OFFSET_POINT = LAST_KNOWN_OFFSET_POINT;
+    OFFSET_POINT_LIST.push_back(LAST_KNOWN_OFFSET_POINT);
+  }
+  else 
+  {
+    if ((int)OFFSET_POINT_LIST.size() >= OFFSET_POINT_VECTOR_SIZE)
+    {
+      while ((int)OFFSET_POINT_LIST.size() >= OFFSET_POINT_VECTOR_SIZE)
+      {
+        OFFSET_POINT_LIST.erase(OFFSET_POINT_LIST.begin());
+      }
+    }
+
+    OFFSET_POINT_LIST.push_back(LAST_KNOWN_OFFSET_POINT);
+
+    OFFSET_POINT = emperical_mean_zyz(OFFSET_POINT_LIST, 1.0);
+  }
+}
+
 float CALIBRATION_DATA::variance_from_offset(FLOAT_XYZ Offset, bool &Good_Data_Count_Pass)
 {
   float max_variance = 0;
@@ -121,6 +144,8 @@ float CALIBRATION_DATA::variance_from_offset(FLOAT_XYZ Offset, bool &Good_Data_C
     }
     else
     {
+      Good_Data_Count_Pass = true;
+
       float tmp_variance = 0;
 
       for (int pos = 0; pos < (int)QUAD_DATA.DATA_POINTS.size(); pos++)
@@ -172,12 +197,12 @@ bool CALIBRATION_DATA::stick_the_landing(FLOAT_XYZ Current_Offset, int Quadrant)
 
   // return mean
   float mean = 0;
-  float qualifying_value_for_variance = 0;
+  float mean_difference_for_variance = 0;
 
   // Set to false if fail, keep same (false or true) if true.
   bool good_data = false;
 
-  good_data = emperical_mean(variance_collection, 1.0, 1 * COMMS_COMPASS_POLLING_RATE_FPS, mean, qualifying_value_for_variance);
+  good_data = emperical_mean(variance_collection, 1.0, 1 * COMMS_COMPASS_POLLING_RATE_FPS, mean, mean_difference_for_variance);
   // Good data count of 2 seconds worth of valid points.
 
   if (good_data)
@@ -193,7 +218,7 @@ bool CALIBRATION_DATA::stick_the_landing(FLOAT_XYZ Current_Offset, int Quadrant)
       // This is only to ensure that only a value that has been considered in the mean 
       //  value will be checked for a qualifying stick the landing value.
       //  Also, the landing should have already been stuck.
-      if(abs(variance_collection[pos] - mean) <= qualifying_value_for_variance)
+      if(abs(variance_collection[pos] - mean) <= mean_difference_for_variance)
       {
         if (just_started)
         {
@@ -234,19 +259,19 @@ bool CALIBRATION_DATA::stick_the_landing(FLOAT_XYZ Current_Offset, int Quadrant)
 
       if (Quadrant == 1)
       {
-        COORD = calc_Y_min_pt;
+        LAST_KNOWN_OFFSET_POINT = calc_Y_min_pt;
       }
       else if (Quadrant == 2)
       {
-        COORD = calc_X_max_pt;
+        LAST_KNOWN_OFFSET_POINT = calc_X_max_pt;
       }
       else if (Quadrant == 3)
       {
-        COORD = calc_Y_max_pt;
+        LAST_KNOWN_OFFSET_POINT = calc_Y_max_pt;
       }
       else if (Quadrant == 4)
       {
-        COORD = calc_X_min_pt;
+        LAST_KNOWN_OFFSET_POINT = calc_X_min_pt;
       }
 
       HAS_DATA = true;
@@ -262,7 +287,11 @@ void CALIBRATION_DATA::clear(bool Simple_Calibration)
   QUAD_DATA.clear(Simple_Calibration);
 
   FLOAT_XYZ t_coord;
-  COORD = t_coord;
+  OFFSET_POINT = t_coord;
+  LAST_KNOWN_OFFSET_POINT = t_coord;
+
+  OFFSET_POINT_LIST.clear();
+  OFFSET_POINT_LIST.reserve(OFFSET_POINT_VECTOR_SIZE);
 
   VARIANCE = 1000;
   LAST_KNOWN_VARIANCE = 1000;
@@ -384,8 +413,8 @@ FLOAT_XYZ CAL_LEVEL_2::calc_offset(int Swap_0_Quad_With)
   
   if (CALIBRATION_QUADS.size() == 5)
   {
-    ret_offset.Y = (CALIBRATION_QUADS[quad_1].COORD.Y + CALIBRATION_QUADS[quad_3].COORD.Y) / 2.0f;
-    ret_offset.X = (CALIBRATION_QUADS[quad_4].COORD.X + CALIBRATION_QUADS[quad_2].COORD.X) / 2.0f;
+    ret_offset.Y = (CALIBRATION_QUADS[quad_1].OFFSET_POINT.Y + CALIBRATION_QUADS[quad_3].OFFSET_POINT.Y) / 2.0f;
+    ret_offset.X = (CALIBRATION_QUADS[quad_4].OFFSET_POINT.X + CALIBRATION_QUADS[quad_2].OFFSET_POINT.X) / 2.0f;
   }
 
   return ret_offset;
@@ -397,8 +426,8 @@ FLOAT_XYZ CAL_LEVEL_2::calc_skew()
 
   if (CALIBRATION_QUADS.size() == 5)
   {
-    ret_skew.Y = (abs(CALIBRATION_QUADS[2].COORD.Y - CALIBRATION_QUADS[4].COORD.Y)) / 2.0f;
-    ret_skew.X = (abs(CALIBRATION_QUADS[3].COORD.X - CALIBRATION_QUADS[1].COORD.X)) / 2.0f;
+    ret_skew.Y = (abs(CALIBRATION_QUADS[2].OFFSET_POINT.Y - CALIBRATION_QUADS[4].OFFSET_POINT.Y)) / 2.0f;
+    ret_skew.X = (abs(CALIBRATION_QUADS[3].OFFSET_POINT.X - CALIBRATION_QUADS[1].OFFSET_POINT.X)) / 2.0f;
   }
 
   return ret_skew;
@@ -408,7 +437,7 @@ float CAL_LEVEL_2::calc_all_quad_variance(int Swap_0_Quad_With, bool &Ret_Good_D
 {
   float ret_variance = 0.0f;
 
-  bool tmp_good_data_count_pass = true; // Only down sets for fogotten reasons, start true.
+  bool tmp_good_data_count_pass = false;
 
   FLOAT_XYZ tmp_offset = calc_offset(Swap_0_Quad_With);
   
@@ -446,10 +475,10 @@ void CAL_LEVEL_2::build_non_simple_offsets()
 {
   if (CALIBRATION_QUADS.size() == 5)
   {
-    Y_MIN_MAX.MIN_VALUE = CALIBRATION_QUADS[1].COORD.Y;
-    X_MIN_MAX.MAX_VALUE = CALIBRATION_QUADS[2].COORD.X;
-    Y_MIN_MAX.MAX_VALUE = CALIBRATION_QUADS[3].COORD.Y;
-    X_MIN_MAX.MIN_VALUE = CALIBRATION_QUADS[4].COORD.X;
+    Y_MIN_MAX.MIN_VALUE = CALIBRATION_QUADS[1].OFFSET_POINT.Y;
+    X_MIN_MAX.MAX_VALUE = CALIBRATION_QUADS[2].OFFSET_POINT.X;
+    Y_MIN_MAX.MAX_VALUE = CALIBRATION_QUADS[3].OFFSET_POINT.Y;
+    X_MIN_MAX.MIN_VALUE = CALIBRATION_QUADS[4].OFFSET_POINT.X;
 
     OFFSET = calc_offset(0);
     SKEW = calc_skew();
@@ -495,19 +524,23 @@ void CAL_LEVEL_2::calibration_preload_set()
     SIMPLE_CALIBRATION = false;
 
     // Load Data
-    CALIBRATION_QUADS[1].COORD = A_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[1].OFFSET_POINT = A_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[1].LAST_KNOWN_OFFSET_POINT = A_Cal_Pt_PRELOAD;
     CALIBRATION_QUADS[1].VARIANCE = A_Cal_Var_PRELOAD;
     CALIBRATION_QUADS[1].HAS_DATA = true;
 
-    CALIBRATION_QUADS[2].COORD = D_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[2].OFFSET_POINT = D_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[1].LAST_KNOWN_OFFSET_POINT = D_Cal_Pt_PRELOAD;
     CALIBRATION_QUADS[2].VARIANCE = D_Cal_Var_PRELOAD;
     CALIBRATION_QUADS[2].HAS_DATA = true;
 
-    CALIBRATION_QUADS[3].COORD = B_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[3].OFFSET_POINT = B_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[1].LAST_KNOWN_OFFSET_POINT = B_Cal_Pt_PRELOAD;
     CALIBRATION_QUADS[3].VARIANCE = B_Cal_Var_PRELOAD;
     CALIBRATION_QUADS[3].HAS_DATA = true;
 
-    CALIBRATION_QUADS[4].COORD = C_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[4].OFFSET_POINT = C_Cal_Pt_PRELOAD;
+    CALIBRATION_QUADS[1].LAST_KNOWN_OFFSET_POINT = C_Cal_Pt_PRELOAD;
     CALIBRATION_QUADS[4].VARIANCE = C_Cal_Var_PRELOAD;
     CALIBRATION_QUADS[4].HAS_DATA = true;
 
@@ -563,15 +596,19 @@ void CAL_LEVEL_2::clear()
   COMPLETE_QUAD_DATA_SET = false;
   DISTANCE_VARIANCE_FULL = -1;
 
-  CALIBRATION_DATA tmp_calibration_data;
+  CALIBRATION_DATA tmp_calibration_data_0;
+  CALIBRATION_DATA tmp_calibration_data_1;
+  CALIBRATION_DATA tmp_calibration_data_2;
+  CALIBRATION_DATA tmp_calibration_data_3;
+  CALIBRATION_DATA tmp_calibration_data_4;
 
   CALIBRATION_QUADS.clear();
 
-  CALIBRATION_QUADS.push_back(tmp_calibration_data);
-  CALIBRATION_QUADS.push_back(tmp_calibration_data);
-  CALIBRATION_QUADS.push_back(tmp_calibration_data);
-  CALIBRATION_QUADS.push_back(tmp_calibration_data);
-  CALIBRATION_QUADS.push_back(tmp_calibration_data);
+  CALIBRATION_QUADS.push_back(tmp_calibration_data_0);
+  CALIBRATION_QUADS.push_back(tmp_calibration_data_1);
+  CALIBRATION_QUADS.push_back(tmp_calibration_data_2);
+  CALIBRATION_QUADS.push_back(tmp_calibration_data_3);
+  CALIBRATION_QUADS.push_back(tmp_calibration_data_4);
 
   if (CALIBRATION_QUADS.size() == 5)
   {
@@ -649,7 +686,7 @@ void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
                 // Get variance in with new quad data set, with temporary offset.
                 //  and stick the landing.
 
-                bool pass_good_data_count = true; // Only down sets for fogotten reasons, start true.
+                bool pass_good_data_count = false; // Only down sets for fogotten reasons, start true.
             
                 variance = calc_all_quad_variance(QUAD, pass_good_data_count);
 
@@ -677,48 +714,72 @@ void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
                   
                   if (QUAD == 1)
                   {
-                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[0].COORD, b_tmp, c_tmp, d_tmp);
+                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT, 
+                                                              b_tmp, 
+                                                              c_tmp, 
+                                                              d_tmp);
                   }
                   else if (QUAD == 2)
                   {
-                    pass_four_point_check = four_point_check(a_tmp, b_tmp, c_tmp, CALIBRATION_QUADS[0].COORD);
+                    pass_four_point_check = four_point_check(a_tmp, 
+                                                              b_tmp, 
+                                                              c_tmp, 
+                                                              CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT);
                   }
                   else if (QUAD == 3)
                   {
-                    pass_four_point_check = four_point_check(a_tmp, CALIBRATION_QUADS[0].COORD, c_tmp, d_tmp);
+                    pass_four_point_check = four_point_check(a_tmp, 
+                                                              CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT, 
+                                                              c_tmp, 
+                                                              d_tmp);
                   }
                   else if (QUAD == 4)
                   {
-                    pass_four_point_check = four_point_check(a_tmp, b_tmp, CALIBRATION_QUADS[0].COORD, d_tmp);
+                    pass_four_point_check = four_point_check(a_tmp, 
+                                                              b_tmp, 
+                                                              CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT, 
+                                                              d_tmp);
                   }
                 }
                 else
                 {
                   if (QUAD == 1)
                   {
-                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[0].COORD, CALIBRATION_QUADS[3].COORD, CALIBRATION_QUADS[4].COORD, CALIBRATION_QUADS[2].COORD);
+                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[3].OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[4].OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[2].OFFSET_POINT);
                   }
                   else if (QUAD == 2)
                   {
-                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[1].COORD, CALIBRATION_QUADS[3].COORD, CALIBRATION_QUADS[4].COORD, CALIBRATION_QUADS[0].COORD);
+                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[1].OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[3].OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[4].OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT);
                   }
                   else if (QUAD == 3)
                   {
-                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[1].COORD, CALIBRATION_QUADS[0].COORD, CALIBRATION_QUADS[4].COORD, CALIBRATION_QUADS[2].COORD);
+                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[1].OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[4].OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[2].OFFSET_POINT);
                   }
                   else if (QUAD == 4)
                   {
-                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[1].COORD, CALIBRATION_QUADS[3].COORD, CALIBRATION_QUADS[0].COORD, CALIBRATION_QUADS[2].COORD);
+                    pass_four_point_check = four_point_check(CALIBRATION_QUADS[1].OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[3].OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT, 
+                                                              CALIBRATION_QUADS[2].OFFSET_POINT);
                   }
                 }
  
                 // Store all passing and calc new Min Max and Offsets
-                if ((pass_four_point_check || SIMPLE_CALIBRATION) && pass_good_data_count)
+                if (pass_four_point_check && pass_good_data_count)
                 {
                   // If all quadrants have data get all min max points if distance variance improves.
                   if (SIMPLE_CALIBRATION == false)
                   {
-                    if ((variance < (DISTANCE_VARIANCE_FULL * 1.05f)) || (DISTANCE_VARIANCE_FULL < 0.0f))
+                    if ((variance < (DISTANCE_VARIANCE_FULL * 1.50f)) || (DISTANCE_VARIANCE_FULL < 0.0f))
                     {
                       changed = true;
                     }
@@ -726,7 +787,7 @@ void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
                 }
 
                 // Store info if data set incomplete or successfully changed DISTANCE_VARIANCE_FULL.
-                if (SIMPLE_CALIBRATION || changed == true)
+                if ((SIMPLE_CALIBRATION && pass_good_data_count && pass_four_point_check) || changed == true)
                 {
                   // Find best and worste variance values and only update values improved if 
                   //  not best and not improved if not worste. (quads should be queueed)
@@ -755,18 +816,26 @@ void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
                   }
                   else
                   { 
-                    // Copy Active Quad
+                    // Copy Active Quad values to appropriate QUAD
                     CALIBRATION_QUADS[QUAD].QUAD_DATA.DATA_POINTS.swap(CALIBRATION_QUADS[0].QUAD_DATA.DATA_POINTS);
                     CALIBRATION_QUADS[QUAD].QUAD_DATA.OVERFLOW = CALIBRATION_QUADS[0].QUAD_DATA.OVERFLOW;
-                    CALIBRATION_QUADS[QUAD].COORD = CALIBRATION_QUADS[0].COORD;
+                    CALIBRATION_QUADS[QUAD].LAST_KNOWN_OFFSET_POINT = CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT;
                     CALIBRATION_QUADS[QUAD].LAST_KNOWN_VARIANCE = CALIBRATION_QUADS[0].LAST_KNOWN_VARIANCE;
                     CALIBRATION_QUADS[QUAD].HAS_DATA = CALIBRATION_QUADS[0].HAS_DATA;
-                    DISTANCE_VARIANCE_FULL = variance;
+
+                    // Update Offset Point with new point
+                    CALIBRATION_QUADS[QUAD].add_last_known_offset_point();
+
+                    // Recalculate full variance. 
+                    DISTANCE_VARIANCE_FULL = 0.0f;
 
                     // update all variance last know values as referenced good variance values from last variance scan.
                     for (int quad = 1; quad < (int)CALIBRATION_QUADS.size(); quad++)
                     {
                       CALIBRATION_QUADS[quad].VARIANCE = CALIBRATION_QUADS[quad].LAST_KNOWN_VARIANCE;
+                      
+                      // For display only. 
+                      DISTANCE_VARIANCE_FULL = DISTANCE_VARIANCE_FULL + CALIBRATION_QUADS[quad].VARIANCE;
                     }
                   }
                 }

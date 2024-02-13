@@ -187,14 +187,21 @@ class CALIBRATION_DATA
 {
   private:
 
+  int OFFSET_POINT_VECTOR_SIZE = 20;
+
   public:
 
   CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
-  FLOAT_XYZ COORD;
+  
+  //FLOAT_XYZ COORD;
 
   FLOAT_XYZ OFFSET_POINT;               // Stores Offset point value after ER 
                                         //  cycle. Refer to OFFSET_POINT when 
                                         //  building skew and boundaries. 
+
+  FLOAT_XYZ LAST_KNOWN_OFFSET_POINT;    // Stores the Offset point while it is being
+                                        //  considered to be added to the list. 
+
   vector<FLOAT_XYZ> OFFSET_POINT_LIST;  // Stores a list of previous Offset point
 
   float VARIANCE = 1000;            // The Good Variance value. Copied from 
@@ -202,6 +209,8 @@ class CALIBRATION_DATA
   float LAST_KNOWN_VARIANCE = 1000; // Stores Variance from the previous 
                                     //  variance_from_offset() pass
   bool HAS_DATA = false;
+
+  void add_last_known_offset_point();
 
   float variance_from_offset(FLOAT_XYZ Offset, bool &Good_Data_Count);
   // If Quadrant = -1 then no stick the landing is performed.

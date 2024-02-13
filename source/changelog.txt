@@ -1,3 +1,12 @@
+2.131_240212
+  - Never found the segmentation fault error. Changed some of the 
+      conditions related to the hmc5883l quadrant update and it 
+      went away. 
+  - Offset points are now stored in a list and returned through 
+      an emperical rule mean for its position. 
+  - Loosened the conditions of quadrant updates. from < 105% to 
+      < 150%.
+
 2.130_240210
   - Revised some code in hmc5883l to hopefully reduce stray bugs. 
   - Unfound segmentation fault after clearing calibration settings 

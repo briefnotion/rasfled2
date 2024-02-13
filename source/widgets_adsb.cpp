@@ -1659,8 +1659,8 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     {
       for (int quads = 1; quads < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quads++)
       {
-        ImGui::Text("CAL PT %d: %.0f, %.0f: %.3f", quads, sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].COORD.X, 
-                                                          sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].COORD.Y, 
+        ImGui::Text("CAL PT %d: %.0f, %.0f: %.3f", quads, sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.X, 
+                                                          sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.Y, 
                                                           sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].VARIANCE);
       }
 
@@ -1846,14 +1846,14 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       // A
       if (sdSysData.COMMS_COMPASS.calibration_simple() == false)
       {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[1].COORD.X/ 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[1].COORD.Y / 4.0f));
-        p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[2].COORD.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[2].COORD.Y / 4.0f));
-        p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[3].COORD.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[3].COORD.Y / 4.0f));
-        p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].COORD.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].COORD.Y / 4.0f));
+        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[1].OFFSET_POINT.X/ 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[1].OFFSET_POINT.Y / 4.0f));
+        p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[2].OFFSET_POINT.X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[2].OFFSET_POINT.Y / 4.0f));
+        p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[3].OFFSET_POINT.X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[3].OFFSET_POINT.Y / 4.0f));
+        p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].OFFSET_POINT.X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].OFFSET_POINT.Y / 4.0f));
 
         draw_line(draw_list_map, sdSysData, p1, p2, sdSysData.COLOR_SELECT.green(), 2.0f);
         draw_line(draw_list_map, sdSysData, p2, p3, sdSysData.COLOR_SELECT.green(), 2.0f);

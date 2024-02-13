@@ -1000,12 +1000,12 @@ float pressure_translate_kPa_to_inHg(float kPa)
 }
 
 bool emperical_mean(vector<float> &Number_List, float Deviations, 
-                          int Qualifying_Count, float &Ret_Mean, 
-                          float &Qualifying_Value)
+                    int Required_Qualifying_Dataset_Count, float &Ret_Mean, 
+                    float &Ret_Mean_Difference)
 {
   // Return variable reset.
   Ret_Mean = 0; 
-  Qualifying_Value = 0;
+  Ret_Mean_Difference = 0;
 
   int count = 0;
   float total = 0.0f;
@@ -1038,12 +1038,12 @@ bool emperical_mean(vector<float> &Number_List, float Deviations,
     }
 
     stdev = sqrt(stdev / Number_List.size());
-    Qualifying_Value = Deviations * stdev;
+    Ret_Mean_Difference = Deviations * stdev;
 
     // Calculate Emperical Rule
     for (int pos = 0; pos < (int)Number_List.size(); pos++)
     {
-      if(abs(Number_List[pos] - Ret_Mean) <= Qualifying_Value)
+      if(abs(Number_List[pos] - Ret_Mean) <= Ret_Mean_Difference)
       {
         count++;
         total = total + Number_List[pos];
@@ -1052,7 +1052,7 @@ bool emperical_mean(vector<float> &Number_List, float Deviations,
   }
                 
   // Calculate mean if count is > 0.
-  if (count >= Qualifying_Count)
+  if (count >= Required_Qualifying_Dataset_Count)
   {
     Ret_Mean = (total / (float)count);
     return true;
@@ -1067,8 +1067,8 @@ bool emperical_mean(vector<float> &Number_List, float Deviations,
 float emperical_mean(vector<float> &Number_List, float Deviations)
 {
   float mean = 0;
-  float qualifying_value = 0;
-  emperical_mean(Number_List, Deviations, 0, mean, qualifying_value);
+  float mean_difference = 0;
+  emperical_mean(Number_List, Deviations, 0, mean, mean_difference);
   return mean;
 }
 
