@@ -1659,9 +1659,11 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     {
       for (int quads = 1; quads < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quads++)
       {
-        ImGui::Text("CAL PT %d: %.0f, %.0f: %.3f", quads, sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.X, 
-                                                          sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.Y, 
-                                                          sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].VARIANCE);
+        ImGui::Text("CAL PT %d | %d | %.0f, %.0f: %.3f", quads,
+                                                    sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT_LIST.size(), 
+                                                    sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.X, 
+                                                    sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.Y, 
+                                                    sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].VARIANCE);
       }
 
       ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.3f  OFFSET: %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, 
@@ -1892,6 +1894,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     {
       if (RANGE_INDICATOR.gps_display_current_location())
       {
+        // draw compass at center location
         draw_compass(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                             sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, 
@@ -1899,6 +1902,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       }
       else
       {
+        // draw compass at gps pos
         draw_compass(draw_list_map, sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                             sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false);

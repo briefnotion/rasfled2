@@ -1,3 +1,11 @@
+2.132_240214
+  - Tuning some of the values in hmc5883l.
+  - Testing different methods to getting accurate readings. 
+      Thinking of dropping the variance trace function and 
+      Just replacing it with the Emperical Rule Stick the Landing 
+      function. It would be much less code and much more dynamic 
+      and tolerant to change. 
+
 2.131_240212
   - Never found the segmentation fault error. Changed some of the 
       conditions related to the hmc5883l quadrant update and it 

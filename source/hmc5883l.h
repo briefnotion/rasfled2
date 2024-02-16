@@ -134,6 +134,11 @@ using namespace std;
 
 float dist(float X, float Y);
 
+void calc_offset_and_skew(bool Simple, FLOAT_XYZ Top, FLOAT_XYZ Right, FLOAT_XYZ Bot, FLOAT_XYZ Left, 
+                          FLOAT_XYZ &Ret_Offset, FLOAT_XYZ &Ret_Skew);
+
+FLOAT_XYZ calculate_calibrated_xyz(FLOAT_XYZ &Raw_XYZ, FLOAT_XYZ Offset, FLOAT_XYZ Skew);
+
 // -------------------------------------------------------------------------------------
 
 class COMPASS_XY
@@ -158,7 +163,7 @@ class CAL_LEVEL_2_QUAD_RECORD
   private:
 
   int VARIANCE_COLLECTION_SIZE_SIMPLE = 60 * COMMS_COMPASS_POLLING_RATE_FPS;
-  int VARIANCE_COLLECTION_SIZE_COMPLEX = 10 * COMMS_COMPASS_POLLING_RATE_FPS;
+  int VARIANCE_COLLECTION_SIZE_COMPLEX = 30 * COMMS_COMPASS_POLLING_RATE_FPS;
   // To assist with first round calibration times, the larger 
   //  VARIANCE_COLLECTION_SIZE_SIMPLE will be the collection size, 
   //  and the system will return to VARIANCE_COLLECTION_SIZE_COMPLEX 
@@ -187,7 +192,7 @@ class CALIBRATION_DATA
 {
   private:
 
-  int OFFSET_POINT_VECTOR_SIZE = 20;
+  int OFFSET_POINT_VECTOR_SIZE = 50;
 
   public:
 
@@ -212,7 +217,7 @@ class CALIBRATION_DATA
 
   void add_last_known_offset_point();
 
-  float variance_from_offset(FLOAT_XYZ Offset, bool &Good_Data_Count);
+  float variance_from_offset(FLOAT_XYZ Offset, FLOAT_XYZ Skew, bool &Good_Data_Count);
   // If Quadrant = -1 then no stick the landing is performed.
 
   bool stick_the_landing(FLOAT_XYZ Current_Offset, int Quadrant);
@@ -285,10 +290,6 @@ class CAL_LEVEL_2
 
   bool XYZ_MIN_MAX(FLOAT_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_MAX_SIMPLE &Ymm, MIN_MAX_SIMPLE &Zmm);
 
-  FLOAT_XYZ calc_offset(int Swap_0_Quad_With);
-
-  FLOAT_XYZ calc_skew();
-
   float calc_all_quad_variance(int Swap_0_Quad_With, bool &Ret_Good_Data_Count_Pass);
 
   void build_calibration_display_data();
@@ -296,8 +297,6 @@ class CAL_LEVEL_2
   void build_non_simple_offsets();
 
   public:
-
-  FLOAT_XYZ calculate_calibrated_xyz(FLOAT_XYZ &Raw_XYZ);
 
   void calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
                             FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
@@ -311,6 +310,7 @@ class CAL_LEVEL_2
   MIN_MAX_SIMPLE z_min_max();
 
   FLOAT_XYZ offset();
+  FLOAT_XYZ skew();
   
   void clear();
 
