@@ -259,14 +259,14 @@ class CAL_LEVEL_2
   bool COMPLETE_QUAD_DATA_SET = false;
   float DISTANCE_VARIANCE_FULL = -1;
 
-  FLOAT_XYZ A_Cal_Pt_PRELOAD;
-  FLOAT_XYZ B_Cal_Pt_PRELOAD;
-  FLOAT_XYZ C_Cal_Pt_PRELOAD;
-  FLOAT_XYZ D_Cal_Pt_PRELOAD;
-  float A_Cal_Var_PRELOAD;
-  float B_Cal_Var_PRELOAD;
-  float C_Cal_Var_PRELOAD;
-  float D_Cal_Var_PRELOAD;
+  FLOAT_XYZ Cal_Pt_PRELOAD_1;
+  FLOAT_XYZ Cal_Pt_PRELOAD_2;
+  FLOAT_XYZ Cal_Pt_PRELOAD_3;
+  FLOAT_XYZ Cal_Pt_PRELOAD_4;
+  float Cal_Var_PRELOAD_1;
+  float Cal_Var_PRELOAD_2;
+  float Cal_Var_PRELOAD_3;
+  float Cal_Var_PRELOAD_4;
 
   public:
 
@@ -298,10 +298,10 @@ class CAL_LEVEL_2
 
   public:
 
-  void calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
-                            FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
-                            FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
-                            FLOAT_XYZ D_Cal_Pt, float D_Cal_Var);
+  void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
+                            FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
+                            FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
+                            FLOAT_XYZ Cal_Pt_4, float Cal_Var_4);
 
   void calibration_preload_set();
 
@@ -414,10 +414,10 @@ class HMC5883L
 
   CAL_LEVEL_2 LEVEL_2;
 
-  void calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
-                            FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
-                            FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
-                            FLOAT_XYZ D_Cal_Pt, float D_Cal_Var, 
+  void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
+                            FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
+                            FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
+                            FLOAT_XYZ Cal_Pt_4, float Cal_Var_4, 
                             float Cal_Offset);
 
   void calibration_preload_set();

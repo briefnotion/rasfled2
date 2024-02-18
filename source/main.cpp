@@ -368,30 +368,30 @@ int loop_2(bool TTY_Only)
   sdSystem.COMMS_COMPASS.PROPS.CALIBRATION_LOCK_AT_START = COMMS_COMPASS_CAL_LOCK_AT_START;
   
   // Preload Calibration Data
-  FLOAT_XYZ A_Cal_Pt;
-  FLOAT_XYZ B_Cal_Pt;
-  FLOAT_XYZ C_Cal_Pt;
-  FLOAT_XYZ D_Cal_Pt;
+  FLOAT_XYZ Cal_Pt_1;
+  FLOAT_XYZ Cal_Pt_2;
+  FLOAT_XYZ Cal_Pt_3;
+  FLOAT_XYZ Cal_Pt_4;
 
-  A_Cal_Pt.X = COMMS_COMPASS_CAL_PT_A_X;
-  A_Cal_Pt.Y = COMMS_COMPASS_CAL_PT_A_Y;
-  float A_Cal_Var = COMMS_COMPASS_CAL_PT_A_VAR;
+  Cal_Pt_1.X = COMMS_COMPASS_CAL_PT_1_X;
+  Cal_Pt_1.Y = COMMS_COMPASS_CAL_PT_1_Y;
+  float Cal_Var_1 = COMMS_COMPASS_CAL_PT_1_VAR;
 
-  B_Cal_Pt.X = COMMS_COMPASS_CAL_PT_B_X;
-  B_Cal_Pt.Y = COMMS_COMPASS_CAL_PT_B_Y;
-  float B_Cal_Var = COMMS_COMPASS_CAL_PT_B_VAR;
+  Cal_Pt_2.X = COMMS_COMPASS_CAL_PT_2_X;
+  Cal_Pt_2.Y = COMMS_COMPASS_CAL_PT_2_Y;
+  float Cal_Var_2 = COMMS_COMPASS_CAL_PT_2_VAR;
 
-  C_Cal_Pt.X = COMMS_COMPASS_CAL_PT_C_X;
-  C_Cal_Pt.Y = COMMS_COMPASS_CAL_PT_C_Y;
-  float C_Cal_Var = COMMS_COMPASS_CAL_PT_C_VAR;
+  Cal_Pt_3.X = COMMS_COMPASS_CAL_PT_3_X;
+  Cal_Pt_3.Y = COMMS_COMPASS_CAL_PT_3_Y;
+  float Cal_Var_3 = COMMS_COMPASS_CAL_PT_3_VAR;
 
-  D_Cal_Pt.X = COMMS_COMPASS_CAL_PT_D_X;
-  D_Cal_Pt.Y = COMMS_COMPASS_CAL_PT_D_Y;
-  float D_Cal_Var = COMMS_COMPASS_CAL_PT_D_VAR;
+  Cal_Pt_4.X = COMMS_COMPASS_CAL_PT_4_X;
+  Cal_Pt_4.Y = COMMS_COMPASS_CAL_PT_4_Y;
+  float Cal_Var_4 = COMMS_COMPASS_CAL_PT_4_VAR;
 
   float Cal_Offset = COMMS_COMPASS_CAL_OFFSET;
 
-  sdSystem.COMMS_COMPASS.calibration_preload(A_Cal_Pt, A_Cal_Var, B_Cal_Pt, B_Cal_Var, C_Cal_Pt, C_Cal_Var, D_Cal_Pt, D_Cal_Var, Cal_Offset);
+  sdSystem.COMMS_COMPASS.calibration_preload(Cal_Pt_1, Cal_Var_1, Cal_Pt_2, Cal_Var_2, Cal_Pt_3, Cal_Var_3, Cal_Pt_4, Cal_Var_4, Cal_Offset);
 
   // ---------------------------------------------------------------------------------------
   // Initialize the console

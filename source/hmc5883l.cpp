@@ -85,7 +85,7 @@ void CAL_LEVEL_2_QUAD_RECORD::add_point(FLOAT_XYZ &Raw_XYZ)
   }
   else
   {
-    OVERFLOW = true;
+    		OVERFLOW = true;
   }
 }
 
@@ -513,32 +513,32 @@ void CAL_LEVEL_2::build_non_simple_offsets()
 {
   if (CALIBRATION_QUADS.size() == 5)
   {
+    calc_offset_and_skew(SIMPLE_CALIBRATION, CALIBRATION_QUADS[1].OFFSET_POINT, CALIBRATION_QUADS[2].OFFSET_POINT, CALIBRATION_QUADS[3].OFFSET_POINT, CALIBRATION_QUADS[4].OFFSET_POINT, 
+                          OFFSET, SKEW);
+
     Y_MIN_MAX.MIN_VALUE = CALIBRATION_QUADS[1].OFFSET_POINT.Y;
     X_MIN_MAX.MAX_VALUE = CALIBRATION_QUADS[2].OFFSET_POINT.X;
     Y_MIN_MAX.MAX_VALUE = CALIBRATION_QUADS[3].OFFSET_POINT.Y;
     X_MIN_MAX.MIN_VALUE = CALIBRATION_QUADS[4].OFFSET_POINT.X;
-
-    calc_offset_and_skew(SIMPLE_CALIBRATION, CALIBRATION_QUADS[1].OFFSET_POINT, CALIBRATION_QUADS[2].OFFSET_POINT, CALIBRATION_QUADS[3].OFFSET_POINT, CALIBRATION_QUADS[4].OFFSET_POINT, 
-                          OFFSET, SKEW);
   }
 }
 
-void CAL_LEVEL_2::calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
-                                      FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
-                                      FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
-                                      FLOAT_XYZ D_Cal_Pt, float D_Cal_Var)
+void CAL_LEVEL_2::calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
+                                      FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
+                                      FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
+                                      FLOAT_XYZ Cal_Pt_4, float Cal_Var_4)
 {
-  A_Cal_Pt_PRELOAD = A_Cal_Pt;
-  A_Cal_Var_PRELOAD = A_Cal_Var;
+  Cal_Pt_PRELOAD_1 = Cal_Pt_1;
+  Cal_Var_PRELOAD_1 = Cal_Var_1;
   
-  B_Cal_Pt_PRELOAD = B_Cal_Pt;
-  B_Cal_Var_PRELOAD = B_Cal_Var;
+  Cal_Pt_PRELOAD_2 = Cal_Pt_2;
+  Cal_Var_PRELOAD_2 = Cal_Var_2;
   
-  C_Cal_Pt_PRELOAD = C_Cal_Pt;
-  C_Cal_Var_PRELOAD = C_Cal_Var;
+  Cal_Pt_PRELOAD_3 = Cal_Pt_3;
+  Cal_Var_PRELOAD_3 = Cal_Var_3;
 
-  D_Cal_Pt_PRELOAD = D_Cal_Pt;
-  D_Cal_Var_PRELOAD = D_Cal_Var;
+  Cal_Pt_PRELOAD_4 = Cal_Pt_4;
+  Cal_Var_PRELOAD_4 = Cal_Var_4;
 }
 
 void CAL_LEVEL_2::calibration_preload_set()
@@ -547,38 +547,44 @@ void CAL_LEVEL_2::calibration_preload_set()
   {
     SIMPLE_CALIBRATION = false;
 
+    int preload_pushback_count = 5;    // Build small offset history.
+
     // Load Data
-    CALIBRATION_QUADS[1].OFFSET_POINT = A_Cal_Pt_PRELOAD;
-    CALIBRATION_QUADS[1].LAST_KNOWN_OFFSET_POINT = A_Cal_Pt_PRELOAD;
-    CALIBRATION_QUADS[1].VARIANCE = A_Cal_Var_PRELOAD;
+    CALIBRATION_QUADS[1].OFFSET_POINT = Cal_Pt_PRELOAD_1;
+    CALIBRATION_QUADS[1].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_1;
+    CALIBRATION_QUADS[1].VARIANCE = Cal_Var_PRELOAD_1;
     CALIBRATION_QUADS[1].HAS_DATA = true;
-    CALIBRATION_QUADS[1].add_last_known_offset_point();   // Build small offset history.
-    CALIBRATION_QUADS[1].add_last_known_offset_point();
-    CALIBRATION_QUADS[1].add_last_known_offset_point();
+    for (int x = 0; x < preload_pushback_count; x++)
+    {
+      CALIBRATION_QUADS[1].add_last_known_offset_point();
+    }
 
-    CALIBRATION_QUADS[2].OFFSET_POINT = D_Cal_Pt_PRELOAD;
-    CALIBRATION_QUADS[2].LAST_KNOWN_OFFSET_POINT = D_Cal_Pt_PRELOAD;
-    CALIBRATION_QUADS[2].VARIANCE = D_Cal_Var_PRELOAD;
+    CALIBRATION_QUADS[2].OFFSET_POINT = Cal_Pt_PRELOAD_2;
+    CALIBRATION_QUADS[2].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_2;
+    CALIBRATION_QUADS[2].VARIANCE = Cal_Var_PRELOAD_2;
     CALIBRATION_QUADS[2].HAS_DATA = true;
-    CALIBRATION_QUADS[2].add_last_known_offset_point();
-    CALIBRATION_QUADS[2].add_last_known_offset_point();
-    CALIBRATION_QUADS[2].add_last_known_offset_point();
+    for (int x = 0; x < preload_pushback_count; x++)
+    {
+      CALIBRATION_QUADS[2].add_last_known_offset_point();
+    }
 
-    CALIBRATION_QUADS[3].OFFSET_POINT = B_Cal_Pt_PRELOAD;
-    CALIBRATION_QUADS[3].LAST_KNOWN_OFFSET_POINT = B_Cal_Pt_PRELOAD;
-    CALIBRATION_QUADS[3].VARIANCE = B_Cal_Var_PRELOAD;
+    CALIBRATION_QUADS[3].OFFSET_POINT = Cal_Pt_PRELOAD_3;
+    CALIBRATION_QUADS[3].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_3;
+    CALIBRATION_QUADS[3].VARIANCE = Cal_Var_PRELOAD_3;
     CALIBRATION_QUADS[3].HAS_DATA = true;
-    CALIBRATION_QUADS[3].add_last_known_offset_point();
-    CALIBRATION_QUADS[3].add_last_known_offset_point();
-    CALIBRATION_QUADS[3].add_last_known_offset_point();
+    for (int x = 0; x < preload_pushback_count; x++)
+    {
+      CALIBRATION_QUADS[3].add_last_known_offset_point();
+    }
 
-    CALIBRATION_QUADS[4].OFFSET_POINT = C_Cal_Pt_PRELOAD;
-    CALIBRATION_QUADS[4].LAST_KNOWN_OFFSET_POINT = C_Cal_Pt_PRELOAD;
-    CALIBRATION_QUADS[4].VARIANCE = C_Cal_Var_PRELOAD;
+    CALIBRATION_QUADS[4].OFFSET_POINT = Cal_Pt_PRELOAD_4;
+    CALIBRATION_QUADS[4].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_4;
+    CALIBRATION_QUADS[4].VARIANCE = Cal_Var_PRELOAD_4;
     CALIBRATION_QUADS[4].HAS_DATA = true;
-    CALIBRATION_QUADS[4].add_last_known_offset_point();
-    CALIBRATION_QUADS[4].add_last_known_offset_point();
-    CALIBRATION_QUADS[4].add_last_known_offset_point();
+    for (int x = 0; x < preload_pushback_count; x++)
+    {
+      CALIBRATION_QUADS[4].add_last_known_offset_point();
+    }
 
     // Set Variance
     DISTANCE_VARIANCE_FULL = CALIBRATION_QUADS[1].VARIANCE + CALIBRATION_QUADS[2].VARIANCE + 
@@ -719,7 +725,7 @@ void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
             if (CALIBRATION_QUADS[0].QUAD_DATA.OVERFLOW == false)
             {
               bool changed = false;
-              float variance = 0;
+              float variance = 0.0f;
 
               // Need to stick the landing of point ACTIVE_QUAD_DATA first with current offsets
               if (CALIBRATION_QUADS[0].stick_the_landing(OFFSET, QUAD))
@@ -836,6 +842,7 @@ void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
                 {
                   // Find best and worste variance values and only update values improved if 
                   //  not best and not improved if not worste. (quads should be queueed)
+                  /*
                   float best_variance = CALIBRATION_QUADS[1].LAST_KNOWN_VARIANCE;
                   float worst_variance = CALIBRATION_QUADS[1].LAST_KNOWN_VARIANCE;
 
@@ -860,10 +867,11 @@ void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
                     // do nothing
                   }
                   else
+                  */
                   { 
                     // Copy Active Quad values to appropriate QUAD
                     CALIBRATION_QUADS[QUAD].QUAD_DATA.DATA_POINTS.swap(CALIBRATION_QUADS[0].QUAD_DATA.DATA_POINTS);
-                    CALIBRATION_QUADS[QUAD].QUAD_DATA.OVERFLOW = CALIBRATION_QUADS[0].QUAD_DATA.OVERFLOW;
+                    //CALIBRATION_QUADS[QUAD].QUAD_DATA.OVERFLOW = CALIBRATION_QUADS[0].QUAD_DATA.OVERFLOW;
                     CALIBRATION_QUADS[QUAD].LAST_KNOWN_OFFSET_POINT = CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT;
                     CALIBRATION_QUADS[QUAD].LAST_KNOWN_VARIANCE = CALIBRATION_QUADS[0].LAST_KNOWN_VARIANCE;
                     CALIBRATION_QUADS[QUAD].HAS_DATA = CALIBRATION_QUADS[0].HAS_DATA;
@@ -1139,16 +1147,16 @@ bool HMC5883L::calibration_simple()
   return LEVEL_2.simple_calibration();
 }
 
-void HMC5883L::calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
-                                    FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
-                                    FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
-                                    FLOAT_XYZ D_Cal_Pt, float D_Cal_Var, 
+void HMC5883L::calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
+                                    FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
+                                    FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
+                                    FLOAT_XYZ Cal_Pt_4, float Cal_Var_4, 
                                     float Cal_Offset)
 {
   PRELOAD_DATA_LOADED = true;
   KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD = Cal_Offset;
-  LEVEL_2.calibration_preload(A_Cal_Pt, A_Cal_Var, B_Cal_Pt, B_Cal_Var, 
-                              C_Cal_Pt, C_Cal_Var, D_Cal_Pt, D_Cal_Var);
+  LEVEL_2.calibration_preload(Cal_Pt_1, Cal_Var_1, Cal_Pt_2, Cal_Var_2, 
+                              Cal_Pt_3, Cal_Var_3, Cal_Pt_4, Cal_Var_4);
 }
 
 void HMC5883L::calibration_preload_set()
