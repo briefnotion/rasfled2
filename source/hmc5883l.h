@@ -26,8 +26,10 @@
 #include <cmath>
 
 // RASFled related header files
+#include "definitions.h"
 #include "fled_time.h"
 #include "helper.h"
+#include "json_interface.h"
 
 // -------------------------------------------------------------------------------------
 
@@ -230,7 +232,13 @@ class CALIBRATION_DATA
 class CAL_LEVEL_2
 {
   private:
-  
+
+  // hard coded for now.
+  // Offset Storage
+  string OFFSET_HISTORY_DIRECTORY = FILES_DIRECTORY;
+  string OFFSET_HISTORY_FILENAME  =  COMMS_PORT_COMPASS_OFFSET_HISTORY;
+  string OFFSET_HISTORY_TEST_FILENAME  =  COMMS_PORT_COMPASS_OFFSET_HISTORY_T;
+
   // Simple calibration
   bool MIN_MAX_HAS_DATA = false;
 
@@ -251,10 +259,6 @@ class CAL_LEVEL_2
 
   int QUAD      = -1;
   int QUAD_PREV = -1;
-  // 0 = A
-  // 1 = D
-  // 2 = B
-  // 3 = C
 
   bool COMPLETE_QUAD_DATA_SET = false;
   float DISTANCE_VARIANCE_FULL = -1;
@@ -267,6 +271,10 @@ class CAL_LEVEL_2
   float Cal_Var_PRELOAD_2;
   float Cal_Var_PRELOAD_3;
   float Cal_Var_PRELOAD_4;
+
+  // Offset Point History
+  bool OFFSET_HISTORY_CHANGED = false;
+  TIMED_PING OFFSET_HISTORY_TIMER;
 
   public:
 
@@ -296,6 +304,9 @@ class CAL_LEVEL_2
 
   void build_non_simple_offsets();
 
+  void offset_history_read();
+  void offset_history_write();
+
   public:
 
   void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
@@ -317,7 +328,7 @@ class CAL_LEVEL_2
   float variance();
   bool simple_calibration();
 
-  void calibration_level_2(FLOAT_XYZ &Raw_XYZ);
+  void calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Raw_XYZ);
   // Run Level 2 cal routines.
 
 };
@@ -405,8 +416,9 @@ class HMC5883L
                       //  Not yet fully implemented.
 
   // Process
-  void process();     // Internal: Processes most recent received data. 
-                      // Performs Calibration Routines
+  void process(unsigned long tmeFrame_Time);     
+  // Internal: Processes most recent received data. 
+  // Performs Calibration Routines
 
   public:
 

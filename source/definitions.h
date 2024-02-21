@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.133_240216_B"
+#define Revision "2.134_240221"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -49,6 +49,8 @@
 //#define FILES_AIRCRAFT_JSON       "/home/pi/flightaware/aircraft.json"  // For testing:  FlightAware Aircraft JSON File 
 
 #define ERROR_LOG_FILENAME       "/home/pi/auto/error_log.txt"
+
+#define TEST_MODE           false
 
 // COMMS Settings CAN Bus
 #define COMMS_PORT_CAN     "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"
@@ -91,28 +93,32 @@
 
 // COMMS Settings HMC5883L 3-Axis Compass
 #define COMMS_PORT_COMPASS                    "/dev/i2c-1"
+
+#define COMMS_PORT_COMPASS_OFFSET_HISTORY     "compass_offset_history.json"
+#define COMMS_PORT_COMPASS_OFFSET_HISTORY_T   "compass_offset_history_test.json"
+
 #define COMMS_ID_COMPASS                      0x1E
 #define COMMS_AUTOSTART_COMPASS               true
 #define CONTINUOUS_DATA_COMPASS               true
-#define COMMS_COMPASS_CAL_LOCK_AT_START       true
+#define COMMS_COMPASS_CAL_LOCK_AT_START       false
 
 #define COMMS_COMPASS_POLLING_RATE_FPS        15
 
-#define COMMS_COMPASS_CAL_PT_1_X              391.0f
-#define COMMS_COMPASS_CAL_PT_1_Y              89.0f
-#define COMMS_COMPASS_CAL_PT_1_VAR            0.117f
+#define COMMS_COMPASS_CAL_PT_1_X              385.0f
+#define COMMS_COMPASS_CAL_PT_1_Y              94.0f
+#define COMMS_COMPASS_CAL_PT_1_VAR            0.263f
 
-#define COMMS_COMPASS_CAL_PT_2_X              526.0f
-#define COMMS_COMPASS_CAL_PT_2_Y              247.0f
-#define COMMS_COMPASS_CAL_PT_2_VAR            0.208f
+#define COMMS_COMPASS_CAL_PT_2_X              517.0f
+#define COMMS_COMPASS_CAL_PT_2_Y              254.0f
+#define COMMS_COMPASS_CAL_PT_2_VAR            0.188f
 
-#define COMMS_COMPASS_CAL_PT_3_X              246.0f
-#define COMMS_COMPASS_CAL_PT_3_Y              571.0f
-#define COMMS_COMPASS_CAL_PT_3_VAR            0.336f
+#define COMMS_COMPASS_CAL_PT_3_X              238.0f
+#define COMMS_COMPASS_CAL_PT_3_Y              574.0f
+#define COMMS_COMPASS_CAL_PT_3_VAR            0.445f
 
-#define COMMS_COMPASS_CAL_PT_4_X              84.0f
-#define COMMS_COMPASS_CAL_PT_4_Y              420.0f
-#define COMMS_COMPASS_CAL_PT_4_VAR            0.221f
+#define COMMS_COMPASS_CAL_PT_4_X              80.0f
+#define COMMS_COMPASS_CAL_PT_4_Y              423.0f
+#define COMMS_COMPASS_CAL_PT_4_VAR            0.348f
 
 #define COMMS_COMPASS_CAL_OFFSET              90.0f - 23.0f
 

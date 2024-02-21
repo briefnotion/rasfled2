@@ -1,3 +1,7 @@
+2.134_240221
+  - Saving the compass offset history for future persistant 
+      calibration.  Load not yet implemented. 
+
 2.133_240216_B
   - Tuning some of the values in hmc5883l.
   - Testing different methods to getting accurate readings. 

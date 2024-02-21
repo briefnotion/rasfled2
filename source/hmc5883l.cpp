@@ -523,6 +523,77 @@ void CAL_LEVEL_2::build_non_simple_offsets()
   }
 }
 
+void CAL_LEVEL_2::offset_history_read()
+{
+
+}
+
+void CAL_LEVEL_2::offset_history_write()
+{
+  if (CALIBRATION_QUADS.size() == 5)
+  {
+    deque<string> file_dq_string;
+
+    JSON_INTERFACE offset_list_json;
+
+    JSON_ENTRY history;
+    JSON_ENTRY quad_group;
+    JSON_ENTRY offset_list;
+    JSON_ENTRY xyz_offset;
+    JSON_ENTRY offset;
+
+    for (int quad = 1; quad < (int)CALIBRATION_QUADS.size(); quad++)
+    {
+
+      quad_group.create_label_value(quotify("offset group"), to_string(quad));
+
+      if (CALIBRATION_QUADS[quad].OFFSET_POINT_LIST.size() > 0)
+      {
+        offset_list.create_label_value(quotify("size"), to_string((int)CALIBRATION_QUADS[quad].OFFSET_POINT_LIST.size()));
+
+        for (int pos = 0; pos < (int)CALIBRATION_QUADS[quad].OFFSET_POINT_LIST.size(); pos++)
+        {
+          offset.create_label_value(quotify("x"), to_string((int)CALIBRATION_QUADS[quad].OFFSET_POINT_LIST[pos].X));
+          offset.create_label_value(quotify("y"), to_string((int)CALIBRATION_QUADS[quad].OFFSET_POINT_LIST[pos].Y));
+          offset.create_label_value(quotify("z"), to_string((int)CALIBRATION_QUADS[quad].OFFSET_POINT_LIST[pos].Z));
+
+          xyz_offset.put_json_in_list(offset);
+          offset.clear_data();
+        }
+
+        offset_list.put_json_in_set(quotify("offset coordinates"), xyz_offset);
+        xyz_offset.clear_data();
+        
+        quad_group.put_json_in_list(offset_list);
+        offset_list.clear_data();
+
+      }
+
+      history.put_json_in_list(quad_group);
+      quad_group.clear_data();
+
+    }
+
+    offset_list_json.ROOT.put_json_in_set(quotify("offset history"), history);
+
+    // Create string list of file
+    offset_list_json.json_print_build_to_string_deque(file_dq_string);
+    
+    // Write string list of file
+
+    // bool ret_success = false;
+
+    if (TEST_MODE)
+    {
+      deque_string_to_file(OFFSET_HISTORY_DIRECTORY + OFFSET_HISTORY_TEST_FILENAME, file_dq_string, false);
+    }
+    else
+    {
+      deque_string_to_file(OFFSET_HISTORY_DIRECTORY + OFFSET_HISTORY_FILENAME, file_dq_string, false);
+    }
+  }
+}
+
 void CAL_LEVEL_2::calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
                                       FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
                                       FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
@@ -677,8 +748,19 @@ bool CAL_LEVEL_2::simple_calibration()
   return SIMPLE_CALIBRATION;
 }
 
-void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
+void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Raw_XYZ)
 { 
+
+  // Check to see if the history needs to be written.
+  if (OFFSET_HISTORY_CHANGED)
+  {
+    if (OFFSET_HISTORY_TIMER.ping_down(tmeFrame_Time) == false)
+    {
+      offset_history_write();
+      OFFSET_HISTORY_CHANGED = false;
+    }
+  }
+
   // Inititialization of Offset, to be ignored after second set.
 
   if (SIMPLE_CALIBRATION)
@@ -840,38 +922,9 @@ void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
                 // Store info if data set incomplete or successfully changed DISTANCE_VARIANCE_FULL.
                 if ((SIMPLE_CALIBRATION && pass_good_data_count && pass_four_point_check) || changed == true)
                 {
-                  // Find best and worste variance values and only update values improved if 
-                  //  not best and not improved if not worste. (quads should be queueed)
-                  /*
-                  float best_variance = CALIBRATION_QUADS[1].LAST_KNOWN_VARIANCE;
-                  float worst_variance = CALIBRATION_QUADS[1].LAST_KNOWN_VARIANCE;
-
-                  for (int quad = 2; quad < (int)CALIBRATION_QUADS.size(); quad++)
-                  {
-                    if (CALIBRATION_QUADS[quad].LAST_KNOWN_VARIANCE < best_variance)
-                    {
-                      best_variance = CALIBRATION_QUADS[quad].LAST_KNOWN_VARIANCE;
-                    }
-
-                    if (CALIBRATION_QUADS[quad].LAST_KNOWN_VARIANCE > worst_variance)
-                    {
-                      worst_variance = CALIBRATION_QUADS[quad].LAST_KNOWN_VARIANCE;
-                    }
-                  }
-
-                  // Do not copy if working quad is better than the best or worse than the worst.
-                  if (SIMPLE_CALIBRATION == false && 
-                      ((CALIBRATION_QUADS[QUAD].LAST_KNOWN_VARIANCE == best_variance && CALIBRATION_QUADS[0].LAST_KNOWN_VARIANCE < best_variance) || 
-                      (CALIBRATION_QUADS[QUAD].LAST_KNOWN_VARIANCE == worst_variance && CALIBRATION_QUADS[0].LAST_KNOWN_VARIANCE > worst_variance)))
-                  {
-                    // do nothing
-                  }
-                  else
-                  */
                   { 
                     // Copy Active Quad values to appropriate QUAD
                     CALIBRATION_QUADS[QUAD].QUAD_DATA.DATA_POINTS.swap(CALIBRATION_QUADS[0].QUAD_DATA.DATA_POINTS);
-                    //CALIBRATION_QUADS[QUAD].QUAD_DATA.OVERFLOW = CALIBRATION_QUADS[0].QUAD_DATA.OVERFLOW;
                     CALIBRATION_QUADS[QUAD].LAST_KNOWN_OFFSET_POINT = CALIBRATION_QUADS[0].LAST_KNOWN_OFFSET_POINT;
                     CALIBRATION_QUADS[QUAD].LAST_KNOWN_VARIANCE = CALIBRATION_QUADS[0].LAST_KNOWN_VARIANCE;
                     CALIBRATION_QUADS[QUAD].HAS_DATA = CALIBRATION_QUADS[0].HAS_DATA;
@@ -897,6 +950,9 @@ void CAL_LEVEL_2::calibration_level_2(FLOAT_XYZ &Raw_XYZ)
                 if (changed)
                 {
                   build_non_simple_offsets();
+
+                  OFFSET_HISTORY_CHANGED = true;
+                  OFFSET_HISTORY_TIMER.ping_up(tmeFrame_Time, 10000); // 10 second timer to write
                 }
 
                 if (SIMPLE_CALIBRATION || changed == true)
@@ -990,7 +1046,7 @@ void HMC5883L::stop()
   CONNECTED = false;
 }
 
-void HMC5883L::process()
+void HMC5883L::process(unsigned long tmeFrame_Time)
 {
   FLOAT_XYZ calibrated_bearing_xyz = calculate_calibrated_xyz(RAW_XYZ, LEVEL_2.offset(), LEVEL_2.skew());
   RAW_BEARING = (atan2(calibrated_bearing_xyz.Y, calibrated_bearing_xyz.X) * 180 / M_PI);
@@ -1018,7 +1074,7 @@ void HMC5883L::process()
   // Level 2 - Calibration (Always Active.)
   if (CALIBRATE_LOCK == false)
   {
-    LEVEL_2.calibration_level_2(RAW_XYZ);
+    LEVEL_2.calibration_level_2(tmeFrame_Time, RAW_XYZ);
   }
 
   // Calclulate Bearing
@@ -1317,7 +1373,7 @@ bool HMC5883L::cycle(unsigned long tmeFrame_Time)
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
 
         // Process
-        process();
+        process(tmeFrame_Time);
       }
     }
   }
