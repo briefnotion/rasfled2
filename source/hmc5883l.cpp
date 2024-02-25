@@ -525,7 +525,78 @@ void CAL_LEVEL_2::build_non_simple_offsets()
 
 void CAL_LEVEL_2::offset_history_read()
 {
+  JSON_INTERFACE offset_list_json;
+  string json_offset_list = "";
 
+  bool ret_success = false;
+
+  if (TEST_MODE)
+  {
+    json_offset_list = file_to_string(OFFSET_HISTORY_DIRECTORY + OFFSET_HISTORY_TEST_FILENAME, ret_success);
+  }
+  else
+  {
+    json_offset_list = file_to_string(OFFSET_HISTORY_DIRECTORY + OFFSET_HISTORY_FILENAME, ret_success);
+  }
+
+  if (ret_success == true)
+  {
+    ret_success = offset_list_json.load_json_from_string(json_offset_list);
+
+    if (ret_success == true)
+    {
+      int history_pos = offset_list_json.ROOT.find_label_pos("offset history");
+
+      if (history_pos != -1)
+      {
+        for (int group = 1; group <= 4; group++)
+        {
+          string group_name = "quad offset group ";
+          group_name = group_name + to_string(group);
+
+          int group_id_pos = offset_list_json.ROOT.DATA[history_pos].find_label_pos(group_name.c_str());
+
+          if ((group_id_pos != -1) && (group >= 1) && (group <= 4))
+          {
+            //int size_pos = offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].DATA[0].find_label_pos("size");
+            
+            //STRING_INT coordinate_list_size;
+            //offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].DATA[0].DATA[size_pos].get_if_is("size", coordinate_list_size);
+
+            int coordinates_pos = offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].find_label_pos("offset coordinates");
+
+            if (coordinates_pos != -1)
+            {
+              int coordinate_list_size = offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].DATA[coordinates_pos].DATA.size();
+
+              for (int coordinate = 0; coordinate < coordinate_list_size; coordinate++)
+              {
+                int coordinate_item_size = offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].DATA[coordinates_pos].DATA[coordinate].DATA.size();
+
+                STRING_INT x;
+                STRING_INT y;
+                STRING_INT z;
+                
+                for (int coordinate_item = 0; coordinate_item < coordinate_item_size; coordinate_item++)
+                {
+                  offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].DATA[coordinates_pos].DATA[coordinate].DATA[coordinate_item].get_if_is("x", x);
+                  offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].DATA[coordinates_pos].DATA[coordinate].DATA[coordinate_item].get_if_is("y", y);
+                  offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].DATA[coordinates_pos].DATA[coordinate].DATA[coordinate_item].get_if_is("z", z);
+                }
+
+                FLOAT_XYZ point;
+                point.X = (float)(x.get_int_value());
+                point.Y = (float)(y.get_int_value());
+                point.Z = (float)(z.get_int_value());
+
+                CALIBRATION_QUADS[group].OFFSET_POINT_LIST.push_back(point);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 void CAL_LEVEL_2::offset_history_write()
@@ -544,12 +615,9 @@ void CAL_LEVEL_2::offset_history_write()
 
     for (int quad = 1; quad < (int)CALIBRATION_QUADS.size(); quad++)
     {
-
-      quad_group.create_label_value(quotify("offset group"), to_string(quad));
-
       if (CALIBRATION_QUADS[quad].OFFSET_POINT_LIST.size() > 0)
       {
-        offset_list.create_label_value(quotify("size"), to_string((int)CALIBRATION_QUADS[quad].OFFSET_POINT_LIST.size()));
+        quad_group.create_label_value(quotify("size"), to_string((int)CALIBRATION_QUADS[quad].OFFSET_POINT_LIST.size()));
 
         for (int pos = 0; pos < (int)CALIBRATION_QUADS[quad].OFFSET_POINT_LIST.size(); pos++)
         {
@@ -561,15 +629,11 @@ void CAL_LEVEL_2::offset_history_write()
           offset.clear_data();
         }
 
-        offset_list.put_json_in_set(quotify("offset coordinates"), xyz_offset);
+        quad_group.put_json_in_set(quotify("offset coordinates"), xyz_offset);
         xyz_offset.clear_data();
-        
-        quad_group.put_json_in_list(offset_list);
-        offset_list.clear_data();
-
       }
 
-      history.put_json_in_list(quad_group);
+      history.put_json_in_set(quotify("quad offset group " + to_string(quad)), quad_group);
       quad_group.clear_data();
 
     }
@@ -656,6 +720,9 @@ void CAL_LEVEL_2::calibration_preload_set()
     {
       CALIBRATION_QUADS[4].add_last_known_offset_point();
     }
+
+    // Load history list
+    offset_history_read();
 
     // Set Variance
     DISTANCE_VARIANCE_FULL = CALIBRATION_QUADS[1].VARIANCE + CALIBRATION_QUADS[2].VARIANCE + 

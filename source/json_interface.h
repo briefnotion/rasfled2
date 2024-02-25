@@ -29,6 +29,10 @@ using namespace std;
 #define LEDGEND_SCALER  2
 
 // -------------------------------------------------------------------------------------
+// Notes:
+//  Needs tree search entry and read.
+
+// -------------------------------------------------------------------------------------
 //  Supporting Functions
 
 bool remove_opens_and_closes(string &Entry, char Open, char Close);
@@ -78,6 +82,7 @@ class JSON_ENTRY
 
   int find_label_pos(string Label_In_List);
   // return pos in JSON entry data list.
+  // return -1 if not found.
 
   int size_of_set(string Set_Label);
   // returns the size set list with with Label, within a set.
