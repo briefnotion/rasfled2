@@ -234,7 +234,7 @@ class ADSB_RANGE
   ImVec2 CENTER_LAT_LON;
 
   ImVec2 GPS_POS_LAT_LON;
-  bool GPS_DISPLAY_CURRENT_LOCATION = false;
+  bool GPS_DISPLAY_CURRENT_LOCATION = true;
 
   void calculate_lat_lon_to_point_scale();
 

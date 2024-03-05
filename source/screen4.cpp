@@ -673,11 +673,21 @@ void SCREEN4::draw(system_data &sdSysData)
               working_area.z = ImGui::GetContentRegionAvail().x;
               working_area.w = ImGui::GetContentRegionAvail().y;
 
+              ImVec2 pos1 = ImGui::GetCursorScreenPos();
+
               // Draw North Direction Compass
-                draw_compass(draw_list_status_compass, sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
-                                    (working_area.z / 6.0f), false, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                                    sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, (sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING), 
-                                    sdSysData.COMMS_COMPASS.connected(), (sdSysData.COMMS_COMPASS.bearing()), true);
+              draw_compass(draw_list_status_compass, sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
+                            (working_area.z / 6.0f), false, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                            sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, (sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING), 
+                            sdSysData.COMMS_COMPASS.connected(), (sdSysData.COMMS_COMPASS.bearing()), true);
+
+              // Change Screens
+              ImGui::SetCursorScreenPos(pos1);
+              if (ImGui::InvisibleButton("Compass Window", ImGui::GetContentRegionAvail()))
+              //if (ImGui::Button("Compass Window", ImGui::GetContentRegionAvail()))
+              {
+                DISPLAY_COMPASS_WINDOW = !DISPLAY_COMPASS_WINDOW;
+              }
             }
           }
           ImGui::EndChild();
@@ -1428,6 +1438,34 @@ void SCREEN4::draw(system_data &sdSysData)
       ImGui::Begin("About", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
       QR_CODE.draw(2.0f);
       ImGui::End();
+    }
+
+    // ---------------------------------------------------------------------------------------
+    
+    if (DISPLAY_COMPASS_WINDOW == true)
+    {
+      if (sdSysData.COMMS_COMPASS.connected())
+      {
+        ImGui::SetNextWindowSize(ImVec2(350.0f, 350.0f));
+
+        ImGui::Begin("Compass", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
+        {
+          ImDrawList* draw_list_status_compass_window = ImGui::GetWindowDrawList();
+          
+          ImVec4 working_area;
+
+          working_area.x = ImGui::GetCursorScreenPos().x;
+          working_area.y = ImGui::GetCursorScreenPos().y;
+          working_area.z = ImGui::GetContentRegionAvail().x;
+          working_area.w = ImGui::GetContentRegionAvail().y;
+
+          draw_compass(draw_list_status_compass_window, sdSysData, 2, ImVec2(working_area.x + (working_area.z / 2.0f), working_area.y + (working_area.w / 2.0f)), working_area.z / 2.0f * 0.8f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                      sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
+                      sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, 
+                      true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max());
+        }
+        ImGui::End();
+      }
     }
 
     // ---------------------------------------------------------------------------------------

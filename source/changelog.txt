@@ -1,3 +1,7 @@
+2.136_240304
+  - Made some modifications to hmc5883l.
+  - Started working on other things.
+
 2.135_240224
   - Loading the compass offset history for future persistant 
       calibration.

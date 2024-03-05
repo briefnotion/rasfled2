@@ -217,12 +217,23 @@ class CALIBRATION_DATA
                                     //  variance_from_offset() pass
   bool HAS_DATA = false;
 
+  void add_point_to_offset_point_list(FLOAT_XYZ Point);
+  // Adds new offset point to list and resizes if necessary.
+
+  void calculate_offset_point();
+  // Calculates the best offset point from the OFFSET_POINT_LIST and 
+  //  saves it in OFFSET_POINT;
+
   void add_last_known_offset_point();
+  // Takes the LAST_KNOWN_OFFSET_POINT and puts it in the OFFSET_POINT_LIST, then 
+  //  calculates the best offset point and saves it in OFFSET_POINT;
 
   float variance_from_offset(FLOAT_XYZ Offset, FLOAT_XYZ Skew, bool &Good_Data_Count);
   // If Quadrant = -1 then no stick the landing is performed.
 
   bool stick_the_landing(FLOAT_XYZ Current_Offset, int Quadrant);
+  // Reviews all the points in QUAD_DATA, and finds the best point to represent the 
+  //  offset point and saves it in LAST_KNOWN_OFFSET_POINT
 
   void clear(bool Simple_Calibration);
 };

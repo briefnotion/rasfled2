@@ -17,6 +17,22 @@
 using namespace std;
 
 // -------------------------------------------------------------------------------------
+/*
+
+Notes:
+To improve code:
+  The entire variance routine is unnecessary. It could be cut out to remove a large 
+    chunk of code.  Only the offset routines are necessary.  Although the variance 
+    routines are good for determining if a quad data set is out of range, the emperical 
+    rule on the offset points do the same thing, and varience (curve smoothnes) is 
+    completely unnecessary.
+  Code could be rewritten in more simplified ways by just concentrating on finding good 
+    offsets to calculate skew and range.
+  Memory usage is very arbitrary and can be tuned to require much less memory with more 
+    efficientn methods of choosing points to store in the quads.
+
+*/
+// -------------------------------------------------------------------------------------
 
 float dist(float X, float Y)
 {
@@ -109,27 +125,28 @@ void CAL_LEVEL_2_QUAD_RECORD::clear(bool Simple_Calibration)
   OVERFLOW = false;
 }
 
+void CALIBRATION_DATA::add_point_to_offset_point_list(FLOAT_XYZ Point)
+{
+  OFFSET_POINT_LIST.push_back(Point);
+  
+  if ((int)OFFSET_POINT_LIST.size() >= OFFSET_POINT_VECTOR_SIZE)
+  {
+    while ((int)OFFSET_POINT_LIST.size() >= OFFSET_POINT_VECTOR_SIZE)
+    {
+      OFFSET_POINT_LIST.erase(OFFSET_POINT_LIST.begin());
+    }
+  }
+}
+
+void CALIBRATION_DATA::calculate_offset_point()
+{
+  OFFSET_POINT = emperical_mean_zyz(OFFSET_POINT_LIST, 1.0);
+}
+
 void CALIBRATION_DATA::add_last_known_offset_point()
 {
-  if (OFFSET_POINT_LIST.size() == 0)
-  {
-    OFFSET_POINT = LAST_KNOWN_OFFSET_POINT;
-    OFFSET_POINT_LIST.push_back(LAST_KNOWN_OFFSET_POINT);
-  }
-  else 
-  {
-    if ((int)OFFSET_POINT_LIST.size() >= OFFSET_POINT_VECTOR_SIZE)
-    {
-      while ((int)OFFSET_POINT_LIST.size() >= OFFSET_POINT_VECTOR_SIZE)
-      {
-        OFFSET_POINT_LIST.erase(OFFSET_POINT_LIST.begin());
-      }
-    }
-
-    OFFSET_POINT_LIST.push_back(LAST_KNOWN_OFFSET_POINT);
-
-    OFFSET_POINT = emperical_mean_zyz(OFFSET_POINT_LIST, 1.0);
-  }
+  add_point_to_offset_point_list(LAST_KNOWN_OFFSET_POINT);
+  calculate_offset_point();
 }
 
 float CALIBRATION_DATA::variance_from_offset(FLOAT_XYZ Offset, FLOAT_XYZ Skew, bool &Good_Data_Count_Pass)
@@ -471,7 +488,7 @@ float CAL_LEVEL_2::calc_all_quad_variance(int Swap_0_Quad_With, bool &Ret_Good_D
       calc_offset_and_skew(SIMPLE_CALIBRATION, CALIBRATION_QUADS[1].OFFSET_POINT, CALIBRATION_QUADS[2].OFFSET_POINT, CALIBRATION_QUADS[0].OFFSET_POINT, CALIBRATION_QUADS[4].OFFSET_POINT, 
                             tmp_offset, tmp_skew);
     }
-    else //if (QUAD == 4)
+    else if (QUAD == 4)
     {
       calc_offset_and_skew(SIMPLE_CALIBRATION, CALIBRATION_QUADS[1].OFFSET_POINT, CALIBRATION_QUADS[2].OFFSET_POINT, CALIBRATION_QUADS[3].OFFSET_POINT, CALIBRATION_QUADS[0].OFFSET_POINT, 
                             tmp_offset, tmp_skew);
@@ -558,11 +575,6 @@ void CAL_LEVEL_2::offset_history_read()
 
           if ((group_id_pos != -1) && (group >= 1) && (group <= 4))
           {
-            //int size_pos = offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].DATA[0].find_label_pos("size");
-            
-            //STRING_INT coordinate_list_size;
-            //offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].DATA[0].DATA[size_pos].get_if_is("size", coordinate_list_size);
-
             int coordinates_pos = offset_list_json.ROOT.DATA[history_pos].DATA[group_id_pos].find_label_pos("offset coordinates");
 
             if (coordinates_pos != -1)
@@ -589,7 +601,7 @@ void CAL_LEVEL_2::offset_history_read()
                 point.Y = (float)(y.get_int_value());
                 point.Z = (float)(z.get_int_value());
 
-                CALIBRATION_QUADS[group].OFFSET_POINT_LIST.push_back(point);
+                CALIBRATION_QUADS[group].add_point_to_offset_point_list(point);
               }
             }
           }
@@ -685,49 +697,46 @@ void CAL_LEVEL_2::calibration_preload_set()
     int preload_pushback_count = 5;    // Build small offset history.
 
     // Load Data
-    CALIBRATION_QUADS[1].OFFSET_POINT = Cal_Pt_PRELOAD_1;
     CALIBRATION_QUADS[1].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_1;
-    CALIBRATION_QUADS[1].VARIANCE = Cal_Var_PRELOAD_1;
+    //CALIBRATION_QUADS[1].VARIANCE = Cal_Var_PRELOAD_1;
     CALIBRATION_QUADS[1].HAS_DATA = true;
     for (int x = 0; x < preload_pushback_count; x++)
     {
-      CALIBRATION_QUADS[1].add_last_known_offset_point();
+      CALIBRATION_QUADS[1].add_point_to_offset_point_list(Cal_Pt_PRELOAD_1);
     }
 
-    CALIBRATION_QUADS[2].OFFSET_POINT = Cal_Pt_PRELOAD_2;
     CALIBRATION_QUADS[2].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_2;
-    CALIBRATION_QUADS[2].VARIANCE = Cal_Var_PRELOAD_2;
+    //CALIBRATION_QUADS[2].VARIANCE = Cal_Var_PRELOAD_2;
     CALIBRATION_QUADS[2].HAS_DATA = true;
     for (int x = 0; x < preload_pushback_count; x++)
     {
-      CALIBRATION_QUADS[2].add_last_known_offset_point();
+      CALIBRATION_QUADS[2].add_point_to_offset_point_list(Cal_Pt_PRELOAD_2);
     }
 
-    CALIBRATION_QUADS[3].OFFSET_POINT = Cal_Pt_PRELOAD_3;
     CALIBRATION_QUADS[3].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_3;
-    CALIBRATION_QUADS[3].VARIANCE = Cal_Var_PRELOAD_3;
+    //CALIBRATION_QUADS[3].VARIANCE = Cal_Var_PRELOAD_3;
     CALIBRATION_QUADS[3].HAS_DATA = true;
     for (int x = 0; x < preload_pushback_count; x++)
     {
-      CALIBRATION_QUADS[3].add_last_known_offset_point();
+      CALIBRATION_QUADS[3].add_point_to_offset_point_list(Cal_Pt_PRELOAD_3);
     }
 
-    CALIBRATION_QUADS[4].OFFSET_POINT = Cal_Pt_PRELOAD_4;
     CALIBRATION_QUADS[4].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_4;
-    CALIBRATION_QUADS[4].VARIANCE = Cal_Var_PRELOAD_4;
+    //CALIBRATION_QUADS[4].VARIANCE = Cal_Var_PRELOAD_4;
     CALIBRATION_QUADS[4].HAS_DATA = true;
     for (int x = 0; x < preload_pushback_count; x++)
     {
-      CALIBRATION_QUADS[4].add_last_known_offset_point();
+      CALIBRATION_QUADS[4].add_point_to_offset_point_list(Cal_Pt_PRELOAD_4);
     }
 
     // Load history list
     offset_history_read();
 
-    // Set Variance
-    DISTANCE_VARIANCE_FULL = CALIBRATION_QUADS[1].VARIANCE + CALIBRATION_QUADS[2].VARIANCE + 
-                              CALIBRATION_QUADS[3].VARIANCE + CALIBRATION_QUADS[4].VARIANCE;
-
+    CALIBRATION_QUADS[1].calculate_offset_point();
+    CALIBRATION_QUADS[2].calculate_offset_point();
+    CALIBRATION_QUADS[3].calculate_offset_point();
+    CALIBRATION_QUADS[4].calculate_offset_point();
+    
     // Adjust new offset
     build_non_simple_offsets();
   }

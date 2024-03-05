@@ -61,6 +61,7 @@ class SCREEN4
   bool DISPLAY_OVERHEAD_COLOR = false;
   bool DISPLAY_RUNNING_COLOR = false;
   bool DISPLAY_QR_CODE = false;
+  bool DISPLAY_COMPASS_WINDOW = false;
 
   bool DISPLAY_CONFIRM = false;
 
