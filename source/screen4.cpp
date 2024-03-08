@@ -375,6 +375,20 @@ int SCREEN4::create(system_data &sdSysData)
       BAR_TIMER.create();
     }
   }
+  else
+  {
+    // TTY
+    tcgetattr(0, &TERMINAL);
+    TERMINAL.c_lflag &= ~ICANON;
+    tcsetattr(0, TCSANOW, &TERMINAL);
+
+    fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
+
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &WINDOW);
+
+    std::cout << "Width: " << WINDOW.ws_col << '\n';
+    std::cout << "Height: " << WINDOW.ws_row << '\n';
+  }
 
   return 0;
 }
@@ -666,14 +680,7 @@ void SCREEN4::draw(system_data &sdSysData)
             if (sdSysData.GPS_SYSTEM.active(current_frame_time) ||
                 sdSysData.COMMS_COMPASS.connected())
             {
-              ImVec4 working_area;
-
-              working_area.x = ImGui::GetCursorScreenPos().x;
-              working_area.y = ImGui::GetCursorScreenPos().y;
-              working_area.z = ImGui::GetContentRegionAvail().x;
-              working_area.w = ImGui::GetContentRegionAvail().y;
-
-              ImVec2 pos1 = ImGui::GetCursorScreenPos();
+              ImVec4 working_area = get_working_area();
 
               // Draw North Direction Compass
               draw_compass(draw_list_status_compass, sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
@@ -682,9 +689,7 @@ void SCREEN4::draw(system_data &sdSysData)
                             sdSysData.COMMS_COMPASS.connected(), (sdSysData.COMMS_COMPASS.bearing()), true);
 
               // Change Screens
-              ImGui::SetCursorScreenPos(pos1);
-              if (ImGui::InvisibleButton("Compass Window", ImGui::GetContentRegionAvail()))
-              //if (ImGui::Button("Compass Window", ImGui::GetContentRegionAvail()))
+              if (button_area(working_area))
               {
                 DISPLAY_COMPASS_WINDOW = !DISPLAY_COMPASS_WINDOW;
               }
@@ -1446,23 +1451,26 @@ void SCREEN4::draw(system_data &sdSysData)
     {
       if (sdSysData.COMMS_COMPASS.connected())
       {
-        ImGui::SetNextWindowSize(ImVec2(350.0f, 350.0f));
+        ImGui::SetNextWindowSize(ImVec2(140.0f, 210.0f));
 
         ImGui::Begin("Compass", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
         {
+          ImVec4 working_area = get_working_area();
+
           ImDrawList* draw_list_status_compass_window = ImGui::GetWindowDrawList();
-          
-          ImVec4 working_area;
 
-          working_area.x = ImGui::GetCursorScreenPos().x;
-          working_area.y = ImGui::GetCursorScreenPos().y;
-          working_area.z = ImGui::GetContentRegionAvail().x;
-          working_area.w = ImGui::GetContentRegionAvail().y;
-
-          draw_compass(draw_list_status_compass_window, sdSysData, 2, ImVec2(working_area.x + (working_area.z / 2.0f), working_area.y + (working_area.w / 2.0f)), working_area.z / 2.0f * 0.8f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+          draw_compass(draw_list_status_compass_window, sdSysData, 2, 
+                      ImVec2(working_area.x + (working_area.z / 2.0f), 
+                      working_area.y + (working_area.w / 2.0f)), 
+                      working_area.z / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                       sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                      sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, 
+                      sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), true, 
                       true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max());
+
+          if (button_area(working_area))
+          {
+            DISPLAY_COMPASS_WINDOW = false;
+          }
         }
         ImGui::End();
       }
@@ -1487,6 +1495,38 @@ void SCREEN4::draw(system_data &sdSysData)
   }
   else
   {
+    // Read and write to and from only TTY.
+
+    {
+      char c = 0;
+      read (0, &c, 1);
+
+      switch (c) 
+      {
+        //case '':
+        //{
+          //printf("\n");
+          //break;
+        //}
+
+        case 'X':
+        {
+          printf("\n");
+          exit(0);
+          break;
+        }
+
+        //default:
+        //{
+          //printf("\nother:\n");
+        //  break;
+        //}
+      }
+    }
+
+    //printf("\033[1;1H");
+    //printf("print\n");
+
     // Handle Console Iputs
     if (SCREEN_COMMS.printw_q_avail() == true)
     {

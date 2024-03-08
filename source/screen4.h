@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 #include <string>
+#include <sys/ioctl.h>
 
 // Rasfled Includes
 #include "system.h"
@@ -37,7 +38,11 @@ using namespace std;
 class SCREEN4
 {
   private:
+  // TTY things
+  struct termios TERMINAL;
+  struct winsize WINDOW;
 
+  // ImGui things
   bool use_work_area = true;
 
   bool show_another_window = true;

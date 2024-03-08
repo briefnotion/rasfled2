@@ -1,3 +1,12 @@
+2.137_240307
+  - Made a few changes to the compass draw function to 
+      handle resizing.  I left it unfinished.  Only changes 
+      remaining is cleaning it up. 
+  - Started adding a simple tty input interface.  Its been on 
+      the backburner for too long. 
+  - Resized the Offset Point Vector size, in hmc5883l, from 50 
+      to 100, to see what effects it has. 
+
 2.136_240304
   - Made some modifications to hmc5883l.
   - Started working on other things.

@@ -16,6 +16,39 @@
 
 // ---------------------------------------------------------------------------------------
 
+ImVec2 text_size(string Text)
+{
+  return ImGui::CalcTextSize(Text.c_str());
+}
+
+ImVec4 get_working_area()
+{
+  ImVec4 working_area;
+
+  working_area.x = ImGui::GetCursorScreenPos().x;
+  working_area.y = ImGui::GetCursorScreenPos().y;
+  working_area.z = ImGui::GetContentRegionAvail().x;
+  working_area.w = ImGui::GetContentRegionAvail().y;
+
+  return working_area;
+}
+
+bool button_area(ImVec4 Working_Area)
+{
+  ImGui::SetCursorScreenPos(ImVec2(Working_Area.x, Working_Area.y));
+
+  if (ImGui::InvisibleButton("Clickable Area", ImVec2(Working_Area.z, Working_Area.w)))
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
 ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigned long Duration, 
                       ImColor Start_Color, ImColor End_Color)
 {
@@ -410,6 +443,8 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 
   float size_outline = 3.0f;  // Size / 5
 
+  float font_height = 18.0f;
+
   // Set Color
   if (Valid_Position == false)
   {
@@ -467,192 +502,12 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     }
   }
 
-  // Draw Heading 1
-  if (Valid_Heading_1)
-  {
-    // Adjust the degrees into heading. Convert direction from degrees to radians
-    float rad = (Heading_1 + 90.0f) * float_PI / 180.0f;
-
-    // Calculate
-    ImVec2 p1 = Screen_Position;
-    if (Version == 2)
-    {
-      p1 = ImVec2(Screen_Position.x + (Size - (needle_size / 2.0f)) * cos(rad + float_PI), 
-                  Screen_Position.y + (Size - (needle_size / 2.0f)) * sin(rad + float_PI));
-    }
-
-    ImVec2 p2 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
-                        Screen_Position.y + Size * sin(rad + float_PI));
- 
-    // Draw the line
-    if (Valid_Position)
-    {
-      Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-      Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, needle_size);
-    }
-    else
-    {
-      Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-      Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
-    }
-
-    // Text Descriptor for version 2
-    if (Version == 2)
-    {
-      // Nothing written yet to handle other sized version 2 compass rotated heading text.
-      float rad2 = 0.0f;
-      ImVec2 p3;
-
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
-
-      if (Heading_1 < 90.0f || Heading_1 > 270.0f)
-      {
-        rad2 = (Heading_1 + 90.0f - 5.0f) * float_PI / 180.0f;
-
-        p3 = ImVec2(Screen_Position.x + Size * cos(rad2 + float_PI), 
-                          Screen_Position.y + Size * sin(rad2 + float_PI));
-        ImGui::SetCursorScreenPos(p3);
-
-        Text_Rotate(to_string((int)Heading_1), 180.0f - Heading_1, BB_TL);
-      }
-      else
-      {
-        rad2 = (Heading_1 + 90.0f + 5.0f) * float_PI / 180.0f;
-
-        p3 = ImVec2(Screen_Position.x + (Size - (needle_size / 2.0f)) * cos(rad2 + float_PI), 
-                    Screen_Position.y + (Size - (needle_size / 2.0f)) * sin(rad2 + float_PI));
-        ImGui::SetCursorScreenPos(p3);
-
-        Text_Rotate(to_string((int)Heading_1), -Heading_1, BB_TL);
-      }
-      
-      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
-
-      ImGui::PopStyleColor();
-    }
-  }
-
   // Draw Heading 2
   if (Valid_Heading_2)
   {
     float rad = 0.0f;
     ImVec2 p1;
     ImVec2 p2;
-
-    if (Jitter_Active)
-    {
-      if (Version == 2)
-      {
-        // Jitter 1
-        rad = ((Jitter_Heading_Min) + 90.0f) * float_PI / 180.0f;
-
-        p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
-                    Screen_Position.y + Size * sin(rad + float_PI));
-        p2 = ImVec2(Screen_Position.x + (Size + needle_size) * cos(rad + float_PI), 
-                    Screen_Position.y + (Size + needle_size) * sin(rad + float_PI));
-        
-        // Draw the line
-        if (Valid_Position)
-        {
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (needle_size / 10.0f) + 4.0f);
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, (needle_size / 10.0f));
-        }
-        else
-        {
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (needle_size / 10.0f) + 4.0f);
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, (needle_size / 10.0f));
-        }
-
-        // Jitter 2
-        rad = ((Jitter_Heading_Max) + 90.0f) * float_PI / 180.0f;
-
-        p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
-                    Screen_Position.y + Size * sin(rad + float_PI));
-        p2 = ImVec2(Screen_Position.x + (Size + needle_size) * cos(rad + float_PI), 
-                    Screen_Position.y + (Size + needle_size) * sin(rad + float_PI));
-        
-        // Draw the line
-        if (Valid_Position)
-        {
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (needle_size / 10.0f) + 4.0f);
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, (needle_size / 10.0f));
-        }
-        else
-        {
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (needle_size / 10.0f) + 4.0f);
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, (needle_size / 10.0f));
-        }
-      }
-    }
-
-    // Adjust the degrees into heading. Convert direction from degrees to radians
-    rad = (Heading_2 + 90.0f) * float_PI / 180.0f;
-
-    // Calculate
-    p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
-                Screen_Position.y + Size * sin(rad + float_PI));
-
-    if (Version == 1)
-    {
-      // Version 1
-      p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), 
-                  Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
-    }
-    else
-    {
-      // Version 2
-      p2 = ImVec2(Screen_Position.x + (Size + (needle_size / 2.0f)) * cos(rad + float_PI), 
-                  Screen_Position.y + (Size + (needle_size / 2.0f)) * sin(rad + float_PI));
-    }
- 
-    // Draw the line
-    if (Valid_Position)
-    {
-      Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-      Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, needle_size);
-    }
-    else
-    {
-      Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-      Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
-    }
-
-    // Text Descriptor for version 2
-    if (Version == 2)
-    { 
-      // Nothing written yet to handle other sized version 2 compass rotated heading text.
-      float rad2 = 0.0f;
-      ImVec2 p3;
-
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
-
-      if (Heading_2 < 90.0f || Heading_2 > 270.0f)
-      {
-        rad2 = (Heading_2 + 90.0f - 5.0f) * float_PI / 180.0f;
-
-        p3 = ImVec2(Screen_Position.x + (Size + (needle_size / 2.0f)) * cos(rad2 + float_PI), 
-                    Screen_Position.y + (Size + (needle_size / 2.0f)) * sin(rad2 + float_PI));
-
-        ImGui::SetCursorScreenPos(p3);
-
-        Text_Rotate(to_string((int)Heading_2), 180.0f - Heading_2, BB_TL);
-      }
-      else
-      {
-        rad2 = (Heading_2 + 90.0f + 5.0f) * float_PI / 180.0f;
-
-        p3 = ImVec2(Screen_Position.x + (Size) * cos(rad2 + float_PI), 
-                    Screen_Position.y + (Size) * sin(rad2 + float_PI));
-
-        ImGui::SetCursorScreenPos(p3);
-
-        Text_Rotate(to_string((int)Heading_2), -Heading_2, BB_TL);
-      }
-
-      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
-      
-      ImGui::PopStyleColor();
-    }
 
     // North pointer drawn only if heading provided.
     if (Draw_North_Pointer)
@@ -673,6 +528,213 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
         Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size - 4.0f);
       }
+    }
+
+    if (Jitter_Active)
+    {
+      if (Version == 2)
+      {
+        // Jitter 1
+        rad = ((Jitter_Heading_Min) + 90.0f) * float_PI / 180.0f;
+
+        p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
+                    Screen_Position.y + Size * sin(rad + float_PI));
+        p2 = ImVec2(Screen_Position.x + (Size + (font_height * 2.0f)) * cos(rad + float_PI), 
+                    Screen_Position.y + (Size + (font_height * 2.0f)) * sin(rad + float_PI));
+        
+        // Draw the line
+        if (Valid_Position)
+        {
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f + 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 4.0f);
+        }
+        else
+        {
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f + 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f);
+        }
+
+        // Jitter 2
+        rad = ((Jitter_Heading_Max) + 90.0f) * float_PI / 180.0f;
+
+        p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
+                    Screen_Position.y + Size * sin(rad + float_PI));
+        p2 = ImVec2(Screen_Position.x + (Size + (font_height * 2.0f)) * cos(rad + float_PI), 
+                    Screen_Position.y + (Size + (font_height * 2.0f)) * sin(rad + float_PI));
+        
+        // Draw the line
+        if (Valid_Position)
+        {
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f + 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 4.0f);
+        }
+        else
+        {
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f + 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f);
+        }
+      }
+    }
+
+    // Adjust the degrees into heading. Convert direction from degrees to radians
+    rad = (Heading_2 + 90.0f) * float_PI / 180.0f;
+
+    // Calculate
+    p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
+                Screen_Position.y + Size * sin(rad + float_PI));
+
+    if (Version == 1)
+    {
+      // Version 1
+      p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), 
+                  Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
+ 
+      // Draw the line
+      if (Valid_Position)
+      {
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, needle_size);
+      }
+      else
+      {
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
+      }
+    }
+    else
+    {
+      // Version 2
+      p2 = ImVec2(Screen_Position.x + (Size + font_height) * cos(rad + float_PI), 
+                  Screen_Position.y + (Size + font_height) * sin(rad + float_PI));
+ 
+      // Draw the line
+      if (Valid_Position)
+      {
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (font_height * 3.5f) + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, (font_height * 3.5f));
+      }
+      else
+      {
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (font_height * 3.5f) + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, (font_height * 3.5f));
+      }
+    }
+
+    // Text Descriptor for version 2
+    if (Version == 2)
+    { 
+      float rad2 = 0.0f;
+      ImVec2 p3;
+
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
+
+      if (Heading_2 < 90.0f || Heading_2 > 270.0f)
+      {
+        rad2 = (Heading_2 + 90.0f) * float_PI / 180.0f;
+
+        p3 = ImVec2(Screen_Position.x + (Size + font_height) * cos(rad2 + float_PI), 
+                    Screen_Position.y + (Size + font_height) * sin(rad2 + float_PI));
+
+        ImGui::SetCursorScreenPos(p3);
+
+        Text_Rotate(to_string((int)Heading_2), 180.0f - Heading_2, BB_TL);
+      }
+      else
+      {
+        rad2 = (Heading_2 + 90.0f) * float_PI / 180.0f;
+
+        p3 = ImVec2(Screen_Position.x + (Size) * cos(rad2 + float_PI), 
+                    Screen_Position.y + (Size) * sin(rad2 + float_PI));
+
+        ImGui::SetCursorScreenPos(p3);
+
+        Text_Rotate(to_string((int)Heading_2), -Heading_2, BB_TL);
+      }
+
+      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
+      
+      ImGui::PopStyleColor();
+    }
+  }
+
+  // Draw Heading 1
+  if (Valid_Heading_1)
+  {
+    // Adjust the degrees into heading. Convert direction from degrees to radians
+    float rad = (Heading_1 + 90.0f) * float_PI / 180.0f;
+
+    // Calculate
+    ImVec2 p1 = Screen_Position;
+    
+    if (Version == 2)
+    {
+      p1 = ImVec2(Screen_Position.x + (Size - font_height) * cos(rad + float_PI), 
+                  Screen_Position.y + (Size - font_height) * sin(rad + float_PI));
+    }
+
+    ImVec2 p2 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
+                        Screen_Position.y + Size * sin(rad + float_PI));
+ 
+
+    // Text Descriptor for version 2
+    if (Version == 1)
+    {
+      // Draw the line
+      if (Valid_Position)
+      {
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, needle_size);
+      }
+      else
+      {
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
+      }
+    }
+    else // if (Version == 2)
+    {
+      // Draw the line
+      if (Valid_Position)
+      {
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (font_height * 3.5f) + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, (font_height * 3.5f));
+      }
+      else
+      {
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (font_height * 3.5f) + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, (font_height * 3.5f));
+      }
+
+      // Nothing written yet to handle other sized version 2 compass rotated heading text.
+      float rad2 = 0.0f;
+      ImVec2 p3;
+
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
+
+      if (Heading_1 < 90.0f || Heading_1 > 270.0f)
+      {
+        rad2 = (Heading_1 + 90.0f) * float_PI / 180.0f;
+
+        p3 = ImVec2(Screen_Position.x + Size * cos(rad2 + float_PI), 
+                          Screen_Position.y + Size * sin(rad2 + float_PI));
+        ImGui::SetCursorScreenPos(p3);
+
+        Text_Rotate(to_string((int)Heading_1), 180.0f - Heading_1, BB_TL);
+      }
+      else
+      {
+        rad2 = (Heading_1 + 90.0f) * float_PI / 180.0f;
+
+        p3 = ImVec2(Screen_Position.x + (Size - font_height) * cos(rad2 + float_PI), 
+                    Screen_Position.y + (Size - font_height) * sin(rad2 + float_PI));
+        ImGui::SetCursorScreenPos(p3);
+
+        Text_Rotate(to_string((int)Heading_1), -Heading_1, BB_TL);
+      }
+      
+      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
+
+      ImGui::PopStyleColor();
     }
   }
 }

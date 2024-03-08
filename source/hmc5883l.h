@@ -194,7 +194,7 @@ class CALIBRATION_DATA
 {
   private:
 
-  int OFFSET_POINT_VECTOR_SIZE = 50;
+  int OFFSET_POINT_VECTOR_SIZE = 100;
 
   public:
 
