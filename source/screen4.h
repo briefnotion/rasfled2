@@ -23,6 +23,7 @@
 #include "widgets_automobile.h"
 #include "widgets_adsb.h"
 #include "widgets_drawing.h"
+#include "stringthings.h"
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
@@ -40,7 +41,7 @@ class SCREEN4
   private:
   // TTY things
   struct termios TERMINAL;
-  struct winsize WINDOW;
+  struct winsize TERMINAL_WINDOW;
 
   // ImGui things
   bool use_work_area = true;
@@ -82,7 +83,7 @@ class SCREEN4
 
   TEXTURE_IMAGE QR_CODE;
 
-  string COMMAND_TEXT_TEMP = "";
+  bool COMMAND_TEXT_CHANGED = false;  // for TTY only redraw
   string COMMAND_TEXT = "";
   int PREV_FRAME_KEY_DOWN = 0;
 
@@ -135,13 +136,13 @@ class SCREEN4
   public:
   CONSOLE_COMMUNICATION SCREEN_COMMS;
 
-  // Screen Return Variables
-  bool WINDOW_CLOSE = false;
-
   int create(system_data &sdSysData);
   // Create Screen and set variables
   // Return 0 OK
   // Return 2 error
+
+void character_enter(unsigned char Character, 
+                bool Shift_Pressed, bool Backspace_Pressed, bool Enter_Pressed);
 
   void draw(system_data &sdSysData);
   // Render window to terminal

@@ -1,3 +1,6 @@
+2.138_240308
+  - TTY screen now accepts inputs.  Still in testing.
+
 2.137_240307
   - Made a few changes to the compass draw function to 
       handle resizing.  I left it unfinished.  Only changes 

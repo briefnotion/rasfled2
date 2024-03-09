@@ -384,13 +384,53 @@ int SCREEN4::create(system_data &sdSysData)
 
     fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
 
-    ioctl(STDOUT_FILENO, TIOCGWINSZ, &WINDOW);
-
-    std::cout << "Width: " << WINDOW.ws_col << '\n';
-    std::cout << "Height: " << WINDOW.ws_row << '\n';
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &TERMINAL_WINDOW);
   }
 
   return 0;
+}
+
+// ---------------------------------------------------------------------------------------
+
+void SCREEN4::character_enter(unsigned char Character, 
+                bool Shift_Pressed, bool Backspace_Pressed, bool Enter_Pressed)
+{
+    // Letters
+    if (Character >= 65 && Character <= 90)
+    {
+      // All Upper Case Letters, but with shift not pressed to lower the case.
+      if (Shift_Pressed)
+      {
+        COMMAND_TEXT += Character;
+        SCREEN_COMMS.command_text_set(COMMAND_TEXT);
+      }
+      else
+      {
+        COMMAND_TEXT += Character + 32;
+        SCREEN_COMMS.command_text_set(COMMAND_TEXT);
+      }
+    }
+
+    // Symbols
+    else if ((Character >= 32 && Character <= 64) || 
+              (Character >= 91 && Character <= 96) || 
+              (Character >= 123 && Character <= 126))
+    {
+      COMMAND_TEXT += Character;
+      SCREEN_COMMS.command_text_set(COMMAND_TEXT);
+    }
+
+    // Backspace 
+    else if (Backspace_Pressed)
+    {
+      COMMAND_TEXT.resize(COMMAND_TEXT.size() -1);
+    }
+
+    // CR
+    else if (Enter_Pressed)
+    {
+      SCREEN_COMMS.carrage_return_set();
+    }
 }
 
 // ---------------------------------------------------------------------------------------
@@ -412,18 +452,13 @@ void SCREEN4::draw(system_data &sdSysData)
       CONSOLE.add_line(SCREEN_COMMS.printw_q_get());
     }
     
-    //Does not work yet?
+    // Clear
     if (SCREEN_COMMS.command_text_clear_get() == true)
     {
       COMMAND_TEXT = "";
     }
 
     DISPLAY_TIMER = sdSysData.cdTIMER.is_active();
-
-    if (SCREEN_COMMS.WINDOW_CLOSE == true)
-    {
-      WINDOW_CLOSE = true;
-    }
 
     // ---------------------------------------------------------------------------------------
     // ---------------------------------------------------------------------------------------
@@ -475,41 +510,8 @@ void SCREEN4::draw(system_data &sdSysData)
       {
         PREV_FRAME_KEY_DOWN = character_pressed;
 
-        // Letters
-        if (character_pressed >= 65 && character_pressed <= 90)
-        {
-          if (shift_pressed)
-          {
-            COMMAND_TEXT += character_pressed;
-            SCREEN_COMMS.command_text_set(COMMAND_TEXT);
-          }
-          else
-          {
-            COMMAND_TEXT += character_pressed + 32;
-            SCREEN_COMMS.command_text_set(COMMAND_TEXT);
-          }
-        }
+        character_enter(character_pressed, shift_pressed, backspace_pressed, enter_pressed);
 
-        // Symbols
-        else if ((character_pressed >= 32 && character_pressed <= 64) || 
-                  (character_pressed >= 91 && character_pressed <= 96) || 
-                  (character_pressed >= 123 && character_pressed <= 127))
-        {
-          COMMAND_TEXT += character_pressed;
-          SCREEN_COMMS.command_text_set(COMMAND_TEXT);
-        }
-
-        // Backspace 
-        else if (backspace_pressed)
-        {
-          COMMAND_TEXT.resize(COMMAND_TEXT.size() -1);
-        }
-
-        // CR
-        else if (enter_pressed)
-        {
-          SCREEN_COMMS.carrage_return_set();
-        }
       }
       else if (character_pressed == 0)
       {
@@ -1073,8 +1075,13 @@ void SCREEN4::draw(system_data &sdSysData)
       door_lights(draw_list_window_background, sdSysData, viewport->Size);
       signal_lights(draw_list_window_background, sdSysData, viewport->Size);
       hazard_lights(draw_list_window_background, sdSysData, viewport->Size);
+      
+      ImGui::End();
     }
-    ImGui::End();
+    else
+    {
+      SCREEN_COMMS.WINDOW_CLOSE = true;
+    }
 
 
     // ---------------------------------------------------------------------------------------
@@ -1495,37 +1502,70 @@ void SCREEN4::draw(system_data &sdSysData)
   }
   else
   {
-    // Read and write to and from only TTY.
-
+    // Clear
+    if (SCREEN_COMMS.command_text_clear_get() == true)
     {
-      char c = 0;
-      read (0, &c, 1);
-
-      switch (c) 
-      {
-        //case '':
-        //{
-          //printf("\n");
-          //break;
-        //}
-
-        case 'X':
-        {
-          printf("\n");
-          exit(0);
-          break;
-        }
-
-        //default:
-        //{
-          //printf("\nother:\n");
-        //  break;
-        //}
-      }
+      COMMAND_TEXT = "";
+      COMMAND_TEXT_CHANGED = true;
     }
 
-    //printf("\033[1;1H");
-    //printf("print\n");
+    if (COMMAND_TEXT_CHANGED)
+    {
+      string command_display = left_justify((int)TERMINAL_WINDOW.ws_col, "CMD: " + COMMAND_TEXT) + "\n" + 
+                               left_justify((int)TERMINAL_WINDOW.ws_col, " ") + "\n";
+
+      printf ("\033[1;1H%s\033[%d;1H", command_display.c_str(), TERMINAL_WINDOW.ws_row -1);
+
+      COMMAND_TEXT_CHANGED = false;
+
+      //printf("\033[1;1H");
+      //printf("print\n");
+      //printf "\033[%d;%dH" $row $col
+
+      //std::cout << "Width: " << TERMINAL_WINDOW.ws_col << '\n';
+      //std::cout << "Height: " << TERMINAL_WINDOW.ws_row << '\n';
+    }
+
+    // Read and write to and from only TTY.
+    {
+      char character_pressed = 0;
+      read (0, &character_pressed, 1);
+
+      if (character_pressed > 0)
+      {
+        bool shift_pressed = false;
+        bool backspace_pressed = false;
+        bool enter_pressed = false;
+
+        // check for backspace
+        if (character_pressed == 127)
+        {
+          backspace_pressed = true;
+        }
+
+        // check for enter
+        if (character_pressed == 10)
+        {
+          enter_pressed = true;
+        }
+
+        // Because gui doesnt handle upper case letters, only key presses ...
+        // convert to upper case if lower case then set shift to off
+        if (character_pressed >= 65 + 32  && character_pressed <= 90 + 32)
+        {
+          character_pressed -= 32;
+          shift_pressed = false;
+        }
+        else if (character_pressed >= 65 && character_pressed <= 90)
+        // leave at upper case and set shift to on
+        {
+          shift_pressed = true;
+        }
+
+        character_enter(character_pressed, shift_pressed, backspace_pressed, enter_pressed);
+        COMMAND_TEXT_CHANGED = true;
+      }
+    }
 
     // Handle Console Iputs
     if (SCREEN_COMMS.printw_q_avail() == true)

@@ -632,7 +632,7 @@ int loop_2(bool TTY_Only)
   // **************************************************************************************
 
   // MAIN LOOP START
-  while(cons_2.WINDOW_CLOSE == false)
+  while(cons_2.SCREEN_COMMS.WINDOW_CLOSE == false)
   {
     // ---------------------------------------------------------------------------------------
     // Thread Management
