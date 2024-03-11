@@ -378,9 +378,14 @@ int SCREEN4::create(system_data &sdSysData)
   else
   {
     // TTY
-    tcgetattr(0, &TERMINAL);
-    TERMINAL.c_lflag &= ~ICANON;
-    tcsetattr(0, TCSANOW, &TERMINAL);
+    struct termios terminal;
+
+    tcgetattr(0, &terminal);
+
+    terminal.c_lflag &= ~ICANON;  // set conotical mod.
+    terminal.c_lflag &= ~ECHO;    // turn echo off.
+
+    tcsetattr(0, TCSANOW, &terminal);
 
     fcntl(0, F_SETFL, fcntl(0, F_GETFL) | O_NONBLOCK);
 
@@ -1502,6 +1507,17 @@ void SCREEN4::draw(system_data &sdSysData)
   }
   else
   {
+    // Handle Console Iputs
+    if (SCREEN_COMMS.printw_q_avail() == true)
+    {
+      printf("%s", SCREEN_COMMS.printw_q_get().c_str());
+      
+      if (COMMAND_TEXT != "")
+      {
+        COMMAND_TEXT_CHANGED = true;
+      }
+    }
+
     // Clear
     if (SCREEN_COMMS.command_text_clear_get() == true)
     {
@@ -1514,7 +1530,7 @@ void SCREEN4::draw(system_data &sdSysData)
       string command_display = left_justify((int)TERMINAL_WINDOW.ws_col, "CMD: " + COMMAND_TEXT) + "\n" + 
                                left_justify((int)TERMINAL_WINDOW.ws_col, " ") + "\n";
 
-      printf ("\033[1;1H%s\033[%d;1H", command_display.c_str(), TERMINAL_WINDOW.ws_row -1);
+      printf ("\033[1;1H%s\033[%d;1H", command_display.c_str(), TERMINAL_WINDOW.ws_row);
 
       COMMAND_TEXT_CHANGED = false;
 
@@ -1566,12 +1582,6 @@ void SCREEN4::draw(system_data &sdSysData)
         COMMAND_TEXT_CHANGED = true;
       }
     }
-
-    // Handle Console Iputs
-    if (SCREEN_COMMS.printw_q_avail() == true)
-    {
-      printf("%s", SCREEN_COMMS.printw_q_get().c_str());
-    }
   }
 
   // ---------------------------------------------------------------------------------------
@@ -1592,6 +1602,18 @@ void SCREEN4::shutdown(system_data &sdSysData)
     glfwDestroyWindow(window);
     glfwTerminate();
   }
+  else
+  {
+    struct termios terminal;
+
+    tcgetattr(0, &terminal);
+
+    terminal.c_lflag |=ICANON;  // set conotical mod.
+    terminal.c_lflag |= ECHO;    // turn echo off.
+
+    tcsetattr(0, TCSANOW, &terminal);
+  }
+
 }
 
 /*

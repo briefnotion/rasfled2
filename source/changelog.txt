@@ -1,3 +1,6 @@
+2.139_240310
+  - Corrected some issues with TTY screen command display. 
+
 2.138_240308
   - TTY screen now accepts inputs.  Still in testing.
 

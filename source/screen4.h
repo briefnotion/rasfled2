@@ -40,7 +40,6 @@ class SCREEN4
 {
   private:
   // TTY things
-  struct termios TERMINAL;
   struct winsize TERMINAL_WINDOW;
 
   // ImGui things
