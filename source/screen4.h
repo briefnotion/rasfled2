@@ -23,7 +23,9 @@
 #include "widgets_automobile.h"
 #include "widgets_adsb.h"
 #include "widgets_drawing.h"
+#include "widgets_advertisement.h"
 #include "stringthings.h"
+#include "fled_time.h"
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
@@ -93,6 +95,7 @@ class SCREEN4
   ADSB_SCREEN ADSB;
   //TEXT_CONSOLE GPS_CONSOLE;
   TEXT_CONSOLE DAEMON_LOG;
+  ADVERTISEMENT_SCREENS ADVERTISEMENTS;
 
   // --- 
 

@@ -66,6 +66,7 @@ target_sources(rasfled PRIVATE
   automobile_handler.cpp
   interface.cpp
   aircraft_coordinator.cpp
+  widgets_advertisement.cpp
   widgets.cpp
   widgets_drawing.cpp
   widgets_automobile.cpp

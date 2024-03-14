@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.139_240310"
+#define Revision "2.140_240312"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -36,7 +36,9 @@
 
 // Files
 #define FILES_DIRECTORY           "/etc/RasFLED/"
-//#define FILES_DIRECTORY           "/home/pi/source/RasFLED/configuration/"                   // For Testing:  Configuration Files Directory
+//#define FILES_DIRECTORY           "/home/pi/source/RasFLED/configuration/"   // For Testing:  Configuration Files Directory
+
+#define SUB_DIRECTORY_ADVERTS     "adverts/"
 
 #define FILES_CONFIGURATION       "configuration.json"
 #define FILES_RUNNING_STATE_SAVE  "runningstate.json"

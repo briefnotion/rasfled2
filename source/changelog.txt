@@ -1,3 +1,6 @@
+2.140_240312
+  - Added a simple Advertisement system.
+
 2.139_240310
   - Corrected some issues with TTY screen command display. 
 

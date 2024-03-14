@@ -318,6 +318,55 @@ bool check_create_working_dir()
   return false;
 }
 
+bool get_files_list(string Directory, vector<string> &List, string Only_Type)
+{
+  bool ret_sucess = false;
+  List.clear();
+
+  // Using Boost
+  {
+    namespace fs = boost::filesystem;
+
+    fs::path path (Directory);
+
+    if (fs::exists(path))
+    {
+      if (fs::is_directory(path))
+      {
+        for (fs::directory_entry& x : fs::directory_iterator(path))
+        {
+          if (Only_Type == "")
+          {
+            List.push_back(x.path().string());
+          }
+          else
+          {
+            if (x.path().string().size() > Only_Type.size())
+            {
+              if (x.path().string().substr(x.path().string().size() - Only_Type.size()) == Only_Type)
+              {
+                List.push_back(x.path().string());
+              }
+            }
+          }
+        }
+      
+        ret_sucess = true;
+      }
+      else
+      {
+        // Directory exist, but it is not a directory.
+      }
+    }
+    else
+    {
+      // Directory does not exist.
+    }
+  }
+
+  return ret_sucess;
+}
+
 string file_to_string(string Dir_Filename, bool &Success)
 {
   fstream fsFile;

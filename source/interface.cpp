@@ -628,7 +628,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       // TERMINAL COMMANDS
   
       // Command Line (sudo shutdown now)
-      if (check_command(cons, " comshutd", "Shutdown Started"))
+      if (check_command(cons, " shutdown", "Shutdown Started"))
       {
         command_desc(cons, "Shutting System Down.");
         

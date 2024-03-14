@@ -394,6 +394,11 @@ int loop_2(bool TTY_Only)
   sdSystem.COMMS_COMPASS.calibration_preload(Cal_Pt_1, Cal_Var_1, Cal_Pt_2, Cal_Var_2, Cal_Pt_3, Cal_Var_3, Cal_Pt_4, Cal_Var_4, Cal_Offset);
 
   // ---------------------------------------------------------------------------------------
+  // The Advertisements
+  sdSystem.DIRECTORY_ADVERTISEMENTS = FILES_DIRECTORY;
+  sdSystem.DIRECTORY_ADVERTISEMENTS += SUB_DIRECTORY_ADVERTS;
+
+  // ---------------------------------------------------------------------------------------
   // Initialize the console
   cons_2.create(sdSystem);    // Prepare console.
   cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR.resize(4);

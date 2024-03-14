@@ -173,34 +173,70 @@ void MARKER_GADGET::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 S
 
 // ---------------------------------------------------------------------------------------
 
-bool TEXTURE_IMAGE::create(string Path, string Filename)
+bool TEXTURE_IMAGE::create(string Full_Filename, float Scale_Factor)
 {
-  string qr_code_image_file = Path + Filename;
+  int width = 0;
+  int height = 0;
+  
+  bool ret = Load_Texture_From_File(Full_Filename.c_str(), &IMAGE_TEXTURE, &width, &height);
 
-  bool ret = Load_Texture_From_File(qr_code_image_file.c_str(), &IMAGE_TEXTURE, &IMAGE_WIDTH, &IMAGE_HEIGHT);
+  IMAGE_SIZE = ImVec2(width * Scale_Factor, height * Scale_Factor);
 
   IM_ASSERT(ret);
   return ret;
 }
 
+bool TEXTURE_IMAGE::create(string Full_Filename, ImVec2 Max_Size)
+{
+  int width = 0;
+  int height = 0;
+
+  float scale_factor = 1.0f;
+  
+  bool ret = Load_Texture_From_File(Full_Filename.c_str(), &IMAGE_TEXTURE, &width, &height);
+
+  if (width > Max_Size.x || height > Max_Size.y)
+  {
+    float x_scale = Max_Size.x / width;
+    float y_scale = Max_Size.y / height;
+
+    if (x_scale < y_scale)
+    {
+      scale_factor = x_scale;
+    }
+    else
+    {
+      scale_factor = y_scale;
+    }
+  }
+
+  IMAGE_SIZE = ImVec2(width * scale_factor, height * scale_factor);
+
+  IM_ASSERT(ret);
+  return ret;
+}
+
+bool TEXTURE_IMAGE::create(string Path, string Filename, float Scale_Factor)
+{
+  string qr_code_image_file = Path + Filename;
+  return create(qr_code_image_file, Scale_Factor);
+}
+
 ImVec2 TEXTURE_IMAGE::size()
 {
-  return ImVec2(IMAGE_WIDTH, IMAGE_HEIGHT);
+  return IMAGE_SIZE;
 }
 
-int TEXTURE_IMAGE::widtht()
+ImVec2 TEXTURE_IMAGE::get_should_be_window_size()
 {
-  return IMAGE_WIDTH;
+  ImGuiStyle& style = ImGui::GetStyle();
+  return ImVec2(IMAGE_SIZE.x + style.WindowPadding.x * 2.0f, 
+                IMAGE_SIZE.y + 22.0f + style.WindowPadding.y * 2.0f);
 }
 
-int TEXTURE_IMAGE::height()
+void TEXTURE_IMAGE::draw()
 {
-  return IMAGE_HEIGHT;
-}
-
-void TEXTURE_IMAGE::draw(float Resize_Scale)
-{
-  ImGui::Image((void*)(intptr_t)IMAGE_TEXTURE, ImVec2(IMAGE_WIDTH * Resize_Scale, IMAGE_HEIGHT * Resize_Scale));
+  ImGui::Image((void*)(intptr_t)IMAGE_TEXTURE, IMAGE_SIZE);
 }
 
 // ---------------------------------------------------------------------------------------

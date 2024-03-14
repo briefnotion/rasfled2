@@ -161,6 +161,9 @@ class system_data
   COLOR_COMBOS COLOR_SELECT;
   WIDGET_DEFAULTS SCREEN_DEFAULTS;
 
+  // Advertisements
+  string DIRECTORY_ADVERTISEMENTS = "";
+
   // -------------------------------------------------------------------------------------
 
   void init();

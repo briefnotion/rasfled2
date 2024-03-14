@@ -13,7 +13,7 @@
 #define WIDGETS_DRAWING_H
 
 #include <stdio.h>
-//#include <string>
+#include <string>
 #include <vector>
 #include<cmath>
 
@@ -83,21 +83,21 @@ class TEXTURE_IMAGE
 {
   private:
 
-  int IMAGE_WIDTH = 0;
-  int IMAGE_HEIGHT = 0;
+  ImVec2 IMAGE_SIZE;
+
   GLuint IMAGE_TEXTURE = 0;
 
   public:
 
-  bool create(string Path, string Filename);
+  bool create(string Full_Filename, float Scale_Factor);
+  bool create(string Full_Filename, ImVec2 Max_Size);
+  bool create(string Path, string Filename, float Scale_Factor);
 
   ImVec2 size();
 
-  int widtht();
+  ImVec2 get_should_be_window_size();
 
-  int height();
-
-  void draw(float Resize_Scale);
+  void draw();
 
 };
 

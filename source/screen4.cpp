@@ -289,7 +289,7 @@ int SCREEN4::create(system_data &sdSysData)
     ImGui::EndFrame();
 
     // QR_Image
-    QR_CODE.create(FILES_DIRECTORY, FILES_QR_CODE);
+    QR_CODE.create(FILES_DIRECTORY, FILES_QR_CODE, 2.0f);
 
     // Prepare Screens
     AUTOMOBILE.create(sdSysData);
@@ -374,6 +374,10 @@ int SCREEN4::create(system_data &sdSysData)
       BAR_TIMER.PROPS.MAX_TICK_LEVEL = 3;
       BAR_TIMER.create();
     }
+
+    // Load Advertisements
+    ADVERTISEMENTS.create(sdSysData);
+
   }
   else
   {
@@ -469,7 +473,7 @@ void SCREEN4::draw(system_data &sdSysData)
     // ---------------------------------------------------------------------------------------
     // Handle Console Outputs
     ImGuiIO &io = ImGui::GetIO();
-    ImGuiStyle& style = ImGui::GetStyle();
+    //ImGuiStyle& style = ImGui::GetStyle();
 
     // reduce call backs.
     unsigned long current_frame_time = sdSysData.PROGRAM_TIME.current_frame_time();
@@ -554,6 +558,8 @@ void SCREEN4::draw(system_data &sdSysData)
           // Left
           ImGui::BeginChild("Status Left", ImVec2(region_div_4, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
+            ImVec4 working_area_command = get_working_area();
+
             // Assign Draw List
             ImDrawList* draw_list_status_left = ImGui::GetWindowDrawList();
 
@@ -574,6 +580,11 @@ void SCREEN4::draw(system_data &sdSysData)
 
             ImGui::PopFont();
             ImGui::PopStyleColor();
+
+            if (button_area(working_area_command))
+            {
+              ADVERTISEMENTS.play(sdSysData);
+            }
           }
           ImGui::EndChild();
 
@@ -1047,7 +1058,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
           if (button_simple_color(sdSysData, "SYSTEM\nSHUT\nDOWN", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
-            SCREEN_COMMS.command_pending_set(" comshutd");
+            SCREEN_COMMS.command_pending_set(" shutdown");
             DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
           }
 
@@ -1451,9 +1462,9 @@ void SCREEN4::draw(system_data &sdSysData)
     if (DISPLAY_QR_CODE == true)
     {
       //style.ScrollbarSize + style.WindowPadding.y * 2.0f and fontsize for titlebar
-      ImGui::SetNextWindowSize(ImVec2((QR_CODE.widtht() * 2.0f) + style.WindowPadding.x * 2.0f, (QR_CODE.height() * 2.0f) + 18.0f + style.WindowPadding.y * 2.0f));
+      ImGui::SetNextWindowSize(QR_CODE.get_should_be_window_size());
       ImGui::Begin("About", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
-      QR_CODE.draw(2.0f);
+      QR_CODE.draw();
       ImGui::End();
     }
 
@@ -1489,6 +1500,11 @@ void SCREEN4::draw(system_data &sdSysData)
     }
 
     // ---------------------------------------------------------------------------------------
+    // Display Advert
+
+    ADVERTISEMENTS.draw(sdSysData);
+
+    // ---------------------------------------------------------------------------------------
 
     // Rendering
     ImGui::Render();
@@ -1507,6 +1523,7 @@ void SCREEN4::draw(system_data &sdSysData)
   }
   else
   {
+    // TTY SCREEN
     // Handle Console Iputs
     if (SCREEN_COMMS.printw_q_avail() == true)
     {
@@ -1533,13 +1550,6 @@ void SCREEN4::draw(system_data &sdSysData)
       printf ("\033[1;1H%s\033[%d;1H", command_display.c_str(), TERMINAL_WINDOW.ws_row);
 
       COMMAND_TEXT_CHANGED = false;
-
-      //printf("\033[1;1H");
-      //printf("print\n");
-      //printf "\033[%d;%dH" $row $col
-
-      //std::cout << "Width: " << TERMINAL_WINDOW.ws_col << '\n';
-      //std::cout << "Height: " << TERMINAL_WINDOW.ws_row << '\n';
     }
 
     // Read and write to and from only TTY.

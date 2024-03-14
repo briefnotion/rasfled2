@@ -105,6 +105,9 @@ class FILE_WATCH
 bool check_create_working_dir();
 // Not Coded
 
+bool get_files_list(string Directory, vector<string> &List, string Only_Type);
+// returns false if no files found.
+
 string file_to_string(string Dir_Filename, bool &Success);
 // Opens and loads a file to return as a string.
 // Reurns Success true false value.
