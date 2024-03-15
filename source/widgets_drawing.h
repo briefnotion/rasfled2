@@ -84,10 +84,13 @@ class TEXTURE_IMAGE
   private:
 
   ImVec2 IMAGE_SIZE;
-
   GLuint IMAGE_TEXTURE = 0;
 
   public:
+
+  string FILENAME = "";
+  
+  void clear();
 
   bool create(string Full_Filename, float Scale_Factor);
   bool create(string Full_Filename, ImVec2 Max_Size);

@@ -38,13 +38,13 @@ class ADVERTISEMENT_SCREENS
 {
   private:
 
-  vector<string> AD_IMAGE_LIST;
-
   TIMED_PING PING_NEXT_AD;
 
-  int ADVET_POS = -1;
+  int ADVERT_POS = -1;
 
-  TEXTURE_IMAGE ADVERT_IMAGE;
+  vector<string> AD_IMAGE_LIST;
+  //TEXTURE_IMAGE ADVERT_IMAGE;
+  vector<TEXTURE_IMAGE> ADVERT_IMAGES;
 
   bool ACTIVE = false;
 
@@ -52,6 +52,9 @@ class ADVERTISEMENT_SCREENS
   // -1 Stop
   //  0 Pause
   //  1 Play
+
+  // SCAN
+  int SCAN_LINE = 0;
 
   bool CHANGED = true;
 

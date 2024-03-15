@@ -173,6 +173,16 @@ void MARKER_GADGET::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 S
 
 // ---------------------------------------------------------------------------------------
 
+// ... your code to create and use the texture
+
+// When you're done with the texture and want to unload it:
+//glDeleteTextures(1, &texture);
+void TEXTURE_IMAGE::clear()
+{
+  // UNTESTEST!
+  glDeleteTextures(1, &IMAGE_TEXTURE);
+}
+
 bool TEXTURE_IMAGE::create(string Full_Filename, float Scale_Factor)
 {
   int width = 0;
@@ -181,6 +191,7 @@ bool TEXTURE_IMAGE::create(string Full_Filename, float Scale_Factor)
   bool ret = Load_Texture_From_File(Full_Filename.c_str(), &IMAGE_TEXTURE, &width, &height);
 
   IMAGE_SIZE = ImVec2(width * Scale_Factor, height * Scale_Factor);
+  FILENAME = Full_Filename;
 
   IM_ASSERT(ret);
   return ret;
@@ -211,6 +222,7 @@ bool TEXTURE_IMAGE::create(string Full_Filename, ImVec2 Max_Size)
   }
 
   IMAGE_SIZE = ImVec2(width * scale_factor, height * scale_factor);
+  FILENAME = Full_Filename;
 
   IM_ASSERT(ret);
   return ret;
