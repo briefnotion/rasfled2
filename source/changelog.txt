@@ -1,3 +1,7 @@
+2.142_240316
+  - added more scan lines to adverts.
+  - added a DNFWTS library.
+
 2.141_240313
   - Images for advertisements are loaded at program load.
   - Started adding scan lines in the Advertisements.

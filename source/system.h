@@ -25,6 +25,7 @@
 #include "aircraft_coordinator.h"
 #include "alert_system.h"
 #include "alert_system_2.h"
+#include "dnfwts.h"
 #include "comport.h"
 #include "auto.h"
 #include "nmea.h"
@@ -163,6 +164,8 @@ class system_data
 
   // Advertisements
   string DIRECTORY_ADVERTISEMENTS = "";
+
+  DNFWTS_ DNFWTS;
 
   // -------------------------------------------------------------------------------------
 

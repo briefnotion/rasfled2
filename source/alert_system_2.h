@@ -99,6 +99,8 @@ class ALERT_SYSTEM_2
 {
   private:
 
+  bool MUTE = false;
+
   int LATEST_ID = 10000;
 
   bool CHANGED = false;
@@ -111,6 +113,8 @@ class ALERT_SYSTEM_2
   ALERT_2_TYPE_MONITOR ALERTS_RESERVE[RESERVE_ALERT_LIST_SIZE];
 
   public:
+
+  void set_mute(bool Mute);
 
   bool changed();
   

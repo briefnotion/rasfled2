@@ -376,6 +376,14 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       // Call routines that match the info on the command line.
 
       // -------------------------------------------------------------------------------------
+      // DFWTS
+      
+      if (check_command(cons," 9999", "DFWTS OFF"))
+      {
+        sdSysData.DNFWTS.trun_off();
+      }
+
+      // -------------------------------------------------------------------------------------
       // Automobile Comms
 
       // Start Automobile Comm Port

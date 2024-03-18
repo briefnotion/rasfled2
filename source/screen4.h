@@ -143,7 +143,7 @@ class SCREEN4
   // Return 0 OK
   // Return 2 error
 
-void character_enter(unsigned char Character, 
+  void character_enter(unsigned char Character, 
                 bool Shift_Pressed, bool Backspace_Pressed, bool Enter_Pressed);
 
   void draw(system_data &sdSysData);

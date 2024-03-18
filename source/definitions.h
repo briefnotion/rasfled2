@@ -47,12 +47,14 @@
 #define FILES_QR_CODE             "qr_rasfled2_rev.png"
 
 #define FILES_DEAMON_LOG          "/var/log/daemon.log"             // Raspi System Log
-#define FILES_AIRCRAFT_JSON       "/run/dump1090-fa/aircraft.json"  // FlightAware Aircraft JSON File
-//#define FILES_AIRCRAFT_JSON       "/home/pi/flightaware/aircraft.json"  // For testing:  FlightAware Aircraft JSON File 
 
 #define ERROR_LOG_FILENAME       "/home/pi/auto/error_log.txt"
 
 #define TEST_MODE           false
+
+// COMMS Settings ADS_B
+#define FILES_AIRCRAFT_JSON       "/run/dump1090-fa/aircraft.json"  // FlightAware Aircraft JSON File
+//#define FILES_AIRCRAFT_JSON       "/home/pi/flightaware/aircraft.json"  // For testing:  FlightAware Aircraft JSON File 
 
 // COMMS Settings CAN Bus
 #define COMMS_PORT_CAN     "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"

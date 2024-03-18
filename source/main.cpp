@@ -1123,6 +1123,21 @@ int loop_2(bool TTY_Only)
         sdSystem.CAR_INFO.translate(sdSystem.ALERTS_2, sdSystem.PROGRAM_TIME.current_frame_time());
         cons_2.update_automobile_gadgets(sdSystem);
 
+        // Check DNFWTS
+        if (sdSystem.DNFWTS.check_for_change())
+        {
+          if (sdSystem.DNFWTS.active())
+          {
+            sdSystem.Lights_On.set(false);
+            sdSystem.ALERTS_2.set_mute(true);
+          }
+          else
+          {
+            sdSystem.Lights_On.set(true);
+            sdSystem.ALERTS_2.set_mute(false);
+          }
+        }
+
         // Update Switches to Alert system.
         /*
         for (int door=0; door < sdSystem.CONFIG.vhwDOORS.size(); door++)

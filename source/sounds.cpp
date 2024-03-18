@@ -18,22 +18,28 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
-void SOUNDS::play_test()
+void SOUNDS::play_test(bool Mute)
 {
-  Command_Thread.run_command(TEST.c_str());
-  //system(TEST.c_str());
+  if (Mute == false)
+  {
+    Command_Thread.run_command(TEST.c_str());
+  }
 }
 
-void SOUNDS::play_snd1()
+void SOUNDS::play_snd1(bool Mute)
 {
-  Command_Thread.run_command(SND1.c_str());
-  //system(SND1.c_str());
+  if (Mute == false)
+  {
+    Command_Thread.run_command(SND1.c_str());
+  }
 }
 
-void SOUNDS::play_snd2()
+void SOUNDS::play_snd2(bool Mute)
 {
-  Command_Thread.run_command(SND2.c_str());
-  //system(SND2.c_str());
+  if (Mute == false)
+  {
+    Command_Thread.run_command(SND2.c_str());
+  }
 }
 
 // -------------------------------------------------------------------------------------

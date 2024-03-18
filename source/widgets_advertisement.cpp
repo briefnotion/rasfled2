@@ -108,13 +108,49 @@ void ADVERTISEMENT_SCREENS::draw(system_data &sdSysData)
           }
 
           ImDrawList* draw_list_advertisement = ImGui::GetWindowDrawList();
+          ImVec2 line_start_1;
+          ImVec2 line_end_1;
+          ImVec2 line_start_2;
+          ImVec2 line_end_2;
 
-          ImVec2 line_start = ImVec2(working_area.x, working_area.y + (float)SCAN_LINE);
-          ImVec2 line_end = ImVec2(working_area.x + float((sdSysData.PROGRAM_TIME.current_frame_time() % 10) * 100), working_area.y + (float)SCAN_LINE);
+          {
+            // Time
+            line_start_1 = ImVec2(working_area.x, working_area.y + (float)SCAN_LINE);
+            line_end_1 = ImVec2(line_start_1.x + float((sdSysData.PROGRAM_TIME.current_frame_time() % 1000)), working_area.y + (float)SCAN_LINE);
 
-          draw_list_advertisement->AddLine(line_start, line_end, sdSysData.COLOR_SELECT.c_black().STANDARD, 1.0f);
+            draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.c_black().STANDARD, 1.0f);
+          }
+
+          if (sdSysData.CAR_INFO.active() && sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
+          {
+            line_start_1 = ImVec2(working_area.x, working_area.y + SCAN_LINE + 1.0f);
+            line_end_1 = ImVec2(line_start_1.x + sdSysData.GPS_SYSTEM.current_position().LATITUDE, working_area.y + (float)SCAN_LINE + 1.0f);
+            
+            line_start_2 = ImVec2(line_end_1.x + (sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph() * 10.0f), working_area.y + (float)SCAN_LINE + 1.0f);
+            line_end_2 = ImVec2(line_start_2.x + sdSysData.GPS_SYSTEM.current_position().LONGITUDE, working_area.y + (float)SCAN_LINE + 1.0f);
+
+            draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.c_black().STANDARD, 1.0f);
+            draw_list_advertisement->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.c_black().STANDARD, 1.0f);
+          }
+
+          if (sdSysData.AIRCRAFT_COORD.is_active())
+          {
+            line_start_1 = ImVec2(working_area.x, working_area.y + SCAN_LINE + 2.0f);
+            line_end_1 = ImVec2(line_start_1.x + (float)sdSysData.AIRCRAFT_COORD.DATA.AIRCRAFTS.size(), working_area.y + (float)SCAN_LINE + 2.0f);
+
+            line_start_2 = ImVec2(line_end_1.x, working_area.y + (float)SCAN_LINE + 2.0f);
+            line_end_2 = ImVec2(line_start_2.x + (float)sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT, working_area.y + (float)SCAN_LINE + 2.0f);
+
+            draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.c_white().STANDARD, 1.0f);
+            draw_list_advertisement->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.c_red().STANDARD, 1.0f);
+          }
+
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().STANDARD));
+          ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y));
+          ImGui::Text("t_%.3f", ((float)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0f);
+          ImGui::PopStyleColor();
         }
-        
+
         if (button_area(working_area))
         {
           STOP_PAUSE_PLAY = -1;

@@ -136,6 +136,13 @@ void ALERT_2_TYPE_MONITOR::clear()
   ACTIVE = false;
 }
 
+// -------------------------------------------------------------------------------------
+
+void ALERT_SYSTEM_2::set_mute(bool Mute)
+{
+  MUTE = Mute;
+}
+
 bool ALERT_SYSTEM_2::changed()
 {
   return CHANGED;
@@ -145,7 +152,7 @@ bool ALERT_SYSTEM_2::changed()
 void ALERT_SYSTEM_2::res_alert_no_condition(int Id, string Alert_Text)
 {
   ALERTS_RESERVE[Id].alert_no_condition(Id, Alert_Text);
-  SOUND_SYSTEM.play_snd1();
+  SOUND_SYSTEM.play_snd1(MUTE);
 }
 
 bool ALERT_SYSTEM_2::res_alert_condition(int Id, bool Raise_Alert, bool Clear_Alert)
@@ -156,15 +163,15 @@ bool ALERT_SYSTEM_2::res_alert_condition(int Id, bool Raise_Alert, bool Clear_Al
 
   if (alert_change  == 2)       // Alert
   {
-    SOUND_SYSTEM.play_test();
+    SOUND_SYSTEM.play_test(MUTE);
   }
   else if (alert_change  == 1)  // Warning
   {
-    SOUND_SYSTEM.play_snd2();
+    SOUND_SYSTEM.play_snd2(MUTE);
   }
   else if (alert_change  == -1)  // Cleared
   {
-    SOUND_SYSTEM.play_snd1();
+    SOUND_SYSTEM.play_snd1(MUTE);
   }
 
   return ret_description_request;
@@ -258,7 +265,7 @@ void ALERT_SYSTEM_2::add_generic_alert(string Text)
 
   LATEST_ID++;
 
-  SOUND_SYSTEM.play_test();
+  SOUND_SYSTEM.play_test(MUTE);
 
   CHANGED = true;
 }
@@ -311,15 +318,15 @@ void ALERT_SYSTEM_2::sound_alert(int Value)
 {
   if (Value == 3)
   {
-    SOUND_SYSTEM.play_test();
+    SOUND_SYSTEM.play_test(MUTE);
   }
   else if (Value == 2)
   {
-    SOUND_SYSTEM.play_snd2();
+    SOUND_SYSTEM.play_snd2(MUTE);
   }
   else
   {
-    SOUND_SYSTEM.play_snd1();
+    SOUND_SYSTEM.play_snd1(MUTE);
   }
 }
 

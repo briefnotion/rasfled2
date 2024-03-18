@@ -35,9 +35,9 @@ class SOUNDS
 
   public:
 
-  void play_test();
-  void play_snd1();
-  void play_snd2();
+  void play_test(bool Mute);
+  void play_snd1(bool Mute);
+  void play_snd2(bool Mute);
 };
 
 // -------------------------------------------------------------------------------------
