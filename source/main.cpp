@@ -272,6 +272,8 @@ int loop_2(bool TTY_Only)
   system_data sdSystem;
   sdSystem.TTY_ONLY = TTY_Only;
 
+  sdSystem.FILE_NAMES.assign();
+
   // Load Windows or Console
   SCREEN4 cons_2;
 

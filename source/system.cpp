@@ -20,6 +20,11 @@ using namespace std;
 // STRUCTURES AND CLASSES
 // ***************************************************************************************
 
+void FILES::assign()
+{
+
+}
+
 void SECTION_STATUS::on(bool &Needs_Refresh)
 {
   if (Value == false)

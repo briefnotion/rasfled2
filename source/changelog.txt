@@ -1,3 +1,9 @@
+2.143_240318
+  - Started adding a more cohersive file variable system.
+  - Added braking bar to the auto screen to see what the 
+      values are.
+  - Changed the size of some scan lines.
+
 2.142_240316
   - added more scan lines to adverts.
   - added a DNFWTS library.

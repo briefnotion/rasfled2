@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.141_240313"
+#define Revision "2.143_240318"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -34,7 +34,50 @@
 #define SCREENUPDATEDELAY 30  // in milliseconds 
 //#define CONSOLESPLITSIZE  6
 
+
+
+#define TEST_MODE           false
+
+#define TEST_DATA_CAN_BUS   false
+#define TEST_DATA_AIRCRAFT  false
+#define TEST_DATA_GPS       false
+
 // Files
+#define DEF_WORKING_DIR                   "/etc/RasFLED/"
+#define DEF_CAN_BUS_DIR                   "/home/pi/auto/"
+#define DEF_AIRCRAFT_1090_DIR             "/run/dump1090-fa/"
+#define DEF_AIRCRAFT_DIR                  "/home/pi/flightaware/"
+#define DEF_GPS_DIR                       "/home/pi/gps_log/"
+
+#define DEF_USB_DEV_DIR                   "/dev/serial/by-id"
+
+#define DEF_ADVERTS_SUB_DIR               "adverts/"
+#define DEF_COMPASS_SUB_DIR               "compass/"
+
+#define DEF_CONFIGURATION                 "configuration.json"
+#define DEF_RUNNING_STATE                 "runningstate.json"
+#define DEF_QR_CODE                       "qr_rasfled2_rev.png"
+
+#define DEF_DEAMON_LOG                    "/var/log/daemon.log"
+
+#define DEF_CAN_BUS_HISTORY_LOG_SUB_DIR   "rascomms"
+#define DEF_CAN_BUS_USB_DEV_NAME          "usb-Arduino_LLC_Arduino_Leonardo-if00"
+#define DEF_CAN_BUS_ERROR_LOG             "error_log.txt"
+#define DEF_CAN_BUS_SAVE_LOG_NAME         "rascomms"
+#define DEF_CAN_BUS_TEST_DATA_NAME        "rascomms.txt"
+
+#define DEF_AIRCRAFT_FA_JSON_FILE         "aircraft.json"
+
+#define DEF_GPS_USB_DEV_NAME              "usb-FTDI_FT232R_USB_UART_B001JKAO-if00-port0"
+#define DEF_GPS_SAVE_LOG_NAME             "gpscomms"
+#define DEF_GPS_TEST_DATA_NAME            "gpscomms.txt"
+
+#define DEF_COMPASS_DEV_NAME              "/dev/i2c-1"
+#define DEF_COMPASS_OFFSET_HISTORY        "compass_offset_history.json"
+
+
+
+
 #define FILES_DIRECTORY           "/etc/RasFLED/"
 //#define FILES_DIRECTORY           "/home/pi/source/RasFLED/configuration/"   // For Testing:  Configuration Files Directory
 
@@ -49,8 +92,6 @@
 #define FILES_DEAMON_LOG          "/var/log/daemon.log"             // Raspi System Log
 
 #define ERROR_LOG_FILENAME       "/home/pi/auto/error_log.txt"
-
-#define TEST_MODE           false
 
 // COMMS Settings ADS_B
 #define FILES_AIRCRAFT_JSON       "/run/dump1090-fa/aircraft.json"  // FlightAware Aircraft JSON File

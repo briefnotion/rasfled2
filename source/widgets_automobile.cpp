@@ -1096,6 +1096,20 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       SDATA.TB_TORQUE.PROPS.MAX_TICK_LEVEL = 3;
       SDATA.TB_TORQUE.create();
     }
+    {
+      SDATA.VB_BRAKE.PROPS.LABEL = "Brake";
+      SDATA.VB_BRAKE.PROPS.BAR_HEIGHT = 20;
+      SDATA.VB_BRAKE.PROPS.MARKER_SIZE = 5;
+      SDATA.VB_BRAKE.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.blue();
+      SDATA.VB_BRAKE.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.yellow();
+      SDATA.VB_BRAKE.PROPS.DRAW_MIN_MAX = true;
+      SDATA.VB_BRAKE.PROPS.MAX = 65536.0f;
+      SDATA.VB_BRAKE.PROPS.HORIZONTAL = false;
+      SDATA.VB_BRAKE.PROPS.DRAW_RULER = true;
+      SDATA.VB_BRAKE.PROPS.COLOR_RULER = sdSysData.COLOR_SELECT.white();
+      SDATA.VB_BRAKE.PROPS.MAX_TICK_LEVEL = 2;
+      SDATA.VB_BRAKE.create();
+    }
   }
 
   /*
@@ -1393,6 +1407,8 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.RPM = sdSysData.CAR_INFO.STATUS.RPM.val_rpm();
   SDATA.TORQUE_DEMANDED = sdSysData.CAR_INFO.STATUS.POWER.val_load();
 
+  SDATA.BRAKE_POWER = sdSysData.CAR_INFO.STATUS.BRAKE.val_value();
+
   // Pressure
 
   SDATA.FUEL_RAIL_PRESSURE = sdSysData.CAR_INFO.STATUS.FUEL.FUEL_RAIL_PRESSURE.kPa();
@@ -1608,6 +1624,8 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
       SDATA.TB_ACCELERATION.update_value(sdSysData, SDATA.ACCELERATION);
       SDATA.TB_RPM.update_value(sdSysData, SDATA.RPM);
       SDATA.TB_TORQUE.update_value(sdSysData, (float)SDATA.TORQUE_DEMANDED);
+
+      SDATA.VB_BRAKE.update_value(sdSysData, (float)SDATA.BRAKE_POWER);
     }
 
     /*
@@ -1781,16 +1799,39 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
         if (DISPLAY_MID_BOTTOM == 0)
         // Show bars
         {
-          ImVec2 pos1 = ImGui::GetCursorScreenPos();
+          ImGui::BeginChild("Auto Data Long Bars Left", ImVec2(ImGui::GetContentRegionAvail().x - 30.0f, ImGui::GetContentRegionAvail().y - 50.0f), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          {
+            ImVec2 pos1 = ImGui::GetCursorScreenPos();
+            
+            ImDrawList* draw_list_data_auto_data_bars_left = ImGui::GetWindowDrawList();
 
-          SDATA.TB_STEERING.draw(draw_list_data_auto_data, sdSysData);
-          SDATA.TB_TORQUE.draw(draw_list_data_auto_data, sdSysData);
-          SDATA.TB_RPM.draw(draw_list_data_auto_data, sdSysData);
+            SDATA.TB_STEERING.draw(draw_list_data_auto_data_bars_left, sdSysData);
+            SDATA.TB_TORQUE.draw(draw_list_data_auto_data_bars_left, sdSysData);
+            SDATA.TB_RPM.draw(draw_list_data_auto_data_bars_left, sdSysData);
 
-          ImGui::Separator();
+            ImGui::Separator();
 
-          SDATA.TB_SPEED.draw(draw_list_data_auto_data, sdSysData);
-          SDATA.TB_ACCELERATION.draw(draw_list_data_auto_data, sdSysData);
+            SDATA.TB_SPEED.draw(draw_list_data_auto_data_bars_left, sdSysData);
+            SDATA.TB_ACCELERATION.draw(draw_list_data_auto_data_bars_left, sdSysData);
+            
+            // Change Screens
+            ImGui::SetCursorScreenPos(pos1);
+            if (ImGui::InvisibleButton("InvisibleButton", ImGui::GetContentRegionAvail()))
+            {
+              DISPLAY_MID_BOTTOM++;
+            }
+          }
+          ImGui::EndChild();
+
+          ImGui::SameLine();
+
+          ImGui::BeginChild("Auto Data Long Bars Right", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - 50.0f), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          {
+            ImDrawList* draw_list_data_auto_data_bars_right = ImGui::GetWindowDrawList();
+
+            SDATA.VB_BRAKE.draw(draw_list_data_auto_data_bars_right, sdSysData);
+          }
+          ImGui::EndChild();
 
           // DISPLAY_MID_BOTTOM - Buttons
           ImGui::BeginChild("Record Buttons Left", ImVec2(ImGui::GetContentRegionAvail().x - 322.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
@@ -1835,13 +1876,6 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
             }
           }
           ImGui::EndChild();
-
-          // Change Screens
-          ImGui::SetCursorScreenPos(pos1);
-          if (ImGui::InvisibleButton("InvisibleButton", ImGui::GetContentRegionAvail()))
-          {
-            DISPLAY_MID_BOTTOM++;
-          }
         }
 
         else if (DISPLAY_MID_BOTTOM == 1)

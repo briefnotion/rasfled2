@@ -56,6 +56,63 @@ class SECTION_STATUS
 };
 
 // -------------------------------------------------------------------------------------
+
+class FILES
+{
+  private:
+
+  public:
+
+  // Main Directory
+  string WORKING_DIR = "";
+  string CAN_BUS_DIR = "";
+  string AIRCRAFT_FA_DIR = "";
+  string AIRCRAFT_DIR = "";
+  string GPS_DIR = "";
+  string COMPASS_DIR = "";
+
+  // USB Device Directory
+  string USB_DEV_DIR = "";
+
+  // Sub Directories
+  string ADVERTS_SUB_DIR = "";
+
+  // RasFLED Files
+  string CONFIGURATION = "";
+  string RUNNING_STATE = "";
+  string QR_CODE = "";
+  //string PLAYLIST = "";
+  //string ANIMATIONS = "";
+
+  // Specific Directories and Files
+  string DEAMON_LOG = "";
+
+  // CAN Bus
+  string CAN_BUS_HISTORY_LOG_SUB_DIR  = "";
+
+  string CAN_BUS_USB_DEV_NAME = "";
+  string CAN_BUS_ERROR_LOG = "";
+  string CAN_BUS_SAVE_LOG_NAME = "";
+  string CAN_BUS_TEST_DATA_NAME = "";
+  
+  // Aircraft
+  string AIRCRAFT_FA_JSON_FILE = "";
+  //string AIRCRAFT_DIR_
+
+  // GPS
+  string GPS_USB_DEV_NAME = "";
+  string GPS_SAVE_LOG_NAME = "";
+  string GPS_TEST_DATA_NAME = "";
+
+  // Compass
+  string COMPASS_DEV_NAME = "";
+  string COMPASS_OFFSET_HISTORY = "";
+
+  void assign();
+};
+
+// -------------------------------------------------------------------------------------
+
 class system_data
 {
   // This is just a repository of data that the program will be accessing and storing 
@@ -83,6 +140,9 @@ class system_data
   };
 
   public:
+
+  // Files
+  FILES FILE_NAMES;
 
   // Primary Variables
   FledTime PROGRAM_TIME;
