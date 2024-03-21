@@ -45,13 +45,13 @@ void ADVERTISEMENT_SCREENS::create(system_data &sdSysData)
   {
     if (get_files_list(sdSysData.DIRECTORY_ADVERTISEMENTS, AD_IMAGE_LIST, ".png"))
     {
-      printf("%d\n", AD_IMAGE_LIST.size());
+      //printf("%d\n", AD_IMAGE_LIST.size());
 
       for (int pos = 0; pos < (int)AD_IMAGE_LIST.size(); pos++)
       {
         TEXTURE_IMAGE tmp_image;
         
-        printf("%s\n", AD_IMAGE_LIST[pos].c_str());
+        //printf("%s\n", AD_IMAGE_LIST[pos].c_str());
 
         if (tmp_image.create(AD_IMAGE_LIST[pos], ImVec2(1000.0f, 540.0f)))
         {

@@ -26,11 +26,11 @@ using namespace std;
 //  Configuration
 
 // Load Configuration
-bool load_json_configuration(system_data &sdSysData, string Directory, string Filename);
+bool load_json_configuration(system_data &sdSysData, string Filename);
 
 // -------------------------------------------------------------------------------------
 // Save Configuration
-bool save_json_configuration(system_data &sdSysData, string Directory, string Filename);
+bool save_json_configuration(system_data &sdSysData, string Filename);
 
 // -------------------------------------------------------------------------------------
 //  Running State

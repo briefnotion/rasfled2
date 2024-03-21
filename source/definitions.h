@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.143_240318"
+#define Revision "2.144_240320"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -34,8 +34,6 @@
 #define SCREENUPDATEDELAY 30  // in milliseconds 
 //#define CONSOLESPLITSIZE  6
 
-
-
 #define TEST_MODE           false
 
 #define TEST_DATA_CAN_BUS   false
@@ -43,62 +41,71 @@
 #define TEST_DATA_GPS       false
 
 // Files
-#define DEF_WORKING_DIR                   "/etc/RasFLED/"
-#define DEF_CAN_BUS_DIR                   "/home/pi/auto/"
-#define DEF_AIRCRAFT_1090_DIR             "/run/dump1090-fa/"
-#define DEF_AIRCRAFT_DIR                  "/home/pi/flightaware/"
-#define DEF_GPS_DIR                       "/home/pi/gps_log/"
 
-#define DEF_USB_DEV_DIR                   "/dev/serial/by-id"
+// Specific Directories
+#define DEF_USB_DEV_DIR                   "/dev/serial/by-id/"     // Not Created
+#define DEF_DEAMON_LOG                    "/var/log/daemon.log"   // Not Created
 
-#define DEF_ADVERTS_SUB_DIR               "adverts/"
-#define DEF_COMPASS_SUB_DIR               "compass/"
+#define DEF_AIRCRAFT_1090_DIR             "/run/dump1090-fa/"     // Not Created
+#define DEF_AIRCRAFT_FA_JSON_FILE         "aircraft.json"         // Not Created
 
+// Main Control for working rasfled
+#define DEF_WORKING_DIR                   "/etc/rasfled/"         // Create Directory
+#define DEF_WORKING_DIR_TEST              "/etc/rasfled-t/"       // Create Directory
+
+#define DEF_COMPASS_SUB_DIR               "compass/"              // Create Directory
+
+#define DEF_ANIMATIONS_FILE              "animations.json"
 #define DEF_CONFIGURATION                 "configuration.json"
 #define DEF_RUNNING_STATE                 "runningstate.json"
 #define DEF_QR_CODE                       "qr_rasfled2_rev.png"
 
-#define DEF_DEAMON_LOG                    "/var/log/daemon.log"
+// Rasfled logs and user files
+#define DEF_LOGS_DIR                       "/home/pi/rasfled/"    // Create Directory
+#define DEF_LOGS_DIR_TEST                  "/home/pi/rasfled-t/"  // Create Directory
 
-#define DEF_CAN_BUS_HISTORY_LOG_SUB_DIR   "rascomms"
-#define DEF_CAN_BUS_USB_DEV_NAME          "usb-Arduino_LLC_Arduino_Leonardo-if00"
-#define DEF_CAN_BUS_ERROR_LOG             "error_log.txt"
+#define DEF_CAN_BUS_SUB_DIR               "auto/"                 // Create Directory
+#define DEF_AIRCRAFT_SUB_DIR              "adsb/"                 // Create Directory
+#define DEF_GPS_SUB_DIR                   "gps_log/"              // Create Directory
+#define DEF_ADVERTS_SUB_DIR               "adverts/"              // Create Directory
+
+// CAN Bus
+#define DEF_CAN_BUS_USB_DEV_NAME          "usb-Arduino_LLC_Arduino_Leonardo-if00"         // System File
+#define DEF_CAN_BUS_HISTORY_LOG_SUB_DIR   "history/"
 #define DEF_CAN_BUS_SAVE_LOG_NAME         "rascomms"
 #define DEF_CAN_BUS_TEST_DATA_NAME        "rascomms.txt"
+#define DEF_CAN_BUS_ERROR_LOG             "error_log.txt"
 
-#define DEF_AIRCRAFT_FA_JSON_FILE         "aircraft.json"
-
-#define DEF_GPS_USB_DEV_NAME              "usb-FTDI_FT232R_USB_UART_B001JKAO-if00-port0"
+// GPS
+#define DEF_GPS_USB_DEV_NAME              "usb-FTDI_FT232R_USB_UART_B001JKAO-if00-port0"  // System File
 #define DEF_GPS_SAVE_LOG_NAME             "gpscomms"
-#define DEF_GPS_TEST_DATA_NAME            "gpscomms.txt"
+#define DEF_GPS_TEST_DATA_NAME            "gpscomms_test.txt"
 
-#define DEF_COMPASS_DEV_NAME              "/dev/i2c-1"
+// Compass
+#define DEF_COMPASS_DEV_NAME              "/dev/i2c-1"                                    // System File
 #define DEF_COMPASS_OFFSET_HISTORY        "compass_offset_history.json"
 
-
-
-
-#define FILES_DIRECTORY           "/etc/RasFLED/"
+//#define FILES_DIRECTORY           "/etc/RasFLED/"
 //#define FILES_DIRECTORY           "/home/pi/source/RasFLED/configuration/"   // For Testing:  Configuration Files Directory
 
-#define SUB_DIRECTORY_ADVERTS     "adverts/"
+//#define SUB_DIRECTORY_ADVERTS     "adverts/"
 
-#define FILES_CONFIGURATION       "configuration.json"
-#define FILES_RUNNING_STATE_SAVE  "runningstate.json"
-#define FILES_PLAYLIST            "playlist.json"
-#define FILES_ANIMATIONS          "animations.json"
-#define FILES_QR_CODE             "qr_rasfled2_rev.png"
+//#define FILES_CONFIGURATION       "configuration.json"
+//#define FILES_RUNNING_STATE_SAVE  "runningstate.json"
+//#define FILES_PLAYLIST            "playlist.json"
+//#define FILES_ANIMATIONS          "animations.json"
+//#define FILES_QR_CODE             "qr_rasfled2_rev.png"
 
-#define FILES_DEAMON_LOG          "/var/log/daemon.log"             // Raspi System Log
+//#define FILES_DEAMON_LOG          "/var/log/daemon.log"             // Raspi System Log
 
-#define ERROR_LOG_FILENAME       "/home/pi/auto/error_log.txt"
+//#define ERROR_LOG_FILENAME       "/home/pi/auto/error_log.txt"
 
 // COMMS Settings ADS_B
-#define FILES_AIRCRAFT_JSON       "/run/dump1090-fa/aircraft.json"  // FlightAware Aircraft JSON File
+//#define FILES_AIRCRAFT_JSON       "/run/dump1090-fa/aircraft.json"  // FlightAware Aircraft JSON File
 //#define FILES_AIRCRAFT_JSON       "/home/pi/flightaware/aircraft.json"  // For testing:  FlightAware Aircraft JSON File 
 
 // COMMS Settings CAN Bus
-#define COMMS_PORT_CAN     "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"
+//#define COMMS_PORT_CAN     "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"
 #define COMMS_AUTOSTART                       true
 #define COMMS_BAUD                            115200
 #define COMMS_BIT_COUNT                       8
@@ -108,15 +115,15 @@
 #define COMMS_DISABLE_CANONICAL_MODE          false
 #define COMMS_XONXOFF                         false
 
-#define COMMS_SAVE_LOG_FILENAME               "/home/pi/auto/rascomms"
+//#define COMMS_SAVE_LOG_FILENAME               "/home/pi/auto/rascomms"
 
 #define COMMS_RECEIVE_TEST_DATA               false
-#define COMMS_TEST_DATA_FILENAME              "/home/pi/auto/rascomms.txt"
+//#define COMMS_TEST_DATA_FILENAME              "/home/pi/auto/rascomms.txt"
 
-#define AUTOMOBILE_LOG_FILE_DIRECTORY         "/home/pi/automobile_log/"
+//#define AUTOMOBILE_LOG_FILE_DIRECTORY         "/home/pi/automobile_log/"
 
 // COMMS Settings GPS
-#define COMMS_PORT_GPS     "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_B001JKAO-if00-port0"
+//#define COMMS_PORT_GPS     "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_B001JKAO-if00-port0"
 #define COMMS_AUTOSTART_GPS                   true
 #define COMMS_BAUD_GPS                        9600
 #define COMMS_BAUD_BAUD_RATE_CHANGE_TO_GPS    true
@@ -129,18 +136,18 @@
 #define COMMS_XONXOFF_GPS                     false
 #define CONTINUOUS_DATA_GPS                   true
 
-#define COMMS_SAVE_LOG_FILENAME_GPS           "/home/pi/gps/gpscomms"
+//#define COMMS_SAVE_LOG_FILENAME_GPS           "/home/pi/gps/gpscomms"
 
 #define COMMS_RECEIVE_TEST_DATA_GPS           false
-#define COMMS_TEST_DATA_FILENAME_GPS          "/home/pi/gps/gpscomms.txt"
+//#define COMMS_TEST_DATA_FILENAME_GPS          "/home/pi/gps/gpscomms.txt"
 
-#define AUTOMOBILE_LOG_FILE_DIRECTORY_GPS     "/home/pi/gps_log/"
+//#define AUTOMOBILE_LOG_FILE_DIRECTORY_GPS     "/home/pi/gps_log/"
 
 // COMMS Settings HMC5883L 3-Axis Compass
-#define COMMS_PORT_COMPASS                    "/dev/i2c-1"
+//#define COMMS_PORT_COMPASS                    "/dev/i2c-1"
 
-#define COMMS_PORT_COMPASS_OFFSET_HISTORY     "compass_offset_history.json"
-#define COMMS_PORT_COMPASS_OFFSET_HISTORY_T   "compass_offset_history_test.json"
+//#define COMMS_PORT_COMPASS_OFFSET_HISTORY     "compass_offset_history.json"
+//#define COMMS_PORT_COMPASS_OFFSET_HISTORY_T   "compass_offset_history_test.json"
 
 #define COMMS_ID_COMPASS                      0x1E
 #define COMMS_AUTOSTART_COMPASS               true

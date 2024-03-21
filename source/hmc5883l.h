@@ -244,12 +244,6 @@ class CAL_LEVEL_2
 {
   private:
 
-  // hard coded for now.
-  // Offset Storage
-  string OFFSET_HISTORY_DIRECTORY = FILES_DIRECTORY;
-  string OFFSET_HISTORY_FILENAME  =  COMMS_PORT_COMPASS_OFFSET_HISTORY;
-  string OFFSET_HISTORY_TEST_FILENAME  =  COMMS_PORT_COMPASS_OFFSET_HISTORY_T;
-
   // Simple calibration
   bool MIN_MAX_HAS_DATA = false;
 
@@ -288,6 +282,7 @@ class CAL_LEVEL_2
   TIMED_PING OFFSET_HISTORY_TIMER;
 
   public:
+  string OFFSET_HISTORY_FILENAME = "";
 
   vector<CALIBRATION_DATA> CALIBRATION_QUADS;
 
@@ -365,6 +360,8 @@ class HMC5883L_PROPERTIES
   //  a disconnect, resulting in autoconnet starting again. 
   // If false, port will stay open even if no data is being seen.
   //  No checks for hardware disconnects.
+
+  string OFFSET_HISTORY_FILE_NAME = "";
 };
 
 class HMC5883L
@@ -421,7 +418,7 @@ class HMC5883L
   bool register_write(char Register, char Value);
     // Internal: Change chip settings.
 
-  bool create();      // Internal: Opens port for access.
+  bool create(string Offset_History_Filename);      // Internal: Opens port for access.
 
   void stop();        // Internal: Closes port for access.
                       //  Not yet fully implemented.

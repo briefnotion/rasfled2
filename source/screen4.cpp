@@ -289,7 +289,7 @@ int SCREEN4::create(system_data &sdSysData)
     ImGui::EndFrame();
 
     // QR_Image
-    QR_CODE.create(FILES_DIRECTORY, FILES_QR_CODE, 2.0f);
+    QR_CODE.create(sdSysData.FILE_NAMES.QR_CODE_FILE, 2.0f);
 
     // Prepare Screens
     AUTOMOBILE.create(sdSysData);

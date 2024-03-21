@@ -576,11 +576,11 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
 
       if (check_command(cons, " animld", "Reload Animations"))
       {
-        string Working_Directory = FILES_DIRECTORY;
-        string Animations_Library_JSON = FILES_ANIMATIONS;
-        string Running_State_Filename = Working_Directory + FILES_RUNNING_STATE_SAVE;
+        //string Working_Directory = FILES_DIRECTORY;
+        //string Animations_Library_JSON = FILES_ANIMATIONS;
+        //string Running_State_Filename = Working_Directory + FILES_RUNNING_STATE_SAVE;
 
-        if (Animations.load_collections(Working_Directory, Animations_Library_JSON) == true)
+        if (Animations.load_collections(sdSysData.FILE_NAMES.ANIMATIONS_FILE) == true)
         {
           cons.printw("  Animations file loaded.");
         }

@@ -1,3 +1,17 @@
+2.144_240320
+  - File names class is more complete.
+      - Main system files have moved from /etc/RasFLED to 
+          /etc/rasfled
+      - Test system files are stored in /etc/rasfled-t
+      - Support files are for GPS, Compass, Auto, and Adverts 
+          have their own directory and stored in a single 
+          directory in the home directory, labeled rasfled
+      - Support test files directory is called rasfled-t
+      - Adverts moved to to home rasfled/adverts directory.
+  - Adjusted Braking vertical bar to max at (2 * 256).
+  - Warning: Lots of critical components have changed so 
+      not all the bugs are found.
+
 2.143_240318
   - Started adding a more cohersive file variable system.
   - Added braking bar to the auto screen to see what the 

@@ -102,7 +102,7 @@ class FILE_WATCH
   string get_next_line();
 };
 
-bool check_create_working_dir();
+bool check_create_working_dir(string Directory, bool Create);
 // Not Coded
 
 bool get_files_list(string Directory, vector<string> &List, string Only_Type);

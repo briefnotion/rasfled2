@@ -547,14 +547,7 @@ void CAL_LEVEL_2::offset_history_read()
 
   bool ret_success = false;
 
-  if (TEST_MODE)
-  {
-    json_offset_list = file_to_string(OFFSET_HISTORY_DIRECTORY + OFFSET_HISTORY_TEST_FILENAME, ret_success);
-  }
-  else
-  {
-    json_offset_list = file_to_string(OFFSET_HISTORY_DIRECTORY + OFFSET_HISTORY_FILENAME, ret_success);
-  }
+  json_offset_list = file_to_string(OFFSET_HISTORY_FILENAME, ret_success);
 
   if (ret_success == true)
   {
@@ -659,14 +652,7 @@ void CAL_LEVEL_2::offset_history_write()
 
     // bool ret_success = false;
 
-    if (TEST_MODE)
-    {
-      deque_string_to_file(OFFSET_HISTORY_DIRECTORY + OFFSET_HISTORY_TEST_FILENAME, file_dq_string, false);
-    }
-    else
-    {
-      deque_string_to_file(OFFSET_HISTORY_DIRECTORY + OFFSET_HISTORY_FILENAME, file_dq_string, false);
-    }
+    deque_string_to_file(OFFSET_HISTORY_FILENAME, file_dq_string, false);
   }
 }
 
@@ -1071,13 +1057,14 @@ bool HMC5883L::register_write(char Register, char Value)
   return ret_write_success;
 }
 
-bool HMC5883L::create()
+bool HMC5883L::create(string Offset_History_Filename)
 {
   bool ret_success = false;
 
   CALIBRATED_BEARINGS.clear();
   CALIBRATED_BEARINGS.reserve(CALIBRATED_BEARINGS_SIZE + 1);
   
+  LEVEL_2.OFFSET_HISTORY_FILENAME = Offset_History_Filename;
   LEVEL_2.clear();
 
   CONNECTED = false;
@@ -1379,12 +1366,12 @@ bool HMC5883L::cycle(unsigned long tmeFrame_Time)
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 2000);   // Refresh the data recieve timer.
 
         CYCLE = 0; // Go into normal cycle.
-        create();
+        create(PROPS.OFFSET_HISTORY_FILE_NAME);
       }
       else
       {
         CYCLE = -1;
-        create();
+        create(PROPS.OFFSET_HISTORY_FILE_NAME);
       }
     }
   }

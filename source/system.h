@@ -30,6 +30,7 @@
 #include "auto.h"
 #include "nmea.h"
 #include "hmc5883l.h"
+#include "rasapi.h"
 
 #include "screen4_helper.h"
 
@@ -63,52 +64,54 @@ class FILES
 
   public:
 
-  // Main Directory
-  string WORKING_DIR = "";
-  string CAN_BUS_DIR = "";
-  string AIRCRAFT_FA_DIR = "";
-  string AIRCRAFT_DIR = "";
-  string GPS_DIR = "";
-  string COMPASS_DIR = "";
-
-  // USB Device Directory
-  string USB_DEV_DIR = "";
-
-  // Sub Directories
-  string ADVERTS_SUB_DIR = "";
-
-  // RasFLED Files
-  string CONFIGURATION = "";
-  string RUNNING_STATE = "";
-  string QR_CODE = "";
-  //string PLAYLIST = "";
-  //string ANIMATIONS = "";
-
   // Specific Directories and Files
+  string USB_DEV_DIR = "";
   string DEAMON_LOG = "";
 
-  // CAN Bus
-  string CAN_BUS_HISTORY_LOG_SUB_DIR  = "";
+  string AIRCRAFT_1090_DIR = "";
+  string AIRCRAFT_FA_FILE = "";
 
-  string CAN_BUS_USB_DEV_NAME = "";
-  string CAN_BUS_ERROR_LOG = "";
-  string CAN_BUS_SAVE_LOG_NAME = "";
-  string CAN_BUS_TEST_DATA_NAME = "";
-  
-  // Aircraft
-  string AIRCRAFT_FA_JSON_FILE = "";
-  //string AIRCRAFT_DIR_
+  // Main Control for working rasfled
+  string WORKING_DIR = "";
+
+  string COMPASS_DIR = "";
+
+  string ANIMATIONS_FILE = "";
+  string CONFIGURATION_FILE = "";
+  string RUNNING_STATE_FILE = "";
+  string QR_CODE_FILE = "";
+
+  // Rasfled logs and user files
+  string LOGS_DIR = "";
+
+  string LOGS_CAN_BUS_DIR = "";
+  string LOGS_CAN_BUS_HISTORY_SUB_DIR = "";
+
+  string LOGS_AIRCRAFT_DIR = "";
+  string LOGS_GPS_DIR = "";
+  string LOGS_ADVERTS_DIR = "";
+
+  // CAN Bus
+  string CAN_BUS_DEVICE_FILE = "";
+
+  string CAN_BUS_DIR = "";
+  string CAN_BUS_HISTORY_DIR = "";
+
+  string CAN_BUS_HISTORY_FILE = "";
+  string CAN_BUS_TEST_FILE = "";
+  string CAN_BUS_ERROR_LOG_FILE = "";
 
   // GPS
-  string GPS_USB_DEV_NAME = "";
-  string GPS_SAVE_LOG_NAME = "";
-  string GPS_TEST_DATA_NAME = "";
+  string GPS_DEVICE_FILE = "";
+
+  string GPS_LOG_FILE = "";
+  string GPS_TEST_FILE = "";
 
   // Compass
-  string COMPASS_DEV_NAME = "";
-  string COMPASS_OFFSET_HISTORY = "";
+  string COMPASS_DEVICE_FILE = "";
+  string COMPASS_OFFSET_HISTROY_FILE = "";
 
-  void assign();
+  bool assign();
 };
 
 // -------------------------------------------------------------------------------------

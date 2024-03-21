@@ -89,7 +89,7 @@ class ANIMATIONS_STORAGE
 
   deque<ANIMATIONS_COLLECTION> COLLECTION;
 
-  bool load_collections(string Directory, string Filename);
+  bool load_collections(string Filename);
 
   int get_collection_pos(string Name);
 

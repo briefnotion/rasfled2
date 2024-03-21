@@ -279,7 +279,7 @@ class FALSE_CATCH
   public:
 
   void catch_false(bool Value);
-  // Sets HAS_TRUTH = true if Value is true.
+  // Sets HAS_FALSE = true if Value is false.
 
   bool has_false();
   // Returns true a false value was caught in the catch false routine.

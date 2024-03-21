@@ -17,13 +17,13 @@
 // -------------------------------------------------------------------------------------
 // Animations
 
-bool ANIMATIONS_STORAGE::load_collections(string Directory, string Filename)
+bool ANIMATIONS_STORAGE::load_collections(string Filename)
 {
   JSON_INTERFACE animations_json;
 
   bool ret_success = false;
 
-  string str_animations_json = file_to_string(Directory + Filename, ret_success);
+  string str_animations_json = file_to_string(Filename, ret_success);
 
   if (ret_success == true)
   {

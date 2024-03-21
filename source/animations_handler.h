@@ -106,7 +106,7 @@ class ANIMATION_HANDLER
   void create_events(system_data &sdSysData);
   // Prepares the event system groups.  Must be ran before system accepts events.
 
-  bool load_collections(string Directory, string Filename);
+  bool load_collections(string Filename);
   // Load all animations json file into system memory, LIBRARY, to be duplicated, 
   //  duplicate modified, then duplicate called, when needed.
 

@@ -312,10 +312,33 @@ string FILE_WATCH::get_next_line()
   return str_read_line;
 }
 
-bool check_create_working_dir()
+bool check_create_working_dir(string Directory, bool Create)
 {
-  // Not Coded
-  return false;
+  bool ret_exist = false;
+  namespace fs = boost::filesystem;
+
+  fs::path path(Directory);
+
+  if (fs::exists(Directory))
+  {
+    ret_exist = true;
+    //printf("Exist: %s\n", Directory.c_str());
+  }
+  else
+  {
+    if (Create)
+    {
+      ret_exist = fs::create_directory(path);
+      //printf("Create: %s\n", Directory.c_str());
+    }
+    else
+    {
+      ret_exist = false;
+      //printf("Not Created: %s\n", Directory.c_str());
+    }
+  }
+
+  return ret_exist;
 }
 
 bool get_files_list(string Directory, vector<string> &List, string Only_Type)

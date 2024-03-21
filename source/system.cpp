@@ -20,9 +20,78 @@ using namespace std;
 // STRUCTURES AND CLASSES
 // ***************************************************************************************
 
-void FILES::assign()
+bool FILES::assign()
 {
+  FALSE_CATCH ret_success;
+  USB_DEV_DIR = (string)DEF_USB_DEV_DIR;
+  AIRCRAFT_1090_DIR = (string)DEF_AIRCRAFT_1090_DIR;
 
+  // Check Directories
+  if (!TEST_MODE)
+  {
+    WORKING_DIR = (string)DEF_WORKING_DIR;
+  }
+  else
+  {
+    WORKING_DIR = (string)DEF_WORKING_DIR_TEST;
+  }
+
+  COMPASS_DIR = WORKING_DIR + (string)DEF_COMPASS_SUB_DIR;
+
+  if (!TEST_MODE)
+  {
+    LOGS_DIR = (string)DEF_LOGS_DIR;
+  }
+  else
+  {
+    LOGS_DIR = (string)DEF_LOGS_DIR_TEST;
+  }
+
+  LOGS_CAN_BUS_DIR = LOGS_DIR +  (string)DEF_CAN_BUS_SUB_DIR;
+  LOGS_CAN_BUS_HISTORY_SUB_DIR = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_HISTORY_LOG_SUB_DIR;
+  LOGS_AIRCRAFT_DIR = LOGS_DIR + (string)DEF_AIRCRAFT_SUB_DIR;
+  LOGS_GPS_DIR = LOGS_DIR + (string)DEF_GPS_SUB_DIR;
+  LOGS_ADVERTS_DIR = LOGS_DIR + (string)DEF_ADVERTS_SUB_DIR;
+  
+  // Crash occurs if directory to be created is within a directory that doesnt exist.
+  ret_success.catch_false(check_create_working_dir(WORKING_DIR, true));
+  ret_success.catch_false(check_create_working_dir(COMPASS_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_CAN_BUS_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_CAN_BUS_HISTORY_SUB_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_AIRCRAFT_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_GPS_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_ADVERTS_DIR, true));
+  
+  if (!ret_success.has_false())
+  {
+    // Specific Directories and Files
+    DEAMON_LOG = DEF_DEAMON_LOG;
+    AIRCRAFT_FA_FILE = AIRCRAFT_1090_DIR + (string)DEF_AIRCRAFT_FA_JSON_FILE;
+
+    // Main Control for working rasfled
+    ANIMATIONS_FILE = WORKING_DIR + (string)DEF_ANIMATIONS_FILE;
+    CONFIGURATION_FILE = WORKING_DIR + (string)DEF_CONFIGURATION;
+    RUNNING_STATE_FILE = WORKING_DIR + (string)DEF_RUNNING_STATE;
+    QR_CODE_FILE = WORKING_DIR + (string)DEF_QR_CODE;
+
+    // // CAN Bus
+    CAN_BUS_DEVICE_FILE = USB_DEV_DIR + (string)DEF_CAN_BUS_USB_DEV_NAME;
+    CAN_BUS_HISTORY_FILE = LOGS_CAN_BUS_HISTORY_SUB_DIR + (string)DEF_CAN_BUS_SAVE_LOG_NAME;
+    CAN_BUS_TEST_FILE = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_TEST_DATA_NAME;
+    CAN_BUS_ERROR_LOG_FILE = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_ERROR_LOG;
+
+    // GPS
+    GPS_DEVICE_FILE = USB_DEV_DIR + (string)DEF_GPS_USB_DEV_NAME;
+    GPS_LOG_FILE = LOGS_GPS_DIR + (string)DEF_GPS_SAVE_LOG_NAME;
+    GPS_TEST_FILE = LOGS_GPS_DIR + (string)DEF_GPS_TEST_DATA_NAME;
+
+    // Compass
+    COMPASS_DEVICE_FILE = (string)DEF_COMPASS_DEV_NAME;
+    COMPASS_OFFSET_HISTROY_FILE = COMPASS_DIR + (string)DEF_COMPASS_OFFSET_HISTORY;
+  }
+
+  return !ret_success.has_false();
 }
 
 void SECTION_STATUS::on(bool &Needs_Refresh)

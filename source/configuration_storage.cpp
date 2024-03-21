@@ -20,13 +20,13 @@ using namespace std;
 // -------------------------------------------------------------------------------------
 
 // Load Configuration
-bool load_json_configuration(system_data &sdSysData, string Directory, string Filename)
+bool load_json_configuration(system_data &sdSysData, string Filename)
 {
   JSON_INTERFACE configuration_json;
 
   bool ret_success = false;
 
-  string json_configuration_file = file_to_string(Directory + Filename, ret_success);
+  string json_configuration_file = file_to_string(Filename, ret_success);
 
   if (ret_success == true)
   {
@@ -116,7 +116,7 @@ bool load_json_configuration(system_data &sdSysData, string Directory, string Fi
 
 // -------------------------------------------------------------------------------------
 // Save Configuration
-bool save_json_configuration(system_data &sdSysData, string Directory, string Filename)
+bool save_json_configuration(system_data &sdSysData, string Filename)
 {
   bool ret_success = false;
 
@@ -268,7 +268,7 @@ bool save_json_configuration(system_data &sdSysData, string Directory, string Fi
   configuration_json.json_print_build_to_string_deque(configuration_file_dq_string);
   
   // Write string list of file
-  ret_success = deque_string_to_file(Directory+ Filename, configuration_file_dq_string, false);
+  ret_success = deque_string_to_file(Filename, configuration_file_dq_string, false);
 
   return ret_success;
 }

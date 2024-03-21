@@ -272,10 +272,19 @@ int loop_2(bool TTY_Only)
   system_data sdSystem;
   sdSystem.TTY_ONLY = TTY_Only;
 
-  sdSystem.FILE_NAMES.assign();
-
   // Load Windows or Console
   SCREEN4 cons_2;
+
+  // Check Directories
+  if (sdSystem.FILE_NAMES.assign() == false)
+  {
+    // not fully thought out
+    cons_2.SCREEN_COMMS.printw("Error while checking or creating directories.\n");
+  }
+  else
+  {
+    cons_2.SCREEN_COMMS.printw("Succesful directory check or create.\n");
+  }
 
   // Switch Lights On
   sdSystem.Lights_On.set(true);
@@ -292,14 +301,14 @@ int loop_2(bool TTY_Only)
 
   // System LogFile Variables
   FILE_WATCH watcher_daemon_log;
-  watcher_daemon_log.start(FILES_DEAMON_LOG);
+  watcher_daemon_log.start(sdSystem.FILE_NAMES.DEAMON_LOG);
 
   // System LogFile Variables
   FILE_WATCH watcher_aircraft_json;
   watcher_aircraft_json.PROP.READ_FROM_BEGINNING = true;
   watcher_aircraft_json.PROP.WATCH_SIZE_CHANGE = false;
   watcher_aircraft_json.PROP.WATCH_TIME_CHANGE = true;
-  watcher_aircraft_json.start(FILES_AIRCRAFT_JSON);
+  watcher_aircraft_json.start(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE);
 
   // Disposable Variables
   int count  = 0;
@@ -308,7 +317,7 @@ int loop_2(bool TTY_Only)
   comms_timer.set(2);
   
   // Can Bus Comm Port Setup
-  sdSystem.COMMS_AUTO.PROPS.PORT = COMMS_PORT_CAN;
+  sdSystem.COMMS_AUTO.PROPS.PORT = sdSystem.FILE_NAMES.CAN_BUS_DEVICE_FILE;
   
   sdSystem.COMMS_AUTO.PROPS.AUTOSTART = COMMS_AUTOSTART;
   
@@ -320,10 +329,10 @@ int loop_2(bool TTY_Only)
   sdSystem.COMMS_AUTO.PROPS.DISABLE_CANONICAL_MODE = COMMS_DISABLE_CANONICAL_MODE;
   sdSystem.COMMS_AUTO.PROPS.XONXOFF = COMMS_XONXOFF;
 
-  sdSystem.COMMS_AUTO.PROPS.SAVE_LOG_FILENAME = COMMS_SAVE_LOG_FILENAME;
+  sdSystem.COMMS_AUTO.PROPS.SAVE_LOG_FILENAME = sdSystem.FILE_NAMES.CAN_BUS_HISTORY_FILE;
   
   sdSystem.COMMS_AUTO.PROPS.RECEIVE_TEST_DATA = COMMS_RECEIVE_TEST_DATA;
-  sdSystem.COMMS_AUTO.PROPS.TEST_DATA_FILENAME = COMMS_TEST_DATA_FILENAME;
+  sdSystem.COMMS_AUTO.PROPS.TEST_DATA_FILENAME = sdSystem.FILE_NAMES.CAN_BUS_TEST_FILE;
 
   sdSystem.COMMS_AUTO.PROPS.FLASH_DATA_RECORDER_ACTIVE = COMMS_FLASH_DATA_RECORDER_ACTIVE;
 
@@ -334,7 +343,7 @@ int loop_2(bool TTY_Only)
   // GPS Comm Port Setup
   compass_timer.set( 1000 / COMMS_COMPASS_POLLING_RATE_FPS );
 
-  sdSystem.COMMS_GPS.PROPS.PORT = COMMS_PORT_GPS;
+  sdSystem.COMMS_GPS.PROPS.PORT = sdSystem.FILE_NAMES.GPS_DEVICE_FILE;
 
   sdSystem.COMMS_GPS.PROPS.AUTOSTART = COMMS_AUTOSTART_GPS;
 
@@ -350,17 +359,17 @@ int loop_2(bool TTY_Only)
 
   sdSystem.COMMS_GPS.PROPS.CONTINUOUS_DATA = CONTINUOUS_DATA_GPS;
 
-  sdSystem.COMMS_GPS.PROPS.SAVE_LOG_FILENAME = COMMS_SAVE_LOG_FILENAME_GPS;
+  sdSystem.COMMS_GPS.PROPS.SAVE_LOG_FILENAME = sdSystem.FILE_NAMES.GPS_LOG_FILE;
   
   sdSystem.COMMS_GPS.PROPS.RECEIVE_TEST_DATA = COMMS_RECEIVE_TEST_DATA_GPS;
-  sdSystem.COMMS_GPS.PROPS.TEST_DATA_FILENAME = COMMS_TEST_DATA_FILENAME_GPS;
+  sdSystem.COMMS_GPS.PROPS.TEST_DATA_FILENAME = sdSystem.FILE_NAMES.GPS_TEST_FILE;
 
   sdSystem.COMMS_GPS.device_baud_rate_change_to_target_string(
   sdSystem.GPS_SYSTEM.device_change_baud_rate_string(COMMS_BAUD_TARGET_GPS));
 
   // ---------------------------------------------------------------------------------------
   // Compass Comm Port Setup
-  sdSystem.COMMS_COMPASS.PROPS.PORT = COMMS_PORT_COMPASS;
+  sdSystem.COMMS_COMPASS.PROPS.PORT = sdSystem.FILE_NAMES.COMPASS_DEVICE_FILE;
   sdSystem.COMMS_COMPASS.PROPS.I2C_ID = COMMS_ID_COMPASS;
   //sdSystem.COMMS_COMPASS.PROPS.BAUD_RATE = COMMS_BAUD_GPS;
 
@@ -368,6 +377,8 @@ int loop_2(bool TTY_Only)
   sdSystem.COMMS_COMPASS.PROPS.CONTINUOUS_DATA = CONTINUOUS_DATA_GPS;
 
   sdSystem.COMMS_COMPASS.PROPS.CALIBRATION_LOCK_AT_START = COMMS_COMPASS_CAL_LOCK_AT_START;
+  sdSystem.COMMS_COMPASS.PROPS.OFFSET_HISTORY_FILE_NAME = sdSystem.FILE_NAMES.COMPASS_OFFSET_HISTROY_FILE;
+
   
   // Preload Calibration Data
   FLOAT_XYZ Cal_Pt_1;
@@ -397,8 +408,7 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   // The Advertisements
-  sdSystem.DIRECTORY_ADVERTISEMENTS = FILES_DIRECTORY;
-  sdSystem.DIRECTORY_ADVERTISEMENTS += SUB_DIRECTORY_ADVERTS;
+  sdSystem.DIRECTORY_ADVERTISEMENTS = sdSystem.FILE_NAMES.LOGS_ADVERTS_DIR;
 
   // ---------------------------------------------------------------------------------------
   // Initialize the console
@@ -451,19 +461,19 @@ int loop_2(bool TTY_Only)
   sdSystem.set_running_color(CRGB(32,32,32),"White");
 
   // File System
-  string Working_Directory = FILES_DIRECTORY;
-  string Configuration_Files_JSON = FILES_CONFIGURATION;
-  string Animations_Library_JSON = FILES_ANIMATIONS;
+  //string Working_Directory = FILES_DIRECTORY;
+  //string Configuration_Files_JSON = FILES_CONFIGURATION;
+  //string Animations_Library_JSON = FILES_ANIMATIONS;
   //check_create_working_dir(FILES_DIRECTORY);
 
   //  -----
   // Create Filenames as Variables
-  string Running_State_Filename = Working_Directory + FILES_RUNNING_STATE_SAVE;
+  string Running_State_Filename = sdSystem.FILE_NAMES.RUNNING_STATE_FILE;
 
   // Loading Configuration from files
   // yes, it resaves the file.  as is for now.
 
-  if (load_json_configuration(sdSystem, Working_Directory, Configuration_Files_JSON) == true)
+  if (load_json_configuration(sdSystem, sdSystem.FILE_NAMES.CONFIGURATION_FILE) == true)
   {
     cons_2.SCREEN_COMMS.printw("  Configuration file loaded.");
   }
@@ -472,7 +482,7 @@ int loop_2(bool TTY_Only)
     cons_2.SCREEN_COMMS.printw("  Configuration file not loaded.  Generating Working Configuration File.");
     sdSystem.ALERTS.add_generic_alert("Configuration file not loaded.  Generating Working Configuration File.");
 
-    if (save_json_configuration(sdSystem, Working_Directory, Configuration_Files_JSON) == true)
+    if (save_json_configuration(sdSystem, sdSystem.FILE_NAMES.CONFIGURATION_FILE) == true)
     {
       cons_2.SCREEN_COMMS.printw("    Configuration file created.");
       sdSystem.ALERTS.add_generic_alert("Configuration file created.");
@@ -498,7 +508,7 @@ int loop_2(bool TTY_Only)
 
   animations.create_events(sdSystem);
   
-  if (animations.load_collections(Working_Directory, Animations_Library_JSON) == true)
+  if (animations.load_collections(sdSystem.FILE_NAMES.ANIMATIONS_FILE) == true)
   {
     cons_2.SCREEN_COMMS.printw("  Animations file loaded.");
   }
@@ -960,7 +970,7 @@ int loop_2(bool TTY_Only)
       // Read ADS-B Aircraft JSON
       if (watcher_aircraft_json.changed() == true)
       {
-        sdSystem.AIRCRAFT_COORD.process(file_to_string(FILES_AIRCRAFT_JSON));
+        sdSystem.AIRCRAFT_COORD.process(file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE));
       }
 
       processcommandlineinput(cons_2.SCREEN_COMMS, sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);

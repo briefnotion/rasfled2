@@ -2854,7 +2854,7 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
                   "TTL RB, " + CALCULATED.RB_TTL.life_percentage_mean()
       );
 
-      deque_string_to_file(AUTOMOBILE_LOG_FILE_DIRECTORY + file_format_system_date() + ".txt", STATUS_LOG_MESSAGE, true);
+      deque_string_to_file(PROPS.SAVE_LOG_FILENAME + file_format_system_date() + ".txt", STATUS_LOG_MESSAGE, true);
 
       STATUS_LOG_MESSAGE.clear();
 

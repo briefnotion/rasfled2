@@ -470,9 +470,9 @@ void ANIMATION_HANDLER::create_events(system_data &sdSysData)
 
 }
 
-bool ANIMATION_HANDLER::load_collections(string Directory, string Filename)
+bool ANIMATION_HANDLER::load_collections(string Filename)
 {
-  return LIBRARY.load_collections(Directory, Filename);
+  return LIBRARY.load_collections(Filename);
 }
 
 void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime, 
