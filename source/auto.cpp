@@ -54,6 +54,61 @@ bool check_availability(bool Coded_Availability, bool Source_Availabilty)
 
 //-----------
 
+void BYTE_VALUE_8::store_value(int Value_0, int Value_1, int Value_2, int Value_3, 
+                                  int Value_4, int Value_5, int Value_6, int Value_7)
+{
+  VALUE_0 = Value_0;
+  VALUE_1 = Value_1;
+  VALUE_2 = Value_2;
+  VALUE_3 = Value_3;
+  VALUE_4 = Value_4;
+  VALUE_5 = Value_5;
+  VALUE_6 = Value_6;
+  VALUE_7 = Value_7;
+}
+
+int BYTE_VALUE_8::val_0()
+{
+  return VALUE_0;
+}
+
+int BYTE_VALUE_8::val_1()
+{
+  return VALUE_1;
+}
+
+int BYTE_VALUE_8::val_2()
+{
+  return VALUE_2;
+}
+
+int BYTE_VALUE_8::val_3()
+{
+  return VALUE_3;
+}
+
+int BYTE_VALUE_8::val_4()
+{
+  return VALUE_4;
+}
+
+int BYTE_VALUE_8::val_5()
+{
+  return VALUE_5;
+}
+
+int BYTE_VALUE_8::val_6()
+{
+  return VALUE_6;
+}
+
+int BYTE_VALUE_8::val_7()
+{
+  return VALUE_7;
+}
+
+//-----------
+
 void TEMPERATURE::store_c(int Celsius)
 {
   C  = Celsius;
@@ -2760,6 +2815,10 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     STATUS.INDICATORS.store_signal(DATA.AD_260.DATA[3]);
 
     STATUS.INDICATORS.store_hazards(tmeFrame_Time, DATA.AD_310.DATA[4]);
+
+    // Dashboard Screen
+    STATUS.GUAGES.SCREEN.store_value(DATA.AD_140.DATA[0], DATA.AD_140.DATA[1], DATA.AD_140.DATA[2], DATA.AD_140.DATA[3], 
+                                      DATA.AD_140.DATA[4], DATA.AD_140.DATA[5], DATA.AD_140.DATA[6], DATA.AD_140.DATA[7]);
 
     // FUEL
     STATUS.FUEL.store_consumed(DATA.AD_200.DATA[7]);

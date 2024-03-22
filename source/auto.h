@@ -108,7 +108,7 @@ class AUTOMOBILE_DATA
   AUTOMOBILE_DATA_LINE AD_128;
   AUTOMOBILE_DATA_LINE AD_130;  //* 304 - Speed, Data 6 kph, Data 7 Decimal
   AUTOMOBILE_DATA_LINE AD_138;
-  AUTOMOBILE_DATA_LINE AD_140;  // - Actual Stearing Effort?
+  AUTOMOBILE_DATA_LINE AD_140;  // - Dashboard Screen
   AUTOMOBILE_DATA_LINE AD_150;
   AUTOMOBILE_DATA_LINE AD_160;
   AUTOMOBILE_DATA_LINE AD_17E;
@@ -173,6 +173,34 @@ class AUTOMOBILE_DATA
                                 //    interval. message not sent if 0.
 
   AUTOMOBILE_DATA_LINE AD_UNKNOWN;
+};
+
+class BYTE_VALUE_8
+{
+  private:
+
+  int VALUE_0 = 0;
+  int VALUE_1 = 0;
+  int VALUE_2 = 0;
+  int VALUE_3 = 0;
+  int VALUE_4 = 0;
+  int VALUE_5 = 0;
+  int VALUE_6 = 0;
+  int VALUE_7 = 0;
+
+  public:
+
+  void store_value(int Value_0, int Value_1, int Value_2, int Value_3, 
+                      int Value_4, int Value_5, int Value_6, int Value_7);
+
+  int val_0();
+  int val_1();
+  int val_2();
+  int val_3();
+  int val_4();
+  int val_5();
+  int val_6();
+  int val_7();
 };
 
 class TEMPERATURE
@@ -313,6 +341,8 @@ class AUTOMOBILE_GUAGES
   string COOLANT_DISP = "X";
 
   public:
+
+  BYTE_VALUE_8 SCREEN;
 
   void set_source_availability(bool Available);
   bool available();

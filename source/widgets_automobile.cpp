@@ -659,6 +659,21 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 
     ImGui::Text("ERR:");
     ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.errors());
+    
+    ImGui::SetNextWindowSize(ImVec2(128, 210));
+    if (ImGui::Begin("Message", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+    {
+      ImGui::Text("140 0: %d", sdSysData.CAR_INFO.STATUS.GUAGES.SCREEN.val_0());
+      ImGui::Text("140 1: %d", sdSysData.CAR_INFO.STATUS.GUAGES.SCREEN.val_1());
+      ImGui::Text("140 2: %d", sdSysData.CAR_INFO.STATUS.GUAGES.SCREEN.val_2());
+      ImGui::Text("140 3: %d", sdSysData.CAR_INFO.STATUS.GUAGES.SCREEN.val_3());
+      ImGui::Text("140 4: %d", sdSysData.CAR_INFO.STATUS.GUAGES.SCREEN.val_4());
+      ImGui::Text("140 5: %d", sdSysData.CAR_INFO.STATUS.GUAGES.SCREEN.val_5());
+      ImGui::Text("140 6: %d", sdSysData.CAR_INFO.STATUS.GUAGES.SCREEN.val_6());
+      ImGui::Text("140 7: %d", sdSysData.CAR_INFO.STATUS.GUAGES.SCREEN.val_7());
+      
+      ImGui::End();
+    }
   }
   ImGui::EndChild();
 
@@ -1103,7 +1118,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       SDATA.VB_BRAKE.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.blue();
       SDATA.VB_BRAKE.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.yellow();
       SDATA.VB_BRAKE.PROPS.DRAW_MIN_MAX = true;
-      SDATA.VB_BRAKE.PROPS.MAX = 2.0f * 256.0f;
+      SDATA.VB_BRAKE.PROPS.MAX = 3.0f * 256.0f;
       SDATA.VB_BRAKE.PROPS.HORIZONTAL = false;
       SDATA.VB_BRAKE.PROPS.DRAW_RULER = true;
       SDATA.VB_BRAKE.PROPS.COLOR_RULER = sdSysData.COLOR_SELECT.white();

@@ -4,7 +4,7 @@
 
 // -----------------------------------------------------
 
-#define Revision "2.099_231227"
+#define Revision "2.145_240321"
 
 // -----------------------------------------------------
 // Definitions
@@ -15,7 +15,7 @@
 
 // Message
 
-#define MESSAGES_IMMEDIATE_SIZE           12
+#define MESSAGES_IMMEDIATE_SIZE           13
 #define MESSAGES_STANDARD_SIZE            35
 
 // CAN
@@ -457,7 +457,7 @@ class MESSAGE_STORAGE
         
         MESSAGES_IMMEDIATE[9].Message_timestamp = Message_timestamp;
 
-        if (MESSAGES_IMMEDIATE[9].CHANGED == false)
+        if (MESSAGES_IMMEDIATE[9].CHANGED == true)
         {
           MESSAGES_RECEIVED_COUNT_TO_SEND++;
           MESSAGE_COUNT_IMMEDIATE++;
@@ -519,6 +519,33 @@ class MESSAGE_STORAGE
         
         MESSAGES_IMMEDIATE[11].CHANGED = true;
         
+        break;
+      }
+      case (0x140):
+      {
+        // 12  - (AD_140) - Dash Screens
+        MESSAGES_IMMEDIATE[12].Message_ID = Message_ID;
+        MESSAGES_IMMEDIATE[12].Message_len = Message_len;
+
+        MESSAGES_IMMEDIATE[12].Message_buf[0] = Message_buf[0];
+        MESSAGES_IMMEDIATE[12].Message_buf[1] = Message_buf[1];
+        MESSAGES_IMMEDIATE[12].Message_buf[2] = Message_buf[2];
+        MESSAGES_IMMEDIATE[12].Message_buf[3] = Message_buf[3];
+        MESSAGES_IMMEDIATE[12].Message_buf[4] = Message_buf[4];
+        MESSAGES_IMMEDIATE[12].Message_buf[5] = Message_buf[5];
+        MESSAGES_IMMEDIATE[12].Message_buf[6] = Message_buf[6];
+        MESSAGES_IMMEDIATE[12].Message_buf[7] = Message_buf[7];
+        
+        MESSAGES_IMMEDIATE[12].Message_timestamp = Message_timestamp;
+
+        if (MESSAGES_IMMEDIATE[12].CHANGED == false)
+        {
+          MESSAGES_RECEIVED_COUNT_TO_SEND++;
+          MESSAGE_COUNT_IMMEDIATE++;
+        }
+        
+        MESSAGES_IMMEDIATE[12].CHANGED = true;
+
         break;
       }
 
@@ -1551,6 +1578,11 @@ bool filter(unsigned long ID)
     case (0x130):
       ret_pass = true;
       break;
+
+    case (0x140):
+      ret_pass = true;
+      break;
+
 
     case (0x190):
       ret_pass = true;

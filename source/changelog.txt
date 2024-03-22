@@ -1,3 +1,10 @@
+2.145_240321
+  - Adjusted advertisement scan line.
+  - Modified RasCAN.ini to accept and send mesage x140.
+  - Added a small window on the Nova Screen to display the 
+      value of message x140.
+  - Adjusted Braking vertical bar to max at (3 * 256).
+
 2.144_240320
   - File names class is more complete.
       - Main system files have moved from /etc/RasFLED to 
