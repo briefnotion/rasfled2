@@ -47,6 +47,15 @@ void NOVA_ITEM::store_value(unsigned long tmeFrame_Time, int Id,
 {
   NOVA_VALUE.ID = Id;
 
+  NOVA_VALUE.NOVA_BYTES[0] = Byte_0;
+  NOVA_VALUE.NOVA_BYTES[1] = Byte_1;
+  NOVA_VALUE.NOVA_BYTES[2] = Byte_2;
+  NOVA_VALUE.NOVA_BYTES[3] = Byte_3;
+  NOVA_VALUE.NOVA_BYTES[4] = Byte_4;
+  NOVA_VALUE.NOVA_BYTES[5] = Byte_5;
+  NOVA_VALUE.NOVA_BYTES[6] = Byte_6;
+  NOVA_VALUE.NOVA_BYTES[7] = Byte_7;
+
   int bit_num = 0;
 
   set_bits(tmeFrame_Time, Byte_0, bit_num);

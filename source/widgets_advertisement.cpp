@@ -135,11 +135,11 @@ void ADVERTISEMENT_SCREENS::draw(system_data &sdSysData)
 
           if (sdSysData.AIRCRAFT_COORD.is_active())
           {
-            line_start_1 = ImVec2(working_area.x, working_area.y + SCAN_LINE + 6.0f);
-            line_end_1 = ImVec2(line_start_1.x + (float)(sdSysData.AIRCRAFT_COORD.DATA.AIRCRAFTS.size() * 3), working_area.y + (float)SCAN_LINE + 6.0f);
+            line_start_1 = ImVec2(working_area.x, working_area.y + SCAN_LINE + 8.0f);
+            line_end_1 = ImVec2(line_start_1.x + (float)(sdSysData.AIRCRAFT_COORD.DATA.AIRCRAFTS.size() * 3), working_area.y + (float)SCAN_LINE + 8.0f);
 
-            line_start_2 = ImVec2(line_end_1.x, working_area.y + (float)SCAN_LINE + 6.0f);
-            line_end_2 = ImVec2(line_start_2.x + (float)(sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT * 3), working_area.y + (float)SCAN_LINE + 6.0f);
+            line_start_2 = ImVec2(line_end_1.x, working_area.y + (float)SCAN_LINE + 8.0f);
+            line_end_2 = ImVec2(line_start_2.x + (float)(sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT * 3), working_area.y + (float)SCAN_LINE + 8.0f);
 
             draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.c_white().STANDARD, 2.0f);
             draw_list_advertisement->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.c_red().STANDARD, 2.0f);

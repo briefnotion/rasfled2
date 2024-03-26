@@ -64,6 +64,7 @@ struct NOVA_BITS_VALUE
   public:
 
   int ID = 0;
+  unsigned char NOVA_BYTES[8] = {0};
   bool NOVA_BITS[64] = {0};
   TIMED_PING FREQUENCY[64];
   TIMED_PING HILIGHT[64];

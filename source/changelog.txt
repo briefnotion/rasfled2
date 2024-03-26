@@ -1,3 +1,7 @@
+2.146_240325
+  - Nova message select, expanded, will show window of 
+      message values.
+
 2.145_240321
   - Adjusted advertisement scan line.
   - Modified RasCAN.ini to accept and send mesage x140.
