@@ -76,6 +76,41 @@ void draw_bit(ImDrawList* Draw_List, system_data &sdSysData,
   }
 }
 
+void draw_nova_detail(system_data &sdSysData, NOVA_BITS_VALUE &Nova_Value, int &Item_Location)
+{
+  if (Item_Location != -1)
+  {
+    ImGui::SetNextWindowSize(ImVec2(128.0f, 210.0f));
+
+    if (ImGui::Begin(("Message: " + to_string((int)Nova_Value.ID)).c_str(), 
+                      nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+    {
+      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[0]);
+      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[1]);
+      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[2]);
+      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[3]);
+      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[4]);
+      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[5]);
+      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[6]);
+      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[7]);
+      
+      ImGui::End();
+    }
+  }
+  else
+  {
+    ImGui::SetNextWindowSize(ImVec2(128.0f, 100.0f));
+
+    if (ImGui::Begin("Message: NOT FOUND", 
+                      nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+    {
+      ImGui::Text("Message PID\nnot found.");
+      
+      ImGui::End();
+    }
+  }
+}
+
 void nova_draw(ImDrawList *Draw_List, system_data &sdSysData, NOVA_BITS_VALUE &Value)
 {
   ImVec2 current_position = ImGui::GetCursorScreenPos();
@@ -628,15 +663,16 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 {
   ImGui::BeginChild("Nova Display Buttons", ImVec2(90.0f, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    if (button_simple_color(sdSysData, "NOVA", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
-    {
-      DISPLAY_NOVA = false;
-    }
-
     if (button_simple_toggle_color(sdSysData, "ENABLE\n(On)", "ENABLE\n(Off)", sdSysData.CAR_INFO.NOVA.ENABLED, 
                     sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       sdSysData.CAR_INFO.NOVA.ENABLED = !sdSysData.CAR_INFO.NOVA.ENABLED;
+    }
+
+    if (button_simple_toggle_color(sdSysData, "VAL\n(On)", "VAL\n(Off)", NOVA_CLIP_DETAIL, 
+                    sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    {
+      NOVA_CLIP_DETAIL = !NOVA_CLIP_DETAIL;
     }
 
     ImGui::Text("Size: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size());
@@ -653,12 +689,17 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
     ImGui::Text("RAS_T:");
     ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.ras_recieved_total_count());
 
-    ImGui::Text("DIF_T:");
-    ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.can_sent_total_count() - 
-                        sdSysData.CAR_INFO.STATISTICS.ras_recieved_total_count());
+    //ImGui::Text("DIF_T:");
+    //ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.can_sent_total_count() - 
+    //                    sdSysData.CAR_INFO.STATISTICS.ras_recieved_total_count());
 
     ImGui::Text("ERR:");
     ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.errors());
+
+    if (button_simple_color(sdSysData, "NOVA", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    {
+      DISPLAY_NOVA = false;
+    }
   }
   ImGui::EndChild();
 
@@ -709,21 +750,7 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
           //if expanded, draw window with values.
           if (sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS)
           {
-            ImGui::SetNextWindowSize(ImVec2(128, 210));
-            if (ImGui::Begin(("Message: " + to_string((int)sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.ID)).c_str(), 
-                              nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
-            {
-              ImGui::Text("0: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NOVA_BYTES[0]);
-              ImGui::Text("0: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NOVA_BYTES[1]);
-              ImGui::Text("0: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NOVA_BYTES[2]);
-              ImGui::Text("0: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NOVA_BYTES[3]);
-              ImGui::Text("0: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NOVA_BYTES[4]);
-              ImGui::Text("0: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NOVA_BYTES[5]);
-              ImGui::Text("0: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NOVA_BYTES[6]);
-              ImGui::Text("0: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NOVA_BYTES[7]);
-              
-              ImGui::End();
-            }
+            draw_nova_detail(sdSysData, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE, items);
           }
         }
       }
@@ -731,6 +758,14 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
   }    
   
   ImGui::EndChild();
+
+  // Nova Clip Detail Window
+  if (NOVA_CLIP_DETAIL)
+  {
+    int item_location =  sdSysData.CAR_INFO.NOVA.find_location(sdSysData.CLIPBOARD.get_int_value());
+
+    draw_nova_detail(sdSysData, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[item_location].NOVA_VALUE, item_location);
+  }
 }
 
 void AUTOMOBILE_SCREEN::create(system_data &sdSysData)

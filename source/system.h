@@ -184,6 +184,9 @@ class system_data
   countdown_timer cdTIMER;
   running_colors running_color_list;
 
+  // Clipboard
+  STRING_INT CLIPBOARD;
+
   // Hardware Status Indicators
   HARDWARE_STATUS hsHardware_Status;
 

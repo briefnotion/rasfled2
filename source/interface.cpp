@@ -338,6 +338,12 @@ void process_slow_commands(CONSOLE_COMMUNICATION &cons, system_data &sdSysData)
         string comm_command = cons.command_text_get().substr(1, cons.command_text_get().size()-1);
         sdSysData.COMMS_AUTO.send(comm_command);
       }
+      // Check for clipboard commands
+      else if (cons.command_text_get()[0] == '.')
+      {
+        string comm_command = cons.command_text_get().substr(1, cons.command_text_get().size()-1);
+        sdSysData.CLIPBOARD.store(comm_command);
+      }
     }
   }
 

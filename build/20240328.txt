@@ -1,0 +1,6 @@
+12.14.00, Voltage, -1.0 v, Amiant Air Temp, -1 c, Air Intake Temp, -1 c, Coolant Temp, -1 c, Catalyst Temp, -1 c, S-Temp, -92.287506, TTL LF, -100%%, TTL RF, -100%%, TTL LB, -100%%, TTL RB, -100%%
+12.53.03, Voltage, -1.0 v, Amiant Air Temp, -1 c, Air Intake Temp, -1 c, Coolant Temp, -1 c, Catalyst Temp, -1 c, S-Temp, -92.287506, TTL LF, -100%%, TTL RF, -100%%, TTL LB, -100%%, TTL RB, -100%%
+12.57.27, Voltage, -1.0 v, Amiant Air Temp, -1 c, Air Intake Temp, -1 c, Coolant Temp, -1 c, Catalyst Temp, -1 c, S-Temp, -92.287506, TTL LF, -100%%, TTL RF, -100%%, TTL LB, -100%%, TTL RB, -100%%
+13.29.01, Voltage, -1.0 v, Amiant Air Temp, -1 c, Air Intake Temp, -1 c, Coolant Temp, -1 c, Catalyst Temp, -1 c, S-Temp, -92.287506, TTL LF, -100%%, TTL RF, -100%%, TTL LB, -100%%, TTL RB, -100%%
+13.56.15, Voltage, -1.0 v, Amiant Air Temp, -1 c, Air Intake Temp, -1 c, Coolant Temp, -1 c, Catalyst Temp, -1 c, S-Temp, -92.287506, TTL LF, -100%%, TTL RF, -100%%, TTL LB, -100%%, TTL RB, -100%%
+13.58.30, Voltage, -1.0 v, Amiant Air Temp, -1 c, Air Intake Temp, -1 c, Coolant Temp, -1 c, Catalyst Temp, -1 c, S-Temp, -92.287506, TTL LF, -100%%, TTL RF, -100%%, TTL LB, -100%%, TTL RB, -100%%

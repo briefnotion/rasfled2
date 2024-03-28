@@ -37,6 +37,8 @@ using namespace std;
 void draw_bit(ImDrawList* Draw_List, system_data &sdSysData, 
               ImVec2 Start_Pos, bool Value, bool Ping, bool Details);
 
+void draw_nova_detail(system_data &sdSysData, NOVA_BITS_VALUE &Nova_Value, int &Item_Location);
+
 void nova_draw(ImDrawList *Draw_List, system_data &sdSysData,  
                 NOVA_BITS_VALUE &Value);
 
@@ -418,6 +420,8 @@ class AUTOMOBILE_SCREEN
   bool DISPLAY_CONFIRM = false;
   
   bool DISPLAY_NOVA = false;
+
+  bool NOVA_CLIP_DETAIL = false;
 
   int DISPLAY_MID_BOTTOM = 0; // 0 - Large Horizontal Bars
                               // 1 - Unused

@@ -1,3 +1,11 @@
+2.147_240328
+  - Created a simple clipboard. To copy value to 
+      clipboard preced text on command line with ".", 
+      and the remaining text will be moved to clipboard 
+      when enter is pressed.
+  - Nova details can display the values of the pid 
+      stored in the clipboard.
+
 2.146_240325
   - Nova message select, expanded, will show window of 
       message values.

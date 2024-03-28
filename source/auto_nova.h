@@ -103,9 +103,9 @@ class AUTOMOBILE_NOVA
 
   vector <NOVA_MAP_ITEM> NOVA_MAP;
 
-  int find_location(int Item);
-
   public:
+
+  int find_location(int Item);
   
   vector <NOVA_ITEM> NOVA_ITEMS;
 
