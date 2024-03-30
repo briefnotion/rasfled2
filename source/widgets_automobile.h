@@ -37,10 +37,13 @@ using namespace std;
 void draw_bit(ImDrawList* Draw_List, system_data &sdSysData, 
               ImVec2 Start_Pos, bool Value, bool Ping, bool Details);
 
-void draw_nova_detail(system_data &sdSysData, NOVA_BITS_VALUE &Nova_Value, int &Item_Location);
-
 void nova_draw(ImDrawList *Draw_List, system_data &sdSysData,  
                 NOVA_BITS_VALUE &Value);
+
+void nova_draw_byte(ImDrawList *Draw_List, system_data &sdSysData,  
+                NOVA_BITS_VALUE &Value, int Byte_Position);
+
+void draw_nova_detail(system_data &sdSysData, NOVA_BITS_VALUE &Nova_Value, int &Item_Location);
 
 // ---------------------------------------------------------------------------------------
 

@@ -76,41 +76,6 @@ void draw_bit(ImDrawList* Draw_List, system_data &sdSysData,
   }
 }
 
-void draw_nova_detail(system_data &sdSysData, NOVA_BITS_VALUE &Nova_Value, int &Item_Location)
-{
-  if (Item_Location != -1)
-  {
-    ImGui::SetNextWindowSize(ImVec2(128.0f, 210.0f));
-
-    if (ImGui::Begin(("Message: " + to_string((int)Nova_Value.ID)).c_str(), 
-                      nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
-    {
-      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[0]);
-      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[1]);
-      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[2]);
-      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[3]);
-      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[4]);
-      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[5]);
-      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[6]);
-      ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[7]);
-      
-      ImGui::End();
-    }
-  }
-  else
-  {
-    ImGui::SetNextWindowSize(ImVec2(128.0f, 100.0f));
-
-    if (ImGui::Begin("Message: NOT FOUND", 
-                      nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
-    {
-      ImGui::Text("Message PID\nnot found.");
-      
-      ImGui::End();
-    }
-  }
-}
-
 void nova_draw(ImDrawList *Draw_List, system_data &sdSysData, NOVA_BITS_VALUE &Value)
 {
   ImVec2 current_position = ImGui::GetCursorScreenPos();
@@ -145,6 +110,54 @@ void nova_draw(ImDrawList *Draw_List, system_data &sdSysData, NOVA_BITS_VALUE &V
   }
 }
 
+void nova_draw_byte(ImDrawList *Draw_List, system_data &sdSysData,  
+                NOVA_BITS_VALUE &Value, int Byte_Position)
+{
+  ImVec2 current_position = ImGui::GetCursorScreenPos();
+  unsigned long current_time_frame = sdSysData.PROGRAM_TIME.current_frame_time();
+
+  for (int bit = 0; bit < 8; bit++)
+  {
+    draw_bit(Draw_List, sdSysData, ImVec2(current_position.x + 2.0f + (9.5f * (float)bit), current_position.y + 5.0f),
+              Value.NOVA_BITS[(Byte_Position * 8) + bit], Value.HILIGHT[(Byte_Position * 8) + bit].ping_down(current_time_frame), true);
+  }
+}
+
+void draw_nova_detail(system_data &sdSysData, NOVA_BITS_VALUE &Nova_Value, int &Item_Location)
+{
+  if (Item_Location != -1)
+  {
+    ImGui::SetNextWindowSize(ImVec2(150.0f, 210.0f));
+
+    if (ImGui::Begin(("Message: " + to_string((int)Nova_Value.ID)).c_str(), 
+                      nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+    {
+      ImDrawList* draw_list_nova_details = ImGui::GetWindowDrawList();
+
+      for (int byte = 0; byte < 8; byte ++)
+      {
+        ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[byte]);
+        ImGui::SameLine();
+        nova_draw_byte(draw_list_nova_details, sdSysData, Nova_Value, byte);
+        ImGui::NewLine();
+      }
+      
+      ImGui::End();
+    }
+  }
+  else
+  {
+    ImGui::SetNextWindowSize(ImVec2(128.0f, 100.0f));
+
+    if (ImGui::Begin("Message: NOT FOUND", 
+                      nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+    {
+      ImGui::Text("Message PID\nnot found.");
+      
+      ImGui::End();
+    }
+  }
+}
 // -------------------------------------------------------------------------------------
 
 void T_LARGE_NUMBER_DISPLAY::draw_scroll_num(ImDrawList *Draw_List, float Value, float Y_Height, ImVec2 Start_Pos, ImVec2 Zero_Font_Size)
@@ -755,7 +768,7 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
         }
       }
     }
-  }    
+  }
   
   ImGui::EndChild();
 

@@ -1,3 +1,6 @@
+2.148_240329
+  - Added bit view to nova detailed message view.
+
 2.147_240328
   - Created a simple clipboard. To copy value to 
       clipboard preced text on command line with ".", 
