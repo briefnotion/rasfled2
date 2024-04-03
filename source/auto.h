@@ -690,7 +690,7 @@ class AUTOMOBILE_TRANSMISSION_GEAR
   bool gear_selection_low();
 };
 
-class AUTOMOBILE_BRAKE
+class AUTOMOBILE_ACCELERATOR
 {
   private:
 
@@ -700,6 +700,20 @@ class AUTOMOBILE_BRAKE
   public:
 
   // THIS ROUTINE HAS NOT BEEN TESTED.
+
+  void store_value(int A);
+
+  float val_value();
+};
+
+class AUTOMOBILE_BRAKE
+{
+  private:
+
+  int VAL_VALUE = 0;  // Units unknown
+                  // Range?: 0 - (256 * 256)
+
+  public:
 
   void store_value(int A, int B);
 
@@ -722,6 +736,7 @@ class AUTOMOBILE_TRANSLATED_DATA
   AUTOMOBILE_DOORS DOORS;
   AUTOMOBILE_GUAGES GUAGES;
   AUTOMOBILE_ELECTRICAL ELECTRICAL;
+  AUTOMOBILE_ACCELERATOR ACCELERATOR;
   AUTOMOBILE_BRAKE BRAKE;
 };
 
@@ -902,6 +917,7 @@ class AUTOMOBILE_PROPERTIES
   
   bool SAVE_TO_LOG = false;
   string SAVE_LOG_FILENAME = "";
+  string STATUS_HISTORY_HISTORY_DIR = "";
 
   bool DATA_REQUEST_ENABLE = true;
 };
@@ -915,8 +931,8 @@ class AUTOMOBILE
   string REQUESTED_PID = "";
 
   // Satus Log File
-  deque<string> STATUS_LOG_MESSAGE;
-  TIMED_PING STATUS_LOG_TIMER;
+  deque<string> STATUS_HISTORY_MESSAGE;
+  TIMED_PING STATUS_HISTORY_TIMER;
 
   // PID Send List
   deque<string> REQUESTED_PID_SEND_LIST;

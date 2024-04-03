@@ -231,6 +231,18 @@ string VOLTAGE::v()
 
 //-----------
 
+void AUTOMOBILE_ACCELERATOR::store_value(int A)
+{
+  VAL_VALUE = A;
+}
+
+float AUTOMOBILE_ACCELERATOR::val_value()
+{
+  return (float) VAL_VALUE;
+}
+
+//-----------
+
 void AUTOMOBILE_BRAKE::store_value(int A, int B)
 {
   VAL_VALUE = (A * 256) + B;
@@ -2798,6 +2810,9 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     // Transmission Gear Position
     STATUS.GEAR.store(DATA.AD_F0.DATA[2]);
 
+    // ACCELERATOR POSTION
+    STATUS.ACCELERATOR.store_value(DATA.AD_80.DATA[1]);
+    
     // BRAKE PRESSURE
     STATUS.BRAKE.store_value(DATA.AD_252.DATA[1], DATA.AD_252.DATA[2]);
 
@@ -2896,9 +2911,9 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     // Log File
     //  Create a status log file every 5 minutes
     //  Convert to json in future.
-    if (STATUS_LOG_TIMER.ping_down(tmeFrame_Time) == false && COMMS_RECEIVE_TEST_DATA == false)
+    if (STATUS_HISTORY_TIMER.ping_down(tmeFrame_Time) == false && TEST_DATA_CAN_BUS == false)
     {
-      STATUS_LOG_MESSAGE.push_back(
+      STATUS_HISTORY_MESSAGE.push_back(
                   file_format_system_hour_minutes_seconds() + ", " +
                   "Voltage, " + STATUS.ELECTRICAL.CONTROL_UNIT_42.v() + ", " + 
                   "Amiant Air Temp, " + STATUS.TEMPS.AMBIANT_AIR_46.c() + ", " + 
@@ -2913,11 +2928,11 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
                   "TTL RB, " + CALCULATED.RB_TTL.life_percentage_mean()
       );
 
-      deque_string_to_file(PROPS.SAVE_LOG_FILENAME + file_format_system_date() + ".txt", STATUS_LOG_MESSAGE, true);
+      deque_string_to_file(PROPS.STATUS_HISTORY_HISTORY_DIR + file_format_system_date() + ".txt", STATUS_HISTORY_MESSAGE, true);
 
-      STATUS_LOG_MESSAGE.clear();
+      STATUS_HISTORY_MESSAGE.clear();
 
-      STATUS_LOG_TIMER.ping_up(tmeFrame_Time, 60000 * 5);
+      STATUS_HISTORY_TIMER.ping_up(tmeFrame_Time, 60000 * 5);
     }
   }
 }

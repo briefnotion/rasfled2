@@ -136,7 +136,7 @@ void draw_nova_detail(system_data &sdSysData, NOVA_BITS_VALUE &Nova_Value, int &
 
       for (int byte = 0; byte < 8; byte ++)
       {
-        ImGui::Text("0: %d", Nova_Value.NOVA_BYTES[byte]);
+        ImGui::Text("%d: %d", byte, Nova_Value.NOVA_BYTES[byte]);
         ImGui::SameLine();
         nova_draw_byte(draw_list_nova_details, sdSysData, Nova_Value, byte);
         ImGui::NewLine();
@@ -1168,6 +1168,20 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       SDATA.TB_TORQUE.create();
     }
     {
+      SDATA.VB_ACCELERATOR.PROPS.LABEL = "Accelerator";
+      SDATA.VB_ACCELERATOR.PROPS.BAR_HEIGHT = 20;
+      SDATA.VB_ACCELERATOR.PROPS.MARKER_SIZE = 5;
+      SDATA.VB_ACCELERATOR.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.blue();
+      SDATA.VB_ACCELERATOR.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.yellow();
+      SDATA.VB_ACCELERATOR.PROPS.DRAW_MIN_MAX = true;
+      SDATA.VB_ACCELERATOR.PROPS.MAX = 1.0f * 256.0f;
+      SDATA.VB_ACCELERATOR.PROPS.HORIZONTAL = false;
+      SDATA.VB_ACCELERATOR.PROPS.DRAW_RULER = true;
+      SDATA.VB_ACCELERATOR.PROPS.COLOR_RULER = sdSysData.COLOR_SELECT.white();
+      SDATA.VB_ACCELERATOR.PROPS.MAX_TICK_LEVEL = 2;
+      SDATA.VB_ACCELERATOR.create();
+    }
+    {
       SDATA.VB_BRAKE.PROPS.LABEL = "Brake";
       SDATA.VB_BRAKE.PROPS.BAR_HEIGHT = 20;
       SDATA.VB_BRAKE.PROPS.MARKER_SIZE = 5;
@@ -1478,6 +1492,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.RPM = sdSysData.CAR_INFO.STATUS.RPM.val_rpm();
   SDATA.TORQUE_DEMANDED = sdSysData.CAR_INFO.STATUS.POWER.val_load();
 
+  SDATA.ACCELERATOR_POWER = sdSysData.CAR_INFO.STATUS.ACCELERATOR.val_value();
   SDATA.BRAKE_POWER = sdSysData.CAR_INFO.STATUS.BRAKE.val_value();
 
   // Pressure
@@ -1696,6 +1711,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
       SDATA.TB_RPM.update_value(sdSysData, SDATA.RPM);
       SDATA.TB_TORQUE.update_value(sdSysData, (float)SDATA.TORQUE_DEMANDED);
 
+      SDATA.VB_ACCELERATOR.update_value(sdSysData, (float)SDATA.ACCELERATOR_POWER);
       SDATA.VB_BRAKE.update_value(sdSysData, (float)SDATA.BRAKE_POWER);
     }
 
@@ -1870,7 +1886,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
         if (DISPLAY_MID_BOTTOM == 0)
         // Show bars
         {
-          ImGui::BeginChild("Auto Data Long Bars Left", ImVec2(ImGui::GetContentRegionAvail().x - 30.0f, ImGui::GetContentRegionAvail().y - 50.0f), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          ImGui::BeginChild("Auto Data Long Bars Left", ImVec2(ImGui::GetContentRegionAvail().x - 50.0f, ImGui::GetContentRegionAvail().y - 50.0f), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
             ImVec2 pos1 = ImGui::GetCursorScreenPos();
             
@@ -1900,6 +1916,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
           {
             ImDrawList* draw_list_data_auto_data_bars_right = ImGui::GetWindowDrawList();
 
+            SDATA.VB_ACCELERATOR.draw(draw_list_data_auto_data_bars_right, sdSysData);
             SDATA.VB_BRAKE.draw(draw_list_data_auto_data_bars_right, sdSysData);
           }
           ImGui::EndChild();

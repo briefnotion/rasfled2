@@ -1,3 +1,7 @@
+2.149_240403
+  - Added accelerator position to auto.
+  - Corrected some log file save issues.
+
 2.148_240329
   - Added bit view to nova detailed message view.
 

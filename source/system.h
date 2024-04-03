@@ -98,6 +98,7 @@ class FILES
   string CAN_BUS_HISTORY_DIR = "";
 
   string CAN_BUS_HISTORY_FILE = "";
+  string CAN_BUS_LOG_FILE = "";
   string CAN_BUS_TEST_FILE = "";
   string CAN_BUS_ERROR_LOG_FILE = "";
 
