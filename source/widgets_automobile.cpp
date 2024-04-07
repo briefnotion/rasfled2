@@ -37,11 +37,11 @@ void draw_bit(ImDrawList* Draw_List, system_data &sdSysData,
     {
       if (Value)
       {
-        Draw_List->AddRectFilled(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 15.0f), sdSysData.COLOR_SELECT.c_blue().STANDARD);
+        Draw_List->AddRectFilled(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 15.0f), sdSysData.COLOR_SELECT.c_green().STANDARD);
       }
       else
       {
-        Draw_List->AddRect(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 7.0f), sdSysData.COLOR_SELECT.c_blue().STANDARD);
+        Draw_List->AddRect(Start_Pos, ImVec2(Start_Pos.x + 4.0f, Start_Pos.y + 7.0f), sdSysData.COLOR_SELECT.c_green().STANDARD);
       }
     }
   }
@@ -65,12 +65,12 @@ void draw_bit(ImDrawList* Draw_List, system_data &sdSysData,
       if (Value)
       {
         Draw_List->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
-                            sdSysData.COLOR_SELECT.c_blue().STANDARD, 5.0f);
+                            sdSysData.COLOR_SELECT.c_green().STANDARD, 5.0f);
       }
       else
       {
         Draw_List->AddLine(Start_Pos, ImVec2(Start_Pos.x + 6.0f, Start_Pos.y), 
-                            sdSysData.COLOR_SELECT.c_blue().STANDARD, 1.0f);
+                            sdSysData.COLOR_SELECT.c_green().STANDARD, 1.0f);
       }
     }
   }

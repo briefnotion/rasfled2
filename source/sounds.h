@@ -29,15 +29,31 @@ class SOUNDS
 
   COMMAND_THREAD Command_Thread;
 
-  string TEST = "aplay -q /etc/RasFLED/test.wav";
-  string SND1 = "aplay -q /etc/RasFLED/snd1_up.wav";
-  string SND2 = "aplay -q /etc/RasFLED/snd1_up_2.wav";
+  string C6 = "aplay -q /etc/rasfled/c6.wav";
+  string D6 = "aplay -q /etc/rasfled/c6.wav";
+  string E6 = "aplay -q /etc/rasfled/c6.wav";
+  string F6 = "aplay -q /etc/rasfled/c6.wav";
+  string G6 = "aplay -q /etc/rasfled/c6.wav";
+  string A6 = "aplay -q /etc/rasfled/c6.wav";
+  string B6 = "aplay -q /etc/rasfled/c6.wav";
+
+  string ALERT_LEVEL_1 = "aplay -q /etc/rasfled/mid_low.wav";
+  string ALERT_LEVEL_2 = "aplay -q /etc/rasfled/hi_mid.wav";
+  string ALERT_LEVEL_3 = "aplay -q /etc/rasfled/low_mid_hi.wav";
 
   public:
 
-  void play_test(bool Mute);
-  void play_snd1(bool Mute);
-  void play_snd2(bool Mute);
+  void play_c6(bool Mute);
+  void play_d6(bool Mute);
+  void play_e6(bool Mute);
+  void play_f6(bool Mute);
+  void play_g6(bool Mute);
+  void play_a6(bool Mute);
+  void play_b6(bool Mute);
+
+  void play_alert_level_1(bool Mute);
+  void play_alert_level_2(bool Mute);
+  void play_alert_level_3(bool Mute);
 };
 
 // -------------------------------------------------------------------------------------

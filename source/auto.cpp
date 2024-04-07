@@ -1532,7 +1532,7 @@ int SIMPLE_ERRORS::error_count()
 
 //-----------
 
-void AUTOMOBILE_CALCULATED::compute_low(ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time)
+void AUTOMOBILE_CALCULATED::compute_low(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time)
 {
   // Set Lights
   Status.INDICATORS.process();
@@ -1618,6 +1618,14 @@ void AUTOMOBILE_CALCULATED::compute_low(ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRA
         RF_TTL.calculate(Status.SPEED.SPEED_RF_TIRE, Status.SPEED.SPEED_TRANS, tmeFrame_Time);
         LB_TTL.calculate(Status.SPEED.SPEED_LB_TIRE, Status.SPEED.SPEED_TRANS, tmeFrame_Time);
         RB_TTL.calculate(Status.SPEED.SPEED_RB_TIRE, Status.SPEED.SPEED_TRANS, tmeFrame_Time);
+      }
+    }
+
+    // DNFWTS
+    {
+      if (Status.BRAKE.val_value() > 0.0f && Status.ACCELERATOR.val_value() > 0.0f)
+      {
+        Dnfwts.turn_on(tmeFrame_Time);
       }
     }
   }
@@ -2801,7 +2809,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
   }
 }
 
-void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time)
+void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time)
 {
   if (AVAILABILITY.is_active() == true)
   {
@@ -2889,7 +2897,7 @@ void AUTOMOBILE::translate(ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time
     // Low level Compute not requiring calculation on all data.
     //  Fast but not fully acurate.
     //  Currently call just before the data is displayed.
-    CALCULATED.compute_low(ALERTS_2, STATUS, tmeFrame_Time);
+    CALCULATED.compute_low(Dnfwts, ALERTS_2, STATUS, tmeFrame_Time);
 
     /*
     // Move **********************************************************************************

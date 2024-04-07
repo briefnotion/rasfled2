@@ -1,3 +1,9 @@
+2.150_240406
+  - Created and added some softer sounds.
+  - Changed the bit view of nova from blue to green 
+      for changing bits to be more visible. 
+  - Added a DNFWTS trigger event for testing.
+
 2.149_240403
   - Added accelerator position to auto.
   - Corrected some log file save issues.

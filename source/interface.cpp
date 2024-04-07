@@ -1071,6 +1071,11 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       }
       */
 
+      //if (check_command(cons, " sounda6", "Alert Sound 1"))
+      //{
+      //  sdSysData.ALERTS_2.sound_alert(1);
+      //}
+
       if (check_command(cons, " sound1", "Alert Sound 1"))
       {
         sdSysData.ALERTS_2.sound_alert(1);

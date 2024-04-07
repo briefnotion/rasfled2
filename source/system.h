@@ -81,6 +81,9 @@ class FILES
   string RUNNING_STATE_FILE = "";
   string QR_CODE_FILE = "";
 
+  // Sounds Directory
+  //string SOUNDS_DIR = "";
+
   // Rasfled logs and user files
   string LOGS_DIR = "";
 

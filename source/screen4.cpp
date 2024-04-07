@@ -130,72 +130,72 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
 
 void SCREEN4::set_screen_default_colors(system_data &sdSysData)
 {
-  //if (sdSysData.Day_On_With_Override.value() == true)
-  //{
-    sdSysData.COLOR_SELECT.init(1.0f);
-  //}
-  //else
-  //{
-  //  sdSysData.COLOR_SELECT.init(0.6f);
-  //}
+  sdSysData.COLOR_SELECT.init(1.0f);
   
   ImGuiStyle& style = ImGui::GetStyle();
+
+  // Standard Default Colors on startup
+  ImColor background = sdSysData.COLOR_SELECT.c_blue().BACKGROUND;
+  ImColor dim = sdSysData.COLOR_SELECT.c_blue().DIM;
+  ImColor standard = sdSysData.COLOR_SELECT.c_blue().STANDARD;
+  ImColor hovered = sdSysData.COLOR_SELECT.c_blue().HOVERED;
+  ImColor active = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
 
   //style.Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
   style.Colors[ImGuiCol_Text] = sdSysData.COLOR_SELECT.c_white().TEXT;
 
-  style.Colors[ImGuiCol_TitleBg] = sdSysData.COLOR_SELECT.c_blue().STANDARD;
-  style.Colors[ImGuiCol_TitleBgActive] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
-  style.Colors[ImGuiCol_TitleBgCollapsed] = sdSysData.COLOR_SELECT.c_blue().BACKGROUND;
+  style.Colors[ImGuiCol_TitleBg] = standard;
+  style.Colors[ImGuiCol_TitleBgActive] = active;
+  style.Colors[ImGuiCol_TitleBgCollapsed] = background;
 
-  style.Colors[ImGuiCol_FrameBg] = sdSysData.COLOR_SELECT.c_blue().BACKGROUND;
-  style.Colors[ImGuiCol_FrameBgHovered] = sdSysData.COLOR_SELECT.c_blue().HOVERED;
-  style.Colors[ImGuiCol_FrameBgActive] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
+  style.Colors[ImGuiCol_FrameBg] = background;
+  style.Colors[ImGuiCol_FrameBgHovered] = hovered;
+  style.Colors[ImGuiCol_FrameBgActive] = active;
 
-  style.Colors[ImGuiCol_Border] = sdSysData.COLOR_SELECT.c_blue().BACKGROUND;
+  style.Colors[ImGuiCol_Border] = background;
   style.Colors[ImGuiCol_BorderShadow] = sdSysData.COLOR_SELECT.c_yellow().BACKGROUND;
 
-  style.Colors[ImGuiCol_CheckMark] = sdSysData.COLOR_SELECT.c_blue().STANDARD;
+  style.Colors[ImGuiCol_CheckMark] = standard;
 
-  style.Colors[ImGuiCol_SliderGrab] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
-  style.Colors[ImGuiCol_SliderGrabActive] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
+  style.Colors[ImGuiCol_SliderGrab] = active;
+  style.Colors[ImGuiCol_SliderGrabActive] = active;
 
-  style.Colors[ImGuiCol_Button] = sdSysData.COLOR_SELECT.c_blue().STANDARD;
-  style.Colors[ImGuiCol_ButtonHovered] = sdSysData.COLOR_SELECT.c_blue().HOVERED;
-  style.Colors[ImGuiCol_ButtonActive] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
+  style.Colors[ImGuiCol_Button] = standard;
+  style.Colors[ImGuiCol_ButtonHovered] = hovered;
+  style.Colors[ImGuiCol_ButtonActive] = active;
 
-  style.Colors[ImGuiCol_Header] = sdSysData.COLOR_SELECT.c_blue().STANDARD;
-  style.Colors[ImGuiCol_HeaderActive] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
+  style.Colors[ImGuiCol_Header] = standard;
+  style.Colors[ImGuiCol_HeaderActive] = active;
 
-  style.Colors[ImGuiCol_TableHeaderBg] = sdSysData.COLOR_SELECT.c_blue().BACKGROUND;
-  style.Colors[ImGuiCol_TableBorderLight] = sdSysData.COLOR_SELECT.c_blue().DIM;
-  style.Colors[ImGuiCol_TableBorderStrong] = sdSysData.COLOR_SELECT.c_blue().STANDARD;
-  style.Colors[ImGuiCol_TableRowBg] = sdSysData.COLOR_SELECT.c_blue().DIM;
-  style.Colors[ImGuiCol_TableRowBgAlt] = sdSysData.COLOR_SELECT.c_blue().STANDARD;
+  style.Colors[ImGuiCol_TableHeaderBg] = background;
+  style.Colors[ImGuiCol_TableBorderLight] = dim;
+  style.Colors[ImGuiCol_TableBorderStrong] = standard;
+  style.Colors[ImGuiCol_TableRowBg] = dim;
+  style.Colors[ImGuiCol_TableRowBgAlt] = standard;
 
   style.Colors[ImGuiCol_Separator] = sdSysData.COLOR_SELECT.c_white().STANDARD;
   style.Colors[ImGuiCol_SeparatorHovered] = sdSysData.COLOR_SELECT.c_white().HOVERED;
   style.Colors[ImGuiCol_SeparatorActive] = sdSysData.COLOR_SELECT.c_white().ACTIVE;
 
-  style.Colors[ImGuiCol_ResizeGrip] = sdSysData.COLOR_SELECT.c_blue().STANDARD;
-  style.Colors[ImGuiCol_ResizeGripHovered] = sdSysData.COLOR_SELECT.c_blue().HOVERED;
-  style.Colors[ImGuiCol_ResizeGripActive] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
+  style.Colors[ImGuiCol_ResizeGrip] = standard;
+  style.Colors[ImGuiCol_ResizeGripHovered] = hovered;
+  style.Colors[ImGuiCol_ResizeGripActive] = active;
 
-  //style.Colors[ImGuiCol_ScrollbarBg] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
-  style.Colors[ImGuiCol_ScrollbarGrab] = sdSysData.COLOR_SELECT.c_blue().DIM;
-  style.Colors[ImGuiCol_ScrollbarGrabHovered] = sdSysData.COLOR_SELECT.c_blue().HOVERED;
-  style.Colors[ImGuiCol_ScrollbarGrabActive] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
+  //style.Colors[ImGuiCol_ScrollbarBg] = active;
+  style.Colors[ImGuiCol_ScrollbarGrab] = dim;
+  style.Colors[ImGuiCol_ScrollbarGrabHovered] = hovered;
+  style.Colors[ImGuiCol_ScrollbarGrabActive] = active;
 
-  style.Colors[ImGuiCol_Tab] = sdSysData.COLOR_SELECT.c_blue().STANDARD;
-  style.Colors[ImGuiCol_TabHovered] = sdSysData.COLOR_SELECT.c_blue().HOVERED;
-  style.Colors[ImGuiCol_TabActive] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
-  style.Colors[ImGuiCol_TabUnfocused] = sdSysData.COLOR_SELECT.c_blue().BACKGROUND;
-  style.Colors[ImGuiCol_TabUnfocusedActive] = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
+  style.Colors[ImGuiCol_Tab] = standard;
+  style.Colors[ImGuiCol_TabHovered] = hovered;
+  style.Colors[ImGuiCol_TabActive] = active;
+  style.Colors[ImGuiCol_TabUnfocused] = background;
+  style.Colors[ImGuiCol_TabUnfocusedActive] = active;
 
-  style.Colors[ImGuiCol_TextSelectedBg] = sdSysData.COLOR_SELECT.c_blue().BACKGROUND;
+  style.Colors[ImGuiCol_TextSelectedBg] = background;
 
-  style.Colors[ImGuiCol_NavHighlight] = sdSysData.COLOR_SELECT.c_blue().STANDARD;
+  style.Colors[ImGuiCol_NavHighlight] = standard;
 }
 
 int SCREEN4::create(system_data &sdSysData)
