@@ -1289,101 +1289,120 @@ string AUTOMOBILE_TRANSMISSION_GEAR::long_desc()
   return LONG_DESC;
 }
 
-bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, int Transmission_Gear_Reported)
-{
-  GEAR_SELECTION_REPORTED = Gear;
 
-  /*
-  E0 Reverse
-  00 Neutral
-  10 Drive
-  data 2 51 low
-  01 Park
-  */
+//bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, int Transmission_Gear_Reported)
+bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt)
+{
+  bool ret_changed = false;
+
+  GEAR_SELECTION_REPORTED = Gear;
 
   // Verifying gear selections with transmissin gear position before changing 
   //  Will drasticly increase latency of reported gear shift lever position.
 
-  if (Gear == 0 && Gear_Alt == 0 && Transmission_Gear_Reported == 19)
+  //if (Gear == 0 && Gear_Alt == 0 && Transmission_Gear_Reported == 19)
+  if (Gear_Alt == 0)
   {
-    // Park
-    GEAR_SELECTION_SHORT_DESC = "P";
-    GEAR_SELECTION_LONG_DESC = "Park";
-    GEAR_SELECTION_PARK = true;
-    GEAR_SELECTION_REVERSE = false;
-    GEAR_SELECTION_NEUTRAL = false;
-    GEAR_SELECTION_DRIVE = false;
-    GEAR_SELECTION_LOW = false;
+    if (!GEAR_SELECTION_PARK)
+    {
+      // Park
+      GEAR_SELECTION_SHORT_DESC = "P";
+      GEAR_SELECTION_LONG_DESC = "Park";
+      GEAR_SELECTION_PARK = true;
+      GEAR_SELECTION_REVERSE = false;
+      GEAR_SELECTION_NEUTRAL = false;
+      GEAR_SELECTION_DRIVE = false;
+      GEAR_SELECTION_LOW = false;
 
-    return false;
+      ret_changed = true;
+    }
   }
-  else if (Gear == 0xe0 && Gear_Alt == 0x1e && Transmission_Gear_Reported == 0)
+  //else if (Gear == 0xe0 && Gear_Alt == 0x1e && Transmission_Gear_Reported == 0)
+  else if (bit_value(Gear_Alt, 6) == false && bit_value(Gear_Alt, 5) == false && bit_value(Gear_Alt, 4) == true)
   {
-    // Reverse
-    GEAR_SELECTION_SHORT_DESC = "R";
-    GEAR_SELECTION_LONG_DESC = "Reverse";
-    GEAR_SELECTION_PARK = false;
-    GEAR_SELECTION_REVERSE = true;
-    GEAR_SELECTION_NEUTRAL = false;
-    GEAR_SELECTION_DRIVE = false;
-    GEAR_SELECTION_LOW = false;
+    if (!GEAR_SELECTION_REVERSE)
+    {
+      // Reverse
+      GEAR_SELECTION_SHORT_DESC = "R";
+      GEAR_SELECTION_LONG_DESC = "Reverse";
+      GEAR_SELECTION_PARK = false;
+      GEAR_SELECTION_REVERSE = true;
+      GEAR_SELECTION_NEUTRAL = false;
+      GEAR_SELECTION_DRIVE = false;
+      GEAR_SELECTION_LOW = false;
 
-    return false;
+      ret_changed = true;
+    }
   }
-  else if (Gear == 0 && Gear_Alt > 0 && Transmission_Gear_Reported == 19)
+  //else if (Gear == 0 && Gear_Alt > 0 && Transmission_Gear_Reported == 19)
+  else if (bit_value(Gear_Alt, 6) == false && bit_value(Gear_Alt, 5) == true && bit_value(Gear_Alt, 4) == false)
   {
-    // Reverse
-    GEAR_SELECTION_SHORT_DESC = "N";
-    GEAR_SELECTION_LONG_DESC = "Neutral";
-    GEAR_SELECTION_PARK = false;
-    GEAR_SELECTION_REVERSE = false;
-    GEAR_SELECTION_NEUTRAL = true;
-    GEAR_SELECTION_DRIVE = false;
-    GEAR_SELECTION_LOW = false;
+    if (!GEAR_SELECTION_NEUTRAL)
+    {
+      // Neutral
+      GEAR_SELECTION_SHORT_DESC = "N";
+      GEAR_SELECTION_LONG_DESC = "Neutral";
+      GEAR_SELECTION_PARK = false;
+      GEAR_SELECTION_REVERSE = false;
+      GEAR_SELECTION_NEUTRAL = true;
+      GEAR_SELECTION_DRIVE = false;
+      GEAR_SELECTION_LOW = false;
 
-    return false;
+      ret_changed = true;
+    }
   }
-  else if (Gear >= 10 && Gear <= 96 && !get_bit_value(Gear_Alt, 64) && Transmission_Gear_Reported > 0 && 
-                                                                        Transmission_Gear_Reported <= 6)
+  
+  //else if (Gear >= 10 && Gear <= 96 && !get_bit_value(Gear_Alt, 64) && Transmission_Gear_Reported > 0 && 
+  //                                                                      Transmission_Gear_Reported <= 6)
+  else if (bit_value(Gear_Alt, 6) == false && bit_value(Gear_Alt, 5) == true && bit_value(Gear_Alt, 4) == true)
   {
-    // Drive
-    GEAR_SELECTION_SHORT_DESC = "D";
-    GEAR_SELECTION_LONG_DESC = "Drive";
-    GEAR_SELECTION_PARK = false;
-    GEAR_SELECTION_REVERSE = false;
-    GEAR_SELECTION_NEUTRAL = false;
-    GEAR_SELECTION_DRIVE = true;
-    GEAR_SELECTION_LOW = false;
+    if (!GEAR_SELECTION_DRIVE)
+    {
+      // Drive
+      GEAR_SELECTION_SHORT_DESC = "D";
+      GEAR_SELECTION_LONG_DESC = "Drive";
+      GEAR_SELECTION_PARK = false;
+      GEAR_SELECTION_REVERSE = false;
+      GEAR_SELECTION_NEUTRAL = false;
+      GEAR_SELECTION_DRIVE = true;
+      GEAR_SELECTION_LOW = false;
 
-    return false;
+      ret_changed = true;
+    }
   }
-  else if (Gear >= 10 && Gear <= 96 && get_bit_value(Gear_Alt, 64) && Transmission_Gear_Reported == 1)
+  //else if (Gear >= 10 && Gear <= 96 && get_bit_value(Gear_Alt, 64) && Transmission_Gear_Reported == 1)
+  else if (bit_value(Gear_Alt, 6) == true && bit_value(Gear_Alt, 5) == false && bit_value(Gear_Alt, 4) == true)
   {
-    // Low
-    GEAR_SELECTION_SHORT_DESC = "L";
-    GEAR_SELECTION_LONG_DESC = "Low";
-    GEAR_SELECTION_PARK = false;
-    GEAR_SELECTION_REVERSE = false;
-    GEAR_SELECTION_NEUTRAL = false;
-    GEAR_SELECTION_DRIVE = false;
-    GEAR_SELECTION_LOW = true;
+    if (!GEAR_SELECTION_LOW)
+    {
+      // Low
+      GEAR_SELECTION_SHORT_DESC = "L";
+      GEAR_SELECTION_LONG_DESC = "Low";
+      GEAR_SELECTION_PARK = false;
+      GEAR_SELECTION_REVERSE = false;
+      GEAR_SELECTION_NEUTRAL = false;
+      GEAR_SELECTION_DRIVE = false;
+      GEAR_SELECTION_LOW = true;
 
-    return false;
+      ret_changed = true;
+    }
   }
   else
   {
     // Unknown  - 00 D0 7F 50 35 00 0D 08 0D 08 010F3FCE
     GEAR_SELECTION_SHORT_DESC = "X";
     GEAR_SELECTION_LONG_DESC = "Unknown";
-    //GEAR_SELECTION_PARK = false;
-    //GEAR_SELECTION_REVERSE = false;
-    //GEAR_SELECTION_NEUTRAL = false;
-    //GEAR_SELECTION_DRIVE = false;
-    //GEAR_SELECTION_LOW = false;
+    GEAR_SELECTION_PARK = false;
+    GEAR_SELECTION_REVERSE = false;
+    GEAR_SELECTION_NEUTRAL = false;
+    GEAR_SELECTION_DRIVE = false;
+    GEAR_SELECTION_LOW = false;
 
     // Insert Error Check Here
-    return true;
+    ret_changed = true;
   }
+
+  return ret_changed;
 }
 
 int AUTOMOBILE_TRANSMISSION_GEAR::gear_selection_reported()
@@ -2875,8 +2894,34 @@ void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned l
     // Indicates TCM Failure.
 
     // Gear Lever Selection
-    CALCULATED.CAM_COMM_ERRORS.GEAR_SELECTION.set_error(STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2], STATUS.GEAR.reported()));
-      // Error Check Incomplete
+    //CALCULATED.CAM_COMM_ERRORS.GEAR_SELECTION.set_error(STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2], STATUS.GEAR.reported()));
+    if (STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2]))
+    {
+      if (STATUS.GEAR.gear_selection_park())
+      {
+        ALERTS_2.sound_tone(61);
+      }
+      else if (STATUS.GEAR.gear_selection_reverse())
+      {
+        ALERTS_2.sound_tone(63);
+      }
+      else if (STATUS.GEAR.gear_selection_neutral())
+      {
+        ALERTS_2.sound_tone(64);
+      }
+      else if (STATUS.GEAR.gear_selection_drive())
+      {
+        ALERTS_2.sound_tone(66);
+      }
+      else if (STATUS.GEAR.gear_selection_low())
+      {
+        ALERTS_2.sound_tone(67);
+      }
+      else // unknown
+      {
+        ALERTS_2.sound_tone(0);
+      }
+    }
     
     // Door Open or Closed
     //  03 60 C0 40 3F 07 00 37 B8 7B 01097D8C

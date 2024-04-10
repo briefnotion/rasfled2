@@ -145,7 +145,19 @@ class ALERT_SYSTEM_2
   void display_active_alerts();
 
   void sound_alert(int Value);
+  //  1 - green
+  //  2 - yellow
+  //  3 - red
 
+  void sound_tone(int Value);
+  // simple tones, no sharps and flats
+  // 61 - c6
+  // 62 - d6
+  // 63 - e6
+  // 64 - f6
+  // 65 - g6
+  // 66 - a6
+  // 67 - b6
 };
 
 

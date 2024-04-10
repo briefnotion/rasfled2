@@ -678,8 +678,10 @@ class AUTOMOBILE_TRANSMISSION_GEAR
   string short_desc();
   string long_desc();
 
-  bool store_gear_selection(int Gear, int Gear_Alt, int Transmission_Gear_Reported);
-  // return true if errored.
+  
+  //bool store_gear_selection(int Gear, int Gear_Alt, int Transmission_Gear_Reported);
+  bool store_gear_selection(int Gear, int Gear_Alt);
+  // return true if changed.
 
   int gear_selection_reported();
   string gear_selection_short_desc();

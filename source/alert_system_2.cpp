@@ -330,6 +330,41 @@ void ALERT_SYSTEM_2::sound_alert(int Value)
   }
 }
 
+void ALERT_SYSTEM_2::sound_tone(int Value)
+{
+  if (Value == 61)
+  {
+    SOUND_SYSTEM.play_c6(MUTE);
+  }
+  else if (Value == 62)
+  {
+    SOUND_SYSTEM.play_d6(MUTE);
+  }
+  else if (Value == 63)
+  {
+    SOUND_SYSTEM.play_e6(MUTE);
+  }
+  else if (Value == 64)
+  {
+    SOUND_SYSTEM.play_f6(MUTE);
+  }
+  else if (Value == 65)
+  {
+    SOUND_SYSTEM.play_g6(MUTE);
+  }
+  else if (Value == 66)
+  {
+    SOUND_SYSTEM.play_a6(MUTE);
+  }
+  else if (Value == 67)
+  {
+    SOUND_SYSTEM.play_b6(MUTE);
+  }
+  else // invalid
+  {
+    SOUND_SYSTEM.play_alert_level_1(MUTE);
+  }
+}
 
 
 #endif
