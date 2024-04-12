@@ -432,7 +432,10 @@ void SCREEN4::character_enter(unsigned char Character,
     // Backspace 
     else if (Backspace_Pressed)
     {
-      COMMAND_TEXT.resize(COMMAND_TEXT.size() -1);
+      if (COMMAND_TEXT.size() > 0)
+      {
+        COMMAND_TEXT.resize(COMMAND_TEXT.size() -1);
+      }
     }
 
     // CR

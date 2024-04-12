@@ -25,6 +25,7 @@
 #include "screen4_helper.h"
 #include "auto_nova.h"
 #include "dnfwts.h"
+#include "commands.h"
 
 #include "comport.h"
 
@@ -678,8 +679,6 @@ class AUTOMOBILE_TRANSMISSION_GEAR
   string short_desc();
   string long_desc();
 
-  
-  //bool store_gear_selection(int Gear, int Gear_Alt, int Transmission_Gear_Reported);
   bool store_gear_selection(int Gear, int Gear_Alt);
   // return true if changed.
 
@@ -698,11 +697,9 @@ class AUTOMOBILE_ACCELERATOR
   private:
 
   int VAL_VALUE = 0;  // Units unknown
-                  // Range?: 0 - (256 * 256)
+                  // Range?: 0 - (256)
 
   public:
-
-  // THIS ROUTINE HAS NOT BEEN TESTED.
 
   void store_value(int A);
 
@@ -848,7 +845,7 @@ class AUTOMOBILE_CALCULATED
 
   SIMPLE_ERRORS CAM_COMM_ERRORS;
 
-  void compute_low(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time);
+  void compute_low(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time);
   // Low level Compute not requiring calculation on all data.
   //  Fast but not fully acurate.
   //  Currently call just before the data is displayed.
@@ -974,9 +971,9 @@ class AUTOMOBILE
 
   bool active();
 
-  void process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time);
+  void process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time);
 
-  void translate(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time);
+  void translate(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time);
 };
 
 

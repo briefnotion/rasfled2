@@ -207,7 +207,7 @@ class system_data
   // Event System
   deque<int> intCHANNEL_GROUP_EVENTS_COUNTS;
 
-  COMMAND_THREAD Command_Thread;
+  COMMAND_THREAD COMMAND_THREADS;
 
   // Radio Variables
   AIRCRAFT_COORDINATOR AIRCRAFT_COORD;

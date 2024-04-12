@@ -184,7 +184,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     // Shutdown Waring
     if (IGNITION == false && IGNITION_WARNING_TIMER.enabled() && IGNITION_WARNING_TIMER.ping_down(tmeCurrentTime) == false)
     {
-      sdSysData.ALERTS_2.add_generic_alert("System shutting down in 1 minute.");
+      sdSysData.ALERTS_2.add_generic_alert(sdSysData.COMMAND_THREADS, tmeCurrentTime, "System shutting down in 1 minute.");
     }
 
     // Shutdown

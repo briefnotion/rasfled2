@@ -1289,8 +1289,6 @@ string AUTOMOBILE_TRANSMISSION_GEAR::long_desc()
   return LONG_DESC;
 }
 
-
-//bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt, int Transmission_Gear_Reported)
 bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt)
 {
   bool ret_changed = false;
@@ -1300,7 +1298,6 @@ bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt)
   // Verifying gear selections with transmissin gear position before changing 
   //  Will drasticly increase latency of reported gear shift lever position.
 
-  //if (Gear == 0 && Gear_Alt == 0 && Transmission_Gear_Reported == 19)
   if (Gear_Alt == 0)
   {
     if (!GEAR_SELECTION_PARK)
@@ -1317,7 +1314,6 @@ bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt)
       ret_changed = true;
     }
   }
-  //else if (Gear == 0xe0 && Gear_Alt == 0x1e && Transmission_Gear_Reported == 0)
   else if (bit_value(Gear_Alt, 6) == false && bit_value(Gear_Alt, 5) == false && bit_value(Gear_Alt, 4) == true)
   {
     if (!GEAR_SELECTION_REVERSE)
@@ -1334,7 +1330,6 @@ bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt)
       ret_changed = true;
     }
   }
-  //else if (Gear == 0 && Gear_Alt > 0 && Transmission_Gear_Reported == 19)
   else if (bit_value(Gear_Alt, 6) == false && bit_value(Gear_Alt, 5) == true && bit_value(Gear_Alt, 4) == false)
   {
     if (!GEAR_SELECTION_NEUTRAL)
@@ -1351,9 +1346,6 @@ bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt)
       ret_changed = true;
     }
   }
-  
-  //else if (Gear >= 10 && Gear <= 96 && !get_bit_value(Gear_Alt, 64) && Transmission_Gear_Reported > 0 && 
-  //                                                                      Transmission_Gear_Reported <= 6)
   else if (bit_value(Gear_Alt, 6) == false && bit_value(Gear_Alt, 5) == true && bit_value(Gear_Alt, 4) == true)
   {
     if (!GEAR_SELECTION_DRIVE)
@@ -1370,7 +1362,6 @@ bool AUTOMOBILE_TRANSMISSION_GEAR::store_gear_selection(int Gear, int Gear_Alt)
       ret_changed = true;
     }
   }
-  //else if (Gear >= 10 && Gear <= 96 && get_bit_value(Gear_Alt, 64) && Transmission_Gear_Reported == 1)
   else if (bit_value(Gear_Alt, 6) == true && bit_value(Gear_Alt, 5) == false && bit_value(Gear_Alt, 4) == true)
   {
     if (!GEAR_SELECTION_LOW)
@@ -1551,7 +1542,7 @@ int SIMPLE_ERRORS::error_count()
 
 //-----------
 
-void AUTOMOBILE_CALCULATED::compute_low(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time)
+void AUTOMOBILE_CALCULATED::compute_low(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time)
 {
   // Set Lights
   Status.INDICATORS.process();
@@ -1655,7 +1646,7 @@ void AUTOMOBILE_CALCULATED::compute_low(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_
               Status.TEMPS.COOLANT_05.val_c() + 
               (Status.TEMPS.CATALYST_3C.val_c() / 20.0f)) / 4.0f) - 30.0f) * 3.0f;
 
-  if (ALERTS_2.res_alert_condition(RESERVE_ALERT_TEMP_S_TEMP, S_TEMP >= 60.0f, S_TEMP < 50.0f))
+  if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_TEMP_S_TEMP, S_TEMP >= 60.0f, S_TEMP < 50.0f))
   {
     ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)S_TEMP));
   }
@@ -2487,7 +2478,7 @@ bool AUTOMOBILE::active()
   return AVAILABILITY.is_active();
 }
 
-void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time)
+void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time)
 {
   int pid_recieved = 0;
   bool identified = false;
@@ -2559,7 +2550,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 // Dont send another request until wait delay is up
                 STATUS.SYSTEM.store_malfunction_indicator_light(bit_value(message.DATA[3], 7));
 
-                if (ALERTS_2.res_alert_condition(RESERVE_ALERT_MIL, 
+                if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_MIL, 
                                                   STATUS.SYSTEM.malfunction_indicator_light() == true , 
                                                   STATUS.SYSTEM.malfunction_indicator_light() == false))
                 {
@@ -2574,7 +2565,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_coolant_05(message.DATA[3]);
 
-                if (ALERTS_2.res_alert_condition(RESERVE_ALERT_TEMP_COOLANT, 
+                if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_TEMP_COOLANT, 
                                                   STATUS.TEMPS.COOLANT_05.val_c() >= 100.0f, 
                                                   STATUS.TEMPS.COOLANT_05.val_c() < 80.0f))
                 {
@@ -2599,7 +2590,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_air_intake_0f(message.DATA[3]);
 
-                if (ALERTS_2.res_alert_condition(RESERVE_ALERT_TEMP_INTAKE, 
+                if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_TEMP_INTAKE, 
                                                   STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= 50.0f, 
                                                   STATUS.TEMPS.AIR_INTAKE_0f.val_c() < 40.0f))
                 {
@@ -2696,7 +2687,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
                 // Dont send another request until wait delay is up
                 STATUS.ELECTRICAL.store_control_voltage_42(message.DATA[3], message.DATA[4]);
 
-                if (ALERTS_2.res_alert_condition(RESERVE_ALERT_ELEC_VOLTAGE, 
+                if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_ELEC_VOLTAGE, 
                                                   STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f, 
                                                   STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() >= 12.0f))
                 {
@@ -2710,7 +2701,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
             // Unkown message
             if (message_processed == false) 
             {
-              ALERTS_2.res_alert_no_condition(RESERVE_ALERT_UNKNOWN_MESSAGE, "Unparsed Message Received.");
+              ALERTS_2.res_alert_no_condition(Thread, tmeFrame_Time, RESERVE_ALERT_UNKNOWN_MESSAGE, "Unparsed Message Received.");
               cons.printw("Unparsed Message From Can Bus: " + message.ORIG);
             }
           }
@@ -2765,7 +2756,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
 
           {
             message = DATA.AD_UNKNOWN;
-            ALERTS_2.res_alert_no_condition(RESERVE_ALERT_UNKNOWN_MESSAGE, "Unidentfied Message Received.");
+            ALERTS_2.res_alert_no_condition(Thread, tmeFrame_Time, RESERVE_ALERT_UNKNOWN_MESSAGE, "Unidentfied Message Received.");
             cons.printw("Unidentfied Message From Can Bus: " + message.ORIG);
           }
         }
@@ -2828,7 +2819,7 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, 
   }
 }
 
-void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time)
+void AUTOMOBILE::translate(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time)
 {
   if (AVAILABILITY.is_active() == true)
   {
@@ -2867,7 +2858,7 @@ void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned l
     STATUS.FUEL.store_percentage(DATA.AD_C0.DATA[7]);
     STATUS.FUEL.store_level(DATA.AD_380.DATA[7]);
 
-    if (ALERTS_2.res_alert_condition(RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 1.0f, STATUS.FUEL.val_level() > 2.0f))
+    if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 1.0f, STATUS.FUEL.val_level() > 2.0f))
     {
       ALERTS_2.res_update_alert_text(RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + STATUS.FUEL.level());
     }
@@ -2894,32 +2885,31 @@ void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned l
     // Indicates TCM Failure.
 
     // Gear Lever Selection
-    //CALCULATED.CAM_COMM_ERRORS.GEAR_SELECTION.set_error(STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2], STATUS.GEAR.reported()));
     if (STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2]))
     {
       if (STATUS.GEAR.gear_selection_park())
       {
-        ALERTS_2.sound_tone(61);
+        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 61);
       }
       else if (STATUS.GEAR.gear_selection_reverse())
       {
-        ALERTS_2.sound_tone(63);
+        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 63);
       }
       else if (STATUS.GEAR.gear_selection_neutral())
       {
-        ALERTS_2.sound_tone(64);
+        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 64);
       }
       else if (STATUS.GEAR.gear_selection_drive())
       {
-        ALERTS_2.sound_tone(66);
+        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 66);
       }
       else if (STATUS.GEAR.gear_selection_low())
       {
-        ALERTS_2.sound_tone(67);
+        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 67);
       }
       else // unknown
       {
-        ALERTS_2.sound_tone(0);
+        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 0);
       }
     }
     
@@ -2942,7 +2932,7 @@ void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned l
     // Low level Compute not requiring calculation on all data.
     //  Fast but not fully acurate.
     //  Currently call just before the data is displayed.
-    CALCULATED.compute_low(Dnfwts, ALERTS_2, STATUS, tmeFrame_Time);
+    CALCULATED.compute_low(Thread, Dnfwts, ALERTS_2, STATUS, tmeFrame_Time);
 
     /*
     // Move **********************************************************************************

@@ -1,3 +1,8 @@
+2.152_240410
+  - Wrote a simple command line task manager to try 
+      to get two sounds to play at the same time. 
+      No success.
+
 2.151_240409
   - Started adding tones on gear lever change, via 
       alert system sounds.  Not tested live. 

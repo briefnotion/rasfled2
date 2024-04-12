@@ -18,6 +18,7 @@
 #include <deque>
 
 // RASFled related header files
+#include "commands.h"
 #include "sounds.h"
 
 // -------------------------------------------------------------------------------------
@@ -119,8 +120,8 @@ class ALERT_SYSTEM_2
   bool changed();
   
   // reserved alerts
-  void res_alert_no_condition(int Id, string Alert_Text);
-  bool res_alert_condition(int Id, bool Raise_Alert, bool Clear_Alert);
+  void res_alert_no_condition(COMMAND_THREAD &Thread, unsigned long current_time_frame, int Id, string Alert_Text);
+  bool res_alert_condition(COMMAND_THREAD &Thread, unsigned long current_time_frame, int Id, bool Raise_Alert, bool Clear_Alert);
   void res_update_alert_text(int Id, string Text);
   bool res_active(int Id);        // Returns ACTIVE value
   bool res_warning(int Id);       // Returns WARNING value
@@ -140,16 +141,16 @@ class ALERT_SYSTEM_2
 
   // all alerts
   int alert_count();
-  void add_generic_alert(string Text);
+  void add_generic_alert(COMMAND_THREAD &Thread, unsigned long current_time_frame, string Text);
   void alert_list_clean();
   void display_active_alerts();
 
-  void sound_alert(int Value);
+  void sound_alert(COMMAND_THREAD &Thread, unsigned long current_time_frame, int Value);
   //  1 - green
   //  2 - yellow
   //  3 - red
 
-  void sound_tone(int Value);
+  void sound_tone(COMMAND_THREAD &Thread, unsigned long current_time_frame, int Value);
   // simple tones, no sharps and flats
   // 61 - c6
   // 62 - d6
