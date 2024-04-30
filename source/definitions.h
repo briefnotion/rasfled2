@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.152_240410"
+#define Revision "2.153_240429"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -85,7 +85,6 @@
 #define DEF_COMPASS_OFFSET_HISTORY        "compass_offset_history.json"
 
 // COMMS Settings CAN Bus
-//#define COMMS_PORT_CAN     "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"
 #define COMMS_AUTOSTART                       true
 #define COMMS_BAUD                            115200
 #define COMMS_BIT_COUNT                       8
@@ -96,7 +95,6 @@
 #define COMMS_XONXOFF                         false
 
 // COMMS Settings GPS
-//#define COMMS_PORT_GPS     "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_B001JKAO-if00-port0"
 #define COMMS_AUTOSTART_GPS                   true
 #define COMMS_BAUD_GPS                        9600
 #define COMMS_BAUD_BAUD_RATE_CHANGE_TO_GPS    true
@@ -109,19 +107,9 @@
 #define COMMS_XONXOFF_GPS                     false
 #define CONTINUOUS_DATA_GPS                   true
 
-//#define COMMS_SAVE_LOG_FILENAME_GPS           "/home/pi/gps/gpscomms"
-
 #define COMMS_RECEIVE_TEST_DATA_GPS           false
-//#define COMMS_TEST_DATA_FILENAME_GPS          "/home/pi/gps/gpscomms.txt"
 
-//#define AUTOMOBILE_LOG_FILE_DIRECTORY_GPS     "/home/pi/gps_log/"
-
-// COMMS Settings HMC5883L 3-Axis Compass
-//#define COMMS_PORT_COMPASS                    "/dev/i2c-1"
-
-//#define COMMS_PORT_COMPASS_OFFSET_HISTORY     "compass_offset_history.json"
-//#define COMMS_PORT_COMPASS_OFFSET_HISTORY_T   "compass_offset_history_test.json"
-
+// COMMS Settings Compass
 #define COMMS_ID_COMPASS                      0x1E
 #define COMMS_AUTOSTART_COMPASS               true
 #define CONTINUOUS_DATA_COMPASS               true
@@ -145,7 +133,7 @@
 #define COMMS_COMPASS_CAL_PT_4_Y              423.0f
 #define COMMS_COMPASS_CAL_PT_4_VAR            0.348f
 
-#define COMMS_COMPASS_CAL_OFFSET              90.0f - 23.0f
+#define COMMS_COMPASS_CAL_OFFSET              00.0f - 150.0f
 
 // TTL Values - Individually adjust the TTL values of the auto.
 #define TTL_LF_Top_Percentage   100.15

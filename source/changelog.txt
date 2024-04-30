@@ -1,3 +1,10 @@
+2.153_240429
+  - Corrected shutdown command sent after car 
+      is off for 10 minutes.
+  - Changed default compass offset.
+  - Added a deceleration bar to the automobile 
+      widgets.
+
 2.152_240410
   - Wrote a simple command line task manager to try 
       to get two sounds to play at the same time. 

@@ -176,8 +176,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       if (IGNITION == false)
       {
-        IGNITION_WARNING_TIMER.ping_up(tmeCurrentTime, 8 * 60000);
-        IGNITION_SHUTDOWN_TIMER.ping_up(tmeCurrentTime, 9 * 60000);
+        IGNITION_WARNING_TIMER.ping_up(tmeCurrentTime, 9 * 60000);
+        IGNITION_SHUTDOWN_TIMER.ping_up(tmeCurrentTime, 10 * 60000);
       }
     }
 
@@ -190,7 +190,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     // Shutdown
     if (IGNITION == false && IGNITION_SHUTDOWN_TIMER.enabled() && IGNITION_SHUTDOWN_TIMER.ping_down(tmeCurrentTime) == false)
     {
-      cons.command_text_set(" comshutd");
+      cons.command_text_set(" shutdown");
     }
 
     // Signal Off Reduncancy - because saw a stuck signal in testing.
