@@ -1,3 +1,12 @@
+2.154_240504
+  - Changed default compass offset.
+  - Adjusted the deceleration guage to closer match 
+      the brake pressure. 
+  - Corrected problem with gps test file not loading.
+  - Changing the way compass is showing bearings and 
+      headings for smoother animations. Incomplete 
+      and testing routines.
+
 2.153_240429
   - Corrected shutdown command sent after car 
       is off for 10 minutes.

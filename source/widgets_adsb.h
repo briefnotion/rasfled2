@@ -298,6 +298,8 @@ class ADSB_MAP
   bool SHOW_BUTTONS = true;
   TIMED_PING SHOW_BUTTONS_TIMER;
 
+  COMPASS_WIDGET CURRENT_POSITION_COMPASS;
+
   void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
 
   public:

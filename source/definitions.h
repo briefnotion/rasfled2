@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.153_240429"
+#define Revision "2.154_240504"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -107,8 +107,6 @@
 #define COMMS_XONXOFF_GPS                     false
 #define CONTINUOUS_DATA_GPS                   true
 
-#define COMMS_RECEIVE_TEST_DATA_GPS           false
-
 // COMMS Settings Compass
 #define COMMS_ID_COMPASS                      0x1E
 #define COMMS_AUTOSTART_COMPASS               true
@@ -133,7 +131,7 @@
 #define COMMS_COMPASS_CAL_PT_4_Y              423.0f
 #define COMMS_COMPASS_CAL_PT_4_VAR            0.348f
 
-#define COMMS_COMPASS_CAL_OFFSET              00.0f - 150.0f
+#define COMMS_COMPASS_CAL_OFFSET              0.0f - 127.0f
 
 // TTL Values - Individually adjust the TTL values of the auto.
 #define TTL_LF_Top_Percentage   100.15

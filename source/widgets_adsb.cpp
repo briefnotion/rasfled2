@@ -1895,7 +1895,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       if (RANGE_INDICATOR.gps_display_current_location())
       {
         // draw compass at center location
-        draw_compass(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+        CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                             sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, 
                             true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max());
@@ -1903,7 +1903,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       else
       {
         // draw compass at gps pos
-        draw_compass(draw_list_map, sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+        CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                             sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false);
       }

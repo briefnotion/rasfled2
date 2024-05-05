@@ -116,6 +116,26 @@ ImColor BOOLEAN_GRADIANT::boolean_color(system_data &sdSysData, bool Value, ImCo
 
 // ---------------------------------------------------------------------------------------
 
+void IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::first_run()
+{
+  VALUE_COLLECTION_LOWER.reserve(SIZE);
+  VALUE_COLLECTION_UPPER.reserve(SIZE);
+
+  for (int count = VALUE_COLLECTION_LOWER.size(); count < SIZE; count++)
+  {
+    VALUE_COLLECTION_LOWER.push_back( 0.0f );
+  }
+
+  for (int count = VALUE_COLLECTION_UPPER.size(); count < SIZE; count++)
+  {
+    VALUE_COLLECTION_UPPER.push_back( 0.0f );
+  }
+
+  READ_WRITE_POS = 0;
+
+  FIRST_RUN = false;
+}
+
 void IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::set_size(int Size)
 {
   SIZE = Size;
@@ -126,16 +146,7 @@ void IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::set_value(float Value)
 {
   if (FIRST_RUN)
   {
-    VALUE_COLLECTION.reserve(SIZE);
-
-    for (int count = VALUE_COLLECTION.size(); count < SIZE; count++)
-    {
-      VALUE_COLLECTION.push_back( 0.0f );
-    }
-
-    READ_WRITE_POS = 0;
-
-    FIRST_RUN = false;
+    first_run();
   }
   
   LATEST_VALUE = Value;
@@ -149,18 +160,80 @@ float IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::value()
     READ_WRITE_POS = 0;
   }
 
-  SUMMATION = SUMMATION + LATEST_VALUE - VALUE_COLLECTION[READ_WRITE_POS];
+  SUMMATION_LOWER = SUMMATION_LOWER + LATEST_VALUE - VALUE_COLLECTION_LOWER[READ_WRITE_POS];
   
-  VALUE_COLLECTION[READ_WRITE_POS] = LATEST_VALUE;
+  VALUE_COLLECTION_LOWER[READ_WRITE_POS] = LATEST_VALUE;
 
-  if (VALUE_COLLECTION.size() > 0)
+  if (VALUE_COLLECTION_LOWER.size() > 0)
   {
-    return (SUMMATION / (float)SIZE);
+    return (SUMMATION_LOWER / (float)SIZE);
   }
   else
   {
     return LATEST_VALUE;
   }
+}
+
+float IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::value_no_roll(float Roll_Value)
+{
+  float ret_value = 0;
+
+  READ_WRITE_POS++;
+  if (READ_WRITE_POS >= SIZE)
+  {
+    READ_WRITE_POS = 0;
+  }
+
+  // Mid value calculations
+  SUMMATION_LOWER = SUMMATION_LOWER + LATEST_VALUE - VALUE_COLLECTION_LOWER[READ_WRITE_POS];
+  VALUE_COLLECTION_LOWER[READ_WRITE_POS] = LATEST_VALUE;
+
+  // Outer value calculations
+  if (LATEST_VALUE > (Roll_Value / 2.0f))
+    {
+      // store negative values in outer
+      SUMMATION_UPPER = SUMMATION_UPPER + LATEST_VALUE - Roll_Value - VALUE_COLLECTION_UPPER[READ_WRITE_POS];
+      VALUE_COLLECTION_UPPER[READ_WRITE_POS] = LATEST_VALUE - Roll_Value;
+    }
+    else
+    {
+      // store positive values in outer
+      SUMMATION_UPPER = SUMMATION_UPPER + LATEST_VALUE - VALUE_COLLECTION_UPPER[READ_WRITE_POS];
+      VALUE_COLLECTION_UPPER[READ_WRITE_POS] = LATEST_VALUE;
+    }
+  
+  // Choose to return mid or outer values
+  if (LATEST_VALUE > (Roll_Value / 4.0f) && LATEST_VALUE < (Roll_Value - (Roll_Value / 4.0f)))
+  {
+    // return mid values
+    if (VALUE_COLLECTION_LOWER.size() > 0)
+    {
+      ret_value = (SUMMATION_LOWER / (float)SIZE);
+    }
+    else
+    {
+      ret_value = LATEST_VALUE;
+    }
+  }
+  else
+  {
+    // return outer values
+    if (VALUE_COLLECTION_UPPER.size() > 0)
+    {
+      ret_value = (SUMMATION_UPPER / (float)SIZE);
+    }
+    else
+    {
+      ret_value = LATEST_VALUE;
+    }
+
+    if (ret_value < 0.0f)
+    {
+      ret_value += Roll_Value;
+    }
+  }
+
+  return ret_value;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -423,6 +496,8 @@ bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, 
 
   return ret_value;
 }
+
+// ---------------------------------------------------------------------------------------
 
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                   bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
@@ -747,6 +822,44 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
                 Valid_Heading_2, Heading_2, Draw_North_Pointer, 
                 false, 0.0f, 0.0f);
 }
+
+void COMPASS_WIDGET::draw(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
+                        bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max)
+{
+  if (Valid_Heading_1)
+  {
+    HEADING_1.set_value(Heading_1);
+  }
+
+  if (Valid_Heading_2)
+  {
+    HEADING_2.set_value(Heading_2);
+  }
+
+  draw_compass(Draw_List, sdSysData, Version, Screen_Position, Size, Main, Valid_Position, 
+                        Valid_Heading_1, HEADING_1.value_no_roll(360.0f), Valid_Heading_2, HEADING_2.value_no_roll(360.0f), Draw_North_Pointer, 
+                        Jitter_Active, Jitter_Heading_Min, Jitter_Heading_Max);
+}
+
+void COMPASS_WIDGET::draw(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer)
+{
+  if (Valid_Heading_1)
+  {
+    HEADING_1.set_value(Heading_1);
+  }
+
+  if (Valid_Heading_2)
+  {
+    HEADING_2.set_value(Heading_2);
+  }
+
+  draw_compass(Draw_List, sdSysData, Version, Screen_Position, Size, Main, Valid_Position, 
+                        Valid_Heading_1, HEADING_1.value_no_roll(360.0f), Valid_Heading_2, HEADING_2.value_no_roll(360.0f), Draw_North_Pointer);
+}
+
+// ---------------------------------------------------------------------------------------
 
 bool confirm_dialog(system_data &sdSysData, bool &Choice)
 {

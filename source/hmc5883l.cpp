@@ -1152,6 +1152,7 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
     float bearing_min = CALIBRATED_BEARINGS[0];
     float bearing_max = CALIBRATED_BEARINGS[0];
 
+    // DELETE BEARING AVERAGE CALCULATIONS
     for (int pos = 1; pos < (int)CALIBRATED_BEARINGS.size(); pos++)
     {
       bearing_value = CALIBRATED_BEARINGS[pos];

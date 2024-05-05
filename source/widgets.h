@@ -72,14 +72,19 @@ class IMPACT_RESISTANCE_FLOAT_FRAME_COUNT
   private:
 
   int SIZE = 6;   // 6 - about 200ms at 30fps
-  vector<float> VALUE_COLLECTION;
+  vector<float> VALUE_COLLECTION_LOWER;
+  vector<float> VALUE_COLLECTION_UPPER;
 
   bool FIRST_RUN = true;
 
   int READ_WRITE_POS = 0;
 
   float LATEST_VALUE = 0.0f;
-  float SUMMATION = 0.0f;
+  
+  float SUMMATION_LOWER = 0.0f;
+  float SUMMATION_UPPER = 0.0f;
+
+  void first_run();
 
   public:
 
@@ -88,6 +93,8 @@ class IMPACT_RESISTANCE_FLOAT_FRAME_COUNT
   void set_value(float Value);
 
   float value();
+
+  float value_no_roll(float Roll_Value);
 
 };
 
@@ -214,12 +221,31 @@ bool confirm_dialog(system_data &sdSysData, bool &Choice);
 //  true if clicked
 //  Choice returned when clicked is true or false
 
+// ---------------------------------------------------------------------------------------
+
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                         bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
                         bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max);
 
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                         bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer);
+
+class COMPASS_WIDGET
+{
+  private:
+
+  IMPACT_RESISTANCE_FLOAT_FRAME_COUNT HEADING_1;
+  IMPACT_RESISTANCE_FLOAT_FRAME_COUNT HEADING_2;
+
+  public:
+
+  void draw(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
+                          bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
+                          bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max);
+
+  void draw(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
+                          bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer);
+};
 
 // ---------------------------------------------------------------------------------------
 
