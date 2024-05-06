@@ -772,7 +772,11 @@ void ADSB_MAP::add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type)
 }
 
 void ADSB_MAP::create(system_data &sdSysData)
-{
+{  
+  // Prepare Compass
+  CURRENT_POSITION_COMPASS.set_size(32, (15 / 2));
+  // set at frame rate for slow and jitter size for fast.
+
   RANGE_INDICATOR.PROPS.COLOR = sdSysData.COLOR_SELECT.orange();
   RANGE_INDICATOR.set_range(25.0f);
 

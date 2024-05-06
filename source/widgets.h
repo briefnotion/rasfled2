@@ -230,6 +230,9 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                         bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer);
 
+// Heading 1 - Track or Aircraft Nav Heading      (from GPS, normally slow)
+// Heading 2 - Compass or Aircraft Track Heading. (from hardware compass, normally fast)
+
 class COMPASS_WIDGET
 {
   private:
@@ -238,6 +241,8 @@ class COMPASS_WIDGET
   IMPACT_RESISTANCE_FLOAT_FRAME_COUNT HEADING_2;
 
   public:
+
+  void set_size(int Heading_1_Size, int Heading_2_Size);
 
   void draw(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                           bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 

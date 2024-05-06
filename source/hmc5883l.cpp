@@ -1142,17 +1142,15 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
 
   // Calclulate Bearing
 
-  // Simple Filter
+  // Determine Jitter
   if (CALIBRATED_BEARINGS.size() > 0)
   {
     float bearing_start_value = CALIBRATED_BEARINGS[0];
 
-    int bearing_total = bearing_start_value;
     float bearing_value = 0.0f;
     float bearing_min = CALIBRATED_BEARINGS[0];
     float bearing_max = CALIBRATED_BEARINGS[0];
 
-    // DELETE BEARING AVERAGE CALCULATIONS
     for (int pos = 1; pos < (int)CALIBRATED_BEARINGS.size(); pos++)
     {
       bearing_value = CALIBRATED_BEARINGS[pos];
@@ -1166,8 +1164,6 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
         bearing_value = bearing_value + 360.0f;
       }
 
-      bearing_total = bearing_total + bearing_value;
-      
       // Determine Jitter
       if (pos > 0)
       {
@@ -1175,7 +1171,7 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
         {
           bearing_min = bearing_value;
         }
-        if (bearing_value> bearing_max)
+        if (bearing_value > bearing_max)
         {
           bearing_max = bearing_value;
         }
@@ -1184,7 +1180,7 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
 
     if (CALIBRATED_BEARINGS.size() > 0)
     {
-      BEARING = (bearing_total / (float)CALIBRATED_BEARINGS.size());
+      BEARING = CALIBRATED_BEARINGS.back();
 
       if (BEARING <= 0.0f)
       {

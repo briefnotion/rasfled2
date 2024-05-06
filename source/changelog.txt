@@ -1,3 +1,20 @@
+2.155_240505
+  - Corrected error in IMPACT_RESISTANCE_FLOAT_FRAME_COUNT
+      that would cause a segmentation fault to occur 
+      if the value was read before a value was stored. 
+      The error did not occur with the test data. 
+  - HMC5883L bearing will now return latest value 
+      instead an average over the past jitter frame 
+      size.
+  - Changed the way the compass window compass, and 
+      the ADS-B current position compass is shown so
+      the bearings and headings have smoother animations.
+  - Compass_widget class was created based on the 
+      draw_compass widget routine. draw_compass routine 
+      still exist because it doesn't require assignment. 
+      Compass_widget can have properties in future, if 
+      needed. 
+
 2.154_240504
   - Changed default compass offset.
   - Adjusted the deceleration guage to closer match 

@@ -378,6 +378,9 @@ int SCREEN4::create(system_data &sdSysData)
     // Load Advertisements
     ADVERTISEMENTS.create(sdSysData);
 
+    // Prepare Compass
+    COMPASS_WINDOW_COMPASS.set_size(32, (15 / 2));
+    // set at frame rate for slow and jitter size for fast.
   }
   else
   {
@@ -1526,7 +1529,7 @@ void SCREEN4::draw(system_data &sdSysData)
 
             ImDrawList* draw_list_status_compass_window = ImGui::GetWindowDrawList();
 
-            draw_compass(draw_list_status_compass_window, sdSysData, 2, 
+            COMPASS_WINDOW_COMPASS.draw(draw_list_status_compass_window, sdSysData, 2, 
                         ImVec2(working_area.x + (working_area.z / 2.0f), 
                         working_area.y + (working_area.w / 2.0f)), 
                         working_area.z / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
