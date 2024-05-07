@@ -886,7 +886,7 @@ bool confirm_dialog(system_data &sdSysData, bool &Choice)
 {
   bool ret_choice_clicked = false;
 
-  ImGui::SetNextWindowSize(ImVec2(90, 195));
+  ImGui::SetNextWindowSize(ImVec2(90.0f, 195.0f));
   
   if (ImGui::Begin("Continue", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
   {

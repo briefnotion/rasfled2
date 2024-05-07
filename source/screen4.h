@@ -68,7 +68,9 @@ class SCREEN4
   bool DISPLAY_OVERHEAD_COLOR = false;
   bool DISPLAY_RUNNING_COLOR = false;
   bool DISPLAY_QR_CODE = false;
+  bool DISPLAY_REFERENCE_CARD = false;
   bool DISPLAY_COMPASS_WINDOW = false;
+  bool DISPLAY_CARDS_WINDOW = false;
 
   bool DISPLAY_CONFIRM = false;
 
@@ -83,6 +85,7 @@ class SCREEN4
   // Screen Vars
 
   TEXTURE_IMAGE QR_CODE;
+  TEXTURE_IMAGE REFERENCE_CARD;
 
   bool COMMAND_TEXT_CHANGED = false;  // for TTY only redraw
   string COMMAND_TEXT = "";

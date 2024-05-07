@@ -80,6 +80,7 @@ class FILES
   string CONFIGURATION_FILE = "";
   string RUNNING_STATE_FILE = "";
   string QR_CODE_FILE = "";
+  string REFERENCE_CARD_FILE = "";
 
   // Sounds Directory
   //string SOUNDS_DIR = "";

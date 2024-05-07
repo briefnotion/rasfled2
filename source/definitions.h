@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.155_240505"
+#define Revision "2.156_240507"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -58,6 +58,7 @@
 #define DEF_CONFIGURATION                 "configuration.json"
 #define DEF_RUNNING_STATE                 "runningstate.json"
 #define DEF_QR_CODE                       "qr_rasfled2_rev.png"
+#define DEF_REFERENCE_CARD                "refer_advert.png"
 
 // Rasfled logs and user files
 #define DEF_LOGS_DIR                       "/home/pi/rasfled/"    // Create Directory

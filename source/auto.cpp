@@ -2591,8 +2591,8 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
                 STATUS.TEMPS.store_air_intake_0f(message.DATA[3]);
 
                 if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_TEMP_INTAKE, 
-                                                  STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= 50.0f, 
-                                                  STATUS.TEMPS.AIR_INTAKE_0f.val_c() < 40.0f))
+                                                  STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 20.0f, 
+                                                  STATUS.TEMPS.AIR_INTAKE_0f.val_c() < STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 15.0f))
                 {
                   ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_INTAKE, "Intake Temp Value is " + STATUS.TEMPS.AIR_INTAKE_0f.c());
                 }

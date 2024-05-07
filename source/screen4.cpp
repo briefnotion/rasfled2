@@ -290,6 +290,7 @@ int SCREEN4::create(system_data &sdSysData)
 
     // QR_Image
     QR_CODE.create(sdSysData.FILE_NAMES.QR_CODE_FILE, 2.0f);
+    REFERENCE_CARD.create(sdSysData.FILE_NAMES.REFERENCE_CARD_FILE, 1.0f);
 
     // Prepare Screens
     AUTOMOBILE.create(sdSysData);
@@ -1030,9 +1031,9 @@ void SCREEN4::draw(system_data &sdSysData)
               SCREEN_COMMS.command_text_set("ff");
             }
 
-            if (button_simple_color(sdSysData, "QR\nCODE", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (button_simple_color(sdSysData, "CARDS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
-              DISPLAY_QR_CODE = !DISPLAY_QR_CODE;
+              DISPLAY_CARDS_WINDOW = !DISPLAY_CARDS_WINDOW;
             } 
 
             if (button_simple_toggle_color(sdSysData, "LIGHTS\n(On)", "LIGHTS\n(Off)", sdSysData.Lights_On.value(), sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
@@ -1508,11 +1509,38 @@ void SCREEN4::draw(system_data &sdSysData)
 
       if (DISPLAY_QR_CODE == true)
       {
-        //style.ScrollbarSize + style.WindowPadding.y * 2.0f and fontsize for titlebar
         ImGui::SetNextWindowSize(QR_CODE.get_should_be_window_size());
         ImGui::Begin("About", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
-        QR_CODE.draw();
-        ImGui::End();
+        {
+          ImVec4 working_area = get_working_area();
+          QR_CODE.draw();
+            
+          if (button_area(working_area))
+          {
+            DISPLAY_QR_CODE = false;
+          }
+
+          ImGui::End();
+        }
+      }
+
+      // ---------------------------------------------------------------------------------------
+
+      if (DISPLAY_REFERENCE_CARD == true)
+      {
+        ImGui::SetNextWindowSize(REFERENCE_CARD.get_should_be_window_size());
+        ImGui::Begin("Reference Card", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
+        {
+          ImVec4 working_area = get_working_area();
+          REFERENCE_CARD.draw();
+            
+          if (button_area(working_area))
+          {
+            DISPLAY_REFERENCE_CARD = false;
+          }
+
+          ImGui::End();
+        }
       }
 
       // ---------------------------------------------------------------------------------------
@@ -1544,6 +1572,31 @@ void SCREEN4::draw(system_data &sdSysData)
           }
           ImGui::End();
         }
+      }
+
+      // ---------------------------------------------------------------------------------------
+      
+      if (DISPLAY_CARDS_WINDOW == true)
+      {
+          ImGui::SetNextWindowSize(ImVec2(90.0f, 195.0f));
+
+          ImGui::Begin("Cards", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
+          {
+            if (button_simple_color(sdSysData, "QR\nCODE", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            {
+              DISPLAY_QR_CODE = !DISPLAY_QR_CODE;
+              DISPLAY_CARDS_WINDOW = false;
+            } 
+
+            if (button_simple_color(sdSysData, "REFER", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            {
+              DISPLAY_REFERENCE_CARD = !DISPLAY_REFERENCE_CARD;
+              DISPLAY_CARDS_WINDOW = false;
+            } 
+
+
+            ImGui::End();
+          }
       }
 
       // ---------------------------------------------------------------------------------------

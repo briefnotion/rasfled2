@@ -1,3 +1,10 @@
+2.156_240507
+  - Changed Air intake alert to 20c degrees over ambiant, 
+      and warn at 15c degrees over ambiant.
+  - Changed the QR Code button to a Cards button.
+  - New cards window has 2 buttons. One for showing 
+      the QR Code and another to show a Reference Advert.
+
 2.155_240505
   - Corrected error in IMPACT_RESISTANCE_FLOAT_FRAME_COUNT
       that would cause a segmentation fault to occur 
