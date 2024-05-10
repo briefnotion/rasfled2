@@ -1685,14 +1685,14 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     {
       SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, 1.0f);
       SDATA.PREV_D_CAM_COMM_ERROR = SDATA.CAM_COMM_ERR;
-      sdSysData.ALERTS_2.sound_alert(sdSysData.COMMAND_THREADS, sdSysData.PROGRAM_TIME.current_frame_time(), 2);
+      sdSysData.ALERTS_2.sound_alert(sdSysData.COMMAND_THREADS, 2);
     }
 
     if (SDATA.CAM_STAT_ERR != SDATA.PREV_D_CAM_STAT_ERROR)
     {
       SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, 1.0f);
       SDATA.PREV_D_CAM_STAT_ERROR = SDATA.CAM_STAT_ERR;
-      sdSysData.ALERTS_2.sound_alert(sdSysData.COMMAND_THREADS, sdSysData.PROGRAM_TIME.current_frame_time(), 1);
+      sdSysData.ALERTS_2.sound_alert(sdSysData.COMMAND_THREADS, 1);
     }
 
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);

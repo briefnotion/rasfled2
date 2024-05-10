@@ -450,7 +450,7 @@ int loop_2(bool TTY_Only)
     cons_2.SCREEN_COMMS.printw("Adjusting Program Clock");
     cons_2.SCREEN_COMMS.printw("");
 
-    sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), "Adjusting Program Clock");
+    sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, "Adjusting Program Clock");
     
     sdSystem.PROGRAM_TIME.clear_error();
   }
@@ -697,7 +697,7 @@ int loop_2(bool TTY_Only)
       cons_2.SCREEN_COMMS.printw("           DIFFERANCE: "  + to_string(sdSystem.PROGRAM_TIME.error()));
       cons_2.SCREEN_COMMS.printw("");
 
-      sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
+      sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
                                           to_string(sdSystem.PROGRAM_TIME.error()));
 
       sdSystem.PROGRAM_TIME.clear_error();
@@ -1013,17 +1013,17 @@ int loop_2(bool TTY_Only)
         else if (sdSystem.COMMS_AUTO.cycle_change() == 0)
         {
           cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: NORMAL READ MODE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), 1);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 1);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 1)
         {
           cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: SHUTTING DOWN CYCLE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), 3);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 3);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 2)
         {
           cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: CONNECT START");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), 2);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 2);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 3)
         {
@@ -1045,17 +1045,17 @@ int loop_2(bool TTY_Only)
         else if (sdSystem.COMMS_GPS.cycle_change() == 0)
         {
           cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: NORMAL READ MODE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), 1);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 1);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 1)
         {
           cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: SHUTTING DOWN CYCLE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), 3);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 3);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 2)
         {
           cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: CONNECT START");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), 2);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 2);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 3)
         {
@@ -1095,17 +1095,17 @@ int loop_2(bool TTY_Only)
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 0)
         {
           cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: NORMAL READ MODE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), 1);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 1);
         }
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 1)
         {
           cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: SHUTTING DOWN CYCLE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), 3);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 3);
         }
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 2)
         {
           cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: CONNECT START");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.PROGRAM_TIME.current_frame_time(), 2);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 2);
         }
       }
     }
@@ -1196,9 +1196,9 @@ int loop_2(bool TTY_Only)
 
     // Run external commands, if pending
     {
-      sdSystem.COMMAND_THREADS.execute(sdSystem.PROGRAM_TIME.current_frame_time());
+      sdSystem.COMMAND_THREADS.execute();
     }
-
+    
     // ---------------------------------------------------------------------------------------
     // Now that the complete cycle is over, we need figure out how much time is remaining in 
     // the cycle and go to sleep for the appropriate amount of time. 

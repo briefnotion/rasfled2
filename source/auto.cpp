@@ -1646,7 +1646,7 @@ void AUTOMOBILE_CALCULATED::compute_low(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts,
               Status.TEMPS.COOLANT_05.val_c() + 
               (Status.TEMPS.CATALYST_3C.val_c() / 20.0f)) / 4.0f) - 30.0f) * 3.0f;
 
-  if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_TEMP_S_TEMP, S_TEMP >= 60.0f, S_TEMP < 50.0f))
+  if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_TEMP_S_TEMP, S_TEMP >= 60.0f, S_TEMP < 50.0f))
   {
     ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)S_TEMP));
   }
@@ -2550,7 +2550,7 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
                 // Dont send another request until wait delay is up
                 STATUS.SYSTEM.store_malfunction_indicator_light(bit_value(message.DATA[3], 7));
 
-                if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_MIL, 
+                if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_MIL, 
                                                   STATUS.SYSTEM.malfunction_indicator_light() == true , 
                                                   STATUS.SYSTEM.malfunction_indicator_light() == false))
                 {
@@ -2565,7 +2565,7 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_coolant_05(message.DATA[3]);
 
-                if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_TEMP_COOLANT, 
+                if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_TEMP_COOLANT, 
                                                   STATUS.TEMPS.COOLANT_05.val_c() >= 100.0f, 
                                                   STATUS.TEMPS.COOLANT_05.val_c() < 80.0f))
                 {
@@ -2590,7 +2590,7 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_air_intake_0f(message.DATA[3]);
 
-                if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_TEMP_INTAKE, 
+                if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_TEMP_INTAKE, 
                                                   STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 20.0f, 
                                                   STATUS.TEMPS.AIR_INTAKE_0f.val_c() < STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 15.0f))
                 {
@@ -2687,7 +2687,7 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
                 // Dont send another request until wait delay is up
                 STATUS.ELECTRICAL.store_control_voltage_42(message.DATA[3], message.DATA[4]);
 
-                if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_ELEC_VOLTAGE, 
+                if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_ELEC_VOLTAGE, 
                                                   STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f, 
                                                   STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() >= 12.0f))
                 {
@@ -2701,7 +2701,7 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
             // Unkown message
             if (message_processed == false) 
             {
-              ALERTS_2.res_alert_no_condition(Thread, tmeFrame_Time, RESERVE_ALERT_UNKNOWN_MESSAGE, "Unparsed Message Received.");
+              ALERTS_2.res_alert_no_condition(Thread, RESERVE_ALERT_UNKNOWN_MESSAGE, "Unparsed Message Received.");
               cons.printw("Unparsed Message From Can Bus: " + message.ORIG);
             }
           }
@@ -2756,7 +2756,7 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
 
           {
             message = DATA.AD_UNKNOWN;
-            ALERTS_2.res_alert_no_condition(Thread, tmeFrame_Time, RESERVE_ALERT_UNKNOWN_MESSAGE, "Unidentfied Message Received.");
+            ALERTS_2.res_alert_no_condition(Thread, RESERVE_ALERT_UNKNOWN_MESSAGE, "Unidentfied Message Received.");
             cons.printw("Unidentfied Message From Can Bus: " + message.ORIG);
           }
         }
@@ -2858,7 +2858,7 @@ void AUTOMOBILE::translate(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM
     STATUS.FUEL.store_percentage(DATA.AD_C0.DATA[7]);
     STATUS.FUEL.store_level(DATA.AD_380.DATA[7]);
 
-    if (ALERTS_2.res_alert_condition(Thread, tmeFrame_Time, RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 1.0f, STATUS.FUEL.val_level() > 2.0f))
+    if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 1.0f, STATUS.FUEL.val_level() > 2.0f))
     {
       ALERTS_2.res_update_alert_text(RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + STATUS.FUEL.level());
     }
@@ -2889,27 +2889,27 @@ void AUTOMOBILE::translate(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM
     {
       if (STATUS.GEAR.gear_selection_park())
       {
-        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 61);
+        ALERTS_2.sound_tone(Thread, 61);
       }
       else if (STATUS.GEAR.gear_selection_reverse())
       {
-        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 63);
+        ALERTS_2.sound_tone(Thread, 63);
       }
       else if (STATUS.GEAR.gear_selection_neutral())
       {
-        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 64);
+        ALERTS_2.sound_tone(Thread, 64);
       }
       else if (STATUS.GEAR.gear_selection_drive())
       {
-        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 66);
+        ALERTS_2.sound_tone(Thread, 66);
       }
       else if (STATUS.GEAR.gear_selection_low())
       {
-        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 67);
+        ALERTS_2.sound_tone(Thread, 67);
       }
       else // unknown
       {
-        ALERTS_2.sound_tone(Thread, tmeFrame_Time, 0);
+        ALERTS_2.sound_tone(Thread, 0);
       }
     }
     

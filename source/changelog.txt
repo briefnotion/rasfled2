@@ -1,3 +1,8 @@
+2.157_240509
+  - Play sounds are now queued instad of replacement on 
+      pending delay.
+  - Shortend the sound files to 100ms instead of 250ms.
+
 2.156_240507
   - Changed Air intake alert to 20c degrees over ambiant, 
       and warn at 15c degrees over ambiant.

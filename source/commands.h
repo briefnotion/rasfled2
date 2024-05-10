@@ -19,6 +19,7 @@
 #include <string>
 #include <future>
 #include <vector>
+//#include <deque>
 
 // Rasfled includes
 #include "fled_time.h"
@@ -53,10 +54,7 @@ class COMMAND_STRING
 {
   public: 
 
-  string COMMAND_STR = "";
-  TIMED_PING DELAY;
-  int INSTANCE_ID = -1;
-  bool DELETE_FLAG = true;
+  vector<string> COMMAND_STR;
 };
 
 class COMMAND_T
@@ -79,28 +77,25 @@ class COMMAND_THREAD
 {
   private:
 
-  vector<COMMAND_STRING> PENDING_COMMANDS;
-
+  COMMAND_STRING PENDING_COMMANDS[DEF_COMMANDS_MAX];
   COMMAND_T COMMAND_THREADS[DEF_COMMANDS_MAX];
 
   public:
 
-  void run_command(string Command, unsigned long current_time_frame, 
-                    int one_instance_slot, unsigned long delay);
+  // reserve slot 0 for sounds.
+
+  void run_command(string Command, int one_instance_slot);
   // Run command Command at next execute cycle,
   //  one_instance_slot: an arbitrary user defined id, e.g. 0 for "aplay", 
-  //    for commands that fail when running more than one instance at the 
-  //      same time.
-  //    In the case of two of the same instance is being called, if the command 
-  //      has not already started, the most recent will replace the previous.
-  //    if value is -1, instance id is not observed.
-  //    if command with the same instance has already started, it will likely
-  //      try to run.
-  //  delay is the amout of time in ms to wait to execute the command.
+  //  commands are qued in, so two commands in same slot will execute after 
+  //    the first has completed.
   void run_command(string Command);
   //  Run command immediatly, no instance or delay checks.
 
-  void execute(unsigned long current_time_frame);
+  void que_command(string Command, unsigned long current_time_frame, 
+                    int one_instance_slot, unsigned long delay);
+
+  void execute();
   //  Run whatever commands are queued in the Pending Commands list.
 
 };

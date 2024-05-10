@@ -60,99 +60,69 @@ void COMMAND_T::run_command(string Command)
   }
 }
 
-void COMMAND_THREAD::run_command(string Command, unsigned long current_time_frame, 
-                                  int one_instance_slot, unsigned long delay)
+void COMMAND_THREAD::run_command(string Command, int one_instance_slot)
 {
   if (one_instance_slot == -1)
   {
-    COMMAND_STRING tmp_command;
+    // find first empty slot above 0
 
-    tmp_command.COMMAND_STR = Command;
-    tmp_command.DELAY.ping_up(current_time_frame, delay);
-    tmp_command.INSTANCE_ID = one_instance_slot;
-    tmp_command.DELETE_FLAG = false;
+    int empty_slot = -1;
 
-    PENDING_COMMANDS.push_back(tmp_command);
-  }
-  else
-  {
-    // search for instances of the same
-    int instance_location = -1;
-    
-    if (PENDING_COMMANDS.size() != 0)
+    for (int slot = 1; slot < DEF_COMMANDS_MAX && empty_slot != -1; slot++)
     {
-      for (int pos = 0; (pos < (int)PENDING_COMMANDS.size()) && (instance_location == -1); pos++)
+      if (PENDING_COMMANDS[slot].COMMAND_STR.size() == 0)
       {
-        if (PENDING_COMMANDS[pos].INSTANCE_ID == one_instance_slot)
-        {
-          instance_location = pos;
-        }
+        empty_slot = slot;
       }
     }
 
-    if (instance_location == -1)
+    if (empty_slot == -1)
     {
-      COMMAND_STRING tmp_command;
-
-      tmp_command.COMMAND_STR = Command;
-      tmp_command.DELAY.ping_up(current_time_frame, delay);
-      tmp_command.INSTANCE_ID = one_instance_slot;
-      tmp_command.DELETE_FLAG = false;
-
-      PENDING_COMMANDS.push_back(tmp_command);
+      // no empty slots found
+      // maybe handle this
     }
     else
     {
-      PENDING_COMMANDS[instance_location].COMMAND_STR = Command;
-      PENDING_COMMANDS[instance_location].DELAY.ping_up(current_time_frame, delay);
-      PENDING_COMMANDS[instance_location].INSTANCE_ID = one_instance_slot;
-      PENDING_COMMANDS[instance_location].DELETE_FLAG = false;
+      // define a max size - temp solution
+      if (PENDING_COMMANDS[one_instance_slot].COMMAND_STR.size() < 20)
+      {
+        PENDING_COMMANDS[one_instance_slot].COMMAND_STR.push_back(Command);
+      }
+    }
+  }
+  else
+  {
+    // put in slot asked for, including 0 if necessary.
+
+    if (one_instance_slot < DEF_COMMANDS_MAX)
+    {
+      // define a max size - temp solution
+      if (PENDING_COMMANDS[one_instance_slot].COMMAND_STR.size() < 20)
+      {
+        PENDING_COMMANDS[one_instance_slot].COMMAND_STR.push_back(Command);
+      }
     }
   }
 }
 
 void COMMAND_THREAD::run_command(string Command)
 {
-  run_command(Command, 0, -1, 0);
+  run_command(Command, -1);
 }
 
-void COMMAND_THREAD::execute(unsigned long current_time_frame)
+void COMMAND_THREAD::execute()
 {
-  // Check to execute commands
-  if (PENDING_COMMANDS.size() > 0)
+  // step through theads to see if command is pending
+  for (int thread_slot = 0; thread_slot < DEF_COMMANDS_MAX; thread_slot++)
   {
-    for (int command = 0; command < (int)PENDING_COMMANDS.size(); command++)
+    // execute command if pending and thread not busy
+    if (PENDING_COMMANDS[thread_slot].COMMAND_STR.size() > 0)
     {
-      // check time
-      if (PENDING_COMMANDS[command].DELAY.ping_down(current_time_frame) == false ||
-          PENDING_COMMANDS[command].DELAY.start_time() == 0)
+      if (COMMAND_THREADS[thread_slot].running() == false)
       {
-        // find vacant slot
-        int vacant_slot = -1;
-
-        for (int thread = 0; (thread < DEF_COMMANDS_MAX) && (vacant_slot == -1); thread++)
-        {
-          if (COMMAND_THREADS[thread].running() == false)
-          {
-            vacant_slot = thread;
-          }
-        }
-
-        if (vacant_slot != -1)
-        {
-          COMMAND_THREADS[vacant_slot].run_command(PENDING_COMMANDS[command].COMMAND_STR);
-        }
-
-        PENDING_COMMANDS[command].DELETE_FLAG = true;
-      }
-    }
-    
-    // clear called commands from vector
-    for (int pos = (int)PENDING_COMMANDS.size() -1; pos >= 0; pos--)
-    {
-      if (PENDING_COMMANDS[pos].DELETE_FLAG)
-      {
-        PENDING_COMMANDS.erase(PENDING_COMMANDS.begin() + pos);
+        // run the command and delete it from the queue
+        COMMAND_THREADS[thread_slot].run_command(PENDING_COMMANDS[thread_slot].COMMAND_STR[0]);
+        PENDING_COMMANDS[thread_slot].COMMAND_STR.erase(PENDING_COMMANDS[thread_slot].COMMAND_STR.begin());
       }
     }
   }

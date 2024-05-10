@@ -18,85 +18,90 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
-void SOUNDS::play_c6(COMMAND_THREAD &Thread, unsigned long current_time_frame, bool Mute)
+void SOUNDS::play_c6(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    Thread.run_command(C6.c_str(), current_time_frame, 0, 500);
+    Thread.run_command(C6.c_str(), 0);
   }
 }
 
-void SOUNDS::play_d6(COMMAND_THREAD &Thread, unsigned long current_time_frame, bool Mute)
+void SOUNDS::play_d6(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    Thread.run_command(D6.c_str(), current_time_frame, 0, 500);
+    Thread.run_command(D6.c_str(), 0);
   }
 }
 
-void SOUNDS::play_e6(COMMAND_THREAD &Thread, unsigned long current_time_frame, bool Mute)
+void SOUNDS::play_e6(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    Thread.run_command(E6.c_str(), current_time_frame, 0, 500);
+    Thread.run_command(E6.c_str(), 0);
   }
 }
 
-void SOUNDS::play_f6(COMMAND_THREAD &Thread, unsigned long current_time_frame, bool Mute)
+void SOUNDS::play_f6(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    Thread.run_command(F6.c_str(), current_time_frame, 0, 500);
+    Thread.run_command(F6.c_str(), 0);
   }
 }
 
-void SOUNDS::play_g6(COMMAND_THREAD &Thread, unsigned long current_time_frame, bool Mute)
+void SOUNDS::play_g6(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    Thread.run_command(G6.c_str(), current_time_frame, 0, 500);
+    Thread.run_command(G6.c_str(), 0);
   }
 }
 
-void SOUNDS::play_a6(COMMAND_THREAD &Thread, unsigned long current_time_frame, bool Mute)
+void SOUNDS::play_a6(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    Thread.run_command(A6.c_str(), current_time_frame, 0, 500);
+    Thread.run_command(A6.c_str(), 0);
   }
 }
 
-void SOUNDS::play_b6(COMMAND_THREAD &Thread, unsigned long current_time_frame, bool Mute)
+void SOUNDS::play_b6(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    Thread.run_command(B6.c_str(), current_time_frame, 0, 500);
+    Thread.run_command(B6.c_str(), 0);
   }
 }
 
-void SOUNDS::play_alert_level_1(COMMAND_THREAD &Thread, unsigned long current_time_frame, bool Mute)
+void SOUNDS::play_alert_level_1(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    Thread.run_command(ALERT_LEVEL_1.c_str(), current_time_frame, 0, 000);
+    play_f6(Thread, Mute);
+    play_c6(Thread, Mute);
   }
 }
 
-void SOUNDS::play_alert_level_2(COMMAND_THREAD &Thread, unsigned long current_time_frame, bool Mute)
+void SOUNDS::play_alert_level_2(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    Thread.run_command(ALERT_LEVEL_2.c_str(), current_time_frame, 0, 000);
+    play_b6(Thread, Mute);
+    play_f6(Thread, Mute);
   }
 }
 
-void SOUNDS::play_alert_level_3(COMMAND_THREAD &Thread, unsigned long current_time_frame, bool Mute)
+void SOUNDS::play_alert_level_3(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    Thread.run_command(ALERT_LEVEL_3.c_str(), current_time_frame, 0, 000);
+    play_c6(Thread, Mute);
+    play_f6(Thread, Mute);
+    play_b6(Thread, Mute);
   }
 }
+
 // -------------------------------------------------------------------------------------
 
 
