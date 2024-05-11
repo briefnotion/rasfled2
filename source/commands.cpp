@@ -49,6 +49,11 @@ bool COMMAND_T::running()
   return THREAD_RUNNING;
 }
 
+void COMMAND_THREAD::push_back_command(string Command, int Thread_Slot)
+{
+  PENDING_COMMANDS[Thread_Slot].COMMAND_STR.push_back(Command);
+}
+
 void COMMAND_T::run_command(string Command)
 {
   COMMAND = Command;
@@ -68,9 +73,10 @@ void COMMAND_THREAD::run_command(string Command, int one_instance_slot)
 
     int empty_slot = -1;
 
-    for (int slot = 1; slot < DEF_COMMANDS_MAX && empty_slot != -1; slot++)
+    for (int slot = 1; (slot < DEF_COMMANDS_MAX) && (empty_slot == -1); slot++)
     {
-      if (PENDING_COMMANDS[slot].COMMAND_STR.size() == 0)
+      if (PENDING_COMMANDS[slot].COMMAND_STR.size() == 0 && 
+          COMMAND_THREADS[slot].running() == false)
       {
         empty_slot = slot;
       }
@@ -83,24 +89,15 @@ void COMMAND_THREAD::run_command(string Command, int one_instance_slot)
     }
     else
     {
-      // define a max size - temp solution
-      if (PENDING_COMMANDS[one_instance_slot].COMMAND_STR.size() < 20)
-      {
-        PENDING_COMMANDS[one_instance_slot].COMMAND_STR.push_back(Command);
-      }
+      push_back_command(Command, empty_slot);
     }
   }
   else
   {
     // put in slot asked for, including 0 if necessary.
-
     if (one_instance_slot < DEF_COMMANDS_MAX)
     {
-      // define a max size - temp solution
-      if (PENDING_COMMANDS[one_instance_slot].COMMAND_STR.size() < 20)
-      {
-        PENDING_COMMANDS[one_instance_slot].COMMAND_STR.push_back(Command);
-      }
+      push_back_command(Command, one_instance_slot);
     }
   }
 }
@@ -112,8 +109,29 @@ void COMMAND_THREAD::run_command(string Command)
 
 void COMMAND_THREAD::execute()
 {
+  // play sounds
+  {
+    if (PENDING_COMMANDS[0].COMMAND_STR.size() > 0)
+    {
+      if (COMMAND_THREADS[0].running() == false)
+      {
+        string command_string = PLAY_COMMAND + " ";
+
+        // define a max size - temp solution
+        // cap only audio
+        for (int pos = 0; (pos < (int)PENDING_COMMANDS[0].COMMAND_STR.size()) && (pos < 20); pos++)
+        {
+          command_string += PENDING_COMMANDS[0].COMMAND_STR[pos] + " ";
+        }
+
+        PENDING_COMMANDS[0].COMMAND_STR.clear();
+        COMMAND_THREADS[0].run_command(command_string);
+      }
+    }
+  }
+
   // step through theads to see if command is pending
-  for (int thread_slot = 0; thread_slot < DEF_COMMANDS_MAX; thread_slot++)
+  for (int thread_slot = 1; thread_slot < DEF_COMMANDS_MAX; thread_slot++)
   {
     // execute command if pending and thread not busy
     if (PENDING_COMMANDS[thread_slot].COMMAND_STR.size() > 0)

@@ -1,3 +1,8 @@
+2.158_240510
+  - Commands called from run command should now work. 
+      The problem was intrduced with previous changes. 
+  - Made some minor changes to the play sound system.
+
 2.157_240509
   - Play sounds are now queued instad of replacement on 
       pending delay.

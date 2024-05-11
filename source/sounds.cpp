@@ -78,8 +78,8 @@ void SOUNDS::play_alert_level_1(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    play_f6(Thread, Mute);
-    play_c6(Thread, Mute);
+    Thread.run_command(F6.c_str(), 0);
+    Thread.run_command(C6.c_str(), 0);
   }
 }
 
@@ -87,8 +87,8 @@ void SOUNDS::play_alert_level_2(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    play_b6(Thread, Mute);
-    play_f6(Thread, Mute);
+    Thread.run_command(B6.c_str(), 0);
+    Thread.run_command(F6.c_str(), 0);
   }
 }
 
@@ -96,9 +96,9 @@ void SOUNDS::play_alert_level_3(COMMAND_THREAD &Thread, bool Mute)
 {
   if (Mute == false)
   {
-    play_c6(Thread, Mute);
-    play_f6(Thread, Mute);
-    play_b6(Thread, Mute);
+    Thread.run_command(C6.c_str(), 0);
+    Thread.run_command(F6.c_str(), 0);
+    Thread.run_command(B6.c_str(), 0);
   }
 }
 

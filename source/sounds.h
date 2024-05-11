@@ -25,15 +25,13 @@ class SOUNDS
 {
   private:
 
-  //COMMAND_THREAD Command_Thread;
-
-  string C6 = "aplay -q /etc/rasfled/c6.wav";
-  string D6 = "aplay -q /etc/rasfled/d6.wav";
-  string E6 = "aplay -q /etc/rasfled/e6.wav";
-  string F6 = "aplay -q /etc/rasfled/f6.wav";
-  string G6 = "aplay -q /etc/rasfled/g6.wav";
-  string A6 = "aplay -q /etc/rasfled/a6.wav";
-  string B6 = "aplay -q /etc/rasfled/b6.wav";
+  string C6 = "/etc/rasfled/c6.wav";
+  string D6 = "/etc/rasfled/d6.wav";
+  string E6 = "/etc/rasfled/e6.wav";
+  string F6 = "/etc/rasfled/f6.wav";
+  string G6 = "/etc/rasfled/g6.wav";
+  string A6 = "/etc/rasfled/a6.wav";
+  string B6 = "/etc/rasfled/b6.wav";
 
   public:
 

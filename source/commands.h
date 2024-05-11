@@ -77,8 +77,12 @@ class COMMAND_THREAD
 {
   private:
 
+  string PLAY_COMMAND = "aplay -q";
+
   COMMAND_STRING PENDING_COMMANDS[DEF_COMMANDS_MAX];
   COMMAND_T COMMAND_THREADS[DEF_COMMANDS_MAX];
+
+  void push_back_command(string Command, int Thread_Slot);
 
   public:
 
