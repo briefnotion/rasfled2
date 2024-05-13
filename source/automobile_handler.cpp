@@ -62,6 +62,55 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
   // Automobile Data Available
   if (sdSysData.CAR_INFO.active() == true)
   {
+    // Check alerts
+
+    // S-Temp alert
+    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_S_TEMP, 
+        sdSysData.CAR_INFO.CALCULATED.s_temp() >= 60.0f, sdSysData.CAR_INFO.CALCULATED.s_temp() < 50.0f))
+    {
+      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)sdSysData.CAR_INFO.CALCULATED.s_temp()));
+    }
+
+    // MIL alert
+    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_MIL, 
+                                      sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == true , 
+                                      sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == false))
+    {
+      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_MIL, "Malfunction Indicator Lamp is " + to_string(sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light()));
+    }
+
+    // Coolant alert
+    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_COOLANT, 
+                                      sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c() >= 100.0f, 
+                                      sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c() < 80.0f))
+    {
+      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_COOLANT, "Coolant Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.c());
+    }
+
+    // Air Intake Temp alert
+    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_INTAKE, 
+                                      sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 20.0f, 
+                                      sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c() < sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 15.0f))
+    {
+      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_INTAKE, "Intake Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.c());
+    }
+
+    // Voltage alert
+    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_ELEC_VOLTAGE, 
+                                      sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f, 
+                                      sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() >= 12.0f))
+    {
+      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_ELEC_VOLTAGE, "Voltage Value is " + sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
+    }
+
+    // Fuel Level alert
+    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_FUEL_LEVEL, 
+                                      sdSysData.CAR_INFO.STATUS.FUEL.val_level() < 1.0f, sdSysData.CAR_INFO.STATUS.FUEL.val_level() > 2.0f))
+    {
+      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + sdSysData.CAR_INFO.STATUS.FUEL.level());
+    }
+
+
     // Gear Selection
 
     // Changing Gear to Park
@@ -69,6 +118,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       if (GEAR_PARK == true)
       {
+        sdSysData.SOUND_SYSTEM.play_gear_park(sdSysData.COMMAND_THREADS);
+        
         // Call animation to turn on Park color.
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Park_On");
       }
@@ -84,6 +135,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       if (GEAR_NEUTRAL == true)
       {
+        sdSysData.SOUND_SYSTEM.play_gear_neutral(sdSysData.COMMAND_THREADS);
+
         // Call animation to turn on Neutral color.
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Neutral_On");
       }
@@ -99,6 +152,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       if (GEAR_REVERSE == true)
       {
+        sdSysData.SOUND_SYSTEM.play_gear_reverse(sdSysData.COMMAND_THREADS);
+
         // Call animation to turn on Reverse color.
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Reverse_On");
       }
@@ -110,11 +165,29 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     }
 
     // Changing Gear to Drive
-    if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_drive() || 
-                                    sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_low(), GEAR_DRIVE) == true)
+    if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_drive(), GEAR_DRIVE) == true)
     {
       if (GEAR_DRIVE == true)
       {
+        sdSysData.SOUND_SYSTEM.play_gear_drive(sdSysData.COMMAND_THREADS);
+        
+        // Call animation to turn on Drive color.
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_On");
+      }
+      else
+      {
+        // Call animation to turn off Drive color.
+        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_Off");
+      }
+    }
+
+    // Changing Gear to Low
+    if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_low(), GEAR_LOW) == true)
+    {
+      if (GEAR_LOW == true)
+      {
+        sdSysData.SOUND_SYSTEM.play_gear_low(sdSysData.COMMAND_THREADS);
+        
         // Call animation to turn on Drive color.
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_On");
       }
@@ -184,7 +257,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     // Shutdown Waring
     if (IGNITION == false && IGNITION_WARNING_TIMER.enabled() && IGNITION_WARNING_TIMER.ping_down(tmeCurrentTime) == false)
     {
-      sdSysData.ALERTS_2.add_generic_alert(sdSysData.COMMAND_THREADS, "System shutting down in 1 minute.");
+      sdSysData.ALERTS_2.add_generic_alert(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, 
+                                            "System shutting down in 1 minute.");
     }
 
     // Shutdown

@@ -100,28 +100,22 @@ class ALERT_SYSTEM_2
 {
   private:
 
-  bool MUTE = false;
-
   int LATEST_ID = 10000;
 
   bool CHANGED = false;
 
   int ALERTS_RESERVE_COUNT = 0;
-
-  SOUNDS SOUND_SYSTEM;  // Primitive sound system.
   
   deque<ALERT_2_TYPE_MONITOR> GENERIC_ALERTS;
   ALERT_2_TYPE_MONITOR ALERTS_RESERVE[RESERVE_ALERT_LIST_SIZE];
 
   public:
 
-  void set_mute(bool Mute);
-
   bool changed();
   
   // reserved alerts
-  void res_alert_no_condition(COMMAND_THREAD &Thread, int Id, string Alert_Text);
-  bool res_alert_condition(COMMAND_THREAD &Thread, int Id, bool Raise_Alert, bool Clear_Alert);
+  void res_alert_no_condition(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, string Alert_Text);
+  bool res_alert_condition(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, bool Raise_Alert, bool Clear_Alert);
   void res_update_alert_text(int Id, string Text);
   bool res_active(int Id);        // Returns ACTIVE value
   bool res_warning(int Id);       // Returns WARNING value
@@ -141,24 +135,14 @@ class ALERT_SYSTEM_2
 
   // all alerts
   int alert_count();
-  void add_generic_alert(COMMAND_THREAD &Thread, string Text);
+  void add_generic_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_System, string Text);
   void alert_list_clean();
   void display_active_alerts();
 
-  void sound_alert(COMMAND_THREAD &Thread, int Value);
+  void sound_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Value);
   //  1 - green
   //  2 - yellow
   //  3 - red
-
-  void sound_tone(COMMAND_THREAD &Thread, int Value);
-  // simple tones, no sharps and flats
-  // 61 - c6
-  // 62 - d6
-  // 63 - e6
-  // 64 - f6
-  // 65 - g6
-  // 66 - a6
-  // 67 - b6
 };
 
 

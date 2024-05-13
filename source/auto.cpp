@@ -1542,7 +1542,7 @@ int SIMPLE_ERRORS::error_count()
 
 //-----------
 
-void AUTOMOBILE_CALCULATED::compute_low(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time)
+void AUTOMOBILE_CALCULATED::compute_low(DNFWTS_ &Dnfwts, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time)
 {
   // Set Lights
   Status.INDICATORS.process();
@@ -1645,12 +1645,6 @@ void AUTOMOBILE_CALCULATED::compute_low(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts,
               Status.TEMPS.AIR_INTAKE_0f.val_c() + 
               Status.TEMPS.COOLANT_05.val_c() + 
               (Status.TEMPS.CATALYST_3C.val_c() / 20.0f)) / 4.0f) - 30.0f) * 3.0f;
-
-  if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_TEMP_S_TEMP, S_TEMP >= 60.0f, S_TEMP < 50.0f))
-  {
-    ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)S_TEMP));
-  }
-
 }
 
 float AUTOMOBILE_CALCULATED::acceleration(unsigned long tmeFrame_Time)
@@ -2478,7 +2472,7 @@ bool AUTOMOBILE::active()
   return AVAILABILITY.is_active();
 }
 
-void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time)
+void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time)
 {
   int pid_recieved = 0;
   bool identified = false;
@@ -2550,13 +2544,6 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
                 // Dont send another request until wait delay is up
                 STATUS.SYSTEM.store_malfunction_indicator_light(bit_value(message.DATA[3], 7));
 
-                if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_MIL, 
-                                                  STATUS.SYSTEM.malfunction_indicator_light() == true , 
-                                                  STATUS.SYSTEM.malfunction_indicator_light() == false))
-                {
-                  ALERTS_2.res_update_alert_text(RESERVE_ALERT_MIL, "Malfunction Indicator Lamp is " + to_string(STATUS.SYSTEM.malfunction_indicator_light()));
-                }
-
                 message_processed = true;
               }
 
@@ -2564,13 +2551,6 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
               {
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_coolant_05(message.DATA[3]);
-
-                if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_TEMP_COOLANT, 
-                                                  STATUS.TEMPS.COOLANT_05.val_c() >= 100.0f, 
-                                                  STATUS.TEMPS.COOLANT_05.val_c() < 80.0f))
-                {
-                  ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_COOLANT, "Coolant Temp Value is " + STATUS.TEMPS.COOLANT_05.c());
-                }
 
                 message_processed = true;
               }
@@ -2589,13 +2569,6 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
               {
                 // Dont send another request until wait delay is up
                 STATUS.TEMPS.store_air_intake_0f(message.DATA[3]);
-
-                if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_TEMP_INTAKE, 
-                                                  STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 20.0f, 
-                                                  STATUS.TEMPS.AIR_INTAKE_0f.val_c() < STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 15.0f))
-                {
-                  ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_INTAKE, "Intake Temp Value is " + STATUS.TEMPS.AIR_INTAKE_0f.c());
-                }
 
                 message_processed = true;
               }
@@ -2687,13 +2660,6 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
                 // Dont send another request until wait delay is up
                 STATUS.ELECTRICAL.store_control_voltage_42(message.DATA[3], message.DATA[4]);
 
-                if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_ELEC_VOLTAGE, 
-                                                  STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f, 
-                                                  STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() >= 12.0f))
-                {
-                  ALERTS_2.res_update_alert_text(RESERVE_ALERT_ELEC_VOLTAGE, "Voltage Value is " + STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
-                }
-
                 message_processed = true;
               }
             }
@@ -2701,8 +2667,10 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
             // Unkown message
             if (message_processed == false) 
             {
-              ALERTS_2.res_alert_no_condition(Thread, RESERVE_ALERT_UNKNOWN_MESSAGE, "Unparsed Message Received.");
-              cons.printw("Unparsed Message From Can Bus: " + message.ORIG);
+              //ALERTS_2.res_alert_no_condition(Thread, RESERVE_ALERT_UNKNOWN_MESSAGE, "Unparsed Message Received.");
+              //cons.printw("Unparsed Message From Can Bus: " + message.ORIG);
+
+              // ADD ALERT HERE!!!
             }
           }
           
@@ -2756,8 +2724,10 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
 
           {
             message = DATA.AD_UNKNOWN;
-            ALERTS_2.res_alert_no_condition(Thread, RESERVE_ALERT_UNKNOWN_MESSAGE, "Unidentfied Message Received.");
-            cons.printw("Unidentfied Message From Can Bus: " + message.ORIG);
+            //ALERTS_2.res_alert_no_condition(Thread, RESERVE_ALERT_UNKNOWN_MESSAGE, "Unidentfied Message Received.");
+            //cons.printw("Unidentfied Message From Can Bus: " + message.ORIG);
+          
+            // ADD ALERT HERE!!!
           }
         }
 
@@ -2819,7 +2789,7 @@ void AUTOMOBILE::process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, AL
   }
 }
 
-void AUTOMOBILE::translate(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time)
+void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, unsigned long tmeFrame_Time)
 {
   if (AVAILABILITY.is_active() == true)
   {
@@ -2858,11 +2828,6 @@ void AUTOMOBILE::translate(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM
     STATUS.FUEL.store_percentage(DATA.AD_C0.DATA[7]);
     STATUS.FUEL.store_level(DATA.AD_380.DATA[7]);
 
-    if (ALERTS_2.res_alert_condition(Thread, RESERVE_ALERT_FUEL_LEVEL, STATUS.FUEL.val_level() < 1.0f, STATUS.FUEL.val_level() > 2.0f))
-    {
-      ALERTS_2.res_update_alert_text(RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + STATUS.FUEL.level());
-    }
-
     // Guages
     STATUS.GUAGES.store_coolant(DATA.AD_100.DATA[3]);
 
@@ -2885,33 +2850,7 @@ void AUTOMOBILE::translate(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM
     // Indicates TCM Failure.
 
     // Gear Lever Selection
-    if (STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2]))
-    {
-      if (STATUS.GEAR.gear_selection_park())
-      {
-        ALERTS_2.sound_tone(Thread, 61);
-      }
-      else if (STATUS.GEAR.gear_selection_reverse())
-      {
-        ALERTS_2.sound_tone(Thread, 63);
-      }
-      else if (STATUS.GEAR.gear_selection_neutral())
-      {
-        ALERTS_2.sound_tone(Thread, 64);
-      }
-      else if (STATUS.GEAR.gear_selection_drive())
-      {
-        ALERTS_2.sound_tone(Thread, 66);
-      }
-      else if (STATUS.GEAR.gear_selection_low())
-      {
-        ALERTS_2.sound_tone(Thread, 67);
-      }
-      else // unknown
-      {
-        ALERTS_2.sound_tone(Thread, 0);
-      }
-    }
+    STATUS.GEAR.store_gear_selection(DATA.AD_D0.DATA[1], DATA.AD_D0.DATA[2]);
     
     // Door Open or Closed
     //  03 60 C0 40 3F 07 00 37 B8 7B 01097D8C
@@ -2932,7 +2871,7 @@ void AUTOMOBILE::translate(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM
     // Low level Compute not requiring calculation on all data.
     //  Fast but not fully acurate.
     //  Currently call just before the data is displayed.
-    CALCULATED.compute_low(Thread, Dnfwts, ALERTS_2, STATUS, tmeFrame_Time);
+    CALCULATED.compute_low(Dnfwts, STATUS, tmeFrame_Time);
 
     /*
     // Move **********************************************************************************

@@ -450,7 +450,7 @@ int loop_2(bool TTY_Only)
     cons_2.SCREEN_COMMS.printw("Adjusting Program Clock");
     cons_2.SCREEN_COMMS.printw("");
 
-    sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, "Adjusting Program Clock");
+    sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, "Adjusting Program Clock");
     
     sdSystem.PROGRAM_TIME.clear_error();
   }
@@ -697,7 +697,7 @@ int loop_2(bool TTY_Only)
       cons_2.SCREEN_COMMS.printw("           DIFFERANCE: "  + to_string(sdSystem.PROGRAM_TIME.error()));
       cons_2.SCREEN_COMMS.printw("");
 
-      sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
+      sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
                                           to_string(sdSystem.PROGRAM_TIME.error()));
 
       sdSystem.PROGRAM_TIME.clear_error();
@@ -1013,17 +1013,17 @@ int loop_2(bool TTY_Only)
         else if (sdSystem.COMMS_AUTO.cycle_change() == 0)
         {
           cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: NORMAL READ MODE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 1);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 1)
         {
           cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: SHUTTING DOWN CYCLE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 3);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 2)
         {
           cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: CONNECT START");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 2);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 3)
         {
@@ -1045,17 +1045,17 @@ int loop_2(bool TTY_Only)
         else if (sdSystem.COMMS_GPS.cycle_change() == 0)
         {
           cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: NORMAL READ MODE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 1);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 1)
         {
           cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: SHUTTING DOWN CYCLE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 3);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 2)
         {
           cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: CONNECT START");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 2);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 3)
         {
@@ -1067,7 +1067,7 @@ int loop_2(bool TTY_Only)
       // CAN Bus Process
 
       // Process info from comm port int automobile system.
-      sdSystem.CAR_INFO.process(sdSystem.COMMAND_THREADS, cons_2.SCREEN_COMMS, sdSystem.ALERTS_2, sdSystem.COMMS_AUTO, sdSystem.PROGRAM_TIME.current_frame_time());
+      sdSystem.CAR_INFO.process(cons_2.SCREEN_COMMS, sdSystem.COMMS_AUTO, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // Process Automobile Lights
       automobile_handler.update_events(sdSystem, cons_2.SCREEN_COMMS, animations, sdSystem.PROGRAM_TIME.current_frame_time());
@@ -1095,17 +1095,17 @@ int loop_2(bool TTY_Only)
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 0)
         {
           cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: NORMAL READ MODE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 1);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
         }
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 1)
         {
           cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: SHUTTING DOWN CYCLE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 3);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
         }
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 2)
         {
           cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: CONNECT START");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, 2);
+          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
         }
       }
     }
@@ -1136,7 +1136,7 @@ int loop_2(bool TTY_Only)
         cons_2.update_ADS_B_gadgets(sdSystem);
 
         // Automobile - Update all automobile Reference Data
-        sdSystem.CAR_INFO.translate(sdSystem.COMMAND_THREADS, sdSystem.DNFWTS, sdSystem.ALERTS_2, sdSystem.PROGRAM_TIME.current_frame_time());
+        sdSystem.CAR_INFO.translate(sdSystem.DNFWTS, sdSystem.PROGRAM_TIME.current_frame_time());
         cons_2.update_automobile_gadgets(sdSystem);
 
         // Check DNFWTS
@@ -1145,12 +1145,12 @@ int loop_2(bool TTY_Only)
           if (sdSystem.DNFWTS.active())
           {
             sdSystem.Lights_On.set(false);
-            sdSystem.ALERTS_2.set_mute(true);
+            sdSystem.SOUND_SYSTEM.set_mute(true);
           }
           else
           {
             sdSystem.Lights_On.set(true);
-            sdSystem.ALERTS_2.set_mute(false);
+            sdSystem.SOUND_SYSTEM.set_mute(false);
           }
         }
 

@@ -238,6 +238,8 @@ class system_data
 
   DNFWTS_ DNFWTS;
 
+  SOUNDS SOUND_SYSTEM;  // Primitive sound system.
+
   // -------------------------------------------------------------------------------------
 
   void init();

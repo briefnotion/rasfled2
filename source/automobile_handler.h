@@ -20,6 +20,7 @@
 #include "animations_handler.h"
 #include "LEDstuff.h"
 #include "fled_time.h"
+#include "alert_system_2.h"
 
 using namespace std;
 
@@ -37,6 +38,7 @@ class AUTOMOBILE_HANDLER
   bool GEAR_NEUTRAL = false;
   bool GEAR_REVERSE = false;
   bool GEAR_DRIVE = false;
+  bool GEAR_LOW = false;
 
   bool SIGNAL_LEFT = false;
   bool SIGNAL_RIGHT = false;

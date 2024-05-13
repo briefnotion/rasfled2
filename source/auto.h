@@ -21,7 +21,6 @@
 #include "stringthings.h"
 #include "helper.h"
 #include "globe_helper.h"
-#include "alert_system_2.h"
 #include "screen4_helper.h"
 #include "auto_nova.h"
 #include "dnfwts.h"
@@ -845,7 +844,7 @@ class AUTOMOBILE_CALCULATED
 
   SIMPLE_ERRORS CAM_COMM_ERRORS;
 
-  void compute_low(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time);
+  void compute_low(DNFWTS_ &Dnfwts, AUTOMOBILE_TRANSLATED_DATA &Status, unsigned long tmeFrame_Time);
   // Low level Compute not requiring calculation on all data.
   //  Fast but not fully acurate.
   //  Currently call just before the data is displayed.
@@ -971,9 +970,9 @@ class AUTOMOBILE
 
   bool active();
 
-  void process(COMMAND_THREAD &Thread, CONSOLE_COMMUNICATION &cons, ALERT_SYSTEM_2 &ALERTS_2, COMPORT &Com_Port, unsigned long tmeFrame_Time);
+  void process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time);
 
-  void translate(COMMAND_THREAD &Thread, DNFWTS_ &Dnfwts, ALERT_SYSTEM_2 &ALERTS_2, unsigned long tmeFrame_Time);
+  void translate(DNFWTS_ &Dnfwts, unsigned long tmeFrame_Time);
 };
 
 

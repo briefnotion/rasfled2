@@ -1,3 +1,7 @@
+2.159_240512
+  - Added octave 7 to sounds.
+  - Changed location of the Sounds System to system.h
+
 2.158_240510
   - Commands called from run command should now work. 
       The problem was intrduced with previous changes. 
