@@ -65,10 +65,11 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     // Check alerts
 
     // S-Temp alert
-    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_S_TEMP, 
-        sdSysData.CAR_INFO.CALCULATED.s_temp() >= 60.0f, sdSysData.CAR_INFO.CALCULATED.s_temp() < 50.0f))
+    if (sdSysData.ALERTS_2.res_alert_condition_greater_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_S_TEMP, 
+        sdSysData.CAR_INFO.CALCULATED.s_temp(), 60.0f, 50.0f))
     {
-      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)sdSysData.CAR_INFO.CALCULATED.s_temp()));
+      sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)sdSysData.CAR_INFO.CALCULATED.s_temp()));
+      sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_TEMP_S_TEMP);
     }
 
     // MIL alert
@@ -76,38 +77,41 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
                                       sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == true , 
                                       sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == false))
     {
-      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_MIL, "Malfunction Indicator Lamp is " + to_string(sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light()));
+      sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_MIL, "Malfunction Indicator Lamp is " + to_string(sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light()));
     }
 
     // Coolant alert
-    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_COOLANT, 
-                                      sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c() >= 100.0f, 
-                                      sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c() < 80.0f))
+    if (sdSysData.ALERTS_2.res_alert_condition_greater_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_COOLANT, 
+                                      sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c(), 100.0f, 80.0f))
     {
-      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_COOLANT, "Coolant Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.c());
+      sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_TEMP_COOLANT, "Coolant Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.c());
+      sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_TEMP_COOLANT);
     }
 
     // Air Intake Temp alert
-    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_INTAKE, 
-                                      sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c() >= sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 20.0f, 
-                                      sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c() < sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 15.0f))
+    if (sdSysData.ALERTS_2.res_alert_condition_greater_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_INTAKE, 
+                                      sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c(), 
+                                      sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 20.0f, 
+                                      sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 15.0f))
     {
-      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_TEMP_INTAKE, "Intake Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.c());
+      sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_TEMP_INTAKE, "Intake Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.c());
+      sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_TEMP_INTAKE);
     }
 
     // Voltage alert
-    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_ELEC_VOLTAGE, 
-                                      sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f, 
-                                      sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() >= 12.0f))
+    if (sdSysData.ALERTS_2.res_alert_condition_less_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_ELEC_VOLTAGE, 
+                                      sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v(), 11.5f, 12.0f))
     {
-      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_ELEC_VOLTAGE, "Voltage Value is " + sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
+      sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_ELEC_VOLTAGE, "Voltage Value is " + sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
+      sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_ELEC_VOLTAGE);
     }
 
     // Fuel Level alert
-    if (sdSysData.ALERTS_2.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_FUEL_LEVEL, 
-                                      sdSysData.CAR_INFO.STATUS.FUEL.val_level() < 1.0f, sdSysData.CAR_INFO.STATUS.FUEL.val_level() > 2.0f))
+    if (sdSysData.ALERTS_2.res_alert_condition_less_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_FUEL_LEVEL, 
+                                      sdSysData.CAR_INFO.STATUS.FUEL.val_level(), 1.0f, 2.0f))
     {
-      sdSysData.ALERTS_2.res_update_alert_text(RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + sdSysData.CAR_INFO.STATUS.FUEL.level());
+      sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + sdSysData.CAR_INFO.STATUS.FUEL.level());
+      sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_FUEL_LEVEL);
     }
 
 

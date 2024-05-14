@@ -19,11 +19,12 @@ using namespace std;
 // -------------------------------------------------------------------------------------
 //  Alert Class
 
-void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Alert_Text)
+void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Alert_Text_Line_1)
 {
   ID = Id;
   DISPLAY = true;
-  ALERT_TEXT = Alert_Text;
+  ALERT_TEXT_LINE_1 = Alert_Text_Line_1;
+  ALERT_TEXT_LINE_2 = "";
 }
 
 bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_Alert, int &Changes)
@@ -103,14 +104,25 @@ void ALERT_2_TYPE_MONITOR::set_display_on()
   DISPLAY = true;
 }
 
-string ALERT_2_TYPE_MONITOR::alert_text()
+string ALERT_2_TYPE_MONITOR::alert_text_line_1()
 {
-  return ALERT_TEXT;
+  return ALERT_TEXT_LINE_1;
 }
 
-void ALERT_2_TYPE_MONITOR::update_alert_text(string Text)
+string ALERT_2_TYPE_MONITOR::alert_text_line_2()
 {
-  ALERT_TEXT = Text;
+  return ALERT_TEXT_LINE_2;
+}
+
+void ALERT_2_TYPE_MONITOR::update_alert_text_line_1(string Text)
+{
+  ALERT_TEXT_LINE_1 = Text;
+  ALERT_TEXT_LINE_2 = "";
+}
+
+void ALERT_2_TYPE_MONITOR::update_alert_text_line_2(string Text)
+{
+  ALERT_TEXT_LINE_2 = Text;
 }
 
 void ALERT_2_TYPE_MONITOR::acknowlege()
@@ -172,9 +184,34 @@ bool ALERT_SYSTEM_2::res_alert_condition(COMMAND_THREAD &Thread, SOUNDS &Sound_S
   return ret_description_request;
 }
 
-void ALERT_SYSTEM_2::res_update_alert_text(int Id, string Text)
+bool ALERT_SYSTEM_2::res_alert_condition_greater_than(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, float Value, float Alert_Condition, float Clear_Condition)
 {
-  ALERTS_RESERVE[Id].update_alert_text(Text);
+  ALERTS_RESERVE[Id].VALUE = Value;
+  ALERTS_RESERVE[Id].ALERT_VALUE = Alert_Condition;
+  ALERTS_RESERVE[Id].CLEAR_VALUE = Clear_Condition;
+
+  return res_alert_condition(Thread, Sound_System, Id, Value >= Alert_Condition, Value < Clear_Condition);
+}
+
+bool ALERT_SYSTEM_2::res_alert_condition_less_than(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, float Value, float Alert_Condition, float Clear_Condition)
+{
+  ALERTS_RESERVE[Id].VALUE = Value;
+  ALERTS_RESERVE[Id].ALERT_VALUE = Alert_Condition;
+  ALERTS_RESERVE[Id].CLEAR_VALUE = Clear_Condition;
+
+  return res_alert_condition(Thread, Sound_System, Id, Value <= Alert_Condition, Value > Clear_Condition);
+}
+
+void ALERT_SYSTEM_2::res_update_alert_text_line_1(int Id, string Text_Line_1)
+{
+  ALERTS_RESERVE[Id].update_alert_text_line_1(Text_Line_1);
+}
+
+void ALERT_SYSTEM_2::res_update_line_2_with_conditions(int Id)
+{
+  ALERTS_RESERVE[Id].update_alert_text_line_2("V: " + to_string_round_to_nth(ALERTS_RESERVE[Id].VALUE, 2) + "   " + 
+                                              "C: " + to_string_round_to_nth(ALERTS_RESERVE[Id].CLEAR_VALUE, 2) + "   " + 
+                                              "A: " + to_string_round_to_nth(ALERTS_RESERVE[Id].ALERT_VALUE, 2));
 }
 
 bool ALERT_SYSTEM_2::res_active(int Id)
@@ -192,9 +229,14 @@ bool ALERT_SYSTEM_2::res_display(int Id)
   return ALERTS_RESERVE[Id].display();
 }
 
-string ALERT_SYSTEM_2::res_alert_text(int Id)
+string ALERT_SYSTEM_2::res_alert_text_line_1(int Id)
 {
-  return ALERTS_RESERVE[Id].alert_text();
+  return ALERTS_RESERVE[Id].alert_text_line_1();
+}
+
+string ALERT_SYSTEM_2::res_alert_text_line_2(int Id)
+{
+  return ALERTS_RESERVE[Id].alert_text_line_2();
 }
 
 void ALERT_SYSTEM_2::res_acknowlege(int Id)
@@ -228,9 +270,9 @@ bool ALERT_SYSTEM_2::gen_display(int Id)
   return  GENERIC_ALERTS[Id].display();
 }
 
-string ALERT_SYSTEM_2::gen_alert_text(int Id)
+string ALERT_SYSTEM_2::gen_alert_text_line_1(int Id)
 {
-  return  GENERIC_ALERTS[Id].alert_text();
+  return  GENERIC_ALERTS[Id].alert_text_line_1();
 }
 
 int ALERT_SYSTEM_2::gen_alert_id(int Id)
