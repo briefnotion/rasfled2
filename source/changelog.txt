@@ -1,3 +1,7 @@
+2.161_240515
+  - Added small value bar to on screen alerts.  Not 
+      yet finished the coding.
+
 2.160_240513
   - Conditioned Alerts can now display their values.
 

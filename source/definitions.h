@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.160_240513"
+#define Revision "2.161_240515"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -132,7 +132,7 @@
 #define COMMS_COMPASS_CAL_PT_4_Y              423.0f
 #define COMMS_COMPASS_CAL_PT_4_VAR            0.348f
 
-#define COMMS_COMPASS_CAL_OFFSET              0.0f - 127.0f
+#define COMMS_COMPASS_CAL_OFFSET              0.0f - 160.0f
 
 // TTL Values - Individually adjust the TTL values of the auto.
 #define TTL_LF_Top_Percentage   100.15

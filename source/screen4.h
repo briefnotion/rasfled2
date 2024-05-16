@@ -24,6 +24,7 @@
 #include "widgets_adsb.h"
 #include "widgets_drawing.h"
 #include "widgets_advertisement.h"
+#include "widgets_alerts.h"
 #include "stringthings.h"
 #include "fled_time.h"
 
@@ -106,6 +107,8 @@ class SCREEN4
 
   // --- 
   // Widgets
+  ALERT_WIDGET AUTOMOBILE_ALERTS;
+
   W_TEXT_TF LIGHTS;
   W_TEXT_TF DEBUG;
   W_TEXT_TF OVERHEAD;

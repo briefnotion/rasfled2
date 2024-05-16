@@ -104,6 +104,16 @@ void ALERT_2_TYPE_MONITOR::set_display_on()
   DISPLAY = true;
 }
 
+void ALERT_2_TYPE_MONITOR::set_show_value_bar(bool Value)
+{
+  SHOW_VALUE_BAR = Value;
+}
+
+bool ALERT_2_TYPE_MONITOR::show_value_bar()
+{
+  return SHOW_VALUE_BAR;
+}
+
 string ALERT_2_TYPE_MONITOR::alert_text_line_1()
 {
   return ALERT_TEXT_LINE_1;

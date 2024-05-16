@@ -70,6 +70,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)sdSysData.CAR_INFO.CALCULATED.s_temp()));
       sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_TEMP_S_TEMP);
+      sdSysData.ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_S_TEMP].set_show_value_bar(true);
     }
 
     // MIL alert
@@ -86,6 +87,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_TEMP_COOLANT, "Coolant Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.c());
       sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_TEMP_COOLANT);
+      sdSysData.ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_COOLANT].set_show_value_bar(true);
     }
 
     // Air Intake Temp alert
@@ -96,6 +98,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_TEMP_INTAKE, "Intake Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.c());
       sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_TEMP_INTAKE);
+      sdSysData.ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_TEMP_INTAKE].set_show_value_bar(true);
     }
 
     // Voltage alert
@@ -104,6 +107,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_ELEC_VOLTAGE, "Voltage Value is " + sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
       sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_ELEC_VOLTAGE);
+      sdSysData.ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_ELEC_VOLTAGE].set_show_value_bar(true);
     }
 
     // Fuel Level alert
@@ -112,6 +116,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + sdSysData.CAR_INFO.STATUS.FUEL.level());
       sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_FUEL_LEVEL);
+      sdSysData.ALERTS_2.ALERTS_RESERVE[RESERVE_ALERT_FUEL_LEVEL].set_show_value_bar(true);
     }
 
 

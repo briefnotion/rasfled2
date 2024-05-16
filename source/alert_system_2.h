@@ -62,6 +62,7 @@ class ALERT_2_TYPE_MONITOR
   bool DISPLAY = false;      // Determine if alert is to be displayed.
   string ALERT_TEXT_LINE_1 = "";   // Text of alert
   string ALERT_TEXT_LINE_2 = "";   // Text of alert
+  bool SHOW_VALUE_BAR = false;
 
   public:
 
@@ -85,6 +86,10 @@ class ALERT_2_TYPE_MONITOR
 
   void set_display_on();
   // Will set display to true
+
+  void set_show_value_bar(bool Value);
+
+  bool show_value_bar();
 
   string alert_text_line_1();  // Text value of alert
   string alert_text_line_2();  // Text value of alert
@@ -117,10 +122,10 @@ class ALERT_SYSTEM_2
 
   int ALERTS_RESERVE_COUNT = 0;
   
+  public:
+
   deque<ALERT_2_TYPE_MONITOR> GENERIC_ALERTS;
   ALERT_2_TYPE_MONITOR ALERTS_RESERVE[RESERVE_ALERT_LIST_SIZE];
-
-  public:
 
   bool changed();
   
