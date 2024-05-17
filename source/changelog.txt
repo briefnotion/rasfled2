@@ -1,3 +1,15 @@
+2.162_240516
+  - Added small value bar to on screen alerts. 
+      After considering how much they show up on the 
+      screen, I thought it would be better to make 
+      them more easily readable.
+  - Changed the BAR_TECH widget.
+      Added a way to set min max value.
+      Easier to see min max values while in corpo mode.
+      Put an outline around the value marker. Was part 
+      of a different solution that the above change 
+      made unnecessary. Left it in anyway. 
+
 2.161_240515
   - Added small value bar to on screen alerts.  Not 
       yet finished the coding.

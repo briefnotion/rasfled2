@@ -988,6 +988,21 @@ void BAR_TECH::create()
   DSP_VALUE.PROPS.CHANGE_NOTIFICATION = false;
 }
 
+void BAR_TECH::update_min_max_value(float Min_Value, float Max_Value)
+{
+  if (Min_Value == 0.0f && Max_Value == 0.0f)
+  {
+    ALT_MIN_MAX = false;
+  }
+  else
+  {
+    ALT_MIN_MAX = true;
+  }
+
+  ALT_MIN = Min_Value;
+  ALT_MAX = Max_Value;
+}
+
 void BAR_TECH::update_value(system_data &sdSysData, float Value)
 {
   VALUE = Value;
@@ -1045,8 +1060,19 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
   {
     if (PROPS.DRAW_MIN_MAX)
     {
-      float min_location = (MIN_MAX.min_float() / PROPS.MAX) * size.x;
-      float max_location = (MIN_MAX.max_float() / PROPS.MAX) * size.x;
+      float min_location = 0.0f;
+      float max_location = 0.0f;
+
+      if (ALT_MIN_MAX)
+      {
+        min_location = ((ALT_MIN - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.x;
+        max_location = ((ALT_MAX - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.x;
+      }
+      else
+      {
+        min_location = ((MIN_MAX.min_float() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.x;
+        max_location = ((MIN_MAX.max_float() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.x;
+      }
 
       if (min_location < 0.0f)
       {
@@ -1072,7 +1098,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
       Draw_List->AddRect(ImVec2(pos.x + min_location, pos.y + 2.0f), 
                                 ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT - 2.0f), 
-                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None, 2.0f);
 
       if (PROPS.DRAW_RULER)
       {
@@ -1084,8 +1110,19 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
   {
     if (PROPS.DRAW_MIN_MAX)
     {
-      float min_location = (MIN_MAX.min_float() / PROPS.MAX) * size.y;
-      float max_location = (MIN_MAX.max_float() / PROPS.MAX) * size.y;
+      float min_location = 0.0f;
+      float max_location = 0.0f;
+
+      if (ALT_MIN_MAX)
+      {
+        min_location = ((ALT_MIN - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.y;
+        max_location = ((ALT_MAX - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.y;
+      }
+      else
+      {
+        min_location = ((MIN_MAX.min_float() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.y;
+        max_location = ((MIN_MAX.max_float() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.y;
+      }
 
       if (min_location < 0)
       {
@@ -1111,7 +1148,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
       Draw_List->AddRect(ImVec2(pos.x, pos.y + size.y - max_location - 2.0f), 
                                 ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - min_location + 2.0f), 
-                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
+                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None, 2.0f);
 
       if (PROPS.DRAW_RULER)
       {
@@ -1123,7 +1160,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
   // Draw Value Marker
   if (PROPS.HORIZONTAL)
   {
-    float marker_location = abs((VALUE_MARKER.value() / PROPS.MAX) * size.x + 1.0f);
+    float marker_location = abs(((VALUE_MARKER.value() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.x + 1.0f);
 
     if (marker_location < 0.0f)
     {
@@ -1136,7 +1173,11 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
     Draw_List->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
                               ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
-                              sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);
+                              sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);    
+    
+    Draw_List->AddRect(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
+                              ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
+                              sdSysData.COLOR_SELECT.c_black().STANDARD, 5.0f, ImDrawFlags_None, 2.0f);
 
     // Move Cursor Pos to new position
     ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
@@ -1149,7 +1190,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
   }
   else
   {
-    float marker_location = abs((VALUE_MARKER.value() / PROPS.MAX) * size.y +1);
+    float marker_location = abs(((VALUE_MARKER.value() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.y +1);
 
     if (marker_location < 0.0f)
     {
@@ -1163,6 +1204,10 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
     Draw_List->AddRectFilled(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
                               ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
                               sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);
+
+    Draw_List->AddRect(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
+                              ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
+                              sdSysData.COLOR_SELECT.c_black().STANDARD, 5.0f, ImDrawFlags_None, 2.0f);
 
     // Move Cursor Pos to new position
     ImGui::SetCursorScreenPos(ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y));

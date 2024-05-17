@@ -25,6 +25,8 @@ using namespace std;
 
 void ALERT_WIDGET_WIDGTS::create(system_data &sdSysData, string Name)
 {
+  // Value Bar
+  {
   VALUES.PROPS.LABEL = Name + " Value";
   VALUES.PROPS.BAR_HEIGHT = 20.0f;
   VALUES.PROPS.MARKER_SIZE = 15.0f;
@@ -32,12 +34,14 @@ void ALERT_WIDGET_WIDGTS::create(system_data &sdSysData, string Name)
   VALUES.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.yellow();
   VALUES.PROPS.DRAW_MIN_MAX_ON_TOP = false;
   VALUES.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
-  VALUES.PROPS.DRAW_MIN_MAX = false;
+  VALUES.PROPS.DRAW_MIN_MAX = true;
+  VALUES.PROPS.MIN = 0.0f;
   VALUES.PROPS.MAX = 1.0f;
   VALUES.PROPS.DRAW_RULER = true;
   VALUES.PROPS.COLOR_RULER = sdSysData.COLOR_SELECT.white();
   VALUES.PROPS.MAX_TICK_LEVEL = 3;
   VALUES.create();
+  }
 }
 
 void ALERT_WIDGET_PROPERTIES_LIST::check_properties_list(system_data &sdSysData, int Alert_Num, string Name)
@@ -98,15 +102,35 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
 
             if (Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE > Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE)
             {
-              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MAX = Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE + 
+              // Calculate Min Max values to display
+              float min = Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE - 
                             (Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE);
+
+              float max = Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE + 
+                            (Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE);
+
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MIN = min;
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MAX = max;
+
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_min_max_value(Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE, 
+                                                                                  Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE);
 
               PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_value(sdSysData, Alerts_List.ALERTS_RESERVE[alert_num].VALUE);
             }
             else
             {
-              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MAX = Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE + 
+              // Calculate Min Max values to display
+              float min = Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE - 
                 (Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE);
+
+              float max = Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE + 
+                (Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE);
+
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MIN = min;
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MAX = max;
+
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_min_max_value(Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE, 
+                                                                                  Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE);
 
               PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_value(sdSysData, Alerts_List.ALERTS_RESERVE[alert_num].VALUE);
             }

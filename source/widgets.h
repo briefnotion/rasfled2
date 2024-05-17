@@ -266,9 +266,10 @@ class BAR_TECH_PROPERTIES
   int COLOR_MARKER;       // Color of Marker
   int COLOR_BACKGROUND;   // Color of Marker
 
-  float MAX = 0.0f;                  // Top Value of Graph
+  float MIN = 0.0f;       // Top Value of Graph
+  float MAX = 0.0f;       // Top Value of Graph
 
-  bool HORIZONTAL = true;         // Bar Orientation
+  bool HORIZONTAL = true; // Bar Orientation
 
   // Min Max Related
   bool DRAW_MIN_MAX = false;                // Records and Displays Opaque Min Max Bar
@@ -293,6 +294,10 @@ class BAR_TECH
 
   MIN_MAX_TIME MIN_MAX;
 
+  bool ALT_MIN_MAX = false;
+  float ALT_MIN = 0.0f;
+  float ALT_MAX = 0.0f;
+
   DRAW_RULER RULER;
 
   W_TEXT DSP_MIN;
@@ -306,6 +311,10 @@ class BAR_TECH
   BAR_TECH_PROPERTIES PROPS;
 
   void create();
+
+  void update_min_max_value(float Min_Value, float Max_Value);
+  // Overwrite the values of the calculated Min Max
+  // 0 and 0 will put it back to normal.
 
   void update_value(system_data &sdSysData, float Value);
 

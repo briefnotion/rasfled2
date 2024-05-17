@@ -132,23 +132,23 @@ void SOUNDS::play_gear_reverse(COMMAND_THREAD &Thread)
 {
   if (MUTE == false)
   {
-    add_note_to_queue(Thread, "d7");
-    add_note_to_queue(Thread, "d7");
+    add_note_to_queue(Thread, "d6");
+    add_note_to_queue(Thread, "d6");
   }
 }
 void SOUNDS::play_gear_neutral(COMMAND_THREAD &Thread)
 {
   if (MUTE == false)
   {
-    add_note_to_queue(Thread, "e7");
+    add_note_to_queue(Thread, "e6");
   }
 }
 void SOUNDS::play_gear_drive(COMMAND_THREAD &Thread)
 {
   if (MUTE == false)
   {
-    add_note_to_queue(Thread, "f7");
-    add_note_to_queue(Thread, "f7");
+    add_note_to_queue(Thread, "f6");
+    add_note_to_queue(Thread, "f6");
   }
 }
 void SOUNDS::play_gear_low(COMMAND_THREAD &Thread)
@@ -156,8 +156,8 @@ void SOUNDS::play_gear_low(COMMAND_THREAD &Thread)
   if (MUTE == false)
   {
     add_note_to_queue(Thread, "g7");
-    add_note_to_queue(Thread, "g7");
-    add_note_to_queue(Thread, "f7");
+    add_note_to_queue(Thread, "g6");
+    add_note_to_queue(Thread, "f6");
   }
 }
 
