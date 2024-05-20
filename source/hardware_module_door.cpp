@@ -101,7 +101,7 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
     {
       //"A Door Opened - Overhead"
       cons.printw("A Door Opened - Overhead");
-      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "A Door Opened - Overhead");
+      Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "A Door Opened - Overhead");
 
       // Step through door status and turn on extteriors of newly opened door and running anim on
       //  the doors that are still closed
@@ -115,14 +115,14 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
         if (door_mini[pos] == 2)
         {
           cons.printw("Door:" + to_string(pos +1) + " This Door Opened - Exterior");
-          Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "This Door Opened - Exterior", pos);
-          Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "This Door Opened - Overhead", pos);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "This Door Opened - Exterior", pos);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "This Door Opened - Overhead", pos);
         }
 
         if (door_mini[pos] == 0)
         {
           cons.printw("Door:" + to_string(pos +1) + " A Door is Opened - Exterior");
-          Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "A Door is Opened - Exterior", pos);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "A Door is Opened - Exterior", pos);
         }
       }
     }
@@ -131,17 +131,17 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
     {
       //"All Doors Closed - Overhead"
       cons.printw("All Doors Closed - Overhead");
-      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "All Doors Closed - Overhead");
+      Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "All Doors Closed - Overhead");
       cons.printw("All Doors Closed - Exterior");
-      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "All Doors Closed - Exterior");
-      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "This Door Closed - Overhead");
+      Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "All Doors Closed - Exterior");
+      Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "This Door Closed - Overhead");
 
       // Run recently closed door anims
       for(int pos = 0; pos < (int)sdSysData.CONFIG.vhwDOORS.size(); pos++)
       {
         if ((tmeCurrentTime - sdSysData.CONFIG.vhwDOORS.at(pos).tmeTOGGLEDTIME) < 15000)
         {
-          Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "This Door Recently Closed - Overhead", pos);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "This Door Recently Closed - Overhead", pos);
         }
       }
     }    
@@ -156,15 +156,15 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
         if (door_mini[pos] == -1)
         {
           cons.printw("Door:" + to_string(pos +1) + " This Door Closed - Exterior");
-          Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "This Door Closed and Another Open - Exterior", pos);
-          Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "This Door Closed - Overhead", pos);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "This Door Closed and Another Open - Exterior", pos);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "This Door Closed - Overhead", pos);
         }
 
         if (door_mini[pos] == 2)
         {
           cons.printw("Door:" + to_string(pos +1) + " This Door Opened - Exterior");
-          Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "This Door Opened and Another Open - Exterior", pos);
-          Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "This Door Opened - Overhead", pos);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "This Door Opened and Another Open - Exterior", pos);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "This Door Opened - Overhead", pos);
         }
       }
     }

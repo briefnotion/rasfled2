@@ -171,7 +171,7 @@ class JSON_INTERFACE
   // Creates an easy to read JSON representation into a string deque.
 
   void json_print_build_to_string_deque(deque<string> &JSON_Print_Build);
-    // Creates a propery formated to read JSON into a string deque.
+  // Creates a propery formated to read JSON into a string deque.
 };
 
 

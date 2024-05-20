@@ -1,3 +1,12 @@
+2.163_240519
+  - Increased alert size of intake temp by 5 degrees.
+  - BAR_TECH now has a property to turn off the 
+      marker if exceding min and max range.
+  - Testing: Sweeping velocity lights are will display 
+      individual tire speeds. Left front door lights 
+      will represent the left front tire speed.  And, 
+      so on for the other doors and tires. 
+
 2.162_240516
   - Added small value bar to on screen alerts. 
       After considering how much they show up on the 

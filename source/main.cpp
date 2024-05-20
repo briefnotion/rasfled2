@@ -637,7 +637,7 @@ int loop_2(bool TTY_Only)
   // -------------------------------------------------------------------------------------
 
   // Start Power On Animation
-  process_power_animation(sdSystem, sdSystem.PROGRAM_TIME.now(), animations, CRGB(0, 0, 25));
+  process_power_animation(sdSystem, cons_2.SCREEN_COMMS, sdSystem.PROGRAM_TIME.now(), animations, CRGB(0, 0, 25));
   
   // ---------------------------------------------------------------------------------------
   //  Repeating Sleeping Loop until eXit is triggered.
@@ -801,7 +801,7 @@ int loop_2(bool TTY_Only)
       bool booUpdate = false;
 
       //  Run ALL GLOBAL Timed Events
-      animations.process_events(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time());
+      animations.process_events(sdSystem, cons_2.SCREEN_COMMS, sdSystem.PROGRAM_TIME.current_frame_time());
 
       for(int group=0; group < sdSystem.CONFIG.LED_MAIN.at(0).g_size(); group++)
       {

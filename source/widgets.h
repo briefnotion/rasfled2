@@ -268,6 +268,7 @@ class BAR_TECH_PROPERTIES
 
   float MIN = 0.0f;       // Top Value of Graph
   float MAX = 0.0f;       // Top Value of Graph
+  bool NO_MARKER_WHEN_OUT_OF_RANGE = false;
 
   bool HORIZONTAL = true; // Bar Orientation
 

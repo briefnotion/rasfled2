@@ -1158,59 +1158,63 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
   }
 
   // Draw Value Marker
-  if (PROPS.HORIZONTAL)
+  if ((PROPS.NO_MARKER_WHEN_OUT_OF_RANGE == false) || 
+        (is_within(VALUE_MARKER.value(), PROPS.MIN, PROPS.MAX)))
   {
-    float marker_location = abs(((VALUE_MARKER.value() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.x + 1.0f);
-
-    if (marker_location < 0.0f)
+    if (PROPS.HORIZONTAL)
     {
-      marker_location = 0.0f;
+      float marker_location = abs(((VALUE_MARKER.value() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.x + 1.0f);
+
+      if (marker_location < 0.0f)
+      {
+        marker_location = 0.0f;
+      }
+      if (marker_location > size.x)
+      {
+        marker_location = size.x;
+      }
+
+      Draw_List->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
+                                ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
+                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);    
+      
+      Draw_List->AddRect(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
+                                ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
+                                sdSysData.COLOR_SELECT.c_black().STANDARD, 5.0f, ImDrawFlags_None, 2.0f);
+
+      // Move Cursor Pos to new position
+      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
+
+      // Min Max
+      if (PROPS.HORIZONTAL && PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_BOTTOM)
+      {
+        draw_min_max_val(sdSysData);
+      }
     }
-    if (marker_location > size.x)
+    else
     {
-      marker_location = size.x;
+      float marker_location = abs(((VALUE_MARKER.value() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.y +1);
+
+      if (marker_location < 0.0f)
+      {
+        marker_location = 0.0f;
+      }
+      if (marker_location > size.y)
+      {
+        marker_location = size.y;
+      }
+
+      Draw_List->AddRectFilled(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
+                                ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
+                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);
+
+      Draw_List->AddRect(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
+                                ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
+                                sdSysData.COLOR_SELECT.c_black().STANDARD, 5.0f, ImDrawFlags_None, 2.0f);
+
+      // Move Cursor Pos to new position
+      ImGui::SetCursorScreenPos(ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y));
     }
-
-    Draw_List->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
-                              ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
-                              sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);    
-    
-    Draw_List->AddRect(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
-                              ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
-                              sdSysData.COLOR_SELECT.c_black().STANDARD, 5.0f, ImDrawFlags_None, 2.0f);
-
-    // Move Cursor Pos to new position
-    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
-
-    // Min Max
-    if (PROPS.HORIZONTAL && PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_BOTTOM)
-    {
-      draw_min_max_val(sdSysData);
-    }
-  }
-  else
-  {
-    float marker_location = abs(((VALUE_MARKER.value() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.y +1);
-
-    if (marker_location < 0.0f)
-    {
-      marker_location = 0.0f;
-    }
-    if (marker_location > size.y)
-    {
-      marker_location = size.y;
-    }
-
-    Draw_List->AddRectFilled(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
-                              ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
-                              sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 5.0f, ImDrawFlags_None);
-
-    Draw_List->AddRect(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
-                              ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
-                              sdSysData.COLOR_SELECT.c_black().STANDARD, 5.0f, ImDrawFlags_None, 2.0f);
-
-    // Move Cursor Pos to new position
-    ImGui::SetCursorScreenPos(ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y));
   }
 }
 

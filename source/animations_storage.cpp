@@ -29,6 +29,31 @@ bool ANIMATIONS_STORAGE::load_collections(string Filename)
   {
     ret_success = animations_json.load_json_from_string(str_animations_json);
 
+    // testing
+    /*
+    {
+      deque<string> test;
+
+      animations_json.json_print_build_to_string_deque(test);
+      for (int x = 0; x < (int)test.size(); x++)
+      {
+        printf("%s\n", test[x].c_str());
+      }
+      
+      test.clear();
+
+      animations_json.json_debug_build_to_string_deque(test);
+      for (int x = 0; x < (int)test.size(); x++)
+      {
+        printf("%s\n", test[x].c_str());
+      }
+
+      test.clear();
+
+      exit(0);
+    }
+    */
+
     // Clear current animations
     COLLECTION.clear();
 

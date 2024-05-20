@@ -190,10 +190,10 @@ void consoleprintconfig(CONSOLE_COMMUNICATION &cons, system_data &sdSysData)
 
 // -------------------------------------------------------------------------------------
 
-void process_power_animation(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor)
+void process_power_animation(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor)
 {
   sdSysData.TMP_PASSTHRU_COLOR = cRGBpulsecolor;
-  Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "POWER");
+  Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "POWER");
   sdSysData.booPulsesRunning = true;
 }
 
@@ -201,31 +201,31 @@ void process_power_animation(system_data &sdSysData, unsigned long tmeCurrentTim
 // Pulses
 
 // Set To End All Pulses
-void processcommandpulseend(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
+void processcommandpulseend(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
-  Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "PULSE COLOR STOP");
-  Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "COUNTDOWN TIMER STOP");
+  Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "PULSE COLOR STOP");
+  Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "COUNTDOWN TIMER STOP");
   sdSysData.booPulsesRunning = false;
 }
 
 // Flash Color All Channels
-void processcommandflash(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
+void processcommandflash(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
-  Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "FLASH");
+  Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "FLASH");
 }
 
 // Pulse Color All Channels
-void processcommandpulse(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor)
+void processcommandpulse(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations, CRGB cRGBpulsecolor)
 {
   sdSysData.PULSE_COLOR = cRGBpulsecolor;
-  Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "PULSE COLOR");
+  Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "PULSE COLOR");
   sdSysData.booPulsesRunning = true;
 }
 
 // Pulse Color All Channels
-void processcommandpulsecountdown(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
+void processcommandpulsecountdown(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
-  Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "COUNTDOWN TIMER");
+  Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "COUNTDOWN TIMER");
   sdSysData.booPulsesRunning = true;
 }
 
@@ -233,16 +233,16 @@ void processcommandpulsecountdown(system_data &sdSysData, unsigned long tmeCurre
 // Overhead Illum
 
 // Set To End All Overhead Illumination
-void processcommandoverheadillumend(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
+void processcommandoverheadillumend(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
-  Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "All Doors Closed - Overhead");
+  Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "All Doors Closed - Overhead");
   sdSysData.booOverheadRunning = false;
 }
 
 // Overhead Illumination Color
-void processcommandoverheadillum(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
+void processcommandoverheadillum(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
-  Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "A Door Opened - Overhead");
+  Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "A Door Opened - Overhead");
   sdSysData.booOverheadRunning = true;
 }
 
@@ -250,16 +250,16 @@ void processcommandoverheadillum(system_data &sdSysData, unsigned long tmeCurren
 // Hazard
 
 // Set To End All Hazard
-void processcommandhazardend(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
+void processcommandhazardend(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
-  Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD STOP");
+  Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "HAZARD STOP");
   sdSysData.booHazardRunning = false;
 }
 
 // Hazard
-void processcommandhazard(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
+void processcommandhazard(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
-  Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD");
+  Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "HAZARD");
   sdSysData.booHazardRunning = true;
 }
 
@@ -531,7 +531,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
 
       if (check_command(cons," animt", "Event System 2 Test Animation"))
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "test1");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "test1");
       }
       
       // Program Exit
@@ -572,9 +572,9 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         // end Countdown Timer
         sdSysData.cdTIMER.end();
 
-        processcommandpulseend(sdSysData, tmeCurrentTime, Animations);
-        processcommandoverheadillumend(sdSysData, tmeCurrentTime, Animations);
-        processcommandhazardend(sdSysData, tmeCurrentTime, Animations);
+        processcommandpulseend(sdSysData, cons, tmeCurrentTime, Animations);
+        processcommandoverheadillumend(sdSysData, cons, tmeCurrentTime, Animations);
+        processcommandhazardend(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // -------------------------------------------------------------------------------------
@@ -650,7 +650,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         command.shutdown_now();
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(25, 0, 0));
 
         // Set system to exit
         cons.WINDOW_CLOSE = true;
@@ -665,7 +665,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         command.reboot();
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(25, 0, 0));
 
         // Set system to exit
         cons.WINDOW_CLOSE = true;
@@ -682,7 +682,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_airstop.sh");
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(25, 0, 0));
       }
 
       // Command Line (load air_m)
@@ -692,7 +692,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_lafm.sh");
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(25, 0, 0));
       }
 
       // Radio Call Airband Lafayette Scan Script Command
@@ -702,7 +702,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_lafs.sh");
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(25, 0, 0));
       }
 
       // Radio Call CB Channel Scan Script Command
@@ -712,7 +712,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_cbs.sh");
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(25, 0, 0));
       }
 
       // Radio Call NOAA Channel Scan Script Command
@@ -722,7 +722,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_noaa.sh");
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(25, 0, 0));
       }
 
       // Radio Call Emergency Channel Scan Script Command
@@ -732,7 +732,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_emergency.sh");
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(25, 0, 0));
       }
 
       /*
@@ -760,7 +760,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.COMMAND_THREADS.run_command("/home/pi/flightaware/fastart.sh");
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(15, 15, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(15, 15, 0));
       }
 
       // Command Line (load fastop.sh)
@@ -770,7 +770,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.COMMAND_THREADS.run_command("/home/pi/flightaware/fastop.sh");
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(15, 15, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(15, 15, 0));
       }
       
       // Command Line (load copy direcory)
@@ -781,7 +781,7 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
         sdSysData.COMMAND_THREADS.run_command("cp -r /run/dump1090-fa/ /home/pi/flightaware/snapshot." + sdSysData.AIRCRAFT_COORD.DATA.NOW.get_str_value());
 
         // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(0, 30, 0));
+        process_power_animation(sdSysData, cons, tmeCurrentTime, Animations, CRGB(0, 30, 0));
       }
       // -------------------------------------------------------------------------------------
       // PLAYLIST
@@ -809,55 +809,55 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       // flash Running
       if (check_command(cons, "ff", "Flash All LEDs with Running Color"))
       {
-        processcommandflash(sdSysData, tmeCurrentTime, Animations);
+        processcommandflash(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // flash White
       if (check_command(cons, "fw", "Flash White All LEDs"))
       {
-        processcommandflash(sdSysData, tmeCurrentTime, Animations);
+        processcommandflash(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // flash Red
       if (check_command(cons, "fr", "Flash Red All LEDs"))
       {
-        processcommandflash(sdSysData, tmeCurrentTime, Animations);
+        processcommandflash(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // flash Green
       if (check_command(cons, "fg", "Flash Green All LEDs"))
       {
-        processcommandflash(sdSysData, tmeCurrentTime, Animations);
+        processcommandflash(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // flash Blue
       if (check_command(cons, "fb", "Flash Blue All LEDs"))
       {
-        processcommandflash(sdSysData, tmeCurrentTime, Animations);
+        processcommandflash(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // flash Purple
       if (check_command(cons, "fu", "Flash Purple All LEDs"))
       {
-        processcommandflash(sdSysData, tmeCurrentTime, Animations);
+        processcommandflash(sdSysData, cons, tmeCurrentTime, Animations);
       }
     
       // flash Yellow
       if (check_command(cons, "fy", "Flash Yellow All LEDs"))
       {
-        processcommandflash(sdSysData, tmeCurrentTime, Animations);
+        processcommandflash(sdSysData, cons, tmeCurrentTime, Animations);
       }
       
       // flash Cyan
       if (check_command(cons, "fc", "Flash Cyan All LEDs"))
       {
-        processcommandflash(sdSysData, tmeCurrentTime, Animations);
+        processcommandflash(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // flash Orange
       if (check_command(cons, "fn", "Flash Orange All LEDs"))
       {
-        processcommandflash(sdSysData, tmeCurrentTime, Animations);
+        processcommandflash(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // -------------------------------------------------------------------------------------
@@ -866,75 +866,75 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       // pulse end
       if (check_command(cons, "p`", "End Most Pulse Animations"))
       {
-        processcommandpulseend(sdSysData, tmeCurrentTime, Animations);
+        processcommandpulseend(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // pulse Running Timer
       if (check_command(cons, "  ", "5 minute Pulse Timer Started with Running Color"))
       {
         sdSysData.start_timer(DEFAULTTIMER * 60);
-        processcommandpulsecountdown(sdSysData, tmeCurrentTime, Animations);
+        processcommandpulsecountdown(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // pulse Running Timer end
       if (check_command(cons, " `", "Pulse Timer Stop"))
       {
         sdSysData.cdTIMER.end();
-        processcommandpulseend(sdSysData, tmeCurrentTime, Animations);
+        processcommandpulseend(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // pulse Running Color
       if (check_command(cons, "pp", "Pulse Running Color All LEDs"))
       {
-        processcommandpulse(sdSysData, tmeCurrentTime, Animations, sdSysData.get_running_color());
+        processcommandpulse(sdSysData, cons, tmeCurrentTime, Animations, sdSysData.get_running_color());
       }
 
       // pulse White
       if (check_command(cons, "pw", "Pulse White All LEDs"))
       {
-        processcommandpulse(sdSysData, tmeCurrentTime, Animations, crgbWhite);
+        processcommandpulse(sdSysData, cons, tmeCurrentTime, Animations, crgbWhite);
       }
 
       // pulse Red
       if (check_command(cons, "pr", "Pulse Red All LEDs"))
       {
-        processcommandpulse(sdSysData, tmeCurrentTime, Animations, crgbRed);
+        processcommandpulse(sdSysData, cons, tmeCurrentTime, Animations, crgbRed);
       }
 
       // pulse Green
       if (check_command(cons, "pg", "Pulse Green All LEDs"))
       {
-        processcommandpulse(sdSysData, tmeCurrentTime, Animations, crgbGreen);
+        processcommandpulse(sdSysData, cons, tmeCurrentTime, Animations, crgbGreen);
       }
 
       // pulse Blue
       if (check_command(cons, "pb", "Pulse Blue All LEDs"))
       {
-        processcommandpulse(sdSysData, tmeCurrentTime, Animations, crgbBlue);
+        processcommandpulse(sdSysData, cons, tmeCurrentTime, Animations, crgbBlue);
       }
 
       // pulse Purple
       if (check_command(cons, "pu", "Pulse Purple All LEDs"))
       {
-        processcommandpulse(sdSysData, tmeCurrentTime, Animations, crgbPurple);
+        processcommandpulse(sdSysData, cons, tmeCurrentTime, Animations, crgbPurple);
       }
 
       // pulse Yellow
       if (check_command(cons, "py", "Pulse Yellow All LEDs"))
       {
-        processcommandpulse(sdSysData, tmeCurrentTime, Animations, crgbYellow);
+        processcommandpulse(sdSysData, cons, tmeCurrentTime, Animations, crgbYellow);
       }
 
       // pulse Cyan
       if (check_command(cons, "pc", "Pulse Cyan All LEDs"))
       {
-        processcommandpulse(sdSysData, tmeCurrentTime, Animations, crgbCyan);
+        processcommandpulse(sdSysData, cons, tmeCurrentTime, Animations, crgbCyan);
       }
 
       // pulse Orange
       if (check_command(cons, "pn", "Pulse Orange All LEDs"))
       {
-        processcommandpulse(sdSysData, tmeCurrentTime, Animations, crgbOrange);
+        processcommandpulse(sdSysData, cons, tmeCurrentTime, Animations, crgbOrange);
       }
 
       // -------------------------------------------------------------------------------------
@@ -943,62 +943,62 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       // pulse end overhead illum
       if (check_command(cons, "o`", "Turn Off Overhead Illumination Lights"))
       {
-        processcommandoverheadillumend(sdSysData, tmeCurrentTime, Animations);
+        processcommandoverheadillumend(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Overhead Running
       if (check_command(cons,"oo", "Turn On Overhead Illumination Lights with Running Color") || 
           check_command(cons,"zz", "Turn On Overhead Illumination Lights with Running Color"))
       {
-        processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
+        processcommandoverheadillum(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Overhead White
       if (check_command(cons, "ow", "Turn On White Overhead Illumination Lights"))
       {
-        processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
+        processcommandoverheadillum(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Overhead Red
       if (check_command(cons, "or", "Turn On Red Overhead Illumination Lights"))
       {
-        processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
+        processcommandoverheadillum(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Overhead Green
       if (check_command(cons, "og", "Turn On Green Overhead Illumination Lights"))
       {
-        processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
+        processcommandoverheadillum(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Overhead Blue
       if (check_command(cons, "ob", "Turn On Blue Overhead Illumination Lights"))
       {
-        processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
+        processcommandoverheadillum(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Overhead Purple
       if (check_command(cons, "ou", "Turn On Purple Overhead Illumination Lights"))
       {
-        processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
+        processcommandoverheadillum(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Overhead Yellow
       if (check_command(cons, "oy", "Turn On Yellow Overhead Illumination Lights"))
       {
-        processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
+        processcommandoverheadillum(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Overhead Cyan
       if (check_command(cons, "oc", "Turn On Cyan Overhead Illumination Lights"))
       {
-        processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
+        processcommandoverheadillum(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Overhead Orange
       if (check_command(cons, "on", "Turn On Orange Overhead Illumination Lights"))
       {
-        processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
+        processcommandoverheadillum(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Set Running Color
@@ -1048,13 +1048,13 @@ void processcommandlineinput(CONSOLE_COMMUNICATION &cons, system_data &sdSysData
       // Hazard illum end
       if (check_command(cons, "h`", "HAZARD LIGHTS OFF"))
       {
-        processcommandhazardend(sdSysData, tmeCurrentTime, Animations);
+        processcommandhazardend(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // Hazard
       if (check_command(cons, "hh", "HAZARD LIGHTS ON ('h`' to turn off"))
       {
-        processcommandhazard(sdSysData, tmeCurrentTime, Animations);
+        processcommandhazard(sdSysData, cons, tmeCurrentTime, Animations);
       }
 
       // -------------------------------------------------------------------------------------
@@ -1208,7 +1208,7 @@ void extraanimationdoorcheck2(CONSOLE_COMMUNICATION &cons, system_data &sdSysDat
     // Check for newly expired timer
     if (sdSysData.cdTIMER.is_triggered() == true)
     {
-      processcommandflash(sdSysData, tmeCurrentTime, Animations);
+      processcommandflash(sdSysData, cons, tmeCurrentTime, Animations);
     }
 
     if (sdSysData.intDoorsOpen > 0)
@@ -1216,7 +1216,7 @@ void extraanimationdoorcheck2(CONSOLE_COMMUNICATION &cons, system_data &sdSysDat
       cons.printw(to_string(sdSysData.intDoorsOpen));
       // End pulses when door is opened and end countdown timer.
       sdSysData.cdTIMER.end();
-      processcommandpulseend(sdSysData, tmeCurrentTime, Animations);
+      processcommandpulseend(sdSysData, cons, tmeCurrentTime, Animations);
       //processcommandoverheadillumend(cons, sdSysData, tmeCurrentTime, Animations);
 
       // Check if Overhead Lights are on, then if a door is opened turn off button and turn off 

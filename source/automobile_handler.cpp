@@ -18,11 +18,11 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
-void AUTOMOBILE_HANDLER::alert(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime)
+void AUTOMOBILE_HANDLER::alert(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime)
 {
   if (ALERT_TIMER.ping_down(tmeCurrentTime) == false)
   {
-    Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "FLASH");
+    Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "FLASH");
     ALERT_TIMER.ping_up(tmeCurrentTime, 10000);
   }
 }
@@ -33,8 +33,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
   // Automobile Data Switched to Not Available
 
   // Data Grab to reduce calc times.
-  //float speed_trans_mph_impres = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph_impres(tmeCurrentTime);
-  float speed_trans_mph_impres = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph();
+  float speed_average_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph();
 
   // Check for changes in the automobile availability
   if ((set_bool_with_change_notify(sdSysData.CAR_INFO.active(), AUTO_ACTIVE) == true))
@@ -42,12 +41,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     if (sdSysData.CAR_INFO.active() == false)
     {
       // if automobile is no longer available, make sure all related lights are off.
-      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Park_Off");
-      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Neutral_Off");
-      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Reverse_Off");
-      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_Off");
-      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Velocity_Off");
-      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Door Handle Running Off");
+      Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Park_Off");
+      Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Neutral_Off");
+      Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Reverse_Off");
+      Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_Off");
+      Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Velocity_Off");
+      Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Door Handle Running Off");
 
       GEAR_PARK = false;
       GEAR_NEUTRAL = false;
@@ -93,7 +92,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     // Air Intake Temp alert
     if (sdSysData.ALERTS_2.res_alert_condition_greater_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_INTAKE, 
                                       sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c(), 
-                                      sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 20.0f, 
+                                      sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 25.0f, 
                                       sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 15.0f))
     {
       sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_TEMP_INTAKE, "Intake Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.c());
@@ -130,12 +129,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
         sdSysData.SOUND_SYSTEM.play_gear_park(sdSysData.COMMAND_THREADS);
         
         // Call animation to turn on Park color.
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Park_On");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Park_On");
       }
       else
       {
         // Call animation to turn off Park color.
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Park_Off");        
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Park_Off");        
       }
     }
     
@@ -147,12 +146,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
         sdSysData.SOUND_SYSTEM.play_gear_neutral(sdSysData.COMMAND_THREADS);
 
         // Call animation to turn on Neutral color.
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Neutral_On");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Neutral_On");
       }
       else
       {
         // Call animation to turn off Neutral color.
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Neutral_Off");        
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Neutral_Off");        
       }
     }
 
@@ -164,12 +163,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
         sdSysData.SOUND_SYSTEM.play_gear_reverse(sdSysData.COMMAND_THREADS);
 
         // Call animation to turn on Reverse color.
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Reverse_On");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Reverse_On");
       }
       else
       {
         // Call animation to turn off Reverse color.
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Reverse_Off");        
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Reverse_Off");        
       }
     }
 
@@ -181,12 +180,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
         sdSysData.SOUND_SYSTEM.play_gear_drive(sdSysData.COMMAND_THREADS);
         
         // Call animation to turn on Drive color.
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_On");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_On");
       }
       else
       {
         // Call animation to turn off Drive color.
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_Off");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_Off");
       }
     }
 
@@ -198,12 +197,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
         sdSysData.SOUND_SYSTEM.play_gear_low(sdSysData.COMMAND_THREADS);
         
         // Call animation to turn on Drive color.
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_On");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_On");
       }
       else
       {
         // Call animation to turn off Drive color.
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_Off");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_Off");
       }
     }
 
@@ -213,12 +212,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       if (SIGNAL_LEFT)
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_On", 0);
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_On", 1);
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Signal_Left_On", 0);
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Signal_Left_On", 1);
       }
       else
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_Off");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Signal_Left_Off");
         SIGNAL_OFF_REDUNDANCY.ping_up(tmeCurrentTime, 2000);
       }
     }
@@ -228,12 +227,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       if (SIGNAL_RIGHT)
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_On", 2);
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_On", 3);
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Signal_Right_On", 2);
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Signal_Right_On", 3);
       }
       else
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_Off");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Signal_Right_Off");
         SIGNAL_OFF_REDUNDANCY.ping_up(tmeCurrentTime, 2000);
       }
     }
@@ -243,12 +242,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       if (HAZARDS)
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "HAZARD");
         sdSysData.booHazardRunning = true;
       }
       else
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD STOP");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "HAZARD STOP");
         sdSysData.booHazardRunning = false;
       }
     }
@@ -263,7 +262,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
       }
     }
 
-    // Shutdown Waring
+    // Shutdown Warning
     if (IGNITION == false && IGNITION_WARNING_TIMER.enabled() && IGNITION_WARNING_TIMER.ping_down(tmeCurrentTime) == false)
     {
       sdSysData.ALERTS_2.add_generic_alert(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, 
@@ -282,8 +281,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     {
       if (SIGNAL_OFF_REDUNDANCY.ping_down(tmeCurrentTime) == false)
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_Off");
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_Off");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Signal_Left_Off");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Signal_Right_Off");
       }
     }
 
@@ -292,15 +291,22 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     float multiplier = 0;
     float multiplier_caution = 0;
 
-    const int activate_speed = 10;
+    // Tire Values
+    float multiplier_LF = 0;
+    float multiplier_RF = 0;
+    float multiplier_LB = 0;
+    float multiplier_RB = 0;
+
+    // control values
+    const int activate_speed = 15;
     const int caution_speed = 5;
 
     // -------------------------------------------------------------------------------------
     // Alerts at non stops at low speed
     
     // Alert if door is open
-    if (speed_trans_mph_impres > 0 && 
-        speed_trans_mph_impres < 5)
+    if (speed_average_tire_speed > 0 && 
+        speed_average_tire_speed < 5)
     {
       if (sdSysData.CAR_INFO.STATUS.DOORS.hatchback_door_open() == true ||
           sdSysData.CAR_INFO.STATUS.DOORS.hood_door_open() == true ||
@@ -309,13 +315,13 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
           sdSysData.CAR_INFO.STATUS.DOORS.rb_door_open() == true ||
           sdSysData.CAR_INFO.STATUS.DOORS.rf_door_open() == true)
       {
-        alert(sdSysData, Animations, tmeCurrentTime);
+        alert(sdSysData, cons, Animations, tmeCurrentTime);
       }
 
       // Alert if only parking lights are on
       if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_pos() == 1)
       {
-          alert(sdSysData, Animations, tmeCurrentTime);
+          alert(sdSysData, cons, Animations, tmeCurrentTime);
       }
     }
 
@@ -323,77 +329,152 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
     // Lights
     
     // Turn off lights if speed over set value.
-    if (speed_trans_mph_impres > activate_speed + 6)
+    if (speed_average_tire_speed > activate_speed + 6)
     {
       if (LIGHT_DOOR_HANDLE_ON == true)
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Door Handle Running Off");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Door Handle Running Off");
         LIGHT_DOOR_HANDLE_ON = false;
       }
 
       if (LIGHT_DRIVE_ON == true)
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_Off");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_Off");
         LIGHT_DRIVE_ON = false;
       }
 
       if (LIGHT_VELOCITY_ON == true)
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Velocity_Off");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Velocity_Off");
         LIGHT_VELOCITY_ON = false;
       }
     }
 
     // -------------------------------------------------------------------------------------
     // Turn on lights if speed under set value.
-    else if (speed_trans_mph_impres < activate_speed + 4)
+    else if (speed_average_tire_speed < activate_speed + 4)
     {
       if (LIGHT_DOOR_HANDLE_ON == false)
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Door Handle Running On");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Door Handle Running On");
         LIGHT_DOOR_HANDLE_ON = true;
       }
 
       if (LIGHT_DRIVE_ON == false)
       {
-        Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_On");
+        Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_On");
         LIGHT_DRIVE_ON = true;
       }
 
+      // Velocity Sweeping Lights
       if (set_bool_with_change_notify((GEAR_DRIVE == true || GEAR_NEUTRAL == true), LIGHT_VELOCITY_ON) == true)
       {
         if (LIGHT_VELOCITY_ON == true)
         {
-          Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Velocity_On");
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Velocity_On_LF", 1);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Velocity_On_RF", 3);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Velocity_On_LB", 0);
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Velocity_On_RB", 2);
         }
         else
         {
-          Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Velocity_Off");
+          Animations.call_animation(sdSysData, cons, tmeCurrentTime, "Car", "Automobile - Velocity_Off");
         }
       }
 
       // Set colors if Velocity lights are on.  They could be off if in reverse or park.
       if (LIGHT_VELOCITY_ON == true)
       {
-        // Multiplier
-        if (speed_trans_mph_impres < activate_speed)
+        // Gather data for tire speed for velocity animations.
+        float adjustment = .8;  // Simple way to adjust the speed of the animations.
+
+        float speed_tire_LF = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LF_TIRE.val_mph() * adjustment;
+        float speed_tire_RF = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RF_TIRE.val_mph() * adjustment;
+        float speed_tire_LB = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LB_TIRE.val_mph() * adjustment;
+        float speed_tire_RB = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RB_TIRE.val_mph() * adjustment;
+
+        // Keep velocity animations running unless all tires have stopped.
+        bool all_tires_stopped = (speed_tire_LF == 0.0f && speed_tire_RF == 0.0f && 
+                                  speed_tire_LB == 0.0f && speed_tire_RB == 0.0f);
+
+        if (all_tires_stopped == false)
         {
-          multiplier = 1 - speed_trans_mph_impres / activate_speed;
+          if (speed_tire_LF == 0.0f)
+          {
+            speed_tire_LF = 0.1f;
+          }
+          if (speed_tire_RF == 0.0f)
+          {
+            speed_tire_RF = 0.1f;
+          }
+          if (speed_tire_LB == 0.0f)
+          {
+            speed_tire_LB = 0.1f;
+          }
+          if (speed_tire_RB == 0.0f)
+          {
+            speed_tire_RB = 0.1f;
+          }
+        }
+
+        // Multiplier
+        if (speed_average_tire_speed < activate_speed)
+        {
+          multiplier = 1 - speed_average_tire_speed / activate_speed;
         }
         else 
         {
           multiplier = 0;
         }
-        
-        // Caution Multiplier
-        if (speed_trans_mph_impres < caution_speed)
+
+        // Multiplier for Individual Tire Speeds
+        // LF
+        if (speed_tire_LF < activate_speed)
         {
-          multiplier_caution = 1 - speed_trans_mph_impres / caution_speed;
+          multiplier_LF = 1 - (speed_tire_LF / activate_speed);
+        }
+        else 
+        {
+          multiplier_LF = 0;
+        }
+        // RF
+        if (speed_tire_RF < activate_speed)
+        {
+          multiplier_RF = 1 - (speed_tire_RF / activate_speed);
+        }
+        else 
+        {
+          multiplier_RF = 0;
+        }
+        // LB
+        if (speed_tire_LB < activate_speed)
+        {
+          multiplier_LB = 1 - (speed_tire_LB / activate_speed);
+        }
+        else 
+        {
+          multiplier_LB = 0;
+        }
+        // RB
+        if (speed_tire_RB < activate_speed)
+        {
+          multiplier_RB = 1 - (speed_tire_RB / activate_speed);
+        }
+        else 
+        {
+          multiplier_RB = 0;
+        }
+        
+        // Caution Multiplier based on Trasmission Speed
+        if (speed_average_tire_speed < caution_speed)
+        {
+          multiplier_caution = 1 - speed_average_tire_speed / caution_speed;
         }
         else 
         {
           multiplier_caution = 0;
         }
+        
 
         CRGB drive_color = CRGB(32, (int)(16 * multiplier_caution), 0);
         CRGB velocity_color = CRGB(8, 0, 0);
@@ -405,12 +486,34 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, CONSOLE_COMMUNICA
         Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_D", drive_color.brightness(multiplier));
 
         // Velocity
-        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D", velocity_color.brightness(multiplier));
-        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O", velocity_color.brightness(multiplier));
+        // LF
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_LF", velocity_color.brightness(multiplier_LF));
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_LF", velocity_color.brightness(multiplier_LF));
 
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D", speed_trans_mph_impres);
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O", speed_trans_mph_impres);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_LF", speed_tire_LF);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LF", speed_tire_LF);
+        
+        // RF
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_RF", velocity_color.brightness(multiplier_RF));
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_RF", velocity_color.brightness(multiplier_RF));
 
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_RF", speed_tire_RF);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RF", speed_tire_RF);
+        
+        // LB
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_LB", velocity_color.brightness(multiplier_LB));
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_LB", velocity_color.brightness(multiplier_LB));
+
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_LB", speed_tire_LB);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LB", speed_tire_LB);
+        
+        // RB
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_RB", velocity_color.brightness(multiplier_RB));
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_RB", velocity_color.brightness(multiplier_RB));
+
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_RB", speed_tire_RB);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RB", speed_tire_RB);
+        
         // Keep?
         Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_PULSE", drive_pulse_color.brightness(multiplier));
         Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_PULSE", drive_pulse_color.brightness(multiplier));
