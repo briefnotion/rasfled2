@@ -56,12 +56,12 @@ class AUTOMOBILE_HANDLER
 
   TIMED_PING ALERT_TIMER;   // Restrict multiple sequential alerts
 
-  void alert(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
+  void alert(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
   // Flash lights
 
   public:
 
-  void update_events(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
+  void update_events(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
 };
 
 // -------------------------------------------------------------------------------------

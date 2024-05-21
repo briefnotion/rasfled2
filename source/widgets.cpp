@@ -986,6 +986,8 @@ void BAR_TECH::create()
   DSP_MIN.PROPS.CHANGE_NOTIFICATION = true;
   DSP_MAX.PROPS.CHANGE_NOTIFICATION = true;
   DSP_VALUE.PROPS.CHANGE_NOTIFICATION = false;
+
+  VALUE_MARKER.set_size(PROPS.DRAW_FRAME_COUNT);
 }
 
 void BAR_TECH::update_min_max_value(float Min_Value, float Max_Value)

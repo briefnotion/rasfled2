@@ -19,6 +19,7 @@
 // RASFled related header files
 #include "configuration.h"
 #include "helper.h"
+#include "screen4_helper.h"
 #include "commands.h"
 #include "hardware_status.h"
 
@@ -159,6 +160,8 @@ class system_data
   bool booREBOOT = false;
 
   // System
+  CONSOLE_COMMUNICATION SCREEN_COMMS;
+
   configuration CONFIG;
 
   // System Timing

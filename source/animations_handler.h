@@ -110,7 +110,7 @@ class ANIMATION_HANDLER
   // Load all animations json file into system memory, LIBRARY, to be duplicated, 
   //  duplicate modified, then duplicate called, when needed.
 
-  void call_animation(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime,               
+  void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
                       string Collection_Name, string Animation_Name, int On_Group);
   // Primary Call Animation Routine including all parameters
   //  sdSysData - System Data
@@ -121,7 +121,7 @@ class ANIMATION_HANDLER
   //  String_Var_1    - For passing data, like collection name, to other events, via the json settings
   //  String_Var_2    - For passing data, like animation name, to other events, via the json settings
 
-  void call_animation(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime,               
+  void call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
                       string Collection_Name, string Animation_Name);
   // Call Animation Routine with limited parameters
   //  sdSysData - System Data
@@ -145,7 +145,7 @@ class ANIMATION_HANDLER
   void mod_run_anim_velocity(string Label, float Velocity);
   // Search through active animations with Identity and change.
 
-  void process_events(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime);
+  void process_events(system_data &sdSysData, unsigned long tmeCurrentTime);
   // Processes
   //  Event Clear
   //  Event Clear Running

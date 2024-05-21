@@ -344,7 +344,7 @@ class ADSB_SCREEN
 
   //void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
   //              const char *name, bool *p_open, ImGuiWindowFlags flags);
-  void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms);
+  void display(system_data &sdSysData);
 };
 
 // ---------------------------------------------------------------------------------------

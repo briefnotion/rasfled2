@@ -1,3 +1,9 @@
+2.164_240520
+  - Moved Screen Comms to System Data to reduce the 
+      size of parameters for many functions and to 
+      make printing to the console more accessable 
+      from more places in the program.
+
 2.163_240519
   - Increased alert size of intake temp by 5 degrees.
   - BAR_TECH now has a property to turn off the 

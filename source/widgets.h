@@ -260,8 +260,8 @@ class BAR_TECH_PROPERTIES
 
   string LABEL = "";
 
-  float BAR_HEIGHT = 20.0f;          // Bar Size Height, or Width
-  float MARKER_SIZE = 5;          // Marker Height or Width.
+  float BAR_HEIGHT = 20.0f; // Bar Size Height, or Width
+  float MARKER_SIZE = 5;    // Marker Height or Width.
 
   int COLOR_MARKER;       // Color of Marker
   int COLOR_BACKGROUND;   // Color of Marker
@@ -282,8 +282,11 @@ class BAR_TECH_PROPERTIES
 
   // Ruler
   bool DRAW_RULER = false;  // Draw ruler ticks
-  int COLOR_RULER;  // Ruler color
+  int COLOR_RULER;          // Ruler color
   int MAX_TICK_LEVEL = 4;   // Tick level
+
+  // IMPACT_RESISTANCE_FLOAT_FRAME_COUNT
+  int DRAW_FRAME_COUNT = 6;
 };
 
 class BAR_TECH

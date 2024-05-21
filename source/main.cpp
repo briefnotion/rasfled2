@@ -279,11 +279,11 @@ int loop_2(bool TTY_Only)
   if (sdSystem.FILE_NAMES.assign() == false)
   {
     // not fully thought out
-    cons_2.SCREEN_COMMS.printw("Error while checking or creating directories.\n");
+    sdSystem.SCREEN_COMMS.printw("Error while checking or creating directories.\n");
   }
   else
   {
-    cons_2.SCREEN_COMMS.printw("Succesful directory check or create.\n");
+    sdSystem.SCREEN_COMMS.printw("Succesful directory check or create.\n");
   }
 
   // Switch Lights On
@@ -417,15 +417,15 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
   // Initialize the console
   cons_2.create(sdSystem);    // Prepare console.
-  cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR.resize(4);
+  sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR.resize(4);
   
   // Print Start Info
-  cons_2.SCREEN_COMMS.printw("Console Initialized ...  OK");
-  cons_2.SCREEN_COMMS.printw("");
-  cons_2.SCREEN_COMMS.printw("RasFLED");
-  cons_2.SCREEN_COMMS.printw("  'X'    - Exit");
-  cons_2.SCREEN_COMMS.printw("  'help' - Command List)");
-  cons_2.SCREEN_COMMS.printw("");
+  sdSystem.SCREEN_COMMS.printw("Console Initialized ...  OK");
+  sdSystem.SCREEN_COMMS.printw("");
+  sdSystem.SCREEN_COMMS.printw("RasFLED");
+  sdSystem.SCREEN_COMMS.printw("  'X'    - Exit");
+  sdSystem.SCREEN_COMMS.printw("  'help' - Command List)");
+  sdSystem.SCREEN_COMMS.printw("");
 
   // ---------------------------------------------------------------------------------------
   // System Init
@@ -433,12 +433,12 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
 
   // Initialize Alert System
-  cons_2.SCREEN_COMMS.printw("Initializing Alert System ...");
+  sdSystem.SCREEN_COMMS.printw("Initializing Alert System ...");
 
   // Prepare Alerts
   sdSystem.ALERTS.PROP.SWITCH_COUNT = sdSystem.CONFIG.iNUM_SWITCHES;
   sdSystem.ALERTS.create();
-  cons_2.SCREEN_COMMS.printw("Initializing Timer ...");
+  sdSystem.SCREEN_COMMS.printw("Initializing Timer ...");
   //FledTime tmeFled;
 
   // Sleeping Loop Variables
@@ -446,9 +446,9 @@ int loop_2(bool TTY_Only)
   
   if (sdSystem.PROGRAM_TIME.setframetime() == true)
   {
-    cons_2.SCREEN_COMMS.printw("");
-    cons_2.SCREEN_COMMS.printw("Adjusting Program Clock");
-    cons_2.SCREEN_COMMS.printw("");
+    sdSystem.SCREEN_COMMS.printw("");
+    sdSystem.SCREEN_COMMS.printw("Adjusting Program Clock");
+    sdSystem.SCREEN_COMMS.printw("");
 
     sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, "Adjusting Program Clock");
     
@@ -458,7 +458,7 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
   // Load system configuration and set data
   
-  cons_2.SCREEN_COMMS.printw("Loading Configuration ...");
+  sdSystem.SCREEN_COMMS.printw("Loading Configuration ...");
 
   // Set Running Color to white.
   sdSystem.init_running_color_list();
@@ -479,31 +479,31 @@ int loop_2(bool TTY_Only)
 
   if (load_json_configuration(sdSystem, sdSystem.FILE_NAMES.CONFIGURATION_FILE) == true)
   {
-    cons_2.SCREEN_COMMS.printw("  Configuration file loaded.");
+    sdSystem.SCREEN_COMMS.printw("  Configuration file loaded.");
   }
   else
   {
-    cons_2.SCREEN_COMMS.printw("  Configuration file not loaded.  Generating Working Configuration File.");
+    sdSystem.SCREEN_COMMS.printw("  Configuration file not loaded.  Generating Working Configuration File.");
     sdSystem.ALERTS.add_generic_alert("Configuration file not loaded.  Generating Working Configuration File.");
 
     if (save_json_configuration(sdSystem, sdSystem.FILE_NAMES.CONFIGURATION_FILE) == true)
     {
-      cons_2.SCREEN_COMMS.printw("    Configuration file created.");
+      sdSystem.SCREEN_COMMS.printw("    Configuration file created.");
       sdSystem.ALERTS.add_generic_alert("Configuration file created.");
     }
     else
     {
-      cons_2.SCREEN_COMMS.printw("    Configuration file not created.");
+      sdSystem.SCREEN_COMMS.printw("    Configuration file not created.");
       sdSystem.ALERTS.add_generic_alert("Configuration file not created.");
     }
   }
   
   // Loading Running State
-  cons_2.SCREEN_COMMS.printw("  Loading running state ...");
+  sdSystem.SCREEN_COMMS.printw("  Loading running state ...");
   // yes, it resaves the file.  as is for now.
-  if (load_saved_running_state_json(cons_2.SCREEN_COMMS, sdSystem, Running_State_Filename) != true)
+  if (load_saved_running_state_json(sdSystem.SCREEN_COMMS, sdSystem, Running_State_Filename) != true)
   {
-    cons_2.SCREEN_COMMS.printw("    Running state file not loaded.");
+    sdSystem.SCREEN_COMMS.printw("    Running state file not loaded.");
     sdSystem.ALERTS.add_generic_alert("Running state file not loaded.");
   }
 
@@ -514,17 +514,17 @@ int loop_2(bool TTY_Only)
   
   if (animations.load_collections(sdSystem.FILE_NAMES.ANIMATIONS_FILE) == true)
   {
-    cons_2.SCREEN_COMMS.printw("  Animations file loaded.");
+    sdSystem.SCREEN_COMMS.printw("  Animations file loaded.");
   }
   else
   {
-    cons_2.SCREEN_COMMS.printw("    Animations file not loaded.");
+    sdSystem.SCREEN_COMMS.printw("    Animations file not loaded.");
     sdSystem.ALERTS.add_generic_alert("Animations file not loaded.");
   }
 
   // ---------------------------------------------------------------------------------------
   // LED Library Vars and Init
-  cons_2.SCREEN_COMMS.printw("Initializing LEDS ...");
+  sdSystem.SCREEN_COMMS.printw("Initializing LEDS ...");
 
   int led_count = sdSystem.CONFIG.LED_MAIN.at(0).led_count();
 
@@ -549,7 +549,7 @@ int loop_2(bool TTY_Only)
   }
   else
   {
-    cons_2.SCREEN_COMMS.printw("  LED count: " + to_string(led_count));
+    sdSystem.SCREEN_COMMS.printw("  LED count: " + to_string(led_count));
   }
 
   // ---------------------------------------------------------------------------------------
@@ -583,14 +583,14 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   // Define the Supid Random Numbers
-  cons_2.SCREEN_COMMS.printw("Initializing Random Number Generator ...");
+  sdSystem.SCREEN_COMMS.printw("Initializing Random Number Generator ...");
   stupid_random sRND;
   // Initialize the Stupid Random Numbers
   sRND.set();
 
   // ---------------------------------------------------------------------------------------
   // Light Strip Event System
-  cons_2.SCREEN_COMMS.printw("Initializing Event System ...");
+  sdSystem.SCREEN_COMMS.printw("Initializing Event System ...");
 
   // count number of strips
   // Count the amount of events needed
@@ -615,7 +615,7 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
 
   // Define Door Sensors.
-  cons_2.SCREEN_COMMS.printw("Initializing Hardware Sensors ...");
+  sdSystem.SCREEN_COMMS.printw("Initializing Hardware Sensors ...");
   for(int x=0; x<sdSystem.CONFIG.iNUM_SWITCHES; x++)
   {
     pinMode(sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).pin, INPUT);
@@ -624,7 +624,7 @@ int loop_2(bool TTY_Only)
 
   // -------------------------------------------------------------------------------------
   // Door Sensor
-  cons_2.SCREEN_COMMS.printw("Initializing Hardware Sensor Interface ...");
+  sdSystem.SCREEN_COMMS.printw("Initializing Hardware Sensor Interface ...");
 
   // Initialize Switches
   hardware_monitor tmpSwitch;
@@ -637,13 +637,13 @@ int loop_2(bool TTY_Only)
   // -------------------------------------------------------------------------------------
 
   // Start Power On Animation
-  process_power_animation(sdSystem, cons_2.SCREEN_COMMS, sdSystem.PROGRAM_TIME.now(), animations, CRGB(0, 0, 25));
+  process_power_animation(sdSystem, sdSystem.PROGRAM_TIME.now(), animations, CRGB(0, 0, 25));
   
   // ---------------------------------------------------------------------------------------
   //  Repeating Sleeping Loop until eXit is triggered.
   // ---------------------------------------------------------------------------------------
 
-  cons_2.SCREEN_COMMS.printw("Starting System ...");
+  sdSystem.SCREEN_COMMS.printw("Starting System ...");
 
   // Start the the compute timer (stopwatch) for first iteration. 
   effi_timer.start_timer(sdSystem.PROGRAM_TIME.current_frame_time());
@@ -653,7 +653,7 @@ int loop_2(bool TTY_Only)
   // **************************************************************************************
 
   // MAIN LOOP START
-  while(cons_2.SCREEN_COMMS.WINDOW_CLOSE == false)
+  while(sdSystem.SCREEN_COMMS.WINDOW_CLOSE == false)
   {
     // ---------------------------------------------------------------------------------------
     // Thread Management
@@ -692,10 +692,10 @@ int loop_2(bool TTY_Only)
     //  Get current time.  This will be our timeframe to work in.
     if (sdSystem.PROGRAM_TIME.setframetime() == true)
     {
-      cons_2.SCREEN_COMMS.printw("");
-      cons_2.SCREEN_COMMS.printw("ALERT: PROGRAM TIME STREAM INTURPTED OR CORRUPT");
-      cons_2.SCREEN_COMMS.printw("           DIFFERANCE: "  + to_string(sdSystem.PROGRAM_TIME.error()));
-      cons_2.SCREEN_COMMS.printw("");
+      sdSystem.SCREEN_COMMS.printw("");
+      sdSystem.SCREEN_COMMS.printw("ALERT: PROGRAM TIME STREAM INTURPTED OR CORRUPT");
+      sdSystem.SCREEN_COMMS.printw("           DIFFERANCE: "  + to_string(sdSystem.PROGRAM_TIME.error()));
+      sdSystem.SCREEN_COMMS.printw("");
 
       sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
                                           to_string(sdSystem.PROGRAM_TIME.error()));
@@ -761,13 +761,13 @@ int loop_2(bool TTY_Only)
 
       // Override the digital pins if in debugging mode.
       //if(cons.keywatch.getnoreset(KEYDEBUG) == 1)
-      if(cons_2.SCREEN_COMMS.DEBUG_STATUS.DEBUG == true)
+      if(sdSystem.SCREEN_COMMS.DEBUG_STATUS.DEBUG == true)
       {
         // Toggle on and off the door sensors with keyboard.
-        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(0).value = cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
-        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(1).value = cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
-        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(2).value = cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR[2];
-        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(3).value = cons_2.SCREEN_COMMS.DEBUG_STATUS.DOOR[3];        
+        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(0).value = sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
+        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(1).value = sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
+        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(2).value = sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR[2];
+        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(3).value = sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR[3];        
         
         TRUTH_CATCH ret_changed;
         for(int x=0; x<sdSystem.CONFIG.iNUM_SWITCHES; x++)
@@ -783,7 +783,7 @@ int loop_2(bool TTY_Only)
       }
 
       // Check the doors and start or end all animations
-      v_DoorMonitorAndAnimationControlModule2(cons_2.SCREEN_COMMS, sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
+      v_DoorMonitorAndAnimationControlModule2(sdSystem.SCREEN_COMMS, sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
     }
 
     // Read light switchs and set day on or day off modes.
@@ -801,7 +801,7 @@ int loop_2(bool TTY_Only)
       bool booUpdate = false;
 
       //  Run ALL GLOBAL Timed Events
-      animations.process_events(sdSystem, cons_2.SCREEN_COMMS, sdSystem.PROGRAM_TIME.current_frame_time());
+      animations.process_events(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time());
 
       for(int group=0; group < sdSystem.CONFIG.LED_MAIN.at(0).g_size(); group++)
       {
@@ -977,8 +977,8 @@ int loop_2(bool TTY_Only)
         sdSystem.AIRCRAFT_COORD.process(file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE));
       }
 
-      processcommandlineinput(cons_2.SCREEN_COMMS, sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
-      extraanimationdoorcheck2(cons_2.SCREEN_COMMS, sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
+      processcommandlineinput(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
+      extraanimationdoorcheck2(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
       
       // Also delayed, File maintenance.
       if (sdSystem.booRunning_State_File_Dirty == true)
@@ -1004,30 +1004,30 @@ int loop_2(bool TTY_Only)
       {
         if (sdSystem.COMMS_AUTO.cycle_change() == 99)
         {
-          cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: INITIALIZE");
+          sdSystem.SCREEN_COMMS.printw("Automobile COMMS changed to: INITIALIZE");
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == -1)
         {
-          cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: NO AUTOCONNECT MODE");
+          sdSystem.SCREEN_COMMS.printw("Automobile COMMS changed to: NO AUTOCONNECT MODE");
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 0)
         {
-          cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: NORMAL READ MODE");
+          sdSystem.SCREEN_COMMS.printw("Automobile COMMS changed to: NORMAL READ MODE");
           sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 1)
         {
-          cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: SHUTTING DOWN CYCLE");
+          sdSystem.SCREEN_COMMS.printw("Automobile COMMS changed to: SHUTTING DOWN CYCLE");
           sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 2)
         {
-          cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: CONNECT START");
+          sdSystem.SCREEN_COMMS.printw("Automobile COMMS changed to: CONNECT START");
           sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 3)
         {
-          cons_2.SCREEN_COMMS.printw("Automobile COMMS changed to: BAUD RATE CHECK");
+          sdSystem.SCREEN_COMMS.printw("Automobile COMMS changed to: BAUD RATE CHECK");
         }
       }
 
@@ -1036,30 +1036,30 @@ int loop_2(bool TTY_Only)
       {
         if (sdSystem.COMMS_GPS.cycle_change() == 99)
         {
-          cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: INITIALIZE");
+          sdSystem.SCREEN_COMMS.printw("GPS COMMS changed to: INITIALIZE");
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == -1)
         {
-          cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: NO AUTOCONNECT MODE");
+          sdSystem.SCREEN_COMMS.printw("GPS COMMS changed to: NO AUTOCONNECT MODE");
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 0)
         {
-          cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: NORMAL READ MODE");
+          sdSystem.SCREEN_COMMS.printw("GPS COMMS changed to: NORMAL READ MODE");
           sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 1)
         {
-          cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: SHUTTING DOWN CYCLE");
+          sdSystem.SCREEN_COMMS.printw("GPS COMMS changed to: SHUTTING DOWN CYCLE");
           sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 2)
         {
-          cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: CONNECT START");
+          sdSystem.SCREEN_COMMS.printw("GPS COMMS changed to: CONNECT START");
           sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 3)
         {
-          cons_2.SCREEN_COMMS.printw("GPS COMMS changed to: BAUD RATE CHECK");
+          sdSystem.SCREEN_COMMS.printw("GPS COMMS changed to: BAUD RATE CHECK");
         }
       }
 
@@ -1067,15 +1067,15 @@ int loop_2(bool TTY_Only)
       // CAN Bus Process
 
       // Process info from comm port int automobile system.
-      sdSystem.CAR_INFO.process(cons_2.SCREEN_COMMS, sdSystem.COMMS_AUTO, sdSystem.PROGRAM_TIME.current_frame_time());
+      sdSystem.CAR_INFO.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_AUTO, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // Process Automobile Lights
-      automobile_handler.update_events(sdSystem, cons_2.SCREEN_COMMS, animations, sdSystem.PROGRAM_TIME.current_frame_time());
+      automobile_handler.update_events(sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // ---------------------------------------------------------------------------------------
       // GPS Process
       
-      sdSystem.GPS_SYSTEM.process(cons_2.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
+      sdSystem.GPS_SYSTEM.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
       //cons_2.update_GPS_gadgets(sdSystem);
     }
 
@@ -1086,25 +1086,25 @@ int loop_2(bool TTY_Only)
       {
         if (sdSystem.COMMS_COMPASS.cycle_change() == 99)
         {
-          cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: INITIALIZE");
+          sdSystem.SCREEN_COMMS.printw("COMPASS COMMS changed to: INITIALIZE");
         }
         else if (sdSystem.COMMS_COMPASS.cycle_change() == -1)
         {
-          cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: NO AUTOCONNECT MODE");
+          sdSystem.SCREEN_COMMS.printw("COMPASS COMMS changed to: NO AUTOCONNECT MODE");
         }
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 0)
         {
-          cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: NORMAL READ MODE");
+          sdSystem.SCREEN_COMMS.printw("COMPASS COMMS changed to: NORMAL READ MODE");
           sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
         }
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 1)
         {
-          cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: SHUTTING DOWN CYCLE");
+          sdSystem.SCREEN_COMMS.printw("COMPASS COMMS changed to: SHUTTING DOWN CYCLE");
           sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
         }
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 2)
         {
-          cons_2.SCREEN_COMMS.printw("COMPASS COMMS changed to: CONNECT START");
+          sdSystem.SCREEN_COMMS.printw("COMPASS COMMS changed to: CONNECT START");
           sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
         }
       }
@@ -1255,7 +1255,7 @@ int loop_2(bool TTY_Only)
   {
     while(thread_render.wait_for(10ms) != future_status::ready)
     {
-      cons_2.SCREEN_COMMS.printw("Shutting thread down.");
+      sdSystem.SCREEN_COMMS.printw("Shutting thread down.");
     }
     thread_render_running = false;
   }

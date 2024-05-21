@@ -2057,7 +2057,7 @@ void ADSB_SCREEN::update(system_data &sdSysData)
   sdSysData.AIRCRAFT_COORD.DATA.CHANGED = false;
 }
 
-void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms)
+void ADSB_SCREEN::display(system_data &sdSysData)
 { 
   ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
@@ -2065,17 +2065,17 @@ void ADSB_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_
     {
       if (SDATA.ADSB_ACTIVE == true)
       {
-        Screen_Comms.command_text_set(" adsboff");
+        sdSysData.SCREEN_COMMS.command_text_set(" adsboff");
       }
       else
       {
-        Screen_Comms.command_text_set(" adsbon");
+        sdSysData.SCREEN_COMMS.command_text_set(" adsbon");
       }
     }
 
     if (button_simple_enabled(sdSysData, "ADSB\nSNAP\nSHOT", SDATA.ADSB_ACTIVE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
-      Screen_Comms.command_text_set(" adsbsnap");
+      sdSysData.SCREEN_COMMS.command_text_set(" adsbsnap");
     }
 
     if (button_simple_color(sdSysData, "VIEW", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))

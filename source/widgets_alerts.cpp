@@ -41,6 +41,7 @@ void ALERT_WIDGET_WIDGTS::create(system_data &sdSysData, string Name)
   VALUES.PROPS.DRAW_RULER = true;
   VALUES.PROPS.COLOR_RULER = sdSysData.COLOR_SELECT.white();
   VALUES.PROPS.MAX_TICK_LEVEL = 6;
+  VALUES.PROPS.DRAW_FRAME_COUNT = 30;
   VALUES.create();
   }
 }

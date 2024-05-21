@@ -442,7 +442,7 @@ class AUTOMOBILE_SCREEN
 
   void update(system_data &sdSysData);
 
-  void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, bool &Display_Confirm);
+  void display(system_data &sdSysData, bool &Display_Confirm);
 
   void display_sidebar(system_data &sdSysData, bool Automobile_Screen_Selected, bool Restack_Windows);
 

@@ -1778,7 +1778,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   }
 }
 
-void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms, bool &Display_Confirm)
+void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
 { 
   //ImGuiIO &io = ImGui::GetIO();
 
@@ -1961,7 +1961,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
           {
             if (button_simple_color(sdSysData, "CLEAR DIAG\nCODES", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              Screen_Comms.command_pending_set_cr("qdiagc");
+              sdSysData.SCREEN_COMMS.command_pending_set_cr("qdiagc");
               Display_Confirm = !Display_Confirm;
             }
 
@@ -1972,11 +1972,11 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
             {
               if (sdSysData.COMMS_AUTO.record_in_progress())
               {
-                Screen_Comms.command_text_set(" autof");
+                sdSysData.SCREEN_COMMS.command_text_set(" autof");
               }
               else
               {
-                Screen_Comms.command_text_set(" autoo");
+                sdSysData.SCREEN_COMMS.command_text_set(" autoo");
               }
             }
 
@@ -1984,7 +1984,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, CONSOLE_COMMUNICATION &S
 
             if (button_simple_color(sdSysData, "FLASH REC", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              Screen_Comms.command_text_set("]]");
+              sdSysData.SCREEN_COMMS.command_text_set("]]");
             }
           }
           ImGui::EndChild();

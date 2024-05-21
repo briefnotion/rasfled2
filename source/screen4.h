@@ -144,14 +144,13 @@ class SCREEN4
   void set_screen_default_colors(system_data &sdSysData);
 
   public:
-  CONSOLE_COMMUNICATION SCREEN_COMMS;
 
   int create(system_data &sdSysData);
   // Create Screen and set variables
   // Return 0 OK
   // Return 2 error
 
-  void character_enter(unsigned char Character, 
+  void character_enter(system_data &sdSysData, unsigned char Character, 
                 bool Shift_Pressed, bool Backspace_Pressed, bool Enter_Pressed);
 
   void draw(system_data &sdSysData);

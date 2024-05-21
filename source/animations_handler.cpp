@@ -475,7 +475,7 @@ bool ANIMATION_HANDLER::load_collections(string Filename)
   return LIBRARY.load_collections(Filename);
 }
 
-void ANIMATION_HANDLER::call_animation(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime, 
+void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime, 
                               string Collection_Name, string Animation_Name, int On_Group)
 
 {
@@ -593,7 +593,7 @@ void ANIMATION_HANDLER::call_animation(system_data &sdSysData, CONSOLE_COMMUNICA
 
       string pr = "Collection not found (" + Collection_Name + ") Collection Size: " + 
                                           to_string(LIBRARY.COLLECTION.size());
-      cons.printw(pr);
+      sdSysData.SCREEN_COMMS.printw(pr);
     }
     if (collection_pos > -1 && animation_pos == -1)
     {
@@ -605,15 +605,15 @@ void ANIMATION_HANDLER::call_animation(system_data &sdSysData, CONSOLE_COMMUNICA
       string pr = "Animation not found (" + Collection_Name + ":" + Animation_Name + ") Animations Size: " + 
                                           to_string(LIBRARY.COLLECTION[collection_pos].ANIMATIONS.size()) +
                                           "\n (" + LIBRARY.COLLECTION[collection_pos].ANIMATIONS[0].LABEL + ")";
-      cons.printw(pr);
+      sdSysData.SCREEN_COMMS.printw(pr);
     }
   }
 }
 
-void ANIMATION_HANDLER::call_animation(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime,               
+void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tmeCurrentTime,               
                       string Collection_Name, string Animation_Name)
 {
-  call_animation(sdSysData, cons, tmeCurrentTime,  Collection_Name, Animation_Name, -1);
+  call_animation(sdSysData, tmeCurrentTime,  Collection_Name, Animation_Name, -1);
 }
 
 void ANIMATION_HANDLER::mod_run_anim_color_start_1(string Label, CRGB Color)
@@ -686,7 +686,7 @@ void ANIMATION_HANDLER::mod_run_anim_velocity(string Label, float Velocity)
   }
 }
 
-void ANIMATION_HANDLER::process_events(system_data &sdSysData, CONSOLE_COMMUNICATION &cons, unsigned long tmeCurrentTime)
+void ANIMATION_HANDLER::process_events(system_data &sdSysData, unsigned long tmeCurrentTime)
 {
   for (int channel = 0; channel < (int)EVENTS.size(); channel++)
   {
@@ -741,7 +741,7 @@ void ANIMATION_HANDLER::process_events(system_data &sdSysData, CONSOLE_COMMUNICA
   {
     for(int pos = 0; pos < (int)SCHEDULE_LIST.size(); pos ++)
     {
-      call_animation(sdSysData, cons, tmeCurrentTime, SCHEDULE_LIST[pos].Collection_Name, SCHEDULE_LIST[pos].Animation_Name, SCHEDULE_LIST[pos].Assigned_Group);
+      call_animation(sdSysData, tmeCurrentTime, SCHEDULE_LIST[pos].Collection_Name, SCHEDULE_LIST[pos].Animation_Name, SCHEDULE_LIST[pos].Assigned_Group);
     }
   }
 
