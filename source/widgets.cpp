@@ -1029,10 +1029,10 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
   
   ImVec2 size = ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y);
 
-  // Draw Background - Red if negative, Normal color if positive.
+  // Draw Background - Red if out of range, Normal color if positive.
   if (PROPS.HORIZONTAL)
   {
-    if (VALUE >= 0)
+    if (is_within(VALUE, PROPS.MIN, PROPS.MAX))
     {
       Draw_List->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.color(PROPS.COLOR_BACKGROUND).DIM, 5.0f, ImDrawFlags_None);
       Draw_List->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), sdSysData.COLOR_SELECT.color(PROPS.COLOR_BACKGROUND).BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
@@ -1045,7 +1045,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
   }
   else
   {
-    if (VALUE >= 0)
+    if (is_within(VALUE, PROPS.MIN, PROPS.MAX))
     {
       Draw_List->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR_BACKGROUND).DIM, 5.0f, ImDrawFlags_None);
       Draw_List->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), sdSysData.COLOR_SELECT.color(PROPS.COLOR_BACKGROUND).BACKGROUND, 5.0f, ImDrawFlags_None, 2.0f);
@@ -1160,12 +1160,23 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
   }
 
   // Draw Value Marker
-  if ((PROPS.NO_MARKER_WHEN_OUT_OF_RANGE == false) || 
-        (is_within(VALUE_MARKER.value(), PROPS.MIN, PROPS.MAX)))
+  if (PROPS.HORIZONTAL)
   {
-    if (PROPS.HORIZONTAL)
+    if ((PROPS.MARKER_LIMIT_AT_RANGE == false) || 
+        (is_within(VALUE_MARKER.value(), PROPS.MIN, PROPS.MAX)))
     {
-      float marker_location = abs(((VALUE_MARKER.value() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.x + 1.0f);
+      float value = VALUE_MARKER.value();
+
+      if (value <  PROPS.MIN)
+      {
+        value = PROPS.MIN + (PROPS.MIN - value);
+      }
+      else if (value > PROPS.MAX)
+      {
+        value = PROPS.MAX - (value - PROPS.MAX);
+      }
+
+      float marker_location = ((value - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.x + 1.0f;
 
       if (marker_location < 0.0f)
       {
@@ -1183,19 +1194,50 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
       Draw_List->AddRect(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
                                 ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
                                 sdSysData.COLOR_SELECT.c_black().STANDARD, 5.0f, ImDrawFlags_None, 2.0f);
-
-      // Move Cursor Pos to new position
-      ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
-
-      // Min Max
-      if (PROPS.HORIZONTAL && PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_BOTTOM)
-      {
-        draw_min_max_val(sdSysData);
-      }
     }
     else
     {
-      float marker_location = abs(((VALUE_MARKER.value() - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.y +1);
+      // Draw out of range markers (HORIZONTAL)
+      float marker_location = 0.0f;
+
+      if (VALUE_MARKER.value() < PROPS.MIN)
+      {
+        marker_location = 0.0f;
+      }
+      else
+      {
+        marker_location = size.x;
+      }
+
+      Draw_List->AddCircleFilled(ImVec2(pos.x + marker_location, pos.y + PROPS.BAR_HEIGHT / 2.0f), 
+                                PROPS.BAR_HEIGHT / 4.0f, 
+                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 12.0f);    
+      
+      Draw_List->AddCircle(ImVec2(pos.x + marker_location, pos.y + PROPS.BAR_HEIGHT / 2.0f), 
+                                PROPS.BAR_HEIGHT / 4.0f, 
+                                sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f, 2.0f);
+    }
+
+    // Move Cursor Pos to new position
+    ImGui::SetCursorScreenPos(ImVec2(pos.x, pos.y + PROPS.BAR_HEIGHT));
+  }
+  else
+  { // (PROPS.HORIZONTAL == false (vertical)
+    if ((PROPS.MARKER_LIMIT_AT_RANGE == false) || 
+        (is_within(VALUE_MARKER.value(), PROPS.MIN, PROPS.MAX)))
+    {
+      float value = VALUE_MARKER.value();
+
+      if (value <  PROPS.MIN)
+      {
+        value = PROPS.MIN + (PROPS.MIN - value);
+      }
+      else if (value > PROPS.MAX)
+      {
+        value = PROPS.MAX - (value - PROPS.MAX);
+      }
+
+      float marker_location = ((value - PROPS.MIN) / (PROPS.MAX - PROPS.MIN)) * size.y + 1.0f;
 
       if (marker_location < 0.0f)
       {
@@ -1213,10 +1255,38 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
       Draw_List->AddRect(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
                                 ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
                                 sdSysData.COLOR_SELECT.c_black().STANDARD, 5.0f, ImDrawFlags_None, 2.0f);
-
-      // Move Cursor Pos to new position
-      ImGui::SetCursorScreenPos(ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y));
     }
+    else
+    {
+      // Draw out of range markers  (VERTICAL)
+      float marker_location = 0.0f;
+
+      if (VALUE_MARKER.value() < PROPS.MIN)
+      {
+        marker_location = 0.0f;
+      }
+      else
+      {
+        marker_location = size.y;
+      }
+
+      Draw_List->AddCircleFilled(ImVec2(pos.x + PROPS.BAR_HEIGHT / 2.0f, pos.y + size.y + marker_location), 
+                                PROPS.BAR_HEIGHT / 4.0f, 
+                                sdSysData.COLOR_SELECT.color(PROPS.COLOR_MARKER).STANDARD_V, 12.0f);
+
+      Draw_List->AddCircle(ImVec2(pos.x + PROPS.BAR_HEIGHT / 2.0f, pos.y + size.y + marker_location), 
+                                PROPS.BAR_HEIGHT / 4.0f, 
+                                sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f, 2.0f);
+    }
+
+    // Move Cursor Pos to new position
+    ImGui::SetCursorScreenPos(ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y));
+  }
+
+  // Min Max
+  if (PROPS.HORIZONTAL && PROPS.DRAW_MIN_MAX && PROPS.DRAW_MIN_MAX_ON_BOTTOM)
+  {
+    draw_min_max_val(sdSysData);
   }
 }
 
