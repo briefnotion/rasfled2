@@ -551,10 +551,16 @@ void CAL_LEVEL_2::offset_history_read()
 
   if (ret_success == true)
   {
+
     ret_success = offset_list_json.load_json_from_string(json_offset_list);
 
     if (ret_success == true)
     {
+      for (int scan = 0; scan < (int)offset_list_json.ROOT.DATA.size(); scan++)
+      {
+        offset_list_json.ROOT.DATA[scan].get_if_is("bearing offset", BEARING_OFFSET_LOAD);
+      }
+
       int history_pos = offset_list_json.ROOT.find_label_pos("offset history");
 
       if (history_pos != -1)
@@ -643,6 +649,7 @@ void CAL_LEVEL_2::offset_history_write()
 
     }
 
+    offset_list_json.ROOT.create_label_value(quotify("bearing offset"), to_string((int)BEARING_OFFSET_LOAD));
     offset_list_json.ROOT.put_json_in_set(quotify("offset history"), history);
 
     // Create string list of file
@@ -676,7 +683,7 @@ void CAL_LEVEL_2::calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1,
 
 void CAL_LEVEL_2::calibration_preload_set()
 {
-  if (CALIBRATION_QUADS.size() == 5)
+  if (CALIBRATION_QUADS.size() == 5 && COMMS_COMPASS_CAL_LOAD_AT_START)
   {
     SIMPLE_CALIBRATION = false;
 
@@ -715,9 +722,6 @@ void CAL_LEVEL_2::calibration_preload_set()
       CALIBRATION_QUADS[4].add_point_to_offset_point_list(Cal_Pt_PRELOAD_4);
     }
 
-    // Load history list
-    offset_history_read();
-
     CALIBRATION_QUADS[1].calculate_offset_point();
     CALIBRATION_QUADS[2].calculate_offset_point();
     CALIBRATION_QUADS[3].calculate_offset_point();
@@ -726,6 +730,9 @@ void CAL_LEVEL_2::calibration_preload_set()
     // Adjust new offset
     build_non_simple_offsets();
   }
+  
+  // Load history list
+  offset_history_read();
 }
 
 MIN_MAX_SIMPLE CAL_LEVEL_2::x_min_max()
@@ -1279,8 +1286,9 @@ void HMC5883L::calibration_preload_set()
 {
   if (PRELOAD_DATA_LOADED)
   {
-    KNOWN_DEVICE_DEGREE_OFFSET = KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD;
+    //KNOWN_DEVICE_DEGREE_OFFSET = KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD;
     LEVEL_2.calibration_preload_set();
+    KNOWN_DEVICE_DEGREE_OFFSET = LEVEL_2.BEARING_OFFSET_LOAD;
   }
 }
 
@@ -1470,6 +1478,8 @@ void HMC5883L::bearing_known_offset_calibration(float Known_Bearing)
   {
     KNOWN_DEVICE_DEGREE_OFFSET = KNOWN_DEVICE_DEGREE_OFFSET + 360.0f;
   }
+
+  LEVEL_2.BEARING_OFFSET_LOAD = KNOWN_DEVICE_DEGREE_OFFSET;
 }
 
 float HMC5883L::bearing_known_offset()

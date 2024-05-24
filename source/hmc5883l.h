@@ -266,22 +266,23 @@ class CAL_LEVEL_2
   int QUAD_PREV = -1;
 
   bool COMPLETE_QUAD_DATA_SET = false;
-  float DISTANCE_VARIANCE_FULL = -1;
+  float DISTANCE_VARIANCE_FULL = -1.0f;
 
   FLOAT_XYZ Cal_Pt_PRELOAD_1;
   FLOAT_XYZ Cal_Pt_PRELOAD_2;
   FLOAT_XYZ Cal_Pt_PRELOAD_3;
   FLOAT_XYZ Cal_Pt_PRELOAD_4;
-  float Cal_Var_PRELOAD_1;
-  float Cal_Var_PRELOAD_2;
-  float Cal_Var_PRELOAD_3;
-  float Cal_Var_PRELOAD_4;
+  float Cal_Var_PRELOAD_1 = 0.0f;
+  float Cal_Var_PRELOAD_2 = 0.0f;
+  float Cal_Var_PRELOAD_3 = 0.0f;
+  float Cal_Var_PRELOAD_4 = 0.0f;
 
   // Offset Point History
   bool OFFSET_HISTORY_CHANGED = false;
   TIMED_PING OFFSET_HISTORY_TIMER;
 
   public:
+
   string OFFSET_HISTORY_FILENAME = "";
 
   vector<CALIBRATION_DATA> CALIBRATION_QUADS;
@@ -297,6 +298,8 @@ class CAL_LEVEL_2
   // CALIBRATION_DATA D;
   // CALIBRATION_DATA B;
   // CALIBRATION_DATA ACTIVE_QUAD_DATA;
+  
+  int BEARING_OFFSET_LOAD = 0.0f;
 
   private:
 
