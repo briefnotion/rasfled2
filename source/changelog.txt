@@ -1,3 +1,23 @@
+2.167_240525
+  - Corrected a few problems introduced in the 
+      previous update.
+
+2.166_240523
+  - Compass calibration load at start can be disabled 
+      by setting COMMS_COMPASS_CAL_LOAD_AT_START 
+      to false in the definitions.h file.
+  - Compass offset bearing now loaded and saved from 
+      level 2 calibration history, but only when the 
+      data is saved. 
+
+2.165_240522
+  - Added property MARKER_LIMIT_AT_RANGE to the 
+      BAR_TECH widget to draw a symbol at min or 
+      max position of bar, when value is out of 
+      range, otherwise, marker will reverse past 
+      its limit.
+      MARKER_LIMIT_AT_RANGE will be on as default. 
+
 2.164_240520
   - Moved Screen Comms to System Data to reduce the 
       size of parameters for many functions and to 

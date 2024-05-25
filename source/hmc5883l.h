@@ -299,7 +299,7 @@ class CAL_LEVEL_2
   // CALIBRATION_DATA B;
   // CALIBRATION_DATA ACTIVE_QUAD_DATA;
   
-  int BEARING_OFFSET_LOAD = 0.0f;
+  int BEARING_OFFSET_LOAD = -1;
 
   private:
 
@@ -313,7 +313,7 @@ class CAL_LEVEL_2
 
   void build_non_simple_offsets();
 
-  void offset_history_read();
+  bool offset_history_read();
   void offset_history_write();
 
   public:

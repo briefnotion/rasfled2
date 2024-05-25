@@ -540,7 +540,7 @@ void CAL_LEVEL_2::build_non_simple_offsets()
   }
 }
 
-void CAL_LEVEL_2::offset_history_read()
+bool CAL_LEVEL_2::offset_history_read()
 {
   JSON_INTERFACE offset_list_json;
   string json_offset_list = "";
@@ -608,6 +608,8 @@ void CAL_LEVEL_2::offset_history_read()
       }
     }
   }
+
+  return ret_success;
 }
 
 void CAL_LEVEL_2::offset_history_write()
@@ -683,56 +685,60 @@ void CAL_LEVEL_2::calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1,
 
 void CAL_LEVEL_2::calibration_preload_set()
 {
-  if (CALIBRATION_QUADS.size() == 5 && COMMS_COMPASS_CAL_LOAD_AT_START)
+  // Load history list
+  if (offset_history_read() == false || COMMS_COMPASS_CAL_LOAD_AT_START)
   {
-    SIMPLE_CALIBRATION = false;
-
-    int preload_pushback_count = 5;    // Build small offset history.
-
-    // Load Data
-    CALIBRATION_QUADS[1].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_1;
-    //CALIBRATION_QUADS[1].VARIANCE = Cal_Var_PRELOAD_1;
-    CALIBRATION_QUADS[1].HAS_DATA = true;
-    for (int x = 0; x < preload_pushback_count; x++)
+    if (CALIBRATION_QUADS.size() == 5 && COMMS_COMPASS_CAL_LOAD_AT_START)
     {
-      CALIBRATION_QUADS[1].add_point_to_offset_point_list(Cal_Pt_PRELOAD_1);
-    }
+      SIMPLE_CALIBRATION = false;
 
-    CALIBRATION_QUADS[2].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_2;
-    //CALIBRATION_QUADS[2].VARIANCE = Cal_Var_PRELOAD_2;
-    CALIBRATION_QUADS[2].HAS_DATA = true;
-    for (int x = 0; x < preload_pushback_count; x++)
-    {
-      CALIBRATION_QUADS[2].add_point_to_offset_point_list(Cal_Pt_PRELOAD_2);
-    }
+      int preload_pushback_count = 5;    // Build small offset history.
 
-    CALIBRATION_QUADS[3].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_3;
-    //CALIBRATION_QUADS[3].VARIANCE = Cal_Var_PRELOAD_3;
-    CALIBRATION_QUADS[3].HAS_DATA = true;
-    for (int x = 0; x < preload_pushback_count; x++)
-    {
-      CALIBRATION_QUADS[3].add_point_to_offset_point_list(Cal_Pt_PRELOAD_3);
-    }
+      // Load Data
+      CALIBRATION_QUADS[1].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_1;
+      //CALIBRATION_QUADS[1].VARIANCE = Cal_Var_PRELOAD_1;
+      CALIBRATION_QUADS[1].HAS_DATA = true;
+      for (int x = 0; x < preload_pushback_count; x++)
+      {
+        CALIBRATION_QUADS[1].add_point_to_offset_point_list(Cal_Pt_PRELOAD_1);
+      }
 
-    CALIBRATION_QUADS[4].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_4;
-    //CALIBRATION_QUADS[4].VARIANCE = Cal_Var_PRELOAD_4;
-    CALIBRATION_QUADS[4].HAS_DATA = true;
-    for (int x = 0; x < preload_pushback_count; x++)
-    {
-      CALIBRATION_QUADS[4].add_point_to_offset_point_list(Cal_Pt_PRELOAD_4);
-    }
+      CALIBRATION_QUADS[2].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_2;
+      //CALIBRATION_QUADS[2].VARIANCE = Cal_Var_PRELOAD_2;
+      CALIBRATION_QUADS[2].HAS_DATA = true;
+      for (int x = 0; x < preload_pushback_count; x++)
+      {
+        CALIBRATION_QUADS[2].add_point_to_offset_point_list(Cal_Pt_PRELOAD_2);
+      }
 
+      CALIBRATION_QUADS[3].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_3;
+      //CALIBRATION_QUADS[3].VARIANCE = Cal_Var_PRELOAD_3;
+      CALIBRATION_QUADS[3].HAS_DATA = true;
+      for (int x = 0; x < preload_pushback_count; x++)
+      {
+        CALIBRATION_QUADS[3].add_point_to_offset_point_list(Cal_Pt_PRELOAD_3);
+      }
+
+      CALIBRATION_QUADS[4].LAST_KNOWN_OFFSET_POINT = Cal_Pt_PRELOAD_4;
+      //CALIBRATION_QUADS[4].VARIANCE = Cal_Var_PRELOAD_4;
+      CALIBRATION_QUADS[4].HAS_DATA = true;
+      for (int x = 0; x < preload_pushback_count; x++)
+      {
+        CALIBRATION_QUADS[4].add_point_to_offset_point_list(Cal_Pt_PRELOAD_4);
+      }
+    }
+  }
+  else
+  {
     CALIBRATION_QUADS[1].calculate_offset_point();
     CALIBRATION_QUADS[2].calculate_offset_point();
     CALIBRATION_QUADS[3].calculate_offset_point();
     CALIBRATION_QUADS[4].calculate_offset_point();
-    
-    // Adjust new offset
+
+    SIMPLE_CALIBRATION = false;
+
     build_non_simple_offsets();
   }
-  
-  // Load history list
-  offset_history_read();
 }
 
 MIN_MAX_SIMPLE CAL_LEVEL_2::x_min_max()
@@ -805,6 +811,8 @@ void CAL_LEVEL_2::clear()
     CALIBRATION_QUADS[3].clear(SIMPLE_CALIBRATION);
     CALIBRATION_QUADS[4].clear(SIMPLE_CALIBRATION);
   }
+
+  OFFSET_HISTORY_CHANGED = true;
 }
 
 float CAL_LEVEL_2::variance()
@@ -1286,9 +1294,14 @@ void HMC5883L::calibration_preload_set()
 {
   if (PRELOAD_DATA_LOADED)
   {
-    //KNOWN_DEVICE_DEGREE_OFFSET = KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD;
+    KNOWN_DEVICE_DEGREE_OFFSET = KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD;
+    
     LEVEL_2.calibration_preload_set();
-    KNOWN_DEVICE_DEGREE_OFFSET = LEVEL_2.BEARING_OFFSET_LOAD;
+    
+    if (LEVEL_2.BEARING_OFFSET_LOAD != -1)
+    {
+      KNOWN_DEVICE_DEGREE_OFFSET = LEVEL_2.BEARING_OFFSET_LOAD;
+    }
   }
 }
 
