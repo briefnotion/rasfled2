@@ -911,11 +911,40 @@ void SCREEN4::draw(system_data &sdSysData)
               }
             }
 
+            else if (DISPLAY_SCREEN == 5)
+            {
+              if (sdSysData.CAR_INFO.active())
+              {
+                ImGui::BeginChild("...", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                  DOT_DOT_DOT.display(sdSysData);
+                  ImGui::PopStyleColor();
+                }
+                ImGui::EndChild();
+
+                ImGui::SameLine();
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
+              }
+              else
+              {
+                DOT_DOT_DOT.display(sdSysData);
+              }
+            }
+
             else
             {
               ImGui::Begin(" ", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
               {
-                // Show Nothing
+                // Show set screen to console.
+                DISPLAY_SCREEN = 0;
               }
               ImGui::End();
             }
@@ -966,6 +995,13 @@ void SCREEN4::draw(system_data &sdSysData)
             {
               DISPLAY_SCREEN = 4;
               RESTACK_WINDOWS = true;
+            }
+
+            ImGui::SameLine();
+
+            if (button_simple_toggle_color(sdSysData, "...", "...", DISPLAY_SCREEN == 5, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            {
+              DISPLAY_SCREEN = 5;
             }
           }
           ImGui::EndChild();
@@ -1641,6 +1677,11 @@ void SCREEN4::shutdown(system_data &sdSysData)
   }
 
 }
+
+//int SCREEN4::get_current_screen()
+//{
+//  return DISPLAY_SCREEN;
+//}
 
 /*
 void SCREEN4::update_gps_gadgets(system_data &sdSysData, string Text)

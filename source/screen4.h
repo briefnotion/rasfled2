@@ -25,6 +25,7 @@
 #include "widgets_drawing.h"
 #include "widgets_advertisement.h"
 #include "widgets_alerts.h"
+#include "widgets_dot_dot_dot.h"
 #include "stringthings.h"
 #include "fled_time.h"
 
@@ -77,6 +78,13 @@ class SCREEN4
 
   int DISPLAY_MENU = 0;
   int DISPLAY_SCREEN = 0;
+  // Screen:
+  //  0 - Console
+  //  1 - Automobile
+  //  2 - ADSB
+  //  3 - not coded
+  //  4 - Logs
+  //  5 - Dot Dot Dot
 
   bool RESET_KEYBOARD_FOCUS = true;
 
@@ -100,6 +108,7 @@ class SCREEN4
   //TEXT_CONSOLE GPS_CONSOLE;
   TEXT_CONSOLE DAEMON_LOG;
   ADVERTISEMENT_SCREENS ADVERTISEMENTS;
+  DOT_DOT_DOT_SCREEN DOT_DOT_DOT;
 
   // --- 
 
@@ -161,7 +170,11 @@ class SCREEN4
 
   // ----
   // Data Update Paths
-  void update_gps_gadgets(system_data &sdSysData, string Text);
+
+  //int get_current_screen();
+  //  Returns ID of screen being displayed (DISPLAY_SCREEN)
+
+  //void update_gps_gadgets(system_data &sdSysData, string Text);
 
   void update_daemon_log(system_data &sdSysData, string Text);
 
@@ -169,7 +182,7 @@ class SCREEN4
 
   void update_ADS_B_gadgets(system_data &sdSysData);
 
-  void update_GPS_gadgets(system_data &sdSysData);
+  //void update_GPS_gadgets(system_data &sdSysData);
 
 };
 

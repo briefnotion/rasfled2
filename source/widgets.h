@@ -32,6 +32,10 @@ ImVec2 text_size(string Text);
 
 ImVec4 get_working_area();
 // must be called before other drawing is done.
+// X = x starting pos
+// Y = y starting pos
+// Z = x size
+// W = y size
 
 bool button_area(ImVec4 Working_Area);
 
