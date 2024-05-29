@@ -17,77 +17,284 @@
 // ---------------------------------------------------------------------------------------
 
 //void draw_marker_led(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color)
-void draw_led(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, ImColor Color)
+void draw_led(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, int Intensity)
 {
   if (sdSysData.PROGRAM_TIME.current_frame_time() > 0)
   {
     //does nothing.
   }
 
-  Draw_List->AddNgonFilled(Screen_Position, 2.0f, (ImU32)Color, 6.0f);
+  float size = (float)(Intensity / 10);
+
+  if (size < 1.0f)
+  {
+    size = 1.0f;
+  }
+
+  Draw_List->AddNgonFilled(Screen_Position, size, (ImU32)Color, 4.0f);
 }
 
 // -------------------------------------------------------------------------------------
 
-ImColor DOT_DOT_DOT_SCREEN::color_multiplier(CRGB Color)
+int DOT_DOT_DOT_SCREEN::intensity(CRGB Color)
 {
-  int max_color = Color.r + Color.g + Color.b;
+  int largest_value = Color.r;
 
-  ImColor ret_color;
-
-  if (max_color < 10)
+  if (Color.g > largest_value)
   {
-    float multiplier = (256.0f / 20.0f);
-
-    ret_color = ImColor((float)Color.r / multiplier, 
-                        (float)Color.g / multiplier, 
-                        (float)Color.b / multiplier, 
-                        1.0f);
-  }
-  else if (max_color < 100)
-  {
-    float multiplier = (256.0f / 5.0f);
-
-    ret_color = ImColor((float)Color.r / multiplier, 
-                        (float)Color.g / multiplier, 
-                        (float)Color.b / multiplier, 
-                        1.0f);
-  }
-  else if (max_color < 100)
-  {
-    float multiplier = (256.0f);
-
-    ret_color = ImColor((float)Color.r / multiplier, 
-                        (float)Color.g / multiplier, 
-                        (float)Color.b / multiplier, 
-                        1.0f);
+    largest_value = Color.g;
   }
 
-  return ret_color;
+  if (Color.b > largest_value)
+  {
+    largest_value = Color.b;
+  }
 
+  return largest_value;
+}
+
+ImColor DOT_DOT_DOT_SCREEN::color_multiplier(CRGB Color, int Intensity)
+{
+  if (Intensity == 0)
+  {
+    return ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  }
+  else
+  {
+    return ImColor((float)Color.r / (float)Intensity, 
+                    (float)Color.g / (float)Intensity, 
+                    (float)Color.b / (float)Intensity, 
+                    1.0f);
+  }
 }
 
 void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData)
-//void DOT_DOT_DOT_SCREEN::display()
 {
-  ImVec4 working_area = get_working_area();
-  ImDrawList* draw_list_screen = ImGui::GetWindowDrawList();
-
-  //ImColor led_color = ImColor(1.0f, 0.0f, 0.0f, 1.0f);
-  ImVec2 draw_position;
-
-  for(int group=0; group < sdSysData.CONFIG.LED_MAIN.at(0).g_size(); group++)
+  ImGui::BeginChild("Dot Dot Dot", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    for(int strip=0; strip < sdSysData.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
-    {
-      for (int pos = 0; pos < sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(); pos++)
-      {
-        draw_position = ImVec2(working_area.x + 50.0f + (pos * 4), working_area.y + 50.0f + (float)(group * 30) + (float)(strip * 10));
+    ImVec4 working_area = get_working_area();
+    ImDrawList* draw_list_screen = ImGui::GetWindowDrawList();
 
-        draw_led(draw_list_screen, sdSysData, draw_position, 
-                  color_multiplier(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos]));
+    // LED Simulator
+    {
+      ImVec2 draw_position;
+
+      int pixel_step = 4;
+
+      int door_size = sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(0).vLED_STRIPS.at(0).led_count();
+      int over_size = sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(1).vLED_STRIPS.at(0).led_count();
+
+      ImVec2 start_pos = ImVec2(20, 20);
+      start_pos = start_pos + ImVec2(working_area.x,  working_area.y);
+
+      // ---
+
+      int left      = start_pos.x + (door_size * pixel_step);
+      int left_left = left - (door_size * pixel_step) - (pixel_step * 2);
+
+      int top       = start_pos.y;
+      int botom     = start_pos.y + (over_size * pixel_step * 2);
+
+      int right       = left + 20;
+      int right_right = right + (door_size * pixel_step);
+
+      // ---
+
+      for(int group=0; group < sdSysData.CONFIG.LED_MAIN.at(0).g_size(); group++)
+      {
+
+        for(int strip=0; strip < sdSysData.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
+        {
+
+          int intense = 0;
+          ImColor color;
+          
+          // 0 0  - LB Door
+          if (group  == 0 && strip == 0)
+          {
+            for (int pos = 0; pos < sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(); pos++)
+            {
+              draw_position = ImVec2(left_left + (pos * pixel_step), 
+                                      botom);
+
+              intense = intensity(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos]);
+              color = color_multiplier(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos], intense);
+
+              draw_led(draw_list_screen, sdSysData, draw_position, color, intense);
+            }
+          }
+
+          // 0 1  - LB Overhead
+          if (group  == 0 && strip == 1)
+          {
+            for (int pos = 0; pos < sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(); pos++)
+            {
+              draw_position = ImVec2(left, 
+                                      botom - (pos * pixel_step ));
+
+              intense = intensity(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos]);
+              color = color_multiplier(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos], intense);
+
+              draw_led(draw_list_screen, sdSysData, draw_position, color, intense);
+            }
+          }
+
+          // 1 0  - LF Overhead
+          if (group  == 1 && strip == 0)
+          {
+            for (int pos = 0; pos < sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(); pos++)
+            {
+              draw_position = ImVec2(left, 
+                                      top + (over_size * pixel_step) - (pos * pixel_step));
+
+              intense = intensity(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos]);
+              color = color_multiplier(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos], intense);
+
+              draw_led(draw_list_screen, sdSysData, draw_position, color, intense);
+            }
+          }
+
+          // 1 1  - LF Door
+          if (group  == 1 && strip == 1)
+          {
+            for (int pos = 0; pos < sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(); pos++)
+            {
+              draw_position = ImVec2(left_left + (pos * pixel_step), 
+                                      top);
+
+              intense = intensity(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos]);
+              color = color_multiplier(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos], intense);
+
+              draw_led(draw_list_screen, sdSysData, draw_position, color, intense);
+            }
+          }
+
+          // 2 0  - RB Door
+          if (group  == 2 && strip == 0)
+          {
+            for (int pos = 0; pos < sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(); pos++)
+            {
+              draw_position = ImVec2(right_right - (pos * pixel_step), 
+                                      botom);
+
+              intense = intensity(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos]);
+              color = color_multiplier(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos], intense);
+
+              draw_led(draw_list_screen, sdSysData, draw_position, color, intense);
+            }
+          }
+
+          // 2 1  - RB Overhead
+          if (group  == 2 && strip == 1)
+          {
+            for (int pos = 0; pos < sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(); pos++)
+            {
+              draw_position = ImVec2(right, 
+                                      botom - (pos * pixel_step ));
+
+              intense = intensity(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos]);
+              color = color_multiplier(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos], intense);
+
+              draw_led(draw_list_screen, sdSysData, draw_position, color, intense);
+            }
+          }
+
+          // 3 0  - LF Overhead
+          if (group  == 3 && strip == 0)
+          {
+            for (int pos = 0; pos < sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(); pos++)
+            {
+              draw_position = ImVec2(right, 
+                                      top + (over_size * pixel_step) - (pos * pixel_step));
+
+              intense = intensity(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos]);
+              color = color_multiplier(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos], intense);
+
+              draw_led(draw_list_screen, sdSysData, draw_position, color, intense);
+            }
+          }
+
+          // 3 1  - LF Door
+          if (group  == 3 && strip == 1)
+          {
+            for (int pos = 0; pos < sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(); pos++)
+            {
+              draw_position = ImVec2(right_right - (pos * pixel_step), 
+                                      top);
+
+              intense = intensity(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos]);
+              color = color_multiplier(sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[pos], intense);
+
+              draw_led(draw_list_screen, sdSysData, draw_position, color, intense);
+            }
+          }
+        }
       }
     }
+    
+    // Simple Button Controls
+    {
+      ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y + 40.0f));
+      // Comms
+      {
+        if (button_simple_color(sdSysData, "Start\nAuto", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" startauto");
+        }
+
+        ImGui::SameLine();
+
+        if (button_simple_color(sdSysData, "Stop\nAuto", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" stopauto");
+        }
+
+        // ---
+
+        if (button_simple_color(sdSysData, "Start\nADS-B", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" startadsb");
+        }
+
+        ImGui::SameLine();
+
+        if (button_simple_color(sdSysData, "Stop\nADS-B", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" stopadsb");
+        }
+        
+        // ---
+
+        if (button_simple_color(sdSysData, "Start\nGPS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" startgps");
+        }
+
+        ImGui::SameLine();
+
+        if (button_simple_color(sdSysData, "Stop\nGPS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" stopgps");
+        }
+        
+        // ---
+        
+        if (button_simple_color(sdSysData, "Start\nCompass", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" startcomp");
+        }
+
+        ImGui::SameLine();
+
+        if (button_simple_color(sdSysData, "Stop\nCompass", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" stopcomp");
+        }
+      }
+    }
+
+    ImGui::EndChild();
+
   }
 }
 

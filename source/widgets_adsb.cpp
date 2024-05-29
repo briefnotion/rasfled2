@@ -2065,11 +2065,11 @@ void ADSB_SCREEN::display(system_data &sdSysData)
     {
       if (SDATA.ADSB_ACTIVE == true)
       {
-        sdSysData.SCREEN_COMMS.command_text_set(" adsboff");
+        sdSysData.SCREEN_COMMS.command_text_set(" stopadsb");
       }
       else
       {
-        sdSysData.SCREEN_COMMS.command_text_set(" adsbon");
+        sdSysData.SCREEN_COMMS.command_text_set(" startadsb");
       }
     }
 

@@ -1,3 +1,7 @@
+2.169_240529
+  - Arranged and Refined the LED Simulator.
+  - Added some simple COMMs buttons.
+
 2.168_240527
   - Started a new screen for miscellaneous things.
 

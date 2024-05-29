@@ -754,7 +754,7 @@ void processcommandlineinput(system_data &sdSysData,
       // -------------------------------------------------------------------------------------
       // ABS-B -------------
       // Command Line (load fastart.sh)
-      if (check_command(sdSysData.SCREEN_COMMS, " adsbon", "ABS-B On"))
+      if (check_command(sdSysData.SCREEN_COMMS, " startadsb", "ABS-B On"))
       { 
         // Call command.
         sdSysData.COMMAND_THREADS.run_command("/home/pi/flightaware/fastart.sh");
@@ -764,7 +764,7 @@ void processcommandlineinput(system_data &sdSysData,
       }
 
       // Command Line (load fastop.sh)
-      if (check_command(sdSysData.SCREEN_COMMS, " adsboff", "ABS-B Off"))
+      if (check_command(sdSysData.SCREEN_COMMS, " stopadsb", "ABS-B Off"))
       {
         // Call command.
         sdSysData.COMMAND_THREADS.run_command("/home/pi/flightaware/fastop.sh");

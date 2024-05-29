@@ -19,7 +19,7 @@
 // Rasfled Includes
 #include "system.h"
 #include "LEDstuff.h"
-//#include "screen4_helper.h"
+#include "screen4_helper.h"
 #include "widgets.h"
 //#include "widgets_drawing.h"
 
@@ -35,7 +35,7 @@ using namespace std;
 // ---------------------------------------------------------------------------------------
 
 //void draw_marker_led(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color);
-void draw_led(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, ImColor Color);
+void draw_led(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, int Intensity);
 
 // ---------------------------------------------------------------------------------------
 
@@ -43,12 +43,13 @@ class DOT_DOT_DOT_SCREEN
 {
   private:
 
-  ImColor color_multiplier(CRGB Color);
+  int intensity(CRGB Color);
+
+  ImColor color_multiplier(CRGB Color, int Intensity);
 
   public:
 
   void display(system_data &sdSysData);
-  //void display();
   // Draw all changes to Panel.
   // Returns true if panel was redrawn.
 
