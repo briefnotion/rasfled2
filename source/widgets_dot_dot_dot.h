@@ -22,6 +22,7 @@
 #include "screen4_helper.h"
 #include "widgets.h"
 //#include "widgets_drawing.h"
+#include "animations_handler.h"
 
 //#include "stringthings.h"
 //#include "fled_time.h"
@@ -35,7 +36,8 @@ using namespace std;
 // ---------------------------------------------------------------------------------------
 
 //void draw_marker_led(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color);
-void draw_led(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, ImColor Color, int Intensity);
+void draw_led(ImDrawList *Draw_List, ImVec2 Screen_Position, ImColor Color, 
+              int Intensity, int low_level_indicator);
 
 // ---------------------------------------------------------------------------------------
 
@@ -49,7 +51,7 @@ class DOT_DOT_DOT_SCREEN
 
   public:
 
-  void display(system_data &sdSysData);
+  void display(system_data &sdSysData, ANIMATION_HANDLER &Animations);
   // Draw all changes to Panel.
   // Returns true if panel was redrawn.
 

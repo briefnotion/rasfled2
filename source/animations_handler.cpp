@@ -41,13 +41,6 @@ void ANIMATION_HANDLER::add_to_schedule_list(string Collection_Name, string Anim
   }
 }
 
-void ANIMATION_HANDLER::EvClear(int Channel_Num, int Event_Num)
-{
-  EVENTS[Channel_Num].teDATA[Event_Num].booCOMPLETE = true;
-  EVENTS[Channel_Num].ClearAll(EVENTS[Channel_Num].teDATA[Event_Num].intSTARTPOS,
-                            EVENTS[Channel_Num].teDATA[Event_Num].intENDPOS);
-}
-
 void ANIMATION_HANDLER::EvClearRunning(int Channel_Num, int Event_Num, unsigned long tmeCurrentTime)
 {
   EVENTS[Channel_Num].teDATA[Event_Num].booCOMPLETE = true;
@@ -442,6 +435,13 @@ CRGB ANIMATION_HANDLER::determine_led_color(system_data &sdSysData, string Color
   }
 
   return ret_crgb;
+}
+
+void ANIMATION_HANDLER::EvClear(int Channel_Num, int Event_Num)
+{
+  EVENTS[Channel_Num].teDATA[Event_Num].booCOMPLETE = true;
+  EVENTS[Channel_Num].ClearAll(EVENTS[Channel_Num].teDATA[Event_Num].intSTARTPOS,
+                            EVENTS[Channel_Num].teDATA[Event_Num].intENDPOS);
 }
 
 void ANIMATION_HANDLER::create_events(system_data &sdSysData)

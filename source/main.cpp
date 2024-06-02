@@ -1167,7 +1167,7 @@ int loop_2(bool TTY_Only)
         // Redraw the console screen with what the screen determines needs to be displayed.
         //cons.display(fsPlayer, sdSystem, sdSystem.PROGRAM_TIME.current_frame_time());
         effi_timer_screen.start_timer(sdSystem.PROGRAM_TIME.now());
-        cons_2.draw(sdSystem);
+        cons_2.draw(sdSystem, animations);
         sdSystem.dblSCREEN_RENDER_TIME.set_data(effi_timer_screen.simple_elapsed_time(sdSystem.PROGRAM_TIME.now()));
 
         /*

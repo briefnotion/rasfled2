@@ -51,9 +51,6 @@ class ANIMATION_HANDLER
   void add_to_schedule_list(string Collection_Name, string Animation_Name, int Assigned_Group);
   // temporaryly stores events to be started after certain processes are complete.
 
-  void EvClear(int Channel_Num, int Event_Num);
-  // Erases all events.
-
   void EvClearRunning(int Channel_Num, int Event_Num, unsigned long tmeCurrentTime);
   // Sets specific event to complete
 
@@ -102,6 +99,9 @@ class ANIMATION_HANDLER
   public:
 
   deque<timed_event> EVENTS;
+  
+  void EvClear(int Channel_Num, int Event_Num);
+  // Erases all events.
 
   void create_events(system_data &sdSysData);
   // Prepares the event system groups.  Must be ran before system accepts events.

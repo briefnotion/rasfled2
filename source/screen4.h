@@ -28,6 +28,7 @@
 #include "widgets_dot_dot_dot.h"
 #include "stringthings.h"
 #include "fled_time.h"
+#include "animations_handler.h"
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
@@ -162,7 +163,7 @@ class SCREEN4
   void character_enter(system_data &sdSysData, unsigned char Character, 
                 bool Shift_Pressed, bool Backspace_Pressed, bool Enter_Pressed);
 
-  void draw(system_data &sdSysData);
+  void draw(system_data &sdSysData, ANIMATION_HANDLER &Animations);
   // Render window to terminal
 
   void shutdown(system_data &sdSysData);
