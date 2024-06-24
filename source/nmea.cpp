@@ -317,6 +317,8 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
               tmp_track_point.LONGITUDE = LONGITUDE;
               tmp_track_point.TIME = GGA_TIME * 1000.0f;
 
+              tmp_track_point.TRUE_HEADING = TRUE_TRACK;
+
               // Velocity color instead of altitude color
               //tmp_track_point.ALTITUDE = ALTITUDE.feet_val();
               tmp_track_point.ALTITUDE = SPEED_KMPH.val_mph();

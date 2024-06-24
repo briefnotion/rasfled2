@@ -30,6 +30,7 @@
 #include "fled_time.h"
 #include "helper.h"
 #include "json_interface.h"
+#include "nmea.h"
 
 // -------------------------------------------------------------------------------------
 
@@ -412,6 +413,9 @@ class HMC5883L
                                               //  true forward facing, adjust compass 
                                               //  bearing to reflect
 
+  // GPS Automatic Heading Calibration Timer
+  TIMED_PING GPS_HEADING_CALIBRATION_TIMER;
+
   // Preload Calibration Data
   bool PRELOAD_DATA_LOADED = false;
 
@@ -427,7 +431,7 @@ class HMC5883L
                       //  Not yet fully implemented.
 
   // Process
-  void process(unsigned long tmeFrame_Time);     
+  void process(NMEA &GPS_System, unsigned long tmeFrame_Time);     
   // Internal: Processes most recent received data. 
   // Performs Calibration Routines
 
@@ -487,7 +491,9 @@ class HMC5883L
   // Returns true if hmc5883l is successfully connected.
   //  Will assume data is being received.
 
-  bool cycle(unsigned long tmeFrame_Time);
+  bool cycle(NMEA &GPS_System, unsigned long tmeFrame_Time);
+  // This is the main update loop.
+
   // Writes and Reads data to comm port to send and
   //  recieve queues.
 

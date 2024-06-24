@@ -1083,7 +1083,7 @@ int loop_2(bool TTY_Only)
     if (compass_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       // Compass Serial Communications
-      if (sdSystem.COMMS_COMPASS.cycle(sdSystem.PROGRAM_TIME.current_frame_time()))
+      if (sdSystem.COMMS_COMPASS.cycle(sdSystem.GPS_SYSTEM, sdSystem.PROGRAM_TIME.current_frame_time()))
       {
         if (sdSystem.COMMS_COMPASS.cycle_change() == 99)
         {

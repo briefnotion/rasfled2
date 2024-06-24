@@ -175,18 +175,19 @@ void ALERT_SYSTEM_2::res_alert_no_condition(COMMAND_THREAD &Thread, SOUNDS &Soun
 bool ALERT_SYSTEM_2::res_alert_condition(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, bool Raise_Alert, bool Clear_Alert)
 {
   int alert_change = 0;
+  bool was_active = ALERTS_RESERVE[Id].active();
+
   bool ret_description_request = ALERTS_RESERVE[Id].alert_condition(Id, Raise_Alert, Clear_Alert, alert_change);
 
-
-  if (alert_change  == 2)       // Alert
+  if (alert_change  == 2 && was_active == false)       // Alert
   {
     Sound_System.play_alert_level_3(Thread);
   }
-  else if (alert_change  == 1)  // Warning
-  {
-    Sound_System.play_alert_level_2(Thread);
-  }
-  else if (alert_change  == -1)  // Cleared
+  //else if (alert_change  == 1)  // Warning
+  //{
+  //  Sound_System.play_alert_level_2(Thread);
+  //}
+  else if (alert_change  == -1)                       // Cleared
   {
     Sound_System.play_alert_level_1(Thread);
   }

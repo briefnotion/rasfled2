@@ -586,6 +586,14 @@ int position_of_scale(int size, int scale, int value);
 // Calculate position of value on scale (eg 100%) with size.
 //  Will not return anything larger than size.
 
+float no_roll_difference(float low_value, float high_value, float roll_value);
+// Gets the difference between two values in scenerios where the low value
+//  can be below the rollover value and the high value can be above the 
+//  rollover value.
+//  Example in a compass, low value can be 359 and high value can be 01. 
+//    Results should be 2.
+//  Will not decern true low and high values.  Currently not necessary.
+
 bool is_within(int Value, int Number_1, int Number_2);
 // Comarison opperator returns true if Value is in between  
 //  or equal to Num 1 and Num 2, regardless if Number 1 

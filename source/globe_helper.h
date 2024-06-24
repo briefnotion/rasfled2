@@ -138,6 +138,8 @@ class DETAILED_TRACK_POINT
   float LATITUDE = 0.0f;
   float LONGITUDE = 0.0f;
 
+  float TRUE_HEADING = 0;
+
   float TIME = 0.0f;            // Time im ms:
                                 //  Represeting either
                                 //  frame time of message received 

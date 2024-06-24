@@ -1130,6 +1130,38 @@ int position_of_scale(int size, int scale, int value)
   }
 }
 
+float no_roll_difference(float low_value, float high_value, float roll_value)
+{
+  /*
+  if (low_value < high_value)
+  {
+    return (high_value - low_value);
+  }
+  else
+  {
+    return (high_value - (low_value - roll_value));
+  }
+  */
+
+  float difference = abs(high_value - low_value);
+
+  if (difference < (roll_value / 2.0f))
+  {
+    return difference;
+  }
+  else
+  {
+    if (high_value > low_value)
+    {
+      return (low_value + roll_value - high_value);
+    }
+    else
+    {
+      return (high_value + roll_value - low_value);
+    }
+  }
+}
+
 bool is_within(int Value, int Number_1, int Number_2)
 {
   if (Number_1 <= Number_2)

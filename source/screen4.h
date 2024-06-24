@@ -75,6 +75,8 @@ class SCREEN4
   bool DISPLAY_COMPASS_WINDOW = false;
   bool DISPLAY_CARDS_WINDOW = false;
 
+  bool DISPLAY_DNFWTS_SHOW = true;
+
   bool DISPLAY_CONFIRM = false;
 
   int DISPLAY_MENU = 0;

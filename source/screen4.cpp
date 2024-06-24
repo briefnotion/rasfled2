@@ -548,31 +548,39 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
     if (sdSysData.DNFWTS.active_update(current_frame_time))
     {
-      if (ImGui::Begin("Window", &show_test_window, sdSysData.SCREEN_DEFAULTS.flags)) // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
+      if (ImGui::Begin("DNFWTS", &show_test_window, sdSysData.SCREEN_DEFAULTS.flags)) // Pass a pointer to our bool variable (the window will have a closing button that will clear the bool when clicked)
       {
         ImVec4 working_area = get_working_area();
 
-        ImDrawList* draw_list = ImGui::GetWindowDrawList();
-        ImVec2 line_start_1;
-        ImVec2 line_end_1;
-        ImVec2 line_start_2;
-        ImVec2 line_end_2;
+        if (DISPLAY_DNFWTS_SHOW)
+        {
+          ImDrawList* draw_list = ImGui::GetWindowDrawList();
+          ImVec2 line_start_1;
+          ImVec2 line_end_1;
+          ImVec2 line_start_2;
+          ImVec2 line_end_2;
 
-        line_start_1 = ImVec2(working_area.x + 50.0f, working_area.y + 50.0f);
-        line_end_1 = ImVec2(working_area.x + working_area.z - 50.0f, working_area.y + working_area.w - 50.0f);
-        
-        line_start_2 = ImVec2(working_area.x + working_area.z - 50.0f, working_area.y + 50.0f);
-        line_end_2 = ImVec2(working_area.x + 50.0f, working_area.y + working_area.w - 50.0f);
+          line_start_1 = ImVec2(working_area.x + 50.0f, working_area.y + 50.0f);
+          line_end_1 = ImVec2(working_area.x + working_area.z - 50.0f, working_area.y + working_area.w - 50.0f);
+          
+          line_start_2 = ImVec2(working_area.x + working_area.z - 50.0f, working_area.y + 50.0f);
+          line_end_2 = ImVec2(working_area.x + 50.0f, working_area.y + working_area.w - 50.0f);
 
-        draw_list->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.c_red().STANDARD, 50.0f);
-        draw_list->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.c_red().STANDARD, 50.0f);
+          draw_list->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.c_red().STANDARD, 50.0f);
+          draw_list->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.c_red().STANDARD, 50.0f);
 
-        ImGui::PushFont(io.Fonts->Fonts.Data[2]);
-        ImGui::SetCursorScreenPos(ImVec2(working_area.x + 50.0f, working_area.y + 150.0f));
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
-        ImGui::Text("DO \nNOT FUCK \nWITH THE SYSTEM");
-        ImGui::PopStyleColor();
-        ImGui::PopFont();
+          ImGui::PushFont(io.Fonts->Fonts.Data[2]);
+          ImGui::SetCursorScreenPos(ImVec2(working_area.x + 50.0f, working_area.y + 150.0f));
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+          ImGui::Text("DO \nNOT FUCK \nWITH THE SYSTEM");
+          ImGui::PopStyleColor();
+          ImGui::PopFont();
+        }
+
+        if (button_area(working_area))
+        {
+          DISPLAY_DNFWTS_SHOW = !DISPLAY_DNFWTS_SHOW;
+        }
 
         ImGui::End();
       }

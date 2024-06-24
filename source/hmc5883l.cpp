@@ -1124,7 +1124,7 @@ void HMC5883L::stop()
   CONNECTED = false;
 }
 
-void HMC5883L::process(unsigned long tmeFrame_Time)
+void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 {
   FLOAT_XYZ calibrated_bearing_xyz = calculate_calibrated_xyz(RAW_XYZ, LEVEL_2.offset(), LEVEL_2.skew());
   RAW_BEARING = (atan2(calibrated_bearing_xyz.Y, calibrated_bearing_xyz.X) * 180 / M_PI);
@@ -1154,8 +1154,6 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
   {
     LEVEL_2.calibration_level_2(tmeFrame_Time, RAW_XYZ);
   }
-
-  // Calclulate Bearing
 
   // Determine Jitter
   if (CALIBRATED_BEARINGS.size() > 0)
@@ -1209,6 +1207,57 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
 
       BEARING_JITTER_MIN = bearing_min;
       BEARING_JITTER_MAX = bearing_max;
+    }
+  }
+
+  // Passive GPS Bearing adjustment
+  if (GPS_System.active(tmeFrame_Time)) // Enable
+  {
+    // Avoid constant recalibration from the GPS heading (gps only updated once per sec)
+    //  If calibration sucessful, wait 1 min. if not, try again 
+    //  in 10 sec.
+
+    if (GPS_HEADING_CALIBRATION_TIMER.ping_down(tmeFrame_Time) == false)
+    { 
+      bool calibrated = false;
+
+      if (GPS_System.current_position().SPEED.val_mph() > 30.0f)  // if speed over X mps
+      {
+
+        if (GPS_System.TRACK.TRACK_POINTS_DETAILED.size() > 3)
+        {
+          // check track difference over past 3 seconds to be less than 1 degree. (not turning)
+          if (no_roll_difference(GPS_System.TRACK.TRACK_POINTS_DETAILED.back().TRUE_HEADING,
+                                  GPS_System.TRACK.TRACK_POINTS_DETAILED[GPS_System.TRACK.TRACK_POINTS_DETAILED.size() - 3].TRUE_HEADING, 
+                                  360.0f)
+                                  < 1.0f)
+          {
+            // Needs no roll system.  
+            float difference = no_roll_difference(BEARING_JITTER_MIN, BEARING_JITTER_MAX, 360.0f);
+            
+            // continue if jitter difference is small
+            if (difference < 3.0f) // if jitter less than X degrees
+            {
+              bearing_known_offset_calibration(GPS_System.current_position().TRUE_HEADING);
+
+              // cal good, wait 60 seconds
+              calibrated = true;
+            }
+          }
+        }
+      }
+
+      if (calibrated)
+      {
+        GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 60000);
+      }
+      else
+      {
+        // turning over 1 degree in 3 seconds.
+        // jitter too large, wait 10 sec
+        // not over 30 mph, wait 10 seconds
+        GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 10000);
+      }
     }
   }
 }
@@ -1310,7 +1359,7 @@ bool HMC5883L::connected()
   return CONNECTED;
 }
 
-bool HMC5883L::cycle(unsigned long tmeFrame_Time)
+bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
 {
   //bool data_received = true;
   bool ret_cycle_changed = false;
@@ -1454,7 +1503,7 @@ bool HMC5883L::cycle(unsigned long tmeFrame_Time)
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
 
         // Process
-        process(tmeFrame_Time);
+        process(GPS_System, tmeFrame_Time);
       }
     }
   }

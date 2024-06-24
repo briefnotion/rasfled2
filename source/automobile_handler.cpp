@@ -65,7 +65,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 
     // S-Temp alert
     if (sdSysData.ALERTS_2.res_alert_condition_greater_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, RESERVE_ALERT_TEMP_S_TEMP, 
-        sdSysData.CAR_INFO.CALCULATED.s_temp(), 60.0f, 50.0f))
+        sdSysData.CAR_INFO.CALCULATED.s_temp(), 65.0f, 50.0f))
     {
       sdSysData.ALERTS_2.res_update_alert_text_line_1(RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)sdSysData.CAR_INFO.CALCULATED.s_temp()));
       sdSysData.ALERTS_2.res_update_line_2_with_conditions(RESERVE_ALERT_TEMP_S_TEMP);

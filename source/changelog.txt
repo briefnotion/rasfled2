@@ -1,3 +1,10 @@
+2.171_240624
+  - Adjusted the S-Temp alert fomm 60 to 65.
+  - Turned off the warning alert sound because it was 
+      annoying.
+  - Compass bearing should self calibrate with good 
+      GPS data (over 30mph and < 3 degrees of jitter)
+
 2.170_240601
   - Minor Changes.
 
