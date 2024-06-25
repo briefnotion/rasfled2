@@ -1,3 +1,7 @@
+2.172_240625
+  - Started adding a North Up or Bearing Up option 
+      to the map.
+
 2.171_240624
   - Adjusted the S-Temp alert fomm 60 to 65.
   - Turned off the warning alert sound because it was 

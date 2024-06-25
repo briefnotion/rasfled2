@@ -44,10 +44,15 @@ using namespace std;
 // ---------------------------------------------------------------------------------------
 // Map Tools
 
+float degrees_to_radians(float Degrees);
+
+void rotate_point(ImVec2 Center, float Angle_In_Rads, ImVec2 &Point);
+
 ImVec2 point_position_center(ImVec4 Working_Area);
 
 ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
-                                ImVec2 Lat_Lon_Center, ImVec2 Lat_Lon, bool &Drawn);
+                                ImVec2 Lat_Lon_Center, ImVec2 Lat_Lon, 
+                                float Degrees, bool &Drawn);
 
 ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 
@@ -67,7 +72,7 @@ void draw_point_marker(ImDrawList *Draw_List, ImVec2 Screen_Position, ImColor Co
 
 void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
                 float Strength_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
-                ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track);
+                ImVec2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track);
 
 // ---------------------------------------------------------------------------------------
 
@@ -104,7 +109,8 @@ class MAP_MARKER
 
   void clear();
 
-  void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon, float Range);
+  void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+            ImVec2 Center_Lat_Lon, float Map_Bearing, float Range);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -193,7 +199,8 @@ class ADSB_WIDGET
 
   bool active();
 
-  void draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon);
+  void draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+                                int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon, float Map_Bearing);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -297,6 +304,9 @@ class ADSB_MAP
   bool DISPLAY_LOCATION = false;
   bool SHOW_BUTTONS = true;
   TIMED_PING SHOW_BUTTONS_TIMER;
+
+  IMPACT_RESISTANCE_FLOAT_FRAME_COUNT MAP_HEADING_DEGREES;
+  bool NORTH_UP = true;
 
   COMPASS_WIDGET CURRENT_POSITION_COMPASS;
 

@@ -16,6 +16,29 @@
 
 // ---------------------------------------------------------------------------------------
 
+float degrees_to_radians(float Degrees)
+{
+  return ((Degrees * float_PI) / 180.0f);
+}
+
+void rotate_point(ImVec2 Center, float Angle_In_Rads, ImVec2 &Point) 
+{
+  float s = sin(Angle_In_Rads);
+  float c = cos(Angle_In_Rads);
+
+  // Translate point back to origin
+  Point.x -= Center.x;
+  Point.y -= Center.y;
+
+  // Rotate point
+  float xnew = Point.x * c + Point.y * s;
+  float ynew = -Point.x * s + Point.y * c;
+
+  // Translate point back
+  Point.x = xnew + Center.x;
+  Point.y = ynew + Center.y;
+}
+
 ImVec2 point_position_center(ImVec4 Working_Area)
 {
   ImVec2 ret_center;
@@ -25,7 +48,8 @@ ImVec2 point_position_center(ImVec4 Working_Area)
 }
 
 ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
-                                ImVec2 Lat_Lon_Center, ImVec2 Lat_Lon, bool &Drawn)
+                                ImVec2 Lat_Lon_Center, ImVec2 Lat_Lon, 
+                                float Degrees, bool &Drawn)
 {
   ImVec2 center = point_position_center(Working_Area);
 
@@ -36,6 +60,11 @@ ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale,
 
   ret_point.y = -(lat_diff * Scale.x) + center.y;
   ret_point.x = (lon_diff * Scale.y) + center.x;
+
+  if (Degrees != 0.0f)
+  {
+    rotate_point(center, degrees_to_radians(Degrees), ret_point);
+  }
 
   // check if draw_position is within screen size + offset.
   if (ret_point.x >= Working_Area.x && ret_point.x <= Working_Area.x + Working_Area.z && 
@@ -96,7 +125,7 @@ void draw_point_marker(ImDrawList *Draw_List, ImVec2 Screen_Position, ImColor Co
 
 void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
                 float Strength_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
-                ImVec2 Center_Lat_Lon, DETAILED_TRACK &Track)
+                ImVec2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track)
 {
   bool draw_0 = false;
   bool draw_1 = false;
@@ -108,12 +137,12 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Ar
   if ((int)Track.TRACK_POINTS_SIMPLE.size() > 0)
   {
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                      ImVec2(Track.TRACK_POINTS_SIMPLE[0].LATITUDE, Track.TRACK_POINTS_SIMPLE[0].LONGITUDE), draw_1);
+                                                      ImVec2(Track.TRACK_POINTS_SIMPLE[0].LATITUDE, Track.TRACK_POINTS_SIMPLE[0].LONGITUDE), Map_Bearing, draw_1);
   }
   else
   {
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                      ImVec2(Track.TRACK_POINTS_DETAILED[0].LATITUDE, Track.TRACK_POINTS_DETAILED[0].LONGITUDE), draw_1);
+                                                      ImVec2(Track.TRACK_POINTS_DETAILED[0].LATITUDE, Track.TRACK_POINTS_DETAILED[0].LONGITUDE), Map_Bearing, draw_1);
   }
 
   // Draw Simple Track
@@ -128,7 +157,7 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Ar
     draw_0 = draw_1;
 
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                    ImVec2(Track.TRACK_POINTS_SIMPLE[position].LATITUDE, Track.TRACK_POINTS_SIMPLE[position].LONGITUDE), draw_1);
+                                                    ImVec2(Track.TRACK_POINTS_SIMPLE[position].LATITUDE, Track.TRACK_POINTS_SIMPLE[position].LONGITUDE), Map_Bearing, draw_1);
 
     Draw_List->AddLine(track_position_0, track_position_1, 
                         sdSysData.COLOR_SELECT.c_grey().TEXT, 1.0f);
@@ -141,7 +170,7 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Ar
     draw_0 = draw_1;
 
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                    ImVec2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, Track.TRACK_POINTS_DETAILED[position].LONGITUDE), draw_1);
+                                                    ImVec2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, Track.TRACK_POINTS_DETAILED[position].LONGITUDE), Map_Bearing, draw_1);
 
     if (draw_0 || draw_1)
     {
@@ -169,10 +198,11 @@ void MAP_MARKER::clear()
   REGION_GPS_COORDS.clear();
 }
 
-void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, ImVec2 Center_Lat_Lon, float Range)
+void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+                      ImVec2 Center_Lat_Lon, float Map_Bearing, float Range)
 {
   bool draw = false;
-  ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, LAT_LON, draw);
+  ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, LAT_LON, Map_Bearing, draw);
 
   if (draw || TYPE == 3)
   {
@@ -204,7 +234,7 @@ void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
             // 5 miles out.
             ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
                                                       get_coords_x_miles_from_coords(LAT_LON.x, LAT_LON.y, 5.0f, AIRPORT_LANDING_VECTORS[vector]), 
-                                                      on_screen);
+                                                      Map_Bearing, on_screen);
 
             Draw_List->AddLine(draw_position, landing_vector_end, 
                                 sdSysData.COLOR_SELECT.c_yellow().STANDARD, 2);
@@ -227,14 +257,14 @@ void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
         {
           //bool on_screen = false;
           
-          ImVec2 landing_vector_start = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[REGION_GPS_COORDS.size() -1.0f], draw);
-          ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[0], draw);
+          ImVec2 landing_vector_start = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[REGION_GPS_COORDS.size() -1.0f], Map_Bearing, draw);
+          ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[0], Map_Bearing, draw);
           Draw_List->AddLine(landing_vector_start, landing_vector_end, Color, 2.0f);
 
           for(int pos = 1; pos < (int)REGION_GPS_COORDS.size(); pos++)
           {
             landing_vector_start = landing_vector_end;
-            landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[pos], draw);
+            landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[pos], Map_Bearing, draw);
 
             Draw_List->AddLine(landing_vector_start, landing_vector_end, 
                                 Color, 2.0f);
@@ -262,14 +292,14 @@ void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
           bool on_screen_2 = false;
   
           ImVec2 landing_vector_start; 
-          ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[0], on_screen_2);
+          ImVec2 landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[0], Map_Bearing, on_screen_2);
 
           for(int pos = 1; pos < (int)REGION_GPS_COORDS.size(); pos++)
           {
             landing_vector_start = landing_vector_end;
             on_screen_1 = on_screen_2;
 
-            landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[pos], on_screen_2);
+            landing_vector_end = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, REGION_GPS_COORDS[pos], Map_Bearing, on_screen_2);
 
             if (on_screen_1 == true || on_screen_2 == true)
             {
@@ -470,7 +500,8 @@ bool ADSB_WIDGET::active()
 }
 
 // Draw all aircraft onto the maps.
-void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon)
+void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+                                            int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon, float Map_Bearing)
 {
   if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.TRACK_POINTS_DETAILED.size() > 1)
   {
@@ -478,12 +509,12 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
     ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon,
                                                   ImVec2( AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value(), 
                                                           AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value()), 
-                                                          draw);
+                                                          Map_Bearing, draw);
 
     // Draw track first then overlay aircraft.
     if (TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 3.0f, ALTITUDE_COLOR_SCALE, Center_Lat_Lon, TRACK);
+      draw_track(Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 3.0f, ALTITUDE_COLOR_SCALE, Center_Lat_Lon, Map_Bearing, TRACK);
     }
 
     // Draw Aircraft Marker
@@ -772,7 +803,10 @@ void ADSB_MAP::add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type)
 }
 
 void ADSB_MAP::create(system_data &sdSysData)
-{  
+{
+  // Prepare Map Orientation with Impact Resistance
+  MAP_HEADING_DEGREES.set_size(30);
+
   // Prepare Compass
   CURRENT_POSITION_COMPASS.set_size(32, (15 / 2));
   // set at frame rate for slow and jitter size for fast.
@@ -1575,6 +1609,19 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   working_area.z = ImGui::GetContentRegionAvail().x;
   working_area.w = ImGui::GetContentRegionAvail().y;
 
+  // Before drawing the map, get map heading in degrees from sources Compass or GPS or both
+  float map_heading_degrees = 0.0f;
+
+  if (!NORTH_UP)
+  {
+    if (sdSysData.COMMS_COMPASS.connected())
+    {
+      MAP_HEADING_DEGREES.set_value(sdSysData.COMMS_COMPASS.bearing());
+      map_heading_degrees = MAP_HEADING_DEGREES.value_no_roll(360.0f);
+    }
+  }
+  
+  //
   if (sdSysData.GPS_SYSTEM.current_position().VALID_COORDS && sdSysData.GPS_SYSTEM.current_position().CHANGED)
   {
     // Check and store GPS Current Location
@@ -1682,6 +1729,8 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   if (SHOW_BUTTONS)
   {
     // Range and Location Buttons
+    
+    // Zoom Out
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
@@ -1690,6 +1739,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       RANGE_INDICATOR.zoom_out();
     }
     
+    // Location Selection
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
@@ -1698,6 +1748,18 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       DISPLAY_LOCATION = !DISPLAY_LOCATION;
     }
 
+    // North Up
+    ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                      working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+    if (button_simple_toggle_color(sdSysData, "NORTH\nUP", "NORTH\nUP", NORTH_UP,
+                                    sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
+                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      NORTH_UP = !NORTH_UP;
+    }
+
+    // Zoom In
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
@@ -1877,7 +1939,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   // Draw Landmarks
   for (int landmark = 0; landmark < (int)LANDMARKS.size(); landmark++)
   {
-    LANDMARKS[landmark].draw(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.range());
+    LANDMARKS[landmark].draw(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), map_heading_degrees, RANGE_INDICATOR.range());
   }
 
   // Draw Current Position Marker
@@ -1887,11 +1949,11 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     // Draw track of GPS Position.
     if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 2.5f, GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.center_lat_lon(), sdSysData.GPS_SYSTEM.TRACK);
+      draw_track(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 2.5f, GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.center_lat_lon(), map_heading_degrees, sdSysData.GPS_SYSTEM.TRACK);
     }
 
     bool draw = false;
-    ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.gps_pos_lat_lon() ,draw);
+    ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.gps_pos_lat_lon(), map_heading_degrees, draw);
 
     // Draw point position compass
     if (draw)
@@ -1919,7 +1981,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   {
     if (ADSB_Widgets[aircraft].is_expired(sdSysData) == false)
     {
-      ADSB_Widgets[aircraft].draw_aircraft_map_marker(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), RANGE_INDICATOR.center_lat_lon());
+      ADSB_Widgets[aircraft].draw_aircraft_map_marker(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), RANGE_INDICATOR.center_lat_lon(), map_heading_degrees);
     }
   }
 
