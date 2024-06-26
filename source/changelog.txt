@@ -1,3 +1,6 @@
+2.173_240626
+  - Compass will properly rotate with map.
+
 2.172_240625
   - Started adding a North Up or Bearing Up option 
       to the map.

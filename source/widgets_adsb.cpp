@@ -522,7 +522,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
     {
       draw_compass(Draw_List, sdSysData, 1, draw_position, 15.0f, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
                           AIRCRAFT_DATA.NAV_HEADING.conversion_success(), AIRCRAFT_DATA.NAV_HEADING.get_float_value(), 
-                          AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value(), false);
+                          AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value(), false, Map_Bearing);
     }
 
     // Text Describing Aircraft
@@ -739,7 +739,7 @@ void ADSB_RANGE::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
   
   // Text Range
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V));
-  ImGui::Text("%.0f", RANGE);
+  ImGui::Text("%.0f mi", RANGE);
   ImGui::PopStyleColor();
 }
 
@@ -747,7 +747,7 @@ void ADSB_RANGE::draw_info()
 {
   ImGui::Text("LAT: %f", CENTER_LAT_LON.x);
   ImGui::Text("LON: %f", CENTER_LAT_LON.y);
-  ImGui::Text("RNG: %.0f", RANGE);
+  ImGui::Text("RNG: %.0f mi", RANGE);
 
   // test
   /*
@@ -1620,6 +1620,11 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       map_heading_degrees = MAP_HEADING_DEGREES.value_no_roll(360.0f);
     }
   }
+  else
+  {
+      MAP_HEADING_DEGREES.set_value(0.0f);
+      map_heading_degrees = MAP_HEADING_DEGREES.value_no_roll(360.0f);
+  }
   
   //
   if (sdSysData.GPS_SYSTEM.current_position().VALID_COORDS && sdSysData.GPS_SYSTEM.current_position().CHANGED)
@@ -1752,7 +1757,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    if (button_simple_toggle_color(sdSysData, "NORTH\nUP", "NORTH\nUP", NORTH_UP,
+    if (button_simple_toggle_color(sdSysData, "NORTH\nUP", "DIR\nUP", NORTH_UP,
                                     sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
                                     sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
@@ -1964,14 +1969,14 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
         CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                             sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, 
-                            true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max());
+                            true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), map_heading_degrees);
       }
       else
       {
         // draw compass at gps pos
         CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                            sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false);
+                            sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, map_heading_degrees);
       }
     }
   }

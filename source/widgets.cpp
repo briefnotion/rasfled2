@@ -516,7 +516,7 @@ bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, 
 
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                   bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
-                  bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max)
+                  bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max, float Map_Bearing)
 {
   // Heading 1 - Track or Aircraft Nav Heading
   // Heading 2 - Compass or Aircraft Track Heading.
@@ -602,7 +602,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     // North pointer drawn only if heading provided.
     if (Draw_North_Pointer)
     {
-      rad = ((-Heading_2) + 90.0f) * float_PI / 180.0f;
+      rad = ((-Heading_2) + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
       p1 = Screen_Position;
       p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), 
@@ -625,7 +625,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       if (Version == 2)
       {
         // Jitter 1
-        rad = ((Jitter_Heading_Min) + 90.0f) * float_PI / 180.0f;
+        rad = ((Jitter_Heading_Min) + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
         p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
                     Screen_Position.y + Size * sin(rad + float_PI));
@@ -645,7 +645,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         }
 
         // Jitter 2
-        rad = ((Jitter_Heading_Max) + 90.0f) * float_PI / 180.0f;
+        rad = ((Jitter_Heading_Max) + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
         p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
                     Screen_Position.y + Size * sin(rad + float_PI));
@@ -667,7 +667,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     }
 
     // Adjust the degrees into heading. Convert direction from degrees to radians
-    rad = (Heading_2 + 90.0f) * float_PI / 180.0f;
+    rad = (Heading_2 + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
     // Calculate
     p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
@@ -718,27 +718,27 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
 
-      if (Heading_2 < 90.0f || Heading_2 > 270.0f)
+      if (Heading_2 - Map_Bearing < 90.0f || Heading_2 - Map_Bearing > 270.0f)
       {
-        rad2 = (Heading_2 + 90.0f) * float_PI / 180.0f;
+        rad2 = (Heading_2 + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
         p3 = ImVec2(Screen_Position.x + (Size + font_height) * cos(rad2 + float_PI), 
                     Screen_Position.y + (Size + font_height) * sin(rad2 + float_PI));
 
         ImGui::SetCursorScreenPos(p3);
 
-        Text_Rotate(to_string((int)Heading_2), 180.0f - Heading_2, BB_TL);
+        Text_Rotate(to_string((int)Heading_2), 180.0f - Heading_2 + Map_Bearing, BB_TL);
       }
       else
       {
-        rad2 = (Heading_2 + 90.0f) * float_PI / 180.0f;
+        rad2 = (Heading_2 + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
         p3 = ImVec2(Screen_Position.x + (Size) * cos(rad2 + float_PI), 
                     Screen_Position.y + (Size) * sin(rad2 + float_PI));
 
         ImGui::SetCursorScreenPos(p3);
 
-        Text_Rotate(to_string((int)Heading_2), -Heading_2, BB_TL);
+        Text_Rotate(to_string((int)Heading_2), -Heading_2 + Map_Bearing, BB_TL);
       }
 
       //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
@@ -751,7 +751,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
   if (Valid_Heading_1)
   {
     // Adjust the degrees into heading. Convert direction from degrees to radians
-    float rad = (Heading_1 + 90.0f) * float_PI / 180.0f;
+    float rad = (Heading_1 + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
     // Calculate
     ImVec2 p1 = Screen_Position;
@@ -801,25 +801,25 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
 
-      if (Heading_1 < 90.0f || Heading_1 > 270.0f)
+      if (Heading_1 - Map_Bearing < 90.0f || Heading_1 - Map_Bearing > 270.0f)
       {
-        rad2 = (Heading_1 + 90.0f) * float_PI / 180.0f;
+        rad2 = (Heading_1 + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
         p3 = ImVec2(Screen_Position.x + Size * cos(rad2 + float_PI), 
                           Screen_Position.y + Size * sin(rad2 + float_PI));
         ImGui::SetCursorScreenPos(p3);
 
-        Text_Rotate(to_string((int)Heading_1), 180.0f - Heading_1, BB_TL);
+        Text_Rotate(to_string((int)Heading_1), 180.0f - Heading_1 + Map_Bearing, BB_TL);
       }
       else
       {
-        rad2 = (Heading_1 + 90.0f) * float_PI / 180.0f;
+        rad2 = (Heading_1 + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
         p3 = ImVec2(Screen_Position.x + (Size - font_height) * cos(rad2 + float_PI), 
                     Screen_Position.y + (Size - font_height) * sin(rad2 + float_PI));
         ImGui::SetCursorScreenPos(p3);
 
-        Text_Rotate(to_string((int)Heading_1), -Heading_1, BB_TL);
+        Text_Rotate(to_string((int)Heading_1), -Heading_1 + Map_Bearing, BB_TL);
       }
       
       //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
@@ -830,12 +830,12 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 }
 
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
-                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer)
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, float Map_Bearing)
 {
   draw_compass(Draw_List, sdSysData, Version, Screen_Position, Size, Main, 
                 Valid_Position, Valid_Heading_1, Heading_1, 
                 Valid_Heading_2, Heading_2, Draw_North_Pointer, 
-                false, 0.0f, 0.0f);
+                false, 0.0f, 0.0f, Map_Bearing);
 }
 
 void COMPASS_WIDGET::set_size(int Heading_1_Size, int Heading_2_Size)
@@ -846,7 +846,7 @@ void COMPASS_WIDGET::set_size(int Heading_1_Size, int Heading_2_Size)
 
 void COMPASS_WIDGET::draw(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                         bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
-                        bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max)
+                        bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max, float Map_Bearing)
 {
   if (Valid_Heading_1)
   {
@@ -860,11 +860,11 @@ void COMPASS_WIDGET::draw(ImDrawList *Draw_List, system_data &sdSysData, int Ver
 
   draw_compass(Draw_List, sdSysData, Version, Screen_Position, Size, Main, Valid_Position, 
                         Valid_Heading_1, HEADING_1.value_no_roll(360.0f), Valid_Heading_2, HEADING_2.value_no_roll(360.0f), Draw_North_Pointer, 
-                        Jitter_Active, Jitter_Heading_Min, Jitter_Heading_Max);
+                        Jitter_Active, Jitter_Heading_Min, Jitter_Heading_Max, Map_Bearing);
 }
 
 void COMPASS_WIDGET::draw(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
-                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer)
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, float Map_Bearing)
 {
   if (Valid_Heading_1)
   {
@@ -877,7 +877,7 @@ void COMPASS_WIDGET::draw(ImDrawList *Draw_List, system_data &sdSysData, int Ver
   }
 
   draw_compass(Draw_List, sdSysData, Version, Screen_Position, Size, Main, Valid_Position, 
-                        Valid_Heading_1, HEADING_1.value_no_roll(360.0f), Valid_Heading_2, HEADING_2.value_no_roll(360.0f), Draw_North_Pointer);
+                        Valid_Heading_1, HEADING_1.value_no_roll(360.0f), Valid_Heading_2, HEADING_2.value_no_roll(360.0f), Draw_North_Pointer, Map_Bearing);
 }
 
 // ---------------------------------------------------------------------------------------

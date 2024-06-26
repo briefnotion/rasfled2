@@ -229,10 +229,10 @@ bool confirm_dialog(system_data &sdSysData, bool &Choice);
 
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                         bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
-                        bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max);
+                        bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max, float Map_Bearing);
 
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
-                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer);
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, float Map_Bearing);
 
 // Heading 1 - Track or Aircraft Nav Heading      (from GPS, normally slow)
 // Heading 2 - Compass or Aircraft Track Heading. (from hardware compass, normally fast)
@@ -250,10 +250,10 @@ class COMPASS_WIDGET
 
   void draw(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                           bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
-                          bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max);
+                          bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max, float Map_Bearing);
 
   void draw(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
-                          bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer);
+                          bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, float Map_Bearing);
 };
 
 // ---------------------------------------------------------------------------------------
