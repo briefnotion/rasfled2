@@ -22,6 +22,17 @@
 #include "fled_time.h"
 #include "alert_system_2.h"
 
+// -------------------------------------------------------------------------------------
+
+// Reserved Alert List
+#define AUTO_RESERVE_ALERT_TEMP_S_TEMP     0
+#define AUTO_RESERVE_ALERT_TEMP_COOLANT    1
+#define AUTO_RESERVE_ALERT_ELEC_VOLTAGE    2
+#define AUTO_RESERVE_ALERT_FUEL_LEVEL      3
+#define AUTO_RESERVE_ALERT_TEMP_INTAKE     4
+#define AUTO_RESERVE_ALERT_UNKNOWN_MESSAGE 5
+#define AUTO_RESERVE_ALERT_MIL             6
+
 using namespace std;
 
 // -------------------------------------------------------------------------------------

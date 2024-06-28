@@ -64,12 +64,14 @@ void ALERT_WIDGET_PROPERTIES_LIST::check_properties_list(system_data &sdSysData,
 void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
 {
   // Go through and display all reserve
-  for (int alert_num = 0; alert_num < RESERVE_ALERT_LIST_SIZE; alert_num++)
+  for (int alert_num = 0; alert_num < (int)Alerts_List.ALERTS_RESERVE.size(); alert_num++)
   {
       if (Alerts_List.res_display(alert_num))
       {
         // Create properties if needed
         PROPERTIES_RESERVE_LIST.check_properties_list(sdSysData, alert_num, "Reserve Alert ");
+
+        string title = Alerts_List.PROPS.ALERT_SYSTEM_NAME;
 
         ImGui::SetNextWindowSize(ImVec2(300, 100));
 
@@ -78,21 +80,27 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
           ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
           ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
           ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
+          
+          title +=  ": WARNING - " + Alerts_List.res_alert_title(alert_num) + " (" + to_string(alert_num) + ")";
         }
         else if(Alerts_List.res_active(alert_num))
         {
           ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
           ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
           ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+          
+          title +=  ": ALERT - " + Alerts_List.res_alert_title(alert_num) + " (" + to_string(alert_num) + ")";
         }
         else
         {
           ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_green().STANDARD));
           ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_green().STANDARD));
           ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_green().STANDARD));
+          
+          title +=  ": CLEAR - " + Alerts_List.res_alert_title(alert_num) + " (" + to_string(alert_num) + ")";
         }
         
-        if (ImGui::Begin(("ALERT " + to_string(alert_num)).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+        if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           ImVec2 screen_pos = ImGui::GetCursorScreenPos();
           ImGui::Text(Alerts_List.res_alert_text_line_1(alert_num).c_str());
@@ -164,21 +172,26 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
       {
         // Create properties if needed
         //PROPERTIES_GENERAL_LIST.check_properties_list(sdSysData, alert_num, "General Alert ");
+        
+        string title = Alerts_List.PROPS.ALERT_SYSTEM_NAME;
 
         if (Alerts_List.gen_warning(alert_num))
         {
           ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
           ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
           ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_yellow().DIM));
+          
+          title +=  ": INFO (" + to_string(alert_num) + ")";
         }
         else
         {
           ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
           ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
           ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+          title +=  ": INFO (" + to_string(alert_num) + ")";
         }
         
-        if (ImGui::Begin(("ALERT " + to_string(Alerts_List.gen_alert_id(alert_num))).c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+        if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           ImVec2 screen_pos = ImGui::GetCursorScreenPos();
           ImGui::Text(Alerts_List.gen_alert_text_line_1(alert_num).c_str());

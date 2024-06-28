@@ -1014,13 +1014,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           }
           ImGui::EndChild();
 
-          if (sdSysData.ALERTS_2.alert_count() > 0)
+          if (sdSysData.ALERTS_AUTO.alert_count() > 0)
           {
             ImGui::SameLine();
 
             if (button_simple_color(sdSysData, "DISPLAY\nALERTS", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              sdSysData.ALERTS_2.display_active_alerts();
+              sdSysData.ALERTS_AUTO.display_active_alerts();
             }
           }
         }
@@ -1467,7 +1467,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
       if (RESTACK_WINDOWS == false)
       {
-        AUTOMOBILE_ALERTS.draw(sdSysData, sdSysData.ALERTS_2);
+        AUTOMOBILE_ALERTS.draw(sdSysData, sdSysData.ALERTS_AUTO);
       }
 
       // ---------------------------------------------------------------------------------------

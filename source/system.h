@@ -172,7 +172,7 @@ class system_data
   STAT_DATA_DOUBLE dblCOMMS_TRANSFER_TIME; // Stored value returned on pref sleep cycle.
 
   ALERT_SYSTEM ALERTS;
-  ALERT_SYSTEM_2 ALERTS_2;
+  ALERT_SYSTEM_2 ALERTS_AUTO;
 
   // For Debuging Gadgets
   //bool DEBUG_COUNTER = false;

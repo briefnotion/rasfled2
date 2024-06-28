@@ -602,21 +602,30 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     // North pointer drawn only if heading provided.
     if (Draw_North_Pointer)
     {
-      rad = ((-Heading_2) + 90.0f - Map_Bearing) * float_PI / 180.0f;
-
-      p1 = Screen_Position;
-      p2 = ImVec2(Screen_Position.x + ( 2.0f * Size) * cos(rad + float_PI), 
-                  Screen_Position.y + ( 2.0f * Size) * sin(rad + float_PI));
-
-      if (Valid_Position)
+      if (Map_Bearing != 0.0f)
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, needle_size);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size - 4.0f);
+        // Map is rotating. Point north up relative to map rotation.
+        rad = (90.0f - Map_Bearing) * float_PI / 180.0f;
       }
       else
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size - 4.0f);
+        // Map is not rotating. Point north opposite of heading.
+        rad = (90.0f - Heading_2) * float_PI / 180.0f;
+      }
+
+      p1 = Screen_Position;
+      p2 = ImVec2(Screen_Position.x + (Size + 15.0f) * cos(rad + float_PI), 
+                  Screen_Position.y + (Size + 15.0f) * sin(rad + float_PI));
+
+      if (Valid_Position)
+      {
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f - 2.0f);
+      }
+      else
+      {
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f - 2.0f);
       }
     }
 

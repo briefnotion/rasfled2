@@ -442,6 +442,16 @@ int loop_2(bool TTY_Only)
   sdSystem.SCREEN_COMMS.printw("Initializing Timer ...");
   //FledTime tmeFled;
 
+  // Initialize Alert_2 System - Generate Reserve Alerts
+  sdSystem.ALERTS_AUTO.PROPS.ALERT_SYSTEM_NAME = "AUTOMOBILE";
+  sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_TEMP_S_TEMP, "SUPER TEMP");
+  sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_TEMP_COOLANT, "COOLANT TEMP");
+  sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_ELEC_VOLTAGE, "VOLTAGE");
+  sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_FUEL_LEVEL, "FUEL LEVEL");
+  sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_TEMP_INTAKE, "INTTAKE TEMP");
+  sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_UNKNOWN_MESSAGE, "UNKNOW COMMUNICATION");
+  sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_MIL, "MALFUNTION INDICATOR LAMP");
+
   // Sleeping Loop Variables
   sdSystem.PROGRAM_TIME.create();    //  Get current time.  This will be our timeframe to work in.
   
@@ -451,7 +461,7 @@ int loop_2(bool TTY_Only)
     sdSystem.SCREEN_COMMS.printw("Adjusting Program Clock");
     sdSystem.SCREEN_COMMS.printw("");
 
-    sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, "Adjusting Program Clock");
+    sdSystem.ALERTS_AUTO.add_generic_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, "Adjusting Program Clock");
     
     sdSystem.PROGRAM_TIME.clear_error();
   }
@@ -698,7 +708,7 @@ int loop_2(bool TTY_Only)
       sdSystem.SCREEN_COMMS.printw("           DIFFERANCE: "  + to_string(sdSystem.PROGRAM_TIME.error()));
       sdSystem.SCREEN_COMMS.printw("");
 
-      sdSystem.ALERTS_2.add_generic_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
+      sdSystem.ALERTS_AUTO.add_generic_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
                                           to_string(sdSystem.PROGRAM_TIME.error()));
 
       sdSystem.PROGRAM_TIME.clear_error();
@@ -1014,17 +1024,17 @@ int loop_2(bool TTY_Only)
         else if (sdSystem.COMMS_AUTO.cycle_change() == 0)
         {
           sdSystem.SCREEN_COMMS.printw("Automobile COMMS changed to: NORMAL READ MODE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
+          sdSystem.ALERTS_AUTO.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 1)
         {
           sdSystem.SCREEN_COMMS.printw("Automobile COMMS changed to: SHUTTING DOWN CYCLE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
+          sdSystem.ALERTS_AUTO.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 2)
         {
           sdSystem.SCREEN_COMMS.printw("Automobile COMMS changed to: CONNECT START");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
+          sdSystem.ALERTS_AUTO.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
         }
         else if (sdSystem.COMMS_AUTO.cycle_change() == 3)
         {
@@ -1046,17 +1056,17 @@ int loop_2(bool TTY_Only)
         else if (sdSystem.COMMS_GPS.cycle_change() == 0)
         {
           sdSystem.SCREEN_COMMS.printw("GPS COMMS changed to: NORMAL READ MODE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
+          sdSystem.ALERTS_AUTO.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 1)
         {
           sdSystem.SCREEN_COMMS.printw("GPS COMMS changed to: SHUTTING DOWN CYCLE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
+          sdSystem.ALERTS_AUTO.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 2)
         {
           sdSystem.SCREEN_COMMS.printw("GPS COMMS changed to: CONNECT START");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
+          sdSystem.ALERTS_AUTO.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
         }
         else if (sdSystem.COMMS_GPS.cycle_change() == 3)
         {
@@ -1096,17 +1106,17 @@ int loop_2(bool TTY_Only)
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 0)
         {
           sdSystem.SCREEN_COMMS.printw("COMPASS COMMS changed to: NORMAL READ MODE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
+          sdSystem.ALERTS_AUTO.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 1);
         }
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 1)
         {
           sdSystem.SCREEN_COMMS.printw("COMPASS COMMS changed to: SHUTTING DOWN CYCLE");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
+          sdSystem.ALERTS_AUTO.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 3);
         }
         else if (sdSystem.COMMS_COMPASS.cycle_change() == 2)
         {
           sdSystem.SCREEN_COMMS.printw("COMPASS COMMS changed to: CONNECT START");
-          sdSystem.ALERTS_2.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
+          sdSystem.ALERTS_AUTO.sound_alert(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 2);
         }
       }
     }
@@ -1191,7 +1201,7 @@ int loop_2(bool TTY_Only)
       }
   
       // Alert system checks
-      sdSystem.ALERTS_2.alert_list_clean();
+      sdSystem.ALERTS_AUTO.alert_list_clean();
       
     } // Is display to console ready -----------------
 

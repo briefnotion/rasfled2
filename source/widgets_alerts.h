@@ -63,7 +63,6 @@ class ALERT_WIDGET
 
   // Simple list to keep track if gadget properties
   ALERT_WIDGET_PROPERTIES_LIST PROPERTIES_RESERVE_LIST;
-  //ALERT_WIDGET_PROPERTIES_LIST PROPERTIES_GENERAL_LIST;
 
   public:
 

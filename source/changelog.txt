@@ -1,3 +1,12 @@
+2.174_240627
+  - Changed the size of the Compass on the ADS-B 
+      screen.
+  - Added north pointing needle to compass when 
+      North up is off.
+  - If available, compass will display on map if 
+      GPS is active.
+  - Minor changes made to the Alert System 2.
+
 2.173_240626
   - Compass will properly rotate with map.
 

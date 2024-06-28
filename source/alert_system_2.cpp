@@ -114,6 +114,11 @@ bool ALERT_2_TYPE_MONITOR::show_value_bar()
   return SHOW_VALUE_BAR;
 }
 
+string ALERT_2_TYPE_MONITOR::alert_title()
+{
+  return ALERT_TITLE;
+}
+
 string ALERT_2_TYPE_MONITOR::alert_text_line_1()
 {
   return ALERT_TEXT_LINE_1;
@@ -122,6 +127,11 @@ string ALERT_2_TYPE_MONITOR::alert_text_line_1()
 string ALERT_2_TYPE_MONITOR::alert_text_line_2()
 {
   return ALERT_TEXT_LINE_2;
+}
+
+void ALERT_2_TYPE_MONITOR::update_alert_title(string Text)
+{
+  ALERT_TITLE = Text;
 }
 
 void ALERT_2_TYPE_MONITOR::update_alert_text_line_1(string Text)
@@ -213,6 +223,11 @@ bool ALERT_SYSTEM_2::res_alert_condition_less_than(COMMAND_THREAD &Thread, SOUND
   return res_alert_condition(Thread, Sound_System, Id, Value <= Alert_Condition, Value > Clear_Condition);
 }
 
+void ALERT_SYSTEM_2::res_update_alert_title(int Id, string Title)
+{
+  ALERTS_RESERVE[Id].update_alert_title(Title);
+}
+
 void ALERT_SYSTEM_2::res_update_alert_text_line_1(int Id, string Text_Line_1)
 {
   ALERTS_RESERVE[Id].update_alert_text_line_1(Text_Line_1);
@@ -240,6 +255,11 @@ bool ALERT_SYSTEM_2::res_display(int Id)
   return ALERTS_RESERVE[Id].display();
 }
 
+string ALERT_SYSTEM_2::res_alert_title(int Id)
+{
+  return ALERTS_RESERVE[Id].alert_title();
+}
+
 string ALERT_SYSTEM_2::res_alert_text_line_1(int Id)
 {
   return ALERTS_RESERVE[Id].alert_text_line_1();
@@ -248,6 +268,18 @@ string ALERT_SYSTEM_2::res_alert_text_line_1(int Id)
 string ALERT_SYSTEM_2::res_alert_text_line_2(int Id)
 {
   return ALERTS_RESERVE[Id].alert_text_line_2();
+}
+
+void ALERT_SYSTEM_2::generate_reserve_alert(int Id, string Title)
+{
+  while (Id >= (int)ALERTS_RESERVE.size())
+  {
+    ALERT_2_TYPE_MONITOR tmp_alert_monitor;
+
+    ALERTS_RESERVE.push_back(tmp_alert_monitor);
+  }
+
+  ALERTS_RESERVE[Id].update_alert_title(Title);
 }
 
 void ALERT_SYSTEM_2::res_acknowlege(int Id)
@@ -337,7 +369,7 @@ void ALERT_SYSTEM_2::alert_list_clean()
   }
 
   ALERTS_RESERVE_COUNT = 0;
-  for (int res_alert_pos = 0; res_alert_pos < RESERVE_ALERT_LIST_SIZE; res_alert_pos++)
+  for (int res_alert_pos = 0; res_alert_pos < (int)ALERTS_RESERVE.size(); res_alert_pos++)
   {
     if (ALERTS_RESERVE[res_alert_pos].active())
     {
@@ -348,7 +380,7 @@ void ALERT_SYSTEM_2::alert_list_clean()
 
 void ALERT_SYSTEM_2::display_active_alerts()
 {
-  for (int alert_pos = 0; alert_pos < RESERVE_ALERT_LIST_SIZE; alert_pos++)
+  for (int alert_pos = 0; alert_pos < (int)ALERTS_RESERVE.size(); alert_pos++)
   {
     if (ALERTS_RESERVE[alert_pos].active())
     {

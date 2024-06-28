@@ -1609,22 +1609,46 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   working_area.z = ImGui::GetContentRegionAvail().x;
   working_area.w = ImGui::GetContentRegionAvail().y;
 
+  // Gather some frequent variables
+  bool active_gps     = sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time());
+  bool active_compass = sdSysData.COMMS_COMPASS.connected();
+
   // Before drawing the map, get map heading in degrees from sources Compass or GPS or both
   float map_heading_degrees = 0.0f;
 
   if (!NORTH_UP)
   {
-    if (sdSysData.COMMS_COMPASS.connected())
+    if (active_compass && active_gps)
+    {
+      if (sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph() > 15.0f)
+      {
+        MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+      }
+      else
+      {
+        MAP_HEADING_DEGREES.set_value(sdSysData.COMMS_COMPASS.bearing());
+      }
+    }
+    else if (active_compass)
     {
       MAP_HEADING_DEGREES.set_value(sdSysData.COMMS_COMPASS.bearing());
-      map_heading_degrees = MAP_HEADING_DEGREES.value_no_roll(360.0f);
+    }
+    else if (active_gps)
+    {
+      MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+    }
+    else
+    {
+      MAP_HEADING_DEGREES.set_value(0.0f);
     }
   }
   else
   {
-      MAP_HEADING_DEGREES.set_value(0.0f);
-      map_heading_degrees = MAP_HEADING_DEGREES.value_no_roll(360.0f);
+    MAP_HEADING_DEGREES.set_value(0.0f);
   }
+
+  map_heading_degrees = MAP_HEADING_DEGREES.value_no_roll(360.0f);
+
   
   //
   if (sdSysData.GPS_SYSTEM.current_position().VALID_COORDS && sdSysData.GPS_SYSTEM.current_position().CHANGED)
@@ -1687,7 +1711,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   RANGE_INDICATOR.draw_info();
 
   // GPS Information
-  if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
+  if (active_gps)
   {
     ImGui::NewLine();
 
@@ -1703,7 +1727,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   }
 
   // Compass Information
-  if (sdSysData.COMMS_COMPASS.connected())
+  if (active_compass)
   {
     ImGui::NewLine();
 
@@ -1777,7 +1801,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y));
 
-    if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
+    if (active_gps)
     {
       if (button_simple_toggle_color(sdSysData, "CENT\n(On)", "CENT\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
                                       sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
@@ -1792,7 +1816,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     }
 
     // Compass Calibration
-    if (sdSysData.COMMS_COMPASS.connected())
+    if (active_compass)
     {
       ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                     working_area.y + sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f));
@@ -1819,7 +1843,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
                                 working_area.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
         if (button_simple_color(sdSysData, "BEAR\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
-          if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
+          if (active_gps)
           {
             sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
           }
@@ -1844,7 +1868,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   RANGE_INDICATOR.draw(draw_list_map, sdSysData, working_area);
 
   // Draw Compass Calibration
-  if (sdSysData.COMMS_COMPASS.connected())
+  if (active_compass)
   {
     if (sdSysData.COMMS_COMPASS.calibrate_on())
     {
@@ -1948,8 +1972,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   }
 
   // Draw Current Position Marker
-  if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()) &&
-      sdSysData.GPS_SYSTEM.current_position().VALID_COORDS)
+  if (active_gps && sdSysData.GPS_SYSTEM.current_position().VALID_COORDS)
   {
     // Draw track of GPS Position.
     if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
@@ -1966,9 +1989,9 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       if (RANGE_INDICATOR.gps_display_current_location())
       {
         // draw compass at center location
-        CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+        CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                            sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, 
+                            active_compass, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, 
                             true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), map_heading_degrees);
       }
       else
@@ -1976,9 +1999,17 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
         // draw compass at gps pos
         CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                            sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, map_heading_degrees);
+                            active_compass, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, map_heading_degrees);
       }
     }
+  }
+  else if (active_compass)
+  {
+    CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, ImVec2(working_area.x + working_area.z / 2.0f, working_area.y + working_area.w / 2.0f), 
+                    working_area.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                    sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
+                    active_compass, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, 
+                    true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), map_heading_degrees);
   }
   
   // Draw Aircraft

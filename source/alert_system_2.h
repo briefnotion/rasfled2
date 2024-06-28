@@ -24,19 +24,6 @@
 
 // -------------------------------------------------------------------------------------
 
-// Reserved Alert List
-#define RESERVE_ALERT_LIST_SIZE       7
-
-#define RESERVE_ALERT_TEMP_S_TEMP     0
-#define RESERVE_ALERT_TEMP_COOLANT    1
-#define RESERVE_ALERT_ELEC_VOLTAGE    2
-#define RESERVE_ALERT_FUEL_LEVEL      3
-#define RESERVE_ALERT_TEMP_INTAKE     4
-#define RESERVE_ALERT_UNKNOWN_MESSAGE 5
-#define RESERVE_ALERT_MIL             6
-
-// -------------------------------------------------------------------------------------
-
 using namespace std;
 
 // -------------------------------------------------------------------------------------
@@ -60,6 +47,8 @@ class ALERT_2_TYPE_MONITOR
   
   bool ACKNOWLEGED = false; // Indicates the alert was acknowedeged.
   bool DISPLAY = false;      // Determine if alert is to be displayed.
+  
+  string ALERT_TITLE       = "";   // Display Title of Alert
   string ALERT_TEXT_LINE_1 = "";   // Text of alert
   string ALERT_TEXT_LINE_2 = "";   // Text of alert
   bool SHOW_VALUE_BAR = false;
@@ -91,8 +80,12 @@ class ALERT_2_TYPE_MONITOR
 
   bool show_value_bar();
 
+  string alert_title();  // Text value of alert
   string alert_text_line_1();  // Text value of alert
   string alert_text_line_2();  // Text value of alert
+
+  void update_alert_title(string Text);
+  // Change the title value of the alert;
 
   void update_alert_text_line_1(string Text);
   // Change the text value of the alert;
@@ -112,6 +105,15 @@ class ALERT_2_TYPE_MONITOR
   // Sets active to false;
 };
 
+class ALERT_SYSTEM_2_PROPERTIES
+{
+  public:
+
+  string ALERT_SYSTEM_NAME = "X";
+
+  int RESERVE_ALERT_SIZE = 0;
+};
+
 class ALERT_SYSTEM_2
 {
   private:
@@ -125,7 +127,9 @@ class ALERT_SYSTEM_2
   public:
 
   deque<ALERT_2_TYPE_MONITOR> GENERIC_ALERTS;
-  ALERT_2_TYPE_MONITOR ALERTS_RESERVE[RESERVE_ALERT_LIST_SIZE];
+  deque<ALERT_2_TYPE_MONITOR> ALERTS_RESERVE;
+
+  ALERT_SYSTEM_2_PROPERTIES PROPS;
 
   bool changed();
   
@@ -136,6 +140,7 @@ class ALERT_SYSTEM_2
   bool res_alert_condition_greater_than(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, float Value, float Alert_Condition, float Clear_Condition);
   bool res_alert_condition_less_than(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, float Value, float Alert_Condition, float Clear_Condition);
   
+  void res_update_alert_title(int Id, string Title);
   void res_update_alert_text_line_1(int Id, string Text_Line_1);
   void res_update_line_2_with_conditions(int Id);
 
@@ -143,8 +148,12 @@ class ALERT_SYSTEM_2
   bool res_warning(int Id);       // Returns WARNING value
   bool res_display(int Id);       // Returns DISPLAY value
 
+  string res_alert_title(int Id);  // Text value of alert
   string res_alert_text_line_1(int Id);  // Text value of alert
   string res_alert_text_line_2(int Id);  // Text value of alert
+
+  void generate_reserve_alert(int Id, string Title);
+  // Assigne Titles to Generate reserve alerts.
   
   void res_acknowlege(int Id);
   bool res_is_clear(int Id);
