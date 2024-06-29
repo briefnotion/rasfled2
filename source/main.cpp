@@ -443,7 +443,7 @@ int loop_2(bool TTY_Only)
   //FledTime tmeFled;
 
   // Initialize Alert_2 System - Generate Reserve Alerts
-  sdSystem.ALERTS_AUTO.PROPS.ALERT_SYSTEM_NAME = "AUTOMOBILE";
+  sdSystem.ALERTS_AUTO.PROPS.ALERT_SYSTEM_NAME = "AUTO";
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_TEMP_S_TEMP, "SUPER TEMP");
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_TEMP_COOLANT, "COOLANT TEMP");
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_ELEC_VOLTAGE, "VOLTAGE");

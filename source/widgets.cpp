@@ -22,6 +22,11 @@ ImVec2 text_size(string Text)
 }
 
 ImVec4 get_working_area()
+// must be called before other drawing is done.
+// X = x starting pos (position of left most window, if no write)
+// Y = y starting pos (position of left most window, if no write)
+// Z = x size
+// W = y size
 {
   ImVec4 working_area;
 

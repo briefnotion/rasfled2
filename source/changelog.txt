@@ -1,3 +1,6 @@
+2.175_240628
+  - Minor changes made to the Alert System 2.
+
 2.174_240627
   - Changed the size of the Compass on the ADS-B 
       screen.

@@ -53,6 +53,8 @@ bool Load_Texture_From_File(const char* filename, GLuint* out_texture, int* out_
 // Image Loading and Displaying Examples
 // https://github.com/ocornut/imgui/wiki/Image-Loading-and-Displaying-Examples
 
+void Graphical_Number(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Position, float Width, int Number);
+
 // ---------------------------------------------------------------------------------------
 
 class MARKER_GADGET_PROPERTIES
