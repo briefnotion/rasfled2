@@ -59,12 +59,18 @@ int AIRCRAFT::data_count()
   return DATA_COUNT;
 }
 
-void AIRCRAFT::check_alerts()
+void AIRCRAFT::check_alerts(ALERT_SYSTEM_2 &Alerts)
 {
-  ALERT_ENTRY tmp_alert_entry;
+  if (0 < Alerts.gen_size())
+  {
+    //do nothing
+  }
+  
+  //ALERT_ENTRY tmp_alert_entry;
   // Check Squak Codes
   if(SQUAWK.conversion_success() == true)
   {
+    /*
     if (SQUAWK.get_int_value() == 1200)
     {
       tmp_alert_entry.ALERT_LEVEL = 1;
@@ -72,42 +78,60 @@ void AIRCRAFT::check_alerts()
       ALERT_LIST.push_back(tmp_alert_entry);
       ALERT= true;
     }
+    */
 
     if (SQUAWK.get_int_value() == 7500)
     {
-      tmp_alert_entry.ALERT_LEVEL = 3;
-      tmp_alert_entry.ALERT = "  \\___ SQUAWK ALERT: Special Purpose Code - Hi-Jacking";
-      ALERT_LIST.push_back(tmp_alert_entry);
-      ALERT= true;
+      //tmp_alert_entry.ALERT_LEVEL = 3;
+      //tmp_alert_entry.ALERT = "  \\___ SQUAWK ALERT: Special Purpose Code - Hi-Jacking";
+      //ALERT_LIST.push_back(tmp_alert_entry);
+      //ALERT= true;
+
+      Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
+                                "ALERT: Special Purpose Code", 
+                                "Hi-Jacking");
     }
 
     if (SQUAWK.get_int_value() == 7600)
     {        
-      tmp_alert_entry.ALERT_LEVEL = 2;
-      tmp_alert_entry.ALERT = "  \\___ SQUAWK ALERT: Special Purpose Code - Radio Failure";
-      ALERT_LIST.push_back(tmp_alert_entry);
-      ALERT= true;
+      //tmp_alert_entry.ALERT_LEVEL = 2;
+      //tmp_alert_entry.ALERT = "  \\___ SQUAWK ALERT: Special Purpose Code - Radio Failure";
+      //ALERT_LIST.push_back(tmp_alert_entry);
+      //ALERT= true;
+
+      Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
+                                "ALERT: Special Purpose Code",
+                                "Radio Failure");
     }
 
     if (SQUAWK.get_int_value() == 7700)
     {
-      tmp_alert_entry.ALERT_LEVEL = 3;
-      tmp_alert_entry.ALERT = "  \\___ SQUAWK ALERT: Special Purpose Code - Emergency";
-      ALERT_LIST.push_back(tmp_alert_entry);
-      ALERT= true;
+      //tmp_alert_entry.ALERT_LEVEL = 3;
+      //tmp_alert_entry.ALERT = "  \\___ SQUAWK ALERT: Special Purpose Code - Emergency";
+      //ALERT_LIST.push_back(tmp_alert_entry);
+      //ALERT= true;
+
+      Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
+                                "ALERT: Special Purpose Code",
+                                "Emergency");
     }
   }
 
   // Check Emergency Stat
   if (EMERGENCY.get_str_value() != "" && EMERGENCY.get_str_value() != "none")
   {
-      tmp_alert_entry.ALERT_LEVEL = 3;
-      tmp_alert_entry.ALERT = "  \\ EMERGENCY ALERT: " + EMERGENCY.get_str_value();
-      ALERT_LIST.push_back(tmp_alert_entry);
-      ALERT= true;
+      //tmp_alert_entry.ALERT_LEVEL = 3;
+      //tmp_alert_entry.ALERT = "  \\ EMERGENCY ALERT: " + EMERGENCY.get_str_value();
+      //ALERT_LIST.push_back(tmp_alert_entry);
+      //ALERT= true;
+
+      Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
+                                "ALERT: Special Purpose Code",
+                                EMERGENCY.get_str_value());
   }
 
   // Check Values
+  /*
   if (D_FLIGHT_ANGLE.get_float_value() > 6)
   {
       tmp_alert_entry.ALERT_LEVEL = 2;
@@ -115,6 +139,7 @@ void AIRCRAFT::check_alerts()
       ALERT_LIST.push_back(tmp_alert_entry);
       ALERT= true;
   }
+  */
 }
 
 void AIRCRAFT::count_data()
@@ -151,7 +176,7 @@ void AIRCRAFT::count_data()
                 ;
 }
 
-void AIRCRAFT::post_process()
+void AIRCRAFT::post_process(ALERT_SYSTEM_2 &Alerts)
 {
   // Convert Data to Display Standard.
   // Vertical Rate
@@ -187,7 +212,7 @@ void AIRCRAFT::post_process()
   count_data();
 
   // Fill Alert Fields.
-  check_alerts();
+  check_alerts(Alerts);
 }
 
 bool AIRCRAFT::alert()
@@ -215,7 +240,7 @@ bool AIRCRAFT_COORDINATOR::is_active()
   return IS_ACTIVE;
 }
 
-bool AIRCRAFT_COORDINATOR::process(string JSON_Text)
+bool AIRCRAFT_COORDINATOR::process(string JSON_Text, ALERT_SYSTEM_2 &Alerts)
 {
   bool ret_success = false;
 
@@ -303,7 +328,7 @@ bool AIRCRAFT_COORDINATOR::process(string JSON_Text)
           }
 
           // Process Data Recieved on Aircraft
-          tmpAircraft.post_process();
+          tmpAircraft.post_process(Alerts);
 
           // Store Aircraft ADS-B Data into list.
           DATA.AIRCRAFTS.push_back(tmpAircraft);

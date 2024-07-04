@@ -59,8 +59,9 @@ class ALERT_2_TYPE_MONITOR
   float ALERT_VALUE = 0;
   float CLEAR_VALUE = 0;
 
+  void alert_no_condition(int Id, string Title, string Line_1, string Line_2);
   void alert_no_condition(int Id, string Alert_Text_Line_1);
-
+  
   bool alert_condition(int Id, bool Raise_Alert, bool Clear_Alert, int &Changes);
   // returns true if requesting a description.
   // Changes = 0  - no change
@@ -129,6 +130,14 @@ class ALERT_SYSTEM_2
   deque<ALERT_2_TYPE_MONITOR> GENERIC_ALERTS;
   deque<ALERT_2_TYPE_MONITOR> ALERTS_RESERVE;
 
+  private:
+
+  int search_for_alert(deque<ALERT_2_TYPE_MONITOR> &Alert_deque, string Title);
+  // returns position of alert with title in list.
+  // returns -1 if not found.
+
+  public:
+
   ALERT_SYSTEM_2_PROPERTIES PROPS;
 
   bool changed();
@@ -160,16 +169,20 @@ class ALERT_SYSTEM_2
   void res_clear(int Id);
 
   // generic alerts
+  void add_generic_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_System, string Text);
+  void add_generic_alert(string Title, string Line_1, string Line_2);
+
   int gen_size();
   bool gen_warning(int Id);       // Returns WARNING value
   bool gen_display(int Id);       // Returns DISPLAY value
+  string gen_alert_title(int Id);  // Text value of alert
   string gen_alert_text_line_1(int Id);  // Text value of alert
+  string gen_alert_text_line_2(int Id);  // Text value of alert
   int gen_alert_id(int Id);
   void gen_acknowlege(int Id);
 
   // all alerts
   int alert_count();
-  void add_generic_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_System, string Text);
   void alert_list_clean();
   void display_active_alerts();
 

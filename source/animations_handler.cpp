@@ -588,8 +588,8 @@ void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tme
   {
     if (collection_pos == -1)
     {
-      sdSysData.ALERTS.add_generic_alert("Collection not found (" + Collection_Name + ") Collection Size: " + 
-                                          to_string(LIBRARY.COLLECTION.size()));
+      //sdSysData.ALERTS.add_generic_alert("Collection not found (" + Collection_Name + ") Collection Size: " + 
+      //                                    to_string(LIBRARY.COLLECTION.size()));
 
       string pr = "Collection not found (" + Collection_Name + ") Collection Size: " + 
                                           to_string(LIBRARY.COLLECTION.size());
@@ -597,10 +597,10 @@ void ANIMATION_HANDLER::call_animation(system_data &sdSysData, unsigned long tme
     }
     if (collection_pos > -1 && animation_pos == -1)
     {
-      sdSysData.ALERTS.add_generic_alert("Animation not found (" + Collection_Name + ":" + Animation_Name + ") Animations Size: " + 
-                                          to_string(LIBRARY.COLLECTION[collection_pos].ANIMATIONS.size()));
+      //sdSysData.ALERTS.add_generic_alert("Animation not found (" + Collection_Name + ":" + Animation_Name + ") Animations Size: " + 
+      //                                    to_string(LIBRARY.COLLECTION[collection_pos].ANIMATIONS.size()));
 
-      sdSysData.ALERTS.add_generic_alert(" (" + LIBRARY.COLLECTION[collection_pos].ANIMATIONS[0].LABEL + ")");
+      //sdSysData.ALERTS.add_generic_alert(" (" + LIBRARY.COLLECTION[collection_pos].ANIMATIONS[0].LABEL + ")");
 
       string pr = "Animation not found (" + Collection_Name + ":" + Animation_Name + ") Animations Size: " + 
                                           to_string(LIBRARY.COLLECTION[collection_pos].ANIMATIONS.size()) +

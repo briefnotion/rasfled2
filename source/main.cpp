@@ -276,7 +276,7 @@ int loop_2(bool TTY_Only)
   SCREEN4 cons_2;
 
   // Check Directories
-  if (sdSystem.FILE_NAMES.assign() == false)
+  if (sdSystem.FILE_NAMES.assign(sdSystem.SCREEN_COMMS) == false)
   {
     // not fully thought out
     sdSystem.SCREEN_COMMS.printw("Error while checking or creating directories.\n");
@@ -437,12 +437,12 @@ int loop_2(bool TTY_Only)
   sdSystem.SCREEN_COMMS.printw("Initializing Alert System ...");
 
   // Prepare Alerts
-  sdSystem.ALERTS.PROP.SWITCH_COUNT = sdSystem.CONFIG.iNUM_SWITCHES;
-  sdSystem.ALERTS.create();
+  //sdSystem.ALERTS.PROP.SWITCH_COUNT = sdSystem.CONFIG.iNUM_SWITCHES;
+  //sdSystem.ALERTS.create();
   sdSystem.SCREEN_COMMS.printw("Initializing Timer ...");
   //FledTime tmeFled;
 
-  // Initialize Alert_2 System - Generate Reserve Alerts
+  // Initialize AUTO Alert_2 System - Generate Reserve Alerts
   sdSystem.ALERTS_AUTO.PROPS.ALERT_SYSTEM_NAME = "AUTO";
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_TEMP_S_TEMP, "SUPER TEMP");
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_TEMP_COOLANT, "COOLANT TEMP");
@@ -451,6 +451,9 @@ int loop_2(bool TTY_Only)
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_TEMP_INTAKE, "INTTAKE TEMP");
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_UNKNOWN_MESSAGE, "UNKNOW COMMUNICATION");
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_MIL, "MALFUNTION INDICATOR LAMP");
+  
+  // Initialize ADSB Alert_2 System - Generate Reserve Alerts
+  sdSystem.ALERTS_ADSB.PROPS.ALERT_SYSTEM_NAME = "ADSB";
 
   // Sleeping Loop Variables
   sdSystem.PROGRAM_TIME.create();    //  Get current time.  This will be our timeframe to work in.
@@ -495,17 +498,17 @@ int loop_2(bool TTY_Only)
   else
   {
     sdSystem.SCREEN_COMMS.printw("  Configuration file not loaded.  Generating Working Configuration File.");
-    sdSystem.ALERTS.add_generic_alert("Configuration file not loaded.  Generating Working Configuration File.");
+    //sdSystem.ALERTS.add_generic_alert("Configuration file not loaded.  Generating Working Configuration File.");
 
     if (save_json_configuration(sdSystem, sdSystem.FILE_NAMES.CONFIGURATION_FILE) == true)
     {
       sdSystem.SCREEN_COMMS.printw("    Configuration file created.");
-      sdSystem.ALERTS.add_generic_alert("Configuration file created.");
+      //sdSystem.ALERTS.add_generic_alert("Configuration file created.");
     }
     else
     {
       sdSystem.SCREEN_COMMS.printw("    Configuration file not created.");
-      sdSystem.ALERTS.add_generic_alert("Configuration file not created.");
+      //sdSystem.ALERTS.add_generic_alert("Configuration file not created.");
     }
   }
   
@@ -515,7 +518,7 @@ int loop_2(bool TTY_Only)
   if (load_saved_running_state_json(sdSystem.SCREEN_COMMS, sdSystem, Running_State_Filename) != true)
   {
     sdSystem.SCREEN_COMMS.printw("    Running state file not loaded.");
-    sdSystem.ALERTS.add_generic_alert("Running state file not loaded.");
+    //sdSystem.ALERTS.add_generic_alert("Running state file not loaded.");
   }
 
   // Loading Animations Library.
@@ -530,7 +533,7 @@ int loop_2(bool TTY_Only)
   else
   {
     sdSystem.SCREEN_COMMS.printw("    Animations file not loaded.");
-    sdSystem.ALERTS.add_generic_alert("Animations file not loaded.");
+    //sdSystem.ALERTS.add_generic_alert("Animations file not loaded.");
   }
 
   // ---------------------------------------------------------------------------------------
@@ -985,7 +988,7 @@ int loop_2(bool TTY_Only)
       // Read ADS-B Aircraft JSON
       if (watcher_aircraft_json.changed() == true)
       {
-        sdSystem.AIRCRAFT_COORD.process(file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE));
+        sdSystem.AIRCRAFT_COORD.process(file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE), sdSystem.ALERTS_ADSB);
       }
 
       processcommandlineinput(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);

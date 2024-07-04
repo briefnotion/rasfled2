@@ -20,7 +20,7 @@ using namespace std;
 // STRUCTURES AND CLASSES
 // ***************************************************************************************
 
-bool FILES::assign()
+bool FILES::assign(CONSOLE_COMMUNICATION &cons)
 {
   FALSE_CATCH ret_success;
   USB_DEV_DIR = (string)DEF_USB_DEV_DIR;
@@ -65,32 +65,78 @@ bool FILES::assign()
   
   if (!ret_success.has_false())
   {
+    cons.printw("File Assignments:");
+
     // Specific Directories and Files
     DEAMON_LOG = DEF_DEAMON_LOG;
-    AIRCRAFT_FA_FILE = AIRCRAFT_1090_DIR + (string)DEF_AIRCRAFT_FA_JSON_FILE;
+    cons.printw("  " + DEAMON_LOG);
+
+    if (!TEST_DATA_AIRCRAFT)
+    {
+      AIRCRAFT_FA_FILE = AIRCRAFT_1090_DIR + (string)DEF_AIRCRAFT_FA_JSON_FILE;
+    }
+    else
+    {
+      AIRCRAFT_FA_FILE = LOGS_AIRCRAFT_DIR + (string)DEF_AIRCRAFT_FA_JSON_FILE;
+    }
+    
+    cons.printw("  " + AIRCRAFT_FA_FILE);
+
 
     // Main Control for working rasfled
     ANIMATIONS_FILE = WORKING_DIR + (string)DEF_ANIMATIONS_FILE;
+    cons.printw("  " + ANIMATIONS_FILE);
+
     CONFIGURATION_FILE = WORKING_DIR + (string)DEF_CONFIGURATION;
+    cons.printw("  " + CONFIGURATION_FILE);
+
     RUNNING_STATE_FILE = WORKING_DIR + (string)DEF_RUNNING_STATE;
+    cons.printw("  " + RUNNING_STATE_FILE);
+
     QR_CODE_FILE = WORKING_DIR + (string)DEF_QR_CODE;
+    cons.printw("  " + QR_CODE_FILE);
+
     REFERENCE_CARD_FILE = WORKING_DIR + (string)DEF_REFERENCE_CARD;
+    cons.printw("  " + REFERENCE_CARD_FILE);
+
 
     // // CAN Bus
     CAN_BUS_DEVICE_FILE = USB_DEV_DIR + (string)DEF_CAN_BUS_USB_DEV_NAME;
+    cons.printw("  " + CAN_BUS_DEVICE_FILE);
+
     CAN_BUS_HISTORY_FILE = LOGS_CAN_BUS_HISTORY_SUB_DIR + (string)DEF_CAN_BUS_SAVE_LOG_NAME;
+    cons.printw("  " + CAN_BUS_HISTORY_FILE);
+
     CAN_BUS_LOG_FILE = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_SAVE_LOG_NAME;
+    cons.printw("  " + CAN_BUS_LOG_FILE);
+
     CAN_BUS_TEST_FILE = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_TEST_DATA_NAME;
+    cons.printw("  " + CAN_BUS_TEST_FILE);
+
     CAN_BUS_ERROR_LOG_FILE = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_ERROR_LOG;
+    cons.printw("  " + CAN_BUS_ERROR_LOG_FILE);
+
 
     // GPS
     GPS_DEVICE_FILE = USB_DEV_DIR + (string)DEF_GPS_USB_DEV_NAME;
+    cons.printw("  " + GPS_DEVICE_FILE);
+
     GPS_LOG_FILE = LOGS_GPS_DIR + (string)DEF_GPS_SAVE_LOG_NAME;
+    cons.printw("  " + GPS_LOG_FILE);
+
     GPS_TEST_FILE = LOGS_GPS_DIR + (string)DEF_GPS_TEST_DATA_NAME;
+    cons.printw("  " + GPS_TEST_FILE);
+
 
     // Compass
     COMPASS_DEVICE_FILE = (string)DEF_COMPASS_DEV_NAME;
+    cons.printw("  " + COMPASS_DEVICE_FILE);
+
     COMPASS_OFFSET_HISTROY_FILE = COMPASS_DIR + (string)DEF_COMPASS_OFFSET_HISTORY;
+    cons.printw("  " + COMPASS_OFFSET_HISTROY_FILE);
+
+
+    cons.printw("");
   }
 
   return !ret_success.has_false();

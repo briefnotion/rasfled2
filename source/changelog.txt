@@ -1,3 +1,9 @@
+2.176_240703
+  - Phased out older alert system.
+  - Brought the ADSB alerts into the newer Alert 
+      system.
+  - Made changes to the newer Alert System.
+
 2.175_240628
   - Minor changes made to the Alert System 2.
 

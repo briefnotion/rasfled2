@@ -196,14 +196,14 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
           ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
         }
 
-        title +=  ": INFO (" + to_string(alert_num) + ")";
+        title +=  ": INFO (" + to_string(alert_num) + ") " + Alerts_List.gen_alert_title(alert_num);
         
         if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           ImVec2 screen_pos = ImGui::GetCursorScreenPos();
 
           ImGui::Text(Alerts_List.gen_alert_text_line_1(alert_num).c_str());
-          ImGui::Text(Alerts_List.res_alert_text_line_2(alert_num).c_str());
+          ImGui::Text(Alerts_List.gen_alert_text_line_2(alert_num).c_str());
 
           ImGui::SetCursorScreenPos(screen_pos);
           if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(alert_num)).c_str(), ImGui::GetContentRegionAvail()))

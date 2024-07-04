@@ -21,6 +21,7 @@
 #include "stringthings.h"
 #include "fled_time.h"
 #include "json_interface.h"
+#include "alert_system_2.h"
 
 /*
 aircraft.json
@@ -44,12 +45,14 @@ seen:       how long ago (in seconds before "now") a message was last received f
 rssi:       recent average RSSI (signal power), in dbFS; this will always be negative.
 */
 
+/*
 class ALERT_ENTRY
 {
   public:
   int ALERT_LEVEL;
   string ALERT;
 };
+*/
 
 class AIRCRAFT
 {
@@ -61,7 +64,7 @@ class AIRCRAFT
   public:
   
   // Alert List
-  deque<ALERT_ENTRY> ALERT_LIST;
+  //deque<ALERT_ENTRY> ALERT_LIST;
 
   // VARIABLES            // DESCRIPTION                                EXAMPLE
   // Idents
@@ -115,11 +118,11 @@ class AIRCRAFT
 
   int data_count();
 
-  void check_alerts();
+  void check_alerts(ALERT_SYSTEM_2 &Alerts);
 
   void count_data();
 
-  void post_process();
+  void post_process(ALERT_SYSTEM_2 &Alerts);
 
   bool alert();
 };
@@ -158,7 +161,7 @@ class AIRCRAFT_COORDINATOR
 
   bool is_active();
 
-  bool process(string JSON_Text);
+  bool process(string JSON_Text, ALERT_SYSTEM_2 &Alerts);
 };
 
 

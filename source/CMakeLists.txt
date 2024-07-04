@@ -45,7 +45,6 @@ target_sources(rasfled PRIVATE
   helper.cpp
   globe_helper.cpp
   screen4_helper.cpp
-  alert_system.cpp
   alert_system_2.cpp
   dnfwts.cpp
   LEDstuff.cpp

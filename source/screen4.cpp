@@ -1023,6 +1023,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               sdSysData.ALERTS_AUTO.display_active_alerts();
             }
           }
+          
         }
         ImGui::EndChild();
 
@@ -1468,6 +1469,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       if (RESTACK_WINDOWS == false)
       {
         AUTOMOBILE_ALERTS.draw(sdSysData, sdSysData.ALERTS_AUTO);
+        ADSB_ALERTS.draw(sdSysData, sdSysData.ALERTS_ADSB);
       }
 
       // ---------------------------------------------------------------------------------------

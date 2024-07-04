@@ -24,7 +24,7 @@
 #include "hardware_status.h"
 
 #include "aircraft_coordinator.h"
-#include "alert_system.h"
+//#include "alert_system.h"
 #include "alert_system_2.h"
 #include "dnfwts.h"
 #include "comport.h"
@@ -117,7 +117,7 @@ class FILES
   string COMPASS_DEVICE_FILE = "";
   string COMPASS_OFFSET_HISTROY_FILE = "";
 
-  bool assign();
+  bool assign(CONSOLE_COMMUNICATION &cons);
 };
 
 // -------------------------------------------------------------------------------------
@@ -171,7 +171,9 @@ class system_data
   STAT_DATA_DOUBLE dblSCREEN_RENDER_TIME; // Stored value returned on pref sleep cycle.
   STAT_DATA_DOUBLE dblCOMMS_TRANSFER_TIME; // Stored value returned on pref sleep cycle.
 
-  ALERT_SYSTEM ALERTS;
+  //ALERT_SYSTEM ALERTS;
+  
+  ALERT_SYSTEM_2 ALERTS_ADSB;
   ALERT_SYSTEM_2 ALERTS_AUTO;
 
   // For Debuging Gadgets

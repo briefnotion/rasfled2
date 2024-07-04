@@ -19,12 +19,18 @@ using namespace std;
 // -------------------------------------------------------------------------------------
 //  Alert Class
 
-void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Alert_Text_Line_1)
+void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Title, string Line_1, string Line_2)
 {
   ID = Id;
   DISPLAY = true;
-  ALERT_TEXT_LINE_1 = Alert_Text_Line_1;
-  ALERT_TEXT_LINE_2 = "";
+  ALERT_TITLE = Title;
+  ALERT_TEXT_LINE_1 = Line_1;
+  ALERT_TEXT_LINE_2 = Line_2;
+}
+
+void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Alert_Text_Line_1)
+{
+  alert_no_condition(Id, "", Alert_Text_Line_1, "");
 }
 
 bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_Alert, int &Changes)
@@ -170,6 +176,24 @@ void ALERT_2_TYPE_MONITOR::clear()
 
 // -------------------------------------------------------------------------------------
 
+int ALERT_SYSTEM_2::search_for_alert(deque<ALERT_2_TYPE_MONITOR> &Alert_deque, string Title)
+{
+  int ret_pos = -1;
+
+  if (Alert_deque.size() > 0)
+  {
+    for (int pos = 0; pos < (int)Alert_deque.size() && ret_pos == -1; pos++)
+    {
+      if (Title == Alert_deque[pos].alert_title())
+      {
+        ret_pos = pos;
+      }
+    }
+  }
+
+  return ret_pos;
+}
+
 bool ALERT_SYSTEM_2::changed()
 {
   return CHANGED;
@@ -298,6 +322,46 @@ void ALERT_SYSTEM_2::res_clear(int Id)
 }
 
 // generic alerts
+
+void ALERT_SYSTEM_2::add_generic_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_System, string Text)
+{
+  ALERT_2_TYPE_MONITOR tmp_alert;
+
+  tmp_alert.alert_no_condition(LATEST_ID, Text);
+
+  GENERIC_ALERTS.push_back(tmp_alert);
+
+  LATEST_ID++;
+
+  Sound_System.add_note_to_queue(Thread, "f7");
+
+  CHANGED = true;
+}
+
+void ALERT_SYSTEM_2::add_generic_alert(string Title, string Line_1, string Line_2)
+{
+  int find_id = search_for_alert(GENERIC_ALERTS, Title);
+
+  if (find_id == -1)
+  {
+    ALERT_2_TYPE_MONITOR tmp_alert;
+
+    tmp_alert.alert_no_condition(LATEST_ID, Title, Line_1, Line_2);
+    GENERIC_ALERTS.push_back(tmp_alert);
+    LATEST_ID++;
+  }
+  else
+  {
+    GENERIC_ALERTS[find_id].update_alert_text_line_1(Line_1);
+    GENERIC_ALERTS[find_id].update_alert_text_line_2(Line_2);
+    GENERIC_ALERTS[find_id].set_display_on();   // tmp until clear method created.
+  }
+
+  //Sound_System.add_note_to_queue(Thread, "f7");
+
+  CHANGED = true;
+}
+
 int ALERT_SYSTEM_2::gen_size()
 {
   return GENERIC_ALERTS.size();
@@ -313,10 +377,21 @@ bool ALERT_SYSTEM_2::gen_display(int Id)
   return  GENERIC_ALERTS[Id].display();
 }
 
+string ALERT_SYSTEM_2::gen_alert_title(int Id)
+{
+  return  GENERIC_ALERTS[Id].alert_title();
+}
+
 string ALERT_SYSTEM_2::gen_alert_text_line_1(int Id)
 {
   return  GENERIC_ALERTS[Id].alert_text_line_1();
 }
+
+string ALERT_SYSTEM_2::gen_alert_text_line_2(int Id)
+{
+  return  GENERIC_ALERTS[Id].alert_text_line_2();
+}
+
 
 int ALERT_SYSTEM_2::gen_alert_id(int Id)
 {
@@ -333,21 +408,6 @@ void ALERT_SYSTEM_2::gen_acknowlege(int Id)
 int ALERT_SYSTEM_2::alert_count()
 {
   return (GENERIC_ALERTS.size() + ALERTS_RESERVE_COUNT);
-}
-
-void ALERT_SYSTEM_2::add_generic_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_System, string Text)
-{
-  ALERT_2_TYPE_MONITOR tmp_alert;
-
-  tmp_alert.alert_no_condition(LATEST_ID, Text);
-
-  GENERIC_ALERTS.push_back(tmp_alert);
-
-  LATEST_ID++;
-
-  Sound_System.add_note_to_queue(Thread, "f7");
-
-  CHANGED = true;
 }
 
 void ALERT_SYSTEM_2::alert_list_clean()
