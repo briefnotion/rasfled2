@@ -64,7 +64,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     // Check alerts
 
     // S-Temp alert
-    if (sdSysData.ALERTS_AUTO.res_alert_condition_greater_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, AUTO_RESERVE_ALERT_TEMP_S_TEMP, 
+    if (sdSysData.ALERTS_AUTO.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_S_TEMP, 
         sdSysData.CAR_INFO.CALCULATED.s_temp(), 65.0f, 50.0f))
     {
       sdSysData.ALERTS_AUTO.res_update_alert_text_line_1(AUTO_RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)sdSysData.CAR_INFO.CALCULATED.s_temp()));
@@ -73,7 +73,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     }
 
     // MIL alert
-    if (sdSysData.ALERTS_AUTO.res_alert_condition(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, AUTO_RESERVE_ALERT_MIL, 
+    if (sdSysData.ALERTS_AUTO.res_alert_condition(AUTO_RESERVE_ALERT_MIL, 
                                       sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == true , 
                                       sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == false))
     {
@@ -81,7 +81,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     }
 
     // Coolant alert
-    if (sdSysData.ALERTS_AUTO.res_alert_condition_greater_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, AUTO_RESERVE_ALERT_TEMP_COOLANT, 
+    if (sdSysData.ALERTS_AUTO.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_COOLANT, 
                                       sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c(), 100.0f, 80.0f))
     {
       sdSysData.ALERTS_AUTO.res_update_alert_text_line_1(AUTO_RESERVE_ALERT_TEMP_COOLANT, "Coolant Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.c());
@@ -90,7 +90,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     }
 
     // Air Intake Temp alert
-    if (sdSysData.ALERTS_AUTO.res_alert_condition_greater_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, AUTO_RESERVE_ALERT_TEMP_INTAKE, 
+    if (sdSysData.ALERTS_AUTO.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_INTAKE, 
                                       sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c(), 
                                       sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 25.0f, 
                                       sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 15.0f))
@@ -101,7 +101,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     }
 
     // Voltage alert
-    if (sdSysData.ALERTS_AUTO.res_alert_condition_less_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, AUTO_RESERVE_ALERT_ELEC_VOLTAGE, 
+    if (sdSysData.ALERTS_AUTO.res_alert_condition_less_than(AUTO_RESERVE_ALERT_ELEC_VOLTAGE, 
                                       sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v(), 11.5f, 12.0f))
     {
       sdSysData.ALERTS_AUTO.res_update_alert_text_line_1(AUTO_RESERVE_ALERT_ELEC_VOLTAGE, "Voltage Value is " + sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
@@ -110,7 +110,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     }
 
     // Fuel Level alert
-    if (sdSysData.ALERTS_AUTO.res_alert_condition_less_than(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, AUTO_RESERVE_ALERT_FUEL_LEVEL, 
+    if (sdSysData.ALERTS_AUTO.res_alert_condition_less_than(AUTO_RESERVE_ALERT_FUEL_LEVEL, 
                                       sdSysData.CAR_INFO.STATUS.FUEL.val_level(), 1.0f, 2.0f))
     {
       sdSysData.ALERTS_AUTO.res_update_alert_text_line_1(AUTO_RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + sdSysData.CAR_INFO.STATUS.FUEL.level());
@@ -265,8 +265,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     // Shutdown Warning
     if (IGNITION == false && IGNITION_WARNING_TIMER.enabled() && IGNITION_WARNING_TIMER.ping_down(tmeCurrentTime) == false)
     {
-      sdSysData.ALERTS_AUTO.add_generic_alert(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, 
-                                            "System shutting down in 1 minute.");
+      sdSysData.ALERTS_AUTO.add_generic_alert("System shutting down in 1 minute.");
     }
 
     // Shutdown

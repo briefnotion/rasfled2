@@ -1,3 +1,7 @@
+2.177_240705
+  - Made some small changes to how the alert system 
+      plays sounds.
+
 2.176_240703
   - Phased out older alert system.
   - Brought the ADSB alerts into the newer Alert 

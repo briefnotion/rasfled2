@@ -175,6 +175,24 @@ void ALERT_2_TYPE_MONITOR::clear()
 }
 
 // -------------------------------------------------------------------------------------
+void ALERT_SYSTEM_2::play_alert_level_1()
+{
+  PASSING_NOTE_QUEUE.push_back("d7");
+  PASSING_NOTE_QUEUE.push_back( "c7");
+}
+
+void ALERT_SYSTEM_2::play_alert_level_2()
+{
+  PASSING_NOTE_QUEUE.push_back("e7");
+  PASSING_NOTE_QUEUE.push_back("d7");
+}
+
+void ALERT_SYSTEM_2::play_alert_level_3()
+{
+  PASSING_NOTE_QUEUE.push_back("c7");
+  PASSING_NOTE_QUEUE.push_back("d7");
+  PASSING_NOTE_QUEUE.push_back("e7");
+}
 
 int ALERT_SYSTEM_2::search_for_alert(deque<ALERT_2_TYPE_MONITOR> &Alert_deque, string Title)
 {
@@ -200,13 +218,13 @@ bool ALERT_SYSTEM_2::changed()
 }
 
 // reserve alerts
-void ALERT_SYSTEM_2::res_alert_no_condition(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, string Alert_Text)
+void ALERT_SYSTEM_2::res_alert_no_condition(int Id, string Alert_Text)
 {
   ALERTS_RESERVE[Id].alert_no_condition(Id, Alert_Text);
-  Sound_System.add_note_to_queue(Thread, "f7");
+  PASSING_NOTE_QUEUE.push_back("f7");
 }
 
-bool ALERT_SYSTEM_2::res_alert_condition(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, bool Raise_Alert, bool Clear_Alert)
+bool ALERT_SYSTEM_2::res_alert_condition(int Id, bool Raise_Alert, bool Clear_Alert)
 {
   int alert_change = 0;
   bool was_active = ALERTS_RESERVE[Id].active();
@@ -215,7 +233,7 @@ bool ALERT_SYSTEM_2::res_alert_condition(COMMAND_THREAD &Thread, SOUNDS &Sound_S
 
   if (alert_change  == 2 && was_active == false)       // Alert
   {
-    Sound_System.play_alert_level_3(Thread);
+    play_alert_level_3();
   }
   //else if (alert_change  == 1)  // Warning
   //{
@@ -223,28 +241,28 @@ bool ALERT_SYSTEM_2::res_alert_condition(COMMAND_THREAD &Thread, SOUNDS &Sound_S
   //}
   else if (alert_change  == -1)                       // Cleared
   {
-    Sound_System.play_alert_level_1(Thread);
+    play_alert_level_1();
   }
 
   return ret_description_request;
 }
 
-bool ALERT_SYSTEM_2::res_alert_condition_greater_than(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, float Value, float Alert_Condition, float Clear_Condition)
+bool ALERT_SYSTEM_2::res_alert_condition_greater_than(int Id, float Value, float Alert_Condition, float Clear_Condition)
 {
   ALERTS_RESERVE[Id].VALUE = Value;
   ALERTS_RESERVE[Id].ALERT_VALUE = Alert_Condition;
   ALERTS_RESERVE[Id].CLEAR_VALUE = Clear_Condition;
 
-  return res_alert_condition(Thread, Sound_System, Id, Value >= Alert_Condition, Value < Clear_Condition);
+  return res_alert_condition(Id, Value >= Alert_Condition, Value < Clear_Condition);
 }
 
-bool ALERT_SYSTEM_2::res_alert_condition_less_than(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, float Value, float Alert_Condition, float Clear_Condition)
+bool ALERT_SYSTEM_2::res_alert_condition_less_than(int Id, float Value, float Alert_Condition, float Clear_Condition)
 {
   ALERTS_RESERVE[Id].VALUE = Value;
   ALERTS_RESERVE[Id].ALERT_VALUE = Alert_Condition;
   ALERTS_RESERVE[Id].CLEAR_VALUE = Clear_Condition;
 
-  return res_alert_condition(Thread, Sound_System, Id, Value <= Alert_Condition, Value > Clear_Condition);
+  return res_alert_condition(Id, Value <= Alert_Condition, Value > Clear_Condition);
 }
 
 void ALERT_SYSTEM_2::res_update_alert_title(int Id, string Title)
@@ -323,7 +341,7 @@ void ALERT_SYSTEM_2::res_clear(int Id)
 
 // generic alerts
 
-void ALERT_SYSTEM_2::add_generic_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_System, string Text)
+void ALERT_SYSTEM_2::add_generic_alert(string Text)
 {
   ALERT_2_TYPE_MONITOR tmp_alert;
 
@@ -333,7 +351,7 @@ void ALERT_SYSTEM_2::add_generic_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_Sys
 
   LATEST_ID++;
 
-  Sound_System.add_note_to_queue(Thread, "f7");
+  PASSING_NOTE_QUEUE.push_back("f7");
 
   CHANGED = true;
 }
@@ -349,6 +367,8 @@ void ALERT_SYSTEM_2::add_generic_alert(string Title, string Line_1, string Line_
     tmp_alert.alert_no_condition(LATEST_ID, Title, Line_1, Line_2);
     GENERIC_ALERTS.push_back(tmp_alert);
     LATEST_ID++;
+    
+    PASSING_NOTE_QUEUE.push_back("f7");
   }
   else
   {
@@ -356,8 +376,6 @@ void ALERT_SYSTEM_2::add_generic_alert(string Title, string Line_1, string Line_
     GENERIC_ALERTS[find_id].update_alert_text_line_2(Line_2);
     GENERIC_ALERTS[find_id].set_display_on();   // tmp until clear method created.
   }
-
-  //Sound_System.add_note_to_queue(Thread, "f7");
 
   CHANGED = true;
 }
@@ -410,7 +428,7 @@ int ALERT_SYSTEM_2::alert_count()
   return (GENERIC_ALERTS.size() + ALERTS_RESERVE_COUNT);
 }
 
-void ALERT_SYSTEM_2::alert_list_clean()
+void ALERT_SYSTEM_2::alert_list_clean(COMMAND_THREAD &Thread, SOUNDS &Sound_System)
 {
   if (GENERIC_ALERTS.size() > 0)
   {
@@ -436,6 +454,15 @@ void ALERT_SYSTEM_2::alert_list_clean()
       ALERTS_RESERVE_COUNT++;
     }
   }
+
+  if (PASSING_NOTE_QUEUE.size() > 0)
+  {
+    for (int pos = 0; pos < (int)PASSING_NOTE_QUEUE.size(); pos++)
+    {
+      Sound_System.add_note_to_queue(Thread, PASSING_NOTE_QUEUE[pos]);
+    }
+    PASSING_NOTE_QUEUE.clear();
+  }
 }
 
 void ALERT_SYSTEM_2::display_active_alerts()
@@ -454,19 +481,19 @@ void ALERT_SYSTEM_2::display_active_alerts()
   }
 }
 
-void ALERT_SYSTEM_2::sound_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Value)
+void ALERT_SYSTEM_2::sound_alert(int Value)
 {
   if (Value == 3)
   {
-    Sound_System.play_alert_level_3(Thread);
+    play_alert_level_3();
   }
   else if (Value == 2)
   {
-    Sound_System.play_alert_level_2(Thread);
+    play_alert_level_2();
   }
   else
   {
-    Sound_System.play_alert_level_1(Thread);
+    play_alert_level_1();
   }
 }
 

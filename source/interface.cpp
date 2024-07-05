@@ -1061,7 +1061,7 @@ void processcommandlineinput(system_data &sdSysData,
       // Alert Test
       if (check_command(sdSysData.SCREEN_COMMS, " alert", "Alert"))
       {
-        sdSysData.ALERTS_AUTO.add_generic_alert(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, "Alert");
+        sdSysData.ALERTS_AUTO.add_generic_alert("Alert");
       }
 
       /*
@@ -1078,17 +1078,17 @@ void processcommandlineinput(system_data &sdSysData,
 
       if (check_command(sdSysData.SCREEN_COMMS, " sound1", "Alert Sound 1"))
       {
-        sdSysData.ALERTS_AUTO.sound_alert(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, 1);
+        sdSysData.ALERTS_AUTO.sound_alert(1);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, " sound2", "Alert Sound 2"))
       {
-        sdSysData.ALERTS_AUTO.sound_alert(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, 2);
+        sdSysData.ALERTS_AUTO.sound_alert(2);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, " sound3", "Alert Sound 3"))
       {
-        sdSysData.ALERTS_AUTO.sound_alert(sdSysData.COMMAND_THREADS, sdSysData.SOUND_SYSTEM, 3);
+        sdSysData.ALERTS_AUTO.sound_alert(3);
       }
 
       /*

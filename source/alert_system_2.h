@@ -124,6 +124,8 @@ class ALERT_SYSTEM_2
   bool CHANGED = false;
 
   int ALERTS_RESERVE_COUNT = 0;
+
+  vector<string> PASSING_NOTE_QUEUE;
   
   public:
 
@@ -131,6 +133,10 @@ class ALERT_SYSTEM_2
   deque<ALERT_2_TYPE_MONITOR> ALERTS_RESERVE;
 
   private:
+
+  void play_alert_level_1();
+  void play_alert_level_2();
+  void play_alert_level_3();
 
   int search_for_alert(deque<ALERT_2_TYPE_MONITOR> &Alert_deque, string Title);
   // returns position of alert with title in list.
@@ -143,11 +149,11 @@ class ALERT_SYSTEM_2
   bool changed();
   
   // reserved alerts
-  void res_alert_no_condition(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, string Alert_Text);
+  void res_alert_no_condition(int Id, string Alert_Text);
 
-  bool res_alert_condition(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, bool Raise_Alert, bool Clear_Alert);
-  bool res_alert_condition_greater_than(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, float Value, float Alert_Condition, float Clear_Condition);
-  bool res_alert_condition_less_than(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Id, float Value, float Alert_Condition, float Clear_Condition);
+  bool res_alert_condition(int Id, bool Raise_Alert, bool Clear_Alert);
+  bool res_alert_condition_greater_than(int Id, float Value, float Alert_Condition, float Clear_Condition);
+  bool res_alert_condition_less_than(int Id, float Value, float Alert_Condition, float Clear_Condition);
   
   void res_update_alert_title(int Id, string Title);
   void res_update_alert_text_line_1(int Id, string Text_Line_1);
@@ -169,7 +175,7 @@ class ALERT_SYSTEM_2
   void res_clear(int Id);
 
   // generic alerts
-  void add_generic_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_System, string Text);
+  void add_generic_alert(string Text);
   void add_generic_alert(string Title, string Line_1, string Line_2);
 
   int gen_size();
@@ -183,10 +189,10 @@ class ALERT_SYSTEM_2
 
   // all alerts
   int alert_count();
-  void alert_list_clean();
+  void alert_list_clean(COMMAND_THREAD &Thread, SOUNDS &Sound_System);
   void display_active_alerts();
 
-  void sound_alert(COMMAND_THREAD &Thread, SOUNDS &Sound_System, int Value);
+  void sound_alert(int Value);
   //  1 - green
   //  2 - yellow
   //  3 - red
