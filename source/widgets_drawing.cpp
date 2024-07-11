@@ -101,10 +101,18 @@ void Text_Rotate(std::string textToRotate, float angleToRotate, bbEnum rotationC
 
 // ---------------------------------------------------------------------------------------
 
-void simple_wrap_text_box(ImDrawList *Draw_List, system_data &sdSysData)
+void simple_wrap_text_box(string Text, ImDrawList *Draw_List, system_data &sdSysData)
 {
+  ImGui::Text(Text.c_str());
   Draw_List->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), sdSysData.COLOR_SELECT.c_yellow().ACTIVE);
 }
+
+//void simple_black_back_text_box(string Text, ImDrawList *Draw_List, system_data &sdSysData)
+//{
+  // isnt going to work
+//  ImGui::Text(Text.c_str());
+//  Draw_List->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), sdSysData.COLOR_SELECT.c_black().ACTIVE, 3.0f);
+//}
 
 // ---------------------------------------------------------------------------------------
 

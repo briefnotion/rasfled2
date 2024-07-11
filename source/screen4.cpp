@@ -623,8 +623,8 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
               ImGui::SameLine();
 
-              ImGui::Text(COMMAND_TEXT.c_str());
-              simple_wrap_text_box(draw_list_status_left, sdSysData);
+              //ImGui::Text(COMMAND_TEXT.c_str());
+              simple_wrap_text_box(COMMAND_TEXT, draw_list_status_left, sdSysData);
 
               ImGui::PopFont();
               ImGui::PopStyleColor();

@@ -102,7 +102,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
         alert_type = 1;
       }
       
-      title += ": " + Alerts_List.res_alert_title(alert_num) + " (" + to_string(alert_num) + ")";
+      title += "(" + to_string(alert_num) + ") : " + Alerts_List.res_alert_title(alert_num);
 
       if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
       {
@@ -196,7 +196,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
           ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
         }
 
-        title +=  ": INFO (" + to_string(alert_num) + ") " + Alerts_List.gen_alert_title(alert_num);
+        title +=  "(" + to_string(alert_num) + ") : " + Alerts_List.gen_alert_title(alert_num);
         
         if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {

@@ -464,7 +464,7 @@ int loop_2(bool TTY_Only)
     sdSystem.SCREEN_COMMS.printw("Adjusting Program Clock");
     sdSystem.SCREEN_COMMS.printw("");
 
-    sdSystem.ALERTS_AUTO.add_generic_alert("Adjusting Program Clock");
+    sdSystem.ALERTS_AUTO.add_generic_alert("PROGRAM CLOCK", "Adjusting Program Clock", "");
     
     sdSystem.PROGRAM_TIME.clear_error();
   }
@@ -711,8 +711,8 @@ int loop_2(bool TTY_Only)
       sdSystem.SCREEN_COMMS.printw("           DIFFERANCE: "  + to_string(sdSystem.PROGRAM_TIME.error()));
       sdSystem.SCREEN_COMMS.printw("");
 
-      sdSystem.ALERTS_AUTO.add_generic_alert("ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
-                                          to_string(sdSystem.PROGRAM_TIME.error()));
+      sdSystem.ALERTS_AUTO.add_generic_alert("ALERT", "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
+                                          to_string(sdSystem.PROGRAM_TIME.error()), "");
 
       sdSystem.PROGRAM_TIME.clear_error();
     }
@@ -988,7 +988,9 @@ int loop_2(bool TTY_Only)
       // Read ADS-B Aircraft JSON
       if (watcher_aircraft_json.changed() == true)
       {
-        sdSystem.AIRCRAFT_COORD.process(file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE), sdSystem.ALERTS_ADSB);
+        sdSystem.AIRCRAFT_COORD.process(file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE), sdSystem.ALERTS_ADSB, 
+                                                          sdSystem.GPS_SYSTEM.active(sdSystem.PROGRAM_TIME.current_frame_time()), 
+                                                          sdSystem.GPS_SYSTEM.current_position().LATITUDE, sdSystem.GPS_SYSTEM.current_position().LONGITUDE);
       }
 
       processcommandlineinput(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);

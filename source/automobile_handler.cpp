@@ -265,7 +265,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     // Shutdown Warning
     if (IGNITION == false && IGNITION_WARNING_TIMER.enabled() && IGNITION_WARNING_TIMER.ping_down(tmeCurrentTime) == false)
     {
-      sdSysData.ALERTS_AUTO.add_generic_alert("System shutting down in 1 minute.");
+      sdSysData.ALERTS_AUTO.add_generic_alert("POWER", "System shutting down in", "1 minute.");
     }
 
     // Shutdown

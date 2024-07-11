@@ -1,3 +1,8 @@
+2.178_240706
+  - Small Changes.
+  - Added proximity alert to ADS-B. 
+  - Small change to the way aircraft data is shown on the ADS-B screen. 
+
 2.177_240705
   - Made some small changes to how the alert system 
       plays sounds.

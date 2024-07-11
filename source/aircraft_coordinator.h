@@ -114,6 +114,9 @@ class AIRCRAFT
                           //  received message (300 second expiration)
   STRING_FLOAT RSSI;      // Signal Strength                            "rssi":-28.4
 
+  // Alternate Data
+  float DISTANCE_FROM_BASE = -1;  // Distance from received antenna. -1 if data not avail.
+
   string simple_float_to_string(int Decimal_Positions, float Number);
 
   int data_count();
@@ -122,7 +125,7 @@ class AIRCRAFT
 
   void count_data();
 
-  void post_process(ALERT_SYSTEM_2 &Alerts);
+  void post_process();
 
   bool alert();
 };
@@ -138,6 +141,11 @@ class AIRCRAFT_DATA
   FLED_TIME_VAR CONVERTED_TIME;
 
   int DELTA_MESSAGES = 0;
+
+  // GPS Active
+  bool CURRENT_POS_AVAIL = false;
+  float CURRENT_LAT = 0.0f;
+  float CURRENT_LON = 0.0f;
   
   bool CHANGED = false;
 };
@@ -155,13 +163,14 @@ class AIRCRAFT_COORDINATOR
 
   private:
 
-  void post_post_process();
+  void post_post_process(ALERT_SYSTEM_2 &Alerts);
 
   public:
 
   bool is_active();
 
-  bool process(string JSON_Text, ALERT_SYSTEM_2 &Alerts);
+  bool process(string JSON_Text, ALERT_SYSTEM_2 &Alerts, 
+                bool GPS_Avail, float Current_Latitude, float Current_Longitude);
 };
 
 

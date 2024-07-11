@@ -28,10 +28,10 @@ void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Title, string Line_
   ALERT_TEXT_LINE_2 = Line_2;
 }
 
-void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Alert_Text_Line_1)
-{
-  alert_no_condition(Id, "", Alert_Text_Line_1, "");
-}
+//void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Alert_Text_Line_1)
+//{
+//  alert_no_condition(Id, "", Alert_Text_Line_1, "");
+//}
 
 bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_Alert, int &Changes)
 {
@@ -218,9 +218,9 @@ bool ALERT_SYSTEM_2::changed()
 }
 
 // reserve alerts
-void ALERT_SYSTEM_2::res_alert_no_condition(int Id, string Alert_Text)
+void ALERT_SYSTEM_2::res_alert_no_condition(int Id, string Title, string Line_1, string Line_2)
 {
-  ALERTS_RESERVE[Id].alert_no_condition(Id, Alert_Text);
+  ALERTS_RESERVE[Id].alert_no_condition(Id, Title, Line_1, Line_2);
   PASSING_NOTE_QUEUE.push_back("f7");
 }
 
@@ -341,20 +341,20 @@ void ALERT_SYSTEM_2::res_clear(int Id)
 
 // generic alerts
 
-void ALERT_SYSTEM_2::add_generic_alert(string Text)
-{
-  ALERT_2_TYPE_MONITOR tmp_alert;
-
-  tmp_alert.alert_no_condition(LATEST_ID, Text);
-
-  GENERIC_ALERTS.push_back(tmp_alert);
-
-  LATEST_ID++;
-
-  PASSING_NOTE_QUEUE.push_back("f7");
-
-  CHANGED = true;
-}
+//void ALERT_SYSTEM_2::add_generic_alert(string Text)
+//{
+//  ALERT_2_TYPE_MONITOR tmp_alert;
+//
+//  tmp_alert.alert_no_condition(LATEST_ID, Text);
+//
+//  GENERIC_ALERTS.push_back(tmp_alert);
+//
+//  LATEST_ID++;
+//
+//  PASSING_NOTE_QUEUE.push_back("f7");
+//
+//  CHANGED = true;
+//}
 
 void ALERT_SYSTEM_2::add_generic_alert(string Title, string Line_1, string Line_2)
 {

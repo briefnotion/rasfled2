@@ -85,7 +85,7 @@ void SOUNDS::add_note_to_queue(COMMAND_THREAD &Thread, string Note)
     note_filename = B7;
   }
 
-  if (note_filename != "")
+  if (note_filename != "" && MUTE == false)
   {
     Thread.run_command(note_filename.c_str(), 0);
   }
@@ -93,72 +93,48 @@ void SOUNDS::add_note_to_queue(COMMAND_THREAD &Thread, string Note)
 
 void SOUNDS::play_alert_level_1(COMMAND_THREAD &Thread)
 {
-  if (MUTE == false)
-  {
-    add_note_to_queue(Thread, "d7");
-    add_note_to_queue(Thread, "c7");
-  }
+  add_note_to_queue(Thread, "d7");
+  add_note_to_queue(Thread, "c7");
 }
 
 void SOUNDS::play_alert_level_2(COMMAND_THREAD &Thread)
 {
-  if (MUTE == false)
-  {
-    add_note_to_queue(Thread, "e7");
-    add_note_to_queue(Thread, "d7");
-  }
+  add_note_to_queue(Thread, "e7");
+  add_note_to_queue(Thread, "d7");
 }
 
 void SOUNDS::play_alert_level_3(COMMAND_THREAD &Thread)
 {
-  if (MUTE == false)
-  {
-    add_note_to_queue(Thread, "c7");
-    add_note_to_queue(Thread, "d7");
-    add_note_to_queue(Thread, "e7");
-  }
+  add_note_to_queue(Thread, "c7");
+  add_note_to_queue(Thread, "d7");
+  add_note_to_queue(Thread, "e7");
 }
 
 void SOUNDS::play_gear_park(COMMAND_THREAD &Thread)
 {
-  if (MUTE == false)
-  {
-    add_note_to_queue(Thread, "c6");
-    add_note_to_queue(Thread, "c6");
-    add_note_to_queue(Thread, "c6");
-  }
+  add_note_to_queue(Thread, "c6");
+  add_note_to_queue(Thread, "c6");
+  add_note_to_queue(Thread, "c6");
 }
 void SOUNDS::play_gear_reverse(COMMAND_THREAD &Thread)
 {
-  if (MUTE == false)
-  {
-    add_note_to_queue(Thread, "d6");
-    add_note_to_queue(Thread, "d6");
-  }
+  add_note_to_queue(Thread, "d6");
+  add_note_to_queue(Thread, "d6");
 }
 void SOUNDS::play_gear_neutral(COMMAND_THREAD &Thread)
 {
-  if (MUTE == false)
-  {
-    add_note_to_queue(Thread, "e6");
-  }
+  add_note_to_queue(Thread, "e6");
 }
 void SOUNDS::play_gear_drive(COMMAND_THREAD &Thread)
 {
-  if (MUTE == false)
-  {
-    add_note_to_queue(Thread, "f6");
-    add_note_to_queue(Thread, "f6");
-  }
+  add_note_to_queue(Thread, "f6");
+  add_note_to_queue(Thread, "f6");
 }
 void SOUNDS::play_gear_low(COMMAND_THREAD &Thread)
 {
-  if (MUTE == false)
-  {
-    add_note_to_queue(Thread, "g7");
-    add_note_to_queue(Thread, "g6");
-    add_note_to_queue(Thread, "f6");
-  }
+  add_note_to_queue(Thread, "g7");
+  add_note_to_queue(Thread, "g6");
+  add_note_to_queue(Thread, "f6");
 }
 
 // -------------------------------------------------------------------------------------

@@ -60,7 +60,7 @@ class ALERT_2_TYPE_MONITOR
   float CLEAR_VALUE = 0;
 
   void alert_no_condition(int Id, string Title, string Line_1, string Line_2);
-  void alert_no_condition(int Id, string Alert_Text_Line_1);
+  //void alert_no_condition(int Id, string Alert_Text_Line_1);
   
   bool alert_condition(int Id, bool Raise_Alert, bool Clear_Alert, int &Changes);
   // returns true if requesting a description.
@@ -149,7 +149,7 @@ class ALERT_SYSTEM_2
   bool changed();
   
   // reserved alerts
-  void res_alert_no_condition(int Id, string Alert_Text);
+  void res_alert_no_condition(int Id, string Title, string Line_1, string Line_2);
 
   bool res_alert_condition(int Id, bool Raise_Alert, bool Clear_Alert);
   bool res_alert_condition_greater_than(int Id, float Value, float Alert_Condition, float Clear_Condition);
@@ -175,7 +175,7 @@ class ALERT_SYSTEM_2
   void res_clear(int Id);
 
   // generic alerts
-  void add_generic_alert(string Text);
+  //void add_generic_alert(string Text);
   void add_generic_alert(string Title, string Line_1, string Line_2);
 
   int gen_size();

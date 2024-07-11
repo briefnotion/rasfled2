@@ -45,7 +45,9 @@ void Text_Rotate(std::string textToRotate, float angleToRotate, bbEnum rotationC
 
 // ---------------------------------------------------------------------------------------
 
-void simple_wrap_text_box(ImDrawList *Draw_List, system_data &sdSysData);
+void simple_wrap_text_box(string Text, ImDrawList *Draw_List, system_data &sdSysData);
+
+//void simple_black_back_text_box(string Text, ImDrawList *Draw_List, system_data &sdSysData);
 
 // ---------------------------------------------------------------------------------------
 

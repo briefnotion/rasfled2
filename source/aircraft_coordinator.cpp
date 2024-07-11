@@ -120,14 +120,14 @@ void AIRCRAFT::check_alerts(ALERT_SYSTEM_2 &Alerts)
   // Check Emergency Stat
   if (EMERGENCY.get_str_value() != "" && EMERGENCY.get_str_value() != "none")
   {
-      //tmp_alert_entry.ALERT_LEVEL = 3;
-      //tmp_alert_entry.ALERT = "  \\ EMERGENCY ALERT: " + EMERGENCY.get_str_value();
-      //ALERT_LIST.push_back(tmp_alert_entry);
-      //ALERT= true;
+    //tmp_alert_entry.ALERT_LEVEL = 3;
+    //tmp_alert_entry.ALERT = "  \\ EMERGENCY ALERT: " + EMERGENCY.get_str_value();
+    //ALERT_LIST.push_back(tmp_alert_entry);
+    //ALERT= true;
 
-      Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
-                                "ALERT: Special Purpose Code",
-                                EMERGENCY.get_str_value());
+    Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
+                              "ALERT: Special Purpose Code",
+                              EMERGENCY.get_str_value());
   }
 
   // Check Values
@@ -140,6 +140,14 @@ void AIRCRAFT::check_alerts(ALERT_SYSTEM_2 &Alerts)
       ALERT= true;
   }
   */
+
+ // Check Proximity
+  if (DISTANCE_FROM_BASE >= 0.0f &&  "" && DISTANCE_FROM_BASE < 1.0f)
+  {
+    Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
+                              "ALERT: Proximity",
+                              "Distance: " + to_string_round_to_nth(DISTANCE_FROM_BASE, 1) + " miles");
+  }
 }
 
 void AIRCRAFT::count_data()
@@ -176,7 +184,7 @@ void AIRCRAFT::count_data()
                 ;
 }
 
-void AIRCRAFT::post_process(ALERT_SYSTEM_2 &Alerts)
+void AIRCRAFT::post_process()
 {
   // Convert Data to Display Standard.
   // Vertical Rate
@@ -195,7 +203,7 @@ void AIRCRAFT::post_process(ALERT_SYSTEM_2 &Alerts)
     float scent_rate  = (float)D_VERTICAL_RATE.get_int_value();
     float speed       = ((float)SPEED.get_float_value()) * (5280/ 60);
 
-    D_FLIGHT_ANGLE.store (to_string(abs((atan( scent_rate / speed) * (180 / 3.14159)))));
+    D_FLIGHT_ANGLE.store (to_string(abs((atan( scent_rate / speed) * (180 / float_PI)))));
   }
 
   if (POSITION.LATITUDE.conversion_success() == true && 
@@ -210,9 +218,6 @@ void AIRCRAFT::post_process(ALERT_SYSTEM_2 &Alerts)
 
   // Fill Data Size Field
   count_data();
-
-  // Fill Alert Fields.
-  check_alerts(Alerts);
 }
 
 bool AIRCRAFT::alert()
@@ -220,7 +225,7 @@ bool AIRCRAFT::alert()
   return ALERT;
 }
 
-void AIRCRAFT_COORDINATOR::post_post_process()
+void AIRCRAFT_COORDINATOR::post_post_process(ALERT_SYSTEM_2 &Alerts)
 // Calculate full aircraft data.
 {
   // Convert time
@@ -233,6 +238,28 @@ void AIRCRAFT_COORDINATOR::post_post_process()
       DATA.CONVERTED_TIME.put_deciseconds(string_to_int(DATA.NOW.get_str_value().erase(0, dec_pos +1)));
     }
   }
+  
+  // Step through each aircraft
+  for (int aircraft = 0; aircraft < (int)DATA.AIRCRAFTS.size(); aircraft++)
+  {
+    // Calculate Distance from base for each Aircraft
+    if (DATA.CURRENT_POS_AVAIL && DATA.AIRCRAFTS[aircraft].POSITION.GLOBAL_POSITION_FOUND)
+    {
+      DATA.AIRCRAFTS[aircraft].DISTANCE_FROM_BASE = calculate_distance(
+                                  DATA.AIRCRAFTS[aircraft].POSITION.LATITUDE.get_float_value(), 
+                                  DATA.AIRCRAFTS[aircraft].POSITION.LONGITUDE.get_float_value(), 
+                                  DATA.CURRENT_LAT, 
+                                  DATA.CURRENT_LON);
+    }
+    else
+    {
+      DATA.AIRCRAFTS[aircraft].DISTANCE_FROM_BASE = -1;
+    }
+
+    // Check alerts for each Aircraft
+    DATA.AIRCRAFTS[aircraft].check_alerts(Alerts);
+  }
+
 }
 
 bool AIRCRAFT_COORDINATOR::is_active()
@@ -240,9 +267,21 @@ bool AIRCRAFT_COORDINATOR::is_active()
   return IS_ACTIVE;
 }
 
-bool AIRCRAFT_COORDINATOR::process(string JSON_Text, ALERT_SYSTEM_2 &Alerts)
+bool AIRCRAFT_COORDINATOR::process(string JSON_Text, ALERT_SYSTEM_2 &Alerts, 
+                                    bool GPS_Avail, float Current_Latitude, float Current_Longitude)
 {
   bool ret_success = false;
+
+  if (GPS_Avail)
+  {
+    DATA.CURRENT_POS_AVAIL = true;
+    DATA.CURRENT_LAT = Current_Latitude;
+    DATA.CURRENT_LON = Current_Longitude;
+  }
+  else
+  {
+    DATA.CURRENT_POS_AVAIL = false;
+  }
 
   if (AIRCRAFT_JSON.load_json_from_string(JSON_Text))
   {
@@ -328,7 +367,7 @@ bool AIRCRAFT_COORDINATOR::process(string JSON_Text, ALERT_SYSTEM_2 &Alerts)
           }
 
           // Process Data Recieved on Aircraft
-          tmpAircraft.post_process(Alerts);
+          tmpAircraft.post_process();
 
           // Store Aircraft ADS-B Data into list.
           DATA.AIRCRAFTS.push_back(tmpAircraft);
@@ -337,7 +376,7 @@ bool AIRCRAFT_COORDINATOR::process(string JSON_Text, ALERT_SYSTEM_2 &Alerts)
     }
 
     // Process Data Recieved on All Aircraft
-    post_post_process();
+    post_post_process(Alerts);
     DATA.CHANGED = true;
     ret_success = true;
   }  
