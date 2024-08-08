@@ -2345,6 +2345,7 @@
       [
         {
           "Comment_1" : "Walking Pulse Velocity Anim Door_LF",
+          "Comment_2" : "All Velocity Colors are assigned in Rasfled",
           "Run_On_LED_LED_Strip_Name" : "Door"
         },
         {
@@ -2380,6 +2381,7 @@
       [
         {
           "Comment_1" : "Walking Pulse Velocity Anim Overhead_RF",
+          "Comment_2" : "All Velocity Colors are assigned in Rasfled",
           "Run_On_LED_LED_Strip_Name" : "Overhead"
         },
         {
@@ -2415,6 +2417,7 @@
       [
         {
           "Comment_1" : "Walking Pulse Velocity Anim Door_RF",
+          "Comment_2" : "All Velocity Colors are assigned in Rasfled",
           "Run_On_LED_LED_Strip_Name" : "Door"
         },
         {
@@ -2450,6 +2453,7 @@
       [
         {
           "Comment_1" : "Walking Pulse Velocity Anim Overhead_LB",
+          "Comment_2" : "All Velocity Colors are assigned in Rasfled",
           "Run_On_LED_LED_Strip_Name" : "Overhead"
         },
         {
@@ -2485,6 +2489,7 @@
       [
         {
           "Comment_1" : "Walking Pulse Velocity Anim Door_LB",
+          "Comment_2" : "All Velocity Colors are assigned in Rasfled",
           "Run_On_LED_LED_Strip_Name" : "Door"
         },
         {
@@ -2520,6 +2525,7 @@
       [
         {
           "Comment_1" : "Walking Pulse Velocity Anim Overhead_RB",
+          "Comment_2" : "All Velocity Colors are assigned in Rasfled",
           "Run_On_LED_LED_Strip_Name" : "Overhead"
         },
         {
@@ -2555,6 +2561,7 @@
       [
         {
           "Comment_1" : "Walking Pulse Velocity Anim Door_RB",
+          "Comment_2" : "All Velocity Colors are assigned in Rasfled",
           "Run_On_LED_LED_Strip_Name" : "Door"
         },
         {

@@ -1586,6 +1586,28 @@ void AUTOMOBILE_CALCULATED::compute_low(DNFWTS_ &Dnfwts, AUTOMOBILE_TRANSLATED_D
                                                       tmeFrame_Time,
                                                       Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent());
 
+    // Find slowest tire
+    {
+      float lowest_tire_speed = Status.SPEED.SPEED_LF_TIRE.val_meters_per_second();
+
+      if (Status.SPEED.SPEED_RF_TIRE.val_meters_per_second() < lowest_tire_speed)
+      {
+        lowest_tire_speed = Status.SPEED.SPEED_RF_TIRE.val_meters_per_second();
+      }
+
+      if (Status.SPEED.SPEED_LB_TIRE.val_meters_per_second() < lowest_tire_speed)
+      {
+        lowest_tire_speed = Status.SPEED.SPEED_LB_TIRE.val_meters_per_second();
+      }
+
+      if (Status.SPEED.SPEED_RB_TIRE.val_meters_per_second() < lowest_tire_speed)
+      {
+        lowest_tire_speed = Status.SPEED.SPEED_RB_TIRE.val_meters_per_second();
+      }
+
+      SPEED_ALL_TIRES_LOWEST.store_meters_per_second(lowest_tire_speed, tmeFrame_Time, 
+                                                      Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent());
+    }                                                      
 
     float current_velocity = SPEED_ALL_TIRES_AVERAGE.val_meters_per_second();
 

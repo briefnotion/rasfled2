@@ -102,8 +102,8 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
       if (BLINKER_BLINK)
       {
         Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
-                      sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
-                      sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD);
+                      sdSysData.COLOR_SELECT.c_orange().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                      sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_orange().STANDARD);
       }
     }
     else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
@@ -117,8 +117,8 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
       if (BLINKER_BLINK)
       {
         Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
-                      sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_yellow().STANDARD, 
-                      sdSysData.COLOR_SELECT.c_yellow().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+                      sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_orange().STANDARD, 
+                      sdSysData.COLOR_SELECT.c_orange().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
       }
     }
     //else

@@ -1,3 +1,19 @@
+2.179_240807
+  - Zoom level on map screen can now zoom down to .01 miles.
+  - Adjusted the tire rotation speed with a multiplier of 0.9.
+      Hopefully, this will allow velocity of the automobile, 
+      read from the wheels, to match the velocity read by 
+      the gps system.  Also, when cruise is set to 55, the 
+      speedometer should be displaying a value closer to 55, 
+      and not 55 and a half.
+  - Adjusted the brightness of the velocity animations. 
+  - Changed the signal indication color from yellow to 
+      orange (amber, like the signal lights.)
+  - Set the fuel level warning level from 2 to 5 gallons, so 
+      that it will be less likely to pop on and off. 
+  - Changed the velocity animation color to orange. 
+  - Changed some of the velocity animation parameters. 
+
 2.178_240706
   - Small Changes.
   - Added proximity alert to ADS-B. 

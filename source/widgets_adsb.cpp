@@ -633,75 +633,117 @@ void ADSB_RANGE::set_zoom_level()
   {
     case 0:
     {
-      set_range(1.0f);
+      set_range(0.01f);
       calculate_lat_lon_to_point_scale();
       break;
     }
 
     case 1:
     {
-      set_range(2.0f);
+      set_range(0.03f);
       calculate_lat_lon_to_point_scale();
       break;
     }
 
     case 2:
     {
-      set_range(5.0f);
+      set_range(0.05f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 3:
     {
-      set_range(7.0f);
+      set_range(0.1f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 4:
     {
-      set_range(10.0f);
+      set_range(0.25f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 5:
     {
-      set_range(15.0f);
+      set_range(0.5f);
       calculate_lat_lon_to_point_scale();
       break;
     }
-    
+
     case 6:
     {
-      set_range(25.0f);
+      set_range(1.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
-    
+
     case 7:
     {
-      set_range(35.0f);
+      set_range(2.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
-    
+
     case 8:
     {
-      set_range(50.0f);
+      set_range(5.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 9:
     {
-      set_range(75.0f);
+      set_range(7.0f);
       calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 10:
+    {
+      set_range(10.0f);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 11:
+    {
+      set_range(15.0f);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 12:
+    {
+      set_range(25.0f);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 13:
+    {
+      set_range(35.0f);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 14:
+    {
+      set_range(50.0f);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 15:
+    {
+      set_range(75.0f);
+      calculate_lat_lon_to_point_scale();
+      break;
+    }
+    
+    case 16:
     {
       set_range(100.0f);
       calculate_lat_lon_to_point_scale();
@@ -761,7 +803,7 @@ void ADSB_RANGE::zoom_in()
 
 void ADSB_RANGE::zoom_out()
 {
-  if (ZOOM_LEVEL < 10)
+  if (ZOOM_LEVEL < 16)
   {
     ZOOM_LEVEL = ZOOM_LEVEL + 1;
     set_zoom_level();
@@ -779,7 +821,7 @@ void ADSB_RANGE::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
   {
     RADIUS_CIRCLE_POINT_SIZE = Working_Area.w / 2.0f * 0.6f;
 
-    ZOOM_LEVEL = 7;     // Default start zoom level
+    ZOOM_LEVEL = 13;     // Default start zoom level
     set_zoom_level();
   }
 
@@ -792,7 +834,7 @@ void ADSB_RANGE::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
   
   // Text Range
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V));
-  ImGui::Text("%.0f mi", RANGE);
+  ImGui::Text("%.2f mi", RANGE);
   ImGui::PopStyleColor();
 }
 
@@ -800,7 +842,7 @@ void ADSB_RANGE::draw_info()
 {
   ImGui::Text("LAT: %f", CENTER_LAT_LON.x);
   ImGui::Text("LON: %f", CENTER_LAT_LON.y);
-  ImGui::Text("RNG: %.0f mi", RANGE);
+  ImGui::Text("RNG: %.2f mi", RANGE);
 
   // test
   /*
