@@ -21,6 +21,7 @@
 // -------------------------------------------------------------------------------------
 // Timed Event Data Variable
 
+/*
 void timed_event_data::PostCheck(unsigned long tmeCurrent)
 // Check to see if the event is over, unlock and release Start Colors.
 {
@@ -44,6 +45,15 @@ void timed_event_data::PostCheck(unsigned long tmeCurrent)
         PREV_TIME_STAMP = tmeCurrent;
       }
     }
+  }
+}
+*/
+
+void timed_event_data::PostCheck_Duplication(unsigned long tmeCurrent)
+{
+  if (tmeCurrent >= ((abs(intENDPOS - intSTARTPOS) + 1) * intSPEED) + tmeSTARTTIME)
+  {
+    booDUPLICATION_NEEDED_FLAG = true;
   }
 }
 
@@ -464,7 +474,6 @@ bool timed_event::execute2(system_data &sdSysData, stupid_random sRND, CRGB hwLE
 
       if (teDATA[event].booCOMPLETE == false)
       {
-
         //Make adjustment if Event is a Velocity
         if (teDATA[event].VELOCITY == true)
         {
@@ -526,7 +535,7 @@ bool timed_event::execute2(system_data &sdSysData, stupid_random sRND, CRGB hwLE
           if (booEventComplete == true)
           {
             teDATA[event].booCOMPLETE = true;
-            teDATA[event].PostCheck(tmeCurrentTime);
+            //teDATA[event].PostCheck(tmeCurrentTime);
           }
         }
       }
@@ -581,13 +590,79 @@ bool timed_event::execute2(system_data &sdSysData, stupid_random sRND, CRGB hwLE
         }
       }
     }
-    
-    // Erase all completed events
-    for(int e = teDATA.size() -1; e >= 0; e-- )
+
+    // Post Check
+    for (int event = 0; event < (int)teDATA.size(); event ++)
     {
-      if (teDATA[e].booCOMPLETE == true)
+      // Check for duplication needed.
+      if (teDATA[event].booREPEAT && teDATA[event].booDUPLICATED == false)
       {
-        teDATA.erase(teDATA.begin() + e);
+        teDATA[event].PostCheck_Duplication(tmeCurrentTime);
+      }
+
+      // Check completion status of each event
+      //if (teDATA[event].booCOMPLETE)
+      //{
+        //teDATA[event].PostCheck(tmeCurrentTime);
+      //}
+    }
+
+    // Duplicate Needed
+    for (int event = 0; event < (int)teDATA.size(); event ++)
+    {
+      if (teDATA[event].booDUPLICATION_NEEDED_FLAG)
+      {
+        teDATA[event].booDUPLICATED = true;
+        teDATA[event].booDUPLICATION_NEEDED_FLAG = false;
+
+        // duplicate event with new times
+        timed_event_data tmp_event;
+
+        tmp_event.tmeSTARTTIME =  ((abs(teDATA[event].intENDPOS - teDATA[event].intSTARTPOS) + 1) * 
+                                      teDATA[event].intSPEED) + teDATA[event].tmeSTARTTIME;
+
+        tmp_event.strIdent = teDATA[event].strIdent;
+        tmp_event.intDURATION = teDATA[event].intDURATION;
+        tmp_event.intSPEED = teDATA[event].intSPEED;
+        tmp_event.bytANIMATION = teDATA[event].bytANIMATION;
+        tmp_event.bytLEDANIMATION = teDATA[event].bytLEDANIMATION;
+        tmp_event.crgbCOLORSTART1 = teDATA[event].crgbCOLORSTART1;
+        tmp_event.crgbCOLORSTART2 = teDATA[event].crgbCOLORSTART2;
+        tmp_event.crgbCOLORDEST1 = teDATA[event].crgbCOLORDEST1;
+        tmp_event.crgbCOLORDEST2 = teDATA[event].crgbCOLORDEST2;
+        tmp_event.intSTARTPOS = teDATA[event].intSTARTPOS;
+        tmp_event.intENDPOS = teDATA[event].intENDPOS;
+        tmp_event.booINVERTCOLOR = teDATA[event].booINVERTCOLOR;
+        tmp_event.booREPEAT = teDATA[event].booREPEAT;
+        tmp_event.booCLEARONEND = teDATA[event].booCLEARONEND;
+        tmp_event.booOFFDURINGDAY = teDATA[event].booOFFDURINGDAY;
+        tmp_event.String_Var_1 = teDATA[event].String_Var_1;
+        tmp_event.String_Var_2 = teDATA[event].String_Var_2;
+        tmp_event.Assigned_Group = teDATA[event].Assigned_Group;
+        tmp_event.VELOCITY = teDATA[event].VELOCITY;
+
+        tmp_event.PREV_TIME_STAMP = teDATA[event].PREV_TIME_STAMP;
+
+        tmp_event.booCOMPLETE = false;
+        tmp_event.booDUPLICATED = false;
+        tmp_event.booDUPLICATION_NEEDED_FLAG = false;
+
+        // add newly created event.
+        teDATA.push_back(tmp_event);
+      }
+    }
+
+    // Remove completed Events
+    int event = 0;
+    while (event < (int)teDATA.size())
+    {
+      if (teDATA[event].booCOMPLETE == true)
+      {
+        teDATA.erase(teDATA.begin() + event);
+      }
+      else
+      {
+        event++;
       }
     }
 

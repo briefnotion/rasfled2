@@ -1050,8 +1050,7 @@ void AUTOMOBILE_VELOCITY::store_trans(int kmph, float Multiplier, unsigned long 
   // Possibly meters per second devided by 3  (Multiplier = 1.2 for kmph conversion )
   //                                          (3.6 kmph = 1 mps                     )
 
-  MULTIPLIER = Multiplier;
-  float calculated_velocity = (kmph * MULTIPLIER) / 10;
+  float calculated_velocity = (kmph * Multiplier) / 10;
 
   float compared_velocity_diff = abs(calculated_velocity - Verify_kmph);
   
@@ -1068,27 +1067,27 @@ void AUTOMOBILE_VELOCITY::store_dash(int Upper, int Lower, unsigned long tmeFram
 
 void AUTOMOBILE_VELOCITY::store_LF(int mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  SPEED_LF_TIRE.store_kmph(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
+  SPEED_LF_TIRE.store_kmph(((float)(mps - 32768) * TIRE_MULTIPLIER) / 100.0f, tmeFrame_Time, tmeFrame_Time_Sent);
 }
 
 void AUTOMOBILE_VELOCITY::store_RF(int mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  SPEED_RF_TIRE.store_kmph(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
+  SPEED_RF_TIRE.store_kmph(((float)(mps - 32768) * TIRE_MULTIPLIER) / 100.0f, tmeFrame_Time, tmeFrame_Time_Sent);
 }
 
 void AUTOMOBILE_VELOCITY::store_LB(int mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  SPEED_LB_TIRE.store_kmph(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
+  SPEED_LB_TIRE.store_kmph(((float)(mps - 32768) * TIRE_MULTIPLIER) / 100.0f, tmeFrame_Time, tmeFrame_Time_Sent);
 }
 
 void AUTOMOBILE_VELOCITY::store_RB(int mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent)
 {
-  SPEED_RB_TIRE.store_kmph(((mps - 32768) * MULTIPLIER) / 100, tmeFrame_Time, tmeFrame_Time_Sent);
+  SPEED_RB_TIRE.store_kmph(((float)(mps - 32768) * TIRE_MULTIPLIER) / 100.0f, tmeFrame_Time, tmeFrame_Time_Sent);
 }
 
-float AUTOMOBILE_VELOCITY::multiplier()
+float AUTOMOBILE_VELOCITY::tire_multiplier()
 {
-  return MULTIPLIER;
+  return TIRE_MULTIPLIER;
 }
 
 //-----------

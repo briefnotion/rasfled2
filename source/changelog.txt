@@ -1,3 +1,12 @@
+2.180_240809
+  - Corrected the speed read from the tires multiplication 
+      error.
+  - Dimmed the velocity lights.
+  - Added Distance and removed Seen Time to and from the ADS-B 
+      table. 
+  - Made some changes to fledcore and the way repeat animations 
+      are handled.
+
 2.179_240807
   - Zoom level on map screen can now zoom down to .01 miles.
   - Adjusted the tire rotation speed with a multiplier of 0.9.

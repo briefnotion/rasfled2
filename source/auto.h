@@ -554,7 +554,7 @@ class AUTOMOBILE_VELOCITY
   bool CODED_AVAILABILITY = true;
   bool SOURCE_AVAILABILITY = false;
 
-  float MULTIPLIER = .9;
+  float TIRE_MULTIPLIER = 1.0f;
 
   public:
 
@@ -578,7 +578,7 @@ class AUTOMOBILE_VELOCITY
   void store_LB(int mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent);
   void store_RB(int mps, unsigned long tmeFrame_Time, unsigned long tmeFrame_Time_Sent);
 
-  float multiplier();
+  float tire_multiplier();
 };
 
 class AUTOMOBILE_TEMPATURE

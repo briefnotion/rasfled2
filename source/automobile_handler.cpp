@@ -428,37 +428,41 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         }
 
         // Multiplier for Individual Tire Speeds
+        
         // LF
         if (speed_tire_LF < activate_speed)
         {
-          brightness_LF = (activate_speed - speed_tire_LF) / 2.0f;
+          brightness_LF = (activate_speed - speed_tire_LF);
         }
         else 
         {
           brightness_LF = 0;
         }
         // RF
+
         if (speed_tire_RF < activate_speed)
         {
-          brightness_RF = (activate_speed - speed_tire_RF) / 2.0f;
+          brightness_RF = (activate_speed - speed_tire_RF);
         }
         else 
         {
           brightness_RF = 0;
         }
+
         // LB
         if (speed_tire_LB < activate_speed)
         {
-          brightness_LB = (activate_speed - speed_tire_LB) / 2.0f;
+          brightness_LB = (activate_speed - speed_tire_LB);
         }
         else 
         {
           brightness_LB = 0;
         }
+
         // RB
         if (speed_tire_RB < activate_speed)
         {
-          brightness_RB = (activate_speed - speed_tire_RB) / 2.0f;
+          brightness_RB = (activate_speed - speed_tire_RB);
         }
         else 
         {
@@ -477,7 +481,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         
 
         CRGB drive_color = CRGB(32, (int)(16 * multiplier_caution), 0);
-        CRGB velocity_color = CRGB(16, 8, 0);
+        CRGB velocity_color = CRGB(6, 3, 0);
         CRGB drive_pulse_color = CRGB(30, 30, 30);
 
         // Adjust light colors and atttributes

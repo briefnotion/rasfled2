@@ -88,10 +88,15 @@ class timed_event_data
   float VELOCITY_VALUE = 0;
   unsigned long PREV_TIME_STAMP = 0;
 
+  // Management Vars
   bool booCOMPLETE = true;
 
+  bool booDUPLICATED = false;
+  bool booDUPLICATION_NEEDED_FLAG = false;
 
-  void PostCheck(unsigned long tmeCurrent);
+  // Management Routines
+  //void PostCheck(unsigned long tmeCurrent);
+  void PostCheck_Duplication(unsigned long tmeCurrent);
 };
 
 

@@ -454,10 +454,12 @@ bool ADSB_WIDGET::draw(system_data &sdSysData)
     ImGui::TableNextColumn();
     ImGui::Text("%s", AIRCRAFT_DATA.NAV_HEADING.get_str_value().c_str());
     ImGui::TableNextColumn();
+    ImGui::Text("%.2f", AIRCRAFT_DATA.DISTANCE_FROM_BASE);
+    ImGui::TableNextColumn();
     ImGui::Text("%s", AIRCRAFT_DATA.SEEN_POS.get_str_value().c_str());
     ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.SEEN.get_str_value().c_str());
-    ImGui::TableNextColumn();
+    //ImGui::Text("%s", AIRCRAFT_DATA.SEEN.get_str_value().c_str());
+    //ImGui::TableNextColumn();
     ImGui::Text("%s", AIRCRAFT_DATA.RSSI.get_str_value().c_str());
   }
   else
@@ -487,6 +489,8 @@ bool ADSB_WIDGET::draw(system_data &sdSysData)
     ImGui::TableNextColumn();
     ImGui::Text(" ");
     ImGui::TableNextColumn();
+    //ImGui::Text(" ");
+    //ImGui::TableNextColumn();
     ImGui::Text(" ");
   }
   
@@ -2310,12 +2314,13 @@ void ADSB_SCREEN::display(system_data &sdSysData)
           ImGui::TableSetupColumn("SQWK");
           ImGui::TableSetupColumn("G SPD");
           ImGui::TableSetupColumn("V RTE");
-          ImGui::TableSetupColumn("ALTITUDE");
+          ImGui::TableSetupColumn("ALT");
           ImGui::TableSetupColumn("ALT NAV");
           ImGui::TableSetupColumn("HDG");
           ImGui::TableSetupColumn("HDG NAV");
-          ImGui::TableSetupColumn("SEEN P");
-          ImGui::TableSetupColumn("SEEN");
+          ImGui::TableSetupColumn("DIST");
+          ImGui::TableSetupColumn("SEEN");  // seen p
+          //ImGui::TableSetupColumn("SEEN");
           ImGui::TableSetupColumn("RSSI");
           ImGui::TableHeadersRow();
         }
