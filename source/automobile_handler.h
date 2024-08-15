@@ -67,10 +67,15 @@ class AUTOMOBILE_HANDLER
 
   TIMED_PING ALERT_TIMER;   // Restrict multiple sequential alerts
 
+  CRGB velocity_color = CRGB(6, 3, 0);
+  CRGB drive_pulse_color = CRGB(30, 30, 30);
+
   void alert(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
   // Flash lights
 
   public:
+
+  void set_velocity_color(CRGB CRGB_COLOR);
 
   void update_events(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
 };

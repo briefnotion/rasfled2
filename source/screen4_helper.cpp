@@ -48,55 +48,100 @@ void COLOR_COMBO::set_rgb(float R, float G, float B, float A, float Intensity)
   STANDARD_V  = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.7f);
   HOVERED     = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.8f);
   ACTIVE      = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.9f);
-
+  SIMPLE_RGB  = CRGB(static_cast<unsigned char>(R * 255.0f), static_cast<unsigned char>(G * 255.0f), static_cast<unsigned char>(B * 255.0f));
 }
+
+void COLOR_COMBO::set_rgb_v(float R, float G, float B, float A, float Intensity)
+{
+  TEXT = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
+
+  BACKGROUND  = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.2f);
+  DIM         = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.5f);
+  STANDARD    = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.7f);
+  STANDARD_V  = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
+  HOVERED     = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.8f);
+  ACTIVE      = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.9f);
+  SIMPLE_RGB  = CRGB(static_cast<unsigned char>(R * 255.0f), static_cast<unsigned char>(G * 255.0f), static_cast<unsigned char>(B * 255.0f));
+}
+
 
 void COLOR_COMBOS::init(float Intensity)
 {
-  COLOR_COMBO COLOR_COMB_BLACK; 
-  COLOR_COMBO COLOR_COMB_WHITE;
-  COLOR_COMBO COLOR_COMB_GREY;
-  COLOR_COMBO COLOR_COMB_RED;
-  COLOR_COMBO COLOR_COMB_ORANGE;
-  COLOR_COMBO COLOR_COMB_YELLOW;
-  COLOR_COMBO COLOR_COMB_GREEN;
-  COLOR_COMBO COLOR_COMB_CYAN;
-  COLOR_COMBO COLOR_COMB_BLUE;
-  COLOR_COMBO COLOR_COMB_PURPLE;
-  COLOR_COMBO COLOR_COMB_PINK;
-  COLOR_COMBO COLOR_COMB_CORPO;
+  if (ALREADY_INITIALIZED == false)
+  {
+    ALREADY_INITIALIZED = true; //prevent another routine from running again
 
-  // Base Colors
-  COLOR_COMB_BLACK.set_rgb(0.0f, 0.0f, 0.0f, 1.0f, Intensity);
-  COLOR_COMB_WHITE.set_rgb(1.0f, 1.0f, 1.0f, 1.0f, Intensity);
-  COLOR_COMB_GREY.set_rgb(0.2f, 0.2f, 0.2f, 1.0f, Intensity);
-  COLOR_COMB_RED.set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
-  COLOR_COMB_ORANGE.set_rgb(1.0f, 0.75f, 0.0f, 1.0f, Intensity);
-  COLOR_COMB_YELLOW.set_rgb(1.0f, 1.0f, 0.0f, 1.0f, Intensity);
-  COLOR_COMB_GREEN.set_rgb(0.0f, 1.0f, 0.0f, 1.0f, Intensity);
-  COLOR_COMB_CYAN.set_rgb(0.0f, 1.0f, 1.0f, 1.0f, Intensity);
-  COLOR_COMB_BLUE.set_rgb(0.0f, 0.0f, 1.0f, 1.0f, Intensity);
-  COLOR_COMB_PURPLE.set_rgb(1.0f, 0.0f, 1.0f, 1.0f, Intensity);
-  COLOR_COMB_PINK.set_rgb(1.0f, 0.0f, 0.5f, 1.0f, Intensity);
+    COLOR_COMBO COLOR_COMB_BLACK; 
+    COLOR_COMBO COLOR_COMB_WHITE;
+    COLOR_COMBO COLOR_COMB_GREY;
+    COLOR_COMBO COLOR_COMB_RED;
+    COLOR_COMBO COLOR_COMB_ORANGE;
+    COLOR_COMBO COLOR_COMB_YELLOW;
+    COLOR_COMBO COLOR_COMB_GREEN;
+    COLOR_COMBO COLOR_COMB_CYAN;
+    COLOR_COMBO COLOR_COMB_BLUE;
+    COLOR_COMBO COLOR_COMB_PURPLE;
+    COLOR_COMBO COLOR_COMB_PINK;
+    COLOR_COMBO COLOR_COMB_CORPO;
 
-  // Specific Colors
-  COLOR_COMB_CORPO.set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
-  COLOR_COMB_CORPO.STANDARD_V = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
-  COLOR_COMB_CORPO.TEXT = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
+    // Base Colors
+    COLOR_COMB_BLACK.set_rgb(0.0f, 0.0f, 0.0f, 1.0f, Intensity);
+    COLOR_COMB_WHITE.set_rgb(1.0f, 1.0f, 1.0f, 1.0f, Intensity);
+    COLOR_COMB_GREY.set_rgb(0.2f, 0.2f, 0.2f, 1.0f, Intensity);
+    COLOR_COMB_RED.set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
+    COLOR_COMB_ORANGE.set_rgb(1.0f, 0.75f, 0.0f, 1.0f, Intensity);
+    COLOR_COMB_YELLOW.set_rgb(1.0f, 1.0f, 0.0f, 1.0f, Intensity);
+    COLOR_COMB_GREEN.set_rgb(0.0f, 1.0f, 0.0f, 1.0f, Intensity);
+    COLOR_COMB_CYAN.set_rgb(0.0f, 1.0f, 1.0f, 1.0f, Intensity);
+    COLOR_COMB_BLUE.set_rgb(0.0f, 0.0f, 1.0f, 1.0f, Intensity);
+    COLOR_COMB_PURPLE.set_rgb(1.0f, 0.0f, 1.0f, 1.0f, Intensity);
+    COLOR_COMB_PINK.set_rgb(1.0f, 0.0f, 0.5f, 1.0f, Intensity);
 
-  // Put colors in vector list for reference
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_BLACK);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_WHITE);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_GREY);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_RED);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_ORANGE);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_YELLOW);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_GREEN);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_CYAN);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_BLUE);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_PURPLE);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_PINK);
-  COLOR_COMBINATIONS.push_back(COLOR_COMB_CORPO);
+    // Specific Colors
+    //COLOR_COMB_CORPO.set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
+    //COLOR_COMB_CORPO.STANDARD_V = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
+    //COLOR_COMB_CORPO.TEXT = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
+
+    // Put colors in vector list for reference
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_BLACK);
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_WHITE);
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_GREY);
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_RED);
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_ORANGE);
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_YELLOW);
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_GREEN);
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_CYAN);
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_BLUE);
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_PURPLE);
+    COLOR_COMBINATIONS.push_back(COLOR_COMB_PINK);
+    //COLOR_COMBINATIONS.push_back(COLOR_COMB_CORPO);
+
+    // Base Colors V
+    COLOR_COMB_BLACK.set_rgb_v(0.0f, 0.0f, 0.0f, 1.0f, Intensity);
+    COLOR_COMB_WHITE.set_rgb_v(1.0f, 1.0f, 1.0f, 1.0f, Intensity);
+    COLOR_COMB_GREY.set_rgb_v(0.2f, 0.2f, 0.2f, 1.0f, Intensity);
+    COLOR_COMB_RED.set_rgb_v(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
+    COLOR_COMB_ORANGE.set_rgb_v(1.0f, 0.75f, 0.0f, 1.0f, Intensity);
+    COLOR_COMB_YELLOW.set_rgb_v(1.0f, 1.0f, 0.0f, 1.0f, Intensity);
+    COLOR_COMB_GREEN.set_rgb_v(0.0f, 1.0f, 0.0f, 1.0f, Intensity);
+    COLOR_COMB_CYAN.set_rgb_v(0.0f, 1.0f, 1.0f, 1.0f, Intensity);
+    COLOR_COMB_BLUE.set_rgb_v(0.0f, 0.0f, 1.0f, 1.0f, Intensity);
+    COLOR_COMB_PURPLE.set_rgb_v(1.0f, 0.0f, 1.0f, 1.0f, Intensity);
+    COLOR_COMB_PINK.set_rgb_v(1.0f, 0.0f, 0.5f, 1.0f, Intensity);
+
+    // Put colors in vector list for reference
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_BLACK);
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_WHITE);
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_GREY);
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_RED);
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_ORANGE);
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_YELLOW);
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_GREEN);
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_CYAN);
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_BLUE);
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_PURPLE);
+    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_PINK);
+  }
 }
 
 COLOR_COMBO COLOR_COMBOS::color(int Color)
@@ -109,7 +154,7 @@ COLOR_COMBO COLOR_COMBOS::color(int Color)
     }
     else
     {
-      return COLOR_COMBINATIONS[void_color_value];
+      return COLOR_COMBINATIONS_V[void_color_value];
     }
   }
   else
@@ -120,20 +165,9 @@ COLOR_COMBO COLOR_COMBOS::color(int Color)
 
 void COLOR_COMBOS::toggle_void_color(unsigned long Time)
 {
-  /*
-  // Fade default colors from one color to another over time
-  if (void_color)
-  {
-    color = gradiant_color();
-  }
-  else
-  {
-    color = gradiant_color();
-  }
-  */
-
   if (void_color_fade_timer.ping_down(Time) == false)
   {
+    CHANGED = true;
     void_color = !void_color;
     void_color_fade_timer.ping_up(Time, 5000);
   }
@@ -249,6 +283,34 @@ int COLOR_COMBOS::pink()
   return 10;
 }
 
+int COLOR_COMBOS::void_colr()
+{
+  return void_color_value;
+}
+
+void COLOR_COMBOS::void_color_set(int Color)
+{
+  void_color_value = Color;
+  CHANGED = true;
+}
+
+bool COLOR_COMBOS::changed_no_reset()
+{
+  return CHANGED;
+}
+
+bool COLOR_COMBOS::changed()
+{
+  if (CHANGED)
+  {
+    CHANGED = false;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
 
 // ---------------------------------------------------------------------------------------
 

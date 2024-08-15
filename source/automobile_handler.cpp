@@ -27,6 +27,11 @@ void AUTOMOBILE_HANDLER::alert(system_data &sdSysData, ANIMATION_HANDLER &Animat
   }
 }
 
+void AUTOMOBILE_HANDLER::set_velocity_color(CRGB CRGB_COLOR)
+{
+  velocity_color = CRGB_COLOR;
+}
+
 void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime)
 {
   // -------------------------------------------------------------------------------------
@@ -298,7 +303,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     float brightness_RB = 0;
 
     // control values
-    const int activate_speed = 10;
+    const int activate_speed = 6;
     const int caution_speed = 5;
 
     // -------------------------------------------------------------------------------------
@@ -432,7 +437,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         // LF
         if (speed_tire_LF < activate_speed)
         {
-          brightness_LF = (activate_speed - speed_tire_LF);
+          brightness_LF = 1 - speed_tire_LF / activate_speed;
         }
         else 
         {
@@ -442,7 +447,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 
         if (speed_tire_RF < activate_speed)
         {
-          brightness_RF = (activate_speed - speed_tire_RF);
+          brightness_RF = 1 - speed_tire_RF / activate_speed;
         }
         else 
         {
@@ -452,7 +457,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         // LB
         if (speed_tire_LB < activate_speed)
         {
-          brightness_LB = (activate_speed - speed_tire_LB);
+          brightness_LB = 1 - speed_tire_LB / activate_speed;
         }
         else 
         {
@@ -462,7 +467,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         // RB
         if (speed_tire_RB < activate_speed)
         {
-          brightness_RB = (activate_speed - speed_tire_RB);
+          brightness_RB = 1 - speed_tire_RB / activate_speed;
         }
         else 
         {
@@ -481,9 +486,6 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         
 
         CRGB drive_color = CRGB(32, (int)(16 * multiplier_caution), 0);
-        CRGB velocity_color = CRGB(6, 3, 0);
-        CRGB drive_pulse_color = CRGB(30, 30, 30);
-
         // Adjust light colors and atttributes
         // Gear
         Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_O", drive_color.brightness(multiplier));

@@ -356,41 +356,6 @@ bool save_running_state_json(system_data &sdSysData, string strFilename)
   return ret_success;
 }
 
-// -------------------------------------------------------------------------------------
-// Load Playlist
-/*
-bool load_playlist_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename)
-{
-  JSON_INTERFACE movies_json;
-
-  bool ret_success = false;
-
-  string json_movie_file = file_to_string(strFilename, ret_success);
-  
-  if (ret_success == true)
-  {
-    ret_success = movies_json.load_json_from_string(json_movie_file);
-
-    if (ret_success == true)
-    {
-      cons.printw("  " + strFilename + " read success");
-
-      for (int list = 0; list < movies_json.ROOT.DATA.size(); list++)
-      {
-        cons.the_player.Play_List.add_to_list(movies_json.ROOT.DATA[list].value());
-      }
-    }
-  }
-
-  if (ret_success == false)
-  {
-    cons.printw("  " + strFilename + " read error");
-    cons.printw("  Playlist not loaded.");
-  }
-
-  return ret_success;
-}
-*/
 
 
 #endif

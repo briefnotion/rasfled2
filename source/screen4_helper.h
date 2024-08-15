@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "fled_time.h"
+#include "LEDstuff.h"
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
@@ -99,19 +100,25 @@ class COLOR_COMBO
   ImColor HOVERED;
   ImColor ACTIVE;
   ImColor TEXT;
+  CRGB    SIMPLE_RGB;
 
   void set_rgb(float R, float G, float B, float A, float Intensity);
+  void set_rgb_v(float R, float G, float B, float A, float Intensity);
 };
 
 class COLOR_COMBOS
 {
   private:
 
-  vector<COLOR_COMBO> COLOR_COMBINATIONS;
+  vector<COLOR_COMBO> COLOR_COMBINATIONS;   //Color palates for standard
+  vector<COLOR_COMBO> COLOR_COMBINATIONS_V; // Color palates for corpo mode
 
-  int void_color_value = 11;
+  bool ALREADY_INITIALIZED = false;
+
+  int void_color_value = 3;
   bool void_color = false;
   TIMED_PING void_color_fade_timer;
+  bool CHANGED = false;
 
   public:
 
@@ -144,7 +151,23 @@ class COLOR_COMBOS
   int blue();
   int purple();
   int pink();
+  int void_colr();
+
+  void void_color_set(int Color);
+  bool void_color_change();
+
+  bool changed_no_reset();
+  // tmp routine
+
+  bool changed();
+  // tmp routine
+  // resets to false after read
 };
+
+//class NEO_COLOR
+//{
+//  COLOR_COMBO color();
+//}
 
 // ---------------------------------------------------------------------------------------
 

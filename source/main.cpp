@@ -520,6 +520,45 @@ int loop_2(bool TTY_Only)
     sdSystem.SCREEN_COMMS.printw("    Running state file not loaded.");
     //sdSystem.ALERTS.add_generic_alert("Running state file not loaded.");
   }
+  else
+  {
+    sdSystem.SCREEN_COMMS.printw("    Running state file loaded.");
+
+    // Simple screen void color set
+    if (sdSystem.running_color_list.strRunningColor == "White")
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.white());
+    }
+    else if (sdSystem.running_color_list.strRunningColor == "Red")
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.red());
+    }
+    else if (sdSystem.running_color_list.strRunningColor == "Green")
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.green());
+    }
+    else if (sdSystem.running_color_list.strRunningColor == "Blue")
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.blue());
+    }
+    else if (sdSystem.running_color_list.strRunningColor == "Purple")
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.purple());
+    }
+    else if (sdSystem.running_color_list.strRunningColor == "Cyan")
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.cyan());
+    }
+    else if (sdSystem.running_color_list.strRunningColor == "Orange")
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.orange());
+    }
+    else
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.red());
+    }
+
+  }
 
   // Loading Animations Library.
   ANIMATION_HANDLER animations;
@@ -1086,6 +1125,18 @@ int loop_2(bool TTY_Only)
       sdSystem.CAR_INFO.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_AUTO, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // Process Automobile Lights
+      if (sdSystem.COLOR_SELECT.changed_no_reset())
+      {
+        if (sdSystem.running_color_list.strRunningColor == "Red" || sdSystem.running_color_list.strRunningColor == "Blue")
+        {
+          automobile_handler.set_velocity_color(CRGB(255, 192, 0).brightness(0.20f));
+        }
+        else
+        {
+          automobile_handler.set_velocity_color((sdSystem.COLOR_SELECT.color(sdSystem.COLOR_SELECT.void_colr()).SIMPLE_RGB).brightness(0.20f));
+        }
+      }
+
       automobile_handler.update_events(sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // ---------------------------------------------------------------------------------------

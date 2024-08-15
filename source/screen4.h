@@ -148,7 +148,7 @@ class SCREEN4
   TIMED_PING PING_BLINKER;
   bool BLINKER_BLINK = true;
 
-  bool CHANGED = false;
+  //bool CHANGED = false;
 
   void door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size);
   void hazard_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size);

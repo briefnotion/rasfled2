@@ -554,7 +554,7 @@ class AUTOMOBILE_VELOCITY
   bool CODED_AVAILABILITY = true;
   bool SOURCE_AVAILABILITY = false;
 
-  float TIRE_MULTIPLIER = 1.0f;
+  float TIRE_MULTIPLIER = 1.126f;
 
   public:
 
