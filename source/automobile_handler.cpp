@@ -27,9 +27,18 @@ void AUTOMOBILE_HANDLER::alert(system_data &sdSysData, ANIMATION_HANDLER &Animat
   }
 }
 
-void AUTOMOBILE_HANDLER::set_velocity_color(CRGB CRGB_COLOR)
+void AUTOMOBILE_HANDLER::set_velocity_color(system_data &sdSysData)
 {
-  velocity_color = CRGB_COLOR;
+  if (sdSysData.running_color_list.strRunningColor == "Red" || sdSysData.running_color_list.strRunningColor == "Blue")
+  {
+    velocity_color = CRGB(255, 192, 0).brightness(0.20f);
+  }
+  else
+  {
+    velocity_color = CRGB(sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB).brightness(0.20f);
+  }
+  
+  sdSysData.AUTO_VELOCITY_COLOR_CHANGED = false;
 }
 
 void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime)
@@ -38,6 +47,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
   // Automobile Data Switched to Not Available
 
   // Data Grab to reduce calc times.
+
+  if (sdSysData.AUTO_VELOCITY_COLOR_CHANGED)
+  {
+    set_velocity_color(sdSysData);
+  }
+
   float speed_lowest_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_LOWEST.val_mph();
   float speed_average_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph();
 
@@ -302,10 +317,6 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     float brightness_LB = 0;
     float brightness_RB = 0;
 
-    // control values
-    const int activate_speed = 6;
-    const int caution_speed = 5;
-
     // -------------------------------------------------------------------------------------
     // Alerts at non stops at low speed
     
@@ -334,7 +345,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     // Lights
     
     // Turn off lights if speed over set value.
-    if (speed_lowest_tire_speed > activate_speed + 6)
+    if (speed_lowest_tire_speed > ACTIVATE_SPEED + 6)
     {
       if (LIGHT_DOOR_HANDLE_ON == true)
       {
@@ -357,7 +368,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 
     // -------------------------------------------------------------------------------------
     // Turn on lights if speed under set value.
-    else if (speed_lowest_tire_speed < activate_speed + 4)
+    else if (speed_lowest_tire_speed < ACTIVATE_SPEED + 4)
     {
       if (LIGHT_DOOR_HANDLE_ON == false)
       {
@@ -423,9 +434,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         }
 
         // Multiplier
-        if (speed_average_tire_speed < activate_speed)
+        if (speed_average_tire_speed < ACTIVATE_SPEED)
         {
-          multiplier = 1 - speed_average_tire_speed / activate_speed;
+          multiplier = 1 - speed_average_tire_speed / ACTIVATE_SPEED;
         }
         else 
         {
@@ -435,9 +446,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         // Multiplier for Individual Tire Speeds
         
         // LF
-        if (speed_tire_LF < activate_speed)
+        if (speed_tire_LF < ACTIVATE_SPEED)
         {
-          brightness_LF = 1 - speed_tire_LF / activate_speed;
+          brightness_LF = 1 - speed_tire_LF / ACTIVATE_SPEED;
         }
         else 
         {
@@ -445,9 +456,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         }
         // RF
 
-        if (speed_tire_RF < activate_speed)
+        if (speed_tire_RF < ACTIVATE_SPEED)
         {
-          brightness_RF = 1 - speed_tire_RF / activate_speed;
+          brightness_RF = 1 - speed_tire_RF / ACTIVATE_SPEED;
         }
         else 
         {
@@ -455,9 +466,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         }
 
         // LB
-        if (speed_tire_LB < activate_speed)
+        if (speed_tire_LB < ACTIVATE_SPEED)
         {
-          brightness_LB = 1 - speed_tire_LB / activate_speed;
+          brightness_LB = 1 - speed_tire_LB / ACTIVATE_SPEED;
         }
         else 
         {
@@ -465,9 +476,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         }
 
         // RB
-        if (speed_tire_RB < activate_speed)
+        if (speed_tire_RB < ACTIVATE_SPEED)
         {
-          brightness_RB = 1 - speed_tire_RB / activate_speed;
+          brightness_RB = 1 - speed_tire_RB / ACTIVATE_SPEED;
         }
         else 
         {
@@ -475,9 +486,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         }
         
         // Caution Multiplier based on Trasmission Speed
-        if (speed_average_tire_speed < caution_speed)
+        if (speed_average_tire_speed < CAUTION_SPEED)
         {
-          multiplier_caution = 1 - speed_average_tire_speed / caution_speed;
+          multiplier_caution = 1 - speed_average_tire_speed / CAUTION_SPEED;
         }
         else 
         {

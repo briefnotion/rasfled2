@@ -24,7 +24,6 @@
 #include "hardware_status.h"
 
 #include "aircraft_coordinator.h"
-//#include "alert_system.h"
 #include "alert_system_2.h"
 #include "dnfwts.h"
 #include "comport.h"
@@ -40,24 +39,6 @@ using namespace std;
 // ***************************************************************************************
 // STRUCTURES AND CLASSES
 // ***************************************************************************************
-
-
-class SECTION_STATUS
-{
-  private:
-
-  bool Value = false;
-
-  public:
-
-  void on(bool &Needs_Refresh);
-
-  void off(bool &Needs_Refresh);
-
-  bool value();
-};
-
-// -------------------------------------------------------------------------------------
 
 class FILES
 {
@@ -241,7 +222,11 @@ class system_data
   // Advertisements
   string DIRECTORY_ADVERTISEMENTS = "";
 
+  // Do not eff with the system var
   DNFWTS_ DNFWTS;
+
+  // Temporary placement of auto velocity color
+  bool AUTO_VELOCITY_COLOR_CHANGED = false;
 
   SOUNDS SOUND_SYSTEM;  // Primitive sound system.
 
@@ -273,133 +258,7 @@ class system_data
   void read_hardware_status(int Milis_Frequency);
 
  };
-// -------------------------------------------------------------------------------------
 
-// -------------------------------------------------------------------------------------
-// Tacks all key presses and remembers data associated to whatever key is pressed.
-class Keys
-{
-  private:
-  struct Letter
-  // For each letter, assign a behavior and type for it.
-  {
-    int LETTER;           // Letter, keypress, main value
-    int COUNT = 0;        // set up how many times the key can be pressed brofor reset.
-    int VALUE = 0;        // with every press, this value increases, this is value returned.
-    bool PRESSED = true;  // Assume anything could have been press when 
-                          //   program starts.
-    bool ACTIVE = true ;  // Only process keys that are set to active.
-  };
-
-  // Full Command Line value(as is)
-  struct CommandLine
-  {
-    string COMMANDLINE = "";
-    bool PRESSED = true;
-    bool CLEARED = true;
-    bool CARRAGE_RETURN = false;
-  };
-
-  public:
-  Letter Chars[256];      // Full array of all letters
-  CommandLine Command;    // Command Line Reference.
-
-  void cmdClear();
-
-  bool cmdPressed();
-  
-  bool cmdCleared();
-
-  string cmdRead();
-
-  void cmdIn(int c);
-
-  void cmdInString(string cmd);
-
-  void set(int letter, int size);
-
-  void in(int c);
-
-  int get(int c);
-
-  int getnoreset(int c);
-
-  // returns true false value of letter, reset pressed (clean)
-  bool getTF(int c);
-
-  // returns pressed value (clean or dirty)
-  bool pressed(int c);
-};
-// -------------------------------------------------------------------------------------
-
-// -------------------------------------------------------------------------------------
-// Keeps track of mouse stuff.
-class TheMouse
-{
-  private:
-  
-  int X = 0;
-  int Y = 0;
-  int B = 0;
-
-  //MEVENT MOUSE_EVENT
-
-  int XDOWN = 0;
-  int YDOWN = 0;
-
-  int XCLICK = 0;
-  int YCLICK = 0;
-
-  bool CLICKED = false;
-
-  public:
-
-  int x();   // X Pos
-  
-  int y();   // Y Pos
-  
-  //MEVENT mouse_event()   // B Pos
-  int b(); // B Pos;
-
-  int x_clicked();   // Clicked X pos
-
-  int y_clicked();   // Clicked Y pos
-
-  void check_click();
-  // Do stuff on click down and click up.
-
-  //void store(int x, int y, MEVENT &mouse_event)
-  void store(int x, int y, int b);
-  // Put mouse changes into storage.
-
-  bool Clicked();
-// Check Clicked status.  If true clear click status.
-};
-// -------------------------------------------------------------------------------------
-
-// -------------------------------------------------------------------------------------
-// Screen Status Variables
-class ScreenStatus
-{
-  public:
-  // Main Refresh Indicator
-  bool Needs_Refresh = false;
-
-  SECTION_STATUS Window_CYBR;
-  SECTION_STATUS Window_Status;
-  SECTION_STATUS Window_Buttons;
-  SECTION_STATUS Window_Debug;
-  SECTION_STATUS Window_Timer;
-  SECTION_STATUS Window_CPicker;
-  SECTION_STATUS Window_Tabs;
-  SECTION_STATUS Window_Console;
-  SECTION_STATUS Window_Automobile_Screen;
-  SECTION_STATUS Window_Player;
-  SECTION_STATUS Window_ADS_B_Buttons;
-  SECTION_STATUS Window_ADS_B_Screen;
-  SECTION_STATUS Window_Log_Screen;
-  SECTION_STATUS Window_Alerts_Screen;
-};
 // -------------------------------------------------------------------------------------
 
 

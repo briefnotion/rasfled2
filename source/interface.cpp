@@ -1005,41 +1005,67 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS, "rw", "Set Running Color to White"))
       {
         sdSysData.set_running_color(crgbWhite, "White");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rr", "Set Running Color to Red"))
       {
         sdSysData.set_running_color(crgbRed, "Red");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rg", "Set Running Color to Green"))
       {
         sdSysData.set_running_color(crgbGreen, "Green");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rb", "Set Running Color to Blue"))
       {
         sdSysData.set_running_color(crgbBlue, "Blue");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "ru", "Set Running Color to Purple"))
       {
         sdSysData.set_running_color(crgbPurple, "Purple");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "ry", "Set Running Color to Yellow"))
       {
         sdSysData.set_running_color(crgbYellow, "Yellow");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rc", "Set Running Color to Cyan"))
       {
         sdSysData.set_running_color(crgbCyan, "Cyan");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rn", "Set Running Color to Orange"))
       {
         sdSysData.set_running_color(crgbOrange, "Orange");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+      }
+
+      if (check_command(sdSysData.SCREEN_COMMS, "rx", "Set Running Color to Black"))
+      {
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_black().SIMPLE_RGB).brightness(0.25f), "Black");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+      }
+
+      if (check_command(sdSysData.SCREEN_COMMS, "re", "Set Running Color to Grey"))
+      {
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_grey().SIMPLE_RGB).brightness(0.25f), "Grey");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+      }
+
+      if (check_command(sdSysData.SCREEN_COMMS, "rp", "Set Running Color to Pink"))
+      {
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_pink().SIMPLE_RGB).brightness(0.25f), "Pink");
+        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
       // -------------------------------------------------------------------------------------

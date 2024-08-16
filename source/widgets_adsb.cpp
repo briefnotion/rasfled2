@@ -454,7 +454,14 @@ bool ADSB_WIDGET::draw(system_data &sdSysData)
     ImGui::TableNextColumn();
     ImGui::Text("%s", AIRCRAFT_DATA.NAV_HEADING.get_str_value().c_str());
     ImGui::TableNextColumn();
+    if (AIRCRAFT_DATA.DISTANCE_FROM_BASE != -1.0f)
+    {
     ImGui::Text("%.2f", AIRCRAFT_DATA.DISTANCE_FROM_BASE);
+    }
+    else
+    {
+      ImGui::Text(" ");
+    }
     ImGui::TableNextColumn();
     ImGui::Text("%s", AIRCRAFT_DATA.SEEN_POS.get_str_value().c_str());
     ImGui::TableNextColumn();

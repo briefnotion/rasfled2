@@ -135,11 +135,21 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   ImGuiStyle& style = ImGui::GetStyle();
 
   // Standard Default Colors on startup
+  /*
   ImColor background = sdSysData.COLOR_SELECT.c_blue().BACKGROUND;
   ImColor dim = sdSysData.COLOR_SELECT.c_blue().DIM;
   ImColor standard = sdSysData.COLOR_SELECT.c_blue().STANDARD;
   ImColor hovered = sdSysData.COLOR_SELECT.c_blue().HOVERED;
   ImColor active = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
+  */
+ 
+  ImColor background = BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().BACKGROUND);
+  ImColor dim = DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().DIM);
+  ImColor standard = STANDARD.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().STANDARD);
+  ImColor hovered = HOVERED.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().HOVERED);
+  ImColor active = ACTIVE.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().ACTIVE);
+
+  DEFAULT_COLORS_CHANGED = BACKGROUND.changed() || DIM.changed() || STANDARD.changed() || HOVERED.changed() || ACTIVE.changed();
 
   //style.Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -456,10 +466,9 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
   if (sdSysData.TTY_ONLY == false)
   {
     //Check for changes in style
-    if (sdSysData.COLOR_SELECT.changed())
+    if (sdSysData.COLOR_SELECT.changed() || DEFAULT_COLORS_CHANGED)
     {
       set_screen_default_colors(sdSysData);
-      //CHANGED = false;
     }
 
     // Handle Console Iputs
@@ -1375,7 +1384,8 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       
       if (DISPLAY_RUNNING_COLOR == true && RESTACK_WINDOWS == false)
       {
-        ImGui::SetNextWindowSize(ImVec2(143, 292));
+        ImGui::SetNextWindowSize(ImVec2(sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x * 2.5f, 
+                                        sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y * 7.0f));
         if (ImGui::Begin("Running Color", &DISPLAY_RUNNING_COLOR, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           if (button_simple_color(sdSysData, "Red", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -1435,10 +1445,33 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
+          if (button_simple_color(sdSysData, "Black", sdSysData.COLOR_SELECT.black(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          {
+            sdSysData.SCREEN_COMMS.command_text_set("rx");
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.black());
+            DISPLAY_RUNNING_COLOR = false;
+          }
+          
+          if (button_simple_color(sdSysData, "Grey", sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          {
+            sdSysData.SCREEN_COMMS.command_text_set("re");
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.grey());
+            DISPLAY_RUNNING_COLOR = false;
+          }
+
+          ImGui::SameLine();
+          
           if (button_simple_color(sdSysData, "White", sdSysData.COLOR_SELECT.white(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rw");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.white());
+            DISPLAY_RUNNING_COLOR = false;
+          }
+
+          if (button_simple_color(sdSysData, "Pink", sdSysData.COLOR_SELECT.pink(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          {
+            sdSysData.SCREEN_COMMS.command_text_set("rp");
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.pink());
             DISPLAY_RUNNING_COLOR = false;
           }
         }

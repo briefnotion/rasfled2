@@ -164,10 +164,32 @@ class COLOR_COMBOS
   // resets to false after read
 };
 
-//class NEO_COLOR
-//{
-//  COLOR_COMBO color();
-//}
+class NEO_COLOR_PROPERTIES
+{
+  public:
+
+  float DURATION = 5000.0f;
+
+};
+
+class NEO_COLOR
+{
+  private:
+  ImColor CURRENT_COLOR = ImColor(0.0f, 0.0f, 0.0f, 0.0f);
+  ImColor NEW_COLOR = ImColor(0.0f, 0.0f, 0.0f, 0.0f);
+  ImColor PREV_COLOR = ImColor(0.0f, 0.0f, 0.0f, 0.0f);
+
+  float START_TIME = 0.0f;
+
+  bool CHANGED = false;
+
+  public:
+  NEO_COLOR_PROPERTIES PROPS;
+
+  bool changed();
+
+  ImColor color(unsigned long Time, ImColor Color);
+};
 
 // ---------------------------------------------------------------------------------------
 

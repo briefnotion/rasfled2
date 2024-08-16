@@ -524,6 +524,8 @@ int loop_2(bool TTY_Only)
   {
     sdSystem.SCREEN_COMMS.printw("    Running state file loaded.");
 
+    sdSystem.AUTO_VELOCITY_COLOR_CHANGED = true;
+
     // Simple screen void color set
     if (sdSystem.running_color_list.strRunningColor == "White")
     {
@@ -553,11 +555,22 @@ int loop_2(bool TTY_Only)
     {
       sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.orange());
     }
+    else if (sdSystem.running_color_list.strRunningColor == "Black")
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.black());
+    }
+    else if (sdSystem.running_color_list.strRunningColor == "Grey")
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.grey());
+    }
+    else if (sdSystem.running_color_list.strRunningColor == "Pink")
+    {
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.pink());
+    }
     else
     {
       sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.red());
     }
-
   }
 
   // Loading Animations Library.
@@ -1125,18 +1138,6 @@ int loop_2(bool TTY_Only)
       sdSystem.CAR_INFO.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_AUTO, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // Process Automobile Lights
-      if (sdSystem.COLOR_SELECT.changed_no_reset())
-      {
-        if (sdSystem.running_color_list.strRunningColor == "Red" || sdSystem.running_color_list.strRunningColor == "Blue")
-        {
-          automobile_handler.set_velocity_color(CRGB(255, 192, 0).brightness(0.20f));
-        }
-        else
-        {
-          automobile_handler.set_velocity_color((sdSystem.COLOR_SELECT.color(sdSystem.COLOR_SELECT.void_colr()).SIMPLE_RGB).brightness(0.20f));
-        }
-      }
-
       automobile_handler.update_events(sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
 
       // ---------------------------------------------------------------------------------------

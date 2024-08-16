@@ -95,7 +95,7 @@ void COLOR_COMBOS::init(float Intensity)
     COLOR_COMB_CYAN.set_rgb(0.0f, 1.0f, 1.0f, 1.0f, Intensity);
     COLOR_COMB_BLUE.set_rgb(0.0f, 0.0f, 1.0f, 1.0f, Intensity);
     COLOR_COMB_PURPLE.set_rgb(1.0f, 0.0f, 1.0f, 1.0f, Intensity);
-    COLOR_COMB_PINK.set_rgb(1.0f, 0.0f, 0.5f, 1.0f, Intensity);
+    COLOR_COMB_PINK.set_rgb(1.0f, 0.5f, 1.0f, 1.0f, Intensity);
 
     // Specific Colors
     //COLOR_COMB_CORPO.set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
@@ -127,7 +127,7 @@ void COLOR_COMBOS::init(float Intensity)
     COLOR_COMB_CYAN.set_rgb_v(0.0f, 1.0f, 1.0f, 1.0f, Intensity);
     COLOR_COMB_BLUE.set_rgb_v(0.0f, 0.0f, 1.0f, 1.0f, Intensity);
     COLOR_COMB_PURPLE.set_rgb_v(1.0f, 0.0f, 1.0f, 1.0f, Intensity);
-    COLOR_COMB_PINK.set_rgb_v(1.0f, 0.0f, 0.5f, 1.0f, Intensity);
+    COLOR_COMB_PINK.set_rgb_v(1.0f, 0.5f, 1.0f, 1.0f, Intensity);
 
     // Put colors in vector list for reference
     COLOR_COMBINATIONS_V.push_back(COLOR_COMB_BLACK);
@@ -309,6 +309,57 @@ bool COLOR_COMBOS::changed()
   else
   {
     return false;
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
+bool NEO_COLOR::changed()
+{
+  return CHANGED;
+}
+
+ImColor NEO_COLOR::color(unsigned long Time, ImColor Color)
+{
+  if (Color == CURRENT_COLOR)
+  {
+    CHANGED = false;
+    return CURRENT_COLOR;
+  }
+  else
+  {
+    if (Color == NEW_COLOR)
+    {
+      float power = (float)(Time) - START_TIME / PROPS.DURATION;
+
+      if (power > 1.0f)
+      {
+        power = 1.0f;
+        
+        CURRENT_COLOR = Color;
+        CHANGED = true;
+
+        return CURRENT_COLOR;
+      }
+
+      float r = (power * NEW_COLOR.Value.x) + ((1.0f - power) * PREV_COLOR.Value.x);
+      float g = (power * NEW_COLOR.Value.y) + ((1.0f - power) * PREV_COLOR.Value.y);
+      float b = (power * NEW_COLOR.Value.z) + ((1.0f - power) * PREV_COLOR.Value.z);
+
+      CURRENT_COLOR = ImColor(r, g, b, 1.0f);
+      
+      CHANGED = true;
+      return CURRENT_COLOR;
+    }
+    else
+    {
+      PREV_COLOR = CURRENT_COLOR;
+      NEW_COLOR = Color;
+      START_TIME = (float)Time;
+
+      CHANGED = true;
+      return PREV_COLOR;
+    }
   }
 }
 
