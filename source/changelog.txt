@@ -1,3 +1,13 @@
+2.183_240817
+  - NEO_COLOR Class added to display colors.  If color changes 
+      the routine will provide a smooth transition from the previous 
+      color to the new color.
+  - Changed some widgets to accomodate the Neocolor.
+  - Buttons are no longer simple and will need to be declared.
+  - BAR_TECH was modified for Neocolor.
+  - Modifications will probably increase code size to over 
+      2 megabytes and possibly require more processing time. 
+
 2.182_240816
   - Added 3 colors to the running color list. (Black, Grey, 
       and Pink)

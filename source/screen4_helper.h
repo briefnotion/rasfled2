@@ -117,7 +117,6 @@ class COLOR_COMBOS
 
   int void_color_value = 3;
   bool void_color = false;
-  TIMED_PING void_color_fade_timer;
   bool CHANGED = false;
 
   public:
@@ -126,7 +125,7 @@ class COLOR_COMBOS
 
   COLOR_COMBO color(int Color);
 
-  void toggle_void_color(unsigned long Time);
+  void toggle_void_color();
 
   COLOR_COMBO c_black();
   COLOR_COMBO c_white();
@@ -154,10 +153,6 @@ class COLOR_COMBOS
   int void_colr();
 
   void void_color_set(int Color);
-  bool void_color_change();
-
-  bool changed_no_reset();
-  // tmp routine
 
   bool changed();
   // tmp routine
@@ -168,7 +163,7 @@ class NEO_COLOR_PROPERTIES
 {
   public:
 
-  float DURATION = 5000.0f;
+  float DURATION = 2000.0f;
 
 };
 

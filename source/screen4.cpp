@@ -133,15 +133,6 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   sdSysData.COLOR_SELECT.init(1.0f);
   
   ImGuiStyle& style = ImGui::GetStyle();
-
-  // Standard Default Colors on startup
-  /*
-  ImColor background = sdSysData.COLOR_SELECT.c_blue().BACKGROUND;
-  ImColor dim = sdSysData.COLOR_SELECT.c_blue().DIM;
-  ImColor standard = sdSysData.COLOR_SELECT.c_blue().STANDARD;
-  ImColor hovered = sdSysData.COLOR_SELECT.c_blue().HOVERED;
-  ImColor active = sdSysData.COLOR_SELECT.c_blue().ACTIVE;
-  */
  
   ImColor background = BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().BACKGROUND);
   ImColor dim = DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().DIM);
@@ -746,8 +737,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               ImGui::SetCursorScreenPos(start_position);
               if (ImGui::InvisibleButton("CORPO VOID", ImGui::GetContentRegionAvail()))
               {
-                sdSysData.COLOR_SELECT.toggle_void_color(current_frame_time);
-                //CHANGED = true;
+                sdSysData.COLOR_SELECT.toggle_void_color();
               }
             }
             ImGui::EndChild();
@@ -977,7 +967,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x - 215.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
 
-            if (button_simple_toggle_color(sdSysData, "Console", "Console", DISPLAY_SCREEN == 0, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_CONSOLE.button_toggle_color(sdSysData, "Console", "Console", DISPLAY_SCREEN == 0, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               DISPLAY_SCREEN = 0;
               RESTACK_WINDOWS = true;
@@ -985,14 +975,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::SameLine();
 
-            if (button_simple_toggle_color(sdSysData, "Automobile", "Automobile", DISPLAY_SCREEN == 1, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_AUTOMOBILE.button_toggle_color(sdSysData, "Automobile", "Automobile", DISPLAY_SCREEN == 1, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               DISPLAY_SCREEN = 1;
             }
 
             ImGui::SameLine();
 
-            if (button_simple_toggle_color(sdSysData, "ADSB", "ADSB", DISPLAY_SCREEN == 2, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_ADSB.button_toggle_color(sdSysData, "ADSB", "ADSB", DISPLAY_SCREEN == 2, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               DISPLAY_SCREEN = 2;
             }
@@ -1000,7 +990,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             ImGui::SameLine();
 
             /*
-            if (button_simple_toggle_color(sdSysData, "GPS", "GPS", DISPLAY_SCREEN == 3, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (button_toggle_color(sdSysData, "GPS", "GPS", DISPLAY_SCREEN == 3, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               DISPLAY_SCREEN = 3;
             }
@@ -1008,7 +998,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             ImGui::SameLine();
             */
 
-            if (button_simple_toggle_color(sdSysData, "LOGS", "LOGS", DISPLAY_SCREEN == 4, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_LOGS.button_toggle_color(sdSysData, "LOGS", "LOGS", DISPLAY_SCREEN == 4, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               DISPLAY_SCREEN = 4;
               RESTACK_WINDOWS = true;
@@ -1016,7 +1006,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::SameLine();
 
-            if (button_simple_toggle_color(sdSysData, "...", "...", DISPLAY_SCREEN == 5, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_DOTDOTDOT.button_toggle_color(sdSysData, "...", "...", DISPLAY_SCREEN == 5, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               DISPLAY_SCREEN = 5;
             }
@@ -1027,7 +1017,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           {
             ImGui::SameLine();
 
-            if (button_simple_color(sdSysData, "DISPLAY\nALERTS", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BT_DISPLAY_ALERTS.button_color(sdSysData, "DISPLAY\nALERTS", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               sdSysData.ALERTS_AUTO.display_active_alerts();
             }
@@ -1046,7 +1036,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           // Main Menu
           if (DISPLAY_MENU == 0)
           {
-            if (button_simple_toggle_color(sdSysData, "STOP\nTIMER", "START\nTIMER", sdSysData.cdTIMER.is_active(), sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_TIMER.button_toggle_color(sdSysData, "STOP\nTIMER", "START\nTIMER", sdSysData.cdTIMER.is_active(), sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               if (sdSysData.cdTIMER.is_active() == false)
               {
@@ -1060,7 +1050,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::InvisibleButton("noshow2", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
-            if (button_simple_toggle_color(sdSysData, "OVER\nHEAD\nLIGHTS", "OVER\nHEAD\nLIGHTS", sdSysData.booOverheadRunning, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_OVER_HEAD_LIGHTS.button_toggle_color(sdSysData, "OVER\nHEAD\nLIGHTS", "OVER\nHEAD\nLIGHTS", sdSysData.booOverheadRunning, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               if (sdSysData.booOverheadRunning == true)
               {
@@ -1080,17 +1070,17 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               }
             }
 
-            if (button_simple_color(sdSysData, "FLASH", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_FLASH.button_color(sdSysData, "FLASH", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               sdSysData.SCREEN_COMMS.command_text_set("ff");
             }
 
-            if (button_simple_color(sdSysData, "CARDS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_CARDS.button_color(sdSysData, "CARDS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               DISPLAY_CARDS_WINDOW = !DISPLAY_CARDS_WINDOW;
             } 
 
-            if (button_simple_toggle_color(sdSysData, "LIGHTS\n(On)", "LIGHTS\n(Off)", sdSysData.Lights_On.value(), sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_LIGHTS.button_toggle_color(sdSysData, "LIGHTS\n(On)", "LIGHTS\n(Off)", sdSysData.Lights_On.value(), sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               if (sdSysData.Lights_On.value() == true)
               {
@@ -1102,14 +1092,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               }
             }
 
-            if (button_simple_color(sdSysData, "...", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_DOTDOTDOT.button_color(sdSysData, "...", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               DISPLAY_MENU = 1;
             } 
           }
           else if (DISPLAY_MENU == 1)
           {
-            if (button_simple_toggle_color(sdSysData, "HAZARD\n(On)", "HAZARD\n(Off)", sdSysData.booHazardRunning, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_HAZARD.button_toggle_color(sdSysData, "HAZARD\n(On)", "HAZARD\n(Off)", sdSysData.booHazardRunning, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               if (sdSysData.booHazardRunning == true)
               {
@@ -1123,34 +1113,34 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::InvisibleButton("noshow2", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
-            if (button_simple_toggle_color(sdSysData, "NIGHT\nMODE", "DAY\nMODE", sdSysData.Day_On_With_Override.value(), sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_NIGHT_MODE.button_toggle_color(sdSysData, "NIGHT\nMODE", "DAY\nMODE", sdSysData.Day_On_With_Override.value(), sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               sdSysData.SCREEN_COMMS.command_text_set("dd");
             }
 
-            if (button_simple_toggle_color(sdSysData, "SET\nRUNNING\nCOLOR", "SET\nRUNNING\nCOLOR", DISPLAY_RUNNING_COLOR, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_RUNNING_COLOR.button_toggle_color(sdSysData, "SET\nRUNNING\nCOLOR", "SET\nRUNNING\nCOLOR", DISPLAY_RUNNING_COLOR, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
                 DISPLAY_RUNNING_COLOR = !DISPLAY_RUNNING_COLOR;
             }
 
-            if (button_simple_color(sdSysData, "CLEAR\nANIMS", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_CLEAR_ANIMS.button_color(sdSysData, "CLEAR\nANIMS", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               sdSysData.SCREEN_COMMS.command_text_set("``");
             }
 
-            if (button_simple_color(sdSysData, "SYSTEM", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_SYSTEM.button_color(sdSysData, "SYSTEM", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               DISPLAY_MENU = 2;
             }
 
-            if (button_simple_color(sdSysData, "<-", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_BACK_1.button_color(sdSysData, "<-", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               DISPLAY_MENU = 0;
             }
           }
           else if (DISPLAY_MENU == 2)
           {
-            if (button_simple_color(sdSysData, "EXIT", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_EXIT.button_color(sdSysData, "EXIT", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               sdSysData.SCREEN_COMMS.command_pending_set("X");
               DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
@@ -1158,13 +1148,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::InvisibleButton("noshow2", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
-            if (button_simple_color(sdSysData, "SYSTEM\nSHUT\nDOWN", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_SYSTEM_SHUT_DOWN.button_color(sdSysData, "SYSTEM\nSHUT\nDOWN", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               sdSysData.SCREEN_COMMS.command_pending_set(" shutdown");
               DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
             }
 
-            if (button_simple_color(sdSysData, "SYSTEM\nREBOOT", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_REBOOT.button_color(sdSysData, "SYSTEM\nREBOOT", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               sdSysData.SCREEN_COMMS.command_pending_set(" reboot");
               DISPLAY_CONFIRM = !DISPLAY_CONFIRM;
@@ -1172,12 +1162,12 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::InvisibleButton("noshow5", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
-            if (button_simple_color(sdSysData, "DEBUG", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_DEBUG.button_color(sdSysData, "DEBUG", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               DISPLAY_DEBUG = !DISPLAY_DEBUG;
             }
 
-            if (button_simple_color(sdSysData, "<-", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_BACK_2.button_color(sdSysData, "<-", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               DISPLAY_MENU = 0;
             }
@@ -1213,7 +1203,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           ImGui::Text("%.3f ms/frame  %.1f FPS", 1000.0f / io.Framerate, io.Framerate);
           //ImGui::Text("%.1f FPS", io.Framerate);
 
-          if (button_simple_toggle_color(sdSysData, "Dug", "Dbug", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DEBUG, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+          if (BTC_DEBUG.button_toggle_color(sdSysData, "Dug", "Dbug", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DEBUG, sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
           {
             sdSysData.SCREEN_COMMS.DEBUG_STATUS.DEBUG = ! sdSysData.SCREEN_COMMS.DEBUG_STATUS.DEBUG;
           }
@@ -1224,14 +1214,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (button_simple_toggle_color(sdSysData, "2", "2", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[1], sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+          if (BTC_DEBUG_2.button_toggle_color(sdSysData, "2", "2", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[1], sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
           {
             sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[1] = !sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
           }
 
           ImGui::SameLine();
 
-          if (button_simple_toggle_color(sdSysData, "4", "4", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[3], sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+          if (BTC_DEBUG_4.button_toggle_color(sdSysData, "4", "4", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[3], sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
           {
             sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[3] = !sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[3];
           }
@@ -1253,7 +1243,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (button_simple_toggle_color(sdSysData, "1", "1", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[0], sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+          if (BTC_DEBUG_1.button_toggle_color(sdSysData, "1", "1", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[0], sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
           {
             sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[0] = !sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
           }
@@ -1261,7 +1251,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           ImGui::SameLine();
 
             ImGui::TableNextColumn();
-            if (button_simple_toggle_color(sdSysData, "3", "3", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[2], sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+            if (BTC_DEBUG_3.button_toggle_color(sdSysData, "3", "3", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[2], sdSysData.COLOR_SELECT.white(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
             {
               sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[2] = !sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[2];
             }
@@ -1320,7 +1310,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
         ImGui::SetNextWindowSize(ImVec2(143, 292));
         if (ImGui::Begin("Overhead Color", &DISPLAY_OVERHEAD_COLOR, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
-          if (button_simple_color(sdSysData, "Red", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_OVER_RED.button_color(sdSysData, "Red", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("or");
             DISPLAY_OVERHEAD_COLOR = false;
@@ -1328,13 +1318,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Green", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_OVER_GREEN.button_color(sdSysData, "Green", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("og");
             DISPLAY_OVERHEAD_COLOR = false;
           }
 
-          if (button_simple_color(sdSysData, "Blue", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_OVER_BLUE.button_color(sdSysData, "Blue", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("ob");
             DISPLAY_OVERHEAD_COLOR = false;
@@ -1342,13 +1332,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Purple", sdSysData.COLOR_SELECT.purple(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_OVER_PURPLE.button_color(sdSysData, "Purple", sdSysData.COLOR_SELECT.purple(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("ou");
             DISPLAY_OVERHEAD_COLOR = false;
           }
           
-          if (button_simple_color(sdSysData, "Yellow", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_OVER_YELLOW.button_color(sdSysData, "Yellow", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("oy");
             DISPLAY_OVERHEAD_COLOR = false;
@@ -1356,13 +1346,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Cyan", sdSysData.COLOR_SELECT.cyan(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_OVER_CYAN.button_color(sdSysData, "Cyan", sdSysData.COLOR_SELECT.cyan(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("oc");
             DISPLAY_OVERHEAD_COLOR = false;
           }
           
-          if (button_simple_color(sdSysData, "Orange", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_OVER_ORANGE.button_color(sdSysData, "Orange", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("on");
             DISPLAY_OVERHEAD_COLOR = false;
@@ -1370,7 +1360,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "White", sdSysData.COLOR_SELECT.white(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_OVER_WHITE.button_color(sdSysData, "White", sdSysData.COLOR_SELECT.white(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("ow");
             DISPLAY_OVERHEAD_COLOR = false;
@@ -1388,7 +1378,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                                         sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y * 7.0f));
         if (ImGui::Begin("Running Color", &DISPLAY_RUNNING_COLOR, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
-          if (button_simple_color(sdSysData, "Red", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_RED.button_color(sdSysData, "Red", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rr");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.red());
@@ -1397,14 +1387,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Green", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_GREEN.button_color(sdSysData, "Green", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rg");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.green());
             DISPLAY_RUNNING_COLOR = false;
           }
 
-          if (button_simple_color(sdSysData, "Blue", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_BLUE.button_color(sdSysData, "Blue", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rb");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.blue());
@@ -1413,14 +1403,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Purple", sdSysData.COLOR_SELECT.purple(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_PURPLE.button_color(sdSysData, "Purple", sdSysData.COLOR_SELECT.purple(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("ru");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.purple());
             DISPLAY_RUNNING_COLOR = false;
           }
           
-          if (button_simple_color(sdSysData, "Yellow", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_YELLOW.button_color(sdSysData, "Yellow", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("ry");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.yellow());
@@ -1429,14 +1419,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Cyan", sdSysData.COLOR_SELECT.cyan(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_CYAN.button_color(sdSysData, "Cyan", sdSysData.COLOR_SELECT.cyan(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rc");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.cyan());
             DISPLAY_RUNNING_COLOR = false;
           }
           
-          if (button_simple_color(sdSysData, "Orange", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_ORANGE.button_color(sdSysData, "Orange", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rn");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.orange());
@@ -1445,14 +1435,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Black", sdSysData.COLOR_SELECT.black(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_BLACK.button_color(sdSysData, "Black", sdSysData.COLOR_SELECT.black(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rx");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.black());
             DISPLAY_RUNNING_COLOR = false;
           }
           
-          if (button_simple_color(sdSysData, "Grey", sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_GREY.button_color(sdSysData, "Grey", sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("re");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.grey());
@@ -1461,14 +1451,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
           
-          if (button_simple_color(sdSysData, "White", sdSysData.COLOR_SELECT.white(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_WHITE.button_color(sdSysData, "White", sdSysData.COLOR_SELECT.white(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rw");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.white());
             DISPLAY_RUNNING_COLOR = false;
           }
 
-          if (button_simple_color(sdSysData, "Pink", sdSysData.COLOR_SELECT.pink(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_PINK.button_color(sdSysData, "Pink", sdSysData.COLOR_SELECT.pink(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rp");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.pink());
@@ -1485,7 +1475,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       {
         bool choice = false;
 
-        if (confirm_dialog(sdSysData, choice))
+        if (CONFIRM.confirm_dialog(sdSysData, choice))
         {
           if (choice)
           {
@@ -1590,13 +1580,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::Begin("Cards", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
           {
-            if (button_simple_color(sdSysData, "QR\nCODE", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_QR_CODE.button_color(sdSysData, "QR\nCODE", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               DISPLAY_QR_CODE = !DISPLAY_QR_CODE;
               DISPLAY_CARDS_WINDOW = false;
             } 
 
-            if (button_simple_color(sdSysData, "REFER", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BT_REFER.button_color(sdSysData, "REFER", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               DISPLAY_REFERENCE_CARD = !DISPLAY_REFERENCE_CARD;
               DISPLAY_CARDS_WINDOW = false;

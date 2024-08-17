@@ -163,14 +163,10 @@ COLOR_COMBO COLOR_COMBOS::color(int Color)
   }
 }
 
-void COLOR_COMBOS::toggle_void_color(unsigned long Time)
+void COLOR_COMBOS::toggle_void_color()
 {
-  if (void_color_fade_timer.ping_down(Time) == false)
-  {
-    CHANGED = true;
-    void_color = !void_color;
-    void_color_fade_timer.ping_up(Time, 5000);
-  }
+  CHANGED = true;
+  void_color = !void_color;
 }
 
 COLOR_COMBO COLOR_COMBOS::c_black()
@@ -294,11 +290,6 @@ void COLOR_COMBOS::void_color_set(int Color)
   CHANGED = true;
 }
 
-bool COLOR_COMBOS::changed_no_reset()
-{
-  return CHANGED;
-}
-
 bool COLOR_COMBOS::changed()
 {
   if (CHANGED)
@@ -323,21 +314,20 @@ ImColor NEO_COLOR::color(unsigned long Time, ImColor Color)
 {
   if (Color == CURRENT_COLOR)
   {
-    CHANGED = false;
     return CURRENT_COLOR;
   }
   else
   {
     if (Color == NEW_COLOR)
     {
-      float power = (float)(Time) - START_TIME / PROPS.DURATION;
+      float power = ((float)(Time) - START_TIME) / PROPS.DURATION;
 
       if (power > 1.0f)
       {
         power = 1.0f;
         
         CURRENT_COLOR = Color;
-        CHANGED = true;
+        CHANGED = false;
 
         return CURRENT_COLOR;
       }
@@ -345,8 +335,9 @@ ImColor NEO_COLOR::color(unsigned long Time, ImColor Color)
       float r = (power * NEW_COLOR.Value.x) + ((1.0f - power) * PREV_COLOR.Value.x);
       float g = (power * NEW_COLOR.Value.y) + ((1.0f - power) * PREV_COLOR.Value.y);
       float b = (power * NEW_COLOR.Value.z) + ((1.0f - power) * PREV_COLOR.Value.z);
+      float w = (power * NEW_COLOR.Value.w) + ((1.0f - power) * PREV_COLOR.Value.w);
 
-      CURRENT_COLOR = ImColor(r, g, b, 1.0f);
+      CURRENT_COLOR = ImColor(r, g, b, w);
       
       CHANGED = true;
       return CURRENT_COLOR;

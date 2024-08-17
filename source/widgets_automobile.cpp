@@ -676,13 +676,13 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 {
   ImGui::BeginChild("Nova Display Buttons", ImVec2(90.0f, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    if (button_simple_toggle_color(sdSysData, "ENABLE\n(On)", "ENABLE\n(Off)", sdSysData.CAR_INFO.NOVA.ENABLED, 
+    if (BTC_ENABLED.button_toggle_color(sdSysData, "ENABLE\n(On)", "ENABLE\n(Off)", sdSysData.CAR_INFO.NOVA.ENABLED, 
                     sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       sdSysData.CAR_INFO.NOVA.ENABLED = !sdSysData.CAR_INFO.NOVA.ENABLED;
     }
 
-    if (button_simple_toggle_color(sdSysData, "VAL\n(On)", "VAL\n(Off)", NOVA_CLIP_DETAIL, 
+    if (BTC_VAL.button_toggle_color(sdSysData, "VAL\n(On)", "VAL\n(Off)", NOVA_CLIP_DETAIL, 
                     sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       NOVA_CLIP_DETAIL = !NOVA_CLIP_DETAIL;
@@ -709,7 +709,7 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
     ImGui::Text("ERR:");
     ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.errors());
 
-    if (button_simple_color(sdSysData, "NOVA", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (BC_NOVA_1.button_color(sdSysData, "NOVA", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       DISPLAY_NOVA = false;
     }
@@ -1951,7 +1951,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
           // DISPLAY_MID_BOTTOM - Buttons
           ImGui::BeginChild("Record Buttons Left", ImVec2(ImGui::GetContentRegionAvail().x - 322.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
-            if (button_simple_color(sdSysData, "NOVA", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BC_NOVA_2.button_color(sdSysData, "NOVA", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               DISPLAY_NOVA = true;
             }
@@ -1962,7 +1962,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
 
           ImGui::BeginChild("Record Buttons Right", ImGui::GetContentRegionAvail(), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
-            if (button_simple_color(sdSysData, "CLEAR DIAG\nCODES", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BC_CLEAR_DIAG.button_color(sdSysData, "CLEAR DIAG\nCODES", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               sdSysData.SCREEN_COMMS.command_pending_set_cr("qdiagc");
               Display_Confirm = !Display_Confirm;
@@ -1970,7 +1970,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
 
             ImGui::SameLine();
 
-            if (button_simple_toggle_color(sdSysData, "RECORD\n(On)", "RECORD", sdSysData.COMMS_AUTO.record_in_progress(), 
+            if (BTC_RECORD.button_toggle_color(sdSysData, "RECORD\n(On)", "RECORD", sdSysData.COMMS_AUTO.record_in_progress(), 
                                   sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               if (sdSysData.COMMS_AUTO.record_in_progress())
@@ -1985,7 +1985,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
 
             ImGui::SameLine();
 
-            if (button_simple_color(sdSysData, "FLASH REC", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BC_FLASH_REC.button_color(sdSysData, "FLASH REC", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               sdSysData.SCREEN_COMMS.command_text_set("]]");
             }

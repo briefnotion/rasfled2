@@ -1869,7 +1869,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    if (button_simple_color(sdSysData, "+", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    if (BC_PLUS.button_color(sdSysData, "+", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       RANGE_INDICATOR.zoom_out();
     }
@@ -1878,16 +1878,18 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    if (button_simple_color(sdSysData, "LOC", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    /*
+    if (BC_LOC.button_color(sdSysData, "LOC", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       DISPLAY_LOCATION = !DISPLAY_LOCATION;
     }
+    */
 
     // North Up
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    if (button_simple_toggle_color(sdSysData, "NORTH\nUP", "DIR\nUP", NORTH_UP,
+    if (BTC_NORTH_UP.button_toggle_color(sdSysData, "NORTH\nUP", "DIR\nUP", NORTH_UP,
                                     sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
                                     sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
@@ -1898,7 +1900,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    if (button_simple_color(sdSysData, "-", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    if (BC_MINUS.button_color(sdSysData, "-", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       RANGE_INDICATOR.zoom_in();
     }
@@ -1909,7 +1911,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
     if (active_gps)
     {
-      if (button_simple_toggle_color(sdSysData, "CENT\n(On)", "CENT\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
+      if (BTC_CENT.button_toggle_color(sdSysData, "CENT\n(On)", "CENT\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
                                       sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
@@ -1927,7 +1929,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                     working_area.y + sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f));
 
-      if (button_simple_toggle_color(sdSysData, "CALI\n(On)", "CALI\n(Off)", sdSysData.COMMS_COMPASS.calibrate_on(),
+      if (BTC_CALI.button_toggle_color(sdSysData, "CALI\n(On)", "CALI\n(Off)", sdSysData.COMMS_COMPASS.calibrate_on(),
                                       sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
@@ -1938,7 +1940,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       {
         ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                 working_area.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
-        if (button_simple_toggle_color(sdSysData, "LOCK\n(On)", "LOCK\n(Off)", sdSysData.COMMS_COMPASS.calibrate_lock_on(),
+        if (BTC_LOCK.button_toggle_color(sdSysData, "LOCK\n(On)", "LOCK\n(Off)", sdSysData.COMMS_COMPASS.calibrate_lock_on(),
                                       sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
@@ -1947,7 +1949,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
         ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                 working_area.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
-        if (button_simple_color(sdSysData, "BEAR\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        if (BC_BEAR_RESET.button_color(sdSysData, "BEAR\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
           if (active_gps)
           {
@@ -1961,7 +1963,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
         ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                 working_area.y + 3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
-        if (button_simple_color(sdSysData, "CALI\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        if (BC_CALI_RESET.button_color(sdSysData, "CALI\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
           sdSysData.COMMS_COMPASS.calibrateion_reset();
         }
@@ -2127,6 +2129,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     }
   }
 
+  /*
   // Show Location Chooser Window
   if (DISPLAY_LOCATION)
   {
@@ -2135,7 +2138,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     {
       for (int location = 0; location < (int)LANDMARKS.size(); location ++)
       {
-        if (button_simple_color(sdSysData, LANDMARKS[location].DISPLAY_NAME.c_str(), sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+        if (button_color(sdSysData, LANDMARKS[location].DISPLAY_NAME.c_str(), sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
         {
           RANGE_INDICATOR.set_current_center_position(LANDMARKS[location].LAT_LON);
         }
@@ -2144,6 +2147,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     ImGui::End();
 
   }
+  */
 
   // -------------------------------------------------------------------------------------
   // test for point position accuracy by getting geo from range, then putting geo marker 
@@ -2265,7 +2269,7 @@ void ADSB_SCREEN::display(system_data &sdSysData)
 { 
   ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    if (button_simple_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (BTC_ADSB.button_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       if (SDATA.ADSB_ACTIVE == true)
       {
@@ -2282,7 +2286,7 @@ void ADSB_SCREEN::display(system_data &sdSysData)
       sdSysData.SCREEN_COMMS.command_text_set(" adsbsnap");
     }
 
-    if (button_simple_color(sdSysData, "VIEW", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (BC_VIEW.button_color(sdSysData, "VIEW", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       if (DISPLAY_TABLE)
       {

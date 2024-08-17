@@ -215,15 +215,52 @@ class TEXT_CONSOLE
 void text_simple_bool(system_data &sdSysData, string Text, bool Indication, int COLOR);
 
 bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, ImVec2 ImVec2_Size);
-bool button_simple_color(system_data &sdSysData, string Text, int Color, ImVec2 ImVec2_Size);
-bool button_simple_toggle_color(system_data &sdSysData, string True_Value_Text, string False_Value_Text, bool Toggle, 
-                                int True_Color, int False_Color, ImVec2 ImVec2_Size);
 
-bool confirm_dialog(system_data &sdSysData, bool &Choice);
-// Display confirmation dialog.
-// Returns:
-//  true if clicked
-//  Choice returned when clicked is true or false
+// ---------------------------------------------------------------------------------------
+
+class BUTTON_COLOR
+{
+  private:
+
+  NEO_COLOR BUTTON_COLOR;
+  NEO_COLOR BUTTON_HOVERED_COLOR;
+  NEO_COLOR BUTTON_ACTIVE_COLOR;
+
+  public:
+
+  bool button_color(system_data &sdSysData, string Text, int Color, ImVec2 ImVec2_Size);
+};
+
+class BUTTON_TOGGLE_COLOR
+{
+  private:
+
+  NEO_COLOR BUTTON_COLOR;
+  NEO_COLOR BUTTON_HOVERED_COLOR;
+  NEO_COLOR BUTTON_ACTIVE_COLOR;
+
+  public:
+
+  bool button_toggle_color(system_data &sdSysData, string True_Value_Text, string False_Value_Text, bool Toggle, 
+                                int True_Color, int False_Color, ImVec2 ImVec2_Size);
+};
+
+// ---------------------------------------------------------------------------------------
+
+class CONFIRM_DIALOG
+{
+  private:
+  BUTTON_COLOR CONFIRM;
+  BUTTON_COLOR DENY;
+
+  public:
+
+  bool confirm_dialog(system_data &sdSysData, bool &Choice);
+  // Display confirmation dialog.
+  // Returns:
+  //  true if clicked
+  //  Choice returned when clicked is true or false
+};
 
 // ---------------------------------------------------------------------------------------
 
@@ -296,6 +333,20 @@ class BAR_TECH_PROPERTIES
 class BAR_TECH
 {
   private:
+  
+  // COLORS
+  //NEO_COLOR NEO_MARKER;
+  //NEO_COLOR NEO_MARKER_DIM;
+
+  NEO_COLOR NEO_BACKGROUND;
+  NEO_COLOR NEO_BACKGROUND_DIM;
+
+  NEO_COLOR NEO_MIN_MAX;
+  NEO_COLOR NEO_MIN_MAX_DIM;
+
+  NEO_COLOR NEO_VALUE;
+
+  NEO_COLOR NEO_RULER;
 
   float VALUE = 0.0f;
   IMPACT_RESISTANCE_FLOAT_FRAME_COUNT VALUE_MARKER;

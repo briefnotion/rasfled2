@@ -266,56 +266,56 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
       {
       // Comms
         {
-          if (button_simple_color(sdSysData, "Start\nAuto", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          if (START_AUTO.button_color(sdSysData, "Start\nAuto", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" startauto");
           }
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Stop\nAuto", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          if (STOP_AUTO.button_color(sdSysData, "Stop\nAuto", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" stopauto");
           }
 
           // ---
 
-          if (button_simple_color(sdSysData, "Start\nADS-B", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          if (START_ADSB.button_color(sdSysData, "Start\nADS-B", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" startadsb");
           }
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Stop\nADS-B", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          if (STOP_ADSB.button_color(sdSysData, "Stop\nADS-B", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" stopadsb");
           }
           
           // ---
 
-          if (button_simple_color(sdSysData, "Start\nGPS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          if (START_GPS.button_color(sdSysData, "Start\nGPS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" startgps");
           }
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Stop\nGPS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          if (STOP_GPS.button_color(sdSysData, "Stop\nGPS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" stopgps");
           }
           
           // ---
           
-          if (button_simple_color(sdSysData, "Start\nCompass", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          if (START_COMPASS.button_color(sdSysData, "Start\nCompass", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" startcomp");
           }
 
           ImGui::SameLine();
 
-          if (button_simple_color(sdSysData, "Stop\nCompass", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+          if (STOP_COMPASS.button_color(sdSysData, "Stop\nCompass", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" stopcomp");
           }
@@ -343,7 +343,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
 
         // ---
 
-        if (button_simple_color(sdSysData, "CLEAR\nEVENTS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        if (CLEAR_EVENTS.button_color(sdSysData, "CLEAR\nEVENTS", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
           for (int channel = 0; channel < sdSysData.CONFIG.iNUM_CHANNELS; channel++)
           {
@@ -357,7 +357,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
         /*
         ImGui::SameLine();
 
-        if (button_simple_color(sdSysData, "ANIMB", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        if (button_color(sdSysData, "ANIMB", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
           sdSysData.SCREEN_COMMS.command_text_set(" stopauto");
         }
