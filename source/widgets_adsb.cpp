@@ -844,7 +844,10 @@ void ADSB_RANGE::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
   ImGui::SetCursorScreenPos(ImVec2(center.x, center.y - RADIUS_CIRCLE_POINT_SIZE + 5));
   
   // Text Range
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V));
+  //ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD_V));
+
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color(PROPS.COLOR).STANDARD_V.color(sdSysData.PROGRAM_TIME.current_frame_time())));
+
   ImGui::Text("%.2f mi", RANGE);
   ImGui::PopStyleColor();
 }

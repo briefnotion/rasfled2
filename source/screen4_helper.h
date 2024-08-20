@@ -89,22 +89,80 @@ class WIDGET_DEFAULTS
 
 // ---------------------------------------------------------------------------------------
 
+class NEO_COLOR_PROPERTIES
+{
+  public:
+
+  float DURATION = 2000.0f;
+};
+
+class NEO_COLOR
+{
+  private:
+  ImColor CURRENT_COLOR = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  ImColor NEW_COLOR = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  ImColor PREV_COLOR = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  
+  float CURRENT_TIME = 0.0f;
+  float START_TIME = 0.0f;
+
+  bool CHANGED = false;
+
+  ImColor calc_transition();
+  void reset_to_new_color(ImColor Color);
+
+  public:
+  NEO_COLOR_PROPERTIES PROPS;
+
+  bool changed();
+
+  void set_current_frame_time(unsigned long Time);
+
+  ImColor color(unsigned long Time, ImColor Color);
+  ImColor color(unsigned long Time);
+  ImColor color();
+
+  void set_color(unsigned long Time, ImColor Color); 
+};
+
+// ---------------------------------------------------------------------------------------
+
 class COLOR_COMBO
 {
   public:
 
+  ImColor TEXT;
   ImColor BACKGROUND;
   ImColor DIM;
   ImColor STANDARD;
   ImColor STANDARD_V;
   ImColor HOVERED;
   ImColor ACTIVE;
-  ImColor TEXT;
   CRGB    SIMPLE_RGB;
 
   void set_rgb(float R, float G, float B, float A, float Intensity);
   void set_rgb_v(float R, float G, float B, float A, float Intensity);
 };
+
+// ---------------------------------------------------------------------------------------
+
+class NEO_COLOR_COMBO
+{
+  public:
+
+  NEO_COLOR TEXT;
+  NEO_COLOR BACKGROUND;
+  NEO_COLOR DIM;
+  NEO_COLOR STANDARD;
+  NEO_COLOR STANDARD_V;
+  NEO_COLOR HOVERED;
+  NEO_COLOR ACTIVE;
+  CRGB      SIMPLE_RGB;
+
+  void set_neo_rgb(unsigned long Time, COLOR_COMBO Color_Combo);
+};
+
+// ---------------------------------------------------------------------------------------
 
 class COLOR_COMBOS
 {
@@ -112,20 +170,30 @@ class COLOR_COMBOS
 
   vector<COLOR_COMBO> COLOR_COMBINATIONS;   //Color palates for standard
   vector<COLOR_COMBO> COLOR_COMBINATIONS_V; // Color palates for corpo mode
+  vector<NEO_COLOR_COMBO> COLOR_COMBINATIONS_NEO; // Color palates for corpo mode
 
   bool ALREADY_INITIALIZED = false;
 
   int void_color_value = 3;
   bool void_color = false;
+  
   bool CHANGED = false;
+
+  void set_neo_colors_with_color_change(unsigned long Time);
 
   public:
 
-  void init(float Intensity);
+  void init(unsigned long Time, float Intensity);
+
+  void set_frame_time(unsigned long);
+  // For all colors, set the current frame time. 
+  // Call first at start of new draw frame to eliminate the 
+  //  need to transfer a new time stamp at every color request.
 
   COLOR_COMBO color(int Color);
+  NEO_COLOR_COMBO neo_color(int Color);
 
-  void toggle_void_color();
+  void toggle_void_color(unsigned long Time);
 
   COLOR_COMBO c_black();
   COLOR_COMBO c_white();
@@ -138,6 +206,18 @@ class COLOR_COMBOS
   COLOR_COMBO c_blue();
   COLOR_COMBO c_purple();
   COLOR_COMBO c_pink();
+
+  NEO_COLOR_COMBO neo_c_black();
+  NEO_COLOR_COMBO neo_c_white();
+  NEO_COLOR_COMBO neo_c_grey();
+  NEO_COLOR_COMBO neo_c_red();
+  NEO_COLOR_COMBO neo_c_orange();
+  NEO_COLOR_COMBO neo_c_yellow();
+  NEO_COLOR_COMBO neo_c_green();
+  NEO_COLOR_COMBO neo_c_cyan();
+  NEO_COLOR_COMBO neo_c_blue();
+  NEO_COLOR_COMBO neo_c_purple();
+  NEO_COLOR_COMBO neo_c_pink();
 
   int black();
   int white();
@@ -157,33 +237,6 @@ class COLOR_COMBOS
   bool changed();
   // tmp routine
   // resets to false after read
-};
-
-class NEO_COLOR_PROPERTIES
-{
-  public:
-
-  float DURATION = 2000.0f;
-
-};
-
-class NEO_COLOR
-{
-  private:
-  ImColor CURRENT_COLOR = ImColor(0.0f, 0.0f, 0.0f, 0.0f);
-  ImColor NEW_COLOR = ImColor(0.0f, 0.0f, 0.0f, 0.0f);
-  ImColor PREV_COLOR = ImColor(0.0f, 0.0f, 0.0f, 0.0f);
-
-  float START_TIME = 0.0f;
-
-  bool CHANGED = false;
-
-  public:
-  NEO_COLOR_PROPERTIES PROPS;
-
-  bool changed();
-
-  ImColor color(unsigned long Time, ImColor Color);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -242,6 +295,7 @@ class CONSOLE_COMMUNICATION
   void printw(string Text);
   
 };
+
 
 // ---------------------------------------------------------------------------------------
 #endif

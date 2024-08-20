@@ -1,3 +1,7 @@
+2.184_240818
+  - Made more changes to neo color.
+  - Started modifying some routines to neo color.
+
 2.183_240817
   - NEO_COLOR Class added to display colors.  If color changes 
       the routine will provide a smooth transition from the previous 

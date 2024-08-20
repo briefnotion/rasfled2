@@ -130,7 +130,7 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
 
 void SCREEN4::set_screen_default_colors(system_data &sdSysData)
 {
-  sdSysData.COLOR_SELECT.init(1.0f);
+  //sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f);
   
   ImGuiStyle& style = ImGui::GetStyle();
  
@@ -204,7 +204,7 @@ int SCREEN4::create(system_data &sdSysData)
   if (sdSysData.TTY_ONLY == false)
   {
     // Set colors
-    sdSysData.COLOR_SELECT.init(1.0f);
+    //sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f);
 
     // Init and prepare DISPLAY_SCREEN
     
@@ -456,6 +456,9 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 {
   if (sdSysData.TTY_ONLY == false)
   {
+    // For all colors, set the current frame time
+    sdSysData.COLOR_SELECT.set_frame_time(sdSysData.PROGRAM_TIME.current_frame_time());
+
     //Check for changes in style
     if (sdSysData.COLOR_SELECT.changed() || DEFAULT_COLORS_CHANGED)
     {
@@ -737,7 +740,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               ImGui::SetCursorScreenPos(start_position);
               if (ImGui::InvisibleButton("CORPO VOID", ImGui::GetContentRegionAvail()))
               {
-                sdSysData.COLOR_SELECT.toggle_void_color();
+                sdSysData.COLOR_SELECT.toggle_void_color(sdSysData.PROGRAM_TIME.current_frame_time());
               }
             }
             ImGui::EndChild();

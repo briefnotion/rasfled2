@@ -318,11 +318,11 @@ void W_TEXT::draw(system_data &sdSysData)
   {
     if (PROPS.STANDARD_COLOR)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.c_orange().ACTIVE, sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.neo_c_orange().ACTIVE.color(), sdSysData.COLOR_SELECT.neo_color(PROPS.COLOR).STANDARD.color())));
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.c_orange().ACTIVE, sdSysData.COLOR_SELECT.color(PROPS.COLOR).TEXT)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.neo_c_orange().ACTIVE.color(), sdSysData.COLOR_SELECT.neo_color(PROPS.COLOR).TEXT.color())));
     }
     
     ImGui::Text(TEXT.c_str());
@@ -332,11 +332,11 @@ void W_TEXT::draw(system_data &sdSysData)
   {
     if (PROPS.STANDARD_COLOR)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).STANDARD));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color(PROPS.COLOR).STANDARD.color()));
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(PROPS.COLOR).TEXT));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color(PROPS.COLOR).TEXT.color()));
     }
     ImGui::Text(TEXT.c_str());
     ImGui::PopStyleColor();
@@ -407,7 +407,7 @@ void TEXT_CONSOLE::display(system_data &sdSysData, const char *name, bool *p_ope
 { 
   ImGui::Begin(name, p_open, flags);
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
 
     ImGui::TextUnformatted(CONSOLE_TEXT.c_str());
     if (CONSOLE_SCROLL_TO_BOTTOM == true && ImGui::GetScrollMaxY() > 0)
@@ -427,7 +427,8 @@ void text_simple_bool(system_data &sdSysData, string Text, bool Indication, int 
 {
   if (Indication == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(COLOR).TEXT));
+    //ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(COLOR).TEXT));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color(COLOR).TEXT.color(sdSysData.PROGRAM_TIME.current_frame_time())));
     ImGui::Text(Text.c_str());
     ImGui::PopStyleColor();
   }
@@ -441,7 +442,7 @@ bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, Im
 {
   bool ret_value = false;
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
 
   if (Enabled == true)
   {
@@ -452,10 +453,10 @@ bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, Im
   }
   else
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(sdSysData.COLOR_SELECT.c_blue().BACKGROUND)); 
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(sdSysData.COLOR_SELECT.c_blue().BACKGROUND));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(sdSysData.COLOR_SELECT.c_blue().BACKGROUND));
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_blue().STANDARD));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(sdSysData.COLOR_SELECT.neo_c_blue().BACKGROUND.color())); 
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(sdSysData.COLOR_SELECT.neo_c_blue().BACKGROUND.color()));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(sdSysData.COLOR_SELECT.neo_c_blue().BACKGROUND.color()));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_blue().STANDARD.color()));
     ImGui::Button(Text.c_str(), ImVec2_Size);
     ImGui::PopStyleColor(4);
   }
@@ -471,7 +472,7 @@ bool BUTTON_COLOR::button_color(system_data &sdSysData, string Text, int Color, 
 {
   bool ret_value = false;
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
 
   ImGui::PushStyleColor(ImGuiCol_Button, ImU32(BUTTON_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.color(Color).STANDARD)));
   ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.color(Color).HOVERED)));
@@ -491,7 +492,7 @@ bool BUTTON_TOGGLE_COLOR::button_toggle_color(system_data &sdSysData, string Tru
   // Does not control toggle, just shows value.
   bool ret_value = false;
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
 
   if (Toggle == false)
   {
@@ -580,24 +581,24 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     if (Version == 1)
     {
       // Draw Location (Circle)
-      Draw_List->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f);
-      Draw_List->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f);
-      Draw_List->AddNgon(Screen_Position, Size + 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f, size_outline);
-      Draw_List->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f, size_outline);
+      Draw_List->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 12.0f);
+      Draw_List->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 12.0f);
+      Draw_List->AddNgon(Screen_Position, Size + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 12.0f, size_outline);
+      Draw_List->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 12.0f, size_outline);
 
       // Draw Double Location (Second Circle)
       if (Main)
       {
-        Draw_List->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f, 2.0f);
+        Draw_List->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 12.0f, 2.0f);
       }
     }
     else
     {
       // Draw Center Location (Solid Circle)
-      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f + 4.0f);
-      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f);
-      Draw_List->AddNgon(Screen_Position, 15.0f + 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f, size_outline);
-      Draw_List->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 12.0f, size_outline);
+      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 12.0f + 4.0f);
+      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 12.0f);
+      Draw_List->AddNgon(Screen_Position, 15.0f + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 12.0f, size_outline);
+      Draw_List->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 12.0f, size_outline);
     }
   }
   else
@@ -605,24 +606,24 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     if (Version == 1)
     {
       // Draw Location (Circle)
-      Draw_List->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f);
-      Draw_List->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f);
-      Draw_List->AddNgon(Screen_Position, Size + 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f, size_outline);
-      Draw_List->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f, size_outline);
+      Draw_List->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 12.0f);
+      Draw_List->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 12.0f);
+      Draw_List->AddNgon(Screen_Position, Size + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 12.0f, size_outline);
+      Draw_List->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 12.0f, size_outline);
 
       // Draw Double Location (Second Circle)
       if (Main)
       {
-        Draw_List->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f, 2.0f);
+        Draw_List->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 12.0f, 2.0f);
       }
     }
     else
     {
       // Draw Center Location (Solid Circle)
-      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f + 4.0f);
-      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f);
-      Draw_List->AddNgon(Screen_Position, 15.0f + 2.0f, (ImU32)sdSysData.COLOR_SELECT.c_black().STANDARD, 12.0f, size_outline);
-      Draw_List->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.color(Color).STANDARD, 12.0f, size_outline);
+      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 12.0f + 4.0f);
+      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 12.0f);
+      Draw_List->AddNgon(Screen_Position, 15.0f + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 12.0f, size_outline);
+      Draw_List->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 12.0f, size_outline);
     }
   }
 
@@ -653,13 +654,13 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 
       if (Valid_Position)
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f - 2.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 4.0f - 2.0f);
       }
       else
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f - 2.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 4.0f - 2.0f);
       }
     }
 
@@ -678,13 +679,13 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         // Draw the line
         if (Valid_Position)
         {
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f + 4.0f);
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 4.0f + 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 4.0f);
         }
         else
         {
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f + 4.0f);
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 4.0f + 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 4.0f);
         }
 
         // Jitter 2
@@ -698,13 +699,13 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         // Draw the line
         if (Valid_Position)
         {
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f + 4.0f);
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 4.0f + 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 4.0f);
         }
         else
         {
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, 4.0f + 4.0f);
-          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 4.0f + 4.0f);
+          Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 4.0f);
         }
       }
     }
@@ -725,13 +726,13 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       // Draw the line
       if (Valid_Position)
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, needle_size);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), needle_size);
       }
       else
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), needle_size);
       }
     }
     else
@@ -743,13 +744,13 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       // Draw the line
       if (Valid_Position)
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (font_height * 3.5f) + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, (font_height * 3.5f));
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), (font_height * 3.5f) + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), (font_height * 3.5f));
       }
       else
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (font_height * 3.5f) + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, (font_height * 3.5f));
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), (font_height * 3.5f) + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), (font_height * 3.5f));
       }
     }
 
@@ -759,7 +760,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       float rad2 = 0.0f;
       ImVec2 p3;
 
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_black().DIM.color()));
 
       if (Heading_2 - Map_Bearing < 90.0f || Heading_2 - Map_Bearing > 270.0f)
       {
@@ -784,7 +785,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         Text_Rotate(to_string((int)Heading_2), -Heading_2 + Map_Bearing, BB_TL);
       }
 
-      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
+      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_green().STANDARD, 4.0f, 1.5f);
       
       ImGui::PopStyleColor();
     }
@@ -815,13 +816,13 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       // Draw the line
       if (Valid_Position)
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, needle_size);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), needle_size);
       }
       else
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, needle_size + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, needle_size);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), needle_size);
       }
     }
     else // if (Version == 2)
@@ -829,20 +830,20 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       // Draw the line
       if (Valid_Position)
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (font_height * 3.5f) + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD_V, (font_height * 3.5f));
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), (font_height * 3.5f) + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), (font_height * 3.5f));
       }
       else
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.c_black().STANDARD, (font_height * 3.5f) + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.color(Color).STANDARD, (font_height * 3.5f));
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), (font_height * 3.5f) + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), (font_height * 3.5f));
       }
 
       // Nothing written yet to handle other sized version 2 compass rotated heading text.
       float rad2 = 0.0f;
       ImVec2 p3;
 
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().DIM));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_black().DIM.color()));
 
       if (Heading_1 - Map_Bearing < 90.0f || Heading_1 - Map_Bearing > 270.0f)
       {
@@ -865,7 +866,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         Text_Rotate(to_string((int)Heading_1), -Heading_1 + Map_Bearing, BB_TL);
       }
       
-      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.c_green().STANDARD, 4.0f, 1.5f);
+      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_green().STANDARD, 4.0f, 1.5f);
 
       ImGui::PopStyleColor();
     }
@@ -974,7 +975,7 @@ void BAR_TECH::draw_min_max_val(system_data &sdSysData)
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
       
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
       ImGui::Text(PROPS.LABEL.c_str());
       ImGui::PopStyleColor();
 
@@ -1215,7 +1216,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
       
       Draw_List->AddRect(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
                                 ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
-                                sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                                sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
                                 5.0f, ImDrawFlags_None, 2.0f);
     }
     else
@@ -1239,7 +1240,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
       
       Draw_List->AddCircle(ImVec2(pos.x + marker_location, pos.y + PROPS.BAR_HEIGHT / 2.0f), 
                                 PROPS.BAR_HEIGHT / 4.0f, 
-                                sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                                sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
                                 12.0f, 2.0f);
     }
 
@@ -1280,7 +1281,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
       Draw_List->AddRect(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
                                 ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
-                                sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                                sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
                                 5.0f, ImDrawFlags_None, 2.0f);
     }
     else
@@ -1304,7 +1305,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
       Draw_List->AddCircle(ImVec2(pos.x + PROPS.BAR_HEIGHT / 2.0f, pos.y + size.y + marker_location), 
                                 PROPS.BAR_HEIGHT / 4.0f, 
-                                sdSysData.COLOR_SELECT.c_black().STANDARD, 
+                                sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
                                 12.0f, 2.0f);
     }
 

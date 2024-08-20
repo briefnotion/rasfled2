@@ -273,6 +273,7 @@ int loop_2(bool TTY_Only)
   sdSystem.TTY_ONLY = TTY_Only;
 
   // Load Windows or Console
+  sdSystem.COLOR_SELECT.init(sdSystem.PROGRAM_TIME.current_frame_time(), 1.0f);
   SCREEN4 cons_2;
 
   // Check Directories
@@ -418,6 +419,7 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
   // Initialize the console
   cons_2.create(sdSystem);    // Prepare console.
+
   sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR.resize(4);
   
   // Print Start Info
