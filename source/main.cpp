@@ -531,47 +531,47 @@ int loop_2(bool TTY_Only)
     // Simple screen void color set
     if (sdSystem.running_color_list.strRunningColor == "White")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.white());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.white());
     }
     else if (sdSystem.running_color_list.strRunningColor == "Red")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.red());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.red());
     }
     else if (sdSystem.running_color_list.strRunningColor == "Green")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.green());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.green());
     }
     else if (sdSystem.running_color_list.strRunningColor == "Blue")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.blue());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.blue());
     }
     else if (sdSystem.running_color_list.strRunningColor == "Purple")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.purple());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.purple());
     }
     else if (sdSystem.running_color_list.strRunningColor == "Cyan")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.cyan());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.cyan());
     }
     else if (sdSystem.running_color_list.strRunningColor == "Orange")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.orange());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.orange());
     }
     else if (sdSystem.running_color_list.strRunningColor == "Black")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.black());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.black());
     }
     else if (sdSystem.running_color_list.strRunningColor == "Grey")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.grey());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.grey());
     }
     else if (sdSystem.running_color_list.strRunningColor == "Pink")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.pink());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.pink());
     }
     else
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.COLOR_SELECT.red());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.red());
     }
   }
 

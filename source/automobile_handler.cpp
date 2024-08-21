@@ -31,11 +31,11 @@ void AUTOMOBILE_HANDLER::set_velocity_color(system_data &sdSysData)
 {
   if (sdSysData.running_color_list.strRunningColor == "Red" || sdSysData.running_color_list.strRunningColor == "Blue")
   {
-    velocity_color = CRGB(255, 192, 0).brightness(0.20f);
+    velocity_color = CRGB(255, 192, 0).brightness(0.050);
   }
   else
   {
-    velocity_color = CRGB(sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB).brightness(0.20f);
+    velocity_color = CRGB(sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB).brightness(0.05f);
   }
   
   sdSysData.AUTO_VELOCITY_COLOR_CHANGED = false;

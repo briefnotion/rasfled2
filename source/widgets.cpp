@@ -64,9 +64,9 @@ ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigne
   float r = (power * End_Color.Value.x) + ((1.0f - power) * Start_Color.Value.x);
   float g = (power * End_Color.Value.y) + ((1.0f - power) * Start_Color.Value.y);
   float b = (power * End_Color.Value.z) + ((1.0f - power) * Start_Color.Value.z);
-  //float a = (power * End_Color.Value.w) + ((1.0f - power) * Start_Color.Value.w);
+  float w = End_Color.Value.w;
 
-  return ImColor(r, g, b);
+  return ImColor(r, g, b, w);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -427,8 +427,7 @@ void text_simple_bool(system_data &sdSysData, string Text, bool Indication, int 
 {
   if (Indication == false)
   {
-    //ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(COLOR).TEXT));
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color(COLOR).TEXT.color(sdSysData.PROGRAM_TIME.current_frame_time())));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color(COLOR).TEXT.color()));
     ImGui::Text(Text.c_str());
     ImGui::PopStyleColor();
   }
@@ -760,7 +759,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       float rad2 = 0.0f;
       ImVec2 p3;
 
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_black().DIM.color()));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_black().TEXT.color()));
 
       if (Heading_2 - Map_Bearing < 90.0f || Heading_2 - Map_Bearing > 270.0f)
       {
@@ -784,8 +783,6 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 
         Text_Rotate(to_string((int)Heading_2), -Heading_2 + Map_Bearing, BB_TL);
       }
-
-      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_green().STANDARD, 4.0f, 1.5f);
       
       ImGui::PopStyleColor();
     }
@@ -843,7 +840,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       float rad2 = 0.0f;
       ImVec2 p3;
 
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_black().DIM.color()));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_black().TEXT.color()));
 
       if (Heading_1 - Map_Bearing < 90.0f || Heading_1 - Map_Bearing > 270.0f)
       {
@@ -865,8 +862,6 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 
         Text_Rotate(to_string((int)Heading_1), -Heading_1 + Map_Bearing, BB_TL);
       }
-      
-      //Draw_List->AddNgon(p3, 4.0f, (ImU32)sdSysData.COLOR_SELECT.neo_c_green().STANDARD, 4.0f, 1.5f);
 
       ImGui::PopStyleColor();
     }

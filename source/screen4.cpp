@@ -38,29 +38,29 @@ void SCREEN4::door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value)
   {
     Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
-                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
-                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_white().STANDARD_V);
+                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
+                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_white().STANDARD_V.color());
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value)
   {
     Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), 
-                    sdSysData.COLOR_SELECT.c_white().STANDARD_V, sdSysData.COLOR_SELECT.c_black().STANDARD, 
-                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+                    sdSysData.COLOR_SELECT.neo_c_white().STANDARD_V.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
+                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color());
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value)
   {
     Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x, Window_Size.y), 
-                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
-                    sdSysData.COLOR_SELECT.c_white().STANDARD_V, sdSysData.COLOR_SELECT.c_black().STANDARD);
+                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
+                    sdSysData.COLOR_SELECT.neo_c_white().STANDARD_V.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color());
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value)
   {
     Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y / 2.0f), 
-                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_white().STANDARD_V, 
-                    sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_white().STANDARD_V.color(), 
+                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color());
   }
 }
 
@@ -77,12 +77,12 @@ void SCREEN4::hazard_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
     if (BLINKER_BLINK)
     {
       Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
-                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_red().STANDARD, 
-                          sdSysData.COLOR_SELECT.c_red().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+                          sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color(), 
+                          sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color());
 
       Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
-                          sdSysData.COLOR_SELECT.c_red().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
-                          sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_red().STANDARD);
+                          sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
+                          sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color());
     }
   }
 }
@@ -102,8 +102,8 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
       if (BLINKER_BLINK)
       {
         Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
-                      sdSysData.COLOR_SELECT.c_orange().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD, 
-                      sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_orange().STANDARD);
+                      sdSysData.COLOR_SELECT.neo_c_orange().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
+                      sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_orange().STANDARD.color());
       }
     }
     else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
@@ -117,8 +117,8 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
       if (BLINKER_BLINK)
       {
         Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
-                      sdSysData.COLOR_SELECT.c_black().STANDARD, sdSysData.COLOR_SELECT.c_orange().STANDARD, 
-                      sdSysData.COLOR_SELECT.c_orange().STANDARD, sdSysData.COLOR_SELECT.c_black().STANDARD);
+                      sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_orange().STANDARD.color(), 
+                      sdSysData.COLOR_SELECT.neo_c_orange().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color());
       }
     }
     //else
@@ -144,7 +144,7 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
 
   //style.Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-  style.Colors[ImGuiCol_Text] = sdSysData.COLOR_SELECT.c_white().TEXT;
+  style.Colors[ImGuiCol_Text] = sdSysData.COLOR_SELECT.neo_c_white().TEXT.color();
 
   style.Colors[ImGuiCol_TitleBg] = standard;
   style.Colors[ImGuiCol_TitleBgActive] = active;
@@ -155,7 +155,7 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   style.Colors[ImGuiCol_FrameBgActive] = active;
 
   style.Colors[ImGuiCol_Border] = background;
-  style.Colors[ImGuiCol_BorderShadow] = sdSysData.COLOR_SELECT.c_yellow().BACKGROUND;
+  style.Colors[ImGuiCol_BorderShadow] = sdSysData.COLOR_SELECT.neo_c_yellow().BACKGROUND.color();
 
   style.Colors[ImGuiCol_CheckMark] = standard;
 
@@ -175,9 +175,9 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   style.Colors[ImGuiCol_TableRowBg] = dim;
   style.Colors[ImGuiCol_TableRowBgAlt] = standard;
 
-  style.Colors[ImGuiCol_Separator] = sdSysData.COLOR_SELECT.c_white().STANDARD;
-  style.Colors[ImGuiCol_SeparatorHovered] = sdSysData.COLOR_SELECT.c_white().HOVERED;
-  style.Colors[ImGuiCol_SeparatorActive] = sdSysData.COLOR_SELECT.c_white().ACTIVE;
+  style.Colors[ImGuiCol_Separator] = sdSysData.COLOR_SELECT.neo_c_white().STANDARD.color();
+  style.Colors[ImGuiCol_SeparatorHovered] = sdSysData.COLOR_SELECT.neo_c_white().HOVERED.color();
+  style.Colors[ImGuiCol_SeparatorActive] = sdSysData.COLOR_SELECT.neo_c_white().ACTIVE.color();
 
   style.Colors[ImGuiCol_ResizeGrip] = standard;
   style.Colors[ImGuiCol_ResizeGripHovered] = hovered;
@@ -620,7 +620,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 RESET_KEYBOARD_FOCUS = false;
               }
 
-              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_white().TEXT));
+              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
               ImGui::PushFont(io.Fonts->Fonts.Data[2]);
               ImGui::Text("CMD:");
 
@@ -1384,7 +1384,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           if (BT_RUNNING_RED.button_color(sdSysData, "Red", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rr");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.red());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.red());
             DISPLAY_RUNNING_COLOR = false;
           }
 
@@ -1393,14 +1393,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           if (BT_RUNNING_GREEN.button_color(sdSysData, "Green", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rg");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.green());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.green());
             DISPLAY_RUNNING_COLOR = false;
           }
 
           if (BT_RUNNING_BLUE.button_color(sdSysData, "Blue", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rb");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.blue());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.blue());
             DISPLAY_RUNNING_COLOR = false;
           }
 
@@ -1409,14 +1409,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           if (BT_RUNNING_PURPLE.button_color(sdSysData, "Purple", sdSysData.COLOR_SELECT.purple(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("ru");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.purple());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.purple());
             DISPLAY_RUNNING_COLOR = false;
           }
           
           if (BT_RUNNING_YELLOW.button_color(sdSysData, "Yellow", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("ry");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.yellow());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.yellow());
             DISPLAY_RUNNING_COLOR = false;
           }
 
@@ -1425,14 +1425,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           if (BT_RUNNING_CYAN.button_color(sdSysData, "Cyan", sdSysData.COLOR_SELECT.cyan(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rc");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.cyan());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.cyan());
             DISPLAY_RUNNING_COLOR = false;
           }
           
           if (BT_RUNNING_ORANGE.button_color(sdSysData, "Orange", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rn");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.orange());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.orange());
             DISPLAY_RUNNING_COLOR = false;
           }
 
@@ -1441,14 +1441,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           if (BT_RUNNING_BLACK.button_color(sdSysData, "Black", sdSysData.COLOR_SELECT.black(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rx");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.black());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.black());
             DISPLAY_RUNNING_COLOR = false;
           }
           
           if (BT_RUNNING_GREY.button_color(sdSysData, "Grey", sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("re");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.grey());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.grey());
             DISPLAY_RUNNING_COLOR = false;
           }
 
@@ -1457,14 +1457,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           if (BT_RUNNING_WHITE.button_color(sdSysData, "White", sdSysData.COLOR_SELECT.white(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rw");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.white());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.white());
             DISPLAY_RUNNING_COLOR = false;
           }
 
           if (BT_RUNNING_PINK.button_color(sdSysData, "Pink", sdSysData.COLOR_SELECT.pink(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rp");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.COLOR_SELECT.pink());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pink());
             DISPLAY_RUNNING_COLOR = false;
           }
         }

@@ -142,6 +142,7 @@ class COLOR_COMBO
 
   void set_rgb(float R, float G, float B, float A, float Intensity);
   void set_rgb_v(float R, float G, float B, float A, float Intensity);
+  void set_rgb_black();
 };
 
 // ---------------------------------------------------------------------------------------
@@ -232,7 +233,7 @@ class COLOR_COMBOS
   int pink();
   int void_colr();
 
-  void void_color_set(int Color);
+  void void_color_set(unsigned long Time, int Color);
 
   bool changed();
   // tmp routine

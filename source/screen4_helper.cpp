@@ -180,6 +180,18 @@ void COLOR_COMBO::set_rgb_v(float R, float G, float B, float A, float Intensity)
   SIMPLE_RGB  = CRGB(static_cast<unsigned char>(R * 255.0f), static_cast<unsigned char>(G * 255.0f), static_cast<unsigned char>(B * 255.0f));
 }
 
+void COLOR_COMBO::set_rgb_black()
+{
+  TEXT        = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  BACKGROUND  = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  DIM         = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  STANDARD    = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  STANDARD_V  = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  HOVERED     = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  ACTIVE      = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  SIMPLE_RGB  = CRGB(0, 0, 0);
+}
+
 // ---------------------------------------------------------------------------------------
 
 void NEO_COLOR_COMBO::set_neo_rgb(unsigned long Time, COLOR_COMBO Color_Combo)
@@ -200,7 +212,7 @@ void COLOR_COMBOS::set_neo_colors_with_color_change(unsigned long Time)
 {
   if (void_color)
   {
-    COLOR_COMBINATIONS_NEO[0].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+    COLOR_COMBINATIONS_NEO[0].set_neo_rgb(Time, COLOR_COMBINATIONS_V[0]);
     COLOR_COMBINATIONS_NEO[1].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
     COLOR_COMBINATIONS_NEO[2].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
     COLOR_COMBINATIONS_NEO[3].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
@@ -249,85 +261,72 @@ void COLOR_COMBOS::init(unsigned long Time, float Intensity)
   {
     ALREADY_INITIALIZED = true; //prevent another routine from running again
 
-    COLOR_COMBO COLOR_COMB_BLACK; 
-    COLOR_COMBO COLOR_COMB_WHITE;
-    COLOR_COMBO COLOR_COMB_GREY;
-    COLOR_COMBO COLOR_COMB_RED;
-    COLOR_COMBO COLOR_COMB_ORANGE;
-    COLOR_COMBO COLOR_COMB_YELLOW;
-    COLOR_COMBO COLOR_COMB_GREEN;
-    COLOR_COMBO COLOR_COMB_CYAN;
-    COLOR_COMBO COLOR_COMB_BLUE;
-    COLOR_COMBO COLOR_COMB_PURPLE;
-    COLOR_COMBO COLOR_COMB_PINK;
-    COLOR_COMBO COLOR_COMB_CORPO;
-
-    // Base Colors
-    COLOR_COMB_BLACK.set_rgb(0.0f, 0.0f, 0.0f, 1.0f, Intensity);
-    COLOR_COMB_WHITE.set_rgb(1.0f, 1.0f, 1.0f, 1.0f, Intensity);
-    COLOR_COMB_GREY.set_rgb(0.2f, 0.2f, 0.2f, 1.0f, Intensity);
-    COLOR_COMB_RED.set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
-    COLOR_COMB_ORANGE.set_rgb(1.0f, 0.75f, 0.0f, 1.0f, Intensity);
-    COLOR_COMB_YELLOW.set_rgb(1.0f, 1.0f, 0.0f, 1.0f, Intensity);
-    COLOR_COMB_GREEN.set_rgb(0.0f, 1.0f, 0.0f, 1.0f, Intensity);
-    COLOR_COMB_CYAN.set_rgb(0.0f, 1.0f, 1.0f, 1.0f, Intensity);
-    COLOR_COMB_BLUE.set_rgb(0.0f, 0.0f, 1.0f, 1.0f, Intensity);
-    COLOR_COMB_PURPLE.set_rgb(1.0f, 0.0f, 1.0f, 1.0f, Intensity);
-    COLOR_COMB_PINK.set_rgb(1.0f, 0.5f, 1.0f, 1.0f, Intensity);
-
-    // Put colors in vector list for reference
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_BLACK);
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_WHITE);
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_GREY);
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_RED);
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_ORANGE);
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_YELLOW);
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_GREEN);
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_CYAN);
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_BLUE);
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_PURPLE);
-    COLOR_COMBINATIONS.push_back(COLOR_COMB_PINK);
-
-    // Base Colors V
-    COLOR_COMB_BLACK.set_rgb_v(0.0f, 0.0f, 0.0f, 1.0f, Intensity);
-    COLOR_COMB_WHITE.set_rgb_v(1.0f, 1.0f, 1.0f, 1.0f, Intensity);
-    COLOR_COMB_GREY.set_rgb_v(0.2f, 0.2f, 0.2f, 1.0f, Intensity);
-    COLOR_COMB_RED.set_rgb_v(1.0f, 0.0f, 0.0f, 1.0f, Intensity);
-    COLOR_COMB_ORANGE.set_rgb_v(1.0f, 0.75f, 0.0f, 1.0f, Intensity);
-    COLOR_COMB_YELLOW.set_rgb_v(1.0f, 1.0f, 0.0f, 1.0f, Intensity);
-    COLOR_COMB_GREEN.set_rgb_v(0.0f, 1.0f, 0.0f, 1.0f, Intensity);
-    COLOR_COMB_CYAN.set_rgb_v(0.0f, 1.0f, 1.0f, 1.0f, Intensity);
-    COLOR_COMB_BLUE.set_rgb_v(0.0f, 0.0f, 1.0f, 1.0f, Intensity);
-    COLOR_COMB_PURPLE.set_rgb_v(1.0f, 0.0f, 1.0f, 1.0f, Intensity);
-    COLOR_COMB_PINK.set_rgb_v(1.0f, 0.5f, 1.0f, 1.0f, Intensity);
-
-    // Put colors in vector list for reference
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_BLACK);
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_WHITE);
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_GREY);
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_RED);
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_ORANGE);
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_YELLOW);
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_GREEN);
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_CYAN);
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_BLUE);
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_PURPLE);
-    COLOR_COMBINATIONS_V.push_back(COLOR_COMB_PINK);
-
-    // Neo Colors
+    COLOR_COMBO tmp_color_combo; 
     NEO_COLOR_COMBO tmp_neo_color_combo;
 
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
-    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);
+    // Base Colors
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Black
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // White
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Grey
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Red
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Orange
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Yellow
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Green
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Cyan
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Blue
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Purple
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Pink
+
+    // Base Colors V
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Black
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // White
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Grey
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Red
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Orange
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Yellow
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Green
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Cyan
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Blue
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Purple
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Pink
+
+    // Neo Colors
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Black
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // White
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Grey
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Red
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Orange
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Yellow
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Green
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Cyan
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Blue
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Purple
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Pink
+
+    // Assign Colors
+    COLOR_COMBINATIONS[0].set_rgb_black();  // Black
+    COLOR_COMBINATIONS[1].set_rgb(1.0f, 1.0f, 1.0f, 1.0f, Intensity);  // White
+    COLOR_COMBINATIONS[2].set_rgb(0.4f, 0.4f, 0.4f, 1.0f, Intensity);  // Grey
+    COLOR_COMBINATIONS[3].set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Red
+    COLOR_COMBINATIONS[4].set_rgb(1.0f, 0.75f, 0.0f, 1.0f, Intensity);  // Orange
+    COLOR_COMBINATIONS[5].set_rgb(1.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Yellow
+    COLOR_COMBINATIONS[6].set_rgb(0.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Green
+    COLOR_COMBINATIONS[7].set_rgb(0.0f, 1.0f, 1.0f, 1.0f, Intensity);  // Cyan
+    COLOR_COMBINATIONS[8].set_rgb(0.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Blue
+    COLOR_COMBINATIONS[9].set_rgb(1.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
+    COLOR_COMBINATIONS[10].set_rgb(1.0f, 0.5f, 1.0f, 1.0f, Intensity);  // Pink
+
+    COLOR_COMBINATIONS_V[0].set_rgb_black();                                // Black
+    COLOR_COMBINATIONS_V[1].set_rgb_v(1.0f, 1.0f, 1.0f, 1.0f, Intensity);  // White
+    COLOR_COMBINATIONS_V[2].set_rgb_v(0.4f, 0.4f, 0.4f, 1.0f, Intensity);  // Grey
+    COLOR_COMBINATIONS_V[3].set_rgb_v(1.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Red
+    COLOR_COMBINATIONS_V[4].set_rgb_v(1.0f, 0.75f, 0.0f, 1.0f, Intensity);  // Orange
+    COLOR_COMBINATIONS_V[5].set_rgb_v(1.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Yellow
+    COLOR_COMBINATIONS_V[6].set_rgb_v(0.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Green
+    COLOR_COMBINATIONS_V[7].set_rgb_v(0.0f, 1.0f, 1.0f, 1.0f, Intensity);  // Cyan
+    COLOR_COMBINATIONS_V[8].set_rgb_v(0.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Blue
+    COLOR_COMBINATIONS_V[9].set_rgb_v(1.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
+    COLOR_COMBINATIONS_V[10].set_rgb_v(1.0f, 0.5f, 1.0f, 1.0f, Intensity);  // Pink
 
     set_neo_colors_with_color_change(Time);
   }
@@ -542,10 +541,10 @@ int COLOR_COMBOS::void_colr()
 
 // ---
 
-void COLOR_COMBOS::void_color_set(int Color)
+void COLOR_COMBOS::void_color_set(unsigned long Time, int Color)
 {
   void_color_value = Color;
-
+  set_neo_colors_with_color_change(Time);
   CHANGED = true;
 }
 

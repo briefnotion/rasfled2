@@ -1,3 +1,7 @@
+2.184_240821
+  - Modified all color routines to neocolor system. 
+      It's possible I missed a few.
+
 2.184_240818
   - Made more changes to neo color.
   - Started modifying some routines to neo color.
