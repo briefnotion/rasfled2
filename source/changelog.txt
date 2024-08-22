@@ -1,3 +1,8 @@
+2.185_240822
+  - Changed default state for door switches to off.  More changes will 
+      need to be made.
+  - Small changes to alerts windows to make the text more legible.
+
 2.184_240821
   - Modified all color routines to neocolor system. 
       It's possible I missed a few.

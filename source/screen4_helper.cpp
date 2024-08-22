@@ -548,6 +548,73 @@ void COLOR_COMBOS::void_color_set(unsigned long Time, int Color)
   CHANGED = true;
 }
 
+int COLOR_COMBOS::counter_color(int Color)
+{
+  switch (Color)
+  {
+    case 0:     // If Black, return White.  
+    {
+      return 1;
+      break;
+    }
+    case 1:     // If White, return Black.  
+    {
+      return 0;
+      break;
+    }
+    case 2:     // If Grey, return White.  
+    {
+      return 1;
+      break;
+    }
+    case 3:     // If Red, return White.  
+    {
+      return 1;
+      break;
+    }
+    case 4:     // If Orange, return Black.  
+    {
+      return 0;
+      break;
+    }
+    case 5:     // If Yellow, return Black.  
+    {
+      return 0;
+      break;
+    }
+    case 6:     // If Green, return Black.  
+    {
+      return 0;
+      break;
+    }
+    case 7:     // If Cyan, return Black.  
+    {
+      return 0;
+      break;
+    }
+    case 8:     // If Blue, return White.  
+    {
+      return 1;
+      break;
+    }
+    case 9:     // If Purple, return White.  
+    {
+      return 1;
+      break;
+    }
+    case 10:     // If Pink, return Black.  
+    {
+      return 0;
+      break;
+    }
+    default:     // If not specified, return White.  
+    {
+      return 1;
+      break;
+    }
+  }
+}
+
 bool COLOR_COMBOS::changed()
 {
   if (CHANGED)

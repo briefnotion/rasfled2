@@ -61,6 +61,13 @@ class ALERT_WIDGET
 {
   private:
 
+  int BACKGROUND_COLOR_VALUE;
+  ImColor BACKGROUND_COLOR;
+
+  int TEXT_COLOR_VALUE;
+  ImColor TEXT_COLOR;
+  //NEO_COLOR TEXT_COLOR;
+
   // Simple list to keep track if gadget properties
   ALERT_WIDGET_PROPERTIES_LIST PROPERTIES_RESERVE_LIST;
 

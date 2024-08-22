@@ -78,30 +78,35 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
       int alert_type = 0;
 
       if (Alerts_List.res_warning(alert_num))
-      {
-        ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().DIM.color()));
-        ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().DIM.color()));
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().DIM.color()));
+      {        
+        BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.yellow();
+        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.counter_color(BACKGROUND_COLOR_VALUE);
         
         alert_type = 2;
       }
       else if(Alerts_List.res_active(alert_num))
       {
-        ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color()));
-        ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color()));
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color()));
+        BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.red();
+        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.counter_color(BACKGROUND_COLOR_VALUE);
         
         alert_type = 3;
       }
       else
       {
-        ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.neo_c_green().STANDARD.color()));
-        ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.neo_c_green().STANDARD.color()));
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.neo_c_green().STANDARD.color()));
-        
+        BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.green();
+        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.counter_color(BACKGROUND_COLOR_VALUE);
+
         alert_type = 1;
       }
+
+      BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color(BACKGROUND_COLOR_VALUE).DIM.color();
+      BACKGROUND_COLOR.Value.w = 0.8f;
       
+      ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(BACKGROUND_COLOR));
+      ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(BACKGROUND_COLOR));
+      ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(BACKGROUND_COLOR));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
+
       title += "(" + to_string(alert_num) + ") : " + Alerts_List.res_alert_title(alert_num);
 
       if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
@@ -165,7 +170,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
       }
       ImGui::End();
 
-      ImGui::PopStyleColor(3);
+      ImGui::PopStyleColor(4);
     }
   }
 
@@ -185,16 +190,22 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
 
         if (Alerts_List.gen_warning(alert_num))
         {
-          ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().DIM.color()));
-          ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().DIM.color()));
-          ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().DIM.color()));
+          BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.red();
+          TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.counter_color(BACKGROUND_COLOR_VALUE);
         }
         else
         {
-          ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color()));
-          ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color()));
-          ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color()));
+          BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.red();
+          TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.counter_color(BACKGROUND_COLOR_VALUE);
         }
+
+        BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color(BACKGROUND_COLOR_VALUE).DIM.color();
+        BACKGROUND_COLOR.Value.w = 0.8f;
+        
+        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(BACKGROUND_COLOR));
+        ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(BACKGROUND_COLOR));
+        ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(BACKGROUND_COLOR));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
 
         title +=  "(" + to_string(alert_num) + ") : " + Alerts_List.gen_alert_title(alert_num);
         
@@ -213,7 +224,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
         }
         ImGui::End();
 
-        ImGui::PopStyleColor(3);
+        ImGui::PopStyleColor(4);
       }
     }
   }

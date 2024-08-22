@@ -235,6 +235,9 @@ class COLOR_COMBOS
 
   void void_color_set(unsigned long Time, int Color);
 
+  int counter_color(int Color);
+  // Simple color to prevent things like white on yellow.
+
   bool changed();
   // tmp routine
   // resets to false after read

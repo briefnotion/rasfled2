@@ -816,7 +816,7 @@ int loop_2(bool TTY_Only)
         TRUTH_CATCH ret_changed;
         for(int x=0; x<sdSystem.CONFIG.iNUM_SWITCHES; x++)
         {
-          sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).value = digitalRead(sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).pin);
+          sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).value = !digitalRead(sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).pin);    // Default at fail state is closed.
           ret_changed.catch_truth(sdSystem.CAR_INFO.STATUS.DOORS.store_from_alt_source(x, sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).value));
 
           if (ret_changed.has_truth() == true)

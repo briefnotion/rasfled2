@@ -1440,9 +1440,9 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           if (BT_RUNNING_BLACK.button_color(sdSysData, "Black", sdSysData.COLOR_SELECT.black(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
-            sdSysData.SCREEN_COMMS.command_text_set("rx");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.black());
-            DISPLAY_RUNNING_COLOR = false;
+            //sdSysData.SCREEN_COMMS.command_text_set("rx");
+            //sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.black());
+            //DISPLAY_RUNNING_COLOR = false;
           }
           
           if (BT_RUNNING_GREY.button_color(sdSysData, "Grey", sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
