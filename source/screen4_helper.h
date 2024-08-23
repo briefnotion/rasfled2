@@ -115,14 +115,89 @@ class NEO_COLOR
   NEO_COLOR_PROPERTIES PROPS;
 
   bool changed();
+  // Called after color or set color:
+  //  Returns true if a color value returned will 
+  //  be or is different from the previous time called.
 
   void set_current_frame_time(unsigned long Time);
+  // Sets the current time of the color varible.
+  //  Necessary if only .color() will be called and 
+  //  advantagous if called multiple times in the same
+  //  time frame.
 
   ImColor color(unsigned long Time, ImColor Color);
+  // Returns Color entered in parameter.  Will 
+  //  return transition color over time defined in props if 
+  //  the colors are different.
+
   ImColor color(unsigned long Time);
+  // Returns Color enter in previous set_color. Will 
+  //  return transition color over time defined in props if 
+  //  the colors are different.
+  //  set_color will need to be called before.
+
   ImColor color();
+  // Returns Color enter in previous set_color. Will 
+  //  return transition color over time defined in props if 
+  //  the colors are different.
+  //  set_current_frame_time will need to be called before.
+  //  set_color will need to be called before.
 
   void set_color(unsigned long Time, ImColor Color); 
+  // Enters color for next color call.
+};
+
+// ---------------------------------------------------------------------------------------
+
+class NEO_COLOR_CRGB
+{
+  private:
+  CRGB CURRENT_COLOR = CRGB(0, 0, 0);
+  CRGB NEW_COLOR = CRGB(0, 0, 0);
+  CRGB PREV_COLOR = CRGB(0, 0, 0);
+  
+  float CURRENT_TIME = 0.0f;
+  float START_TIME = 0.0f;
+
+  bool CHANGED = false;
+
+  CRGB calc_transition();
+  void reset_to_new_color(CRGB Color);
+
+  public:
+  NEO_COLOR_PROPERTIES PROPS;
+
+  bool changed();
+  // Called after color or set color:
+  //  Returns true if a color value returned will 
+  //  be or is different from the previous time called.
+
+  void set_current_frame_time(unsigned long Time);
+  // Sets the current time of the color varible.
+  //  Necessary if only .color() will be called and 
+  //  advantagous if called multiple times in the same
+  //  time frame.
+
+  CRGB color(unsigned long Time, CRGB Color);
+  // Returns Color entered in parameter.  Will 
+  //  return transition color over time defined in props if 
+  //  the colors are different.
+  
+  CRGB color(unsigned long Time);
+  // Returns Color enter in previous set_color. Will 
+  //  return transition color over time defined in props if 
+  //  the colors are different.
+  //  set_color will need to be called before.
+
+  CRGB color();
+  // Returns Color enter in previous set_color. Will 
+  //  return transition color over time defined in props if 
+  //  the colors are different.
+  //  set_current_frame_time will need to be called before.
+  //  set_color will need to be called before.
+
+  void set_color(unsigned long Time, CRGB Color); 
+  // Enters color for next color call.
 };
 
 // ---------------------------------------------------------------------------------------
@@ -131,14 +206,14 @@ class COLOR_COMBO
 {
   public:
 
-  ImColor TEXT;
-  ImColor BACKGROUND;
-  ImColor DIM;
-  ImColor STANDARD;
-  ImColor STANDARD_V;
-  ImColor HOVERED;
-  ImColor ACTIVE;
-  CRGB    SIMPLE_RGB;
+  ImColor         TEXT;
+  ImColor         BACKGROUND;
+  ImColor         DIM;
+  ImColor         STANDARD;
+  ImColor         STANDARD_V;
+  ImColor         HOVERED;
+  ImColor         ACTIVE;
+  CRGB            SIMPLE_RGB;
 
   void set_rgb(float R, float G, float B, float A, float Intensity);
   void set_rgb_v(float R, float G, float B, float A, float Intensity);
@@ -151,14 +226,14 @@ class NEO_COLOR_COMBO
 {
   public:
 
-  NEO_COLOR TEXT;
-  NEO_COLOR BACKGROUND;
-  NEO_COLOR DIM;
-  NEO_COLOR STANDARD;
-  NEO_COLOR STANDARD_V;
-  NEO_COLOR HOVERED;
-  NEO_COLOR ACTIVE;
-  CRGB      SIMPLE_RGB;
+  NEO_COLOR       TEXT;
+  NEO_COLOR       BACKGROUND;
+  NEO_COLOR       DIM;
+  NEO_COLOR       STANDARD;
+  NEO_COLOR       STANDARD_V;
+  NEO_COLOR       HOVERED;
+  NEO_COLOR       ACTIVE;
+  NEO_COLOR_CRGB  SIMPLE_RGB;
 
   void set_neo_rgb(unsigned long Time, COLOR_COMBO Color_Combo);
 };
@@ -169,8 +244,8 @@ class COLOR_COMBOS
 {
   private:
 
-  vector<COLOR_COMBO> COLOR_COMBINATIONS;   //Color palates for standard
-  vector<COLOR_COMBO> COLOR_COMBINATIONS_V; // Color palates for corpo mode
+  vector<COLOR_COMBO>     COLOR_COMBINATIONS;     // Color palates for standard
+  vector<COLOR_COMBO>     COLOR_COMBINATIONS_V;   // Color palates for corpo mode
   vector<NEO_COLOR_COMBO> COLOR_COMBINATIONS_NEO; // Color palates for corpo mode
 
   bool ALREADY_INITIALIZED = false;
@@ -207,6 +282,7 @@ class COLOR_COMBOS
   COLOR_COMBO c_blue();
   COLOR_COMBO c_purple();
   COLOR_COMBO c_pink();
+  COLOR_COMBO c_monochrome();
 
   NEO_COLOR_COMBO neo_c_black();
   NEO_COLOR_COMBO neo_c_white();
@@ -219,6 +295,7 @@ class COLOR_COMBOS
   NEO_COLOR_COMBO neo_c_blue();
   NEO_COLOR_COMBO neo_c_purple();
   NEO_COLOR_COMBO neo_c_pink();
+  NEO_COLOR_COMBO neo_c_monochrome();
 
   int black();
   int white();
@@ -231,6 +308,8 @@ class COLOR_COMBOS
   int blue();
   int purple();
   int pink();
+  int monochrome();
+
   int void_colr();
 
   void void_color_set(unsigned long Time, int Color);

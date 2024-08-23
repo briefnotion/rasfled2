@@ -1,3 +1,12 @@
+2.186_240823
+  - Created a CRGB version of Neocolor.
+  - Implemented NEO_COLOR_CRGB into the Running color system for 
+      automobile_handler. 
+  - Reset the Alerts colors to how they were before.  Previous changes 
+      weren't working.
+  - Removed Black as a running color and replaced it with a Monochrome. 
+  - Created a Monochrome color profile.
+
 2.185_240822
   - Changed default state for door switches to off.  More changes will 
       need to be made.

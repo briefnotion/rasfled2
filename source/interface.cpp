@@ -1050,9 +1050,9 @@ void processcommandlineinput(system_data &sdSysData,
         sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
-      if (check_command(sdSysData.SCREEN_COMMS, "rx", "Set Running Color to Black"))
+      if (check_command(sdSysData.SCREEN_COMMS, "rx", "Set Running Color to Monochrome"))
       {
-        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_black().SIMPLE_RGB).brightness(0.25f), "Black");
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_monochrome().SIMPLE_RGB).brightness(0.25f), "Monochrome");
         sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 

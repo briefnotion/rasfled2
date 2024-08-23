@@ -557,9 +557,9 @@ int loop_2(bool TTY_Only)
     {
       sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.orange());
     }
-    else if (sdSystem.running_color_list.strRunningColor == "Black")
+    else if (sdSystem.running_color_list.strRunningColor == "Black" || sdSystem.running_color_list.strRunningColor == "Monochrome")
     {
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.black());
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.monochrome());
     }
     else if (sdSystem.running_color_list.strRunningColor == "Grey")
     {

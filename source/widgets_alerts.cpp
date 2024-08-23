@@ -100,7 +100,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
       }
 
       BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color(BACKGROUND_COLOR_VALUE).DIM.color();
-      BACKGROUND_COLOR.Value.w = 0.8f;
+      //BACKGROUND_COLOR.Value.w = 0.8f;
       
       ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(BACKGROUND_COLOR));
       ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(BACKGROUND_COLOR));
@@ -200,7 +200,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
         }
 
         BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color(BACKGROUND_COLOR_VALUE).DIM.color();
-        BACKGROUND_COLOR.Value.w = 0.8f;
+        //BACKGROUND_COLOR.Value.w = 0.8f;
         
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(BACKGROUND_COLOR));
         ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(BACKGROUND_COLOR));

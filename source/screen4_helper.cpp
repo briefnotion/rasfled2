@@ -156,6 +156,123 @@ void NEO_COLOR::set_color(unsigned long Time, ImColor Color)
 
 // ---------------------------------------------------------------------------------------
 
+CRGB NEO_COLOR_CRGB::calc_transition()
+{
+  float power = (CURRENT_TIME - START_TIME) / PROPS.DURATION;
+
+  if (power >= 1.0f)
+  {
+    // Power, is at or above 1 at this pass. Meaning transition is complete.
+    
+    CURRENT_COLOR = NEW_COLOR;
+
+    CHANGED = false;
+
+    return NEW_COLOR;
+  }
+  else
+  {
+    float r = (power * (float)NEW_COLOR.r) + ((1.0f - power) * (float)PREV_COLOR.r);
+    float g = (power * (float)NEW_COLOR.g) + ((1.0f - power) * (float)PREV_COLOR.g);
+    float b = (power * (float)NEW_COLOR.b) + ((1.0f - power) * (float)PREV_COLOR.b);
+
+    CURRENT_COLOR = CRGB(r, g, b);
+    
+    CHANGED = true;
+    return CURRENT_COLOR;
+  }
+}
+
+void NEO_COLOR_CRGB::reset_to_new_color(CRGB Color)
+{
+  calc_transition();
+
+  START_TIME = CURRENT_TIME;
+  PREV_COLOR = CURRENT_COLOR;
+  NEW_COLOR = Color;
+
+  CHANGED = true;
+}
+
+bool NEO_COLOR_CRGB::changed()
+{
+  return CHANGED;
+}
+
+void NEO_COLOR_CRGB::set_current_frame_time(unsigned long Time)
+{
+  CURRENT_TIME = (float)Time;
+}
+
+CRGB NEO_COLOR_CRGB::color(unsigned long Time, CRGB Color)
+{
+  if (Color == CURRENT_COLOR)
+  {
+    // Color previously adjusted already matches current and new color
+    return NEW_COLOR;
+  }
+  else
+  {
+    set_current_frame_time(Time);
+
+    if (Color == NEW_COLOR)
+    {
+      // Color requested matches previously requested color.  
+      // Previously calculated color doesnt match requested color.
+      // Transition still in progress.
+
+      return calc_transition();
+    }
+    else
+    {
+      // Color requested doesnt match previously requested color. Set to start over.
+
+      reset_to_new_color(Color);
+
+      return CURRENT_COLOR;
+    }
+  }
+}
+
+CRGB NEO_COLOR_CRGB::color(unsigned long Time)
+{
+  // Do not check for color changes.  Just handle the trasition and return 
+  //  either current color or previously requested color.
+  if (CURRENT_COLOR == NEW_COLOR)
+  {
+    return NEW_COLOR;
+  }
+  else
+  {
+    set_current_frame_time(Time);
+
+    return calc_transition();
+  }
+}
+
+CRGB NEO_COLOR_CRGB::color()
+{
+  // Do not check for color changes.  Just handle the trasition and return 
+  //  either current color or previously requested color.
+  if (CURRENT_COLOR == NEW_COLOR)
+  {
+    return NEW_COLOR;
+  }
+  else
+  {
+    return calc_transition();
+  }
+}
+
+void NEO_COLOR_CRGB::set_color(unsigned long Time, CRGB Color)
+{
+  // Set a color trasition change but do not return anything.
+  set_current_frame_time(Time);
+  reset_to_new_color(Color);
+}
+
+// ---------------------------------------------------------------------------------------
+
 void COLOR_COMBO::set_rgb(float R, float G, float B, float A, float Intensity)
 {
   TEXT        = ImColor((R *0.8f + 0.5f) * Intensity, (G *0.8f + 0.5f) * Intensity, (B *0.8f + 0.5f) * Intensity, A);
@@ -203,7 +320,7 @@ void NEO_COLOR_COMBO::set_neo_rgb(unsigned long Time, COLOR_COMBO Color_Combo)
   STANDARD_V.set_color(Time, Color_Combo.STANDARD_V);
   HOVERED.set_color(Time, Color_Combo.HOVERED);
   ACTIVE.set_color(Time, Color_Combo.ACTIVE);
-  SIMPLE_RGB  = Color_Combo.SIMPLE_RGB;
+  SIMPLE_RGB.set_color(Time, Color_Combo.SIMPLE_RGB);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -252,6 +369,7 @@ void COLOR_COMBOS::set_frame_time(unsigned long Time)
     COLOR_COMBINATIONS_NEO[pos].STANDARD_V.set_current_frame_time(Time);
     COLOR_COMBINATIONS_NEO[pos].HOVERED.set_current_frame_time(Time);
     COLOR_COMBINATIONS_NEO[pos].ACTIVE.set_current_frame_time(Time);
+    COLOR_COMBINATIONS_NEO[pos].SIMPLE_RGB.set_current_frame_time(Time);
   }
 }
 
@@ -276,6 +394,7 @@ void COLOR_COMBOS::init(unsigned long Time, float Intensity)
     COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Blue
     COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Purple
     COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Pink
+    COLOR_COMBINATIONS.push_back(tmp_color_combo);  // Monochrome
 
     // Base Colors V
     COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Black
@@ -289,6 +408,7 @@ void COLOR_COMBOS::init(unsigned long Time, float Intensity)
     COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Blue
     COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Purple
     COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Pink
+    COLOR_COMBINATIONS_V.push_back(tmp_color_combo);  // Monochrome
 
     // Neo Colors
     COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Black
@@ -302,6 +422,7 @@ void COLOR_COMBOS::init(unsigned long Time, float Intensity)
     COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Blue
     COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Purple
     COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Pink
+    COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Monochrome
 
     // Assign Colors
     COLOR_COMBINATIONS[0].set_rgb_black();  // Black
@@ -315,6 +436,7 @@ void COLOR_COMBOS::init(unsigned long Time, float Intensity)
     COLOR_COMBINATIONS[8].set_rgb(0.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Blue
     COLOR_COMBINATIONS[9].set_rgb(1.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
     COLOR_COMBINATIONS[10].set_rgb(1.0f, 0.5f, 1.0f, 1.0f, Intensity);  // Pink
+    COLOR_COMBINATIONS[11].set_rgb(0.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Monochrome
 
     COLOR_COMBINATIONS_V[0].set_rgb_black();                                // Black
     COLOR_COMBINATIONS_V[1].set_rgb_v(1.0f, 1.0f, 1.0f, 1.0f, Intensity);  // White
@@ -327,6 +449,7 @@ void COLOR_COMBOS::init(unsigned long Time, float Intensity)
     COLOR_COMBINATIONS_V[8].set_rgb_v(0.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Blue
     COLOR_COMBINATIONS_V[9].set_rgb_v(1.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
     COLOR_COMBINATIONS_V[10].set_rgb_v(1.0f, 0.5f, 1.0f, 1.0f, Intensity);  // Pink
+    COLOR_COMBINATIONS_V[11].set_rgb_v(0.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Monochrome
 
     set_neo_colors_with_color_change(Time);
   }
@@ -420,6 +543,11 @@ COLOR_COMBO COLOR_COMBOS::c_pink()
   return color(10);
 }
 
+COLOR_COMBO COLOR_COMBOS::c_monochrome()
+{
+  return color(11);
+}
+
 // ---
 
 NEO_COLOR_COMBO COLOR_COMBOS::neo_c_black()
@@ -477,6 +605,12 @@ NEO_COLOR_COMBO COLOR_COMBOS::neo_c_pink()
   return neo_color(10);
 }
 
+NEO_COLOR_COMBO COLOR_COMBOS::neo_c_monochrome()
+{
+  return neo_color(11);
+}
+
+
 // ---
 
 int COLOR_COMBOS::black()
@@ -532,6 +666,11 @@ int COLOR_COMBOS::purple()
 int COLOR_COMBOS::pink()
 {
   return 10;
+}
+
+int COLOR_COMBOS::monochrome()
+{
+  return 11;
 }
 
 int COLOR_COMBOS::void_colr()
@@ -603,6 +742,11 @@ int COLOR_COMBOS::counter_color(int Color)
       break;
     }
     case 10:     // If Pink, return Black.  
+    {
+      return 0;
+      break;
+    }
+    case 11:     // If Monochrome, return White.  
     {
       return 0;
       break;

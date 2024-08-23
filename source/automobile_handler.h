@@ -70,14 +70,14 @@ class AUTOMOBILE_HANDLER
   CRGB velocity_color = CRGB(6, 3, 0);
   CRGB drive_pulse_color = CRGB(30, 30, 30);
 
+  NEO_COLOR_CRGB VELOCITY_COLOR;
+
   // control values
   const int ACTIVATE_SPEED = 10;
   const int CAUTION_SPEED = 5;
 
   void alert(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
   // Flash lights
-
-  void set_velocity_color(system_data &sdSysData);
 
   public:
 
