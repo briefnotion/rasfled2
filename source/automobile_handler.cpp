@@ -18,6 +18,99 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
+void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, float S_Temp)
+{
+  // Simple temp color set.
+  int rank = 0;
+
+  if (S_Temp < 40.0f)
+  {
+    rank = 0;
+  }
+  else if (S_Temp < 45.0f)
+  {
+    rank = 1;
+  }
+  else if (S_Temp < 50.0f)
+  {
+    rank = 2;
+  }
+  else if (S_Temp < 55.0f)
+  {
+    rank = 3;
+  }
+  else if (S_Temp < 60.0f)
+  {
+    rank = 4;
+  }
+  else if (S_Temp < 65.0f)
+  {
+    rank = 5;
+  }
+  else if (S_Temp < 70.0f)
+  {
+    rank = 6;
+  }
+  else
+  {
+    rank = 7;
+  }
+
+  if (rank != running_temperature_color_rank)
+  {
+    running_temperature_color_rank = rank;
+
+    switch (running_temperature_color_rank)
+    {
+      case 0:     // < 40
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.cyan());
+        break;
+      }
+      case 1:     // 40 - 45
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.blue());
+        break;
+      }
+      case 2:     // 45 - 50
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.green());
+        break;
+      }
+      case 3:     // 50 - 55
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.yellow());
+        break;
+      }
+      case 4:     // 55 - 60
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.orange());
+        break;
+      }
+      case 5:     // 60 - 65
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.red());
+        break;
+      }
+      case 6:     // 65 - 70
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.purple());
+        break;
+      }
+      case 7:     // 70 +
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pink());
+        break;
+      }
+      default:
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.monochrome());
+        break;
+      }
+    }
+  }
+}
+
 void AUTOMOBILE_HANDLER::alert(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime)
 {
   if (ALERT_TIMER.ping_down(tmeCurrentTime) == false)
@@ -31,9 +124,6 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 {
   // -------------------------------------------------------------------------------------
   // Automobile Data Switched to Not Available
-
-  float speed_lowest_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_LOWEST.val_mph();
-  float speed_average_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph();
 
   // Check for changes in the automobile availability
   if ((set_bool_with_change_notify(sdSysData.CAR_INFO.active(), AUTO_ACTIVE) == true))
@@ -63,6 +153,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
   {
     // Check alerts
 
+    float speed_lowest_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_LOWEST.val_mph();
+    float speed_average_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph();
+
     // S-Temp alert
     if (sdSysData.ALERTS_AUTO.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_S_TEMP, 
         sdSysData.CAR_INFO.CALCULATED.s_temp(), 65.0f, 50.0f))
@@ -70,6 +163,26 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
       sdSysData.ALERTS_AUTO.res_update_alert_text_line_1(AUTO_RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)sdSysData.CAR_INFO.CALCULATED.s_temp()));
       sdSysData.ALERTS_AUTO.res_update_line_2_with_conditions(AUTO_RESERVE_ALERT_TEMP_S_TEMP);
       sdSysData.ALERTS_AUTO.ALERTS_RESERVE[AUTO_RESERVE_ALERT_TEMP_S_TEMP].set_show_value_bar(true);
+    }
+
+    // S-Temp Color Set
+    running_temperature.set(sdSysData.RUNNING_COLOR_TEMPERATURE);
+    if (running_temperature.bounce())
+    {
+      if (running_temperature.value())
+      {
+        sdSysData.COLOR_SELECT.set_neo_duration(20000.0f);
+      }
+      else
+      {
+        sdSysData.COLOR_SELECT.set_neo_duration(2000.0f);
+        running_temperature_color_rank = -1;
+      }
+    }
+
+    if (running_temperature.value())
+    {
+      running_temperature_color_set(sdSysData, sdSysData.CAR_INFO.CALCULATED.s_temp());
     }
 
     // MIL alert

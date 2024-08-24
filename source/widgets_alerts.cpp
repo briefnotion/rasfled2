@@ -80,26 +80,26 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
       if (Alerts_List.res_warning(alert_num))
       {        
         BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.yellow();
-        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.counter_color(BACKGROUND_COLOR_VALUE);
+        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
         
         alert_type = 2;
       }
       else if(Alerts_List.res_active(alert_num))
       {
         BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.red();
-        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.counter_color(BACKGROUND_COLOR_VALUE);
+        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
         
         alert_type = 3;
       }
       else
       {
         BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.green();
-        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.counter_color(BACKGROUND_COLOR_VALUE);
+        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
 
         alert_type = 1;
       }
 
-      BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color(BACKGROUND_COLOR_VALUE).DIM.color();
+      BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color(BACKGROUND_COLOR_VALUE).STANDARD.color();
       //BACKGROUND_COLOR.Value.w = 0.8f;
       
       ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(BACKGROUND_COLOR));
@@ -191,15 +191,15 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
         if (Alerts_List.gen_warning(alert_num))
         {
           BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.red();
-          TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.counter_color(BACKGROUND_COLOR_VALUE);
+          TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
         }
         else
         {
           BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.red();
-          TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.counter_color(BACKGROUND_COLOR_VALUE);
+          TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
         }
 
-        BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color(BACKGROUND_COLOR_VALUE).DIM.color();
+        BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color(BACKGROUND_COLOR_VALUE).STANDARD.color();
         //BACKGROUND_COLOR.Value.w = 0.8f;
         
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(BACKGROUND_COLOR));

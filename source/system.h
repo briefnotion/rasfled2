@@ -226,7 +226,7 @@ class system_data
   DNFWTS_ DNFWTS;
 
   // Temporary placement of auto velocity color
-  bool AUTO_VELOCITY_COLOR_CHANGED = false;
+  bool RUNNING_COLOR_TEMPERATURE = false;
 
   SOUNDS SOUND_SYSTEM;  // Primitive sound system.
 

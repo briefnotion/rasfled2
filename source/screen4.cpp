@@ -133,14 +133,14 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   //sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f);
   
   ImGuiStyle& style = ImGui::GetStyle();
- 
-  ImColor background = BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().BACKGROUND);
-  ImColor dim = DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().DIM);
-  ImColor standard = STANDARD.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().STANDARD);
-  ImColor hovered = HOVERED.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().HOVERED);
-  ImColor active = ACTIVE.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.c_blue().ACTIVE);
 
-  DEFAULT_COLORS_CHANGED = BACKGROUND.changed() || DIM.changed() || STANDARD.changed() || HOVERED.changed() || ACTIVE.changed();
+  ImColor background = sdSysData.COLOR_SELECT.neo_c_blue().BACKGROUND.color();
+  ImColor dim = sdSysData.COLOR_SELECT.neo_c_blue().DIM.color();
+  ImColor standard = sdSysData.COLOR_SELECT.neo_c_blue().STANDARD.color();
+  ImColor hovered = sdSysData.COLOR_SELECT.neo_c_blue().HOVERED.color();
+  ImColor active = sdSysData.COLOR_SELECT.neo_c_blue().ACTIVE.color();
+
+  DEFAULT_COLORS_CHANGED = sdSysData.COLOR_SELECT.neo_c_blue().BACKGROUND.changed() || sdSysData.COLOR_SELECT.neo_c_blue().DIM.changed() || sdSysData.COLOR_SELECT.neo_c_blue().STANDARD.changed() || sdSysData.COLOR_SELECT.neo_c_blue().HOVERED.changed() || sdSysData.COLOR_SELECT.neo_c_blue().ACTIVE.changed();
 
   //style.Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
@@ -1465,6 +1465,15 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           {
             sdSysData.SCREEN_COMMS.command_text_set("rp");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pink());
+            DISPLAY_RUNNING_COLOR = false;
+          }
+
+          ImGui::SameLine();
+
+          if (BT_RUNNING_PINK.button_color(sdSysData, "Temp", sdSysData.COLOR_SELECT.black(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          {
+            sdSysData.SCREEN_COMMS.command_text_set("rt");
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.monochrome());
             DISPLAY_RUNNING_COLOR = false;
           }
         }

@@ -76,6 +76,10 @@ class AUTOMOBILE_HANDLER
   const int ACTIVATE_SPEED = 10;
   const int CAUTION_SPEED = 5;
 
+  BOOL_BOUNCE running_temperature;
+  int running_temperature_color_rank = 0;
+  void running_temperature_color_set(system_data &sdSysData, float S_Temp);
+
   void alert(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
   // Flash lights
 

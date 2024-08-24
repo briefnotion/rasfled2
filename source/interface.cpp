@@ -1004,68 +1004,74 @@ void processcommandlineinput(system_data &sdSysData,
       // Set Running Color
       if (check_command(sdSysData.SCREEN_COMMS, "rw", "Set Running Color to White"))
       {
-        sdSysData.set_running_color(crgbWhite, "White");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_white().SIMPLE_RGB).brightness(0.25f), "White");
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rr", "Set Running Color to Red"))
       {
-        sdSysData.set_running_color(crgbRed, "Red");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_red().SIMPLE_RGB).brightness(0.25f), "Red");
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rg", "Set Running Color to Green"))
       {
-        sdSysData.set_running_color(crgbGreen, "Green");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_green().SIMPLE_RGB).brightness(0.25f), "Green");
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rb", "Set Running Color to Blue"))
       {
-        sdSysData.set_running_color(crgbBlue, "Blue");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_blue().SIMPLE_RGB).brightness(0.25f), "Blue");
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "ru", "Set Running Color to Purple"))
       {
-        sdSysData.set_running_color(crgbPurple, "Purple");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_purple().SIMPLE_RGB).brightness(0.25f), "Purple");
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "ry", "Set Running Color to Yellow"))
       {
-        sdSysData.set_running_color(crgbYellow, "Yellow");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_yellow().SIMPLE_RGB).brightness(0.25f), "Yellow");
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rc", "Set Running Color to Cyan"))
       {
-        sdSysData.set_running_color(crgbCyan, "Cyan");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_cyan().SIMPLE_RGB).brightness(0.25f), "Cyan");
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rn", "Set Running Color to Orange"))
       {
-        sdSysData.set_running_color(crgbOrange, "Orange");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_orange().SIMPLE_RGB).brightness(0.25f), "Orange");
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rx", "Set Running Color to Monochrome"))
       {
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_monochrome().SIMPLE_RGB).brightness(0.25f), "Monochrome");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "re", "Set Running Color to Grey"))
       {
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_grey().SIMPLE_RGB).brightness(0.25f), "Grey");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rp", "Set Running Color to Pink"))
       {
+        sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_pink().SIMPLE_RGB).brightness(0.25f), "Pink");
-        sdSysData.AUTO_VELOCITY_COLOR_CHANGED = true;
+      }
+
+      if (check_command(sdSysData.SCREEN_COMMS, "rt", "Set Running Color to Automobile Temperature"))
+      {
+        sdSysData.RUNNING_COLOR_TEMPERATURE = true;
+        sdSysData.set_running_color(CRGB(sdSysData.COLOR_SELECT.c_monochrome().SIMPLE_RGB).brightness(0.25f), "Temperature");
       }
 
       // -------------------------------------------------------------------------------------

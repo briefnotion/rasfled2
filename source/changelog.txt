@@ -1,3 +1,6 @@
+2.187_240824
+  - Added Automobile Temperature to be a running color.
+
 2.186_240823
   - Created a CRGB version of Neocolor.
   - Implemented NEO_COLOR_CRGB into the Running color system for 

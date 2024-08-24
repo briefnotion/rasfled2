@@ -87,9 +87,9 @@ void AIRCRAFT::check_alerts(ALERT_SYSTEM_2 &Alerts)
       //ALERT_LIST.push_back(tmp_alert_entry);
       //ALERT= true;
 
-      Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
-                                "ALERT: Special Purpose Code", 
-                                "Hi-Jacking");
+      Alerts.add_generic_alert("Squawk: " + SQUAWK.get_str_value(), 
+                                "Flight: " + FLIGHT.get_str_value(), 
+                                "ALERT: Hi-Jacking");
     }
 
     if (SQUAWK.get_int_value() == 7600)
@@ -99,9 +99,9 @@ void AIRCRAFT::check_alerts(ALERT_SYSTEM_2 &Alerts)
       //ALERT_LIST.push_back(tmp_alert_entry);
       //ALERT= true;
 
-      Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
-                                "ALERT: Special Purpose Code",
-                                "Radio Failure");
+      Alerts.add_generic_alert("Squawk: " + SQUAWK.get_str_value(), 
+                                "Flight: " + FLIGHT.get_str_value(), 
+                                "ALERT: Radio Failure");
     }
 
     if (SQUAWK.get_int_value() == 7700)
@@ -111,9 +111,9 @@ void AIRCRAFT::check_alerts(ALERT_SYSTEM_2 &Alerts)
       //ALERT_LIST.push_back(tmp_alert_entry);
       //ALERT= true;
 
-      Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
-                                "ALERT: Special Purpose Code",
-                                "Emergency");
+      Alerts.add_generic_alert("Squawk: " + SQUAWK.get_str_value(), 
+                                "Flight: " + FLIGHT.get_str_value(), 
+                                "ALERT: Emergency");
     }
   }
 
@@ -125,9 +125,9 @@ void AIRCRAFT::check_alerts(ALERT_SYSTEM_2 &Alerts)
     //ALERT_LIST.push_back(tmp_alert_entry);
     //ALERT= true;
 
-    Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
-                              "ALERT: Special Purpose Code",
-                              EMERGENCY.get_str_value());
+    Alerts.add_generic_alert("Squawk: " + SQUAWK.get_str_value(), 
+                              "Flight: " + FLIGHT.get_str_value(), 
+                              "ALERT: " + EMERGENCY.get_str_value());
   }
 
   // Check Values
@@ -144,9 +144,9 @@ void AIRCRAFT::check_alerts(ALERT_SYSTEM_2 &Alerts)
  // Check Proximity
   if (DISTANCE_FROM_BASE >= 0.0f &&  "" && DISTANCE_FROM_BASE < 1.0f)
   {
-    Alerts.add_generic_alert(SQUAWK.get_str_value() + " " + FLIGHT.get_str_value(), 
-                              "ALERT: Proximity",
-                              "Distance: " + to_string_round_to_nth(DISTANCE_FROM_BASE, 1) + " miles");
+    Alerts.add_generic_alert("Squawk: " + SQUAWK.get_str_value(), 
+                              "Flight: " + FLIGHT.get_str_value(), 
+                              "ALERT: Distance: " + to_string_round_to_nth(DISTANCE_FROM_BASE, 1) + " miles");
   }
 }
 

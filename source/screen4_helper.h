@@ -261,6 +261,8 @@ class COLOR_COMBOS
 
   void init(unsigned long Time, float Intensity);
 
+  void set_neo_duration(float Duration);
+
   void set_frame_time(unsigned long);
   // For all colors, set the current frame time. 
   // Call first at start of new draw frame to eliminate the 
@@ -313,9 +315,6 @@ class COLOR_COMBOS
   int void_colr();
 
   void void_color_set(unsigned long Time, int Color);
-
-  int counter_color(int Color);
-  // Simple color to prevent things like white on yellow.
 
   bool changed();
   // tmp routine

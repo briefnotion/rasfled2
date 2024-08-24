@@ -836,7 +836,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
   SDATA.L_S_TEMP_SB.PROPS.MIN_MAX_TIME_SPAN = 5* 60000;
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(40.0f, sdSysData.COLOR_SELECT.blue());
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(50.0f, sdSysData.COLOR_SELECT.green());
-  SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(60.0f, sdSysData.COLOR_SELECT.yellow());
+  SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(65.0f, sdSysData.COLOR_SELECT.yellow());
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(70.0f, sdSysData.COLOR_SELECT.red());
   SDATA.L_S_TEMP_SB.PROPS.COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.purple());
   SDATA.L_S_TEMP_SB.PROPS.DISPLAY_MARKER = true;

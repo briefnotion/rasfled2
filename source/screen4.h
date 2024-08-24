@@ -48,13 +48,6 @@ class SCREEN4
   struct winsize TERMINAL_WINDOW;
 
   // Default Colors
-
-  // Standard Default Colors on startup
-  NEO_COLOR BACKGROUND;
-  NEO_COLOR DIM;
-  NEO_COLOR STANDARD;
-  NEO_COLOR HOVERED;
-  NEO_COLOR ACTIVE;
   bool DEFAULT_COLORS_CHANGED = false;
 
   // ImGui things

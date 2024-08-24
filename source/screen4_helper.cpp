@@ -357,6 +357,20 @@ void COLOR_COMBOS::set_neo_colors_with_color_change(unsigned long Time)
   }
 }
 
+void COLOR_COMBOS::set_neo_duration(float Duration)
+{
+  for (int pos = 0; pos < (int)COLOR_COMBINATIONS_NEO.size(); pos++)
+  {
+    COLOR_COMBINATIONS_NEO[pos].TEXT.PROPS.DURATION = Duration;
+    COLOR_COMBINATIONS_NEO[pos].BACKGROUND.PROPS.DURATION = Duration;
+    COLOR_COMBINATIONS_NEO[pos].DIM.PROPS.DURATION = Duration;
+    COLOR_COMBINATIONS_NEO[pos].STANDARD.PROPS.DURATION = Duration;
+    COLOR_COMBINATIONS_NEO[pos].STANDARD_V.PROPS.DURATION = Duration;
+    COLOR_COMBINATIONS_NEO[pos].HOVERED.PROPS.DURATION = Duration;
+    COLOR_COMBINATIONS_NEO[pos].ACTIVE.PROPS.DURATION = Duration;
+    COLOR_COMBINATIONS_NEO[pos].SIMPLE_RGB.PROPS.DURATION = Duration;
+  }
+}
 
 void COLOR_COMBOS::set_frame_time(unsigned long Time)
 {
@@ -685,78 +699,6 @@ void COLOR_COMBOS::void_color_set(unsigned long Time, int Color)
   void_color_value = Color;
   set_neo_colors_with_color_change(Time);
   CHANGED = true;
-}
-
-int COLOR_COMBOS::counter_color(int Color)
-{
-  switch (Color)
-  {
-    case 0:     // If Black, return White.  
-    {
-      return 1;
-      break;
-    }
-    case 1:     // If White, return Black.  
-    {
-      return 0;
-      break;
-    }
-    case 2:     // If Grey, return White.  
-    {
-      return 1;
-      break;
-    }
-    case 3:     // If Red, return White.  
-    {
-      return 1;
-      break;
-    }
-    case 4:     // If Orange, return Black.  
-    {
-      return 0;
-      break;
-    }
-    case 5:     // If Yellow, return Black.  
-    {
-      return 0;
-      break;
-    }
-    case 6:     // If Green, return Black.  
-    {
-      return 0;
-      break;
-    }
-    case 7:     // If Cyan, return Black.  
-    {
-      return 0;
-      break;
-    }
-    case 8:     // If Blue, return White.  
-    {
-      return 1;
-      break;
-    }
-    case 9:     // If Purple, return White.  
-    {
-      return 1;
-      break;
-    }
-    case 10:     // If Pink, return Black.  
-    {
-      return 0;
-      break;
-    }
-    case 11:     // If Monochrome, return White.  
-    {
-      return 0;
-      break;
-    }
-    default:     // If not specified, return White.  
-    {
-      return 1;
-      break;
-    }
-  }
 }
 
 bool COLOR_COMBOS::changed()
