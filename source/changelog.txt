@@ -1,3 +1,7 @@
+2.188_240825
+  - Corrected a few things.
+  - Changed the way alerts look.
+
 2.187_240824
   - Added Automobile Temperature to be a running color.
 

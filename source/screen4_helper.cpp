@@ -40,28 +40,37 @@ ImVec2 operator*(ImVec2 V1, float Number)
 
 ImColor NEO_COLOR::calc_transition()
 {
-  float power = (CURRENT_TIME - START_TIME) / PROPS.DURATION;
-
-  if (power >= 1.0f)
+  if (NEEDS_CALC == true)
   {
-    // Power, is at or above 1 at this pass. Meaning transition is complete.
-    
-    CURRENT_COLOR = NEW_COLOR;
+    float power = (CURRENT_TIME - START_TIME) / PROPS.DURATION;
 
-    CHANGED = false;
+    if (power >= 1.0f)
+    {
+      // Power, is at or above 1 at this pass. Meaning transition is complete.
+      
+      CURRENT_COLOR = NEW_COLOR;
 
-    return NEW_COLOR;
+      CHANGED = false;
+
+      return NEW_COLOR;
+    }
+    else
+    {
+      float r = (power * NEW_COLOR.Value.x) + ((1.0f - power) * PREV_COLOR.Value.x);
+      float g = (power * NEW_COLOR.Value.y) + ((1.0f - power) * PREV_COLOR.Value.y);
+      float b = (power * NEW_COLOR.Value.z) + ((1.0f - power) * PREV_COLOR.Value.z);
+      float w = (power * NEW_COLOR.Value.w) + ((1.0f - power) * PREV_COLOR.Value.w);
+
+      CURRENT_COLOR = ImColor(r, g, b, w);
+      
+      NEEDS_CALC = false;
+      CHANGED = true;
+
+      return CURRENT_COLOR;
+    }
   }
   else
   {
-    float r = (power * NEW_COLOR.Value.x) + ((1.0f - power) * PREV_COLOR.Value.x);
-    float g = (power * NEW_COLOR.Value.y) + ((1.0f - power) * PREV_COLOR.Value.y);
-    float b = (power * NEW_COLOR.Value.z) + ((1.0f - power) * PREV_COLOR.Value.z);
-    float w = (power * NEW_COLOR.Value.w) + ((1.0f - power) * PREV_COLOR.Value.w);
-
-    CURRENT_COLOR = ImColor(r, g, b, w);
-    
-    CHANGED = true;
     return CURRENT_COLOR;
   }
 }
@@ -74,6 +83,8 @@ void NEO_COLOR::reset_to_new_color(ImColor Color)
   PREV_COLOR = CURRENT_COLOR;
   NEW_COLOR = Color;
 
+  NEEDS_CALC = true; 
+
   CHANGED = true;
 }
 
@@ -84,7 +95,11 @@ bool NEO_COLOR::changed()
 
 void NEO_COLOR::set_current_frame_time(unsigned long Time)
 {
-  CURRENT_TIME = (float)Time;
+  if (CURRENT_TIME != (float)Time)
+  {
+    CURRENT_TIME = (float)Time;
+    NEEDS_CALC = true;
+  }
 }
 
 ImColor NEO_COLOR::color(unsigned long Time, ImColor Color)
@@ -158,27 +173,34 @@ void NEO_COLOR::set_color(unsigned long Time, ImColor Color)
 
 CRGB NEO_COLOR_CRGB::calc_transition()
 {
-  float power = (CURRENT_TIME - START_TIME) / PROPS.DURATION;
-
-  if (power >= 1.0f)
+  if (NEEDS_CALC == true)
   {
-    // Power, is at or above 1 at this pass. Meaning transition is complete.
-    
-    CURRENT_COLOR = NEW_COLOR;
+    float power = (CURRENT_TIME - START_TIME) / PROPS.DURATION;
 
-    CHANGED = false;
+    if (power >= 1.0f)
+    {
+      // Power, is at or above 1 at this pass. Meaning transition is complete.
+      
+      CURRENT_COLOR = NEW_COLOR;
 
-    return NEW_COLOR;
+      CHANGED = false;
+
+      return NEW_COLOR;
+    }
+    else
+    {
+      float r = (power * (float)NEW_COLOR.r) + ((1.0f - power) * (float)PREV_COLOR.r);
+      float g = (power * (float)NEW_COLOR.g) + ((1.0f - power) * (float)PREV_COLOR.g);
+      float b = (power * (float)NEW_COLOR.b) + ((1.0f - power) * (float)PREV_COLOR.b);
+
+      CURRENT_COLOR = CRGB(r, g, b);
+      
+      CHANGED = true;
+      return CURRENT_COLOR;
+    }
   }
   else
   {
-    float r = (power * (float)NEW_COLOR.r) + ((1.0f - power) * (float)PREV_COLOR.r);
-    float g = (power * (float)NEW_COLOR.g) + ((1.0f - power) * (float)PREV_COLOR.g);
-    float b = (power * (float)NEW_COLOR.b) + ((1.0f - power) * (float)PREV_COLOR.b);
-
-    CURRENT_COLOR = CRGB(r, g, b);
-    
-    CHANGED = true;
     return CURRENT_COLOR;
   }
 }
@@ -191,6 +213,8 @@ void NEO_COLOR_CRGB::reset_to_new_color(CRGB Color)
   PREV_COLOR = CURRENT_COLOR;
   NEW_COLOR = Color;
 
+  NEEDS_CALC = true; 
+
   CHANGED = true;
 }
 
@@ -201,7 +225,11 @@ bool NEO_COLOR_CRGB::changed()
 
 void NEO_COLOR_CRGB::set_current_frame_time(unsigned long Time)
 {
-  CURRENT_TIME = (float)Time;
+  if (CURRENT_TIME != (float)Time)
+  {
+    CURRENT_TIME = (float)Time;
+    NEEDS_CALC = true;
+  }
 }
 
 CRGB NEO_COLOR_CRGB::color(unsigned long Time, CRGB Color)

@@ -73,7 +73,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
 
       string title = Alerts_List.PROPS.ALERT_SYSTEM_NAME;
 
-      ImGui::SetNextWindowSize(ImVec2(300, 100));
+      ImGui::SetNextWindowSize(ImVec2(315, 120));
 
       int alert_type = 0;
 
@@ -111,62 +111,66 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
 
       if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
       {
-        ImVec4 working_area = get_working_area();
-        ImDrawList* draw_list_alert = ImGui::GetWindowDrawList();
-
-        ImVec2 screen_pos = ImGui::GetCursorScreenPos();
-
-        Graphical_Number(draw_list_alert, sdSysData, ImVec2(working_area.x, working_area.y), working_area.z, alert_type);
-
-        ImGui::Text(Alerts_List.res_alert_text_line_1(alert_num).c_str());
-        ImGui::Text(Alerts_List.res_alert_text_line_2(alert_num).c_str());
-
-        if (Alerts_List.ALERTS_RESERVE[alert_num].show_value_bar())
+        ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 255)); // Set background to black and opaque
+        ImGui::BeginChild("ChildWindow", ImVec2(300, 80), true);
         {
-          if (Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE > Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE)
+          ImVec4 working_area = get_working_area();
+          ImDrawList* draw_list_alert = ImGui::GetWindowDrawList();
+          ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+
+          Graphical_Number(draw_list_alert, sdSysData, ImVec2(working_area.x, working_area.y), working_area.z, alert_type);
+
+          ImGui::Text(Alerts_List.res_alert_text_line_1(alert_num).c_str());
+          ImGui::Text(Alerts_List.res_alert_text_line_2(alert_num).c_str());
+
+          if (Alerts_List.ALERTS_RESERVE[alert_num].show_value_bar())
           {
-            // Calculate Min Max values to display
-            float min = Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE - 
-                          (Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE);
+            if (Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE > Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE)
+            {
+              // Calculate Min Max values to display
+              float min = Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE - 
+                            (Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE);
 
-            float max = Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE + 
-                          (Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE);
+              float max = Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE + 
+                            (Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE);
 
-            PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MIN = min;
-            PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MAX = max;
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MIN = min;
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MAX = max;
 
-            PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_min_max_value(Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE, 
-                                                                                Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE);
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_min_max_value(Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE, 
+                                                                                  Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE);
 
-            PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_value(sdSysData, Alerts_List.ALERTS_RESERVE[alert_num].VALUE);
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_value(sdSysData, Alerts_List.ALERTS_RESERVE[alert_num].VALUE);
+            }
+            else
+            {
+              // Calculate Min Max values to display
+              float min = Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE - 
+                (Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE);
+
+              float max = Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE + 
+                (Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE);
+
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MIN = min;
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MAX = max;
+
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_min_max_value(Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE, 
+                                                                                  Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE);
+
+              PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_value(sdSysData, Alerts_List.ALERTS_RESERVE[alert_num].VALUE);
+            }
+          
+            PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.draw(draw_list_alert, sdSysData);
           }
-          else
+
+          ImGui::SetCursorScreenPos(screen_pos);
+          if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(alert_num)).c_str(), ImGui::GetContentRegionAvail()))
           {
-            // Calculate Min Max values to display
-            float min = Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE - 
-              (Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE);
-
-            float max = Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE + 
-              (Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE - Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE);
-
-            PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MIN = min;
-            PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.PROPS.MAX = max;
-
-            PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_min_max_value(Alerts_List.ALERTS_RESERVE[alert_num].ALERT_VALUE, 
-                                                                                Alerts_List.ALERTS_RESERVE[alert_num].CLEAR_VALUE);
-
-            PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.update_value(sdSysData, Alerts_List.ALERTS_RESERVE[alert_num].VALUE);
+            Alerts_List.res_acknowlege(alert_num);
           }
-        
-          PROPERTIES_RESERVE_LIST.LIST[alert_num].VALUES.draw(draw_list_alert, sdSysData);
-
         }
-
-        ImGui::SetCursorScreenPos(screen_pos);
-        if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(alert_num)).c_str(), ImGui::GetContentRegionAvail()))
-        {
-          Alerts_List.res_acknowlege(alert_num);
-        }
+        ImGui::PopStyleColor();
+        ImGui::EndChild();
       }
       ImGui::End();
 
@@ -179,7 +183,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
   {
     for (int alert_num = 0; alert_num < (int)Alerts_List.gen_size(); alert_num++)
     {
-      ImGui::SetNextWindowSize(ImVec2(300, 100));
+      ImGui::SetNextWindowSize(ImVec2(315, 120));
       
       if (Alerts_List.gen_display(alert_num))
       {
@@ -211,19 +215,24 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
         
         if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
-          ImVec2 screen_pos = ImGui::GetCursorScreenPos();
-
-          ImGui::Text(Alerts_List.gen_alert_text_line_1(alert_num).c_str());
-          ImGui::Text(Alerts_List.gen_alert_text_line_2(alert_num).c_str());
-
-          ImGui::SetCursorScreenPos(screen_pos);
-          if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(alert_num)).c_str(), ImGui::GetContentRegionAvail()))
+          ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 255)); // Set background to black and opaque
+          ImGui::BeginChild("ChildWindow", ImVec2(300, 80), true);
           {
-            Alerts_List.gen_acknowlege(alert_num);
+            ImVec2 screen_pos = ImGui::GetCursorScreenPos();
+
+            ImGui::Text(Alerts_List.gen_alert_text_line_1(alert_num).c_str());
+            ImGui::Text(Alerts_List.gen_alert_text_line_2(alert_num).c_str());
+
+            ImGui::SetCursorScreenPos(screen_pos);
+            if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(alert_num)).c_str(), ImGui::GetContentRegionAvail()))
+            {
+              Alerts_List.gen_acknowlege(alert_num);
+            }
           }
+          ImGui::EndChild();
+          ImGui::PopStyleColor();
         }
         ImGui::End();
-
         ImGui::PopStyleColor(4);
       }
     }

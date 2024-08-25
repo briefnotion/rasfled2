@@ -64,12 +64,12 @@ void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, f
     {
       case 0:     // < 40
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.cyan());
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.blue());
         break;
       }
       case 1:     // 40 - 45
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.blue());
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.cyan());
         break;
       }
       case 2:     // 45 - 50
@@ -546,7 +546,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         // LF
         if (speed_tire_LF < ACTIVATE_SPEED)
         {
-          brightness_LF = 1 - speed_tire_LF / ACTIVATE_SPEED;
+          brightness_LF = 1 - (speed_tire_LF / ACTIVATE_SPEED);
         }
         else 
         {
@@ -556,7 +556,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 
         if (speed_tire_RF < ACTIVATE_SPEED)
         {
-          brightness_RF = 1 - speed_tire_RF / ACTIVATE_SPEED;
+          brightness_RF = 1 - (speed_tire_RF / ACTIVATE_SPEED);
         }
         else 
         {
@@ -566,7 +566,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         // LB
         if (speed_tire_LB < ACTIVATE_SPEED)
         {
-          brightness_LB = 1 - speed_tire_LB / ACTIVATE_SPEED;
+          brightness_LB = 1 - (speed_tire_LB / ACTIVATE_SPEED);
         }
         else 
         {
@@ -576,7 +576,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         // RB
         if (speed_tire_RB < ACTIVATE_SPEED)
         {
-          brightness_RB = 1 - speed_tire_RB / ACTIVATE_SPEED;
+          brightness_RB = 1 - (speed_tire_RB / ACTIVATE_SPEED);
         }
         else 
         {

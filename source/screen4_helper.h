@@ -106,6 +106,8 @@ class NEO_COLOR
   float CURRENT_TIME = 0.0f;
   float START_TIME = 0.0f;
 
+  bool NEEDS_CALC = true;
+
   bool CHANGED = false;
 
   ImColor calc_transition();
@@ -158,6 +160,8 @@ class NEO_COLOR_CRGB
   
   float CURRENT_TIME = 0.0f;
   float START_TIME = 0.0f;
+
+  bool NEEDS_CALC = true;
 
   bool CHANGED = false;
 

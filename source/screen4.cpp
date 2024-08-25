@@ -1438,7 +1438,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (BT_RUNNING_BLACK.button_color(sdSysData, "Mono", sdSysData.COLOR_SELECT.black(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_BLACK.button_color(sdSysData, "Mono", sdSysData.COLOR_SELECT.monochrome(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rx");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.monochrome());
@@ -1470,7 +1470,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (BT_RUNNING_PINK.button_color(sdSysData, "Temp", sdSysData.COLOR_SELECT.black(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+          if (BT_RUNNING_TEMP.button_color(sdSysData, "Temp", sdSysData.COLOR_SELECT.monochrome(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rt");
             sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.monochrome());
