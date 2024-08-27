@@ -36,6 +36,11 @@ ImVec2 operator*(ImVec2 V1, float Number)
   return ImVec2(V1.x * Number, V1.y * Number);
 }
 
+bool vector4_is_same(ImVec4 V1, ImVec4 V2)
+{
+  return (V1.x == V2.x) && (V1.y == V2.y) && (V1.z == V2.z) && (V1.w == V2.w);
+}
+
 // ---------------------------------------------------------------------------------------
 
 ImColor NEO_COLOR::calc_transition()
@@ -51,6 +56,7 @@ ImColor NEO_COLOR::calc_transition()
       CURRENT_COLOR = NEW_COLOR;
 
       CHANGED = false;
+      NEEDS_CALC = false; 
 
       return NEW_COLOR;
     }
@@ -184,6 +190,7 @@ CRGB NEO_COLOR_CRGB::calc_transition()
       CURRENT_COLOR = NEW_COLOR;
 
       CHANGED = false;
+      NEEDS_CALC = false; 
 
       return NEW_COLOR;
     }
@@ -525,7 +532,6 @@ void COLOR_COMBOS::toggle_void_color(unsigned long Time)
 {
   void_color = !void_color;
   set_neo_colors_with_color_change(Time);
-  CHANGED = true;
 }
 
 // ---
@@ -726,21 +732,8 @@ void COLOR_COMBOS::void_color_set(unsigned long Time, int Color)
 {
   void_color_value = Color;
   set_neo_colors_with_color_change(Time);
-  CHANGED = true;
 }
 
-bool COLOR_COMBOS::changed()
-{
-  if (CHANGED)
-  {
-    CHANGED = false;
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
 
 // ---------------------------------------------------------------------------------------
 

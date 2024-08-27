@@ -140,8 +140,6 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   ImColor hovered = sdSysData.COLOR_SELECT.neo_c_blue().HOVERED.color();
   ImColor active = sdSysData.COLOR_SELECT.neo_c_blue().ACTIVE.color();
 
-  DEFAULT_COLORS_CHANGED = sdSysData.COLOR_SELECT.neo_c_blue().BACKGROUND.changed() || sdSysData.COLOR_SELECT.neo_c_blue().DIM.changed() || sdSysData.COLOR_SELECT.neo_c_blue().STANDARD.changed() || sdSysData.COLOR_SELECT.neo_c_blue().HOVERED.changed() || sdSysData.COLOR_SELECT.neo_c_blue().ACTIVE.changed();
-
   //style.Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
   style.Colors[ImGuiCol_Text] = sdSysData.COLOR_SELECT.neo_c_white().TEXT.color();
@@ -460,7 +458,8 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
     sdSysData.COLOR_SELECT.set_frame_time(sdSysData.PROGRAM_TIME.current_frame_time());
 
     //Check for changes in style
-    if (sdSysData.COLOR_SELECT.changed() || DEFAULT_COLORS_CHANGED)
+    ImGuiStyle& style = ImGui::GetStyle();
+    if (!vector4_is_same(style.Colors[ImGuiCol_TitleBg], sdSysData.COLOR_SELECT.neo_c_blue().STANDARD.color()))
     {
       set_screen_default_colors(sdSysData);
     }

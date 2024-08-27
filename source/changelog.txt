@@ -1,3 +1,9 @@
+2.189_240826
+  - Made a few changes.
+  - Corrected a few errors.
+  - Attempted to improve frame rate related to colors by restricting 
+      the call to set default colors to with changes only. 
+
 2.188_240825
   - Corrected a few things.
   - Changed the way alerts look.

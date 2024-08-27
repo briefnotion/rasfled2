@@ -32,6 +32,8 @@ ImVec2 operator-(ImVec2 V1, ImVec2 V2);
 ImVec2 operator*(ImVec2 V1, ImVec2 V2);
 ImVec2 operator*(ImVec2 V1, float Number);
 
+bool vector4_is_same(ImVec4 V1, ImVec4 V2);
+
 // ---------------------------------------------------------------------------------------
 
 class WIDGET_DEFAULTS
@@ -256,8 +258,6 @@ class COLOR_COMBOS
 
   int void_color_value = 3;
   bool void_color = false;
-  
-  bool CHANGED = false;
 
   void set_neo_colors_with_color_change(unsigned long Time);
 
@@ -319,10 +319,6 @@ class COLOR_COMBOS
   int void_colr();
 
   void void_color_set(unsigned long Time, int Color);
-
-  bool changed();
-  // tmp routine
-  // resets to false after read
 };
 
 // ---------------------------------------------------------------------------------------

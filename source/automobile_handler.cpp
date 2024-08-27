@@ -23,37 +23,41 @@ void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, f
   // Simple temp color set.
   int rank = 0;
 
-  if (S_Temp < 40.0f)
+  if (S_Temp < 35.0f)
   {
     rank = 0;
   }
-  else if (S_Temp < 45.0f)
+  else if (S_Temp < 40.0f)
   {
     rank = 1;
   }
-  else if (S_Temp < 50.0f)
+  else if (S_Temp < 45.0f)
   {
     rank = 2;
   }
-  else if (S_Temp < 55.0f)
+  else if (S_Temp < 50.0f)
   {
     rank = 3;
   }
-  else if (S_Temp < 60.0f)
+  else if (S_Temp < 55.0f)
   {
     rank = 4;
   }
-  else if (S_Temp < 65.0f)
+  else if (S_Temp < 60.0f)
   {
     rank = 5;
   }
-  else if (S_Temp < 70.0f)
+  else if (S_Temp < 65.0f)
   {
     rank = 6;
   }
-  else
+  else if (S_Temp < 70.0f)
   {
     rank = 7;
+  }
+  else
+  {
+    rank = 8;
   }
 
   if (rank != running_temperature_color_rank)
@@ -62,44 +66,49 @@ void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, f
 
     switch (running_temperature_color_rank)
     {
-      case 0:     // < 40
+      case 0:     // < 35
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.blue());
         break;
       }
-      case 1:     // 40 - 45
+      case 1:     // 35 - 40
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.grey());
+        break;
+      }
+      case 2:     // 40 - 45
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.cyan());
         break;
       }
-      case 2:     // 45 - 50
+      case 3:     // 45 - 50
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.green());
         break;
       }
-      case 3:     // 50 - 55
-      {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.yellow());
-        break;
-      }
-      case 4:     // 55 - 60
-      {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.orange());
-        break;
-      }
-      case 5:     // 60 - 65
-      {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.red());
-        break;
-      }
-      case 6:     // 65 - 70
+      case 4:     // 50 - 55
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.purple());
         break;
       }
-      case 7:     // 70 +
+      case 5:     // 55 - 60
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pink());
+        break;
+      }
+      case 6:     // 60 - 65
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.red());
+        break;
+      }
+      case 7:     // 65 - 70
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.orange());
+        break;
+      }
+      case 8:     // 70 +
+      {
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.yellow());
         break;
       }
       default:
@@ -494,7 +503,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
       if (LIGHT_VELOCITY_ON == true)
       {
         // Gather data for tire speed for velocity animations.
-        float adjustment = .8;  // Simple way to adjust the speed of the animations.
+        float adjustment = .5;  // Simple way to adjust the speed of the animations.
 
         float speed_tire_LF = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LF_TIRE.val_mph() * adjustment;
         float speed_tire_RF = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RF_TIRE.val_mph() * adjustment;
@@ -603,12 +612,10 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         // Velocity
         // LF
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_LF", 
-                                              VELOCITY_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), 
-                                              sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB)
+                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
                                               .brightness(brightness_LF * 0.05f));
-        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_LF", 
-                                              VELOCITY_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), 
-                                              sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB)
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_LF",
+                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
                                               .brightness(brightness_LF * 0.05f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_LF", speed_tire_LF);
@@ -616,12 +623,10 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         
         // RF
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_RF", 
-                                              VELOCITY_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), 
-                                              sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB)
+                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
                                               .brightness(brightness_RF * 0.05f));
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_RF", 
-                                              VELOCITY_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), 
-                                              sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB)
+                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
                                               .brightness(brightness_RF * 0.05f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_RF", speed_tire_RF);
@@ -629,12 +634,10 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         
         // LB
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_LB", 
-                                              VELOCITY_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), 
-                                              sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB)
+                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
                                               .brightness(brightness_LB * 0.05f));
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_LB", 
-                                              VELOCITY_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), 
-                                              sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB)
+                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
                                               .brightness(brightness_LB * 0.05f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_LB", speed_tire_LB);
@@ -642,12 +645,10 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         
         // RB
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_RB", 
-                                              VELOCITY_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), 
-                                              sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB)
+                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
                                               .brightness(brightness_RB * 0.05f));
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_RB", 
-                                              VELOCITY_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), 
-                                              sdSysData.COLOR_SELECT.color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB)
+                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
                                               .brightness(brightness_RB * 0.05f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_RB", speed_tire_RB);
