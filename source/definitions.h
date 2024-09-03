@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.189_240826"
+#define Revision "2.190_2400903"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -143,8 +143,8 @@
 #define TTL_RF_Top_Percentage   100.15
 #define TTL_RF_Low_Percentage   99.6
 
-#define TTL_LB_Top_Percentage   100.15
-#define TTL_LB_Low_Percentage   99.6
+#define TTL_LB_Top_Percentage   99.37 // Same Tire, Different Specs?
+#define TTL_LB_Low_Percentage   98.92
 
 #define TTL_RB_Top_Percentage   99.37
 #define TTL_RB_Low_Percentage   98.92

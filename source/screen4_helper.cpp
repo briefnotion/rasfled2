@@ -364,17 +364,34 @@ void COLOR_COMBOS::set_neo_colors_with_color_change(unsigned long Time)
 {
   if (void_color)
   {
-    COLOR_COMBINATIONS_NEO[0].set_neo_rgb(Time, COLOR_COMBINATIONS_V[0]);
-    COLOR_COMBINATIONS_NEO[1].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
-    COLOR_COMBINATIONS_NEO[2].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
-    COLOR_COMBINATIONS_NEO[3].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
-    COLOR_COMBINATIONS_NEO[4].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
-    COLOR_COMBINATIONS_NEO[5].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
-    COLOR_COMBINATIONS_NEO[6].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
-    COLOR_COMBINATIONS_NEO[7].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
-    COLOR_COMBINATIONS_NEO[8].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
-    COLOR_COMBINATIONS_NEO[9].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
-    COLOR_COMBINATIONS_NEO[10].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+    if (void_color_value == -1)
+    {
+      COLOR_COMBINATIONS_NEO[0].set_neo_rgb(Time, COLOR_COMBINATIONS_V[0]);
+      COLOR_COMBINATIONS_NEO[1].set_neo_rgb(Time, CUSTOM_COLOR_COMBO);
+      COLOR_COMBINATIONS_NEO[2].set_neo_rgb(Time, CUSTOM_COLOR_COMBO);
+      COLOR_COMBINATIONS_NEO[3].set_neo_rgb(Time, CUSTOM_COLOR_COMBO);
+      COLOR_COMBINATIONS_NEO[4].set_neo_rgb(Time, CUSTOM_COLOR_COMBO);
+      COLOR_COMBINATIONS_NEO[5].set_neo_rgb(Time, CUSTOM_COLOR_COMBO);
+      COLOR_COMBINATIONS_NEO[6].set_neo_rgb(Time, CUSTOM_COLOR_COMBO);
+      COLOR_COMBINATIONS_NEO[7].set_neo_rgb(Time, CUSTOM_COLOR_COMBO);
+      COLOR_COMBINATIONS_NEO[8].set_neo_rgb(Time, CUSTOM_COLOR_COMBO);
+      COLOR_COMBINATIONS_NEO[9].set_neo_rgb(Time, CUSTOM_COLOR_COMBO);
+      COLOR_COMBINATIONS_NEO[10].set_neo_rgb(Time, CUSTOM_COLOR_COMBO);
+    }
+    else
+    {
+      COLOR_COMBINATIONS_NEO[0].set_neo_rgb(Time, COLOR_COMBINATIONS_V[0]);
+      COLOR_COMBINATIONS_NEO[1].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+      COLOR_COMBINATIONS_NEO[2].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+      COLOR_COMBINATIONS_NEO[3].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+      COLOR_COMBINATIONS_NEO[4].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+      COLOR_COMBINATIONS_NEO[5].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+      COLOR_COMBINATIONS_NEO[6].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+      COLOR_COMBINATIONS_NEO[7].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+      COLOR_COMBINATIONS_NEO[8].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+      COLOR_COMBINATIONS_NEO[9].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+      COLOR_COMBINATIONS_NEO[10].set_neo_rgb(Time, COLOR_COMBINATIONS_V[void_color_value]);
+    }
   }
   else
   {
@@ -533,6 +550,21 @@ void COLOR_COMBOS::toggle_void_color(unsigned long Time)
   void_color = !void_color;
   set_neo_colors_with_color_change(Time);
 }
+
+void COLOR_COMBOS::void_color_set(unsigned long Time, int Color)
+{
+  void_color_value = Color;
+  set_neo_colors_with_color_change(Time);
+}
+
+void COLOR_COMBOS::void_color_set(unsigned long Time, float R, float G, float B, float Intensity)
+{
+  CUSTOM_COLOR_COMBO.set_rgb_v(R, G, B, 1.0f, Intensity);
+
+  void_color_value = -1;
+  set_neo_colors_with_color_change(Time);
+}
+
 
 // ---
 
@@ -721,19 +753,12 @@ int COLOR_COMBOS::monochrome()
   return 11;
 }
 
+// ---
+
 int COLOR_COMBOS::void_colr()
 {
   return void_color_value;
 }
-
-// ---
-
-void COLOR_COMBOS::void_color_set(unsigned long Time, int Color)
-{
-  void_color_value = Color;
-  set_neo_colors_with_color_change(Time);
-}
-
 
 // ---------------------------------------------------------------------------------------
 

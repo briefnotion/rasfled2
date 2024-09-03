@@ -254,6 +254,8 @@ class COLOR_COMBOS
   vector<COLOR_COMBO>     COLOR_COMBINATIONS_V;   // Color palates for corpo mode
   vector<NEO_COLOR_COMBO> COLOR_COMBINATIONS_NEO; // Color palates for corpo mode
 
+  COLOR_COMBO             CUSTOM_COLOR_COMBO;
+
   bool ALREADY_INITIALIZED = false;
 
   int void_color_value = 3;
@@ -276,6 +278,8 @@ class COLOR_COMBOS
   NEO_COLOR_COMBO neo_color(int Color);
 
   void toggle_void_color(unsigned long Time);
+  void void_color_set(unsigned long Time, int Color);
+  void void_color_set(unsigned long Time, float R, float G, float B, float Intensity);
 
   COLOR_COMBO c_black();
   COLOR_COMBO c_white();
@@ -317,8 +321,6 @@ class COLOR_COMBOS
   int monochrome();
 
   int void_colr();
-
-  void void_color_set(unsigned long Time, int Color);
 };
 
 // ---------------------------------------------------------------------------------------

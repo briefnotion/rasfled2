@@ -73,7 +73,7 @@ class AUTOMOBILE_HANDLER
   NEO_COLOR_CRGB VELOCITY_COLOR;
 
   // control values
-  const int ACTIVATE_SPEED = 10;
+  const int ACTIVATE_SPEED = 12;
   const int CAUTION_SPEED = 5;
 
   BOOL_BOUNCE running_temperature;
