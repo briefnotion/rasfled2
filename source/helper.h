@@ -540,6 +540,12 @@ class IMPACT_RESISTANCE_FLOAT
 // ***************************************************************************************
 
 // ---------------------------------------------------------------------------------------
+
+// Debug Walker
+float walker_float(unsigned long Time, float One_Second_Value, float Max_value);
+// Time based value walker for debugging. 
+// Max_value not yet implemented.
+
 // Random Number
 int intRandomHD(int intBase);
 

@@ -936,6 +936,22 @@ float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
 // ***************************************************************************************
 
 // ---------------------------------------------------------------------------------------
+
+// Debug Walker
+float walker_float(unsigned long Time, float One_Second_Value, float Max_value)
+{
+  float ret_value = (float(Time) / 1000.0f) * One_Second_Value;
+
+  if (ret_value > Max_value)
+  {
+    return ret_value;
+  }
+  else
+  {
+    return ret_value;
+  }
+}
+
 // Random Number
 
 int intRandomHD(int intBase)

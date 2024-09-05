@@ -542,7 +542,14 @@ COLOR_COMBO COLOR_COMBOS::color(int Color)
 
 NEO_COLOR_COMBO COLOR_COMBOS::neo_color(int Color)
 {
-  return COLOR_COMBINATIONS_NEO[Color];
+  if (Color == -1)
+  {
+    return COLOR_COMBINATIONS_NEO[void_color_prev_value];
+  }
+  else
+  {
+    return COLOR_COMBINATIONS_NEO[Color];
+  }
 }
 
 void COLOR_COMBOS::toggle_void_color(unsigned long Time)
@@ -561,7 +568,14 @@ void COLOR_COMBOS::void_color_set(unsigned long Time, float R, float G, float B,
 {
   CUSTOM_COLOR_COMBO.set_rgb_v(R, G, B, 1.0f, Intensity);
 
+  // for now, avoid invalid value, monocrome and black
+  if (void_color_value != -1 && void_color_value != 0 && void_color_value != 11)
+  {
+    void_color_prev_value = void_color_value;
+  }
+
   void_color_value = -1;
+
   set_neo_colors_with_color_change(Time);
 }
 
@@ -690,6 +704,23 @@ NEO_COLOR_COMBO COLOR_COMBOS::neo_c_monochrome()
   return neo_color(11);
 }
 
+// ---
+
+int COLOR_COMBOS::void_colr()
+{
+  return void_color_value;
+}
+
+//int COLOR_COMBOS::custom_colr()
+//{
+//  return -1;
+//}
+
+int COLOR_COMBOS::void_colr_prev()
+{
+  return void_color_prev_value;
+}
+
 
 // ---
 
@@ -751,13 +782,6 @@ int COLOR_COMBOS::pink()
 int COLOR_COMBOS::monochrome()
 {
   return 11;
-}
-
-// ---
-
-int COLOR_COMBOS::void_colr()
-{
-  return void_color_value;
 }
 
 // ---------------------------------------------------------------------------------------

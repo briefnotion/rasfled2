@@ -259,6 +259,7 @@ class COLOR_COMBOS
   bool ALREADY_INITIALIZED = false;
 
   int void_color_value = 3;
+  int void_color_prev_value = 3;
   bool void_color = false;
 
   void set_neo_colors_with_color_change(unsigned long Time);
@@ -307,6 +308,10 @@ class COLOR_COMBOS
   NEO_COLOR_COMBO neo_c_pink();
   NEO_COLOR_COMBO neo_c_monochrome();
 
+  int void_colr();
+  //int custom_colr();
+  int void_colr_prev();
+
   int black();
   int white();
   int grey();
@@ -320,7 +325,6 @@ class COLOR_COMBOS
   int pink();
   int monochrome();
 
-  int void_colr();
 };
 
 // ---------------------------------------------------------------------------------------

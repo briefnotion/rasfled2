@@ -1,3 +1,12 @@
+2.194_2400904
+  - Smoothed out the temperture custom color to go from blue, to green, 
+      to red with stemps from 0 to 70.  White on both ends.  Probably needs 
+      to be dialed back the ends to a cold white grey and a hot white grey.
+  - Added a mask to the velocity animations to dim or turn off the leds, 
+      positioned facing front seats, to improve visibility while in 
+      drive. 
+  - Corrected problem with LED Temp lights getting stuck on monochrome. 
+
 2.190_2400903
   - Small adjustments.
   - Changed the Temp Vcolor Scheme.
