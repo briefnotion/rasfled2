@@ -417,13 +417,17 @@ CRGB ANIMATION_HANDLER::determine_led_color(system_data &sdSysData, string Color
   {
     ret_crgb = sdSysData.PULSE_COLOR;
   }
+  else if (Color_or_Var == "custom_color")
+  {
+    ret_crgb = sdSysData.CUSTOM_COLOR;
+  }
   else if (Color_or_Var == "countdown_color")
   {
     ret_crgb = sdSysData.get_countdown_color();
   }
   else if (Color_or_Var == "running_color")
   {
-    ret_crgb = sdSysData.running_color_list.color[0];
+    ret_crgb = sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color().brightness(0.25f);
   }
   else if (Color_or_Var == "color")
   {

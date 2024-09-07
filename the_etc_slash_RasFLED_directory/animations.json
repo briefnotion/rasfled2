@@ -1405,7 +1405,7 @@
           "Label" : "ADOO",
           "Start_Delay_Time" : 500, "Duration_Of_Brighness" : 1900, "Speed_Of_LED_Walk" : 150, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith", 
-          "Start_1" : "0,0,0", "Dest_1" : "running_color", 
+          "Start_1" : "0,0,0", "Dest_1" : "custom_color", 
           "Start_2" : "0,0,0", "Dest_2" : "0,0,32",
           "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_end|0", 
           "Clear_On_End" : false, "Off_During_Day" : true
@@ -1414,7 +1414,7 @@
           "Label" : "ADOO",
           "Start_Delay_Time" : 500, "Duration_Of_Brighness" : 1900, "Speed_Of_LED_Walk" : 150, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith", 
-          "Start_1" : "0,0,0", "Dest_1" : "running_color", 
+          "Start_1" : "0,0,0", "Dest_1" : "custom_color", 
           "Start_2" : "0,0,0", "Dest_2" : "0,0,32",
           "LED_Start_Pos" : "from_1/2|0", "LED_End_Pos" : "from_start|0", 
           "Clear_On_End" : false, "Off_During_Day" : true

@@ -521,6 +521,11 @@ void COLOR_COMBOS::init(unsigned long Time, float Intensity)
   }
 }
 
+COLOR_COMBO COLOR_COMBOS::pure_color(int Color)
+{
+  return COLOR_COMBINATIONS[Color];
+}
+
 COLOR_COMBO COLOR_COMBOS::color(int Color)
 {
   if (void_color)
@@ -579,6 +584,68 @@ void COLOR_COMBOS::void_color_set(unsigned long Time, float R, float G, float B,
   set_neo_colors_with_color_change(Time);
 }
 
+
+// ---
+
+COLOR_COMBO COLOR_COMBOS::p_black()
+{
+  return pure_color(0);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_white()
+{
+  return pure_color(1);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_grey()
+{
+  return pure_color(2);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_red()
+{
+  return pure_color(3);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_orange()
+{
+  return pure_color(4);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_yellow()
+{
+  return pure_color(5);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_green()
+{
+  return pure_color(6);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_cyan()
+{
+  return pure_color(7);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_blue()
+{
+  return pure_color(8);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_purple()
+{
+  return pure_color(9);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_pink()
+{
+  return pure_color(10);
+}
+
+COLOR_COMBO COLOR_COMBOS::p_monochrome()
+{
+  return pure_color(11);
+}
 
 // ---
 
@@ -702,6 +769,11 @@ NEO_COLOR_COMBO COLOR_COMBOS::neo_c_pink()
 NEO_COLOR_COMBO COLOR_COMBOS::neo_c_monochrome()
 {
   return neo_color(11);
+}
+
+NEO_COLOR_COMBO COLOR_COMBOS::neo_c_neo()
+{
+  return neo_color(void_color_value);
 }
 
 // ---

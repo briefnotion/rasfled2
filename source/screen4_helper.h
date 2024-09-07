@@ -275,6 +275,7 @@ class COLOR_COMBOS
   // Call first at start of new draw frame to eliminate the 
   //  need to transfer a new time stamp at every color request.
 
+  COLOR_COMBO pure_color(int Color);
   COLOR_COMBO color(int Color);
   NEO_COLOR_COMBO neo_color(int Color);
 
@@ -282,6 +283,21 @@ class COLOR_COMBOS
   void void_color_set(unsigned long Time, int Color);
   void void_color_set(unsigned long Time, float R, float G, float B, float Intensity);
 
+  // Return color only
+  COLOR_COMBO p_black();
+  COLOR_COMBO p_white();
+  COLOR_COMBO p_grey();
+  COLOR_COMBO p_red();
+  COLOR_COMBO p_orange();
+  COLOR_COMBO p_yellow();
+  COLOR_COMBO p_green();
+  COLOR_COMBO p_cyan();
+  COLOR_COMBO p_blue();
+  COLOR_COMBO p_purple();
+  COLOR_COMBO p_pink();
+  COLOR_COMBO p_monochrome();
+
+  // Return color with respects to void on or off
   COLOR_COMBO c_black();
   COLOR_COMBO c_white();
   COLOR_COMBO c_grey();
@@ -295,6 +311,7 @@ class COLOR_COMBOS
   COLOR_COMBO c_pink();
   COLOR_COMBO c_monochrome();
 
+  // Return color with respects to void neo color shift
   NEO_COLOR_COMBO neo_c_black();
   NEO_COLOR_COMBO neo_c_white();
   NEO_COLOR_COMBO neo_c_grey();
@@ -307,6 +324,7 @@ class COLOR_COMBOS
   NEO_COLOR_COMBO neo_c_purple();
   NEO_COLOR_COMBO neo_c_pink();
   NEO_COLOR_COMBO neo_c_monochrome();
+  NEO_COLOR_COMBO neo_c_neo();
 
   int void_colr();
   //int custom_colr();

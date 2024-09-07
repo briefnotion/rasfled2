@@ -169,6 +169,7 @@ class system_data
   bool  booHazardRunning = false;   // Are exta anims running.
 
   CRGB PULSE_COLOR;
+  CRGB CUSTOM_COLOR;
   CRGB TMP_PASSTHRU_COLOR;
   
   // Timer and Color Schemes

@@ -568,12 +568,12 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           line_start_2 = ImVec2(working_area.x + working_area.z - 50.0f, working_area.y + 50.0f);
           line_end_2 = ImVec2(working_area.x + 50.0f, working_area.y + working_area.w - 50.0f);
 
-          draw_list->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.c_red().STANDARD, 50.0f);
-          draw_list->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.c_red().STANDARD, 50.0f);
+          draw_list->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.p_red().STANDARD, 50.0f);
+          draw_list->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.p_red().STANDARD, 50.0f);
 
           ImGui::PushFont(io.Fonts->Fonts.Data[2]);
           ImGui::SetCursorScreenPos(ImVec2(working_area.x + 50.0f, working_area.y + 150.0f));
-          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_red().STANDARD));
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.p_red().STANDARD));
           ImGui::Text("DO \nNOT FUCK \nWITH THE SYSTEM");
           ImGui::PopStyleColor();
           ImGui::PopFont();

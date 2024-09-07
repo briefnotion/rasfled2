@@ -1,3 +1,7 @@
+2.195_2400907
+  - Corrected a few problems related to the Overhead Animations not 
+      having the correct colors.
+
 2.194_2400904
   - Smoothed out the temperture custom color to go from blue, to green, 
       to red with stemps from 0 to 70.  White on both ends.  Probably needs 
