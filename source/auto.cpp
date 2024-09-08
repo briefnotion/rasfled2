@@ -410,7 +410,7 @@ void AUTOMOBILE_FUEL::set_source_availability(bool Available)
     PERCENTAGE = -1;
     PERCENTAGE_DISP = "X";
 
-    LEVEL = -1;
+    LEVEL_RAW = -1;
     LEVEL_DISP = "X";
   }
   
@@ -438,9 +438,9 @@ void AUTOMOBILE_FUEL::store_percentage(int Percentage)
 
 void AUTOMOBILE_FUEL::store_level(int Level)
 {
-  LEVEL = ((float)Level) / 20;
-
-  LEVEL_DISP = to_string_round_to_nth(LEVEL, 1) + " gal";
+  LEVEL_RAW = ((float)Level) / 20;
+  LEVEL_EMPERICAL.add_value(LEVEL_RAW);
+  LEVEL_DISP = to_string_round_to_nth(LEVEL_EMPERICAL.mean(), 1) + " gal";
 }
 
 void AUTOMOBILE_FUEL::store_fuel_rail_pressure_23(int A, int B)
@@ -477,7 +477,7 @@ string AUTOMOBILE_FUEL::percentage()
 
 float AUTOMOBILE_FUEL::val_level()
 {
-  return LEVEL;
+  return LEVEL_EMPERICAL.mean();
 }
 
 string AUTOMOBILE_FUEL::level()
@@ -1748,362 +1748,434 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved, bool &Identified)
     if(data.ID == 0)
     {
       DATA.AD_0 = data;
+      DATA.AD_0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 16)
     {
       DATA.AD_10 = data;
       PID_Recieved = data.ID;
+      DATA.AD_10.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 48)
     {
       DATA.AD_30 = data;
+      DATA.AD_30.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 50)
     {
       DATA.AD_32 = data;
+      DATA.AD_32.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 74)
     {
       DATA.AD_4A = data;
+      DATA.AD_4A.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 75)
     {
       DATA.AD_4B = data;
+      DATA.AD_4B.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 80)
     {
       DATA.AD_50 = data;
+      DATA.AD_50.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 96)
     {
       DATA.AD_60 = data;
+      DATA.AD_60.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 100)
     {
       DATA.AD_64 = data;
+      DATA.AD_64.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 106)
     {
       DATA.AD_6A = data;
+      DATA.AD_6A.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 112)
     {
       DATA.AD_70 = data;
+      DATA.AD_70.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 128)
     {
       DATA.AD_80 = data;
+      DATA.AD_80.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 144)
     {
       DATA.AD_90 = data;
+      DATA.AD_90.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 160)
     {
       DATA.AD_A0 = data;
+      DATA.AD_A0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 176)
     {
       DATA.AD_B0 = data;
+      DATA.AD_B0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 192)
     {
       DATA.AD_C0 = data;
+      DATA.AD_C0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 200)
     {
       DATA.AD_C8 = data;
+      DATA.AD_C8.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 208)
     {
       DATA.AD_D0 = data;
+      DATA.AD_D0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 224)
     {
       DATA.AD_E0 = data;
+      DATA.AD_E0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 240)
     {
       DATA.AD_F0 = data;
       PID_Recieved = data.ID;
+      DATA.AD_F0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 248)
     {
       DATA.AD_F8 = data;
+      DATA.AD_F8.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 256)
     {
       DATA.AD_100 = data;
+      DATA.AD_100.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 258)
     {
       DATA.AD_102 = data;
+      DATA.AD_102.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 416)
     {
       DATA.AD_1A0 = data;
+      DATA.AD_1A0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 448)
     {
       DATA.AD_1C0 = data;
+      DATA.AD_1C0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 288)
     {
       DATA.AD_120 = data;
+      DATA.AD_120.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 296)
     {
       DATA.AD_128 = data;
+      DATA.AD_128.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 304)
     {
       DATA.AD_130 = data;
+      DATA.AD_130.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 312)
     {
       DATA.AD_138 = data;
+      DATA.AD_138.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 320)
     {
       DATA.AD_140 = data;
+      DATA.AD_140.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 336)
     {
       DATA.AD_150 = data;
+      DATA.AD_150.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 352)
     {
       DATA.AD_160 = data;
+      DATA.AD_160.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 382)
     {
       DATA.AD_17E = data;
+      DATA.AD_17E.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 384)
     {
       DATA.AD_180 = data;
+      DATA.AD_180.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 400)
     {
       DATA.AD_190 = data;
       PID_Recieved = data.ID;
+      DATA.AD_190.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 464)
     {
       DATA.AD_1D0 = data;
+      DATA.AD_1D0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 480)
     {
       DATA.AD_1E0 = data;
+      DATA.AD_1E0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 512)
     {
       DATA.AD_200 = data;
+      DATA.AD_200.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 520)
     {
       DATA.AD_208 = data;
+      DATA.AD_208.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 528)
     {
       DATA.AD_210 = data;
+      DATA.AD_210.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 531)
     {
       DATA.AD_213 = data;
+      DATA.AD_213.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 536)
     {
       DATA.AD_218 = data;
+      DATA.AD_218.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 583)
     {
       DATA.AD_247 = data;
+      DATA.AD_247.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 594)
     {
       DATA.AD_252 = data;
+      DATA.AD_252.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 595)
     {
       DATA.AD_253 = data;
+      DATA.AD_253.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 608)
     {
       DATA.AD_260 = data;
+      DATA.AD_260.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 624)
     {
       DATA.AD_270 = data;
+      DATA.AD_270.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 640)
     {
       DATA.AD_280 = data;
+      DATA.AD_280.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 656)
     {
       DATA.AD_290 = data;
+      DATA.AD_290.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 688)
     {
       DATA.AD_2B0 = data;
+      DATA.AD_2B0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 704)
     {
       DATA.AD_2C0 = data;
+      DATA.AD_2C0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 720)
     {
       DATA.AD_2D0 = data;
+      DATA.AD_2D0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 724)
     {
       DATA.AD_2D4 = data;
+      DATA.AD_2D4.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 728)
     {
       DATA.AD_2D8 = data;
+      DATA.AD_2D8.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 752)
     {
       DATA.AD_2F0 = data;
+      DATA.AD_2F0.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 784)
     {
       DATA.AD_310 = data;
+      DATA.AD_310.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 792)
     {
       DATA.AD_318 = data;
+      DATA.AD_318.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 832)
     {
       DATA.AD_340 = data;
+      DATA.AD_340.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 864)
     {
       DATA.AD_360 = data;
+      DATA.AD_360.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 896)
     {
       DATA.AD_380 = data;
+      DATA.AD_380.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 904)
     {
       DATA.AD_388 = data;
+      DATA.AD_388.CHANGED = true;
     }
     else if(data.ID == 912)
     {
       DATA.AD_390 = data;
+      DATA.AD_390.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 920)
     {
       DATA.AD_398 = data;
+      DATA.AD_398.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 948)
     {
       DATA.AD_3B4 = data;
+      DATA.AD_3B4.CHANGED = true;
     }
     else if(data.ID == 1024)
     {
       DATA.AD_400 = data;
+      DATA.AD_400.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 1029)
     {
       DATA.AD_405 = data;
+      DATA.AD_405.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 1034)
     {
       DATA.AD_40A = data;
+      DATA.AD_40A.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 1077)
     {
       DATA.AD_435 = data;
+      DATA.AD_435.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 1109)
     {
       DATA.AD_455 = data;
+      DATA.AD_455.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 1409)
     {
       DATA.AD_581 = data;
+      DATA.AD_581.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 1506)
     {
       DATA.AD_5E2 = data;
+      DATA.AD_5E2.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 0x73f)
     {
       DATA.AD_73F = data;
+      DATA.AD_73F.CHANGED = true;
       Identified = true;
     }
 
@@ -2112,24 +2184,28 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved, bool &Identified)
     {
       DATA.AD_7E8 = data;
       PID_Recieved = data.ID;
+      DATA.AD_7E8.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 2025)
     {
       DATA.AD_7E9 = data;
       PID_Recieved = data.ID;
+      DATA.AD_7E9.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 2026)
     {
       DATA.AD_7EA = data;
       PID_Recieved = data.ID;
+      DATA.AD_7EA.CHANGED = true;
       Identified = true;
     }
     else if(data.ID == 2027)
     {
       DATA.AD_7EB = data;
       PID_Recieved = data.ID;
+      DATA.AD_7EB.CHANGED = true;
       Identified = true;
     }
     
@@ -2138,6 +2214,7 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved, bool &Identified)
     {
       DATA.AD_FFFF = data;
       PID_Recieved = data.ID;
+      DATA.AD_FFFF.CHANGED = true;
       Identified = true;
     }
     
@@ -2145,6 +2222,7 @@ bool AUTOMOBILE::parse(string Line, int &PID_Recieved, bool &Identified)
     else
     {
       DATA.AD_UNKNOWN = data;
+      DATA.AD_UNKNOWN.CHANGED = true;
       Identified = false;
     }
 
@@ -2814,43 +2892,103 @@ void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, unsigned long tmeFrame_Time)
 {
   if (AVAILABILITY.is_active() == true)
   {
-    STATUS.SPEED.store_dash(DATA.AD_130.DATA[6], DATA.AD_130.DATA[7], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
+    if (DATA.AD_130.CHANGED)
+    {
+      STATUS.SPEED.store_dash(DATA.AD_130.DATA[6], DATA.AD_130.DATA[7], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
+      DATA.AD_130.CHANGED = false;
+    }
 
     // Transmission Gear Position
-    STATUS.GEAR.store(DATA.AD_F0.DATA[2]);
-
-    // ACCELERATOR POSTION
-    STATUS.ACCELERATOR.store_value(DATA.AD_80.DATA[1]);
+    if (DATA.AD_F0.CHANGED)
+    {
+      STATUS.GEAR.store(DATA.AD_F0.DATA[2]);
+      DATA.AD_F0.CHANGED = false;
+    }
     
     // BRAKE PRESSURE
-    STATUS.BRAKE.store_value(DATA.AD_252.DATA[1], DATA.AD_252.DATA[2]);
+    if (DATA.AD_252.CHANGED)
+    {
+      STATUS.BRAKE.store_value(DATA.AD_252.DATA[1], DATA.AD_252.DATA[2]);
+      DATA.AD_252.CHANGED = false;
+    }
 
     // LOAD
-    STATUS.POWER.store((DATA.AD_80.DATA[5] *256) + DATA.AD_80.DATA[6]);
+    // ACCELERATOR POSTION
+    if (DATA.AD_80.CHANGED)
+    {
+      STATUS.POWER.store((DATA.AD_80.DATA[5] *256) + DATA.AD_80.DATA[6]);
+      STATUS.ACCELERATOR.store_value(DATA.AD_80.DATA[1]);
+      DATA.AD_80.CHANGED = false;
+    }
 
     // INDICATORS int Lights, int Parking_Brake, int Ignition
-    STATUS.INDICATORS.store_lights(DATA.AD_C8.DATA[7]);
-    STATUS.INDICATORS.store_ignition_switch(DATA.AD_C8.DATA[5]);
+    if (DATA.AD_360.CHANGED)
+    {
+      STATUS.INDICATORS.store_lights_high_beam(DATA.AD_360.DATA[0]);
+      DATA.AD_360.CHANGED = false;
+    }
 
-    STATUS.INDICATORS.store_lights_high_beam(DATA.AD_360.DATA[0]);
-    STATUS.INDICATORS.store_on(DATA.AD_C8.DATA[3]);
-    STATUS.INDICATORS.store_ignition(DATA.AD_C8.DATA[5]);
-    STATUS.INDICATORS.store_cruise_control(DATA.AD_200.DATA[6], DATA.AD_200.DATA[7], .312);
-    STATUS.INDICATORS.store_signal(DATA.AD_260.DATA[3]);
+    if (DATA.AD_C8.CHANGED)
+    {
+      STATUS.INDICATORS.store_on(DATA.AD_C8.DATA[3]);
+      STATUS.INDICATORS.store_ignition(DATA.AD_C8.DATA[5]);
+      STATUS.INDICATORS.store_ignition_switch(DATA.AD_C8.DATA[5]);
+      STATUS.INDICATORS.store_lights(DATA.AD_C8.DATA[7]);
+      DATA.AD_C8.CHANGED = false;
+    }
 
-    STATUS.INDICATORS.store_hazards(tmeFrame_Time, DATA.AD_310.DATA[4]);
+    if (DATA.AD_200.CHANGED)
+    {
+      STATUS.INDICATORS.store_cruise_control(DATA.AD_200.DATA[6], DATA.AD_200.DATA[7], .312);
+      DATA.AD_200.CHANGED = false;
+    }
+
+    if (DATA.AD_260.CHANGED)
+    {
+      STATUS.INDICATORS.store_signal(DATA.AD_260.DATA[3]);
+      DATA.AD_260.CHANGED = false;
+    }
+
+    if (DATA.AD_310.CHANGED)
+    {
+      STATUS.INDICATORS.store_hazards(tmeFrame_Time, DATA.AD_310.DATA[4]);
+      DATA.AD_310.CHANGED = false;
+    }
 
     // Dashboard Screen
-    STATUS.GUAGES.SCREEN.store_value(DATA.AD_140.DATA[0], DATA.AD_140.DATA[1], DATA.AD_140.DATA[2], DATA.AD_140.DATA[3], 
-                                      DATA.AD_140.DATA[4], DATA.AD_140.DATA[5], DATA.AD_140.DATA[6], DATA.AD_140.DATA[7]);
+    if (DATA.AD_140.CHANGED)
+    {
+      STATUS.GUAGES.SCREEN.store_value(DATA.AD_140.DATA[0], DATA.AD_140.DATA[1], DATA.AD_140.DATA[2], DATA.AD_140.DATA[3], 
+                                        DATA.AD_140.DATA[4], DATA.AD_140.DATA[5], DATA.AD_140.DATA[6], DATA.AD_140.DATA[7]);
+      DATA.AD_140.CHANGED = false;
+    }
 
     // FUEL
-    STATUS.FUEL.store_consumed(DATA.AD_200.DATA[7]);
-    STATUS.FUEL.store_percentage(DATA.AD_C0.DATA[7]);
-    STATUS.FUEL.store_level(DATA.AD_380.DATA[7]);
+    //if (DATA.AD_200.CHANGED)
+    //{
+    //  STATUS.FUEL.store_consumed(DATA.AD_200.DATA[7]);
+    //  DATA.AD_200.CHANGED = false;
+    //}
+    
+    if (DATA.AD_C0.CHANGED)
+    {
+      STATUS.FUEL.store_percentage(DATA.AD_C0.DATA[7]);
+      DATA.AD_C0.CHANGED = false;
+    }
+    
+    if (DATA.AD_380.CHANGED)
+    {
+      STATUS.FUEL.store_level(DATA.AD_380.DATA[7]);
+      DATA.AD_380.CHANGED = false;
+    }
 
     // Guages
-    STATUS.GUAGES.store_coolant(DATA.AD_100.DATA[3]);
+    
+    if (DATA.AD_100.CHANGED)
+    {
+      STATUS.GUAGES.store_coolant(DATA.AD_100.DATA[3]);
+      DATA.AD_100.CHANGED = false;
+    }
 
     // --------------------------------------------------------------------------------------
     //  Fraggin' Stupid Pleb message trap / scrubber.

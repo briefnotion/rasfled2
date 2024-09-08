@@ -1,3 +1,9 @@
+2.196_2400908
+  - Changed the temp colors.
+  - Changed the way Fuel Level is displayes so that sloshing shouldn't 
+      be as appearant.
+  - Changed the ADS-B Aircraft info to be on one line.      
+
 2.195_2400907
   - Corrected a few problems related to the Overhead Animations not 
       having the correct colors.

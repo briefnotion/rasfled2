@@ -1360,6 +1360,49 @@ string file_format_system_hour_minutes_seconds()
   return ret_date_time;
 }
 
+// ---------------------------------------------------------------------------------------
+
+void EMPERICAL::add_value(float Value)
+{
+  if (FIRST_RUN)
+  {
+    VALUES.reserve(PROPS.VALUE_SIZE);
+  }
+
+  VALUES.push_back(Value);
+
+  while ((int)VALUES.size() > PROPS.VALUE_SIZE)
+  {
+    VALUES.erase(VALUES.begin());
+  }
+
+  CHANGED = true;
+  
+}
+
+float EMPERICAL::mean()
+{
+  if ((int)VALUES.size() > 0)
+  {
+    if (CHANGED)
+    {
+      emperical_mean(VALUES, PROPS.DEVIATIONS, 0, LATEST_MEAN, LATEST_MEAN_DIFFERENCE);
+
+      CHANGED = false;
+      
+      return LATEST_MEAN;
+    }
+    else
+    {
+      return LATEST_MEAN;
+    }
+  }
+  else
+  {
+    return -1.0f;
+  }
+}
+
 
 
 #endif

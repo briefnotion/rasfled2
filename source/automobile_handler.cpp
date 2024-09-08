@@ -101,72 +101,72 @@ void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, f
       }
       case 1:     // 0 - 5
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 1.0f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 1.0f, 1.0f);
         break;
       }
       case 2:     // 5 - 10
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.75f, 1.0f, 1.0f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 0.66f, 1.0f, 1.0f);
         break;
       }
       case 3:     // 10 - 15
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.50f, 1.0f, 1.0f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 1.0f, 1.0f);
         break;
       }
       case 4:     // 15 - 20
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.25f, 1.0f, 1.0f, 1.0f); //
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.33f, 1.0f, 1.0f, 1.0f); //
         break;
       }
       case 5:     // 20 - 25
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.75f, 1.0f); //
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 1.0f, 1.0f); //
         break;
       }
       case 6:     // 25 - 30
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.50f, 1.0f); //
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.66f, 1.0f); //
         break;
       }
       case 7:     // 30 - 35
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.25f, 1.0f); //    
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.33f, 1.0f); //    
         break;
       }
       case 8:     // 35 - 40
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.0f, 1.0f); //G
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.0f, 1.0f); // G
         break;
       }
       case 9:     // 40 - 45
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.25f, 1.0f, 0.0f, 1.0f); //
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.33f, 1.0f, 0.0f, 1.0f); //
         break;
       }
       case 10:     // 45 - 50
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.50f, 1.0f, 0.0f, 1.0f); // 
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 0.0f, 1.0f); // 
         break;
       }
       case 11:     // 50 - 55
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.75f, 1.0f, 0.0f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.0f, 1.0f);
         break;
       }
       case 12:     // 55 - 60
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.25f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.33f, 1.0f);
         break;
       }
       case 13:     // 60 - 65
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.50f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 0.66f, 0.66f, 1.0f);
         break;
       }
       case 14:     // 65 - 70
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.75f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.66f, 1.0f);
         break;
       }
       case 15:     // 70 +

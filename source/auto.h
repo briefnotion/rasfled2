@@ -56,6 +56,8 @@ class AUTOMOBILE_DATA_LINE
 
   int DATA[8] = {0};
 
+  bool CHANGED = true;
+
   unsigned long TIMESTAMP_MESSAGE_SENT = 0;
     // Measured in miliseconds
     // Time sent on sending unit
@@ -367,8 +369,9 @@ class AUTOMOBILE_FUEL
   float PERCENTAGE = -1;
   string PERCENTAGE_DISP = "X";
 
-  float LEVEL = -1;
+  float LEVEL_RAW = -1;
   string LEVEL_DISP = "X";
+  EMPERICAL LEVEL_EMPERICAL;
 
   public:
 

@@ -530,22 +530,40 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
 
     // Text Describing Aircraft
     // Build Lines
+    /*
     string line_1 = AIRCRAFT_DATA.SEEN_POS.get_str_value() + " " + 
                                 AIRCRAFT_DATA.SQUAWK.get_str_value() + " " + 
                                 AIRCRAFT_DATA.FLIGHT.get_str_value();
-
     string line_2 = "S: " + AIRCRAFT_DATA.SPEED.get_str_value();
-
     string line_3 = "A: " + to_string_round_to_nth(float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f), 1);
-
     string line_4 = "D: " + to_string_round_to_nth(AIRCRAFT_DATA.DISTANCE_FROM_BASE, 1);
+    */
+
+    string line_1 = AIRCRAFT_DATA.SEEN_POS.get_str_value() + " " + 
+                            AIRCRAFT_DATA.SQUAWK.get_str_value() + " " + 
+                            trim(AIRCRAFT_DATA.FLIGHT.get_str_value()) +
+                            " S:" + AIRCRAFT_DATA.SPEED.get_str_value() +
+                            " A:" + to_string_round_to_nth(float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f), 1);
+
+    if (AIRCRAFT_DATA.DISTANCE_FROM_BASE >= 0.0f)
+    {
+      line_1 += " D:" + to_string_round_to_nth(AIRCRAFT_DATA.DISTANCE_FROM_BASE, 1);
+    }
 
     ImVec2 size_of_line_1 = ImGui::CalcTextSize(line_1.c_str());
 
+    // 3 or 4 lines
+    /*
     ImVec2 size_of_box_s = ImVec2(draw_position.x - 3.0f, draw_position.y + 20.0f);
     ImVec2 size_of_box_e = ImVec2(draw_position.x - 3.0f + size_of_line_1.x, 
                                       draw_position.y + 23.0f + (3.0f * 15.0f) + 
                                       ((float)(AIRCRAFT_DATA.DISTANCE_FROM_BASE >= 0.0f) * 15.0f));  // ;^) starbase
+    */
+
+    // 1 line
+    ImVec2 size_of_box_s = ImVec2(draw_position.x - 3.0f - (size_of_line_1.x / 2.0f), draw_position.y + 20.0f);
+    ImVec2 size_of_box_e = ImVec2(draw_position.x - 3.0f + (size_of_line_1.x / 2.0f) + 6.0f, 
+                                      draw_position.y + 23.0f + (1.0f * 15.0f));  // ;^) starbase
 
     Draw_List->AddRectFilled(size_of_box_s, 
                              size_of_box_e, 
@@ -566,8 +584,10 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
                              sdSysData.COLOR_SELECT.neo_c_yellow().STANDARD.color(), 3.0f);
     }
 
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f));
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - (size_of_line_1.x / 2.0f), draw_position.y + 20.0f));
     ImGui::Text("%s", line_1.c_str());
+
+    /*
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f));
     ImGui::Text("%s", line_2.c_str());
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f + 15.0f));
@@ -578,6 +598,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
       ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f + 15.0f + 15.0f));
       ImGui::Text("%s", line_4.c_str());
     }
+    */
 
     // Draw Aircraft Marker
     if (AIRCRAFT_DATA.TRACK.conversion_success())
@@ -587,10 +608,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
                           AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value(), false, Map_Bearing);
     }
 
-    
-
-
-/*
+    /*
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f));
     ImGui::Text("%d %d %s", AIRCRAFT_DATA.SEEN_POS.get_int_value(), AIRCRAFT_DATA.SQUAWK.get_int_value(), AIRCRAFT_DATA.FLIGHT.get_str_value().c_str());
     
@@ -614,7 +632,8 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
         ImGui::Text("D: %.1f", AIRCRAFT_DATA.DISTANCE_FROM_BASE);
       }
     }
-*/
+    */
+
     ImGui::PopStyleColor();
   }
 }

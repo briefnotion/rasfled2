@@ -649,4 +649,43 @@ string file_format_system_date();
 string file_format_system_hour_minutes_seconds();
 // Return format "20230628_22.44.39"
 
+// ---------------------------------------------------------------------------------------
+
+
+// ***************************************************************************************
+// More Classes
+// ***************************************************************************************
+
+class EMPERICAL_PROPERTIES
+{
+  public:
+
+  int VALUE_SIZE = 50;
+
+  float DEVIATIONS = 2.0f;
+  //  1 - 68% of the data falls within one standard deviation of the mean.
+  //  2 - 95% of the data falls within two standard deviations of the mean.
+  //  3 - 99.7% of the data falls within three standard deviations of the mean.
+};
+
+class EMPERICAL
+{
+  private:
+
+  vector<float> VALUES;
+
+  float LATEST_MEAN = -1.0f;
+  float LATEST_MEAN_DIFFERENCE;
+
+  bool FIRST_RUN = true;
+  bool CHANGED = true;
+
+  public:
+
+  EMPERICAL_PROPERTIES PROPS;
+
+  void add_value(float Value);
+  float mean();
+};
+
 #endif
