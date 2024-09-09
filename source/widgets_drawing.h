@@ -40,6 +40,14 @@ using namespace std;
 // Rotate Text
 
 enum bbEnum { BB_BB, BB_DR, BB_IN, BB_CE, BB_TL, BB_TR, BB_BL, BB_BR, BB_L, BB_R, BB_T, BB_B };
+  //      internal bounding boxes
+  // BB = outermost 'true' bounding box (including bounding box for handles)
+  // DR = bounding box for drawing
+  // IN = inner (ie inside bufferzone for boundaries handles
+  // CE = centron (prob central 10%)
+  // TL...B = bb for handles for grabbing the various edges/corners
+
+  //  TOP LEFT BOTTOM RIGHT
 
 void Text_Rotate(std::string textToRotate, float angleToRotate, bbEnum rotationCentre);
 

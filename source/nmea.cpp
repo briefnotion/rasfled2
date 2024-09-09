@@ -358,6 +358,7 @@ void NMEA::current_position_change_acknowleged()
 bool NMEA::active(unsigned long tmeFrame_Time)
 {
   return ACTIVITY_TIMER.ping_down(tmeFrame_Time);
+  //return ACTIVITY_TIMER.ping_down(tmeFrame_Time) && VALID_COORDS;
 }
 
 // -------------------------------------------------------------------------------------

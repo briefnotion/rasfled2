@@ -514,7 +514,8 @@ bool ADSB_WIDGET::active()
 void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
                                             int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon, float Map_Bearing)
 {
-  if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.TRACK_POINTS_DETAILED.size() > 1)
+  //if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.TRACK_POINTS_DETAILED.size() > 1)
+  if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true)
   {
     bool draw = false;
     ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon,
@@ -539,6 +540,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
     string line_4 = "D: " + to_string_round_to_nth(AIRCRAFT_DATA.DISTANCE_FROM_BASE, 1);
     */
 
+    /*
     string line_1 = AIRCRAFT_DATA.SEEN_POS.get_str_value() + " " + 
                             AIRCRAFT_DATA.SQUAWK.get_str_value() + " " + 
                             trim(AIRCRAFT_DATA.FLIGHT.get_str_value()) +
@@ -551,6 +553,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
     }
 
     ImVec2 size_of_line_1 = ImGui::CalcTextSize(line_1.c_str());
+    */
 
     // 3 or 4 lines
     /*
@@ -560,6 +563,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
                                       ((float)(AIRCRAFT_DATA.DISTANCE_FROM_BASE >= 0.0f) * 15.0f));  // ;^) starbase
     */
 
+    /*
     // 1 line
     ImVec2 size_of_box_s = ImVec2(draw_position.x - 3.0f - (size_of_line_1.x / 2.0f), draw_position.y + 20.0f);
     ImVec2 size_of_box_e = ImVec2(draw_position.x - 3.0f + (size_of_line_1.x / 2.0f) + 6.0f, 
@@ -586,6 +590,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
 
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x - (size_of_line_1.x / 2.0f), draw_position.y + 20.0f));
     ImGui::Text("%s", line_1.c_str());
+    */
 
     /*
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f));
@@ -599,6 +604,41 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
       ImGui::Text("%s", line_4.c_str());
     }
     */
+
+    string line_1 = trim(AIRCRAFT_DATA.SQUAWK.get_str_value());
+    string line_2 = " " + trim(AIRCRAFT_DATA.FLIGHT.get_str_value());
+    string line_3 = trim(AIRCRAFT_DATA.SPEED.get_str_value());
+    string line_4 = "  " + to_string_round_to_nth(float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f), 1);
+    string line_5 = to_string_round_to_nth(AIRCRAFT_DATA.DISTANCE_FROM_BASE, 1);
+    
+    if (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5)
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
+    }
+    else
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().STANDARD.color()));
+    }
+
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y - 39.0f));
+    Text_Rotate(line_1, 135.0f, BB_BL);   // Squawk
+
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 39.0f, draw_position.y));
+    Text_Rotate(line_2, 225.0f, BB_BL);   // Flight
+    
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 33.0f, draw_position.y - 3.0f));
+    Text_Rotate(line_3, 135.0f, BB_BL);   // Speed
+    
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 30.0f));
+    Text_Rotate(line_4, 225.0f, BB_BL);    // Altitude
+    
+    if (AIRCRAFT_DATA.DISTANCE_FROM_BASE >= 0.0f)
+    {
+      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 23.0f, draw_position.y + 23.0f));
+      ImGui::Text("%s", line_5.c_str());
+    }
+
+    ImGui::PopStyleColor();
 
     // Draw Aircraft Marker
     if (AIRCRAFT_DATA.TRACK.conversion_success())
@@ -633,8 +673,6 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
       }
     }
     */
-
-    ImGui::PopStyleColor();
   }
 }
 
@@ -1889,20 +1927,22 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     
     // Zoom Out
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                      working_area.y + working_area.w - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+                                      working_area.y + working_area.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
     if (BC_PLUS.button_color(sdSysData, "+", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
+      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
       RANGE_INDICATOR.zoom_out();
     }
     
+    /*
     // Location Selection
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    /*
     if (BC_LOC.button_color(sdSysData, "LOC", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
+      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
       DISPLAY_LOCATION = !DISPLAY_LOCATION;
     }
     */
@@ -1915,6 +1955,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
                                     sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
                                     sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
+      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
       NORTH_UP = !NORTH_UP;
     }
 
@@ -1924,6 +1965,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
     if (BC_MINUS.button_color(sdSysData, "-", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
+      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
       RANGE_INDICATOR.zoom_in();
     }
 
@@ -1937,6 +1979,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
                                       sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
+        SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
         RANGE_INDICATOR.gps_display_current_location_toggle();
       }
     }
