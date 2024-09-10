@@ -363,20 +363,21 @@ class AUTOMOBILE_FUEL
   bool CODED_AVAILABILITY = true;
   bool SOURCE_AVAILABILITY = false;
 
-  float CONSUMED = -1;
+  float CONSUMED = -1.0f;
   string CONSUMED_DISP = "X";
 
-  float PERCENTAGE = -1;
+  float PERCENTAGE = -1.0f;
   string PERCENTAGE_DISP = "X";
 
-  float LEVEL_RAW = -1;
+  float LEVEL_RAW = -1.0f;
   string LEVEL_DISP = "X";
-  EMPERICAL LEVEL_EMPERICAL;
 
   public:
 
   PRESSURE FUEL_RAIL_PRESSURE;
   PRESSURE EVAP_SYSTEM_VAP_PRESSURE;
+
+  bool LEVEL_RAW_CHANGED = true;
 
   void set_source_availability(bool Available);
   bool available();
@@ -393,8 +394,8 @@ class AUTOMOBILE_FUEL
   float val_percentage();
   string percentage();
 
-  float val_level();
-  string level();
+  float val_level_raw();
+  string level_raw();
 };
 
 class AUTOMOBILE_INDICATORS
@@ -828,6 +829,9 @@ class AUTOMOBILE_CALCULATED
 
   VELOCITY PREVIOUS_VELOCITY;
 
+  EMPERICAL FUEL_LEVEL_EMPERICAL;
+  string FUEL_LEVEL_EMPERICAL_DISP = "X";
+
   public:
 
   TIRE_TTL UNFILTHERED_LF_TTL;
@@ -864,6 +868,10 @@ class AUTOMOBILE_CALCULATED
   //  then all divided by 4 then subtracted by 30 then multiplied by 4. 
   // The results give a better single value about the amount of heat the system 
   //  is handling
+  
+  string fuel_level_emperical();
+  float fuel_level_emperical_val();
+  // Returns Emperical fuel level
 };
 
 class COMMUNICATION_STATISTICS

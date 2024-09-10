@@ -101,12 +101,12 @@ void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, f
       }
       case 1:     // 0 - 5
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 1.0f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 1.0f, 1.0f);
         break;
       }
       case 2:     // 5 - 10
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 0.66f, 1.0f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 1.0f, 1.0f);
         break;
       }
       case 3:     // 10 - 15
@@ -161,17 +161,17 @@ void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, f
       }
       case 13:     // 60 - 65
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 0.66f, 0.66f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.66f, 1.0f);
         break;
       }
       case 14:     // 65 - 70
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.66f, 1.0f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 1.0f, 1.0f);
         break;
       }
       case 15:     // 70 +
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 1.0f, 0.5f);
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 0.0f, 1.0f, 0.5f);
         break;
       }
       default:
@@ -303,9 +303,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 
     // Fuel Level alert
     if (sdSysData.ALERTS_AUTO.res_alert_condition_less_than(AUTO_RESERVE_ALERT_FUEL_LEVEL, 
-                                      sdSysData.CAR_INFO.STATUS.FUEL.val_level(), 1.0f, 5.0f))
+                                      sdSysData.CAR_INFO.CALCULATED.fuel_level_emperical_val(), 1.0f, 5.0f))
     {
-      sdSysData.ALERTS_AUTO.res_update_alert_text_line_1(AUTO_RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + sdSysData.CAR_INFO.STATUS.FUEL.level());
+      sdSysData.ALERTS_AUTO.res_update_alert_text_line_1(AUTO_RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + sdSysData.CAR_INFO.CALCULATED.fuel_level_emperical());
       sdSysData.ALERTS_AUTO.res_update_line_2_with_conditions(AUTO_RESERVE_ALERT_FUEL_LEVEL);
       sdSysData.ALERTS_AUTO.ALERTS_RESERVE[AUTO_RESERVE_ALERT_FUEL_LEVEL].set_show_value_bar(true);
     }

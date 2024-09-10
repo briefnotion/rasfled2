@@ -53,6 +53,24 @@ class ALERT_ENTRY
   string ALERT;
 };
 */
+class AIRCRAFT_META_DATA
+{
+  public: 
+
+  // Specific for displaying compass info on adsb screen
+  string COMPASS_INFO_DISP_FLIGHT = "";
+  string COMPASS_INFO_DISP_SQUAWK = "";
+  string COMPASS_INFO_DISP_ALTITUDE = "";
+  string COMPASS_INFO_DISP_SPEED = "";
+  string COMPASS_INFO_DISP_DISTANCE_FROM_BASE = "";
+
+  /*
+  int DISP_FLIGHT_PIXEL_SIZE = 0;
+  int DISP_SQUAWK_PIXEL_SIZE = 0;
+  int DISP_ALTITUDE_PIXEL_SIZE = 0;
+  int DISP_SPEED_PIXEL_SIZE = 0;
+  */
+};
 
 class AIRCRAFT
 {
@@ -62,6 +80,8 @@ class AIRCRAFT
   bool ALERT = false;
 
   public:
+  // Meta Data
+  AIRCRAFT_META_DATA META;
   
   // Alert List
   //deque<ALERT_ENTRY> ALERT_LIST;

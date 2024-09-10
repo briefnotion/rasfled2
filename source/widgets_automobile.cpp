@@ -1596,8 +1596,8 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
   // Fuel Level
 
-  SDATA.FUEL_LEVEL = sdSysData.CAR_INFO.STATUS.FUEL.level();
-  SDATA.FUEL_LEVEL_VAL = sdSysData.CAR_INFO.STATUS.FUEL.val_level();
+  SDATA.FUEL_LEVEL = sdSysData.CAR_INFO.CALCULATED.fuel_level_emperical();
+  SDATA.FUEL_LEVEL_VAL = sdSysData.CAR_INFO.CALCULATED.fuel_level_emperical_val();
   
   // Update Widgets ------
 
@@ -1634,25 +1634,26 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   SDATA.D_RB_TTL.update_value(sdSysData, SDATA.RB_TTL, (int)SDATA.RB_TTL_VAL);
 
   // Lights
-
-  SDATA.D_LIGHTS.update_value(sdSysData, SDATA.LIGHTS_SWITCH);
-
-  if (SDATA.LIGHTS_BEAM_ON == true)
+  if (SDATA.LIGHTS_HEDLIGHTS_ON == true)
   {
-    SDATA.D_LIGHTS.PROPS.COLOR = sdSysData.COLOR_SELECT.cyan();
-  }
-  else
-  {
-    if (SDATA.LIGHTS_HEDLIGHTS_ON == true)
+    if (SDATA.LIGHTS_BEAM_ON == true)
     {
-      SDATA.D_LIGHTS.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
+      SDATA.D_LIGHTS.update_value(sdSysData, SDATA.LIGHTS_SWITCH + " (HI)");
+      SDATA.D_LIGHTS.PROPS.COLOR = sdSysData.COLOR_SELECT.cyan();
     }
     else
     {
-      SDATA.D_LIGHTS.PROPS.COLOR = sdSysData.COLOR_SELECT.blue();
+      SDATA.D_LIGHTS.update_value(sdSysData, SDATA.LIGHTS_SWITCH + " (LO)");
+      SDATA.D_LIGHTS.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
     }
   }
+  else
+  {
+    SDATA.D_LIGHTS.update_value(sdSysData, SDATA.LIGHTS_SWITCH);
+    SDATA.D_LIGHTS.PROPS.COLOR = sdSysData.COLOR_SELECT.blue();
+  }
 
+  // Fuel
   SDATA.D_FUEL_LEVEL.update_value(sdSysData, SDATA.FUEL_LEVEL, SDATA.FUEL_LEVEL_VAL);
 
   if (SDATA.PARKING_BRAKE == true)

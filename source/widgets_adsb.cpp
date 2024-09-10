@@ -530,87 +530,7 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
     }
 
     // Text Describing Aircraft
-    // Build Lines
-    /*
-    string line_1 = AIRCRAFT_DATA.SEEN_POS.get_str_value() + " " + 
-                                AIRCRAFT_DATA.SQUAWK.get_str_value() + " " + 
-                                AIRCRAFT_DATA.FLIGHT.get_str_value();
-    string line_2 = "S: " + AIRCRAFT_DATA.SPEED.get_str_value();
-    string line_3 = "A: " + to_string_round_to_nth(float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f), 1);
-    string line_4 = "D: " + to_string_round_to_nth(AIRCRAFT_DATA.DISTANCE_FROM_BASE, 1);
-    */
-
-    /*
-    string line_1 = AIRCRAFT_DATA.SEEN_POS.get_str_value() + " " + 
-                            AIRCRAFT_DATA.SQUAWK.get_str_value() + " " + 
-                            trim(AIRCRAFT_DATA.FLIGHT.get_str_value()) +
-                            " S:" + AIRCRAFT_DATA.SPEED.get_str_value() +
-                            " A:" + to_string_round_to_nth(float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f), 1);
-
-    if (AIRCRAFT_DATA.DISTANCE_FROM_BASE >= 0.0f)
-    {
-      line_1 += " D:" + to_string_round_to_nth(AIRCRAFT_DATA.DISTANCE_FROM_BASE, 1);
-    }
-
-    ImVec2 size_of_line_1 = ImGui::CalcTextSize(line_1.c_str());
-    */
-
-    // 3 or 4 lines
-    /*
-    ImVec2 size_of_box_s = ImVec2(draw_position.x - 3.0f, draw_position.y + 20.0f);
-    ImVec2 size_of_box_e = ImVec2(draw_position.x - 3.0f + size_of_line_1.x, 
-                                      draw_position.y + 23.0f + (3.0f * 15.0f) + 
-                                      ((float)(AIRCRAFT_DATA.DISTANCE_FROM_BASE >= 0.0f) * 15.0f));  // ;^) starbase
-    */
-
-    /*
-    // 1 line
-    ImVec2 size_of_box_s = ImVec2(draw_position.x - 3.0f - (size_of_line_1.x / 2.0f), draw_position.y + 20.0f);
-    ImVec2 size_of_box_e = ImVec2(draw_position.x - 3.0f + (size_of_line_1.x / 2.0f) + 6.0f, 
-                                      draw_position.y + 23.0f + (1.0f * 15.0f));  // ;^) starbase
-
-    Draw_List->AddRectFilled(size_of_box_s, 
-                             size_of_box_e, 
-                             sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 3.0f);
-
-    if (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5)
-    {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
-      Draw_List->AddRect(size_of_box_s, 
-                          size_of_box_e, 
-                          sdSysData.COLOR_SELECT.neo_c_white().STANDARD_V.color(), 3.0f);
-    }
-    else
-    {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().STANDARD.color()));
-      Draw_List->AddRect(size_of_box_s, 
-                             size_of_box_e, 
-                             sdSysData.COLOR_SELECT.neo_c_yellow().STANDARD.color(), 3.0f);
-    }
-
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - (size_of_line_1.x / 2.0f), draw_position.y + 20.0f));
-    ImGui::Text("%s", line_1.c_str());
-    */
-
-    /*
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f));
-    ImGui::Text("%s", line_2.c_str());
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f + 15.0f));
-    ImGui::Text("%s", line_3.c_str());
-    
-    if (AIRCRAFT_DATA.DISTANCE_FROM_BASE >= 0.0f)
-    {
-      ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f + 15.0f + 15.0f));
-      ImGui::Text("%s", line_4.c_str());
-    }
-    */
-
-    string line_1 = trim(AIRCRAFT_DATA.SQUAWK.get_str_value());
-    string line_2 = " " + trim(AIRCRAFT_DATA.FLIGHT.get_str_value());
-    string line_3 = trim(AIRCRAFT_DATA.SPEED.get_str_value());
-    string line_4 = "  " + to_string_round_to_nth(float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f), 1);
-    string line_5 = to_string_round_to_nth(AIRCRAFT_DATA.DISTANCE_FROM_BASE, 1);
-    
+   
     if (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5)
     {
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
@@ -621,21 +541,21 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
     }
 
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y - 39.0f));
-    Text_Rotate(line_1, 135.0f, BB_BL);   // Squawk
+    Text_Rotate(AIRCRAFT_DATA.META.COMPASS_INFO_DISP_SQUAWK, 135.0f, BB_BL);   // Squawk
 
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 39.0f, draw_position.y));
-    Text_Rotate(line_2, 225.0f, BB_BL);   // Flight
+    Text_Rotate(AIRCRAFT_DATA.META.COMPASS_INFO_DISP_FLIGHT, 225.0f, BB_BL);   // Flight
     
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 33.0f, draw_position.y - 3.0f));
-    Text_Rotate(line_3, 135.0f, BB_BL);   // Speed
+    Text_Rotate(AIRCRAFT_DATA.META.COMPASS_INFO_DISP_SPEED, 135.0f, BB_BL);   // Speed
     
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 30.0f));
-    Text_Rotate(line_4, 225.0f, BB_BL);    // Altitude
+    Text_Rotate(AIRCRAFT_DATA.META.COMPASS_INFO_DISP_ALTITUDE, 225.0f, BB_BL);    // Altitude
     
     if (AIRCRAFT_DATA.DISTANCE_FROM_BASE >= 0.0f)
     {
       ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 23.0f, draw_position.y + 23.0f));
-      ImGui::Text("%s", line_5.c_str());
+      ImGui::Text("%s", AIRCRAFT_DATA.META.COMPASS_INFO_DISP_DISTANCE_FROM_BASE.c_str());
     }
 
     ImGui::PopStyleColor();
@@ -648,31 +568,11 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
                           AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value(), false, Map_Bearing);
     }
 
-    /*
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f));
-    ImGui::Text("%d %d %s", AIRCRAFT_DATA.SEEN_POS.get_int_value(), AIRCRAFT_DATA.SQUAWK.get_int_value(), AIRCRAFT_DATA.FLIGHT.get_str_value().c_str());
-    
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f));
-    ImGui::Text("S: %d", AIRCRAFT_DATA.SPEED.get_int_value());
-
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f + 15.0f));
-    if (AIRCRAFT_DATA.ALTITUDE.conversion_success())
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 15.0f, draw_position.y - 15.0f));
+    if (ImGui::InvisibleButton(AIRCRAFT_DATA.HEX.get_str_value().c_str(), ImVec2(30.0f, 30.0f)))
     {
-      ImGui::Text("A: %.1f", float(AIRCRAFT_DATA.ALTITUDE.get_int_value() / 1000.0f));
+      sdSysData.SOUND_SYSTEM.add_note_to_queue(sdSysData.COMMAND_THREADS, "c6");
     }
-    else
-    {
-      ImGui::Text("A: %s", AIRCRAFT_DATA.ALTITUDE.get_str_value().c_str());
-    }
-
-    if (AIRCRAFT_DATA.DISTANCE_FROM_BASE >= 0.0f)
-    {
-      ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 20.0f + 15.0f + 15.0f + 15.0f));
-      {
-        ImGui::Text("D: %.1f", AIRCRAFT_DATA.DISTANCE_FROM_BASE);
-      }
-    }
-    */
   }
 }
 

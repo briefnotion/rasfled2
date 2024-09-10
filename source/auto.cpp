@@ -439,8 +439,8 @@ void AUTOMOBILE_FUEL::store_percentage(int Percentage)
 void AUTOMOBILE_FUEL::store_level(int Level)
 {
   LEVEL_RAW = ((float)Level) / 20;
-  LEVEL_EMPERICAL.add_value(LEVEL_RAW);
-  LEVEL_DISP = to_string_round_to_nth(LEVEL_EMPERICAL.mean(), 1) + " gal";
+  LEVEL_DISP = to_string_round_to_nth(LEVEL_RAW, 1) + " gal";
+  LEVEL_RAW_CHANGED = true;
 }
 
 void AUTOMOBILE_FUEL::store_fuel_rail_pressure_23(int A, int B)
@@ -475,12 +475,12 @@ string AUTOMOBILE_FUEL::percentage()
   return PERCENTAGE_DISP;
 }
 
-float AUTOMOBILE_FUEL::val_level()
+float AUTOMOBILE_FUEL::val_level_raw()
 {
-  return LEVEL_EMPERICAL.mean();
+  return LEVEL_RAW;
 }
 
-string AUTOMOBILE_FUEL::level()
+string AUTOMOBILE_FUEL::level_raw()
 {
   return LEVEL_DISP;
 }
@@ -1567,6 +1567,9 @@ void AUTOMOBILE_CALCULATED::compute_low(DNFWTS_ &Dnfwts, AUTOMOBILE_TRANSLATED_D
     ACCELERATION_QUICK_MEAN_HISTORY.PROPS.SIZE = 25;
     ACCELERATION_QUICK_MEAN_HISTORY.PROPS.ALIVE_TIME = 1000;
     ACCELERATION_QUICK_MEAN_HISTORY.PROPS.EMPERICAL_RULE_ENABLE = true;
+
+    FUEL_LEVEL_EMPERICAL.PROPS.DEVIATIONS = 1.0f;
+    FUEL_LEVEL_EMPERICAL.PROPS.VALUE_SIZE = 100;
     
     FIRST_RUN = false;
   }
@@ -1661,6 +1664,15 @@ void AUTOMOBILE_CALCULATED::compute_low(DNFWTS_ &Dnfwts, AUTOMOBILE_TRANSLATED_D
     }
   }
 
+  // Fuel Level
+  
+  if (Status.FUEL.LEVEL_RAW_CHANGED)
+  {
+    FUEL_LEVEL_EMPERICAL.add_value(Status.FUEL.val_level_raw());
+    FUEL_LEVEL_EMPERICAL_DISP = to_string_round_to_nth(FUEL_LEVEL_EMPERICAL.mean(), 2) + " gal";
+    Status.FUEL.LEVEL_RAW_CHANGED = false;
+  }
+
   // S-Temp
   S_TEMP = (((Status.TEMPS.AMBIANT_AIR_46.val_c() + 
               Status.TEMPS.AIR_INTAKE_0f.val_c() + 
@@ -1676,6 +1688,16 @@ float AUTOMOBILE_CALCULATED::acceleration(unsigned long tmeFrame_Time)
 float AUTOMOBILE_CALCULATED::s_temp()
 {
   return S_TEMP;
+}
+
+string AUTOMOBILE_CALCULATED::fuel_level_emperical()
+{
+  return FUEL_LEVEL_EMPERICAL_DISP;
+}
+
+float AUTOMOBILE_CALCULATED::fuel_level_emperical_val()
+{
+  return FUEL_LEVEL_EMPERICAL.mean();
 }
 
 //-----------
