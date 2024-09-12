@@ -199,7 +199,7 @@ class ADSB_WIDGET
 
   bool active();
 
-  void draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+  AIRCRAFT draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
                                 int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon, float Map_Bearing);
 };
 
@@ -212,6 +212,8 @@ class DISPLAY_DATA_ADSB
   bool ADSB_ACTIVE = false;
 
   AIRCRAFT_DATA AIRCRAFT_LIST;
+  AIRCRAFT TRACKED_AIRCRAFT;
+  string TRACKED_AIRCRAFT_HEX = "";
 
   int ADSB_WIDGET_Count = 0;
 
@@ -238,10 +240,11 @@ class ADSB_RANGE
 
   ImVec4 PREV_WORKING_AREA;
 
-  ImVec2 CENTER_LAT_LON;
-
+  ImVec2 NO_POS_LAT_LON;
   ImVec2 GPS_POS_LAT_LON;
-  bool GPS_DISPLAY_CURRENT_LOCATION = true;
+  ImVec2 AIRCRAFT_POS_LAT_LON;
+
+  ImVec2 CENTER_POS_LAT_LON;
 
   void calculate_lat_lon_to_point_scale();
 
@@ -251,17 +254,24 @@ class ADSB_RANGE
 
   ADSB_RANGE_Properties PROPS;
 
-  ImVec2 ll_2_pt_scale();
+  // Center of map at location
+  int CENTER_ON_LOCATION = 1;
+    // 0 - No Location
+    // 1 - Center on current location
+    // 2 - Center on aircraft
 
-  ImVec2 center_lat_lon();
+  ImVec2 ll_2_pt_scale();
 
   void gps_display_current_location_toggle();
 
   bool gps_display_current_location();
 
+  void set_no_pos_lat_lon(ImVec2 Lat_Lon);
   void set_gps_pos_lat_lon(ImVec2 Lat_Lon);
+  void set_aircraft_pos_lat_lon(ImVec2 Lat_Lon);
 
-  ImVec2 gps_pos_lat_lon();
+  ImVec2 get_center_lat_lon();
+  ImVec2 get_gps_lat_lon();
 
   float range();
   // Distance in miles, the range is set at for viewing.
@@ -276,8 +286,6 @@ class ADSB_RANGE
   void zoom_out();
   // Increase the distance in miles, the range is set at for viewing, 
   //  by one.
-
-  void set_current_center_position(ImVec2 Lat_Lon);
   
   void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area);
 
@@ -314,7 +322,6 @@ class ADSB_MAP
 
   NEW_COLOR_SCALE GPS_ALTITUDE_COLOR_SCALE;
 
-  bool DISPLAY_LOCATION = false;
   bool SHOW_BUTTONS = true;
   TIMED_PING SHOW_BUTTONS_TIMER;
 

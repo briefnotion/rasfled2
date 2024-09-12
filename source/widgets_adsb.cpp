@@ -511,9 +511,11 @@ bool ADSB_WIDGET::active()
 }
 
 // Draw all aircraft onto the maps.
-void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+AIRCRAFT ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
                                             int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon, float Map_Bearing)
 {
+  AIRCRAFT ret_clicked_aircraft;
+
   //if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.TRACK_POINTS_DETAILED.size() > 1)
   if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true)
   {
@@ -561,19 +563,18 @@ void ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &s
     ImGui::PopStyleColor();
 
     // Draw Aircraft Marker
-    if (AIRCRAFT_DATA.TRACK.conversion_success())
-    {
-      draw_compass(Draw_List, sdSysData, 1, draw_position, 15.0f, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
-                          AIRCRAFT_DATA.NAV_HEADING.conversion_success(), AIRCRAFT_DATA.NAV_HEADING.get_float_value(), 
-                          AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value(), false, Map_Bearing);
-    }
+    draw_compass(Draw_List, sdSysData, 1, draw_position, 15.0f, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
+                        AIRCRAFT_DATA.NAV_HEADING.conversion_success(), AIRCRAFT_DATA.NAV_HEADING.get_float_value(), 
+                        AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value(), false, Map_Bearing);
 
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 15.0f, draw_position.y - 15.0f));
-    if (ImGui::InvisibleButton(AIRCRAFT_DATA.HEX.get_str_value().c_str(), ImVec2(30.0f, 30.0f)))
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 20.0f, draw_position.y - 20.0f));
+    if (ImGui::InvisibleButton(AIRCRAFT_DATA.HEX.get_str_value().c_str(), ImVec2(40.0f, 40.0f)))
     {
-      sdSysData.SOUND_SYSTEM.add_note_to_queue(sdSysData.COMMAND_THREADS, "c6");
+      ret_clicked_aircraft = AIRCRAFT_DATA;
     }
   }
+
+  return ret_clicked_aircraft;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -582,14 +583,40 @@ void ADSB_RANGE::calculate_lat_lon_to_point_scale()
 {
   float latitude_diff = 0;
   float longitude_diff = 0;
+ 
+  ImVec2 new_coords_east;
+  ImVec2 new_coords_south;
 
-  ImVec2 new_coords_east = get_coords_x_miles_from_coords(CENTER_LAT_LON.x, CENTER_LAT_LON.y,
+  if (CENTER_ON_LOCATION == 1)
+  {
+    new_coords_east = get_coords_x_miles_from_coords(GPS_POS_LAT_LON.x, GPS_POS_LAT_LON.y,
                                                           RANGE, 90.0f);
-  ImVec2 new_coords_south = get_coords_x_miles_from_coords(CENTER_LAT_LON.x, CENTER_LAT_LON.y,
+    new_coords_south = get_coords_x_miles_from_coords(GPS_POS_LAT_LON.x, GPS_POS_LAT_LON.y,
                                                           RANGE, 180.0f);
 
-  latitude_diff = abs(new_coords_south.x - CENTER_LAT_LON.x);
-  longitude_diff = abs(new_coords_east.y - CENTER_LAT_LON.y);
+    latitude_diff = abs(new_coords_south.x - GPS_POS_LAT_LON.x);
+    longitude_diff = abs(new_coords_east.y - GPS_POS_LAT_LON.y);
+  }
+  else if (CENTER_ON_LOCATION == 2)
+  {
+    new_coords_east = get_coords_x_miles_from_coords(AIRCRAFT_POS_LAT_LON.x, AIRCRAFT_POS_LAT_LON.y,
+                                                          RANGE, 90.0f);
+    new_coords_south = get_coords_x_miles_from_coords(AIRCRAFT_POS_LAT_LON.x, AIRCRAFT_POS_LAT_LON.y,
+                                                          RANGE, 180.0f);
+
+    latitude_diff = abs(new_coords_south.x - AIRCRAFT_POS_LAT_LON.x);
+    longitude_diff = abs(new_coords_east.y - AIRCRAFT_POS_LAT_LON.y);
+  }
+  else
+  {
+    new_coords_east = get_coords_x_miles_from_coords(NO_POS_LAT_LON.x, NO_POS_LAT_LON.y,
+                                                          RANGE, 90.0f);
+    new_coords_south = get_coords_x_miles_from_coords(NO_POS_LAT_LON.x, NO_POS_LAT_LON.y,
+                                                          RANGE, 180.0f);
+
+    latitude_diff = abs(new_coords_south.x - NO_POS_LAT_LON.x);
+    longitude_diff = abs(new_coords_east.y - NO_POS_LAT_LON.y);
+  }
 
   LAT_LON_TO_POINT_SCALE.x =(RADIUS_CIRCLE_POINT_SIZE / latitude_diff);
   LAT_LON_TO_POINT_SCALE.y = (RADIUS_CIRCLE_POINT_SIZE / longitude_diff);
@@ -725,19 +752,26 @@ ImVec2 ADSB_RANGE::ll_2_pt_scale()
   return LAT_LON_TO_POINT_SCALE;
 }
 
-ImVec2 ADSB_RANGE::center_lat_lon()
-{
-  return CENTER_LAT_LON;
-}
-
 void ADSB_RANGE::gps_display_current_location_toggle()
 {
-  GPS_DISPLAY_CURRENT_LOCATION = !GPS_DISPLAY_CURRENT_LOCATION;
+  if (GPS_POS_LAT_LON.x != 0.0f && GPS_POS_LAT_LON.y != 0.0f)
+  {
+    CENTER_ON_LOCATION = 1;
+  }
+  else
+  {
+    CENTER_ON_LOCATION = 0;
+  }
 }
 
 bool ADSB_RANGE::gps_display_current_location()
 {
-  return GPS_DISPLAY_CURRENT_LOCATION;
+  return CENTER_ON_LOCATION == 1;
+}
+
+void ADSB_RANGE::set_no_pos_lat_lon(ImVec2 Lat_Lon)
+{
+  NO_POS_LAT_LON = Lat_Lon;
 }
 
 void ADSB_RANGE::set_gps_pos_lat_lon(ImVec2 Lat_Lon)
@@ -745,7 +779,28 @@ void ADSB_RANGE::set_gps_pos_lat_lon(ImVec2 Lat_Lon)
   GPS_POS_LAT_LON = Lat_Lon;
 }
 
-ImVec2 ADSB_RANGE::gps_pos_lat_lon()
+void ADSB_RANGE::set_aircraft_pos_lat_lon(ImVec2 Lat_Lon)
+{
+  AIRCRAFT_POS_LAT_LON = Lat_Lon;
+}
+
+ImVec2 ADSB_RANGE::get_center_lat_lon()
+{
+  if (CENTER_ON_LOCATION == 1)
+  {
+    return GPS_POS_LAT_LON;
+  }
+  else if (CENTER_ON_LOCATION == 2)
+  {
+    return AIRCRAFT_POS_LAT_LON;
+  }
+  else 
+  {
+    return NO_POS_LAT_LON;
+  }
+}
+
+ImVec2 ADSB_RANGE::get_gps_lat_lon()
 {
   return GPS_POS_LAT_LON;
 }
@@ -778,11 +833,6 @@ void ADSB_RANGE::zoom_out()
   }
 }
 
-void ADSB_RANGE::set_current_center_position(ImVec2 Lat_Lon)
-{
-  CENTER_LAT_LON = Lat_Lon;
-}
-
 void ADSB_RANGE::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area)
 {
   if (ZOOM_LEVEL == -1)
@@ -811,8 +861,8 @@ void ADSB_RANGE::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
 
 void ADSB_RANGE::draw_info()
 {
-  ImGui::Text("LAT: %f", CENTER_LAT_LON.x);
-  ImGui::Text("LON: %f", CENTER_LAT_LON.y);
+  ImGui::Text("LAT: %f", get_center_lat_lon().x);
+  ImGui::Text("LON: %f", get_center_lat_lon().y);
   ImGui::Text("RNG: %.2f mi", RANGE);
 
   // test
@@ -898,7 +948,8 @@ void ADSB_MAP::create(system_data &sdSysData)
   // Degrees Decimal Minutes (DDM): N30°12.30'  / W91°59.27'
   // Decimal Degrees (DD):          30.205      / -91.987833
 
-  RANGE_INDICATOR.set_current_center_position(ImVec2(30.205f, -91.987833f));
+  RANGE_INDICATOR.set_no_pos_lat_lon(ImVec2(30.205f, -91.987833f));
+  RANGE_INDICATOR.CENTER_ON_LOCATION = 0;
 
   // Add Landmarks
   MAP_MARKER tmp_map_marker;
@@ -1679,33 +1730,82 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   bool active_gps     = sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time());
   bool active_compass = sdSysData.COMMS_COMPASS.connected();
 
+  // -------------------------------------------------------------------------------------
+
+  // Store some map info regarding positions
+  // Store current gps location
+  {
+    if (sdSysData.GPS_SYSTEM.current_position().VALID_COORDS && sdSysData.GPS_SYSTEM.current_position().CHANGED)
+    {
+      // Check and store GPS Current Location
+      RANGE_INDICATOR.set_gps_pos_lat_lon(ImVec2(sdSysData.GPS_SYSTEM.current_position().LATITUDE, 
+                                                  sdSysData.GPS_SYSTEM.current_position().LONGITUDE));
+
+      // Mark Changes as seen.
+      sdSysData.GPS_SYSTEM.current_position_change_acknowleged();
+    }
+  }
+
+  // Store tracked ADSB Aircraft
+  {
+    if (sdSysData.AIRCRAFT_COORD.is_active())
+    {
+      // Check and store AIRCRAFT Current Location
+      RANGE_INDICATOR.set_aircraft_pos_lat_lon(ImVec2(SDATA.TRACKED_AIRCRAFT.POSITION.LATITUDE.get_float_value(), 
+                                                  SDATA.TRACKED_AIRCRAFT.POSITION.LONGITUDE.get_float_value()));
+    }
+  }
+  
+  // No pos has no store point other than direct
+  {
+    // No Pos
+  }
+
+  // -------------------------------------------------------------------------------------
+
   // Before drawing the map, get map heading in degrees from sources Compass or GPS or both
   float map_heading_degrees = 0.0f;
 
   if (!NORTH_UP)
   {
-    if (active_compass && active_gps)
+    if (RANGE_INDICATOR.CENTER_ON_LOCATION == 1)
     {
-      if (sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph() > 15.0f)
+      // Map direction for GPS
+      if (active_compass && active_gps)
+      {
+        if (sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph() > 15.0f)
+        {
+          MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+        }
+        else
+        {
+          MAP_HEADING_DEGREES.set_value(sdSysData.COMMS_COMPASS.bearing());
+        }
+      }
+      else if (active_compass)
+      {
+        MAP_HEADING_DEGREES.set_value(sdSysData.COMMS_COMPASS.bearing());
+      }
+      else if (active_gps)
       {
         MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
       }
       else
       {
-        MAP_HEADING_DEGREES.set_value(sdSysData.COMMS_COMPASS.bearing());
+        MAP_HEADING_DEGREES.set_value(0.0f);
       }
     }
-    else if (active_compass)
+    else if (RANGE_INDICATOR.CENTER_ON_LOCATION == 2)
     {
-      MAP_HEADING_DEGREES.set_value(sdSysData.COMMS_COMPASS.bearing());
-    }
-    else if (active_gps)
-    {
-      MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
-    }
-    else
-    {
-      MAP_HEADING_DEGREES.set_value(0.0f);
+      // Map Heading for Aircraft
+      if (SDATA.TRACKED_AIRCRAFT.TRACK.conversion_success())
+      {
+        MAP_HEADING_DEGREES.set_value(SDATA.TRACKED_AIRCRAFT.TRACK.get_float_value());
+      }
+      else
+      {
+        MAP_HEADING_DEGREES.set_value(0.0f);
+      }
     }
   }
   else
@@ -1715,29 +1815,14 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
 
   map_heading_degrees = MAP_HEADING_DEGREES.value_no_roll(360.0f);
 
-  
-  //
-  if (sdSysData.GPS_SYSTEM.current_position().VALID_COORDS && sdSysData.GPS_SYSTEM.current_position().CHANGED)
-  {
-    // Check and store GPS Current Location
-    RANGE_INDICATOR.set_gps_pos_lat_lon(ImVec2(sdSysData.GPS_SYSTEM.current_position().LATITUDE, 
-                                                sdSysData.GPS_SYSTEM.current_position().LONGITUDE));
-
-    // Set Center to GPS Location.
-    if (RANGE_INDICATOR.gps_display_current_location())
-    {
-      RANGE_INDICATOR.set_current_center_position(RANGE_INDICATOR.gps_pos_lat_lon());
-    }
-
-    // Mark Changes as seen.
-    sdSysData.GPS_SYSTEM.current_position_change_acknowleged();
-  }
+  // -------------------------------------------------------------------------------------
 
   // Hide buttons if on screen for time
   if (SHOW_BUTTONS && SHOW_BUTTONS_TIMER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
   {
     SHOW_BUTTONS = false;
   }
+
 
   // -------------------------------------------------------------------------------------
   // Screen Draw Start
@@ -2041,7 +2126,7 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   // Draw Landmarks
   for (int landmark = 0; landmark < (int)LANDMARKS.size(); landmark++)
   {
-    LANDMARKS[landmark].draw(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), map_heading_degrees, RANGE_INDICATOR.range());
+    LANDMARKS[landmark].draw(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.get_center_lat_lon(), map_heading_degrees, RANGE_INDICATOR.range());
   }
 
   // Draw Current Position Marker
@@ -2050,16 +2135,16 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     // Draw track of GPS Position.
     if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 2.5f, GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.center_lat_lon(), map_heading_degrees, sdSysData.GPS_SYSTEM.TRACK);
+      draw_track(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 2.5f, GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), map_heading_degrees, sdSysData.GPS_SYSTEM.TRACK);
     }
 
     bool draw = false;
-    ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.center_lat_lon(), RANGE_INDICATOR.gps_pos_lat_lon(), map_heading_degrees, draw);
+    ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.get_center_lat_lon(), RANGE_INDICATOR.get_gps_lat_lon(), map_heading_degrees, draw);
 
     // Draw point position compass
     if (draw)
     {
-      if (RANGE_INDICATOR.gps_display_current_location())
+      if (RANGE_INDICATOR.CENTER_ON_LOCATION == 1)
       {
         // draw compass at center location
         CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
@@ -2074,8 +2159,15 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                             active_compass, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, map_heading_degrees);
       }
+  
+      ImGui::SetCursorScreenPos(ImVec2(gps_pos.x - 20.0f, gps_pos.y - 20.0f));
+      if (ImGui::InvisibleButton("GPS CURRENT POSITION COMPASS", ImVec2(40.0f, 40.0f)))
+      {
+        RANGE_INDICATOR.CENTER_ON_LOCATION = 1;
+      }
     }
   }
+  /*
   else if (active_compass)
   {
     CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, ImVec2(working_area.x + working_area.z / 2.0f, working_area.y + working_area.w / 2.0f), 
@@ -2084,13 +2176,23 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
                     active_compass, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, 
                     true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), map_heading_degrees);
   }
+  */
   
+  // -------------------------------------------------------------------------------------
+
   // Draw Aircraft
   for (int aircraft = 0; aircraft < (int)ADSB_Widgets.size(); aircraft ++)
   {
     if (ADSB_Widgets[aircraft].is_expired(sdSysData) == false)
     {
-      ADSB_Widgets[aircraft].draw_aircraft_map_marker(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), RANGE_INDICATOR.center_lat_lon(), map_heading_degrees);
+      AIRCRAFT tmp_clicked_aircraft = ADSB_Widgets[aircraft].draw_aircraft_map_marker(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), RANGE_INDICATOR.get_center_lat_lon(), map_heading_degrees);
+      
+      if (tmp_clicked_aircraft.HEX.get_str_value() != "")
+      {
+        SDATA.TRACKED_AIRCRAFT = tmp_clicked_aircraft;
+        SDATA.TRACKED_AIRCRAFT_HEX = tmp_clicked_aircraft.HEX.get_str_value();
+        RANGE_INDICATOR.CENTER_ON_LOCATION = 2;
+      }
     }
   }
 
@@ -2168,6 +2270,15 @@ void ADSB_SCREEN::update(system_data &sdSysData)
   // Get new list of Aircraft.
   SDATA.AIRCRAFT_LIST = sdSysData.AIRCRAFT_COORD.DATA;
   SDATA.ADSB_ACTIVE = sdSysData.AIRCRAFT_COORD.is_active();
+
+  // Search for tracked aircraft and update its info if found
+  for (int pos_search = 0; pos_search < (int)SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos_search++)
+  {
+    if (SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search].HEX.get_str_value() == SDATA.TRACKED_AIRCRAFT_HEX)
+    {
+      SDATA.TRACKED_AIRCRAFT = SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search];
+    }
+  }
 
   // Prepare list to display.
   for (int pos_search = 0; pos_search < (int)SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos_search++)

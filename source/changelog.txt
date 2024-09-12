@@ -1,3 +1,7 @@
+2.199_2400911
+  - Aircraft can be centered on the map by clicking on the aircraft 
+      compass.
+
 2.198_2400910
   - Small adjustments.
 
