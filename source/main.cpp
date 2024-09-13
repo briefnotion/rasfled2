@@ -1074,7 +1074,7 @@ int loop_2(bool TTY_Only)
       // Read ADS-B Aircraft JSON
       if (watcher_aircraft_json.changed() == true)
       {
-        sdSystem.AIRCRAFT_COORD.process(file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE), sdSystem.ALERTS_ADSB, 
+        sdSystem.AIRCRAFT_COORD.process(sdSystem.PROGRAM_TIME.current_frame_time(), file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE), sdSystem.ALERTS_ADSB, 
                                                           sdSystem.GPS_SYSTEM.active(sdSystem.PROGRAM_TIME.current_frame_time()), 
                                                           sdSystem.GPS_SYSTEM.current_position().LATITUDE, sdSystem.GPS_SYSTEM.current_position().LONGITUDE);
       }
@@ -1235,7 +1235,7 @@ int loop_2(bool TTY_Only)
         store_event_counts(sdSystem, animations);
 
         // ADS-B - Update all ADS-B gadgets with new data.
-        cons_2.update_ADS_B_gadgets(sdSystem);
+        //cons_2.update_ADS_B_gadgets(sdSystem);
 
         // Automobile - Update all automobile Reference Data
         sdSystem.CAR_INFO.translate(sdSystem.DNFWTS, sdSystem.PROGRAM_TIME.current_frame_time());

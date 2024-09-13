@@ -22,6 +22,8 @@
 #include "fled_time.h"
 #include "json_interface.h"
 #include "alert_system_2.h"
+#include "helper.h"
+#include "globe_helper.h"
 
 /*
 aircraft.json
@@ -45,6 +47,8 @@ seen:       how long ago (in seconds before "now") a message was last received f
 rssi:       recent average RSSI (signal power), in dbFS; this will always be negative.
 */
 
+// -------------------------------------------------------------------------------------
+
 /*
 class ALERT_ENTRY
 {
@@ -53,6 +57,9 @@ class ALERT_ENTRY
   string ALERT;
 };
 */
+
+// -------------------------------------------------------------------------------------
+
 class AIRCRAFT_META_DATA
 {
   public: 
@@ -150,6 +157,43 @@ class AIRCRAFT
   bool alert();
 };
 
+// -------------------------------------------------------------------------------------
+
+class AIRCRAFT_MAP_DETAILS
+{
+  private:
+
+  int EXPIRATION_TIME = 5 * 60000;
+  TIMED_PING EXPIREED;
+  bool WIDGET_ACTIVE = false;
+
+  // Directional varables
+  MIN_MAX_TIME ALTITUDE_DIRECION;
+  MIN_MAX_TIME SPEED_DIRECION;
+  MIN_MAX_TIME SIG_STR_DIRECION;
+
+  public:
+
+  DETAILED_TRACK TRACK;
+  //NEW_COLOR_SCALE ALTITUDE_COLOR_SCALE;
+
+  AIRCRAFT AIRCRAFT_ITEM;
+
+  //void create(system_data &sdSysData);
+
+  void clear();
+  // Clear values
+
+  bool is_expired(unsigned long tmeCurrentMillis);
+
+  void update_aircraft(AIRCRAFT Aircraft_o, unsigned long tmeCurrentMillis);
+
+  bool active();
+
+};
+
+// -------------------------------------------------------------------------------------
+
 class AIRCRAFT_DATA
 {
   public:
@@ -170,6 +214,34 @@ class AIRCRAFT_DATA
   bool CHANGED = false;
 };
 
+class AIRCRAFT_MAP_INFO
+{
+  private:
+
+  int find_HEX(string Hex);
+  int find_expired();
+  
+  public:
+
+  bool CHANGED = false;
+
+  deque<AIRCRAFT_MAP_DETAILS> AIRCRAFT_DETAIL_LIST;
+
+  AIRCRAFT TRACKED_AIRCRAFT;
+  string TRACKED_AIRCRAFT_HEX = "";
+
+  int ADSB_WIDGET_Count = 0;
+
+  string TIME_OF_SIGNAL = "";
+  string POSITIONED_COUNT = "";
+  string POSITIONED_AIRCRAFT = "";
+
+  void update(unsigned long tmeCurrentTime, AIRCRAFT_DATA &DATA);
+
+};
+
+// -------------------------------------------------------------------------------------
+
 class AIRCRAFT_COORDINATOR
 {
   private:
@@ -181,6 +253,8 @@ class AIRCRAFT_COORDINATOR
   public:
   AIRCRAFT_DATA DATA;
 
+  AIRCRAFT_MAP_INFO AIRCRAFTS_MAP;
+
   private:
 
   void post_post_process(ALERT_SYSTEM_2 &Alerts);
@@ -189,7 +263,7 @@ class AIRCRAFT_COORDINATOR
 
   bool is_active();
 
-  bool process(string JSON_Text, ALERT_SYSTEM_2 &Alerts, 
+  bool process(unsigned long tmeCurrentTime, string JSON_Text, ALERT_SYSTEM_2 &Alerts, 
                 bool GPS_Avail, float Current_Latitude, float Current_Longitude);
 };
 

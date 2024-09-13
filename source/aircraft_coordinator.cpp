@@ -14,6 +14,9 @@
 
 #include "aircraft_coordinator.h"
 
+
+// -------------------------------------------------------------------------------------
+
 /*
 aircraft.json
 This file contains dump1090's list of recently seen aircraft. The keys are:
@@ -225,6 +228,198 @@ bool AIRCRAFT::alert()
   return ALERT;
 }
 
+// -------------------------------------------------------------------------------------
+
+void AIRCRAFT_MAP_DETAILS::clear()
+// Clear values
+{
+  // Clear Variables
+  //ADSB_WIDGET_Properties cleared_properties;
+  //PROP = cleared_properties;
+  WIDGET_ACTIVE = false;
+
+  AIRCRAFT blank_aircraft_data;
+  AIRCRAFT_ITEM = blank_aircraft_data;
+
+  TRACK.clear();
+}
+bool AIRCRAFT_MAP_DETAILS::is_expired(unsigned long tmeCurrentMillis)
+{
+  if (EXPIREED.ping_down(tmeCurrentMillis) == true)
+  {
+    return false;
+  }
+  else
+  {
+    clear();
+    return true;
+  }
+}
+
+void AIRCRAFT_MAP_DETAILS::update_aircraft(AIRCRAFT Aircraft_o, unsigned long tmeCurrentMillis)
+// Update values of gadget
+//  Gadget will be redrawn if values did changed or animations scheduled. 
+{
+  // Start or Continue expiration timer
+  EXPIREED.ping_up(tmeCurrentMillis, EXPIRATION_TIME);
+  WIDGET_ACTIVE = true;
+
+  AIRCRAFT_ITEM = Aircraft_o;
+
+  if (AIRCRAFT_ITEM.POSITION.GLOBAL_POSITION_FOUND)
+  {
+    // Add only if new value not the same as prev, or no other values exist.
+    if (TRACK.TRACK_POINTS_DETAILED.size() == 0)
+    {
+      {
+        DETAILED_TRACK_POINT new_lat_lon;
+        new_lat_lon.LATITUDE = AIRCRAFT_ITEM.POSITION.LATITUDE.get_float_value();
+        new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_float_value();
+        new_lat_lon.ALTITUDE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
+        new_lat_lon.TIME = (float)tmeCurrentMillis;
+
+        float intensity = (32.0f + AIRCRAFT_ITEM.RSSI.get_float_value()) / 32.0f;
+
+        if (intensity < 0.2f)
+        {
+          intensity = 0.2f;
+        }
+        
+        new_lat_lon.RSSI_INTENSITY = intensity;
+
+        TRACK.store(new_lat_lon);
+      }
+    }
+    else if (AIRCRAFT_ITEM.POSITION.LATITUDE.get_float_value() != TRACK.TRACK_POINTS_DETAILED[TRACK.TRACK_POINTS_DETAILED.size() -1].LATITUDE || 
+              AIRCRAFT_ITEM.POSITION.LONGITUDE.get_float_value() != TRACK.TRACK_POINTS_DETAILED[TRACK.TRACK_POINTS_DETAILED.size() -1].LONGITUDE)
+    {
+      DETAILED_TRACK_POINT new_lat_lon;
+      new_lat_lon.LATITUDE = AIRCRAFT_ITEM.POSITION.LATITUDE.get_float_value();
+      new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_float_value();
+      new_lat_lon.ALTITUDE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
+      new_lat_lon.TIME = (float)tmeCurrentMillis;
+
+      float intensity = (32.0f + AIRCRAFT_ITEM.RSSI.get_float_value()) / 32.0f;
+
+      if (intensity < 0.2f)
+      {
+        intensity = 0.2f;
+      }
+      
+      new_lat_lon.RSSI_INTENSITY = intensity;
+
+      TRACK.store(new_lat_lon);
+    }
+  }
+
+  //PROP.CHANGED = true;
+}
+
+bool AIRCRAFT_MAP_DETAILS::active()
+{
+  return WIDGET_ACTIVE;
+}
+
+
+int AIRCRAFT_MAP_INFO::find_HEX(string Hex)
+// Gadget Internal:
+//  returns gadget position of aircraft with Hex ID
+{
+  int return_int = -1;
+  for(int x=0; (x < (int)AIRCRAFT_DETAIL_LIST.size()) && (return_int == -1); x++)
+  {
+    if(AIRCRAFT_DETAIL_LIST[x].AIRCRAFT_ITEM.HEX.get_str_value() == Hex)
+    {
+      return_int = x;
+    }
+  }
+  return return_int;
+}
+
+int AIRCRAFT_MAP_INFO::find_expired()
+// Gadget Internal:
+//  returns gadget position of aircraft with time expired.
+{
+  int return_int = -1;
+  for(int x=0; (x < (int)AIRCRAFT_DETAIL_LIST.size()) && (return_int == -1); x++)
+  {
+    if(AIRCRAFT_DETAIL_LIST[x].active() == false || AIRCRAFT_DETAIL_LIST[x].AIRCRAFT_ITEM.data_count() == 0)
+    {
+      return_int = x;
+    }
+  }
+  return return_int;
+} 
+
+void AIRCRAFT_MAP_INFO::update(unsigned long tmeCurrentTime, AIRCRAFT_DATA &DATA)
+{
+  int pos_found = 0;
+  int pos_avail = 0;
+  int pos_expired_avail = 0;
+
+  // Prepare list to display.
+  for (int pos_search = 0; pos_search < (int)DATA.AIRCRAFTS.size(); pos_search++)
+  {
+    //Search gadget list for existing item to update.
+    pos_found = find_HEX(DATA.AIRCRAFTS[pos_search].HEX.get_str_value());
+
+    // if not found, put aircraft info in first avail slot.
+    if (pos_found == -1)
+    {
+      pos_avail = find_HEX("");
+      
+      //if slot found
+      if (pos_avail == -1)
+      {
+        // search to put in empty position
+        pos_expired_avail = find_expired();
+
+        if (pos_expired_avail == -1)
+        {
+          AIRCRAFT_MAP_DETAILS new_aircraft_map_info;
+          new_aircraft_map_info.update_aircraft(DATA.AIRCRAFTS[pos_search], tmeCurrentTime);
+          AIRCRAFT_DETAIL_LIST.push_back(new_aircraft_map_info);
+        }
+        else
+        {
+          AIRCRAFT_DETAIL_LIST[pos_expired_avail].clear();
+          AIRCRAFT_DETAIL_LIST[pos_expired_avail].update_aircraft(DATA.AIRCRAFTS[pos_search], tmeCurrentTime);
+        }
+      }
+      else // slot found and pos avail.
+      {
+        AIRCRAFT_DETAIL_LIST[pos_avail].update_aircraft(DATA.AIRCRAFTS[pos_search], tmeCurrentTime);
+      }
+    }
+    else // put in found pos.
+    {
+      AIRCRAFT_DETAIL_LIST[pos_found].update_aircraft(DATA.AIRCRAFTS[pos_search], tmeCurrentTime);
+    }
+  }
+
+  //---
+
+  TIME_OF_SIGNAL =  (
+                        to_string(DATA.CONVERTED_TIME.get_year()) + 
+                  "-" + linemerge_right_justify(2, "00", to_string(DATA.CONVERTED_TIME.get_month())) + 
+                  "-" + linemerge_right_justify(2, "00", to_string(DATA.CONVERTED_TIME.get_day())) + 
+                  " " + linemerge_right_justify(2, "00", to_string(DATA.CONVERTED_TIME.get_hour())) + 
+                  ":" + linemerge_right_justify(2, "00", to_string(DATA.CONVERTED_TIME.get_minute())) + 
+                  ":" + linemerge_right_justify(2, "00", to_string(DATA.CONVERTED_TIME.get_second())) + 
+                  "." + to_string(DATA.CONVERTED_TIME.get_deciseconds())
+                          );
+
+  POSITIONED_COUNT = to_string(DATA.AIRCRAFTS.size());
+  POSITIONED_AIRCRAFT = to_string(DATA.POSITIONED_AIRCRAFT);
+
+  //---
+
+  DATA.CHANGED = false;
+  CHANGED = true;
+}
+
+// -------------------------------------------------------------------------------------
+
 void AIRCRAFT_COORDINATOR::post_post_process(ALERT_SYSTEM_2 &Alerts)
 // Calculate full aircraft data.
 {
@@ -274,7 +469,7 @@ bool AIRCRAFT_COORDINATOR::is_active()
   return IS_ACTIVE;
 }
 
-bool AIRCRAFT_COORDINATOR::process(string JSON_Text, ALERT_SYSTEM_2 &Alerts, 
+bool AIRCRAFT_COORDINATOR::process(unsigned long tmeCurrentTime, string JSON_Text, ALERT_SYSTEM_2 &Alerts, 
                                     bool GPS_Avail, float Current_Latitude, float Current_Longitude)
 {
   bool ret_success = false;
@@ -397,6 +592,8 @@ bool AIRCRAFT_COORDINATOR::process(string JSON_Text, ALERT_SYSTEM_2 &Alerts,
     IS_ACTIVE = false;
     ret_success = false;
   }
+
+  AIRCRAFTS_MAP.update(tmeCurrentTime, DATA);
 
   return ret_success;
 }

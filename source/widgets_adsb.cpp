@@ -186,6 +186,72 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Ar
   }
 }
 
+// Draw all aircraft onto the maps.
+AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+                                            int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon, float Map_Bearing, NEW_COLOR_SCALE &Altitude_Color_Scale)
+{
+  AIRCRAFT ret_clicked_aircraft;
+
+  //if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.TRACK_POINTS_DETAILED.size() > 1)
+  if (Aircraft.AIRCRAFT_ITEM.POSITION.GLOBAL_POSITION_FOUND == true)
+  {
+    bool draw = false;
+    ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon,
+                                                  ImVec2( Aircraft.AIRCRAFT_ITEM.POSITION.LATITUDE.get_float_value(), 
+                                                          Aircraft.AIRCRAFT_ITEM.POSITION.LONGITUDE.get_float_value()), 
+                                                          Map_Bearing, draw);
+
+    // Draw track first then overlay aircraft.
+    if (Aircraft.TRACK.TRACK_POINTS_DETAILED.size() > 1)
+    {
+      draw_track(Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 3.0f, Altitude_Color_Scale, Center_Lat_Lon, Map_Bearing, Aircraft.TRACK);
+    }
+
+    // Text Describing Aircraft
+   
+    if (Aircraft.AIRCRAFT_ITEM.SEEN_POS.get_int_value() <= 5)
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
+    }
+    else
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().STANDARD.color()));
+    }
+
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y - 39.0f));
+    Text_Rotate(Aircraft.AIRCRAFT_ITEM.META.COMPASS_INFO_DISP_SQUAWK, 135.0f, BB_BL);   // Squawk
+
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 39.0f, draw_position.y));
+    Text_Rotate(Aircraft.AIRCRAFT_ITEM.META.COMPASS_INFO_DISP_FLIGHT, 225.0f, BB_BL);   // Flight
+    
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 33.0f, draw_position.y - 3.0f));
+    Text_Rotate(Aircraft.AIRCRAFT_ITEM.META.COMPASS_INFO_DISP_SPEED, 135.0f, BB_BL);   // Speed
+    
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 30.0f));
+    Text_Rotate(Aircraft.AIRCRAFT_ITEM.META.COMPASS_INFO_DISP_ALTITUDE, 225.0f, BB_BL);    // Altitude
+    
+    if (Aircraft.AIRCRAFT_ITEM.DISTANCE_FROM_BASE >= 0.0f)
+    {
+      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 23.0f, draw_position.y + 23.0f));
+      ImGui::Text("%s", Aircraft.AIRCRAFT_ITEM.META.COMPASS_INFO_DISP_DISTANCE_FROM_BASE.c_str());
+    }
+
+    ImGui::PopStyleColor();
+
+    // Draw Aircraft Marker
+    draw_compass(Draw_List, sdSysData, 1, draw_position, 15.0f, false, (Aircraft.AIRCRAFT_ITEM.SEEN_POS.get_int_value() <= 5), 
+                        Aircraft.AIRCRAFT_ITEM.NAV_HEADING.conversion_success(), Aircraft.AIRCRAFT_ITEM.NAV_HEADING.get_float_value(), 
+                        Aircraft.AIRCRAFT_ITEM.TRACK.conversion_success(), Aircraft.AIRCRAFT_ITEM.TRACK.get_float_value(), false, Map_Bearing);
+
+    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 20.0f, draw_position.y - 20.0f));
+    if (ImGui::InvisibleButton(Aircraft.AIRCRAFT_ITEM.HEX.get_str_value().c_str(), ImVec2(40.0f, 40.0f)))
+    {
+      ret_clicked_aircraft = Aircraft.AIRCRAFT_ITEM;
+    }
+  }
+
+  return ret_clicked_aircraft;
+}
 // ---------------------------------------------------------------------------------------
 
 void MAP_MARKER::clear()
@@ -313,268 +379,6 @@ void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
       }
     }
   }
-}
-
-// ---------------------------------------------------------------------------------------
-
-//  ADSB_Channel Classes
-
-void ADSB_WIDGET::create(system_data &sdSysData)
-{
-  // Create vars if first run
-  if (ALTITUDE_COLOR_SCALE.active() == false)
-  {
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(500.0f, sdSysData.COLOR_SELECT.red());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(1000.0f, sdSysData.COLOR_SELECT.yellow());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(2500.0f, sdSysData.COLOR_SELECT.orange());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(12000.0f, sdSysData.COLOR_SELECT.green());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(45000.0f, sdSysData.COLOR_SELECT.blue());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(65000.0f, sdSysData.COLOR_SELECT.purple());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(100000.0f, sdSysData.COLOR_SELECT.white());
-  }
-}
-
-void ADSB_WIDGET::clear()
-// Clear values
-{
-  // Clear Variables
-  ADSB_WIDGET_Properties cleared_properties;
-  PROP = cleared_properties;
-  WIDGET_ACTIVE = false;
-
-  AIRCRAFT blank_aircraft_data;
-  AIRCRAFT_DATA = blank_aircraft_data;
-
-  TRACK.clear();
-}
-
-bool ADSB_WIDGET::is_expired(system_data &sdSysData)
-{
-  if (EXPIREED.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == true)
-  {
-    return false;
-  }
-  else
-  {
-    clear();
-    return true;
-  }
-}
-
-bool ADSB_WIDGET::changed()
-//  Return true is screen will be redrawn on next draw.
-//  Return false if no changes made.
-{
-  //return PROP.CHANGED; 
-  return false;
-}
-
-void ADSB_WIDGET::update_aircraft(AIRCRAFT Aircraft, unsigned long tmeCurrentMillis)
-// Update values of gadget
-//  Gadget will be redrawn if values did changed or animations scheduled. 
-{
-  // Start or Continue expiration timer
-  EXPIREED.ping_up(tmeCurrentMillis, EXPIRATION_TIME);
-  WIDGET_ACTIVE = true;
-
-  AIRCRAFT_DATA = Aircraft;
-
-  if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND)
-  {
-    // Add only if new value not the same as prev, or no other values exist.
-    if (TRACK.TRACK_POINTS_DETAILED.size() == 0)
-    {
-      {
-        DETAILED_TRACK_POINT new_lat_lon;
-        new_lat_lon.LATITUDE = Aircraft.POSITION.LATITUDE.get_float_value();
-        new_lat_lon.LONGITUDE = Aircraft.POSITION.LONGITUDE.get_float_value();
-        new_lat_lon.ALTITUDE = (float)AIRCRAFT_DATA.ALTITUDE.get_int_value();
-        new_lat_lon.TIME = (float)tmeCurrentMillis;
-
-        float intensity = (32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
-
-        if (intensity < 0.2f)
-        {
-          intensity = 0.2f;
-        }
-        
-        new_lat_lon.RSSI_INTENSITY = intensity;
-
-        TRACK.store(new_lat_lon);
-      }
-    }
-    else if (AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value() != TRACK.TRACK_POINTS_DETAILED[TRACK.TRACK_POINTS_DETAILED.size() -1].LATITUDE || 
-              AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value() != TRACK.TRACK_POINTS_DETAILED[TRACK.TRACK_POINTS_DETAILED.size() -1].LONGITUDE)
-    {
-      DETAILED_TRACK_POINT new_lat_lon;
-      new_lat_lon.LATITUDE = Aircraft.POSITION.LATITUDE.get_float_value();
-      new_lat_lon.LONGITUDE = Aircraft.POSITION.LONGITUDE.get_float_value();
-      new_lat_lon.ALTITUDE = (float)AIRCRAFT_DATA.ALTITUDE.get_int_value();
-      new_lat_lon.TIME = (float)tmeCurrentMillis;
-
-      float intensity = (32.0f + Aircraft.RSSI.get_float_value()) / 32.0f;
-
-      if (intensity < 0.2f)
-      {
-        intensity = 0.2f;
-      }
-      
-      new_lat_lon.RSSI_INTENSITY = intensity;
-
-      TRACK.store(new_lat_lon);
-    }
-  }
-
-  //PROP.CHANGED = true;
-}
-
-bool ADSB_WIDGET::draw(system_data &sdSysData)
-// Draw all changes to Panel.
-//  Set Refresh to true to force redraw.
-//  Animations will be ignored without time reference.
-// Returns true if panel was redrawn.
-{
-  if (is_expired(sdSysData) == false)
-  {
-    ImGui::TableNextRow();
-    ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.FLIGHT.get_str_value().c_str());
-    ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.SQUAWK.get_str_value().c_str());
-    ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.SPEED.get_str_value().c_str());
-    ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.VERT_RATE.get_str_value().c_str());
-    ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.ALTITUDE.get_str_value().c_str());
-    ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.NAV_ALTITUDE_MCP.get_str_value().c_str());
-    ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.TRACK.get_str_value().c_str());
-    ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.NAV_HEADING.get_str_value().c_str());
-    ImGui::TableNextColumn();
-    if (AIRCRAFT_DATA.DISTANCE_FROM_BASE != -1.0f)
-    {
-    ImGui::Text("%.2f", AIRCRAFT_DATA.DISTANCE_FROM_BASE);
-    }
-    else
-    {
-      ImGui::Text(" ");
-    }
-    ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.SEEN_POS.get_str_value().c_str());
-    ImGui::TableNextColumn();
-    //ImGui::Text("%s", AIRCRAFT_DATA.SEEN.get_str_value().c_str());
-    //ImGui::TableNextColumn();
-    ImGui::Text("%s", AIRCRAFT_DATA.RSSI.get_str_value().c_str());
-  }
-  else
-  {
-    // Clear all data and reset to start empty state.
-    clear();  // CLEAR NEEDS CLEANING
-
-    ImGui::TableNextRow();
-    ImGui::TableNextColumn();
-    ImGui::Text(" ");
-    ImGui::TableNextColumn();
-    ImGui::Text(" ");
-    ImGui::TableNextColumn();
-    ImGui::Text(" ");
-    ImGui::TableNextColumn();
-    ImGui::Text(" ");
-    ImGui::TableNextColumn();
-    ImGui::Text(" ");
-    ImGui::TableNextColumn();
-    ImGui::Text(" ");
-    ImGui::TableNextColumn();
-    ImGui::Text(" ");
-    ImGui::TableNextColumn();
-    ImGui::Text(" ");
-    ImGui::TableNextColumn();
-    ImGui::Text(" ");
-    ImGui::TableNextColumn();
-    ImGui::Text(" ");
-    ImGui::TableNextColumn();
-    //ImGui::Text(" ");
-    //ImGui::TableNextColumn();
-    ImGui::Text(" ");
-  }
-  
-  return false;
-
-}
-
-bool ADSB_WIDGET::active()
-{
-  return WIDGET_ACTIVE;
-}
-
-// Draw all aircraft onto the maps.
-AIRCRAFT ADSB_WIDGET::draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
-                                            int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon, float Map_Bearing)
-{
-  AIRCRAFT ret_clicked_aircraft;
-
-  //if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.TRACK_POINTS_DETAILED.size() > 1)
-  if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true)
-  {
-    bool draw = false;
-    ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon,
-                                                  ImVec2( AIRCRAFT_DATA.POSITION.LATITUDE.get_float_value(), 
-                                                          AIRCRAFT_DATA.POSITION.LONGITUDE.get_float_value()), 
-                                                          Map_Bearing, draw);
-
-    // Draw track first then overlay aircraft.
-    if (TRACK.TRACK_POINTS_DETAILED.size() > 1)
-    {
-      draw_track(Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 3.0f, ALTITUDE_COLOR_SCALE, Center_Lat_Lon, Map_Bearing, TRACK);
-    }
-
-    // Text Describing Aircraft
-   
-    if (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5)
-    {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
-    }
-    else
-    {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().STANDARD.color()));
-    }
-
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y - 39.0f));
-    Text_Rotate(AIRCRAFT_DATA.META.COMPASS_INFO_DISP_SQUAWK, 135.0f, BB_BL);   // Squawk
-
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 39.0f, draw_position.y));
-    Text_Rotate(AIRCRAFT_DATA.META.COMPASS_INFO_DISP_FLIGHT, 225.0f, BB_BL);   // Flight
-    
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 33.0f, draw_position.y - 3.0f));
-    Text_Rotate(AIRCRAFT_DATA.META.COMPASS_INFO_DISP_SPEED, 135.0f, BB_BL);   // Speed
-    
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 30.0f));
-    Text_Rotate(AIRCRAFT_DATA.META.COMPASS_INFO_DISP_ALTITUDE, 225.0f, BB_BL);    // Altitude
-    
-    if (AIRCRAFT_DATA.DISTANCE_FROM_BASE >= 0.0f)
-    {
-      ImGui::SetCursorScreenPos(ImVec2(draw_position.x + 23.0f, draw_position.y + 23.0f));
-      ImGui::Text("%s", AIRCRAFT_DATA.META.COMPASS_INFO_DISP_DISTANCE_FROM_BASE.c_str());
-    }
-
-    ImGui::PopStyleColor();
-
-    // Draw Aircraft Marker
-    draw_compass(Draw_List, sdSysData, 1, draw_position, 15.0f, false, (AIRCRAFT_DATA.SEEN_POS.get_int_value() <= 5), 
-                        AIRCRAFT_DATA.NAV_HEADING.conversion_success(), AIRCRAFT_DATA.NAV_HEADING.get_float_value(), 
-                        AIRCRAFT_DATA.TRACK.conversion_success(), AIRCRAFT_DATA.TRACK.get_float_value(), false, Map_Bearing);
-
-    ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 20.0f, draw_position.y - 20.0f));
-    if (ImGui::InvisibleButton(AIRCRAFT_DATA.HEX.get_str_value().c_str(), ImVec2(40.0f, 40.0f)))
-    {
-      ret_clicked_aircraft = AIRCRAFT_DATA;
-    }
-  }
-
-  return ret_clicked_aircraft;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -940,6 +744,18 @@ void ADSB_MAP::create(system_data &sdSysData)
     GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(55.0f, sdSysData.COLOR_SELECT.blue());
     GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(75.0f, sdSysData.COLOR_SELECT.purple());
     GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.white());
+  }
+
+  // Create vars if first run
+  if (ALTITUDE_COLOR_SCALE.active() == false)
+  {
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(500.0f, sdSysData.COLOR_SELECT.red());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(1000.0f, sdSysData.COLOR_SELECT.yellow());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(2500.0f, sdSysData.COLOR_SELECT.orange());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(12000.0f, sdSysData.COLOR_SELECT.green());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(45000.0f, sdSysData.COLOR_SELECT.blue());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(65000.0f, sdSysData.COLOR_SELECT.purple());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(100000.0f, sdSysData.COLOR_SELECT.white());
   }
 
   // KLFT - Lafayette Regional/Paul Fournet Field Airport
@@ -1710,7 +1526,7 @@ void ADSB_MAP::create(system_data &sdSysData)
   //add_landmark(ImVec2(f, f), "", 0);  //
 }
 
-void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets)
+void ADSB_MAP::draw(system_data &sdSysData)
 {
   // ADSB Draw List
   ImDrawList* draw_list_map = ImGui::GetWindowDrawList();
@@ -1751,8 +1567,8 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     if (sdSysData.AIRCRAFT_COORD.is_active())
     {
       // Check and store AIRCRAFT Current Location
-      RANGE_INDICATOR.set_aircraft_pos_lat_lon(ImVec2(SDATA.TRACKED_AIRCRAFT.POSITION.LATITUDE.get_float_value(), 
-                                                  SDATA.TRACKED_AIRCRAFT.POSITION.LONGITUDE.get_float_value()));
+      RANGE_INDICATOR.set_aircraft_pos_lat_lon(ImVec2(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.POSITION.LATITUDE.get_float_value(), 
+                                                  sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.POSITION.LONGITUDE.get_float_value()));
     }
   }
   
@@ -1798,9 +1614,9 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
     else if (RANGE_INDICATOR.CENTER_ON_LOCATION == 2)
     {
       // Map Heading for Aircraft
-      if (SDATA.TRACKED_AIRCRAFT.TRACK.conversion_success())
+      if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.TRACK.conversion_success())
       {
-        MAP_HEADING_DEGREES.set_value(SDATA.TRACKED_AIRCRAFT.TRACK.get_float_value());
+        MAP_HEADING_DEGREES.set_value(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.TRACK.get_float_value());
       }
       else
       {
@@ -1854,9 +1670,9 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   ImGui::Text("WARNING: Information may be considered CONFIDENTIAL");
   ImGui::PopStyleColor();
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_grey().TEXT.color()));
-  ImGui::Text("TIME: %s", SDATA.TIME_OF_SIGNAL.c_str());
-  ImGui::Text("COUNT: %s", SDATA.POSITIONED_COUNT.c_str());
-  ImGui::Text("  POS: %s", SDATA.POSITIONED_AIRCRAFT.c_str());
+  ImGui::Text("TIME: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TIME_OF_SIGNAL.c_str());
+  ImGui::Text("COUNT: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_COUNT.c_str());
+  ImGui::Text("  POS: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_AIRCRAFT.c_str());
 
   // Maps and Other Information
   RANGE_INDICATOR.draw_info();
@@ -1919,18 +1735,6 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
       RANGE_INDICATOR.zoom_out();
     }
-    
-    /*
-    // Location Selection
-    ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                      working_area.y + working_area.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
-
-    if (BC_LOC.button_color(sdSysData, "LOC", sdSysData.COLOR_SELECT.yellow(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-      DISPLAY_LOCATION = !DISPLAY_LOCATION;
-    }
-    */
 
     // North Up
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
@@ -2181,173 +1985,157 @@ void ADSB_MAP::draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB
   // -------------------------------------------------------------------------------------
 
   // Draw Aircraft
-  for (int aircraft = 0; aircraft < (int)ADSB_Widgets.size(); aircraft ++)
+  for (int aircraft = 0; aircraft < (int)sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size(); aircraft ++)
   {
-    if (ADSB_Widgets[aircraft].is_expired(sdSysData) == false)
+    if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].is_expired(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
     {
-      AIRCRAFT tmp_clicked_aircraft = ADSB_Widgets[aircraft].draw_aircraft_map_marker(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), RANGE_INDICATOR.get_center_lat_lon(), map_heading_degrees);
+      AIRCRAFT tmp_clicked_aircraft = draw_aircraft_map_marker(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft], draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), RANGE_INDICATOR.get_center_lat_lon(), map_heading_degrees, ALTITUDE_COLOR_SCALE);
       
       if (tmp_clicked_aircraft.HEX.get_str_value() != "")
       {
-        SDATA.TRACKED_AIRCRAFT = tmp_clicked_aircraft;
-        SDATA.TRACKED_AIRCRAFT_HEX = tmp_clicked_aircraft.HEX.get_str_value();
+        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT = tmp_clicked_aircraft;
+        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT_HEX = tmp_clicked_aircraft.HEX.get_str_value();
         RANGE_INDICATOR.CENTER_ON_LOCATION = 2;
       }
     }
   }
+}
 
-  /*
-  // Show Location Chooser Window
-  if (DISPLAY_LOCATION)
+void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
+{
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
+
+  ImGui::BeginChild("ADSB Display", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    ImGui::SetNextWindowSize(ImVec2(133, 350));
-    if (ImGui::Begin("Location", &DISPLAY_LOCATION, sdSysData.SCREEN_DEFAULTS.flags_w_pop_scroll)) 
+    ImGui::Text("Time: %s  Count: %s  Pos: %s", 
+                  sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TIME_OF_SIGNAL.c_str(), 
+                  sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_COUNT.c_str(), 
+                  sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_AIRCRAFT.c_str());
+    
+    //      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+    //                              ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
+
+    if (ImGui::BeginTable("Aircraft Data", 11, sdSysData.SCREEN_DEFAULTS.flags_t))
     {
-      for (int location = 0; location < (int)LANDMARKS.size(); location ++)
       {
-        if (button_color(sdSysData, LANDMARKS[location].DISPLAY_NAME.c_str(), sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+        ImGui::TableSetupColumn("FLIGHT");
+        ImGui::TableSetupColumn("SQWK");
+        ImGui::TableSetupColumn("G SPD");
+        ImGui::TableSetupColumn("V RTE");
+        ImGui::TableSetupColumn("ALT");
+        ImGui::TableSetupColumn("ALT NAV");
+        ImGui::TableSetupColumn("HDG");
+        ImGui::TableSetupColumn("HDG NAV");
+        ImGui::TableSetupColumn("DIST");
+        ImGui::TableSetupColumn("SEEN");  // seen p
+        //ImGui::TableSetupColumn("SEEN");
+        ImGui::TableSetupColumn("RSSI");
+        ImGui::TableHeadersRow();
+      }
+      
+      //for (int pos = 0; pos < SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos++)
+      for (int pos = 0; pos < (int)sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size(); pos++)
+      {
+        if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].is_expired(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
         {
-          RANGE_INDICATOR.set_current_center_position(LANDMARKS[location].LAT_LON);
+          ImGui::TableNextRow();
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.FLIGHT.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.SQUAWK.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.SPEED.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.VERT_RATE.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.ALTITUDE.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.NAV_ALTITUDE_MCP.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.TRACK.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.NAV_HEADING.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.DISTANCE_FROM_BASE != -1.0f)
+          {
+          ImGui::Text("%.2f", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.DISTANCE_FROM_BASE);
+          }
+          else
+          {
+            ImGui::Text(" ");
+          }
+          ImGui::TableNextColumn();
+          ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.SEEN_POS.get_str_value().c_str());
+          ImGui::TableNextColumn();
+          //ImGui::Text("%s", AIRCRAFT_DATA.SEEN.get_str_value().c_str());
+          //ImGui::TableNextColumn();
+          ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.RSSI.get_str_value().c_str());
+        }
+        else
+        {
+          // Clear all data and reset to start empty state.
+          sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].clear();  // CLEAR NEEDS CLEANING
+
+          ImGui::TableNextRow();
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
+          ImGui::TableNextColumn();
+          //ImGui::Text(" ");
+          //ImGui::TableNextColumn();
+          ImGui::Text(" ");
         }
       }
+      ImGui::EndTable();
     }
-    ImGui::End();
-
   }
-  */
+  ImGui::EndChild();
 
-  // -------------------------------------------------------------------------------------
-  // test for point position accuracy by getting geo from range, then putting geo marker 
-  //  on range indicator.
-
-  // Not Implemented.
+  ImGui::PopStyleColor();
 }
-
-// -------------------------------------------------------------------------------------
-
-int ADSB_SCREEN::find_HEX(string Hex)
-// Gadget Internal:
-//  returns gadget position of aircraft with Hex ID
-{
-  int return_int = -1;
-  for(int x=0; (x < (int)ADSB_WIDGET_q.size()) && (return_int == -1); x++)
-  {
-    if(ADSB_WIDGET_q[x].AIRCRAFT_DATA.HEX.get_str_value() == Hex)
-    {
-      return_int = x;
-    }
-  }
-  return return_int;
-}
-
-int ADSB_SCREEN::find_expired()
-// Gadget Internal:
-//  returns gadget position of aircraft with time expired.
-{
-  int return_int = -1;
-  for(int x=0; (x < (int)ADSB_WIDGET_q.size()) && (return_int == -1); x++)
-  {
-    if(ADSB_WIDGET_q[x].active() == false || ADSB_WIDGET_q[x].AIRCRAFT_DATA.data_count() == 0)
-    {
-      return_int = x;
-    }
-  }
-  return return_int;
-} 
 
 void ADSB_SCREEN::create(system_data &sdSysData)
 {
   ADSB_MAP_DISPLAY.create(sdSysData);
 }
 
-void ADSB_SCREEN::update(system_data &sdSysData)
-{
-
-  int pos_found = 0;
-  int pos_avail = 0;
-  int pos_expired_avail = 0;
-
-  // Get new list of Aircraft.
-  SDATA.AIRCRAFT_LIST = sdSysData.AIRCRAFT_COORD.DATA;
-  SDATA.ADSB_ACTIVE = sdSysData.AIRCRAFT_COORD.is_active();
-
-  // Search for tracked aircraft and update its info if found
-  for (int pos_search = 0; pos_search < (int)SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos_search++)
-  {
-    if (SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search].HEX.get_str_value() == SDATA.TRACKED_AIRCRAFT_HEX)
-    {
-      SDATA.TRACKED_AIRCRAFT = SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search];
-    }
-  }
-
-  // Prepare list to display.
-  for (int pos_search = 0; pos_search < (int)SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos_search++)
-  {
-    //Search gadget list for existing item to update.
-    pos_found = find_HEX(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search].HEX.get_str_value());
-
-    // if not found, put aircraft info in first avail slot.
-    if (pos_found == -1)
-    {
-      pos_avail = find_HEX("");
-      
-      //if slot found
-      if (pos_avail == -1)
-      {
-        // search to put in empty position
-        pos_expired_avail = find_expired();
-
-        if (pos_expired_avail == -1)
-        {
-          ADSB_WIDGET new_adsb_widget;
-          new_adsb_widget.create(sdSysData);
-          new_adsb_widget.update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.PROGRAM_TIME.current_frame_time());
-          ADSB_WIDGET_q.push_back(new_adsb_widget);
-        }
-        else
-        {
-          ADSB_WIDGET_q[pos_expired_avail].clear();
-          ADSB_WIDGET_q[pos_expired_avail].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.PROGRAM_TIME.current_frame_time());
-        }
-      }
-      else // slot found and pos avail.
-      {
-        ADSB_WIDGET_q[pos_avail].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.PROGRAM_TIME.current_frame_time());
-      }
-    }
-    else // put in found pos.
-    {
-      ADSB_WIDGET_q[pos_found].update_aircraft(SDATA.AIRCRAFT_LIST.AIRCRAFTS[pos_search], sdSysData.PROGRAM_TIME.current_frame_time());
-    }
-  }
-
-  //---
-
-  SDATA.TIME_OF_SIGNAL =  (
-                        to_string(SDATA.AIRCRAFT_LIST.CONVERTED_TIME.get_year()) + 
-                  "-" + linemerge_right_justify(2, "00", to_string(SDATA.AIRCRAFT_LIST.CONVERTED_TIME.get_month())) + 
-                  "-" + linemerge_right_justify(2, "00", to_string(SDATA.AIRCRAFT_LIST.CONVERTED_TIME.get_day())) + 
-                  " " + linemerge_right_justify(2, "00", to_string(SDATA.AIRCRAFT_LIST.CONVERTED_TIME.get_hour())) + 
-                  ":" + linemerge_right_justify(2, "00", to_string(SDATA.AIRCRAFT_LIST.CONVERTED_TIME.get_minute())) + 
-                  ":" + linemerge_right_justify(2, "00", to_string(SDATA.AIRCRAFT_LIST.CONVERTED_TIME.get_second())) + 
-                  "." + to_string(SDATA.AIRCRAFT_LIST.CONVERTED_TIME.get_deciseconds())
-                          );
-
-  SDATA.POSITIONED_COUNT = to_string(SDATA.AIRCRAFT_LIST.AIRCRAFTS.size() -1);
-  SDATA.POSITIONED_AIRCRAFT = to_string(SDATA.AIRCRAFT_LIST.POSITIONED_AIRCRAFT);
-
-  //---
-
-  sdSysData.AIRCRAFT_COORD.DATA.CHANGED = false;
-}
-
 void ADSB_SCREEN::display(system_data &sdSysData)
-{ 
+{
+  // Search for tracked aircraft and update its info if found  
+  if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.CHANGED == true)
+  {
+    for (int pos_search = 0; pos_search < (int)sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size(); pos_search++)
+    {
+      if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos_search].AIRCRAFT_ITEM.HEX.get_str_value() == sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT_HEX)
+      {
+        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT = sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos_search].AIRCRAFT_ITEM;
+        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.CHANGED = false;
+      }
+    }
+  }
+
   ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    if (BTC_ADSB.button_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", SDATA.ADSB_ACTIVE, sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (BTC_ADSB.button_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", sdSysData.AIRCRAFT_COORD.is_active(), sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
-      if (SDATA.ADSB_ACTIVE == true)
+      if (sdSysData.AIRCRAFT_COORD.is_active() == true)
       {
         sdSysData.SCREEN_COMMS.command_text_set(" stopadsb");
       }
@@ -2357,7 +2145,7 @@ void ADSB_SCREEN::display(system_data &sdSysData)
       }
     }
 
-    if (button_simple_enabled(sdSysData, "ADSB\nSNAP\nSHOT", SDATA.ADSB_ACTIVE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (button_simple_enabled(sdSysData, "ADSB\nSNAP\nSHOT", sdSysData.AIRCRAFT_COORD.is_active(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       sdSysData.SCREEN_COMMS.command_text_set(" adsbsnap");
     }
@@ -2382,53 +2170,13 @@ void ADSB_SCREEN::display(system_data &sdSysData)
   
   if (DISPLAY_TABLE)
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
-
-    ImGui::BeginChild("ADSB Display", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
-    {
-      ImGui::Text("Time: %s  Count: %s  Pos: %s", 
-                    SDATA.TIME_OF_SIGNAL.c_str(), 
-                    SDATA.POSITIONED_COUNT.c_str(), 
-                    SDATA.POSITIONED_AIRCRAFT.c_str());
-      
-      //      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
-      //                              ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
-
-      if (ImGui::BeginTable("Aircraft Data", 11, DEFAULTS.flags_t))
-      {
-        {
-          ImGui::TableSetupColumn("FLIGHT");
-          ImGui::TableSetupColumn("SQWK");
-          ImGui::TableSetupColumn("G SPD");
-          ImGui::TableSetupColumn("V RTE");
-          ImGui::TableSetupColumn("ALT");
-          ImGui::TableSetupColumn("ALT NAV");
-          ImGui::TableSetupColumn("HDG");
-          ImGui::TableSetupColumn("HDG NAV");
-          ImGui::TableSetupColumn("DIST");
-          ImGui::TableSetupColumn("SEEN");  // seen p
-          //ImGui::TableSetupColumn("SEEN");
-          ImGui::TableSetupColumn("RSSI");
-          ImGui::TableHeadersRow();
-        }
-        
-        //for (int pos = 0; pos < SDATA.AIRCRAFT_LIST.AIRCRAFTS.size(); pos++)
-        for (int pos = 0; pos < (int)ADSB_WIDGET_q.size(); pos++)
-        {
-          ADSB_WIDGET_q[pos].draw(sdSysData);
-        }
-        ImGui::EndTable();
-      }
-    }
-    ImGui::EndChild();
-
-    ImGui::PopStyleColor();
+    adsb_table_draw(sdSysData);
   }
   else if (DISPLAY_MAP)
   {
-    ImGui::BeginChild("ADSB Map", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, DEFAULTS.flags_c);
+    ImGui::BeginChild("ADSB Map", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
-      ADSB_MAP_DISPLAY.draw(sdSysData, SDATA, ADSB_WIDGET_q);
+      ADSB_MAP_DISPLAY.draw(sdSysData);
     }
     ImGui::EndChild();
   }

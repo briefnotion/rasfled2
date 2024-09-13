@@ -243,15 +243,9 @@ class SCREEN4
   //int get_current_screen();
   //  Returns ID of screen being displayed (DISPLAY_SCREEN)
 
-  //void update_gps_gadgets(system_data &sdSysData, string Text);
-
   void update_daemon_log(system_data &sdSysData, string Text);
 
   void update_automobile_gadgets(system_data &sdSysData);
-
-  void update_ADS_B_gadgets(system_data &sdSysData);
-
-  //void update_GPS_gadgets(system_data &sdSysData);
 
 };
 

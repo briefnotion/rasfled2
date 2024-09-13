@@ -1,3 +1,9 @@
+2.200_2400912
+  - Moved the components that stored the ADS-B aircraft tracks out 
+      of the ads-b widgets screen and into the aircraft coordinator. 
+      Aircraft_coordinator's current lack of dependancies should be 
+      retained.  Except for, maybe, ImVec2.
+
 2.199_2400911
   - Aircraft can be centered on the map by clicking on the aircraft 
       compass.

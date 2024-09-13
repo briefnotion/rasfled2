@@ -1767,32 +1767,7 @@ void SCREEN4::update_automobile_gadgets(system_data &sdSysData)
   }
 }
 
-void SCREEN4::update_ADS_B_gadgets(system_data &sdSysData)
-{
-  if (sdSysData.TTY_ONLY == false)
-  {
-    if(sdSysData.AIRCRAFT_COORD.DATA.CHANGED == true)
-    {
-      ADSB.update(sdSysData);
-    }
-  }
-}
 
-/*
-void SCREEN4::update_GPS_gadgets(system_data &sdSysData)
-{
-  if (sdSysData.TTY_ONLY == false)
-  {
-    // Update GPS Console
-    for (int pos = 0; pos < (int)sdSysData.GPS_SYSTEM.RECIEVE_HISTORY.size(); pos++)
-    {
-      GPS_CONSOLE.add_line(trim(sdSysData.GPS_SYSTEM.RECIEVE_HISTORY[pos]) + "\n");
-    }
-  }
-  
-  sdSysData.GPS_SYSTEM.RECIEVE_HISTORY.clear();
-}
-*/
 
 // ---------------------------------------------------------------------------------------
 #endif

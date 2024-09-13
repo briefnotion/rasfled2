@@ -33,6 +33,7 @@
 #include "screen4_helper.h"
 #include "widgets.h"
 #include "widgets_drawing.h"
+#include "globe_helper.h"
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
@@ -74,17 +75,8 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Ar
                 float Strength_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
                 ImVec2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track);
 
-// ---------------------------------------------------------------------------------------
-
-/*
-class COMPASS_CALIBRATION
-{
-  private:
-
-  public:
-
-};
-*/
+AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
+                                  int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon, float Map_Bearing, NEW_COLOR_SCALE &Altitude_Color_Scale);
 
 // ---------------------------------------------------------------------------------------
 
@@ -114,113 +106,6 @@ class MAP_MARKER
 };
 
 // ---------------------------------------------------------------------------------------
-
-class ADSB_WIDGET_Properties
-// Properties (duh)
-{
-  public: 
-
-  int ID = 0;
-  string NAME = "";
-  string LABEL = "";
-
-  int COLOR = COLOR_WHITE;
-  int BCOLOR = COLOR_BLACK;
-  
-  int POSY = 0;
-  int POSX = 0;
-  int SIZEY = 5;
-  int SIZEX = 21;
-
-  //bool CHANGED = true;
-}; 
-
-class ADSB_WIDGET
-// Gadget display single aircraft information to panel with 
-//  primary info.  Includes alt, ground speed, heading, 
-//  some nav info, signal strength, and time to expire. 
-// Set PROP (properties) before calling create routine.
-// Warning:
-//  Some properties can be changed directly but will not 
-//    trigger the redraw or work correctly. 
-//  To change properties properly, call the provided set 
-//    routines or set routines of internal gadgets.
-{
-  
-  private:
-
-  //WIDGET_DEFAULTS DEFAULTS;
-
-  // Was gadget redrawn during the previous draw cycle.
-  //bool WAS_REDRAWN = false;
-
-  int EXPIRATION_TIME = 5 * 60000;
-  TIMED_PING EXPIREED;
-  bool WIDGET_ACTIVE = false;
-
-  // Directional varables
-  MIN_MAX_TIME ALTITUDE_DIRECION;
-  MIN_MAX_TIME SPEED_DIRECION;
-  MIN_MAX_TIME SIG_STR_DIRECION;
-
-  // Last known good cood data
-  float LATITUDE = 0.0f;
-  float LONGITUDE = 0.0f;
-
-  DETAILED_TRACK TRACK;
-  NEW_COLOR_SCALE ALTITUDE_COLOR_SCALE;
-
-  public:
-
-  AIRCRAFT AIRCRAFT_DATA;
-
-  ADSB_WIDGET_Properties PROP;
-
-  void create(system_data &sdSysData);
-
-  void clear();
-  // Clear values
-
-  bool is_expired(system_data &sdSysData);
-
-  bool changed();
-  //  Return true is screen will be redrawn on next draw.
-  //  Return false if no changes made.
-
-  void update_aircraft(AIRCRAFT Aircraft, unsigned long tmeCurrentMillis);
-  // Update values of gadget
-  //  Gadget will be redrawn if values did changed or animations scheduled. 
-
-  bool draw(system_data &sdSysData);
-  // Draw all changes to Panel.
-  //  Set Refresh to true to force redraw.
-  //  Animations will be ignored without time reference.
-  // Returns true if panel was redrawn.
-
-  bool active();
-
-  AIRCRAFT draw_aircraft_map_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
-                                int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon, float Map_Bearing);
-};
-
-// ---------------------------------------------------------------------------------------
-
-class DISPLAY_DATA_ADSB
-{
-  public:
-
-  bool ADSB_ACTIVE = false;
-
-  AIRCRAFT_DATA AIRCRAFT_LIST;
-  AIRCRAFT TRACKED_AIRCRAFT;
-  string TRACKED_AIRCRAFT_HEX = "";
-
-  int ADSB_WIDGET_Count = 0;
-
-  string TIME_OF_SIGNAL = "";
-  string POSITIONED_COUNT = "";
-  string POSITIONED_AIRCRAFT = "";
-};
 
 class ADSB_RANGE_Properties
 {
@@ -294,12 +179,6 @@ class ADSB_RANGE
 
 // ---------------------------------------------------------------------------------------
 
-class ADSB_MAP_Properties
-{
-  
-
-};
-
 class ADSB_MAP
 {
   private:
@@ -321,6 +200,7 @@ class ADSB_MAP
   deque<MAP_MARKER> LANDMARKS;
 
   NEW_COLOR_SCALE GPS_ALTITUDE_COLOR_SCALE;
+  NEW_COLOR_SCALE ALTITUDE_COLOR_SCALE;
 
   bool SHOW_BUTTONS = true;
   TIMED_PING SHOW_BUTTONS_TIMER;
@@ -336,7 +216,7 @@ class ADSB_MAP
 
   void create(system_data &sdSysData);
 
-  void draw(system_data &sdSysData, DISPLAY_DATA_ADSB &SDATA, deque<ADSB_WIDGET> &ADSB_Widgets);
+  void draw(system_data &sdSysData);
 
 };
 
@@ -352,11 +232,6 @@ class ADSB_SCREEN
   // BUTTON_COLOR
   BUTTON_COLOR BC_VIEW;
 
-  DISPLAY_DATA_ADSB SDATA;
-  WIDGET_DEFAULTS DEFAULTS;
-
-  deque<ADSB_WIDGET> ADSB_WIDGET_q;
-
   // Screens
   bool DISPLAY_TABLE = true;
   bool DISPLAY_MAP = false;
@@ -364,22 +239,12 @@ class ADSB_SCREEN
   // Map Variables
   ADSB_MAP ADSB_MAP_DISPLAY;
 
-  int find_HEX(string Hex);
-  // Gadget Internal:
-  //  returns gadget position of aircraft with Hex ID
-
-  int find_expired();
-  // Gadget Internal:
-  //  returns gadget position of aircraft with time expired.
+  void adsb_table_draw(system_data &sdSysData);
 
   public:
 
   void create(system_data &sdSysData);
-  
-  void update(system_data &sdSysData);
 
-  //void display(system_data &sdSysData, CONSOLE_COMMUNICATION &Screen_Comms,
-  //              const char *name, bool *p_open, ImGuiWindowFlags flags);
   void display(system_data &sdSysData);
 };
 
