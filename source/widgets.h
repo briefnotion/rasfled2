@@ -266,13 +266,24 @@ class CONFIRM_DIALOG
 
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                         bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
-                        bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max, float Map_Bearing);
+                        bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max, float Map_Bearing, int Color);
 
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                         bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, float Map_Bearing);
 
+void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, float Map_Bearing, 
+                        int Color);
+
 // Heading 1 - Track or Aircraft Nav Heading      (from GPS, normally slow)
 // Heading 2 - Compass or Aircraft Track Heading. (from hardware compass, normally fast)
+
+class COMPASS_WIDGET_PROPERTIES
+{
+  public:
+
+  int COLOR = 1;
+};
 
 class COMPASS_WIDGET
 {
@@ -282,6 +293,8 @@ class COMPASS_WIDGET
   IMPACT_RESISTANCE_FLOAT_FRAME_COUNT HEADING_2;
 
   public:
+
+  COMPASS_WIDGET_PROPERTIES PROPS;
 
   void set_size(int Heading_1_Size, int Heading_2_Size);
 

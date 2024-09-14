@@ -192,8 +192,7 @@ AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Dra
 {
   AIRCRAFT ret_clicked_aircraft;
 
-  //if (AIRCRAFT_DATA.POSITION.GLOBAL_POSITION_FOUND == true || TRACK.TRACK_POINTS_DETAILED.size() > 1)
-  if (Aircraft.AIRCRAFT_ITEM.POSITION.GLOBAL_POSITION_FOUND == true)
+  if (Aircraft.AIRCRAFT_ITEM.POSITION.GLOBAL_POSITION_FOUND)
   {
     bool draw = false;
     ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon,
@@ -225,10 +224,10 @@ AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Dra
     Text_Rotate(Aircraft.AIRCRAFT_ITEM.META.COMPASS_INFO_DISP_FLIGHT, 225.0f, BB_BL);   // Flight
     
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 33.0f, draw_position.y - 3.0f));
-    Text_Rotate(Aircraft.AIRCRAFT_ITEM.META.COMPASS_INFO_DISP_SPEED, 135.0f, BB_BL);   // Speed
+    Text_Rotate(Aircraft.AIRCRAFT_ITEM.META.COMPASS_INFO_DISP_SPEED, 135.0f, BB_BL);    // Speed
     
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 30.0f));
-    Text_Rotate(Aircraft.AIRCRAFT_ITEM.META.COMPASS_INFO_DISP_ALTITUDE, 225.0f, BB_BL);    // Altitude
+    Text_Rotate(Aircraft.AIRCRAFT_ITEM.META.COMPASS_INFO_DISP_ALTITUDE, 225.0f, BB_BL); // Altitude
     
     if (Aircraft.AIRCRAFT_ITEM.DISTANCE_FROM_BASE >= 0.0f)
     {
@@ -241,7 +240,8 @@ AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Dra
     // Draw Aircraft Marker
     draw_compass(Draw_List, sdSysData, 1, draw_position, 15.0f, false, (Aircraft.AIRCRAFT_ITEM.SEEN_POS.get_int_value() <= 5), 
                         Aircraft.AIRCRAFT_ITEM.NAV_HEADING.conversion_success(), Aircraft.AIRCRAFT_ITEM.NAV_HEADING.get_float_value(), 
-                        Aircraft.AIRCRAFT_ITEM.TRACK.conversion_success(), Aircraft.AIRCRAFT_ITEM.TRACK.get_float_value(), false, Map_Bearing);
+                        Aircraft.AIRCRAFT_ITEM.TRACK.conversion_success(), Aircraft.AIRCRAFT_ITEM.TRACK.get_float_value(), 
+                        false, Map_Bearing, Aircraft.COLOR);
 
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x - 20.0f, draw_position.y - 20.0f));
     if (ImGui::InvisibleButton(Aircraft.AIRCRAFT_ITEM.HEX.get_str_value().c_str(), ImVec2(40.0f, 40.0f)))
@@ -1951,7 +1951,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
       if (RANGE_INDICATOR.CENTER_ON_LOCATION == 1)
       {
         // draw compass at center location
-        CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+        CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 3.3f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                             active_compass, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, 
                             true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), map_heading_degrees);
@@ -1987,9 +1987,13 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // Draw Aircraft
   for (int aircraft = 0; aircraft < (int)sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size(); aircraft ++)
   {
-    if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].is_expired(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
+    if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].active())
     {
-      AIRCRAFT tmp_clicked_aircraft = draw_aircraft_map_marker(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft], draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), RANGE_INDICATOR.get_center_lat_lon(), map_heading_degrees, ALTITUDE_COLOR_SCALE);
+      AIRCRAFT tmp_clicked_aircraft = draw_aircraft_map_marker(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft], 
+                                                                draw_list_map, sdSysData, working_area, 
+                                                                RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 
+                                                                RANGE_INDICATOR.get_center_lat_lon(), map_heading_degrees, 
+                                                                ALTITUDE_COLOR_SCALE);
       
       if (tmp_clicked_aircraft.HEX.get_str_value() != "")
       {
@@ -2015,9 +2019,10 @@ void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
     //      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
     //                              ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
 
-    if (ImGui::BeginTable("Aircraft Data", 11, sdSysData.SCREEN_DEFAULTS.flags_t))
+    if (ImGui::BeginTable("Aircraft Data", 12, sdSysData.SCREEN_DEFAULTS.flags_t))
     {
       {
+        ImGui::TableSetupColumn(" ");
         ImGui::TableSetupColumn("FLIGHT");
         ImGui::TableSetupColumn("SQWK");
         ImGui::TableSetupColumn("G SPD");
@@ -2039,6 +2044,8 @@ void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
         if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].is_expired(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
         {
           ImGui::TableNextRow();
+          ImGui::TableNextColumn();
+          ImGui::Text("%d", (pos + 1));
           ImGui::TableNextColumn();
           ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.FLIGHT.get_str_value().c_str());
           ImGui::TableNextColumn();
@@ -2077,6 +2084,8 @@ void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
           sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].clear();  // CLEAR NEEDS CLEANING
 
           ImGui::TableNextRow();
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
           ImGui::TableNextColumn();
           ImGui::Text(" ");
           ImGui::TableNextColumn();

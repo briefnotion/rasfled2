@@ -553,12 +553,10 @@ bool CONFIRM_DIALOG::confirm_dialog(system_data &sdSysData, bool &Choice)
 
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                   bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
-                  bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max, float Map_Bearing)
+                  bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max, float Map_Bearing, int Color)
 {
   // Heading 1 - Track or Aircraft Nav Heading
   // Heading 2 - Compass or Aircraft Track Heading.
-
-  int Color = sdSysData.COLOR_SELECT.white();
 
   // standards small
   // size 15
@@ -877,7 +875,17 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
   draw_compass(Draw_List, sdSysData, Version, Screen_Position, Size, Main, 
                 Valid_Position, Valid_Heading_1, Heading_1, 
                 Valid_Heading_2, Heading_2, Draw_North_Pointer, 
-                false, 0.0f, 0.0f, Map_Bearing);
+                false, 0.0f, 0.0f, Map_Bearing, sdSysData.COLOR_SELECT.white());
+}
+
+void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
+                        bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, float Map_Bearing, 
+                        int Color)
+{
+  draw_compass(Draw_List, sdSysData, Version, Screen_Position, Size, Main, 
+                Valid_Position, Valid_Heading_1, Heading_1, 
+                Valid_Heading_2, Heading_2, Draw_North_Pointer, 
+                false, 0.0f, 0.0f, Map_Bearing, Color);
 }
 
 void COMPASS_WIDGET::set_size(int Heading_1_Size, int Heading_2_Size)
@@ -902,7 +910,7 @@ void COMPASS_WIDGET::draw(ImDrawList *Draw_List, system_data &sdSysData, int Ver
 
   draw_compass(Draw_List, sdSysData, Version, Screen_Position, Size, Main, Valid_Position, 
                         Valid_Heading_1, HEADING_1.value_no_roll(360.0f), Valid_Heading_2, HEADING_2.value_no_roll(360.0f), Draw_North_Pointer, 
-                        Jitter_Active, Jitter_Heading_Min, Jitter_Heading_Max, Map_Bearing);
+                        Jitter_Active, Jitter_Heading_Min, Jitter_Heading_Max, Map_Bearing, PROPS.COLOR);
 }
 
 void COMPASS_WIDGET::draw(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 

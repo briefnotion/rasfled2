@@ -148,8 +148,6 @@ class AIRCRAFT
 
   int data_count();
 
-  void check_alerts(ALERT_SYSTEM_2 &Alerts);
-
   void count_data();
 
   void post_process();
@@ -173,13 +171,12 @@ class AIRCRAFT_MAP_DETAILS
   MIN_MAX_TIME SIG_STR_DIRECION;
 
   public:
-
   DETAILED_TRACK TRACK;
-  //NEW_COLOR_SCALE ALTITUDE_COLOR_SCALE;
-
   AIRCRAFT AIRCRAFT_ITEM;
 
-  //void create(system_data &sdSysData);
+  // Extra Info
+  int ALERT_LEVEL = 0;
+  int COLOR = 1;
 
   void clear();
   // Clear values
@@ -252,12 +249,14 @@ class AIRCRAFT_COORDINATOR
 
   public:
   AIRCRAFT_DATA DATA;
-
   AIRCRAFT_MAP_INFO AIRCRAFTS_MAP;
 
   private:
 
-  void post_post_process(ALERT_SYSTEM_2 &Alerts);
+  void check_alerts(ALERT_SYSTEM_2 &Alerts, AIRCRAFT_MAP_DETAILS &Aircraft_Deets, int Simple_position);
+
+  void post_post_process();
+  void post_post_post_process(ALERT_SYSTEM_2 &Alerts);
 
   public:
 

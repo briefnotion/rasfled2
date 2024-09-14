@@ -1,3 +1,7 @@
+2.201_2400914
+  - Made the main compass smaller.
+  - ADS-B Alert changes.
+
 2.200_2400912
   - Moved the components that stored the ADS-B aircraft tracks out 
       of the ads-b widgets screen and into the aircraft coordinator. 
