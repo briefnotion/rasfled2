@@ -1951,7 +1951,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
       if (RANGE_INDICATOR.CENTER_ON_LOCATION == 1)
       {
         // draw compass at center location
-        CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 3.3f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+        CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                             sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
                             active_compass, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, 
                             true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), map_heading_degrees);
@@ -1971,6 +1971,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
       }
     }
   }
+  
   /*
   else if (active_compass)
   {

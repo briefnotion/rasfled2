@@ -479,6 +479,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
     DISPLAY_TIMER = sdSysData.cdTIMER.is_active();
 
+    // Will need to create a new ADS-B Alert Widget for every ADSB Enty in the list
+    while (ADSB_ALERTS.size() < sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size())
+    {
+      ALERT_WIDGET tmp_adsb_alert_widget;
+      ADSB_ALERTS.push_back(tmp_adsb_alert_widget);
+    }
+
     // ---------------------------------------------------------------------------------------
     // ---------------------------------------------------------------------------------------
     // Handle Console Outputs
@@ -1018,13 +1025,18 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           }
           ImGui::EndChild();
 
-          if (sdSysData.ALERTS_AUTO.alert_count() > 0)
+          if (sdSysData.ALERTS_AUTO.alert_count() > 0  || sdSysData.AIRCRAFT_COORD.ADSB_ALERT_COUNT > 0)
           {
             ImGui::SameLine();
 
             if (BT_DISPLAY_ALERTS.button_color(sdSysData, "DISPLAY\nALERTS", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               sdSysData.ALERTS_AUTO.display_active_alerts();
+
+              for (int adsb_alert = 0; adsb_alert < (int)sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size(); adsb_alert++)
+              {
+                sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[adsb_alert].ALERTS_ADSB.display_active_alerts();
+              }
             }
           }
           
@@ -1514,7 +1526,10 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       if (RESTACK_WINDOWS == false)
       {
         AUTOMOBILE_ALERTS.draw(sdSysData, sdSysData.ALERTS_AUTO);
-        ADSB_ALERTS.draw(sdSysData, sdSysData.ALERTS_ADSB);
+        for (int alert = 0; alert < (int)ADSB_ALERTS.size(); alert++)
+        {
+          ADSB_ALERTS[alert].draw(sdSysData, sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[alert].ALERTS_ADSB);
+        }
       }
 
       // ---------------------------------------------------------------------------------------

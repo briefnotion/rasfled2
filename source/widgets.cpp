@@ -673,19 +673,21 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 
         p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
                     Screen_Position.y + Size * sin(rad + float_PI));
-        p2 = ImVec2(Screen_Position.x + (Size + (font_height * 2.0f)) * cos(rad + float_PI), 
-                    Screen_Position.y + (Size + (font_height * 2.0f)) * sin(rad + float_PI));
+        p2 = ImVec2(Screen_Position.x + (Size + (font_height * 1.25f)) * cos(rad + float_PI), 
+                    Screen_Position.y + (Size + (font_height * 1.25f)) * sin(rad + float_PI));
         
         // Draw the line
         if (Valid_Position)
         {
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 4.0f + 4.0f);
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 4.0f);
+          Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 1.5f);
         }
         else
         {
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 4.0f + 4.0f);
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 4.0f);
+          Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 1.25f);
         }
 
         // Jitter 2
@@ -693,19 +695,21 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 
         p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
                     Screen_Position.y + Size * sin(rad + float_PI));
-        p2 = ImVec2(Screen_Position.x + (Size + (font_height * 2.0f)) * cos(rad + float_PI), 
-                    Screen_Position.y + (Size + (font_height * 2.0f)) * sin(rad + float_PI));
+        p2 = ImVec2(Screen_Position.x + (Size + (font_height * 1.25f)) * cos(rad + float_PI), 
+                    Screen_Position.y + (Size + (font_height * 1.25f)) * sin(rad + float_PI));
         
         // Draw the line
         if (Valid_Position)
         {
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 4.0f + 4.0f);
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 4.0f);
+          Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD_V.color(), 1.25f);
         }
         else
         {
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 4.0f + 4.0f);
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 4.0f);
+          Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 1.25f);
         }
       }
     }

@@ -1,3 +1,7 @@
+2.202_2400915
+  - Changed the compass again. 
+  - Changed the ADS-B Alert System. 
+
 2.201_2400914
   - Made the main compass smaller.
   - ADS-B Alert changes.

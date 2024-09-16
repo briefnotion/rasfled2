@@ -25,6 +25,18 @@
 #include "helper.h"
 #include "globe_helper.h"
 
+// -------------------------------------------------------------------------------------
+
+// Reserved Alert List
+#define ADSB_RESERVE_ALERT_PROXIMITY        0
+#define ADSB_RESERVE_ALERT_FLIGHT_ANGLE     1
+#define ADSB_RESERVE_ALERT_ADSB_EMERGENCY   2
+#define ADSB_RESERVE_ALERT_SQUAWK_HIJACKING 3
+#define ADSB_RESERVE_ALERT_SQUAWK_RADIO     4
+#define ADSB_RESERVE_ALERT_SQUAWK_EMERGENCY 5
+
+// -------------------------------------------------------------------------------------
+
 /*
 aircraft.json
 This file contains dump1090's list of recently seen aircraft. The keys are:
@@ -175,6 +187,7 @@ class AIRCRAFT_MAP_DETAILS
   AIRCRAFT AIRCRAFT_ITEM;
 
   // Extra Info
+  ALERT_SYSTEM_2 ALERTS_ADSB;
   int ALERT_LEVEL = 0;
   int COLOR = 1;
 
@@ -250,19 +263,20 @@ class AIRCRAFT_COORDINATOR
   public:
   AIRCRAFT_DATA DATA;
   AIRCRAFT_MAP_INFO AIRCRAFTS_MAP;
+  int ADSB_ALERT_COUNT = 0;
 
   private:
 
-  void check_alerts(ALERT_SYSTEM_2 &Alerts, AIRCRAFT_MAP_DETAILS &Aircraft_Deets, int Simple_position);
+  void check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets);
 
   void post_post_process();
-  void post_post_post_process(ALERT_SYSTEM_2 &Alerts);
+  void post_post_post_process(COMMAND_THREAD &Thread, SOUNDS &Sound_System);
 
   public:
 
   bool is_active();
 
-  bool process(unsigned long tmeCurrentTime, string JSON_Text, ALERT_SYSTEM_2 &Alerts, 
+  bool process(unsigned long tmeCurrentTime, string JSON_Text, COMMAND_THREAD &Thread, SOUNDS &Sound_System, 
                 bool GPS_Avail, float Current_Latitude, float Current_Longitude);
 };
 

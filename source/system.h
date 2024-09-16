@@ -154,7 +154,6 @@ class system_data
 
   //ALERT_SYSTEM ALERTS;
   
-  ALERT_SYSTEM_2 ALERTS_ADSB;
   ALERT_SYSTEM_2 ALERTS_AUTO;
 
   // For Debuging Gadgets

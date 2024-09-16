@@ -453,9 +453,6 @@ int loop_2(bool TTY_Only)
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_TEMP_INTAKE, "INTTAKE TEMP");
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_UNKNOWN_MESSAGE, "UNKNOW COMMUNICATION");
   sdSystem.ALERTS_AUTO.generate_reserve_alert(AUTO_RESERVE_ALERT_MIL, "MALFUNTION INDICATOR LAMP");
-  
-  // Initialize ADSB Alert_2 System - Generate Reserve Alerts
-  sdSystem.ALERTS_ADSB.PROPS.ALERT_SYSTEM_NAME = "ADSB";
 
   // Sleeping Loop Variables
   sdSystem.PROGRAM_TIME.create();    //  Get current time.  This will be our timeframe to work in.
@@ -1074,7 +1071,8 @@ int loop_2(bool TTY_Only)
       // Read ADS-B Aircraft JSON
       if (watcher_aircraft_json.changed() == true)
       {
-        sdSystem.AIRCRAFT_COORD.process(sdSystem.PROGRAM_TIME.current_frame_time(), file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE), sdSystem.ALERTS_ADSB, 
+        sdSystem.AIRCRAFT_COORD.process(sdSystem.PROGRAM_TIME.current_frame_time(), file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE), 
+                                                          sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 
                                                           sdSystem.GPS_SYSTEM.active(sdSystem.PROGRAM_TIME.current_frame_time()), 
                                                           sdSystem.GPS_SYSTEM.current_position().LATITUDE, sdSystem.GPS_SYSTEM.current_position().LONGITUDE);
       }
@@ -1293,7 +1291,6 @@ int loop_2(bool TTY_Only)
   
       // Alert system checks
       sdSystem.ALERTS_AUTO.alert_list_clean(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM);
-      sdSystem.ALERTS_ADSB.alert_list_clean(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM);
       
     } // Is display to console ready -----------------
 
