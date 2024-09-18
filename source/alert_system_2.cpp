@@ -174,6 +174,21 @@ void ALERT_2_TYPE_MONITOR::clear()
   ACTIVE = false;
 }
 
+void ALERT_2_TYPE_MONITOR::full_reset()
+{
+  ACTIVE = false;
+  WARNING = false;
+  ACKNOWLEGED = false;
+  DISPLAY = false;
+  ALERT_TITLE       = "";
+  ALERT_TEXT_LINE_1 = "";
+  ALERT_TEXT_LINE_2 = "";
+  SHOW_VALUE_BAR = false;
+  VALUE = 0;
+  ALERT_VALUE = 0;
+  CLEAR_VALUE = 0;
+}
+
 // -------------------------------------------------------------------------------------
 void ALERT_SYSTEM_2::play_alert_level_1()
 {
@@ -430,6 +445,7 @@ int ALERT_SYSTEM_2::alert_count()
 
 void ALERT_SYSTEM_2::alert_list_clean(COMMAND_THREAD &Thread, SOUNDS &Sound_System)
 {
+  // Clear Generic Alerts 
   if (GENERIC_ALERTS.size() > 0)
   {
     int alert_num = 0;
@@ -446,6 +462,7 @@ void ALERT_SYSTEM_2::alert_list_clean(COMMAND_THREAD &Thread, SOUNDS &Sound_Syst
     }
   }
 
+  // Clear Resered Alerts
   ALERTS_RESERVE_COUNT = 0;
   for (int res_alert_pos = 0; res_alert_pos < (int)ALERTS_RESERVE.size(); res_alert_pos++)
   {
@@ -478,6 +495,18 @@ void ALERT_SYSTEM_2::display_active_alerts()
   for (int alert_pos = 0; alert_pos < (int)GENERIC_ALERTS.size(); alert_pos++)
   {
     GENERIC_ALERTS[alert_pos].set_display_on();
+  }
+}
+
+void ALERT_SYSTEM_2::clear_all()
+{
+  // Clear generic alerts
+  GENERIC_ALERTS.clear();
+
+  // clear reserved alerts
+  for (int reserved_alert = 0; reserved_alert < (int)ALERTS_RESERVE.size(); reserved_alert++)
+  {
+    ALERTS_RESERVE[reserved_alert].full_reset();
   }
 }
 

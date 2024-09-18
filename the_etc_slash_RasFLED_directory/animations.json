@@ -2614,7 +2614,7 @@
           "Label" : "AUGEAR_VELOCITY_MASK",
           "Start_Delay_Time" : 500, "Duration_Of_Brighness" : 500, "Speed_Of_LED_Walk" : 50, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith", 
-          "Start_1" : "0,0,0", "Dest_1" : "10,10,10", 
+          "Start_1" : "0,0,0", "Dest_1" : "8,8,8", 
           "Start_2" : "0,0,0", "Dest_2" : "0,0,0",
           "LED_Start_Pos" : "from_bot|0", "LED_End_Pos" : "from_1/2|0", 
           "Invert_Color" : true, "Clear_On_End" : false, "Off_During_Day" : true
@@ -2632,7 +2632,7 @@
           "Label" : "AUGEAR_VELOCITY_MASK",
           "Start_Delay_Time" : 500, "Duration_Of_Brighness" : 500, "Speed_Of_LED_Walk" : 50, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiFadeDith", 
-          "Start_1" : "0,0,0", "Dest_1" : "10,10,10", 
+          "Start_1" : "0,0,0", "Dest_1" : "8,8,8", 
           "Start_2" : "0,0,0", "Dest_2" : "0,0,0",
           "LED_Start_Pos" : "from_bot|0", "LED_End_Pos" : "from_1/2|0", 
           "Invert_Color" : true, "Clear_On_End" : false, "Off_During_Day" : true

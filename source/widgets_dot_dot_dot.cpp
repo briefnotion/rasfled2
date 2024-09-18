@@ -370,13 +370,15 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
 
       }
 
-      /*
       // Debug area
       {
         ImGui::SameLine();
         ImGui::BeginChild("Debug", ImVec2(ImGui::GetContentRegionAvail().x, (2.0f * (over_size * pixel_step) - 40.0f)), true, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
-
+          //ImGui::Text("NEO Changing:\n %d", 
+          //  sdSysData.COLOR_SELECT.neo_c_red().STANDARD.is_changing());
+          
+          /*
           ImGui::Text("Walker:\n %f", 
             walker_float(sdSysData.PROGRAM_TIME.current_frame_time(), 0.20f, 70.0f));
           ImGui::Text("NEO RGB:\n %d : %d : %d", 
@@ -392,11 +394,11 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
           ImGui::Text("Void Color : Prev:\n %d : %d", 
             sdSysData.COLOR_SELECT.void_colr(), 
             sdSysData.COLOR_SELECT.void_colr_prev());
+          */
 
           ImGui::EndChild();
         }
       }
-      */
     }
 
     ImGui::EndChild();

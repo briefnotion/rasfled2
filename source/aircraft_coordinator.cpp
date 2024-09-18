@@ -143,15 +143,15 @@ void AIRCRAFT_MAP_DETAILS::clear()
 // Clear values
 {
   // Clear Variables
-  //ADSB_WIDGET_Properties cleared_properties;
-  //PROP = cleared_properties;
   WIDGET_ACTIVE = false;
 
   AIRCRAFT blank_aircraft_data;
   AIRCRAFT_ITEM = blank_aircraft_data;
 
   TRACK.clear();
+  ALERTS_ADSB.clear_all();
 }
+
 bool AIRCRAFT_MAP_DETAILS::is_expired(unsigned long tmeCurrentMillis)
 {
   if (EXPIREED.ping_down(tmeCurrentMillis) == true)
@@ -357,7 +357,7 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
   if (Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE >= 0.0f)
   {
     if (Aircraft_Deets.ALERTS_ADSB.res_alert_condition_less_than(ADSB_RESERVE_ALERT_PROXIMITY, 
-        Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE, 1.0f, 5.0f))
+        Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE, 1.0f, 2.0f))
     {
       Aircraft_Deets.ALERTS_ADSB.res_update_alert_text_line_1(ADSB_RESERVE_ALERT_PROXIMITY, 
                                                               "Squawk: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 

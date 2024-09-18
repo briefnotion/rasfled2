@@ -101,24 +101,24 @@ class NEO_COLOR_PROPERTIES
 class NEO_COLOR
 {
   private:
-  ImColor CURRENT_COLOR = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
-  ImColor NEW_COLOR = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
-  ImColor PREV_COLOR = ImColor(0.0f, 0.0f, 0.0f, 1.0f);
+  //ImColor CURRENT_COLOR = ImColor(0.0f, 1.0f, 0.0f, 1.0f);
+  ImVec4 CURRENT_COLOR = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+  ImVec4 NEW_COLOR = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+  ImVec4 PREV_COLOR = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
   
   float CURRENT_TIME = 0.0f;
   float START_TIME = 0.0f;
 
   bool NEEDS_CALC = true;
 
-  bool CHANGED = false;
-
+  void set_frame_time(unsigned long Time);
   ImColor calc_transition();
-  void reset_to_new_color(ImColor Color);
+  bool reset_to_new_color(unsigned long Time, ImColor Color);
 
   public:
   NEO_COLOR_PROPERTIES PROPS;
 
-  bool changed();
+  bool is_changing();
   // Called after color or set color:
   //  Returns true if a color value returned will 
   //  be or is different from the previous time called.

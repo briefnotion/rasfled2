@@ -104,6 +104,9 @@ class ALERT_2_TYPE_MONITOR
 
   void clear();
   // Sets active to false;
+
+  void full_reset();
+  // Sets all values to initial clear state.  Full Reset
 };
 
 class ALERT_SYSTEM_2_PROPERTIES
@@ -191,6 +194,10 @@ class ALERT_SYSTEM_2
   int alert_count();
   void alert_list_clean(COMMAND_THREAD &Thread, SOUNDS &Sound_System);
   void display_active_alerts();
+
+  void clear_all();
+  // Sets all alerts to cleared values as a full reset.
+  //  Except, does not change the Reserved Alert List.
 
   void sound_alert(int Value);
   //  1 - green
