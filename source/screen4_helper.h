@@ -101,10 +101,9 @@ class NEO_COLOR_PROPERTIES
 class NEO_COLOR
 {
   private:
-  //ImColor CURRENT_COLOR = ImColor(0.0f, 1.0f, 0.0f, 1.0f);
-  ImVec4 CURRENT_COLOR = ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
-  ImVec4 NEW_COLOR = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
-  ImVec4 PREV_COLOR = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+  ImVec4 CURRENT_COLOR =  ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+  ImVec4 NEW_COLOR =      ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+  ImVec4 PREV_COLOR =     ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
   
   float CURRENT_TIME = 0.0f;
   float START_TIME = 0.0f;
@@ -113,7 +112,7 @@ class NEO_COLOR
 
   void set_frame_time(unsigned long Time);
   ImColor calc_transition();
-  bool reset_to_new_color(unsigned long Time, ImColor Color);
+  bool reset_to_new_color(unsigned long Time, ImVec4 Color);
 
   public:
   NEO_COLOR_PROPERTIES PROPS;
@@ -241,7 +240,7 @@ class NEO_COLOR_COMBO
   NEO_COLOR       ACTIVE;
   NEO_COLOR_CRGB  SIMPLE_RGB;
 
-  void set_neo_rgb(unsigned long Time, COLOR_COMBO Color_Combo);
+  void set_neo_rgb(unsigned long Time, COLOR_COMBO &Color_Combo);
 };
 
 // ---------------------------------------------------------------------------------------

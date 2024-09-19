@@ -375,8 +375,8 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
         ImGui::SameLine();
         ImGui::BeginChild("Debug", ImVec2(ImGui::GetContentRegionAvail().x, (2.0f * (over_size * pixel_step) - 40.0f)), true, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
-          //ImGui::Text("NEO Changing:\n %d", 
-          //  sdSysData.COLOR_SELECT.neo_c_red().STANDARD.is_changing());
+          ImGui::Text("NEO Changing:\n %d", 
+          sdSysData.COLOR_SELECT.neo_c_blue().STANDARD.is_changing());
           
           /*
           ImGui::Text("Walker:\n %f", 

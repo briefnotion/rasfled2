@@ -1,3 +1,8 @@
+2.204_2400919
+  - Shifted the temp scale by 5 degrees. 
+  - Corrected a few errors.
+  - NeoColor debugging.
+
 2.203_2400916
   - Small changes to ADS-B Alerts. 
   - NeoColor debugging.

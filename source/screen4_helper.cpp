@@ -44,15 +44,27 @@ bool vector4_is_same(ImVec4 V1, ImVec4 V2)
 // ---------------------------------------------------------------------------------------
 void NEO_COLOR::set_frame_time(unsigned long Time)
 {
-  if (CURRENT_TIME != (float)Time)
+  CURRENT_TIME = (float)Time;
+  
+  if (!vector4_is_same(CURRENT_COLOR, NEW_COLOR))
   {
-    CURRENT_TIME = (float)Time;
+    NEEDS_CALC = true;
+    //printf("0");
     
-    if (!vector4_is_same(CURRENT_COLOR, NEW_COLOR))
-    {
-      NEEDS_CALC = true;
-    }
+    /*
+    printf("A - %f %f %f - %f %f %f - ", CURRENT_COLOR.x, 
+                                      CURRENT_COLOR.y, 
+                                      CURRENT_COLOR.z, 
+                                      NEW_COLOR.x, 
+                                      NEW_COLOR.y, 
+                                      NEW_COLOR.z);
+    printf(" %d \n", vector4_is_same(CURRENT_COLOR, NEW_COLOR));
+    */
   }
+  //else
+  //{
+  //  printf(".");
+  //}
 }
 
 ImColor NEO_COLOR::calc_transition()
@@ -69,7 +81,7 @@ ImColor NEO_COLOR::calc_transition()
 
       NEEDS_CALC = false; 
 
-      return CURRENT_COLOR;
+      return ImColor(CURRENT_COLOR);
     }
     else
     {
@@ -78,20 +90,20 @@ ImColor NEO_COLOR::calc_transition()
       float b = (power * NEW_COLOR.z) + ((1.0f - power) * PREV_COLOR.z);
       float w = (power * NEW_COLOR.w) + ((1.0f - power) * PREV_COLOR.w);
 
-      CURRENT_COLOR = ImColor(r, g, b, w);
+      CURRENT_COLOR = ImVec4(r, g, b, w);
       
       NEEDS_CALC = false;
 
-      return CURRENT_COLOR;
+      return ImColor(CURRENT_COLOR);
     }
   }
   else
   {
-    return CURRENT_COLOR;
+    return ImColor(CURRENT_COLOR);
   }
 }
 
-bool NEO_COLOR::reset_to_new_color(unsigned long Time, ImColor Color)
+bool NEO_COLOR::reset_to_new_color(unsigned long Time, ImVec4 Color)
 {
   if (!vector4_is_same(Color, NEW_COLOR))
   {
@@ -123,7 +135,8 @@ bool NEO_COLOR::reset_to_new_color(unsigned long Time, ImColor Color)
 
 bool NEO_COLOR::is_changing()
 {   // May not work till i find the bug.
-  return vector4_is_same(CURRENT_COLOR, NEW_COLOR);
+  //return !vector4_is_same(CURRENT_COLOR, NEW_COLOR);
+  return NEEDS_CALC;
 }
 
 void NEO_COLOR::set_current_frame_time(unsigned long Time)
@@ -133,13 +146,13 @@ void NEO_COLOR::set_current_frame_time(unsigned long Time)
 
 ImColor NEO_COLOR::color(unsigned long Time, ImColor Color)
 {
-  if (reset_to_new_color(Time, Color))
+  if (reset_to_new_color(Time, Color.Value))
   {
     return calc_transition();
   }
   else
   {
-    return CURRENT_COLOR;
+    return ImColor(CURRENT_COLOR);
   }
 }
 
@@ -156,16 +169,14 @@ ImColor NEO_COLOR::color()
 {
   // Do not check for color changes.  Just handle the trasition and return 
   //  either current color or previously requested color.
-  
   return calc_transition();
 }
 
 void NEO_COLOR::set_color(unsigned long Time, ImColor Color)
 {
   // Set a color trasition change but do not return anything.
-
   set_current_frame_time(Time);
-  reset_to_new_color(Time, Color);
+  reset_to_new_color(Time, Color.Value);
 }
 
 // ---------------------------------------------------------------------------------------
@@ -339,7 +350,7 @@ void COLOR_COMBO::set_rgb_black()
 
 // ---------------------------------------------------------------------------------------
 
-void NEO_COLOR_COMBO::set_neo_rgb(unsigned long Time, COLOR_COMBO Color_Combo)
+void NEO_COLOR_COMBO::set_neo_rgb(unsigned long Time, COLOR_COMBO &Color_Combo)
 {
   TEXT.set_color(Time, Color_Combo.TEXT);
   BACKGROUND.set_color(Time, Color_Combo.BACKGROUND);

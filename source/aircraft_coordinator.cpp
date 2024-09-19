@@ -149,7 +149,6 @@ void AIRCRAFT_MAP_DETAILS::clear()
   AIRCRAFT_ITEM = blank_aircraft_data;
 
   TRACK.clear();
-  ALERTS_ADSB.clear_all();
 }
 
 bool AIRCRAFT_MAP_DETAILS::is_expired(unsigned long tmeCurrentMillis)
@@ -258,7 +257,21 @@ int AIRCRAFT_MAP_INFO::find_expired()
     }
   }
   return return_int;
-} 
+}
+
+void AIRCRAFT_MAP_INFO::create_reserve_alerts(ALERT_SYSTEM_2 &ALERTS_ADSB, int Item_Position)
+{
+  // Initialize ADSB Alert_2 System - Generate Reserve Alerts
+  ALERTS_ADSB.clear_all();
+
+  ALERTS_ADSB.PROPS.ALERT_SYSTEM_NAME = "ADS-B Item: " + to_string(Item_Position);
+  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_PROXIMITY, "PROXIMITY");
+  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_FLIGHT_ANGLE, "FLIGHT ANGLE");
+  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_ADSB_EMERGENCY, "EMERGENCY FLAG");
+  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_HIJACKING, "SQUAWK HIJACKING");
+  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_RADIO, "SQUAWK RADIO");
+  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_EMERGENCY, "SQUAWK EMERGENCY");
+}
 
 void AIRCRAFT_MAP_INFO::update(unsigned long tmeCurrentTime, AIRCRAFT_DATA &DATA)
 {
@@ -288,28 +301,25 @@ void AIRCRAFT_MAP_INFO::update(unsigned long tmeCurrentTime, AIRCRAFT_DATA &DATA
           AIRCRAFT_MAP_DETAILS new_aircraft_map_info;
 
           // Initialize ADSB Alert_2 System - Generate Reserve Alerts
-          new_aircraft_map_info.ALERTS_ADSB.PROPS.ALERT_SYSTEM_NAME = "ADSB";
-
-          // Initialize AUTO Alert_2 System - Generate Reserve Alerts
-          new_aircraft_map_info.ALERTS_ADSB.PROPS.ALERT_SYSTEM_NAME = "ADS-B Item: " + to_string(AIRCRAFT_DETAIL_LIST.size() +1);
-          new_aircraft_map_info.ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_PROXIMITY, "PROXIMITY");
-          new_aircraft_map_info.ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_FLIGHT_ANGLE, "FLIGHT ANGLE");
-          new_aircraft_map_info.ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_ADSB_EMERGENCY, "EMERGENCY FLAG");
-          new_aircraft_map_info.ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_HIJACKING, "SQUAWK HIJACKING");
-          new_aircraft_map_info.ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_RADIO, "SQUAWK RADIO");
-          new_aircraft_map_info.ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_EMERGENCY, "SQUAWK EMERGENCY");
+          create_reserve_alerts(new_aircraft_map_info.ALERTS_ADSB, AIRCRAFT_DETAIL_LIST.size() +1);
 
           new_aircraft_map_info.update_aircraft(DATA.AIRCRAFTS[pos_search], tmeCurrentTime);
           AIRCRAFT_DETAIL_LIST.push_back(new_aircraft_map_info);
         }
         else
         {
+          // Initialize ADSB Alert_2 System - Generate Reserve Alerts
+          create_reserve_alerts(AIRCRAFT_DETAIL_LIST[pos_expired_avail].ALERTS_ADSB, pos_expired_avail +1);
+
           AIRCRAFT_DETAIL_LIST[pos_expired_avail].clear();
           AIRCRAFT_DETAIL_LIST[pos_expired_avail].update_aircraft(DATA.AIRCRAFTS[pos_search], tmeCurrentTime);
         }
       }
       else // slot found and pos avail.
       {
+        // Initialize ADSB Alert_2 System - Generate Reserve Alerts
+        create_reserve_alerts(AIRCRAFT_DETAIL_LIST[pos_avail].ALERTS_ADSB, pos_avail +1);
+
         AIRCRAFT_DETAIL_LIST[pos_avail].update_aircraft(DATA.AIRCRAFTS[pos_search], tmeCurrentTime);
       }
     }
@@ -404,7 +414,6 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
   // Check Squak Codes
   if(Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.conversion_success() == true)
   {
-
     // Hi-Jack
     if (Aircraft_Deets.ALERTS_ADSB.res_alert_condition(ADSB_RESERVE_ALERT_SQUAWK_HIJACKING, 
           Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_int_value() == 7500,
@@ -461,7 +470,8 @@ void AIRCRAFT_COORDINATOR::post_post_process()
   for (int aircraft = 0; aircraft < (int)DATA.AIRCRAFTS.size(); aircraft++)
   {
     // Calculate Distance from base for each Aircraft
-    if (DATA.CURRENT_POS_AVAIL && DATA.AIRCRAFTS[aircraft].POSITION.GLOBAL_POSITION_FOUND)
+    if (DATA.CURRENT_POS_AVAIL && DATA.AIRCRAFTS[aircraft].POSITION.GLOBAL_POSITION_FOUND && 
+        DATA.CURRENT_POS_AVAIL)
     {
       DATA.AIRCRAFTS[aircraft].DISTANCE_FROM_BASE = calculate_distance(
                                   DATA.AIRCRAFTS[aircraft].POSITION.LATITUDE.get_float_value(), 
@@ -495,6 +505,11 @@ void AIRCRAFT_COORDINATOR::post_post_post_process(COMMAND_THREAD &Thread, SOUNDS
     check_alerts(AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft]);
     AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].ALERTS_ADSB.alert_list_clean(Thread, Sound_System);
     ADSB_ALERT_COUNT += AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].ALERTS_ADSB.alert_count();
+
+    if (AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].AIRCRAFT_ITEM.DISTANCE_FROM_BASE > AIRCRAFTS_MAP.FURTHEST_AIRCRAFT_SINCE_START)
+    {
+      AIRCRAFTS_MAP.FURTHEST_AIRCRAFT_SINCE_START = AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].AIRCRAFT_ITEM.DISTANCE_FROM_BASE;
+    }
   }
 }
 

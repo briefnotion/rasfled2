@@ -27,59 +27,59 @@ void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, f
   {
     rank = 0;
   }
-  else if (S_Temp < 5.0f)
+  else if (S_Temp < 10.0f)
   {
     rank = 1;
   }
-  else if (S_Temp < 10.0f)
+  else if (S_Temp < 15.0f)
   {
     rank = 2;
   }
-  else if (S_Temp < 15.0f)
+  else if (S_Temp < 20.0f)
   {
     rank = 3;
   }
-  else if (S_Temp < 20.0f)
+  else if (S_Temp < 25.0f)
   {
     rank = 4;
   }
-  else if (S_Temp < 25.0f)
+  else if (S_Temp < 30.0f)
   {
     rank = 5;
   }
-  else if (S_Temp < 30.0f)
+  else if (S_Temp < 35.0f)
   {
     rank = 6;
   }
-  else if (S_Temp < 35.0f)
+  else if (S_Temp < 40.0f)
   {
     rank = 7;
   }
-  else if (S_Temp < 40.0f)
+  else if (S_Temp < 45.0f)
   {
     rank = 8;
   }
-  else if (S_Temp < 45.0f)
+  else if (S_Temp < 50.0f)
   {
     rank = 9;
   }
-  else if (S_Temp < 50.0f)
+  else if (S_Temp < 55.0f)
   {
     rank = 10;
   }
-  else if (S_Temp < 55.0f)
+  else if (S_Temp < 60.0f)
   {
     rank = 11;
   }
-  else if (S_Temp < 60.0f)
+  else if (S_Temp < 65.0f)
   {
     rank = 12;
   }
-  else if (S_Temp < 65.0f)
+  else if (S_Temp < 70.0f)
   {
     rank = 13;
   }
-  else if (S_Temp < 70.0f)
+  else if (S_Temp < 75.0f)
   {
     rank = 14;
   }

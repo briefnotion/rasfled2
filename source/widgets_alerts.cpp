@@ -107,7 +107,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
       ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(BACKGROUND_COLOR));
       ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
 
-      title += "(" + to_string(alert_num) + ") : " + Alerts_List.res_alert_title(alert_num);
+      title += " : " + Alerts_List.res_alert_title(alert_num);
 
       if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
       {

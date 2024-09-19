@@ -2012,10 +2012,11 @@ void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
 
   ImGui::BeginChild("ADSB Display", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    ImGui::Text("Time: %s  Count: %s  Pos: %s", 
+    ImGui::Text("Time: %s  Count: %s  Pos: %s  Furthest: %.2f", 
                   sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TIME_OF_SIGNAL.c_str(), 
                   sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_COUNT.c_str(), 
-                  sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_AIRCRAFT.c_str());
+                  sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_AIRCRAFT.c_str(),
+                  sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.FURTHEST_AIRCRAFT_SINCE_START);
     
     //      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
     //                              ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;

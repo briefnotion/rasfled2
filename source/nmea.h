@@ -116,7 +116,6 @@ class NMEA
   // NO CONSOLIDATION OCCURS
   // -------------------------------------------------------------------------------------
 
-  bool VALID_COORDS = false;
   bool CHANGED = false;
 
   GLOBAL_POSITION_DETAILED CURRENT_POSITION;

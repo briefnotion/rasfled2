@@ -230,6 +230,8 @@ class AIRCRAFT_MAP_INFO
 
   int find_HEX(string Hex);
   int find_expired();
+
+  void create_reserve_alerts(ALERT_SYSTEM_2 &ALERTS_ADSB, int Item_Position);
   
   public:
 
@@ -245,6 +247,8 @@ class AIRCRAFT_MAP_INFO
   string TIME_OF_SIGNAL = "";
   string POSITIONED_COUNT = "";
   string POSITIONED_AIRCRAFT = "";
+
+  float FURTHEST_AIRCRAFT_SINCE_START = 0.0f;
 
   void update(unsigned long tmeCurrentTime, AIRCRAFT_DATA &DATA);
 
