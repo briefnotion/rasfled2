@@ -99,13 +99,13 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
         alert_type = 1;
       }
 
-      BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color(BACKGROUND_COLOR_VALUE).STANDARD.color();
+      BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color_STANDARD(BACKGROUND_COLOR_VALUE);
       //BACKGROUND_COLOR.Value.w = 0.8f;
       
       ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(BACKGROUND_COLOR));
       ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(BACKGROUND_COLOR));
       ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(BACKGROUND_COLOR));
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
 
       title += " : " + Alerts_List.res_alert_title(alert_num);
 
@@ -203,13 +203,13 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
           TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
         }
 
-        BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color(BACKGROUND_COLOR_VALUE).STANDARD.color();
+        BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color_STANDARD(BACKGROUND_COLOR_VALUE);
         //BACKGROUND_COLOR.Value.w = 0.8f;
         
         ImGui::PushStyleColor(ImGuiCol_WindowBg, ImU32(BACKGROUND_COLOR));
         ImGui::PushStyleColor(ImGuiCol_TitleBg, ImU32(BACKGROUND_COLOR));
         ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(BACKGROUND_COLOR));
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
 
         title +=  "(" + to_string(alert_num) + ") : " + Alerts_List.gen_alert_title(alert_num);
         

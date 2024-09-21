@@ -226,7 +226,10 @@ class system_data
   DNFWTS_ DNFWTS;
 
   // Temporary placement of auto velocity color
+  //  Move these in the future after moving the automobile handler
+  //  to system_data.
   bool RUNNING_COLOR_TEMPERATURE = false;
+  int  RUNNING_COLOR = 3;
 
   SOUNDS SOUND_SYSTEM;  // Primitive sound system.
 

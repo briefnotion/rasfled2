@@ -38,29 +38,29 @@ void SCREEN4::door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value)
   {
     Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
-                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
-                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_white().STANDARD_V.color());
+                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
+                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE));
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value)
   {
     Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), 
-                    sdSysData.COLOR_SELECT.neo_c_white().STANDARD_V.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
-                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color());
+                    sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
+                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value)
   {
     Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x, Window_Size.y), 
-                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
-                    sdSysData.COLOR_SELECT.neo_c_white().STANDARD_V.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color());
+                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
+                    sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value)
   {
     Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y / 2.0f), 
-                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_white().STANDARD_V.color(), 
-                    sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color());
+                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE), 
+                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
   }
 }
 
@@ -77,12 +77,12 @@ void SCREEN4::hazard_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
     if (BLINKER_BLINK)
     {
       Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
-                          sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color(), 
-                          sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color());
+                          sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED), 
+                          sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
 
       Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
-                          sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
-                          sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_red().STANDARD.color());
+                          sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
+                          sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED));
     }
   }
 }
@@ -102,8 +102,8 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
       if (BLINKER_BLINK)
       {
         Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
-                      sdSysData.COLOR_SELECT.neo_c_orange().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), 
-                      sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_orange().STANDARD.color());
+                      sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_ORANGE), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
+                      sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_ORANGE));
       }
     }
     else if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
@@ -117,8 +117,8 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
       if (BLINKER_BLINK)
       {
         Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
-                      sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_orange().STANDARD.color(), 
-                      sdSysData.COLOR_SELECT.neo_c_orange().STANDARD.color(), sdSysData.COLOR_SELECT.neo_c_black().STANDARD.color());
+                      sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_ORANGE), 
+                      sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_ORANGE), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
       }
     }
     //else
@@ -134,15 +134,15 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   
   ImGuiStyle& style = ImGui::GetStyle();
 
-  ImColor background = sdSysData.COLOR_SELECT.neo_c_blue().BACKGROUND.color();
-  ImColor dim = sdSysData.COLOR_SELECT.neo_c_blue().DIM.color();
-  ImColor standard = sdSysData.COLOR_SELECT.neo_c_blue().STANDARD.color();
-  ImColor hovered = sdSysData.COLOR_SELECT.neo_c_blue().HOVERED.color();
-  ImColor active = sdSysData.COLOR_SELECT.neo_c_blue().ACTIVE.color();
+  ImColor background = sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_BLUE);
+  ImColor dim = sdSysData.COLOR_SELECT.neo_color_DIM(RAS_BLUE);
+  ImColor standard = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLUE);
+  ImColor hovered = sdSysData.COLOR_SELECT.neo_color_HOVERED(RAS_BLUE);
+  ImColor active = sdSysData.COLOR_SELECT.neo_color_ACTIVE(RAS_BLUE);
 
   //style.Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-  style.Colors[ImGuiCol_Text] = sdSysData.COLOR_SELECT.neo_c_white().TEXT.color();
+  style.Colors[ImGuiCol_Text] = sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE);
 
   style.Colors[ImGuiCol_TitleBg] = standard;
   style.Colors[ImGuiCol_TitleBgActive] = active;
@@ -153,7 +153,7 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   style.Colors[ImGuiCol_FrameBgActive] = active;
 
   style.Colors[ImGuiCol_Border] = background;
-  style.Colors[ImGuiCol_BorderShadow] = sdSysData.COLOR_SELECT.neo_c_yellow().BACKGROUND.color();
+  style.Colors[ImGuiCol_BorderShadow] = sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_YELLOW);
 
   style.Colors[ImGuiCol_CheckMark] = standard;
 
@@ -173,9 +173,9 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   style.Colors[ImGuiCol_TableRowBg] = dim;
   style.Colors[ImGuiCol_TableRowBgAlt] = standard;
 
-  style.Colors[ImGuiCol_Separator] = sdSysData.COLOR_SELECT.neo_c_white().STANDARD.color();
-  style.Colors[ImGuiCol_SeparatorHovered] = sdSysData.COLOR_SELECT.neo_c_white().HOVERED.color();
-  style.Colors[ImGuiCol_SeparatorActive] = sdSysData.COLOR_SELECT.neo_c_white().ACTIVE.color();
+  style.Colors[ImGuiCol_Separator] = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE);
+  style.Colors[ImGuiCol_SeparatorHovered] = sdSysData.COLOR_SELECT.neo_color_HOVERED(RAS_WHITE);
+  style.Colors[ImGuiCol_SeparatorActive] = sdSysData.COLOR_SELECT.neo_color_ACTIVE(RAS_WHITE);
 
   style.Colors[ImGuiCol_ResizeGrip] = standard;
   style.Colors[ImGuiCol_ResizeGripHovered] = hovered;
@@ -459,8 +459,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
     sdSysData.COLOR_SELECT.set_frame_time(sdSysData.PROGRAM_TIME.current_frame_time());
 
     //Check for changes in style
-    ImGuiStyle& style = ImGui::GetStyle();
-    if (!vector4_is_same(style.Colors[ImGuiCol_TitleBg], sdSysData.COLOR_SELECT.neo_c_blue().STANDARD.color()))
+    if (sdSysData.COLOR_SELECT.neo_color_is_changing())
     {
       set_screen_default_colors(sdSysData);
     }
@@ -627,7 +626,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 RESET_KEYBOARD_FOCUS = false;
               }
 
-              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
+              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
               ImGui::PushFont(io.Fonts->Fonts.Data[2]);
               ImGui::Text("CMD:");
 
@@ -1487,7 +1486,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           if (BT_RUNNING_TEMP.button_color(sdSysData, "Temp", sdSysData.COLOR_SELECT.monochrome(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
           {
             sdSysData.SCREEN_COMMS.command_text_set("rt");
-            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.monochrome());
+            sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.green());
             DISPLAY_RUNNING_COLOR = false;
           }
         }

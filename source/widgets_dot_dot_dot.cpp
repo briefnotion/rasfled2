@@ -376,25 +376,35 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
         ImGui::BeginChild("Debug", ImVec2(ImGui::GetContentRegionAvail().x, (2.0f * (over_size * pixel_step) - 40.0f)), true, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
           ImGui::Text("NEO Changing:\n %d", 
-          sdSysData.COLOR_SELECT.neo_c_blue().STANDARD.is_changing());
+          sdSysData.COLOR_SELECT.neo_color_is_changing());
           
           /*
           ImGui::Text("Walker:\n %f", 
             walker_float(sdSysData.PROGRAM_TIME.current_frame_time(), 0.20f, 70.0f));
+          */
+
           ImGui::Text("NEO RGB:\n %d : %d : %d", 
-            sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color().r, 
-            sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color().g, 
-            sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color().b);
+            sdSysData.COLOR_SELECT.neo_color_SIMPLE_RGB(RAS_CUSTOM).r, 
+            sdSysData.COLOR_SELECT.neo_color_SIMPLE_RGB(RAS_CUSTOM).g, 
+            sdSysData.COLOR_SELECT.neo_color_SIMPLE_RGB(RAS_CUSTOM).b);
 
           ImGui::Text("NEO RGB (brt 0.04):\n %d : %d : %d", 
-            sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color().brightness(0.04f).r, 
-            sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color().brightness(0.04f).g, 
-            sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color().brightness(0.04f).b);
+            sdSysData.COLOR_SELECT.neo_color_SIMPLE_RGB(RAS_CUSTOM).brightness(0.04f).r, 
+            sdSysData.COLOR_SELECT.neo_color_SIMPLE_RGB(RAS_CUSTOM).brightness(0.04f).g, 
+            sdSysData.COLOR_SELECT.neo_color_SIMPLE_RGB(RAS_CUSTOM).brightness(0.04f).b);
 
           ImGui::Text("Void Color : Prev:\n %d : %d", 
             sdSysData.COLOR_SELECT.void_colr(), 
             sdSysData.COLOR_SELECT.void_colr_prev());
-          */
+
+          ImGui::Text("Running Color : \n %d : %d", 
+            sdSysData.RUNNING_COLOR, 
+            sdSysData.RUNNING_COLOR_TEMPERATURE);
+
+          ImGui::Text("CUSTOM_COLOR ():\n %d : %d : %d", 
+            sdSysData.CUSTOM_COLOR.r, 
+            sdSysData.CUSTOM_COLOR.g, 
+            sdSysData.CUSTOM_COLOR.b);
 
           ImGui::EndChild();
         }

@@ -427,7 +427,7 @@ CRGB ANIMATION_HANDLER::determine_led_color(system_data &sdSysData, string Color
   }
   else if (Color_or_Var == "running_color")
   {
-    ret_crgb = sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color().brightness(0.25f);
+    ret_crgb = sdSysData.COLOR_SELECT.neo_color_SIMPLE_RGB(RAS_CUSTOM).brightness(0.25f);
   }
   else if (Color_or_Var == "color")
   {

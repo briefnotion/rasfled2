@@ -67,8 +67,7 @@ class AUTOMOBILE_HANDLER
 
   TIMED_PING ALERT_TIMER;   // Restrict multiple sequential alerts
 
-  CRGB velocity_color = CRGB(6, 3, 0);
-  CRGB drive_pulse_color = CRGB(30, 30, 30);
+  CRGB DRIVE_PULSE_COLOR = CRGB(30, 30, 30);
 
   NEO_COLOR_CRGB VELOCITY_COLOR;
 
@@ -76,8 +75,7 @@ class AUTOMOBILE_HANDLER
   const int ACTIVATE_SPEED = 12;
   const int CAUTION_SPEED = 5;
 
-  BOOL_BOUNCE running_temperature;
-  int running_temperature_color_rank = 0;
+  int running_temperature_color_rank = -1;
   void running_temperature_color_set(system_data &sdSysData, float S_Temp);
 
   void alert(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);

@@ -527,81 +527,96 @@ int loop_2(bool TTY_Only)
     if (sdSystem.running_color_list.strRunningColor == "White")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_white().SIMPLE_RGB.brightness(0.25f), "White");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.white());
+      sdSystem.RUNNING_COLOR = RAS_WHITE;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_WHITE).SIMPLE_RGB.brightness(0.25f), "White");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_WHITE);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Red")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_red().SIMPLE_RGB.brightness(0.25f), "Red");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.red());
+      sdSystem.RUNNING_COLOR = RAS_RED;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_RED).SIMPLE_RGB.brightness(0.25f), "Red");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_RED);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Green")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_green().SIMPLE_RGB.brightness(0.25f), "Green");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.green());
+      sdSystem.RUNNING_COLOR = RAS_GREEN;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_GREEN).SIMPLE_RGB.brightness(0.25f), "Green");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_GREEN);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Blue")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_blue().SIMPLE_RGB.brightness(0.25f), "Blue");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.blue());
+      sdSystem.RUNNING_COLOR = RAS_BLUE;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_BLUE).SIMPLE_RGB.brightness(0.25f), "Blue");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_BLUE);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Purple")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_purple().SIMPLE_RGB.brightness(0.25f), "Purple");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.purple());
+      sdSystem.RUNNING_COLOR = RAS_PURPLE;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_PURPLE).SIMPLE_RGB.brightness(0.25f), "Purple");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_PURPLE);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Yellow")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_yellow().SIMPLE_RGB.brightness(0.25f), "Yellow");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.yellow());
+      sdSystem.RUNNING_COLOR = RAS_YELLOW;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_YELLOW).SIMPLE_RGB.brightness(0.25f), "Yellow");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_YELLOW);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Cyan")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_cyan().SIMPLE_RGB.brightness(0.25f), "Cyan");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.cyan());
+      sdSystem.RUNNING_COLOR = RAS_CYAN;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_CYAN).SIMPLE_RGB.brightness(0.25f), "Cyan");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_CYAN);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Orange")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_orange().SIMPLE_RGB.brightness(0.25f), "Orange");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.orange());
+      sdSystem.RUNNING_COLOR = RAS_ORANGE;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_ORANGE).SIMPLE_RGB.brightness(0.25f), "Orange");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_ORANGE);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Black" || sdSystem.running_color_list.strRunningColor == "Monochrome")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_monochrome().SIMPLE_RGB.brightness(0.25f), "Monochrome");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.monochrome());
+      sdSystem.RUNNING_COLOR = RAS_MONOCHROME;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_MONOCHROME).SIMPLE_RGB.brightness(0.25f), "Monochrome");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_MONOCHROME);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Grey")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_grey().SIMPLE_RGB.brightness(0.25f), "Grey");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.grey());
+      sdSystem.RUNNING_COLOR = RAS_GREY;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_GREY).SIMPLE_RGB.brightness(0.25f), "Grey");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_GREY);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Pink")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_pink().SIMPLE_RGB.brightness(0.25f), "Pink");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.pink());
+      sdSystem.RUNNING_COLOR = RAS_PINK;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_PINK).SIMPLE_RGB.brightness(0.25f), "Pink");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_PINK);
     }
     else if (sdSystem.running_color_list.strRunningColor == "Temperature")
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = true;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_monochrome().SIMPLE_RGB.brightness(0.25f), "Temperature");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.monochrome());
+      sdSystem.RUNNING_COLOR = RAS_CUSTOM;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_CUSTOM).SIMPLE_RGB.brightness(0.25f), "Temperature");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_CUSTOM);
     }
     else
     {
       sdSystem.RUNNING_COLOR_TEMPERATURE = false;
-      sdSystem.set_running_color(sdSystem.COLOR_SELECT.c_red().SIMPLE_RGB.brightness(0.25f), "Red");
-      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.COLOR_SELECT.red());
+      sdSystem.RUNNING_COLOR = RAS_RED;
+      sdSystem.set_running_color(sdSystem.COLOR_SELECT.pure_color(RAS_RED).SIMPLE_RGB.brightness(0.25f), "Red");
+      sdSystem.COLOR_SELECT.void_color_set(sdSystem.PROGRAM_TIME.current_frame_time(), RAS_RED);
     }
+
+    sdSystem.CUSTOM_COLOR = sdSystem.COLOR_SELECT.pure_color(sdSystem.RUNNING_COLOR).SIMPLE_RGB.brightness(0.25f);
   }
 
   // Loading Animations Library.

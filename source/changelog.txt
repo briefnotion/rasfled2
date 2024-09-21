@@ -1,3 +1,6 @@
+2.205_2400920
+  - Made changes to the COLOR_SELECT routines.
+
 2.204_2400919
   - Shifted the temp scale by 5 degrees. 
   - Corrected a few errors.

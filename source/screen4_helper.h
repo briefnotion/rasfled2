@@ -22,6 +22,25 @@
 // IMGui Includes
 #include "../../imgui/imgui.h"
 #include "../../imgui/misc/cpp/imgui_stdlib.h"
+// -------------------------------------------------------------------------------------
+
+// COLOR_LIST
+#define RAS_CUSTOM     -1
+#define RAS_BLACK       0
+#define RAS_WHITE       1
+#define RAS_GREY        2
+#define RAS_RED         3
+#define RAS_ORANGE      4
+#define RAS_YELLOW      5
+#define RAS_GREEN       6
+#define RAS_CYAN        7
+#define RAS_BLUE        8
+#define RAS_PURPLE      9
+#define RAS_PINK        10
+#define RAS_MONOCHROME  11
+
+// ---------------------------------------------------------------------------------------
+
 
 using namespace std;
 
@@ -91,6 +110,10 @@ class WIDGET_DEFAULTS
 
 // ---------------------------------------------------------------------------------------
 
+CRGB convert_imvec4_to_crgb(ImVec4 Vec4);
+
+// ---------------------------------------------------------------------------------------
+
 class NEO_COLOR_PROPERTIES
 {
   public:
@@ -105,8 +128,9 @@ class NEO_COLOR
   ImVec4 NEW_COLOR =      ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
   ImVec4 PREV_COLOR =     ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
   
-  float CURRENT_TIME = 0.0f;
-  float START_TIME = 0.0f;
+  float CURRENT_TIME_PREV = 0.0f;
+  float CURRENT_TIME = 0.00001f;
+  float START_TIME = 0.00001f;
 
   bool NEEDS_CALC = true;
 
@@ -155,24 +179,24 @@ class NEO_COLOR
 class NEO_COLOR_CRGB
 {
   private:
-  CRGB CURRENT_COLOR = CRGB(0, 0, 0);
-  CRGB NEW_COLOR = CRGB(0, 0, 0);
-  CRGB PREV_COLOR = CRGB(0, 0, 0);
+  ImVec4 CURRENT_COLOR =  ImVec4(0.0f, 1.0f, 0.0f, 1.0f);
+  ImVec4 NEW_COLOR =      ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
+  ImVec4 PREV_COLOR =     ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
   
+  float CURRENT_TIME_PREV = 0.0f;
   float CURRENT_TIME = 0.0f;
   float START_TIME = 0.0f;
 
   bool NEEDS_CALC = true;
 
-  bool CHANGED = false;
-
+  void set_frame_time(unsigned long Time);
   CRGB calc_transition();
-  void reset_to_new_color(CRGB Color);
+  bool reset_to_new_color(unsigned long Time, ImVec4 Color);
 
   public:
   NEO_COLOR_PROPERTIES PROPS;
 
-  bool changed();
+  bool is_changing();
   // Called after color or set color:
   //  Returns true if a color value returned will 
   //  be or is different from the previous time called.
@@ -276,7 +300,17 @@ class COLOR_COMBOS
 
   COLOR_COMBO pure_color(int Color);
   COLOR_COMBO color(int Color);
-  NEO_COLOR_COMBO neo_color(int Color);
+
+  ImColor neo_color_TEXT(int Color);
+  ImColor neo_color_BACKGROUND(int Color);
+  ImColor neo_color_DIM(int Color);
+  ImColor neo_color_STANDARD(int Color);
+  ImColor neo_color_STANDARD_V(int Color);
+  ImColor neo_color_HOVERED(int Color);
+  ImColor neo_color_ACTIVE(int Color);
+  CRGB neo_color_SIMPLE_RGB(int Color);
+  
+  bool neo_color_is_changing();
 
   void toggle_void_color(unsigned long Time);
   void void_color_set(unsigned long Time, int Color);
@@ -309,21 +343,6 @@ class COLOR_COMBOS
   COLOR_COMBO c_purple();
   COLOR_COMBO c_pink();
   COLOR_COMBO c_monochrome();
-
-  // Return color with respects to void neo color shift
-  NEO_COLOR_COMBO neo_c_black();
-  NEO_COLOR_COMBO neo_c_white();
-  NEO_COLOR_COMBO neo_c_grey();
-  NEO_COLOR_COMBO neo_c_red();
-  NEO_COLOR_COMBO neo_c_orange();
-  NEO_COLOR_COMBO neo_c_yellow();
-  NEO_COLOR_COMBO neo_c_green();
-  NEO_COLOR_COMBO neo_c_cyan();
-  NEO_COLOR_COMBO neo_c_blue();
-  NEO_COLOR_COMBO neo_c_purple();
-  NEO_COLOR_COMBO neo_c_pink();
-  NEO_COLOR_COMBO neo_c_monochrome();
-  NEO_COLOR_COMBO neo_c_neo();
 
   int void_colr();
   //int custom_colr();

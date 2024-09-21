@@ -40,6 +40,12 @@ bool vector4_is_same(ImVec4 V1, ImVec4 V2)
 {
   return (V1.x == V2.x) && (V1.y == V2.y) && (V1.z == V2.z) && (V1.w == V2.w);
 }
+// ---------------------------------------------------------------------------------------
+
+CRGB convert_imvec4_to_crgb(ImVec4 Vec4)
+{
+  return CRGB(static_cast<unsigned char>(Vec4.x * 255.0f), static_cast<unsigned char>(Vec4.y * 255.0f), static_cast<unsigned char>(Vec4.z * 255.0f));
+}
 
 // ---------------------------------------------------------------------------------------
 void NEO_COLOR::set_frame_time(unsigned long Time)
@@ -48,23 +54,12 @@ void NEO_COLOR::set_frame_time(unsigned long Time)
   
   if (!vector4_is_same(CURRENT_COLOR, NEW_COLOR))
   {
-    NEEDS_CALC = true;
-    //printf("0");
-    
-    /*
-    printf("A - %f %f %f - %f %f %f - ", CURRENT_COLOR.x, 
-                                      CURRENT_COLOR.y, 
-                                      CURRENT_COLOR.z, 
-                                      NEW_COLOR.x, 
-                                      NEW_COLOR.y, 
-                                      NEW_COLOR.z);
-    printf(" %d \n", vector4_is_same(CURRENT_COLOR, NEW_COLOR));
-    */
+    if (CURRENT_TIME != CURRENT_TIME_PREV)
+    {
+      CURRENT_TIME_PREV = CURRENT_TIME;
+      NEEDS_CALC = true;
+    }
   }
-  //else
-  //{
-  //  printf(".");
-  //}
 }
 
 ImColor NEO_COLOR::calc_transition()
@@ -134,9 +129,8 @@ bool NEO_COLOR::reset_to_new_color(unsigned long Time, ImVec4 Color)
 }
 
 bool NEO_COLOR::is_changing()
-{   // May not work till i find the bug.
-  //return !vector4_is_same(CURRENT_COLOR, NEW_COLOR);
-  return NEEDS_CALC;
+{
+  return !vector4_is_same(CURRENT_COLOR, NEW_COLOR);
 }
 
 void NEO_COLOR::set_current_frame_time(unsigned long Time)
@@ -180,6 +174,19 @@ void NEO_COLOR::set_color(unsigned long Time, ImColor Color)
 }
 
 // ---------------------------------------------------------------------------------------
+void NEO_COLOR_CRGB::set_frame_time(unsigned long Time)
+{
+  CURRENT_TIME = (float)Time;
+  
+  if (!vector4_is_same(CURRENT_COLOR, NEW_COLOR))
+  {
+    if (CURRENT_TIME != CURRENT_TIME_PREV)
+    {
+      CURRENT_TIME_PREV = CURRENT_TIME;
+      NEEDS_CALC = true;
+    }
+  }
+}
 
 CRGB NEO_COLOR_CRGB::calc_transition()
 {
@@ -193,83 +200,79 @@ CRGB NEO_COLOR_CRGB::calc_transition()
       
       CURRENT_COLOR = NEW_COLOR;
 
-      CHANGED = false;
       NEEDS_CALC = false; 
 
-      return NEW_COLOR;
+      return CRGB(CURRENT_COLOR.x, CURRENT_COLOR.y, CURRENT_COLOR.z);
     }
     else
     {
-      float r = (power * (float)NEW_COLOR.r) + ((1.0f - power) * (float)PREV_COLOR.r);
-      float g = (power * (float)NEW_COLOR.g) + ((1.0f - power) * (float)PREV_COLOR.g);
-      float b = (power * (float)NEW_COLOR.b) + ((1.0f - power) * (float)PREV_COLOR.b);
+      float r = (power * NEW_COLOR.x) + ((1.0f - power) * PREV_COLOR.x);
+      float g = (power * NEW_COLOR.y) + ((1.0f - power) * PREV_COLOR.y);
+      float b = (power * NEW_COLOR.z) + ((1.0f - power) * PREV_COLOR.z);
+      float w = (power * NEW_COLOR.w) + ((1.0f - power) * PREV_COLOR.w);
 
-      CURRENT_COLOR = CRGB(r, g, b);
+      CURRENT_COLOR = ImVec4(r, g, b, w);
       
-      CHANGED = true;
-      return CURRENT_COLOR;
+      NEEDS_CALC = false;
+
+      return CRGB(CURRENT_COLOR.x, CURRENT_COLOR.y, CURRENT_COLOR.z);
     }
   }
   else
   {
-    return CURRENT_COLOR;
+    return CRGB(CURRENT_COLOR.x, CURRENT_COLOR.y, CURRENT_COLOR.z);
   }
 }
 
-void NEO_COLOR_CRGB::reset_to_new_color(CRGB Color)
+bool NEO_COLOR_CRGB::reset_to_new_color(unsigned long Time, ImVec4 Color)
 {
-  calc_transition();
+  if (!vector4_is_same(Color, NEW_COLOR))
+  {
+    set_frame_time(Time);
+    
+    calc_transition();
 
-  START_TIME = CURRENT_TIME;
-  PREV_COLOR = CURRENT_COLOR;
-  NEW_COLOR = Color;
+    START_TIME = CURRENT_TIME;
 
-  NEEDS_CALC = true; 
+    PREV_COLOR = CURRENT_COLOR;
+    NEW_COLOR = Color;
 
-  CHANGED = true;
+    return true;
+  }
+  else
+  {
+    if (!vector4_is_same(CURRENT_COLOR, NEW_COLOR))
+    {
+      set_frame_time(Time);
+
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
 }
 
-bool NEO_COLOR_CRGB::changed()
+bool NEO_COLOR_CRGB::is_changing()
 {
-  return CHANGED;
+  return !vector4_is_same(CURRENT_COLOR, NEW_COLOR);
 }
 
 void NEO_COLOR_CRGB::set_current_frame_time(unsigned long Time)
 {
-  if (CURRENT_TIME != (float)Time)
-  {
-    CURRENT_TIME = (float)Time;
-    NEEDS_CALC = true;
-  }
+  set_frame_time(Time);
 }
 
 CRGB NEO_COLOR_CRGB::color(unsigned long Time, CRGB Color)
 {
-  if (Color == CURRENT_COLOR)
+  if (reset_to_new_color(Time, ImVec4(Color.r, Color.g, Color.b, 255.0f)))
   {
-    // Color previously adjusted already matches current and new color
-    return NEW_COLOR;
+    return calc_transition();
   }
   else
   {
-    set_current_frame_time(Time);
-
-    if (Color == NEW_COLOR)
-    {
-      // Color requested matches previously requested color.  
-      // Previously calculated color doesnt match requested color.
-      // Transition still in progress.
-
-      return calc_transition();
-    }
-    else
-    {
-      // Color requested doesnt match previously requested color. Set to start over.
-
-      reset_to_new_color(Color);
-
-      return CURRENT_COLOR;
-    }
+    return CRGB(CURRENT_COLOR.x, CURRENT_COLOR.y, CURRENT_COLOR.z);
   }
 }
 
@@ -277,37 +280,23 @@ CRGB NEO_COLOR_CRGB::color(unsigned long Time)
 {
   // Do not check for color changes.  Just handle the trasition and return 
   //  either current color or previously requested color.
-  if (CURRENT_COLOR == NEW_COLOR)
-  {
-    return NEW_COLOR;
-  }
-  else
-  {
-    set_current_frame_time(Time);
 
-    return calc_transition();
-  }
+  set_frame_time(Time);
+  return calc_transition();
 }
 
 CRGB NEO_COLOR_CRGB::color()
 {
   // Do not check for color changes.  Just handle the trasition and return 
   //  either current color or previously requested color.
-  if (CURRENT_COLOR == NEW_COLOR)
-  {
-    return NEW_COLOR;
-  }
-  else
-  {
-    return calc_transition();
-  }
+  return calc_transition();
 }
 
 void NEO_COLOR_CRGB::set_color(unsigned long Time, CRGB Color)
 {
   // Set a color trasition change but do not return anything.
   set_current_frame_time(Time);
-  reset_to_new_color(Color);
+  reset_to_new_color(Time, ImVec4(Color.r, Color.g, Color.b, 255.0f));
 }
 
 // ---------------------------------------------------------------------------------------
@@ -321,7 +310,7 @@ void COLOR_COMBO::set_rgb(float R, float G, float B, float A, float Intensity)
   STANDARD_V  = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.7f);
   HOVERED     = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.8f);
   ACTIVE      = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.9f);
-  SIMPLE_RGB  = CRGB(static_cast<unsigned char>(R * 255.0f), static_cast<unsigned char>(G * 255.0f), static_cast<unsigned char>(B * 255.0f));
+  SIMPLE_RGB  = convert_imvec4_to_crgb(ImVec4(R, G, B, A));
 }
 
 void COLOR_COMBO::set_rgb_v(float R, float G, float B, float A, float Intensity)
@@ -333,7 +322,7 @@ void COLOR_COMBO::set_rgb_v(float R, float G, float B, float A, float Intensity)
   STANDARD_V  = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
   HOVERED     = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.8f);
   ACTIVE      = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.9f);
-  SIMPLE_RGB  = CRGB(static_cast<unsigned char>(R * 255.0f), static_cast<unsigned char>(G * 255.0f), static_cast<unsigned char>(B * 255.0f));
+  SIMPLE_RGB  = convert_imvec4_to_crgb(ImVec4(R, G, B, A));
 }
 
 void COLOR_COMBO::set_rgb_black()
@@ -532,33 +521,109 @@ COLOR_COMBO COLOR_COMBOS::pure_color(int Color)
 
 COLOR_COMBO COLOR_COMBOS::color(int Color)
 {
-  if (void_color)
-  {
-    if (Color == 0)
-    {
-      return COLOR_COMBINATIONS[0];
-    }
-    else
-    {
-      return COLOR_COMBINATIONS_V[void_color_value];
-    }
-  }
-  else
-  {
-    return COLOR_COMBINATIONS[Color];
-  }
+
+  return COLOR_COMBINATIONS[Color];
 }
 
-NEO_COLOR_COMBO COLOR_COMBOS::neo_color(int Color)
+ImColor COLOR_COMBOS::neo_color_TEXT(int Color)
 {
   if (Color == -1)
   {
-    return COLOR_COMBINATIONS_NEO[void_color_prev_value];
+    return COLOR_COMBINATIONS_NEO[void_color_prev_value].TEXT.color();
   }
   else
   {
-    return COLOR_COMBINATIONS_NEO[Color];
+    return COLOR_COMBINATIONS_NEO[Color].TEXT.color();
   }
+}
+
+ImColor COLOR_COMBOS::neo_color_BACKGROUND(int Color)
+{
+  if (Color == -1)
+  {
+    return COLOR_COMBINATIONS_NEO[void_color_prev_value].BACKGROUND.color();
+  }
+  else
+  {
+    return COLOR_COMBINATIONS_NEO[Color].BACKGROUND.color();
+  }
+}
+
+ImColor COLOR_COMBOS::neo_color_DIM(int Color)
+{
+  if (Color == -1)
+  {
+    return COLOR_COMBINATIONS_NEO[void_color_prev_value].DIM.color();
+  }
+  else
+  {
+    return COLOR_COMBINATIONS_NEO[Color].DIM.color();
+  }
+}
+
+ImColor COLOR_COMBOS::neo_color_STANDARD(int Color)
+{
+  if (Color == -1)
+  {
+    return COLOR_COMBINATIONS_NEO[void_color_prev_value].STANDARD.color();
+  }
+  else
+  {
+    return COLOR_COMBINATIONS_NEO[Color].STANDARD.color();
+  }
+}
+
+ImColor COLOR_COMBOS::neo_color_STANDARD_V(int Color)
+{
+  if (Color == -1)
+  {
+    return COLOR_COMBINATIONS_NEO[void_color_prev_value].STANDARD_V.color();
+  }
+  else
+  {
+    return COLOR_COMBINATIONS_NEO[Color].STANDARD_V.color();
+  }
+}
+
+ImColor COLOR_COMBOS::neo_color_HOVERED(int Color)
+{
+  if (Color == -1)
+  {
+    return COLOR_COMBINATIONS_NEO[void_color_prev_value].HOVERED.color();
+  }
+  else
+  {
+    return COLOR_COMBINATIONS_NEO[Color].HOVERED.color();
+  }
+}
+
+ImColor COLOR_COMBOS::neo_color_ACTIVE(int Color)
+{
+  if (Color == -1)
+  {
+    return COLOR_COMBINATIONS_NEO[void_color_prev_value].ACTIVE.color();
+  }
+  else
+  {
+    return COLOR_COMBINATIONS_NEO[Color].ACTIVE.color();
+  }
+}
+
+CRGB COLOR_COMBOS::neo_color_SIMPLE_RGB(int Color)
+{
+  if (Color == -1)
+  {
+    return COLOR_COMBINATIONS_NEO[void_color_prev_value].SIMPLE_RGB.color();
+  }
+  else
+  {
+    return COLOR_COMBINATIONS_NEO[Color].SIMPLE_RGB.color();
+  }
+}
+
+bool COLOR_COMBOS::neo_color_is_changing()
+{
+  return COLOR_COMBINATIONS_NEO[RAS_WHITE].STANDARD.is_changing();
 }
 
 void COLOR_COMBOS::toggle_void_color(unsigned long Time)
@@ -711,73 +776,6 @@ COLOR_COMBO COLOR_COMBOS::c_pink()
 COLOR_COMBO COLOR_COMBOS::c_monochrome()
 {
   return color(11);
-}
-
-// ---
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_black()
-{
-  return neo_color(0);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_white()
-{
-  return neo_color(1);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_grey()
-{
-  return neo_color(2);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_red()
-{
-  return neo_color(3);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_orange()
-{
-  return neo_color(4);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_yellow()
-{
-  return neo_color(5);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_green()
-{
-  return neo_color(6);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_cyan()
-{
-  return neo_color(7);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_blue()
-{
-  return neo_color(8);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_purple()
-{
-  return neo_color(9);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_pink()
-{
-  return neo_color(10);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_monochrome()
-{
-  return neo_color(11);
-}
-
-NEO_COLOR_COMBO COLOR_COMBOS::neo_c_neo()
-{
-  return neo_color(void_color_value);
 }
 
 // ---

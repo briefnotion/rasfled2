@@ -91,92 +91,112 @@ void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, f
   if (rank != running_temperature_color_rank)
   {
     running_temperature_color_rank = rank;
+    
+    sdSysData.COLOR_SELECT.set_neo_duration(20000.0f);
+    VELOCITY_COLOR.PROPS.DURATION = 20000.0f;
 
     switch (running_temperature_color_rank)
     {
       case 0:     // < 0
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.grey());
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_GREY);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pure_color(RAS_GREY).SIMPLE_RGB);
         break;
       }
       case 1:     // 0 - 5
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 1.0f, 1.0f);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.0f, 1.0f, 1.0f, 1.0f)));
         break;
       }
       case 2:     // 5 - 10
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 1.0f, 1.0f);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)));
         break;
       }
       case 3:     // 10 - 15
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 1.0f, 1.0f);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.66f, 1.0f, 1.0f, 1.0f)));
         break;
       }
       case 4:     // 15 - 20
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.33f, 1.0f, 1.0f, 1.0f); //
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.33f, 1.0f, 1.0f, 1.0f))); //
         break;
       }
       case 5:     // 20 - 25
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 1.0f, 1.0f); //
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.0f, 1.0f, 1.0f, 1.0f))); //
         break;
       }
       case 6:     // 25 - 30
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.66f, 1.0f); //
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.0f, 1.0f, 0.66f, 1.0f))); //
         break;
       }
       case 7:     // 30 - 35
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.33f, 1.0f); //    
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.33f, 1.0f); // 
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.0f, 1.0f, 0.33f, 1.0f))); //
         break;
       }
       case 8:     // 35 - 40
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.0f, 1.0f); // G
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.0f, 1.0f, 0.0f, 1.0f))); // G
         break;
       }
       case 9:     // 40 - 45
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.33f, 1.0f, 0.0f, 1.0f); //
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.33f, 1.0f, 0.0f, 1.0f))); //
         break;
       }
       case 10:     // 45 - 50
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 0.0f, 1.0f); // 
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 0.0f, 1.0f); //
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.66f, 1.0f, 0.0f, 1.0f))); // 
         break;
       }
       case 11:     // 50 - 55
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.0f, 1.0f);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 1.0f, 0.0f, 1.0f)));
         break;
       }
       case 12:     // 55 - 60
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.33f, 1.0f);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 1.0f, 0.33f, 1.0f)));
         break;
       }
       case 13:     // 60 - 65
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.66f, 1.0f);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 1.0f, 0.66f, 1.0f)));
         break;
       }
       case 14:     // 65 - 70
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 1.0f, 1.0f);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)));
         break;
       }
       case 15:     // 70 +
       {
         sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 0.0f, 1.0f, 0.5f);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 0.0f, 1.0f, 0.5f)));
         break;
       }
       default:
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.monochrome());
+        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_MONOCHROME);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pure_color(RAS_MONOCHROME).SIMPLE_RGB);
         break;
       }
     }
@@ -223,15 +243,14 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
   // Automobile Data Available
   if (sdSysData.CAR_INFO.active() == true)
   {
+    // Update neo_color
+    VELOCITY_COLOR.set_current_frame_time(sdSysData.PROGRAM_TIME.current_frame_time());
 
     // Variable Reuse
-
     float speed_lowest_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_LOWEST.val_mph();
     float speed_average_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph();
 
     float s_temp = sdSysData.CAR_INFO.CALCULATED.s_temp();
-
-    //s_temp 
 
     // Check alerts
 
@@ -245,23 +264,15 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     }
 
     // S-Temp Color Set
-    running_temperature.set(sdSysData.RUNNING_COLOR_TEMPERATURE);
-    if (running_temperature.bounce())
-    {
-      if (running_temperature.value())
-      {
-        sdSysData.COLOR_SELECT.set_neo_duration(20000.0f);
-      }
-      else
-      {
-        sdSysData.COLOR_SELECT.set_neo_duration(2000.0f);
-        running_temperature_color_rank = -1;
-      }
-    }
-
-    if (running_temperature.value())
+    if (sdSysData.RUNNING_COLOR == -1)
     {
       running_temperature_color_set(sdSysData, s_temp);
+    }
+    else
+    {
+      sdSysData.COLOR_SELECT.set_neo_duration(2000.0f);
+      VELOCITY_COLOR.PROPS.DURATION = 2000.0f;
+      VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pure_color(sdSysData.RUNNING_COLOR).SIMPLE_RGB);
     }
 
     // MIL alert
@@ -682,10 +693,10 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         // Velocity
         // LF
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_LF", 
-                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
+                                              (VELOCITY_COLOR.color())
                                               .brightness(brightness_LF * 0.04f));
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_LF",
-                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
+                                              (VELOCITY_COLOR.color())
                                               .brightness(brightness_LF * 0.04f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_LF", speed_tire_LF * 0.5f);
@@ -693,10 +704,10 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         
         // RF
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_RF", 
-                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
+                                              (VELOCITY_COLOR.color())
                                               .brightness(brightness_RF * 0.04f));
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_RF", 
-                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
+                                              (VELOCITY_COLOR.color())
                                               .brightness(brightness_RF * 0.04f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_RF", speed_tire_RF * 0.5f);
@@ -704,10 +715,10 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         
         // LB
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_LB", 
-                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
+                                              (VELOCITY_COLOR.color())
                                               .brightness(brightness_LB * 0.04f));
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_LB", 
-                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
+                                              (VELOCITY_COLOR.color())
                                               .brightness(brightness_LB * 0.04f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_LB", speed_tire_LB * 0.5f);
@@ -715,18 +726,18 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         
         // RB
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_RB", 
-                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
+                                              (VELOCITY_COLOR.color())
                                               .brightness(brightness_RB * 0.04f));
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_RB", 
-                                              (sdSysData.COLOR_SELECT.neo_color(sdSysData.COLOR_SELECT.void_colr()).SIMPLE_RGB.color())
+                                              (VELOCITY_COLOR.color())
                                               .brightness(brightness_RB * 0.04f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_RB", speed_tire_RB * 0.5f);
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RB", speed_tire_RB * 0.5f);
         
         // Keep?
-        Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_PULSE", drive_pulse_color.brightness(multiplier));
-        Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_PULSE", drive_pulse_color.brightness(multiplier));
+        Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_PULSE", DRIVE_PULSE_COLOR.brightness(multiplier));
+        Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_PULSE", DRIVE_PULSE_COLOR.brightness(multiplier));
       }
     }
   }

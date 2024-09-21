@@ -94,28 +94,28 @@ ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position)
 void draw_line(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size)
 {
   // simple draw line
-  Draw_List->AddLine(Screen_Position_1, Screen_Position_2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), Size);
+  Draw_List->AddLine(Screen_Position_1, Screen_Position_2, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), Size);
 }
 
 void draw_box(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position_1, ImVec2 Screen_Position_2, int Color, float Size)
 {
   // simple draw line
-  Draw_List->AddRect(Screen_Position_1, Screen_Position_2, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 0.0f, 0, Size);
+  Draw_List->AddRect(Screen_Position_1, Screen_Position_2, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 0.0f, 0, Size);
 }
 
 void draw_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
-  Draw_List->AddNgonFilled(Screen_Position, 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 4.0f);
+  Draw_List->AddNgonFilled(Screen_Position, 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 4.0f);
 }
 
 void draw_marker_filled(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
-  Draw_List->AddNgonFilled(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 4.0f);
+  Draw_List->AddNgonFilled(Screen_Position, 4.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 4.0f);
 }
 
 void draw_airport_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Screen_Position, int Color)
 {
-  Draw_List->AddNgon(Screen_Position, 4.0f, sdSysData.COLOR_SELECT.neo_color(Color).STANDARD.color(), 4.0f, 1.5f);
+  Draw_List->AddNgon(Screen_Position, 4.0f, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 4.0f, 1.5f);
 }
 
 void draw_point_marker(ImDrawList *Draw_List, ImVec2 Screen_Position, ImColor Color, float Size)
@@ -160,7 +160,7 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Ar
                                                     ImVec2(Track.TRACK_POINTS_SIMPLE[position].LATITUDE, Track.TRACK_POINTS_SIMPLE[position].LONGITUDE), Map_Bearing, draw_1);
 
     Draw_List->AddLine(track_position_0, track_position_1, 
-                        sdSysData.COLOR_SELECT.neo_c_grey().TEXT.color(), 1.0f);
+                        sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
   }
 
   // Draw Detailed Track
@@ -174,14 +174,14 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Ar
 
     if (draw_0 || draw_1)
     {
-      ImColor point_color = sdSysData.COLOR_SELECT.neo_color(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position].ALTITUDE)).TEXT.color();
+      ImColor point_color = sdSysData.COLOR_SELECT.neo_color_TEXT(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position].ALTITUDE));
 
       point_color.Value.w = Track.TRACK_POINTS_DETAILED[position].RSSI_INTENSITY;
 
       draw_point_marker(Draw_List, track_position_0, point_color, Strength_Point_Size);
 
       Draw_List->AddLine(track_position_0, track_position_1, 
-                          sdSysData.COLOR_SELECT.neo_c_grey().TEXT.color(), 2.0f);
+                          sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 2.0f);
     }
   }
 }
@@ -210,11 +210,11 @@ AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Dra
    
     if (Aircraft.AIRCRAFT_ITEM.SEEN_POS.get_int_value() <= 5)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().STANDARD.color()));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
     }
 
     ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y - 39.0f));
@@ -283,7 +283,7 @@ void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
         draw_marker(Draw_List, sdSysData, draw_position, sdSysData.COLOR_SELECT.yellow());
         ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5.0f));
 
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().STANDARD.color()));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_YELLOW)));
         ImGui::Text("%s", DISPLAY_NAME.c_str());
         ImGui::PopStyleColor();
         break;
@@ -303,14 +303,14 @@ void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
                                                       Map_Bearing, on_screen);
 
             Draw_List->AddLine(draw_position, landing_vector_end, 
-                                sdSysData.COLOR_SELECT.neo_c_yellow().STANDARD.color(), 2);
+                                sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE), 2);
           }
         }
         
         draw_airport_marker(Draw_List, sdSysData, draw_position, sdSysData.COLOR_SELECT.yellow());
         ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5.0f));
 
-        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_yellow().STANDARD.color()));
+        ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
         ImGui::Text("%s", DISPLAY_NAME.c_str());
         ImGui::PopStyleColor();
         break;
@@ -318,7 +318,7 @@ void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
 
       case 2: // 2 - Region
       {
-        ImColor Color = sdSysData.COLOR_SELECT.neo_c_cyan().STANDARD_V.color();
+        ImColor Color = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_CYAN);
         if (REGION_GPS_COORDS.size() > 1.0f)
         {
           //bool on_screen = false;
@@ -351,7 +351,7 @@ void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
 
       case 3: // 2 - Interstate
       {
-        ImColor Color = sdSysData.COLOR_SELECT.neo_c_cyan().STANDARD.color();
+        ImColor Color = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_CYAN);
         if (REGION_GPS_COORDS.size() > 1)
         {
           bool on_screen_1 = false;
@@ -649,15 +649,15 @@ void ADSB_RANGE::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
 
   ImVec2 center = point_position_center(Working_Area);
   
-  Draw_List->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE, ImU32(sdSysData.COLOR_SELECT.neo_color(PROPS.COLOR).STANDARD_V.color()), 32, 1.5f);
-  Draw_List->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE * 2.0f, ImU32(sdSysData.COLOR_SELECT.neo_color(PROPS.COLOR).STANDARD_V.color()), 32, 1.5f);
+  Draw_List->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)), 32, 1.5f);
+  Draw_List->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE * 2.0f, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)), 32, 1.5f);
   
   ImGui::SetCursorScreenPos(ImVec2(center.x, center.y - RADIUS_CIRCLE_POINT_SIZE + 5));
   
   // Text Range
   //ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color(PROPS.COLOR).STANDARD_V));
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color(PROPS.COLOR).STANDARD_V.color(sdSysData.PROGRAM_TIME.current_frame_time())));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)));
 
   ImGui::Text("%.2f mi", RANGE);
   ImGui::PopStyleColor();
@@ -1665,11 +1665,11 @@ void ADSB_MAP::draw(system_data &sdSysData)
   //Put cursor in upper left
   ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y));
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_red().TEXT.color()));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_RED)));
 
   ImGui::Text("WARNING: Information may be considered CONFIDENTIAL");
   ImGui::PopStyleColor();
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_grey().TEXT.color()));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_GREY)));
   ImGui::Text("TIME: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TIME_OF_SIGNAL.c_str());
   ImGui::Text("COUNT: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_COUNT.c_str());
   ImGui::Text("  POS: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_AIRCRAFT.c_str());
@@ -2008,7 +2008,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
 
 void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
 {
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_c_white().TEXT.color()));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
 
   ImGui::BeginChild("ADSB Display", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
