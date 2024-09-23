@@ -44,7 +44,7 @@ class ALERT_WIDGET_WIDGTS
 
   BAR_TECH VALUES;
 
-  void create(system_data &sdSysData, string Name);
+  void create(string Name);
 
 };
 
@@ -54,7 +54,7 @@ class ALERT_WIDGET_PROPERTIES_LIST
 
   vector<ALERT_WIDGET_WIDGTS> LIST;
 
-  void check_properties_list(system_data &sdSysData, int Alert_Num, string Name);
+  void check_properties_list(int Alert_Num, string Name);
 };
 
 class ALERT_WIDGET

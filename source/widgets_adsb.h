@@ -214,7 +214,7 @@ class ADSB_MAP
 
   public:
 
-  void create(system_data &sdSysData);
+  void create();
 
   void draw(system_data &sdSysData);
 
@@ -243,7 +243,7 @@ class ADSB_SCREEN
 
   public:
 
-  void create(system_data &sdSysData);
+  void create();
 
   void display(system_data &sdSysData);
 };

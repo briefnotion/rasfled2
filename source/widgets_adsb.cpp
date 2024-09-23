@@ -280,7 +280,7 @@ void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
     {
       case 0: //  0 - Generic
       {
-        draw_marker(Draw_List, sdSysData, draw_position, sdSysData.COLOR_SELECT.yellow());
+        draw_marker(Draw_List, sdSysData, draw_position, RAS_YELLOW);
         ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5.0f));
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_YELLOW)));
@@ -307,7 +307,7 @@ void MAP_MARKER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
           }
         }
         
-        draw_airport_marker(Draw_List, sdSysData, draw_position, sdSysData.COLOR_SELECT.yellow());
+        draw_airport_marker(Draw_List, sdSysData, draw_position, RAS_YELLOW);
         ImGui::SetCursorScreenPos(ImVec2(draw_position.x, draw_position.y + 5.0f));
 
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
@@ -722,7 +722,7 @@ void ADSB_MAP::add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type)
   LANDMARKS.push_back(new_landmark);
 }
 
-void ADSB_MAP::create(system_data &sdSysData)
+void ADSB_MAP::create()
 {
   // Prepare Map Orientation with Impact Resistance
   MAP_HEADING_DEGREES.set_size(30);
@@ -731,31 +731,31 @@ void ADSB_MAP::create(system_data &sdSysData)
   CURRENT_POSITION_COMPASS.set_size(32, (15 / 2));
   // set at frame rate for slow and jitter size for fast.
 
-  RANGE_INDICATOR.PROPS.COLOR = sdSysData.COLOR_SELECT.orange();
+  RANGE_INDICATOR.PROPS.COLOR = RAS_ORANGE;
   RANGE_INDICATOR.set_range(25.0f);
 
   if (GPS_ALTITUDE_COLOR_SCALE.active() == false)
   {
     // This is not representing altitude. It is representing speed in mph.
-    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(10.0f, sdSysData.COLOR_SELECT.red());
-    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(15.0f, sdSysData.COLOR_SELECT.yellow());
-    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(35.0f, sdSysData.COLOR_SELECT.orange());
-    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(45.0f, sdSysData.COLOR_SELECT.green());
-    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(55.0f, sdSysData.COLOR_SELECT.blue());
-    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(75.0f, sdSysData.COLOR_SELECT.purple());
-    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(100.0f, sdSysData.COLOR_SELECT.white());
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(10.0f, RAS_RED);
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(15.0f, RAS_YELLOW);
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(35.0f, RAS_ORANGE);
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(45.0f, RAS_GREEN);
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(55.0f, RAS_BLUE);
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(75.0f, RAS_PURPLE);
+    GPS_ALTITUDE_COLOR_SCALE.add_color_value_pair(100.0f, RAS_WHITE);
   }
 
   // Create vars if first run
   if (ALTITUDE_COLOR_SCALE.active() == false)
   {
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(500.0f, sdSysData.COLOR_SELECT.red());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(1000.0f, sdSysData.COLOR_SELECT.yellow());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(2500.0f, sdSysData.COLOR_SELECT.orange());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(12000.0f, sdSysData.COLOR_SELECT.green());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(45000.0f, sdSysData.COLOR_SELECT.blue());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(65000.0f, sdSysData.COLOR_SELECT.purple());
-    ALTITUDE_COLOR_SCALE.add_color_value_pair(100000.0f, sdSysData.COLOR_SELECT.white());
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(500.0f, RAS_RED);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(1000.0f, RAS_YELLOW);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(2500.0f, RAS_ORANGE);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(12000.0f, RAS_GREEN);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(45000.0f, RAS_BLUE);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(65000.0f, RAS_PURPLE);
+    ALTITUDE_COLOR_SCALE.add_color_value_pair(100000.0f, RAS_WHITE);
   }
 
   // KLFT - Lafayette Regional/Paul Fournet Field Airport
@@ -1730,7 +1730,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    if (BC_PLUS.button_color(sdSysData, "+", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    if (BC_PLUS.button_color(sdSysData, "+", RAS_GREEN, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
       RANGE_INDICATOR.zoom_out();
@@ -1741,7 +1741,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
                                       working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
     if (BTC_NORTH_UP.button_toggle_color(sdSysData, "NORTH\nUP", "DIR\nUP", NORTH_UP,
-                                    sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
+                                    RAS_GREEN, RAS_BLUE, 
                                     sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
@@ -1752,7 +1752,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    if (BC_MINUS.button_color(sdSysData, "-", sdSysData.COLOR_SELECT.green(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    if (BC_MINUS.button_color(sdSysData, "-", RAS_GREEN, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
       RANGE_INDICATOR.zoom_in();
@@ -1765,7 +1765,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
     if (active_gps)
     {
       if (BTC_CENT.button_toggle_color(sdSysData, "CENT\n(On)", "CENT\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
-                                      sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
+                                      RAS_GREEN, RAS_BLUE, 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
         SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
@@ -1784,7 +1784,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
                                     working_area.y + sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f));
 
       if (BTC_CALI.button_toggle_color(sdSysData, "CALI\n(On)", "CALI\n(Off)", sdSysData.COMMS_COMPASS.calibrate_on(),
-                                      sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
+                                      RAS_GREEN, RAS_BLUE, 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
         sdSysData.COMMS_COMPASS.calibrate_toggle();
@@ -1795,7 +1795,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
         ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                 working_area.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
         if (BTC_LOCK.button_toggle_color(sdSysData, "LOCK\n(On)", "LOCK\n(Off)", sdSysData.COMMS_COMPASS.calibrate_lock_on(),
-                                      sdSysData.COLOR_SELECT.green(), sdSysData.COLOR_SELECT.blue(), 
+                                      RAS_GREEN, RAS_BLUE, 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
           sdSysData.COMMS_COMPASS.calibrate_lock_toggle();
@@ -1803,7 +1803,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
 
         ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                 working_area.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
-        if (BC_BEAR_RESET.button_color(sdSysData, "BEAR\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        if (BC_BEAR_RESET.button_color(sdSysData, "BEAR\nRESET", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
           if (active_gps)
           {
@@ -1817,7 +1817,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
 
         ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                 working_area.y + 3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
-        if (BC_CALI_RESET.button_color(sdSysData, "CALI\nRESET", sdSysData.COLOR_SELECT.red(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        if (BC_CALI_RESET.button_color(sdSysData, "CALI\nRESET", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
           sdSysData.COMMS_COMPASS.calibrateion_reset();
         }
@@ -1855,7 +1855,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
           p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS[pos].X / 4.0f), 
                               center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS[pos].Y / 4.0f));
 
-          draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.orange());
+          draw_marker(draw_list_map, sdSysData, p1, RAS_ORANGE);
         }
 
         for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED.size(); pos++)
@@ -1863,7 +1863,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
           p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED[pos].X / 4.0f), 
                               center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED[pos].Y / 4.0f));
 
-          draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.blue());
+          draw_marker(draw_list_map, sdSysData, p1, RAS_BLUE);
         }
       }
 
@@ -1875,7 +1875,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
           p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS[pos].X / 4.0f), 
                               center.y + (sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS[pos].Y / 4.0f));
 
-          draw_marker(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.green());
+          draw_marker(draw_list_map, sdSysData, p1, RAS_GREEN);
         }
       }
 
@@ -1885,7 +1885,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
       r2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_min_max_x().MAX_VALUE / 4.0f), 
                                       center.y + (sdSysData.COMMS_COMPASS.calibration_min_max_y().MAX_VALUE / 4.0f));
       
-      draw_box(draw_list_map, sdSysData, r1, r2, sdSysData.COLOR_SELECT.orange(), 2.0f);
+      draw_box(draw_list_map, sdSysData, r1, r2, RAS_ORANGE, 2.0f);
 
       c1 = ImVec2(center.x + ((sdSysData.COMMS_COMPASS.calibration_min_max_x().MIN_VALUE - 
                                       sdSysData.COMMS_COMPASS.calibration_offset().X) / 4.0f), 
@@ -1896,10 +1896,10 @@ void ADSB_MAP::draw(system_data &sdSysData)
                           center.y + ((sdSysData.COMMS_COMPASS.calibration_min_max_y().MAX_VALUE - 
                                       sdSysData.COMMS_COMPASS.calibration_offset().Y) / 4.0f));
 
-      draw_box(draw_list_map, sdSysData, c1, c2, sdSysData.COLOR_SELECT.white(), 2.0f);
+      draw_box(draw_list_map, sdSysData, c1, c2, RAS_WHITE, 2.0f);
 
-      draw_line(draw_list_map, sdSysData, r1, c1, sdSysData.COLOR_SELECT.white(), 2.0f);
-      draw_line(draw_list_map, sdSysData, r2, c2, sdSysData.COLOR_SELECT.white(), 2.0f);
+      draw_line(draw_list_map, sdSysData, r1, c1, RAS_WHITE, 2.0f);
+      draw_line(draw_list_map, sdSysData, r2, c2, RAS_WHITE, 2.0f);
 
       // level 2
       // A
@@ -1914,15 +1914,15 @@ void ADSB_MAP::draw(system_data &sdSysData)
         p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].OFFSET_POINT.X / 4.0f), 
                       center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].OFFSET_POINT.Y / 4.0f));
 
-        draw_line(draw_list_map, sdSysData, p1, p2, sdSysData.COLOR_SELECT.green(), 2.0f);
-        draw_line(draw_list_map, sdSysData, p2, p3, sdSysData.COLOR_SELECT.green(), 2.0f);
-        draw_line(draw_list_map, sdSysData, p3, p4, sdSysData.COLOR_SELECT.green(), 2.0f);
-        draw_line(draw_list_map, sdSysData, p4, p1, sdSysData.COLOR_SELECT.green(), 2.0f);
+        draw_line(draw_list_map, sdSysData, p1, p2, RAS_GREEN, 2.0f);
+        draw_line(draw_list_map, sdSysData, p2, p3, RAS_GREEN, 2.0f);
+        draw_line(draw_list_map, sdSysData, p3, p4, RAS_GREEN, 2.0f);
+        draw_line(draw_list_map, sdSysData, p4, p1, RAS_GREEN, 2.0f);
 
-        draw_marker_filled(draw_list_map, sdSysData, p1, sdSysData.COLOR_SELECT.white());
-        draw_marker_filled(draw_list_map, sdSysData, p2, sdSysData.COLOR_SELECT.white());
-        draw_marker_filled(draw_list_map, sdSysData, p3, sdSysData.COLOR_SELECT.white());
-        draw_marker_filled(draw_list_map, sdSysData, p4, sdSysData.COLOR_SELECT.white());
+        draw_marker_filled(draw_list_map, sdSysData, p1, RAS_WHITE);
+        draw_marker_filled(draw_list_map, sdSysData, p2, RAS_WHITE);
+        draw_marker_filled(draw_list_map, sdSysData, p3, RAS_WHITE);
+        draw_marker_filled(draw_list_map, sdSysData, p4, RAS_WHITE);
       }
     }
   }
@@ -2122,9 +2122,9 @@ void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
   ImGui::PopStyleColor();
 }
 
-void ADSB_SCREEN::create(system_data &sdSysData)
+void ADSB_SCREEN::create()
 {
-  ADSB_MAP_DISPLAY.create(sdSysData);
+  ADSB_MAP_DISPLAY.create();
 }
 
 void ADSB_SCREEN::display(system_data &sdSysData)
@@ -2144,7 +2144,7 @@ void ADSB_SCREEN::display(system_data &sdSysData)
 
   ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    if (BTC_ADSB.button_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", sdSysData.AIRCRAFT_COORD.is_active(), sdSysData.COLOR_SELECT.red(), sdSysData.COLOR_SELECT.grey(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (BTC_ADSB.button_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", sdSysData.AIRCRAFT_COORD.is_active(), RAS_RED, RAS_GREY, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       if (sdSysData.AIRCRAFT_COORD.is_active() == true)
       {
@@ -2161,7 +2161,7 @@ void ADSB_SCREEN::display(system_data &sdSysData)
       sdSysData.SCREEN_COMMS.command_text_set(" adsbsnap");
     }
 
-    if (BC_VIEW.button_color(sdSysData, "VIEW", sdSysData.COLOR_SELECT.orange(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (BC_VIEW.button_color(sdSysData, "VIEW", RAS_ORANGE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       if (DISPLAY_TABLE)
       {

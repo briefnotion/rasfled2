@@ -316,51 +316,9 @@ class COLOR_COMBOS
   void void_color_set(unsigned long Time, int Color);
   void void_color_set(unsigned long Time, float R, float G, float B, float Intensity);
 
-  // Return color only
-  COLOR_COMBO p_black();
-  COLOR_COMBO p_white();
-  COLOR_COMBO p_grey();
-  COLOR_COMBO p_red();
-  COLOR_COMBO p_orange();
-  COLOR_COMBO p_yellow();
-  COLOR_COMBO p_green();
-  COLOR_COMBO p_cyan();
-  COLOR_COMBO p_blue();
-  COLOR_COMBO p_purple();
-  COLOR_COMBO p_pink();
-  COLOR_COMBO p_monochrome();
-
-  // Return color with respects to void on or off
-  COLOR_COMBO c_black();
-  COLOR_COMBO c_white();
-  COLOR_COMBO c_grey();
-  COLOR_COMBO c_red();
-  COLOR_COMBO c_orange();
-  COLOR_COMBO c_yellow();
-  COLOR_COMBO c_green();
-  COLOR_COMBO c_cyan();
-  COLOR_COMBO c_blue();
-  COLOR_COMBO c_purple();
-  COLOR_COMBO c_pink();
-  COLOR_COMBO c_monochrome();
-
   int void_colr();
   //int custom_colr();
   int void_colr_prev();
-
-  int black();
-  int white();
-  int grey();
-  int red();
-  int orange();
-  int yellow();
-  int green();
-  int cyan();
-  int blue();
-  int purple();
-  int pink();
-  int monochrome();
-
 };
 
 // ---------------------------------------------------------------------------------------

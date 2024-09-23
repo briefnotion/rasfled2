@@ -558,6 +558,8 @@ int get_frame_interval(int Frames_Per_Second);
 
 int radio_translate_to_frequency_6(float Frequency);
 
+float temperture_translate_celcius_to_fahrenheit(float celcius);
+
 float velocity_translate_kmph_to_mph(float kmph);
 
 float velocity_translate_Miph_to_mps(float Miph);

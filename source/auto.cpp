@@ -111,12 +111,14 @@ int BYTE_VALUE_8::val_7()
 
 void TEMPERATURE::store_c(int Celsius)
 {
-  C  = Celsius;
+  C = (float)Celsius;
+  F = (float)temperture_translate_celcius_to_fahrenheit(Celsius);
 }
 
 void TEMPERATURE::store_c(float Celsius)
 {
-  C  = Celsius;
+  C = Celsius;
+  F = temperture_translate_celcius_to_fahrenheit(Celsius);
 }
 
 float TEMPERATURE::val_c()
@@ -124,24 +126,20 @@ float TEMPERATURE::val_c()
   return C;
 }
 
-/*
 float TEMPERATURE::val_f()
 {
-  return -1;
+  return F;
 }
-*/
 
 string TEMPERATURE::c()
 {
-  return to_string((int)C) + " c";
+  return to_string((int)C) + "c";
 }
 
-/*
 string TEMPERATURE::f()
 {
-  return "(O)";
+  return to_string((int)F) + "f";
 }
-*/
 
 //-----------
 

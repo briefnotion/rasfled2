@@ -212,11 +212,14 @@ class SCREEN4
   // Blinkers
   TIMED_PING PING_BLINKER;
   bool BLINKER_BLINK = true;
+  NEO_COLOR BLINKER_INDICATOR_LEFT;
+  NEO_COLOR BLINKER_INDICATOR_RIGHT;
+  NEO_COLOR BLINKER_INDICATOR_HAZARD;
+
 
   //bool CHANGED = false;
 
   void door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size);
-  void hazard_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size);
   void signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size);
 
   void set_screen_default_colors(system_data &sdSysData);

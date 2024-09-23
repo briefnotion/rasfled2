@@ -211,6 +211,7 @@ class TEMPERATURE
   private:
 
   float C = -1;
+  float F = -1;
 
   unsigned long TIME_STAMP = -1; // Miliseconds.  Fairly loose timings.
 
@@ -219,9 +220,9 @@ class TEMPERATURE
   void store_c(int Celsius);
   void store_c(float Celsius);
   float val_c();
-  //float val_f();
+  float val_f();
   string c();
-  //string f();
+  string f();
 
   unsigned long time_stamp();
 };

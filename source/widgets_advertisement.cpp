@@ -118,7 +118,7 @@ void ADVERTISEMENT_SCREENS::draw(system_data &sdSysData)
             line_start_1 = ImVec2(working_area.x, working_area.y + (float)SCAN_LINE);
             line_end_1 = ImVec2(line_start_1.x + float((sdSysData.PROGRAM_TIME.current_frame_time() % 1000)), working_area.y + (float)SCAN_LINE);
 
-            draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.c_black().STANDARD, 1.0f);
+            draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.color(RAS_BLACK).STANDARD, 1.0f);
           }
 
           if (sdSysData.CAR_INFO.active() && sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
@@ -129,8 +129,8 @@ void ADVERTISEMENT_SCREENS::draw(system_data &sdSysData)
             line_start_2 = ImVec2(line_end_1.x + (sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph() * 3.0f), working_area.y + (float)SCAN_LINE + 4.0f);
             line_end_2 = ImVec2(line_start_2.x + sdSysData.GPS_SYSTEM.current_position().LONGITUDE, working_area.y + (float)SCAN_LINE + 4.0f);
 
-            draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.c_black().STANDARD, 2.0f);
-            draw_list_advertisement->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.c_black().STANDARD, 2.0f);
+            draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.color(RAS_BLACK).STANDARD, 2.0f);
+            draw_list_advertisement->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.color(RAS_BLACK).STANDARD, 2.0f);
           }
 
           if (sdSysData.AIRCRAFT_COORD.is_active())
@@ -141,11 +141,11 @@ void ADVERTISEMENT_SCREENS::draw(system_data &sdSysData)
             line_start_2 = ImVec2(line_end_1.x, working_area.y + (float)SCAN_LINE + 8.0f);
             line_end_2 = ImVec2(line_start_2.x + (float)(sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT * 3), working_area.y + (float)SCAN_LINE + 8.0f);
 
-            draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.c_white().STANDARD, 2.0f);
-            draw_list_advertisement->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.c_red().STANDARD, 2.0f);
+            draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.color(RAS_WHITE).STANDARD, 2.0f);
+            draw_list_advertisement->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.color(RAS_RED).STANDARD, 2.0f);
           }
 
-          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.c_black().STANDARD));
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.color(RAS_BLACK).STANDARD));
           ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y));
           ImGui::Text("t_%.3f", ((float)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0f);
           ImGui::PopStyleColor();

@@ -957,56 +957,56 @@ void processcommandlineinput(system_data &sdSysData,
       // Overhead White
       if (check_command(sdSysData.SCREEN_COMMS, "ow", "Turn On White Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.p_white().SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_WHITE).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Red
       if (check_command(sdSysData.SCREEN_COMMS, "or", "Turn On Red Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.p_red().SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_RED).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Green
       if (check_command(sdSysData.SCREEN_COMMS, "og", "Turn On Green Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.p_green().SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_GREEN).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Blue
       if (check_command(sdSysData.SCREEN_COMMS, "ob", "Turn On Blue Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.p_blue().SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_BLUE).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Purple
       if (check_command(sdSysData.SCREEN_COMMS, "ou", "Turn On Purple Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.p_purple().SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_PURPLE).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Yellow
       if (check_command(sdSysData.SCREEN_COMMS, "oy", "Turn On Yellow Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.p_yellow().SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_YELLOW).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Cyan
       if (check_command(sdSysData.SCREEN_COMMS, "oc", "Turn On Cyan Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.p_cyan().SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_CYAN).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Orange
       if (check_command(sdSysData.SCREEN_COMMS, "on", "Turn On Orange Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.p_orange().SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_ORANGE).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 

@@ -268,9 +268,11 @@ class DISPLAY_DATA_AUTOMOBILE
   // Temp
 
   string TEMP_AMBIANT_STRING = "";
+  string TEMP_AMBIANT_F_STRING = "";
   float TEMP_AMBIANT = 0.0f;
   
   string TEMP_AIR_INTAKE_STRING = "";
+  string TEMP_AIR_INTAKE_F_STRING = "";
   float TEMP_AIR_INTAKE = 0.0f;
   
   string TEMP_COOLANT_STRING = "";

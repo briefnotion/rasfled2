@@ -532,13 +532,13 @@ bool CONFIRM_DIALOG::confirm_dialog(system_data &sdSysData, bool &Choice)
   
   if (ImGui::Begin("Continue", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
   {
-    if (CONFIRM.button_color(sdSysData, "CONFIRM", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (CONFIRM.button_color(sdSysData, "CONFIRM", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       Choice = true;
       ret_choice_clicked = true;
     }
     
-    if (DENY.button_color(sdSysData, "DENY", sdSysData.COLOR_SELECT.blue(), sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (DENY.button_color(sdSysData, "DENY", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       Choice = false;
       ret_choice_clicked = true;
@@ -573,7 +573,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
   // Set Color
   if (Valid_Position == false)
   {
-    Color = sdSysData.COLOR_SELECT.yellow();
+    Color = RAS_YELLOW;
   }
 
   if (Valid_Position)
@@ -879,7 +879,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
   draw_compass(Draw_List, sdSysData, Version, Screen_Position, Size, Main, 
                 Valid_Position, Valid_Heading_1, Heading_1, 
                 Valid_Heading_2, Heading_2, Draw_North_Pointer, 
-                false, 0.0f, 0.0f, Map_Bearing, sdSysData.COLOR_SELECT.white());
+                false, 0.0f, 0.0f, Map_Bearing, RAS_WHITE);
 }
 
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
@@ -940,29 +940,29 @@ void BAR_TECH::draw_min_max_val(system_data &sdSysData)
 {
   if ((int)MIN_MAX.min() < 0)
   {
-    DSP_MIN.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
+    DSP_MIN.PROPS.COLOR = RAS_WHITE;
   }
   else
   {
-    DSP_MIN.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
+    DSP_MIN.PROPS.COLOR = RAS_WHITE;
   }
   
   if ((int)(VALUE) < 0)
   {
-    DSP_VALUE.PROPS.COLOR = sdSysData.COLOR_SELECT.yellow();
+    DSP_VALUE.PROPS.COLOR = RAS_YELLOW;
   }
   else
   {
-    DSP_VALUE.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
+    DSP_VALUE.PROPS.COLOR = RAS_WHITE;
   }
 
   if ((int)(MIN_MAX.max()) < 0)
   {
-    DSP_MAX.PROPS.COLOR = sdSysData.COLOR_SELECT.yellow();
+    DSP_MAX.PROPS.COLOR = RAS_YELLOW;
   }
   else
   {
-    DSP_MAX.PROPS.COLOR = sdSysData.COLOR_SELECT.white();
+    DSP_MAX.PROPS.COLOR = RAS_WHITE;
   }
 
   // Display Values

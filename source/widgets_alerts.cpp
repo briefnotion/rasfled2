@@ -23,15 +23,15 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
-void ALERT_WIDGET_WIDGTS::create(system_data &sdSysData, string Name)
+void ALERT_WIDGET_WIDGTS::create(string Name)
 {
   // Value Bar
   {
   VALUES.PROPS.LABEL = Name + " Value";
   VALUES.PROPS.BAR_HEIGHT = 20.0f;
   VALUES.PROPS.MARKER_SIZE = 15.0f;
-  VALUES.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.blue();
-  VALUES.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.yellow();
+  VALUES.PROPS.COLOR_BACKGROUND = RAS_BLUE;
+  VALUES.PROPS.COLOR_MARKER = RAS_YELLOW;
   VALUES.PROPS.DRAW_MIN_MAX_ON_TOP = false;
   VALUES.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
   VALUES.PROPS.DRAW_MIN_MAX = true;
@@ -39,14 +39,14 @@ void ALERT_WIDGET_WIDGTS::create(system_data &sdSysData, string Name)
   VALUES.PROPS.MIN = 0.0f;
   VALUES.PROPS.MAX = 1.0f;
   VALUES.PROPS.DRAW_RULER = true;
-  VALUES.PROPS.COLOR_RULER = sdSysData.COLOR_SELECT.white();
+  VALUES.PROPS.COLOR_RULER = RAS_WHITE;
   VALUES.PROPS.MAX_TICK_LEVEL = 6;
   VALUES.PROPS.DRAW_FRAME_COUNT = 30;
   VALUES.create();
   }
 }
 
-void ALERT_WIDGET_PROPERTIES_LIST::check_properties_list(system_data &sdSysData, int Alert_Num, string Name)
+void ALERT_WIDGET_PROPERTIES_LIST::check_properties_list(int Alert_Num, string Name)
 {
   if (Alert_Num >= (int)LIST.size())
   {
@@ -56,7 +56,7 @@ void ALERT_WIDGET_PROPERTIES_LIST::check_properties_list(system_data &sdSysData,
 
       LIST.push_back(tmp_properties);
 
-      LIST.back().create(sdSysData, Name + to_string(LIST.size() -1));
+      LIST.back().create(Name + to_string(LIST.size() -1));
     }
   }
 }
@@ -69,7 +69,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
     if (Alerts_List.res_display(alert_num))
     {
       // Create properties if needed
-      PROPERTIES_RESERVE_LIST.check_properties_list(sdSysData, alert_num, "Reserve Alert ");
+      PROPERTIES_RESERVE_LIST.check_properties_list(alert_num, "Reserve Alert ");
 
       string title = Alerts_List.PROPS.ALERT_SYSTEM_NAME;
 
@@ -79,22 +79,22 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
 
       if (Alerts_List.res_warning(alert_num))
       {        
-        BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.yellow();
-        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
+        BACKGROUND_COLOR_VALUE = RAS_YELLOW;
+        TEXT_COLOR_VALUE = RAS_WHITE;
         
         alert_type = 2;
       }
       else if(Alerts_List.res_active(alert_num))
       {
-        BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.red();
-        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
+        BACKGROUND_COLOR_VALUE = RAS_RED;
+        TEXT_COLOR_VALUE = RAS_WHITE;
         
         alert_type = 3;
       }
       else
       {
-        BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.green();
-        TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
+        BACKGROUND_COLOR_VALUE = RAS_GREEN;
+        TEXT_COLOR_VALUE = RAS_WHITE;
 
         alert_type = 1;
       }
@@ -194,13 +194,13 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
 
         if (Alerts_List.gen_warning(alert_num))
         {
-          BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.red();
-          TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
+          BACKGROUND_COLOR_VALUE = RAS_RED;
+          TEXT_COLOR_VALUE = RAS_WHITE;
         }
         else
         {
-          BACKGROUND_COLOR_VALUE = sdSysData.COLOR_SELECT.red();
-          TEXT_COLOR_VALUE = sdSysData.COLOR_SELECT.white();
+          BACKGROUND_COLOR_VALUE = RAS_RED;
+          TEXT_COLOR_VALUE = RAS_WHITE;
         }
 
         BACKGROUND_COLOR = sdSysData.COLOR_SELECT.neo_color_STANDARD(BACKGROUND_COLOR_VALUE);

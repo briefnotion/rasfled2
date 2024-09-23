@@ -985,6 +985,11 @@ int radio_translate_to_frequency_6(float Frequency)
   return (int)round(Frequency / 1000.0);
 }
 
+float temperture_translate_celcius_to_fahrenheit(float celcius)
+{
+  return (celcius * 9.0f / 5.0f) + 32.0f;
+}
+
 float velocity_translate_kmph_to_mph(float kmph)
 {
   return kmph * 0.6213711922f;
