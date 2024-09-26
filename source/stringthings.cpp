@@ -570,7 +570,16 @@ bool STRING_STRING::conversion_success()
 void STRING_INT::store(string str_value)
 {
   STR_VALUE = str_value;
-  CONVERSION_SUCCESS = string_to_int(str_value, INT_VALUE);
+
+  if (string_to_int(str_value, NEW_INT_VALUE))
+  {
+    INT_VALUE = NEW_INT_VALUE;
+    CONVERSION_SUCCESS = true;
+  }
+  else
+  {
+    CONVERSION_SUCCESS = false;
+  }
 }
 
 string STRING_INT::get_str_value()
@@ -594,7 +603,16 @@ bool STRING_INT::conversion_success()
 void STRING_FLOAT::store(string str_value)
 {
   STR_VALUE = str_value;
-  CONVERSION_SUCCESS = string_to_float(str_value, FLOAT_VALUE);
+
+  if (string_to_float(str_value, NEW_FLOAT_VALUE))
+  {
+    FLOAT_VALUE = NEW_FLOAT_VALUE;
+    CONVERSION_SUCCESS = true;
+  }
+  else
+  {
+    CONVERSION_SUCCESS = false;
+  }
 }
 
 void STRING_FLOAT::store_val(float value)

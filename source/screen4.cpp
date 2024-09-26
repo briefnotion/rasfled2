@@ -37,30 +37,67 @@ void SCREEN4::door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 
 {
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value)
   {
-    Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y), 
-                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
-                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE));
+    DOOR_INDICATOR_RD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
+  }
+  else
+  {
+    DOOR_INDICATOR_RD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value)
   {
-    Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), 
-                    sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
-                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
+    DOOR_INDICATOR_FD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
+  }
+  else
+  {
+    DOOR_INDICATOR_FD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value)
   {
-    Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, Window_Size.y / 2.0f), ImVec2(Window_Size.x, Window_Size.y), 
-                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
-                    sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
+    DOOR_INDICATOR_RP.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
+  }
+  else
+  {
+    DOOR_INDICATOR_RP.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
   }
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value)
   {
-    Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x / 2.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y / 2.0f), 
-                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE), 
-                    sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
+    DOOR_INDICATOR_FP.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
+  }
+  else
+  {
+    DOOR_INDICATOR_FP.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
+  }
+
+
+  if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value || DOOR_INDICATOR_RD.is_changing())
+  {    
+    Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), Window_Size, 
+                BLACK_QPAQUE, BLACK_QPAQUE, 
+                BLACK_QPAQUE, DOOR_INDICATOR_RD.color(sdSysData.PROGRAM_TIME.current_frame_time()));
+  }
+
+  if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value || DOOR_INDICATOR_FD.is_changing())
+  {    
+    Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), Window_Size, 
+                DOOR_INDICATOR_FD.color(sdSysData.PROGRAM_TIME.current_frame_time()), BLACK_QPAQUE, 
+                BLACK_QPAQUE, BLACK_QPAQUE);
+  }
+
+  if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value || DOOR_INDICATOR_RP.is_changing())
+  {    
+    Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), Window_Size, 
+                BLACK_QPAQUE, BLACK_QPAQUE, 
+                DOOR_INDICATOR_RP.color(sdSysData.PROGRAM_TIME.current_frame_time()), BLACK_QPAQUE);
+  }
+
+  if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value || DOOR_INDICATOR_FP.is_changing())
+  {    
+    Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), Window_Size, 
+                BLACK_QPAQUE, DOOR_INDICATOR_FP.color(sdSysData.PROGRAM_TIME.current_frame_time()), 
+                BLACK_QPAQUE, BLACK_QPAQUE);
   }
 }
 
@@ -100,17 +137,17 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
         {
           if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left())
           {
-            BLINKER_INDICATOR_LEFT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
+            BLINKER_INDICATOR_LEFT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
           }
 
           if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
           {
-            BLINKER_INDICATOR_RIGHT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
+            BLINKER_INDICATOR_RIGHT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
           }
 
           if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards() || sdSysData.booHazardRunning)
           {
-            BLINKER_INDICATOR_HAZARD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
+            BLINKER_INDICATOR_HAZARD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
           }
         }
       }
@@ -118,9 +155,9 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
     else if (BLINKER_BLINK)
     {
       BLINKER_BLINK = false;
-      BLINKER_INDICATOR_LEFT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
-      BLINKER_INDICATOR_RIGHT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
-      BLINKER_INDICATOR_HAZARD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
+      BLINKER_INDICATOR_LEFT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
+      BLINKER_INDICATOR_RIGHT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
+      BLINKER_INDICATOR_HAZARD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
     }
 
     // Draw Blinker
@@ -128,29 +165,29 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
     // Left Blinker
     if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left() || BLINKER_INDICATOR_LEFT.is_changing())
     {
-      Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x * 0.3f, Window_Size.y), 
-          BLINKER_INDICATOR_LEFT.color(sdSysData.PROGRAM_TIME.current_frame_time()), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
-          sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), BLINKER_INDICATOR_LEFT.color(sdSysData.PROGRAM_TIME.current_frame_time()));
+      Draw_List->AddRectFilledMultiColor(ImVec2(0.0f, 0.0f), ImVec2(Window_Size.x * 1.0f, Window_Size.y), 
+          BLINKER_INDICATOR_LEFT.color(sdSysData.PROGRAM_TIME.current_frame_time()), BLACK_QPAQUE, 
+          BLACK_QPAQUE, BLINKER_INDICATOR_LEFT.color(sdSysData.PROGRAM_TIME.current_frame_time()));
     }
 
     // Right Blinker
     if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right() || BLINKER_INDICATOR_RIGHT.is_changing())
     {
-      Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x * 0.6f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
-          sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), BLINKER_INDICATOR_RIGHT.color(sdSysData.PROGRAM_TIME.current_frame_time()), 
-          BLINKER_INDICATOR_RIGHT.color(sdSysData.PROGRAM_TIME.current_frame_time()), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
+      Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x * 0.0f, 0.0f), ImVec2(Window_Size.x, Window_Size.y), 
+          BLACK_QPAQUE, BLINKER_INDICATOR_RIGHT.color(sdSysData.PROGRAM_TIME.current_frame_time()), 
+          BLINKER_INDICATOR_RIGHT.color(sdSysData.PROGRAM_TIME.current_frame_time()), BLACK_QPAQUE);
     }
 
     // Hazard Blinker
     if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards() || sdSysData.booHazardRunning || BLINKER_INDICATOR_HAZARD.is_changing())
     {
-      Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x * 0.3f, 0.0f), ImVec2(Window_Size.x * 0.5f, Window_Size.y), 
-          sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), BLINKER_INDICATOR_HAZARD.color(sdSysData.PROGRAM_TIME.current_frame_time()), 
-          BLINKER_INDICATOR_HAZARD.color(sdSysData.PROGRAM_TIME.current_frame_time()), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK));
+      Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x * 0.0f, 0.0f), ImVec2(Window_Size.x * 0.5f, Window_Size.y), 
+          BLACK_QPAQUE, BLINKER_INDICATOR_HAZARD.color(sdSysData.PROGRAM_TIME.current_frame_time()), 
+          BLINKER_INDICATOR_HAZARD.color(sdSysData.PROGRAM_TIME.current_frame_time()), BLACK_QPAQUE);
 
-      Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x * 0.5f, 0.0f), ImVec2(Window_Size.x * 0.6f, Window_Size.y), 
-          BLINKER_INDICATOR_HAZARD.color(sdSysData.PROGRAM_TIME.current_frame_time()), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
-          sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), BLINKER_INDICATOR_HAZARD.color(sdSysData.PROGRAM_TIME.current_frame_time()));
+      Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x * 0.5f, 0.0f), ImVec2(Window_Size.x * 1.0f, Window_Size.y), 
+          BLINKER_INDICATOR_HAZARD.color(sdSysData.PROGRAM_TIME.current_frame_time()), BLACK_QPAQUE, 
+          BLACK_QPAQUE, BLINKER_INDICATOR_HAZARD.color(sdSysData.PROGRAM_TIME.current_frame_time()));
     }
   }
 }
@@ -240,6 +277,9 @@ int SCREEN4::create(system_data &sdSysData)
     // Init and prepare DISPLAY_SCREEN
     
     clear_color = ImVec4(0.00f, 0.55f, 0.00f, 0.00f);
+
+    BLACK_QPAQUE = sdSysData.COLOR_SELECT.pure_color(RAS_BLACK).STANDARD;
+    BLACK_QPAQUE.Value.w = 0.0f;
 
     glfwSetErrorCallback(glfw_error_callback);
     if (!glfwInit())
@@ -633,6 +673,10 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       {
         // draw list
         ImDrawList* draw_list_window_background = ImGui::GetWindowDrawList();
+
+        // Auto Signal and Door Lights
+        door_lights(draw_list_window_background, sdSysData, viewport->Size);
+        signal_lights(draw_list_window_background, sdSysData, viewport->Size);
 
         ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 85.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
@@ -1227,10 +1271,6 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           }
         }
         ImGui::EndChild();
-
-        // Auto Signal Lights
-        door_lights(draw_list_window_background, sdSysData, viewport->Size);
-        signal_lights(draw_list_window_background, sdSysData, viewport->Size);
         
         ImGui::End();
       }

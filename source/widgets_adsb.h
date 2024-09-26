@@ -140,10 +140,14 @@ class ADSB_RANGE
   ADSB_RANGE_Properties PROPS;
 
   // Center of map at location
-  int CENTER_ON_LOCATION = 1;
-    // 0 - No Location
-    // 1 - Center on current location
-    // 2 - Center on aircraft
+  int CENTER_ON_LOCATION = -9;
+    // -9 - No Location
+
+    // -2 - Center on aircraft not set
+    // -1 - Center on current location not set
+    //  0 - No Location
+    //  1 - Center on current location
+    //  2 - Center on aircraft
 
   ImVec2 ll_2_pt_scale();
 
@@ -207,6 +211,8 @@ class ADSB_MAP
 
   IMPACT_RESISTANCE_FLOAT_FRAME_COUNT MAP_HEADING_DEGREES;
   bool NORTH_UP = false;
+  bool ACTIVE_GPS = false;
+  bool ACTIVE_COMPASS = false;
 
   COMPASS_WIDGET CURRENT_POSITION_COMPASS;
 

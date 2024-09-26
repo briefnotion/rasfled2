@@ -1,3 +1,7 @@
+2.207_2400925
+  - Made a few changes to the way the Blinker and Door indicators 
+      are displayed. 
+
 2.206_2400922
   - Changed the blinker indicator colors to neo_color.
   - Added fahrenheit values to ambiant and intake value 

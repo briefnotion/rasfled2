@@ -182,10 +182,12 @@ class STRING_STRING
 class STRING_INT
 // Variable stores original string number and converted value.
 // Sets error if conversion unsucessful.
+// Retains value if conversion not sucessful.
 {
   private:
   string  STR_VALUE = "";
   int     INT_VALUE = 0;
+  int     NEW_INT_VALUE = 0;
   bool    CONVERSION_SUCCESS = false;
 
   public:
@@ -202,10 +204,12 @@ class STRING_INT
 class STRING_FLOAT
 // Variable stores original string number and converted value.
 // Sets error if conversion unsucessful.
+// Retains value if conversion not sucessful.
 {
   private:
   string  STR_VALUE = "";
   float   FLOAT_VALUE = 0;
+  float   NEW_FLOAT_VALUE = 0;
   bool    CONVERSION_SUCCESS = false;
 
   public:

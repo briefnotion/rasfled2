@@ -487,11 +487,25 @@ void AIRCRAFT_COORDINATOR::post_post_process()
     // Meta
     DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_FLIGHT = " " + trim(DATA.AIRCRAFTS[aircraft].FLIGHT.get_str_value());
     DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_SQUAWK = trim(DATA.AIRCRAFTS[aircraft].SQUAWK.get_str_value());
-    DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_ALTITUDE = "  " + to_string_round_to_nth(float(DATA.AIRCRAFTS[aircraft].ALTITUDE.get_int_value() / 1000.0f), 1);
+    DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_ALTITUDE = "  " + to_string_round_to_nth(float(DATA.AIRCRAFTS[aircraft].ALTITUDE.get_int_value() / 1000.0f), 1) + " ft";
     DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_SPEED = trim(DATA.AIRCRAFTS[aircraft].SPEED.get_str_value());
-    DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_DISTANCE_FROM_BASE = to_string_round_to_nth(DATA.AIRCRAFTS[aircraft].DISTANCE_FROM_BASE, 1);
-  }
+    DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_DISTANCE_FROM_BASE = to_string_round_to_nth(DATA.AIRCRAFTS[aircraft].DISTANCE_FROM_BASE, 1) + " mi";
 
+    DATA.AIRCRAFTS[aircraft].META.POSITION_SQUAWK.x = 0.0f;
+    DATA.AIRCRAFTS[aircraft].META.POSITION_SQUAWK.y = -49.0f;
+
+    DATA.AIRCRAFTS[aircraft].META.POSITION_FLIGHT.x = -49.0f;
+    DATA.AIRCRAFTS[aircraft].META.POSITION_FLIGHT.y = 0.0f;
+
+    DATA.AIRCRAFTS[aircraft].META.POSITION_SPEED.x = -43.0f;
+    DATA.AIRCRAFTS[aircraft].META.POSITION_SPEED.y = -3.0f;
+
+    DATA.AIRCRAFTS[aircraft].META.POSITION_ALTITUDE.x = 0.0f;
+    DATA.AIRCRAFTS[aircraft].META.POSITION_ALTITUDE.y = 40.0f;
+
+    DATA.AIRCRAFTS[aircraft].META.POSITION_DISTANCE.x = 25.0f;
+    DATA.AIRCRAFTS[aircraft].META.POSITION_DISTANCE.y = 40.0f;
+  }
 }
 
 // -------------------------------------------------------------------------------------
