@@ -1,3 +1,7 @@
+2.208_2400927
+  - Made the Alert pop ups smaller. 
+  - Corrected some "Map Center On" problems. 
+
 2.207_2400925
   - Made a few changes to the way the Blinker and Door indicators 
       are displayed. 

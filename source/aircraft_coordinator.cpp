@@ -264,13 +264,13 @@ void AIRCRAFT_MAP_INFO::create_reserve_alerts(ALERT_SYSTEM_2 &ALERTS_ADSB, int I
   // Initialize ADSB Alert_2 System - Generate Reserve Alerts
   ALERTS_ADSB.clear_all();
 
-  ALERTS_ADSB.PROPS.ALERT_SYSTEM_NAME = "ADS-B Item: " + to_string(Item_Position);
+  ALERTS_ADSB.PROPS.ALERT_SYSTEM_NAME = "ADS-B (" + to_string(Item_Position) + ")";
   ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_PROXIMITY, "PROXIMITY");
-  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_FLIGHT_ANGLE, "FLIGHT ANGLE");
+  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_FLIGHT_ANGLE, "FLT ANGLE");
   ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_ADSB_EMERGENCY, "EMERGENCY FLAG");
-  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_HIJACKING, "SQUAWK HIJACKING");
-  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_RADIO, "SQUAWK RADIO");
-  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_EMERGENCY, "SQUAWK EMERGENCY");
+  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_HIJACKING, "SQK HIJACKING");
+  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_RADIO, "SQK RADIO");
+  ALERTS_ADSB.generate_reserve_alert(ADSB_RESERVE_ALERT_SQUAWK_EMERGENCY, "SQK EMERGENCY");
 }
 
 void AIRCRAFT_MAP_INFO::update(unsigned long tmeCurrentTime, AIRCRAFT_DATA &DATA)
@@ -370,8 +370,8 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
         Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE, 1.0f, 2.0f))
     {
       Aircraft_Deets.ALERTS_ADSB.res_update_alert_text_line_1(ADSB_RESERVE_ALERT_PROXIMITY, 
-                                                              "Squawk: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
-                                                              "  Flight: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value());
+                                                              "SQK: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
+                                                              "  FLT: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value());
       Aircraft_Deets.ALERTS_ADSB.res_update_line_2_with_conditions(ADSB_RESERVE_ALERT_PROXIMITY);
       Aircraft_Deets.ALERTS_ADSB.ALERTS_RESERVE[ADSB_RESERVE_ALERT_PROXIMITY].set_show_value_bar(true);
     }
@@ -405,7 +405,12 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
         Aircraft_Deets.AIRCRAFT_ITEM.EMERGENCY.get_str_value() != "" && Aircraft_Deets.AIRCRAFT_ITEM.EMERGENCY.get_str_value() != "none",
         Aircraft_Deets.AIRCRAFT_ITEM.EMERGENCY.get_str_value() == "" || Aircraft_Deets.AIRCRAFT_ITEM.EMERGENCY.get_str_value() == "none"))
   {
-    Aircraft_Deets.ALERTS_ADSB.res_update_alert_text_line_1(ADSB_RESERVE_ALERT_ADSB_EMERGENCY, "ADS-B EMERGENCY:" + Aircraft_Deets.AIRCRAFT_ITEM.EMERGENCY.get_str_value());
+    Aircraft_Deets.ALERTS_ADSB.res_update_alert_text_line_1(ADSB_RESERVE_ALERT_ADSB_EMERGENCY, 
+                                                              "ADS-B EMERGENCY:" + Aircraft_Deets.AIRCRAFT_ITEM.EMERGENCY.get_str_value() + 
+                                                              "  SQK: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
+                                                              "  FLT: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value() +
+                                                              "\nALT: " + Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_str_value() +
+                                                              "  SPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
 
     Aircraft_Deets.ALERT_LEVEL = 3;
     Aircraft_Deets.COLOR = 3;
@@ -420,8 +425,10 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
           Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_int_value() != 7500))
     {
       Aircraft_Deets.ALERTS_ADSB.res_update_alert_text_line_1(ADSB_RESERVE_ALERT_SQUAWK_HIJACKING, 
-                                                              "Squawk: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
-                                                              "\nFlight: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value());
+                                                              "SQK: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
+                                                              "  FLT: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value() +
+                                                              "\nALT: " + Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_str_value() +
+                                                              "  SPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
       Aircraft_Deets.ALERT_LEVEL = 3;
       Aircraft_Deets.COLOR = 3;
     }
@@ -432,8 +439,10 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
           Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_int_value() != 7600))
     {
       Aircraft_Deets.ALERTS_ADSB.res_update_alert_text_line_1(ADSB_RESERVE_ALERT_SQUAWK_RADIO, 
-                                                              "Squawk: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
-                                                              "\nFlight: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value());
+                                                              "SQK: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
+                                                              "  FLT: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value() +
+                                                              "\nALT: " + Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_str_value() +
+                                                              "  SPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
       Aircraft_Deets.ALERT_LEVEL = 3;
       Aircraft_Deets.COLOR = 3;
     }
@@ -444,8 +453,10 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
           Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_int_value() != 7700))
     {
       Aircraft_Deets.ALERTS_ADSB.res_update_alert_text_line_1(ADSB_RESERVE_ALERT_SQUAWK_EMERGENCY,  
-                                                              "Squawk: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
-                                                              "\nFlight: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value());
+                                                              "SQK: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
+                                                              "  FLT: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value() +
+                                                              "\nALT: " + Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_str_value() +
+                                                              "  SPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
       Aircraft_Deets.ALERT_LEVEL = 3;
       Aircraft_Deets.COLOR = 3;
     }

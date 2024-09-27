@@ -73,7 +73,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
 
       string title = Alerts_List.PROPS.ALERT_SYSTEM_NAME;
 
-      ImGui::SetNextWindowSize(ImVec2(315, 120));
+      ImGui::SetNextWindowSize(ImVec2(255, 120));
 
       int alert_type = 0;
 
@@ -112,7 +112,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
       if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
       {
         ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 255)); // Set background to black and opaque
-        ImGui::BeginChild("ChildWindow", ImVec2(300, 80), true);
+        ImGui::BeginChild("ChildWindow", ImVec2(240, 80), true);
         {
           ImVec4 working_area = get_working_area();
           ImDrawList* draw_list_alert = ImGui::GetWindowDrawList();
@@ -183,7 +183,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
   {
     for (int alert_num = 0; alert_num < (int)Alerts_List.gen_size(); alert_num++)
     {
-      ImGui::SetNextWindowSize(ImVec2(315, 120));
+      ImGui::SetNextWindowSize(ImVec2(255, 120));
       
       if (Alerts_List.gen_display(alert_num))
       {
@@ -216,7 +216,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
         if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 255)); // Set background to black and opaque
-          ImGui::BeginChild("ChildWindow", ImVec2(300, 80), true);
+          ImGui::BeginChild("ChildWindow", ImVec2(240, 80), true);
           {
             ImVec2 screen_pos = ImGui::GetCursorScreenPos();
 

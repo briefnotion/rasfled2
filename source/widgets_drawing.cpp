@@ -157,8 +157,8 @@ void Graphical_Number(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Posi
 {
   for (int number = 0; number < Number; number++)
   {
-    ImVec2 pos_1 = ImVec2(Position.x + Width - ((float)((number * 2) + 0)  * 12.0f), Position.y + 1.0f);
-    ImVec2 pos_2 = ImVec2(Position.x + Width - ((float)((number * 2) + 1)  * 12.0f), Position.y + 1.0f);
+    ImVec2 pos_1 = ImVec2(Position.x + Width - ((float)((number * 2) + 0)  * 12.0f), Position.y - 3.0f);
+    ImVec2 pos_2 = ImVec2(Position.x + Width - ((float)((number * 2) + 1)  * 12.0f), Position.y - 3.0f);
     Draw_List->AddLine(pos_1, pos_2, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE), 3.0f);
   }
 }

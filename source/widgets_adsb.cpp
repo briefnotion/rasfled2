@@ -590,13 +590,21 @@ void ADSB_RANGE::set_no_pos_lat_lon(ImVec2 Lat_Lon)
 void ADSB_RANGE::set_gps_pos_lat_lon(ImVec2 Lat_Lon)
 {
   GPS_POS_LAT_LON = Lat_Lon;
-  NO_POS_LAT_LON = Lat_Lon;
+
+  if (CENTER_ON_LOCATION == 1)
+  {
+    NO_POS_LAT_LON = Lat_Lon;
+  }
 }
 
 void ADSB_RANGE::set_aircraft_pos_lat_lon(ImVec2 Lat_Lon)
 {
   AIRCRAFT_POS_LAT_LON = Lat_Lon;
-  NO_POS_LAT_LON = Lat_Lon;
+
+  if (CENTER_ON_LOCATION == 2)
+  {
+    NO_POS_LAT_LON = Lat_Lon;
+  }
 }
 
 ImVec2 ADSB_RANGE::get_center_lat_lon()
@@ -736,7 +744,7 @@ void ADSB_MAP::add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type)
 void ADSB_MAP::create()
 {
   // Prepare Map Orientation with Impact Resistance
-  MAP_HEADING_DEGREES.set_size(30);
+  MAP_HEADING_DEGREES.set_size(60);
 
   // Prepare Compass
   CURRENT_POSITION_COMPASS.set_size(32, (15 / 2));
