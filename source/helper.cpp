@@ -781,6 +781,11 @@ int MIN_MAX_TIME::direction()
 // ---------------------------------------------------------------------------------------
 // Impact Resistance
 
+int IMPACT_RESISTANCE_FLOAT::collection_size()
+{
+  return VALUE_COLLECTION.size();
+}
+
 void IMPACT_RESISTANCE_FLOAT::set_size(int Size)
 {
   PROPS.SIZE = Size;
@@ -806,7 +811,6 @@ void IMPACT_RESISTANCE_FLOAT::set_value(unsigned long Time, float Value)
       new_value.VALUE = -1.0f;
       VALUE_COLLECTION.push_back(new_value);
     }
-
     FIRST_RUN = false;
   }
 

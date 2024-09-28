@@ -394,9 +394,9 @@ void ADSB_RANGE::calculate_lat_lon_to_point_scale()
   if (CENTER_ON_LOCATION == 1)
   {
     new_coords_east = get_coords_x_miles_from_coords(GPS_POS_LAT_LON.x, GPS_POS_LAT_LON.y,
-                                                          RANGE, 90.0f);
+                                                          RANGE_IMP_LATEST, 90.0f);
     new_coords_south = get_coords_x_miles_from_coords(GPS_POS_LAT_LON.x, GPS_POS_LAT_LON.y,
-                                                          RANGE, 180.0f);
+                                                          RANGE_IMP_LATEST, 180.0f);
 
     latitude_diff = abs(new_coords_south.x - GPS_POS_LAT_LON.x);
     longitude_diff = abs(new_coords_east.y - GPS_POS_LAT_LON.y);
@@ -404,9 +404,9 @@ void ADSB_RANGE::calculate_lat_lon_to_point_scale()
   else if (CENTER_ON_LOCATION == 2)
   {
     new_coords_east = get_coords_x_miles_from_coords(AIRCRAFT_POS_LAT_LON.x, AIRCRAFT_POS_LAT_LON.y,
-                                                          RANGE, 90.0f);
+                                                          RANGE_IMP_LATEST, 90.0f);
     new_coords_south = get_coords_x_miles_from_coords(AIRCRAFT_POS_LAT_LON.x, AIRCRAFT_POS_LAT_LON.y,
-                                                          RANGE, 180.0f);
+                                                          RANGE_IMP_LATEST, 180.0f);
 
     latitude_diff = abs(new_coords_south.x - AIRCRAFT_POS_LAT_LON.x);
     longitude_diff = abs(new_coords_east.y - AIRCRAFT_POS_LAT_LON.y);
@@ -414,9 +414,9 @@ void ADSB_RANGE::calculate_lat_lon_to_point_scale()
   else
   {
     new_coords_east = get_coords_x_miles_from_coords(NO_POS_LAT_LON.x, NO_POS_LAT_LON.y,
-                                                          RANGE, 90.0f);
+                                                          RANGE_IMP_LATEST, 90.0f);
     new_coords_south = get_coords_x_miles_from_coords(NO_POS_LAT_LON.x, NO_POS_LAT_LON.y,
-                                                          RANGE, 180.0f);
+                                                          RANGE_IMP_LATEST, 180.0f);
 
     latitude_diff = abs(new_coords_south.x - NO_POS_LAT_LON.x);
     longitude_diff = abs(new_coords_east.y - NO_POS_LAT_LON.y);
@@ -630,7 +630,26 @@ ImVec2 ADSB_RANGE::get_gps_lat_lon()
 
 float ADSB_RANGE::range()
 {
-  return RANGE;
+  return RANGE_IMP_LATEST;
+}
+
+void ADSB_RANGE::create()
+{
+  PROPS.COLOR = RAS_ORANGE;
+  set_range(25.0f);
+  RANGE_IMP.set_size(15);
+  RANGE_IMP.set_alive_time(500);
+}
+
+void ADSB_RANGE::range_update(unsigned long Frame_Time)
+{
+  RANGE_IMP.set_value(Frame_Time, RANGE);
+
+  if (RANGE_IMP_LATEST != RANGE)
+  {
+    RANGE_IMP_LATEST = RANGE_IMP.impact(Frame_Time);
+    calculate_lat_lon_to_point_scale();
+  }
 }
 
 void ADSB_RANGE::set_range(float Range_Miles)
@@ -678,7 +697,7 @@ void ADSB_RANGE::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Work
 
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)));
 
-  ImGui::Text("%.2f mi", RANGE);
+  ImGui::Text("%.2f mi", RANGE_IMP_LATEST);
   ImGui::PopStyleColor();
 }
 
@@ -686,7 +705,7 @@ void ADSB_RANGE::draw_info()
 {
   ImGui::Text("LAT: %f", get_center_lat_lon().x);
   ImGui::Text("LON: %f", get_center_lat_lon().y);
-  ImGui::Text("RNG: %.2f mi", RANGE);
+  ImGui::Text("RNG: %.2f mi", RANGE_IMP_LATEST);
 
   // test
   /*
@@ -750,8 +769,7 @@ void ADSB_MAP::create()
   CURRENT_POSITION_COMPASS.set_size(32, (15 / 2));
   // set at frame rate for slow and jitter size for fast.
 
-  RANGE_INDICATOR.PROPS.COLOR = RAS_ORANGE;
-  RANGE_INDICATOR.set_range(25.0f);
+  RANGE_INDICATOR.create();
 
   if (GPS_ALTITUDE_COLOR_SCALE.active() == false)
   {
@@ -1565,6 +1583,32 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // Gather some frequent variables
   ACTIVE_GPS     = sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time());
   ACTIVE_COMPASS = sdSysData.COMMS_COMPASS.connected();
+  ACTIVE_ADSB    = sdSysData.AIRCRAFT_COORD.is_active();
+  
+  // Update range if changing dynamicly with min max aircraft data.
+  if (ACTIVE_ADSB)
+  {
+    if (RANGE_INDICATOR.ZOOM_MIN_MAX > 0)
+    {
+      if (RANGE_INDICATOR.ZOOM_MIN_MAX == 1)
+      {
+        RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_CLOSEST * 0.75f);
+      }
+      else if (RANGE_INDICATOR.ZOOM_MIN_MAX == 2)
+      {
+        RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_FURTHEST * 0.75f);
+      }
+    }
+  }
+  else
+  {
+    if (RANGE_INDICATOR.ZOOM_MIN_MAX > 0)
+    {
+      RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+    }
+  }
+
+  RANGE_INDICATOR.range_update(sdSysData.PROGRAM_TIME.current_frame_time());
 
   // turn on if not set and gps turn active
   if (RANGE_INDICATOR.CENTER_ON_LOCATION == -9 && ACTIVE_GPS)
@@ -1590,7 +1634,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
 
   // Store tracked ADSB Aircraft
   {
-    if (sdSysData.AIRCRAFT_COORD.is_active())
+    if (ACTIVE_ADSB)
     {
       // Check and store AIRCRAFT Current Location
       RANGE_INDICATOR.set_aircraft_pos_lat_lon(ImVec2(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.POSITION.LATITUDE.get_float_value(), 
@@ -1752,13 +1796,57 @@ void ADSB_MAP::draw(system_data &sdSysData)
   {
     // Range and Location Buttons
     
+    // MAX Airplane
+    if (ACTIVE_ADSB)
+    {
+      ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                        working_area.y + working_area.w - (4.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+      if (BC_MAX.button_toggle_color(sdSysData, "MAX\n(On)", "MAX", RANGE_INDICATOR.ZOOM_MIN_MAX == 2, 
+                                        RAS_GREEN, RAS_BLUE, 
+                                        sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+
+        if (RANGE_INDICATOR.ZOOM_MIN_MAX == 2)
+        {
+          RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+        }
+        else
+        {
+          RANGE_INDICATOR.ZOOM_MIN_MAX = 2;
+        }
+      }
+      
+      // MIN Airplane
+      ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                        working_area.y + working_area.w - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+      if (BC_MIN.button_toggle_color(sdSysData, "MIN\n(On)", "MIN", RANGE_INDICATOR.ZOOM_MIN_MAX == 1, 
+                                        RAS_GREEN, RAS_BLUE, 
+                                        sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+
+        if (RANGE_INDICATOR.ZOOM_MIN_MAX == 1)
+        {
+          RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+        }
+        else
+        {
+          RANGE_INDICATOR.ZOOM_MIN_MAX = 1;
+        }
+      }
+    }
+    
     // Zoom Out
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    if (BC_PLUS.button_color(sdSysData, "+", RAS_GREEN, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    if (BC_PLUS.button_color(sdSysData, "+", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+      RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
       RANGE_INDICATOR.zoom_out();
     }
 
@@ -1778,9 +1866,10 @@ void ADSB_MAP::draw(system_data &sdSysData)
     ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
 
-    if (BC_MINUS.button_color(sdSysData, "-", RAS_GREEN, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    if (BC_MINUS.button_color(sdSysData, "-", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+      RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
       RANGE_INDICATOR.zoom_in();
     }
 

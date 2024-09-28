@@ -119,7 +119,11 @@ class ADSB_RANGE
   private:
   
   int ZOOM_LEVEL = -1;
-  float RANGE = 25.0f;
+  
+  float RANGE = 25.0f;                    // Miles for first circle
+  IMPACT_RESISTANCE_FLOAT RANGE_IMP;
+  float RANGE_IMP_LATEST = 0.0f;          // Miles for first circle
+
   float RADIUS_CIRCLE_POINT_SIZE = 0.0f;
   ImVec2 LAT_LON_TO_POINT_SCALE;
 
@@ -132,6 +136,8 @@ class ADSB_RANGE
   ImVec2 CENTER_POS_LAT_LON;
 
   void calculate_lat_lon_to_point_scale();
+
+  private:
 
   void set_zoom_level();
 
@@ -148,6 +154,11 @@ class ADSB_RANGE
     //  0 - No Location
     //  1 - Center on current location
     //  2 - Center on aircraft
+  
+  int ZOOM_MIN_MAX = 0;
+  // 0  - OFF
+  // 1  - MIN
+  // 2  - MAX
 
   ImVec2 ll_2_pt_scale();
 
@@ -161,6 +172,13 @@ class ADSB_RANGE
 
   ImVec2 get_center_lat_lon();
   ImVec2 get_gps_lat_lon();
+
+  void create();
+  // Prep the color, range size, and size of the impact variables
+
+  void range_update(unsigned long Frame_Time);
+  // Update the impact returned range value for futer request. 
+  //  Run once at begining of every frame for range.
 
   float range();
   // Distance in miles, the range is set at for viewing.
@@ -194,6 +212,8 @@ class ADSB_MAP
   BUTTON_TOGGLE_COLOR BTC_LOCK;
   
   // BUTTON_COLOR
+  BUTTON_TOGGLE_COLOR BC_MAX;
+  BUTTON_TOGGLE_COLOR BC_MIN;
   BUTTON_COLOR BC_PLUS;
   //BUTTON_COLOR BC_LOC;
   BUTTON_COLOR BC_MINUS;
@@ -213,6 +233,7 @@ class ADSB_MAP
   bool NORTH_UP = false;
   bool ACTIVE_GPS = false;
   bool ACTIVE_COMPASS = false;
+  bool ACTIVE_ADSB = false;
 
   COMPASS_WIDGET CURRENT_POSITION_COMPASS;
 

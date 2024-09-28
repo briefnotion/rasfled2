@@ -309,8 +309,8 @@ void ALERT_SYSTEM_2::res_update_line_2_with_conditions(int Id)
 {
   if (Id < (int)ALERTS_RESERVE.size())
   {
-    ALERTS_RESERVE[Id].update_alert_text_line_2("c:" + to_string_round_to_nth(ALERTS_RESERVE[Id].CLEAR_VALUE, 2) + "  " +
-                                                "v:" + to_string_round_to_nth(ALERTS_RESERVE[Id].VALUE, 2) + "  " +  
+    ALERTS_RESERVE[Id].update_alert_text_line_2("c:" + to_string_round_to_nth(ALERTS_RESERVE[Id].CLEAR_VALUE, 2) + " " +
+                                                "v:" + to_string_round_to_nth(ALERTS_RESERVE[Id].VALUE, 2) + " " +  
                                                 "a:" + to_string_round_to_nth(ALERTS_RESERVE[Id].ALERT_VALUE, 2));
   }
 }

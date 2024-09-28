@@ -520,15 +520,24 @@ class IMPACT_RESISTANCE_FLOAT
 
   IMPACT_RESISTANCE_FLOAT_PROPERTIES PROPS;
 
+  int collection_size();
+  // for debugging purposes, returns size of IMPACT_RESISTANCE_VALUE queue.
+
   void set_size(int Size);
+  // sets size of IMPACT_RESISTANCE_VALUE queue
 
   void set_alive_time(unsigned long Alive_Time);
+  // When calculating, discards items older than time allowed
+  // dont forget to corelate size with time.
 
   void set_value(unsigned long Time, float Value);
+  // enteres a new value
 
   float latest();
+  // returns last value entered into the queue.
 
   float impact(unsigned long Time);
+  // Runs through all calculations.
 
 };
 

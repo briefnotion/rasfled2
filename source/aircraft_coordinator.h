@@ -254,6 +254,9 @@ class AIRCRAFT_MAP_INFO
   string POSITIONED_COUNT = "";
   string POSITIONED_AIRCRAFT = "";
 
+  float DISTANCE_CLOSEST = 25.0f;
+  float DISTANCE_FURTHEST = 25.0f;
+
   float FURTHEST_AIRCRAFT_SINCE_START = 0.0f;
 
   void update(unsigned long tmeCurrentTime, AIRCRAFT_DATA &DATA);
