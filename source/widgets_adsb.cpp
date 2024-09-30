@@ -1586,7 +1586,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
   ACTIVE_ADSB    = sdSysData.AIRCRAFT_COORD.is_active();
   
   // Update range if changing dynamicly with min max aircraft data.
-  if (ACTIVE_ADSB)
+  if (ACTIVE_ADSB && ACTIVE_GPS)
   {
     if (RANGE_INDICATOR.ZOOM_MIN_MAX > 0)
     {

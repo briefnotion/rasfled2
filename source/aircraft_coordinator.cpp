@@ -527,6 +527,8 @@ void AIRCRAFT_COORDINATOR::post_post_post_process(COMMAND_THREAD &Thread, SOUNDS
 
   if (AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size() > 0)
   {
+    bool set_first = true;
+
     for (int aircraft = 0; aircraft < (int)AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size(); aircraft++)
     {
       check_alerts(AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft]);
@@ -535,10 +537,12 @@ void AIRCRAFT_COORDINATOR::post_post_post_process(COMMAND_THREAD &Thread, SOUNDS
 
       if (AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].AIRCRAFT_ITEM.DISTANCE_FROM_BASE != -1)
       {
-        if (aircraft == 0)
+        if (set_first)
         {
           AIRCRAFTS_MAP.DISTANCE_CLOSEST = AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].AIRCRAFT_ITEM.DISTANCE_FROM_BASE;
           AIRCRAFTS_MAP.DISTANCE_FURTHEST = AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].AIRCRAFT_ITEM.DISTANCE_FROM_BASE;
+
+          set_first = false;
         }
         else
         {

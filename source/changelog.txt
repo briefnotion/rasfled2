@@ -1,3 +1,6 @@
+2.210_2400930
+  - Small Adjustments. 
+
 2.209_2400928
   - Made zooming in and out of the ADS-B map look better. 
   - Added a Min and Max button to set zoom level of ADS-B map to 

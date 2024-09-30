@@ -218,6 +218,17 @@ bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, Im
 
 // ---------------------------------------------------------------------------------------
 
+class BUTTON_INVISIBLE
+{
+  private:
+
+  NEO_COLOR FLASH_COLOR;
+
+  public:
+
+  bool button_flash_color(ImDrawList *Draw_List, system_data &sdSysData, string Text, int Color, ImVec2 Start_Position, ImVec2 Size);
+};
+
 class BUTTON_COLOR
 {
   private:

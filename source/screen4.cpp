@@ -727,7 +727,8 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::BeginChild("Status Mid", ImVec2((region_div_4 * 2.0f) - 45.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
             {
-              ImVec4 working_area = get_working_area();
+              ImVec4 working_area_status_mid = get_working_area();
+              ImDrawList* draw_list_status_mid = ImGui::GetWindowDrawList();
 
               // Display Lights Off mode toggle.
               ImGui::BeginGroup();
@@ -800,11 +801,12 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               ImGui::EndGroup();
 
               // Change Screens
-              if (button_area(working_area))
+              if (COROP_VOID.button_flash_color(draw_list_status_mid, sdSysData, "COROP_VOID_HIDDEN", RAS_RED, 
+                                                  ImVec2(working_area_status_mid.x, working_area_status_mid.y), 
+                                                  ImVec2(working_area_status_mid.z, working_area_status_mid.w)))
               {
                 sdSysData.DNFWTS.turn_on(current_frame_time);
               }
-              
             }
             ImGui::EndChild();
 
@@ -813,7 +815,10 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::BeginChild("Status Right", ImVec2(ImGui::GetContentRegionAvail().x - 90.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
             {
-              ImVec2 start_position = ImGui::GetCursorScreenPos();
+              // Assign Draw List
+              ImVec4 working_area_status_right = get_working_area();
+              ImDrawList* draw_list_status_right = ImGui::GetWindowDrawList();
+
               VERSION.draw(sdSysData);
 
               if (sdSysData.hsHardware_Status.enabled() == true)
@@ -821,9 +826,10 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 TEMP.update_text(sdSysData, ("Temp: " + to_string((int)sdSysData.hsHardware_Status.get_temperature()) + "c").c_str());
                 TEMP.draw(sdSysData);
               }
-
-              ImGui::SetCursorScreenPos(start_position);
-              if (ImGui::InvisibleButton("CORPO VOID", ImGui::GetContentRegionAvail()))
+              
+              if (RUNNING_COLOR.button_flash_color(draw_list_status_right, sdSysData, "RUNNING_COLOR_HIDDEN", RAS_RED, 
+                                                  ImVec2(working_area_status_right.x, working_area_status_right.y), 
+                                                  ImVec2(working_area_status_right.z, working_area_status_right.w)))
               {
                 sdSysData.COLOR_SELECT.toggle_void_color(sdSysData.PROGRAM_TIME.current_frame_time());
               }

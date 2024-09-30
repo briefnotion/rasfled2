@@ -24,7 +24,7 @@ ImVec2 text_size(string Text)
 ImVec4 get_working_area()
 // must be called before other drawing is done.
 // X = x starting pos (position of left most window, if no write)
-// Y = y starting pos (position of left most window, if no write)
+// Y = y starting pos (position of top most window, if no write)
 // Z = x size
 // W = y size
 {
@@ -466,6 +466,31 @@ bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, Im
 }
 
 // ---------------------------------------------------------------------------------------
+
+bool BUTTON_INVISIBLE::button_flash_color(ImDrawList *Draw_List, system_data &sdSysData, string Text, int Color, ImVec2 Start_Position, ImVec2 Size)
+{
+  bool ret_value = false;
+
+  ImGui::SetCursorScreenPos(Start_Position);
+  
+  if (ImGui::InvisibleButton(Text.c_str(), Size))
+  {
+    FLASH_COLOR.set_color_jump(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), IM_COL32(0, 0, 0, 0));
+    
+    ret_value = true;
+  }
+  else
+  {
+    FLASH_COLOR.set_current_frame_time(sdSysData.PROGRAM_TIME.current_frame_time());
+  }
+
+  if (FLASH_COLOR.is_changing())
+  {
+    Draw_List->AddRectFilled(Start_Position, Start_Position + Size, FLASH_COLOR.color());
+  }
+
+  return ret_value;
+}
 
 bool BUTTON_COLOR::button_color(system_data &sdSysData, string Text, int Color, ImVec2 ImVec2_Size)
 {

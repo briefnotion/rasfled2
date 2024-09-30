@@ -138,6 +138,21 @@ void NEO_COLOR::set_current_frame_time(unsigned long Time)
   set_frame_time(Time);
 }
 
+ImColor NEO_COLOR::color_jump(unsigned long Time, ImColor Start_Color, ImColor End_Color)
+{
+  CURRENT_COLOR = Start_Color.Value;
+  NEW_COLOR = Start_Color.Value;
+
+  if (reset_to_new_color(Time, End_Color.Value))
+  {
+    return calc_transition();
+  }
+  else
+  {
+    return ImColor(CURRENT_COLOR);
+  }
+}
+
 ImColor NEO_COLOR::color(unsigned long Time, ImColor Color)
 {
   if (reset_to_new_color(Time, Color.Value))
@@ -164,6 +179,16 @@ ImColor NEO_COLOR::color()
   // Do not check for color changes.  Just handle the trasition and return 
   //  either current color or previously requested color.
   return calc_transition();
+}
+
+void NEO_COLOR::set_color_jump(unsigned long Time, ImColor Start_Color, ImColor End_Color)
+{
+  CURRENT_COLOR = Start_Color.Value;
+  NEW_COLOR = Start_Color.Value;
+
+  // Set a color trasition change but do not return anything.
+  set_current_frame_time(Time);
+  reset_to_new_color(Time, End_Color.Value);
 }
 
 void NEO_COLOR::set_color(unsigned long Time, ImColor Color)

@@ -152,6 +152,12 @@ class NEO_COLOR
   //  advantagous if called multiple times in the same
   //  time frame.
 
+  ImColor color_jump(unsigned long Time, ImColor Start_Color, ImColor End_Color);
+  // Sets color immediatly to Start color, then 
+  //  returns to End_Color entered.  Will 
+  //  return transition color over time defined in props if 
+  //  the colors are different.
+
   ImColor color(unsigned long Time, ImColor Color);
   // Returns Color entered in parameter.  Will 
   //  return transition color over time defined in props if 
@@ -169,6 +175,10 @@ class NEO_COLOR
   //  the colors are different.
   //  set_current_frame_time will need to be called before.
   //  set_color will need to be called before.
+
+  void set_color_jump(unsigned long Time, ImColor Start_Color, ImColor End_Color);
+  // Sets Current Color to Start Color. 
+  //  Sets Transition to End_Color for next color call.
 
   void set_color(unsigned long Time, ImColor Color); 
   // Enters color for next color call.
