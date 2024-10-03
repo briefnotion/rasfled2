@@ -463,7 +463,7 @@ int loop_2(bool TTY_Only)
     sdSystem.SCREEN_COMMS.printw("Adjusting Program Clock");
     sdSystem.SCREEN_COMMS.printw("");
 
-    sdSystem.ALERTS_AUTO.add_generic_alert("PROGRAM CLOCK", "Adjusting Program Clock", "");
+    sdSystem.ALERTS_AUTO.add_generic_alert("PROGRAM CLOCK\nAdjusting Program Clock", "");
     
     sdSystem.PROGRAM_TIME.clear_error();
   }
@@ -810,7 +810,7 @@ int loop_2(bool TTY_Only)
       sdSystem.SCREEN_COMMS.printw("");
 
       sdSystem.ALERTS_AUTO.add_generic_alert("ALERT", "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
-                                          to_string(sdSystem.PROGRAM_TIME.error()), "");
+                                          to_string(sdSystem.PROGRAM_TIME.error()));
 
       sdSystem.PROGRAM_TIME.clear_error();
     }

@@ -1114,7 +1114,7 @@ void processcommandlineinput(system_data &sdSysData,
       // Alert Test
       if (check_command(sdSysData.SCREEN_COMMS, " alert", "Alert"))
       {
-        sdSysData.ALERTS_AUTO.add_generic_alert("ALERT", "Alert", "");
+        sdSysData.ALERTS_AUTO.add_generic_alert("ALERT", "Alert");
       }
 
       /*

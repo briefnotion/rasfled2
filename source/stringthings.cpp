@@ -16,6 +16,11 @@
 
 using namespace std;
 
+int count_char_in_string(string& Text, char Character)
+{
+  return count(Text.begin(), Text.end(), Character);
+}
+
 string char_buf_to_string(char Buf[], int Buf_Len)
 {
   string ret_str(Buf, Buf_Len);

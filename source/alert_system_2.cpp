@@ -19,19 +19,26 @@ using namespace std;
 // -------------------------------------------------------------------------------------
 //  Alert Class
 
-void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Title, string Line_1, string Line_2)
+int ALERT_2_TYPE_MONITOR::text_line_count()
+{
+  if (SHOW_VALUE_BAR)
+  {
+    return ALERT_TEXT_LINE_COUNT + 1;
+  }
+  else
+  {
+    return ALERT_TEXT_LINE_COUNT;
+  }
+}
+
+void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Title, string Line_1)
 {
   ID = Id;
   DISPLAY = true;
   ALERT_TITLE = Title;
-  ALERT_TEXT_LINE_1 = Line_1;
-  ALERT_TEXT_LINE_2 = Line_2;
+  ALERT_TEXT_LINE = Line_1;
+  ALERT_TEXT_LINE_COUNT = 1 + count_char_in_string(ALERT_TEXT_LINE, '\n');
 }
-
-//void ALERT_2_TYPE_MONITOR::alert_no_condition(int Id, string Alert_Text_Line_1)
-//{
-//  alert_no_condition(Id, "", Alert_Text_Line_1, "");
-//}
 
 bool ALERT_2_TYPE_MONITOR::alert_condition(int Id, bool Raise_Alert, bool Clear_Alert, int &Changes)
 {
@@ -125,14 +132,9 @@ string ALERT_2_TYPE_MONITOR::alert_title()
   return ALERT_TITLE;
 }
 
-string ALERT_2_TYPE_MONITOR::alert_text_line_1()
+string ALERT_2_TYPE_MONITOR::alert_text_line()
 {
-  return ALERT_TEXT_LINE_1;
-}
-
-string ALERT_2_TYPE_MONITOR::alert_text_line_2()
-{
-  return ALERT_TEXT_LINE_2;
+  return ALERT_TEXT_LINE;
 }
 
 void ALERT_2_TYPE_MONITOR::update_alert_title(string Text)
@@ -140,15 +142,16 @@ void ALERT_2_TYPE_MONITOR::update_alert_title(string Text)
   ALERT_TITLE = Text;
 }
 
-void ALERT_2_TYPE_MONITOR::update_alert_text_line_1(string Text)
+void ALERT_2_TYPE_MONITOR::update_alert_text_line(string Text)
 {
-  ALERT_TEXT_LINE_1 = Text;
-  ALERT_TEXT_LINE_2 = "";
+  ALERT_TEXT_LINE = Text;
+  ALERT_TEXT_LINE_COUNT = 1 + count_char_in_string(ALERT_TEXT_LINE, '\n');
 }
 
-void ALERT_2_TYPE_MONITOR::update_alert_text_line_2(string Text)
+void ALERT_2_TYPE_MONITOR::update_alert_text_line_append(string Text)
 {
-  ALERT_TEXT_LINE_2 = Text;
+  ALERT_TEXT_LINE = ALERT_TEXT_LINE + Text;
+  ALERT_TEXT_LINE_COUNT = 1 + count_char_in_string(ALERT_TEXT_LINE, '\n');
 }
 
 void ALERT_2_TYPE_MONITOR::acknowlege()
@@ -218,11 +221,16 @@ bool ALERT_SYSTEM_2::changed()
 }
 
 // reserve alerts
-void ALERT_SYSTEM_2::res_alert_no_condition(int Id, string Title, string Line_1, string Line_2)
+int ALERT_SYSTEM_2::res_text_line_count(int Id)
+{
+  return ALERTS_RESERVE[Id].text_line_count();
+}
+
+void ALERT_SYSTEM_2::res_alert_no_condition(int Id, string Title, string Line_1)
 {
   if (Id < (int)ALERTS_RESERVE.size())
   {
-    ALERTS_RESERVE[Id].alert_no_condition(Id, Title, Line_1, Line_2);
+    ALERTS_RESERVE[Id].alert_no_condition(Id, Title, Line_1);
     PASSING_NOTE_QUEUE.push_back("f7");
   }
 }
@@ -297,21 +305,29 @@ void ALERT_SYSTEM_2::res_update_alert_title(int Id, string Title)
   }
 }
 
-void ALERT_SYSTEM_2::res_update_alert_text_line_1(int Id, string Text_Line_1)
+void ALERT_SYSTEM_2::res_update_alert_text_line(int Id, string Text_Line_1)
 {
   if (Id < (int)ALERTS_RESERVE.size())
   {
-    ALERTS_RESERVE[Id].update_alert_text_line_1(Text_Line_1);
+    ALERTS_RESERVE[Id].update_alert_text_line(Text_Line_1);
   }
 }
 
-void ALERT_SYSTEM_2::res_update_line_2_with_conditions(int Id)
+void ALERT_SYSTEM_2::res_update_alert_text_line_append(int Id, string Text_Line_1)
 {
   if (Id < (int)ALERTS_RESERVE.size())
   {
-    ALERTS_RESERVE[Id].update_alert_text_line_2("c:" + to_string_round_to_nth(ALERTS_RESERVE[Id].CLEAR_VALUE, 2) + " " +
-                                                "v:" + to_string_round_to_nth(ALERTS_RESERVE[Id].VALUE, 2) + " " +  
-                                                "a:" + to_string_round_to_nth(ALERTS_RESERVE[Id].ALERT_VALUE, 2));
+    ALERTS_RESERVE[Id].update_alert_text_line_append(Text_Line_1);
+  }
+}
+
+void ALERT_SYSTEM_2::res_update_additional_line_with_conditions(int Id)
+{
+  if (Id < (int)ALERTS_RESERVE.size())
+  {
+    ALERTS_RESERVE[Id].update_alert_text_line_append("\nc:" + to_string_round_to_nth(ALERTS_RESERVE[Id].CLEAR_VALUE, 2) + " " +
+                                                          "v:" + to_string_round_to_nth(ALERTS_RESERVE[Id].VALUE, 2) + " " +  
+                                                          "a:" + to_string_round_to_nth(ALERTS_RESERVE[Id].ALERT_VALUE, 2));
   }
 }
 
@@ -363,23 +379,11 @@ string ALERT_SYSTEM_2::res_alert_title(int Id)
   }
 }
 
-string ALERT_SYSTEM_2::res_alert_text_line_1(int Id)
+string ALERT_SYSTEM_2::res_alert_text_line(int Id)
 {
   if (Id < (int)ALERTS_RESERVE.size())
   {
-    return ALERTS_RESERVE[Id].alert_text_line_1();
-  }
-  else
-  {
-    return "ALERT NOT FOUND";
-  }
-}
-
-string ALERT_SYSTEM_2::res_alert_text_line_2(int Id)
-{
-  if (Id < (int)ALERTS_RESERVE.size())
-  {
-    return ALERTS_RESERVE[Id].alert_text_line_2();
+    return ALERTS_RESERVE[Id].alert_text_line();
   }
   else
   {
@@ -444,7 +448,12 @@ void ALERT_SYSTEM_2::res_clear(int Id)
 //  CHANGED = true;
 //}
 
-void ALERT_SYSTEM_2::add_generic_alert(string Title, string Line_1, string Line_2)
+int ALERT_SYSTEM_2::gen_text_line_count(int Id)
+{
+  return GENERIC_ALERTS[Id].text_line_count();
+}
+
+void ALERT_SYSTEM_2::add_generic_alert(string Title, string Line_1)
 {
   int find_id = search_for_alert(GENERIC_ALERTS, Title);
 
@@ -452,7 +461,7 @@ void ALERT_SYSTEM_2::add_generic_alert(string Title, string Line_1, string Line_
   {
     ALERT_2_TYPE_MONITOR tmp_alert;
 
-    tmp_alert.alert_no_condition(LATEST_ID, Title, Line_1, Line_2);
+    tmp_alert.alert_no_condition(LATEST_ID, Title, Line_1);
     GENERIC_ALERTS.push_back(tmp_alert);
     LATEST_ID++;
     
@@ -460,8 +469,7 @@ void ALERT_SYSTEM_2::add_generic_alert(string Title, string Line_1, string Line_
   }
   else
   {
-    GENERIC_ALERTS[find_id].update_alert_text_line_1(Line_1);
-    GENERIC_ALERTS[find_id].update_alert_text_line_2(Line_2);
+    GENERIC_ALERTS[find_id].update_alert_text_line(Line_1);
     GENERIC_ALERTS[find_id].set_display_on();   // tmp until clear method created.
   }
 
@@ -509,30 +517,17 @@ string ALERT_SYSTEM_2::gen_alert_title(int Id)
   }
 }
 
-string ALERT_SYSTEM_2::gen_alert_text_line_1(int Id)
+string ALERT_SYSTEM_2::gen_alert_text_line(int Id)
 {
   if (Id < (int)GENERIC_ALERTS.size())
   {
-    return  GENERIC_ALERTS[Id].alert_text_line_1();
+    return  GENERIC_ALERTS[Id].alert_text_line();
   }
   else
   {
     return "ALERT NOT FOUND";
   }
 }
-
-string ALERT_SYSTEM_2::gen_alert_text_line_2(int Id)
-{
-  if (Id < (int)GENERIC_ALERTS.size())
-  {
-    return  GENERIC_ALERTS[Id].alert_text_line_2();
-  }
-  else
-  {
-    return "ALERT NOT FOUND";
-  }
-}
-
 
 int ALERT_SYSTEM_2::gen_alert_id(int Id)
 {

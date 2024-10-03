@@ -49,8 +49,10 @@ class ALERT_2_TYPE_MONITOR
   bool DISPLAY = false;      // Determine if alert is to be displayed.
   
   string ALERT_TITLE       = "";   // Display Title of Alert
-  string ALERT_TEXT_LINE_1 = "";   // Text of alert
-  string ALERT_TEXT_LINE_2 = "";   // Text of alert
+  string ALERT_TEXT_LINE = "";   // Text of alert
+
+  int ALERT_TEXT_LINE_COUNT = 1;
+
   bool SHOW_VALUE_BAR = false;
 
   public:
@@ -59,8 +61,9 @@ class ALERT_2_TYPE_MONITOR
   float ALERT_VALUE = 0;
   float CLEAR_VALUE = 0;
 
-  void alert_no_condition(int Id, string Title, string Line_1, string Line_2);
-  //void alert_no_condition(int Id, string Alert_Text_Line_1);
+  int text_line_count();
+
+  void alert_no_condition(int Id, string Title, string Line_1);
   
   bool alert_condition(int Id, bool Raise_Alert, bool Clear_Alert, int &Changes);
   // returns true if requesting a description.
@@ -82,16 +85,15 @@ class ALERT_2_TYPE_MONITOR
   bool show_value_bar();
 
   string alert_title();  // Text value of alert
-  string alert_text_line_1();  // Text value of alert
-  string alert_text_line_2();  // Text value of alert
+  string alert_text_line();  // Text value of alert
 
   void update_alert_title(string Text);
   // Change the title value of the alert;
 
-  void update_alert_text_line_1(string Text);
+  void update_alert_text_line(string Text);
   // Change the text value of the alert;
 
-  void update_alert_text_line_2(string Text);
+  void update_alert_text_line_append(string Text);
   // Change the text value of the alert;
 
   void acknowlege();
@@ -149,23 +151,25 @@ class ALERT_SYSTEM_2
   bool changed();
   
   // reserved alerts
-  void res_alert_no_condition(int Id, string Title, string Line_1, string Line_2);
+  int res_text_line_count(int Id);
+
+  void res_alert_no_condition(int Id, string Title, string Line_1);
 
   bool res_alert_condition(int Id, bool Raise_Alert, bool Clear_Alert);
   bool res_alert_condition_greater_than(int Id, float Value, float Alert_Condition, float Clear_Condition);
   bool res_alert_condition_less_than(int Id, float Value, float Alert_Condition, float Clear_Condition);
   
   void res_update_alert_title(int Id, string Title);
-  void res_update_alert_text_line_1(int Id, string Text_Line_1);
-  void res_update_line_2_with_conditions(int Id);
+  void res_update_alert_text_line(int Id, string Text_Line_1);
+  void res_update_alert_text_line_append(int Id, string Text_Line_1);
+  void res_update_additional_line_with_conditions(int Id);
 
   bool res_active(int Id);        // Returns ACTIVE value
   bool res_warning(int Id);       // Returns WARNING value
   bool res_display(int Id);       // Returns DISPLAY value
 
   string res_alert_title(int Id);  // Text value of alert
-  string res_alert_text_line_1(int Id);  // Text value of alert
-  string res_alert_text_line_2(int Id);  // Text value of alert
+  string res_alert_text_line(int Id);  // Text value of alert
 
   void generate_reserve_alert(int Id, string Title);
   // Assigne Titles to Generate reserve alerts.
@@ -175,15 +179,15 @@ class ALERT_SYSTEM_2
   void res_clear(int Id);
 
   // generic alerts
-  //void add_generic_alert(string Text);
-  void add_generic_alert(string Title, string Line_1, string Line_2);
+  int gen_text_line_count(int Id);
+
+  void add_generic_alert(string Title, string Line_1);
 
   int gen_size();
   bool gen_warning(int Id);       // Returns WARNING value
   bool gen_display(int Id);       // Returns DISPLAY value
   string gen_alert_title(int Id);  // Text value of alert
-  string gen_alert_text_line_1(int Id);  // Text value of alert
-  string gen_alert_text_line_2(int Id);  // Text value of alert
+  string gen_alert_text_line(int Id);  // Text value of alert
   int gen_alert_id(int Id);
   void gen_acknowlege(int Id);
 

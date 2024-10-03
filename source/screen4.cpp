@@ -455,6 +455,10 @@ int SCREEN4::create(system_data &sdSysData)
     // Prepare Compass
     COMPASS_WINDOW_COMPASS.set_size(32, (15 / 2));
     // set at frame rate for slow and jitter size for fast.
+    
+    // Set font size on create.
+    ImVec2 text_size = ImGui::CalcTextSize("Alerts_List.res_alert_text_line(alert_num).c_str()");
+    sdSysData.SCREEN_META_DATA.TYPICAL_PIXEL_LINE_HEIGHT = text_size.y;
   }
   else
   {

@@ -28,7 +28,7 @@ void ALERT_WIDGET_WIDGTS::create(string Name)
   // Value Bar
   {
   VALUES.PROPS.LABEL = Name + " Value";
-  VALUES.PROPS.BAR_HEIGHT = 20.0f;
+  VALUES.PROPS.BAR_HEIGHT = 18.0f;
   VALUES.PROPS.MARKER_SIZE = 15.0f;
   VALUES.PROPS.COLOR_BACKGROUND = RAS_BLUE;
   VALUES.PROPS.COLOR_MARKER = RAS_YELLOW;
@@ -63,6 +63,7 @@ void ALERT_WIDGET_PROPERTIES_LIST::check_properties_list(int Alert_Num, string N
 
 void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
 {
+  // RESERVE ALERTS
   // Go through and display all reserve
   for (int alert_num = 0; alert_num < (int)Alerts_List.ALERTS_RESERVE.size(); alert_num++)
   {
@@ -72,8 +73,8 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
       PROPERTIES_RESERVE_LIST.check_properties_list(alert_num, "Reserve Alert ");
 
       string title = Alerts_List.PROPS.ALERT_SYSTEM_NAME;
-
-      ImGui::SetNextWindowSize(ImVec2(255, 120));
+      float text_size_height = 58.0f + (sdSysData.SCREEN_META_DATA.TYPICAL_PIXEL_LINE_HEIGHT * (float)(Alerts_List.res_text_line_count(alert_num)));
+      ImGui::SetNextWindowSize(ImVec2(255, text_size_height));
 
       int alert_type = 0;
 
@@ -112,7 +113,9 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
       if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
       {
         ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 255)); // Set background to black and opaque
-        ImGui::BeginChild("ChildWindow", ImVec2(240, 80), true);
+        
+        ImVec2 avail = ImGui::GetContentRegionAvail();
+        ImGui::BeginChild("ChildWindow", avail, true);
         {
           ImVec4 working_area = get_working_area();
           ImDrawList* draw_list_alert = ImGui::GetWindowDrawList();
@@ -120,8 +123,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
 
           Graphical_Number(draw_list_alert, sdSysData, ImVec2(working_area.x, working_area.y), working_area.z, alert_type);
 
-          ImGui::Text(Alerts_List.res_alert_text_line_1(alert_num).c_str());
-          ImGui::Text(Alerts_List.res_alert_text_line_2(alert_num).c_str());
+          ImGui::Text(Alerts_List.res_alert_text_line(alert_num).c_str());
 
           if (Alerts_List.ALERTS_RESERVE[alert_num].show_value_bar())
           {
@@ -178,19 +180,20 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
     }
   }
 
+  // GENERIC ALERTS
   // Go through and display all generic alerts
   if (Alerts_List.gen_size() > 0)
   {
     for (int alert_num = 0; alert_num < (int)Alerts_List.gen_size(); alert_num++)
     {
-      ImGui::SetNextWindowSize(ImVec2(255, 120));
-      
       if (Alerts_List.gen_display(alert_num))
       {
         // Create properties if needed
         //PROPERTIES_GENERAL_LIST.check_properties_list(sdSysData, alert_num, "General Alert ");
-        
+
         string title = Alerts_List.PROPS.ALERT_SYSTEM_NAME;
+        float text_size_height = 58.0f + (sdSysData.SCREEN_META_DATA.TYPICAL_PIXEL_LINE_HEIGHT * (float)(Alerts_List.gen_text_line_count(alert_num)));
+        ImGui::SetNextWindowSize(ImVec2(255, text_size_height));
 
         if (Alerts_List.gen_warning(alert_num))
         {
@@ -216,12 +219,13 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
         if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           ImGui::PushStyleColor(ImGuiCol_ChildBg, IM_COL32(0, 0, 0, 255)); // Set background to black and opaque
-          ImGui::BeginChild("ChildWindow", ImVec2(240, 80), true);
+          
+          ImVec2 avail = ImGui::GetContentRegionAvail();
+          ImGui::BeginChild("ChildWindow", avail, true);
           {
             ImVec2 screen_pos = ImGui::GetCursorScreenPos();
 
-            ImGui::Text(Alerts_List.gen_alert_text_line_1(alert_num).c_str());
-            ImGui::Text(Alerts_List.gen_alert_text_line_2(alert_num).c_str());
+            ImGui::Text(Alerts_List.gen_alert_text_line(alert_num).c_str());
 
             ImGui::SetCursorScreenPos(screen_pos);
             if (ImGui::InvisibleButton(("Acknowlege Alert" + to_string(alert_num)).c_str(), ImGui::GetContentRegionAvail()))

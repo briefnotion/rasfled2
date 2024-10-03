@@ -124,26 +124,26 @@ class system_data
   {
     public:
     // array for now. ll in future if necessary.
-    int size = 6;
-    string strRunningColor = "";  // 
-    CRGB color[6];
+    int     size = 6;
+    string  strRunningColor = "";  // 
+    CRGB    color[6];
   };
 
   public:
 
   // Files
-  FILES FILE_NAMES;
+  FILES           FILE_NAMES;
 
   // Primary Variables
-  FledTime PROGRAM_TIME;
+  FledTime        PROGRAM_TIME;
 
   // Main Reset
-  bool booREBOOT = false;
+  bool            booREBOOT = false;
 
   // System
   CONSOLE_COMMUNICATION SCREEN_COMMS;
 
-  configuration CONFIG;
+  configuration   CONFIG;
 
   // System Timing
   STAT_DATA_DOUBLE dblCOMPUTETIME;   // Loop time spent while only proceessing.
@@ -160,78 +160,79 @@ class system_data
   //bool DEBUG_COUNTER = false;
 
   // Door Module Support
-  deque<bool> boolDOOR_SENSOR_STATUS;
+  deque<bool>     boolDOOR_SENSOR_STATUS;
 
-  int   intDoorsOpen = 0;           // Amount of doors open.
-  bool  booPulsesRunning = false;   // Are exta anims running.
-  bool  booOverheadRunning = false; // Are exta anims running.
-  bool  booHazardRunning = false;   // Are exta anims running.
+  int             intDoorsOpen = 0;           // Amount of doors open.
+  bool            booPulsesRunning = false;   // Are exta anims running.
+  bool            booOverheadRunning = false; // Are exta anims running.
+  bool            booHazardRunning = false;   // Are exta anims running.
 
-  CRGB PULSE_COLOR;
-  CRGB CUSTOM_COLOR;
-  CRGB TMP_PASSTHRU_COLOR;
+  CRGB            PULSE_COLOR;
+  CRGB            CUSTOM_COLOR;
+  CRGB            TMP_PASSTHRU_COLOR;
   
   // Timer and Color Schemes
   countdown_timer cdTIMER;
-  running_colors running_color_list;
+  running_colors  running_color_list;
 
   // Clipboard
-  STRING_INT CLIPBOARD;
+  STRING_INT      CLIPBOARD;
 
   // Hardware Status Indicators
   HARDWARE_STATUS hsHardware_Status;
 
   // Lights on or off
-  BOOL_BOUNCE Lights_On;
+  BOOL_BOUNCE     Lights_On;
 
   // Day Mode Active
-  bool Day_On = false;
+  bool            Day_On = false;
   BOOL_WITH_OVERRIDE Day_On_With_Override;
 
   // Files
-  bool booRunning_State_File_Dirty = false;
+  bool            booRunning_State_File_Dirty = false;
 
   // Event System
-  deque<int> intCHANNEL_GROUP_EVENTS_COUNTS;
+  deque<int>      intCHANNEL_GROUP_EVENTS_COUNTS;
 
-  COMMAND_THREAD COMMAND_THREADS;
+  COMMAND_THREAD  COMMAND_THREADS;
 
   // Radio Variables
   AIRCRAFT_COORDINATOR AIRCRAFT_COORD;
 
   // Test Mode
-  int t_group = 0;
-  int t_strip = 0;
+  int             t_group = 0;
+  int             t_strip = 0;
 
   // Communications Port
-  COMPORT COMMS_AUTO;
-  AUTOMOBILE CAR_INFO;
+  COMPORT         COMMS_AUTO;
+  AUTOMOBILE      CAR_INFO;
 
   // GPS
-  COMPORT COMMS_GPS;
-  NMEA GPS_SYSTEM;
+  COMPORT         COMMS_GPS;
+  NMEA            GPS_SYSTEM;
 
   // Compass
-  HMC5883L COMMS_COMPASS;
+  HMC5883L        COMMS_COMPASS;
 
   // Screen Settings
-  bool TTY_ONLY = false;
-  COLOR_COMBOS COLOR_SELECT;
+  bool            TTY_ONLY = false;
+  COLOR_COMBOS    COLOR_SELECT;
   WIDGET_DEFAULTS SCREEN_DEFAULTS;
+  META_SCREEN     SCREEN_META_DATA;
 
   // Advertisements
-  string DIRECTORY_ADVERTISEMENTS = "";
+  string          DIRECTORY_ADVERTISEMENTS = "";
 
   // Do not eff with the system var
-  DNFWTS_ DNFWTS;
+  DNFWTS_         DNFWTS;
 
   // Temporary placement of auto velocity color
   //  Move these in the future after moving the automobile handler
   //  to system_data.
-  bool RUNNING_COLOR_TEMPERATURE = false;
-  int  RUNNING_COLOR = 3;
+  bool            RUNNING_COLOR_TEMPERATURE = false;
+  int             RUNNING_COLOR = 3;
 
-  SOUNDS SOUND_SYSTEM;  // Primitive sound system.
+  SOUNDS          SOUND_SYSTEM;  // Primitive sound system.
 
   // -------------------------------------------------------------------------------------
 

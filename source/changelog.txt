@@ -1,3 +1,7 @@
+2.211_2400931
+  - Alerts will resize vertically depending on the amount of 
+      lines to display. 
+
 2.210_2400930
   - Small Adjustments. 
 

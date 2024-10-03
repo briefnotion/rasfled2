@@ -15,6 +15,7 @@
 // Standard Header Files
 #include <string>
 #include <deque>
+#include <algorithm>
 
 // Optional Includes
 #include <ncurses.h>
@@ -23,6 +24,8 @@
 #include "helper.h"
 
 using namespace std;
+
+int count_char_in_string(string& Text, char Character);
 
 string char_buf_to_string(char* Buf, int Buf_Len);
 
