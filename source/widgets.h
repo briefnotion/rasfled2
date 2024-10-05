@@ -28,19 +28,6 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
-ImVec2 text_size(string Text);
-
-ImVec4 get_working_area();
-// must be called before other drawing is done.
-// X = x starting pos (position of left most window, if no write)
-// Y = y starting pos (position of left most window, if no write)
-// Z = x size
-// W = y size
-
-bool button_area(ImVec4 Working_Area);
-
-// ---------------------------------------------------------------------------------------
-
 ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigned long Duration, 
                       ImColor Start_Color, ImColor End_Color);
 

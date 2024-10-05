@@ -29,8 +29,10 @@
 // Map Tools
 
 float calculate_distance(float lat1, float long1, float lat2, float long2);
+// Returns distance in miles from first and second lat lon coords.
 
 ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees);
+// Returns latitude and longitude coordinates at Distance_Miles on Bearing.
 
 // -------------------------------------------------------------------------------------
 

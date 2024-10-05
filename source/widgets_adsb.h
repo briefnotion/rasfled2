@@ -46,16 +46,25 @@ using namespace std;
 // Map Tools
 
 float degrees_to_radians(float Degrees);
+// Convert Degees to Radians.
 
 void rotate_point(ImVec2 Center, float Angle_In_Rads, ImVec2 &Point);
+// Returns coordinates of Point when rotated at Angle_In_Rads from Center.
 
 ImVec2 point_position_center(ImVec4 Working_Area);
+// Returns Screen coordinates of center of working area.
 
 ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
                                 ImVec2 Lat_Lon_Center, ImVec2 Lat_Lon, 
                                 float Degrees, bool &Drawn);
+// Returns Screen coordinanates x and y pixel position of Latitude and Longitude.
+// Scale needs to be established.
+// Working area needs to established.  
+// Lat and Lon of Center of Working area needs to be established.
+// Map rotation in Degrees need to be established.
 
 ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
+// Returns Screen coordinates of center of working area offset by Position.
 
 // ---------------------------------------------------------------------------------------
 // Markers
@@ -120,14 +129,18 @@ class ADSB_RANGE
   
   int ZOOM_LEVEL = -1;
   
+  ImVec4 WORKING_AREA;
+  ImVec2 CENTER;
+
   float RANGE = 25.0f;                    // Miles for first circle
   IMPACT_RESISTANCE_FLOAT RANGE_IMP;
   float RANGE_IMP_LATEST = 0.0f;          // Miles for first circle
+  float RANGE_BLOCK_CURRENT = 0.0f;       // Current range block size determined by RANGE_IMP_LATEST
+  float RANGE_POINT_DISTANCE = 0.0f;
 
   float RADIUS_CIRCLE_POINT_SIZE = 0.0f;
-  ImVec2 LAT_LON_TO_POINT_SCALE;
-
-  ImVec4 PREV_WORKING_AREA;
+  ImVec2 LAT_LON_TO_POINT_SCALE;          // Required for calculating map draw routines
+                                          // in point_position_lat_lon
 
   ImVec2 NO_POS_LAT_LON;
   ImVec2 GPS_POS_LAT_LON;
@@ -176,6 +189,9 @@ class ADSB_RANGE
   void create();
   // Prep the color, range size, and size of the impact variables
 
+  void update_range_block_size();
+  // Get size of current range block after RANGE_IMP_LATEST is updated.
+
   void range_update(unsigned long Frame_Time);
   // Update the impact returned range value for futer request. 
   //  Run once at begining of every frame for range.
@@ -194,7 +210,7 @@ class ADSB_RANGE
   // Increase the distance in miles, the range is set at for viewing, 
   //  by one.
   
-  void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area);
+  void draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area);
 
   void draw_info();
 };
@@ -231,14 +247,28 @@ class ADSB_MAP
   TIMED_PING SHOW_BUTTONS_TIMER;
 
   IMPACT_RESISTANCE_FLOAT_FRAME_COUNT MAP_HEADING_DEGREES;
+  float MAP_HEADING_DEGREES_LATEST = 0.0f;
+
   bool NORTH_UP = false;
   bool ACTIVE_GPS = false;
   bool ACTIVE_COMPASS = false;
   bool ACTIVE_ADSB = false;
 
+  ImVec4 WORKING_AREA;
+
   COMPASS_WIDGET CURRENT_POSITION_COMPASS;
 
   void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
+
+  void screen_buttons(system_data &sdSysData);
+
+  void screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSysData);
+
+  void screen_text(system_data &sdSysData);
+
+  void screen_draw_position_marker(ImDrawList *Draw_List, system_data &sdSysData);
+
+  void screen_draw_aircraft(ImDrawList *Draw_List, system_data &sdSysData);
 
   public:
 

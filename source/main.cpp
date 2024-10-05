@@ -1412,68 +1412,76 @@ int loop_2(bool TTY_Only)
 }
 
 // ---------------------------------------------------------------------------------------
+// Main entry point for the RasFLED application
 int main(int argc, char *argv[])
 {
+  // Initialize exit code to indicate a run state (1) or failure (0)
   int ret = 1;  // Run
 
+  // Flag to determine whether to load a graphics window
   bool load_gfx_window = true;
 
+  // Parse command-line arguments to configure the program's behavior
   for (int pos = 1; pos < argc; pos++)
   {
-    if (strcmp(argv[pos], "-h") == 0 || strcmp(argv[pos], "--help") == 0)
-    {
-      ret = 2;
-      printf("\n-tty  :Load in Terminal\n");
-      printf("        Warning - Command line input not yet implemented.\n");
-      printf("                  There is no way of safely exiting the program.\n");
-      printf("-gfx  :Load Graphics Window (default)\n\n");
-    }
-    else
-    if (strcmp(argv[pos], "-tty") == 0)
-    {
-      load_gfx_window = false;
-    }
-    if (strcmp(argv[pos], "-gfx") == 0)
-    {
-      load_gfx_window = true;
-    }
+      // Check for help or usage options
+      if (strcmp(argv[pos], "-h") == 0 || strcmp(argv[pos], "--help") == 0)
+      {
+          ret = 2;
+          printf("\n-tty  :Load in Terminal\n");
+          printf("        Warning - Command line input not yet implemented.\n");
+          printf("                  There is no way of safely exiting the program.\n");
+          printf("-gfx  :Load Graphics Window (default)\n\n");
+      }
+      // Check for terminal or graphics window loading options
+      else if (strcmp(argv[pos], "-tty") == 0)
+      {
+          load_gfx_window = false;
+      }
+      else if (strcmp(argv[pos], "-gfx") == 0)
+      {
+          load_gfx_window = true;
+      }
   }
 
-  // Setup the Program
+  // Perform initial setup for the program
   setup();
 
-  // Start the main loop.
+  // Main loop that runs until a termination condition is met
   while (ret == 1)
   {
     printf("RasFLED Start ... \n");
 
     try
     {
+      // Run the main application logic with graphics window loading enabled or disabled
       if (load_gfx_window == true)
       {
-        ret = loop_2(false);
-        printf("Load Graphics Window\n");
+          ret = loop_2(false);
+          printf("Load Graphics Window\n");
       }
       else
       {
-        ret = loop_2(true); // To be phased out?
-        printf("Do Not Load Graphics Window\n");
+          ret = loop_2(true);  // To be phased out?
+          printf("Do Not Load Graphics Window\n");
       }
-    }
+    } 
     catch (std::exception const& e)
     {
+      // Handle unexpected exceptions during the main loop
       printf("An Error has occured in the main loop.\n");
       printf("Error Code: %d\n", ret);
       ret = 0;
     }
-    
-    // Reboot?
-    if(ret == 9999)
-    {
+
+  // Check for a reboot condition and restart the main loop if necessary
+  if (ret == 9999)
+  {
       ret = 1;
-    }
+  }
   }
 
+  // Print exit code information based on the program's termination reason
   printf("Exit Code: %d: ", ret);
 
   if (ret == 0)
@@ -1486,17 +1494,16 @@ int main(int argc, char *argv[])
   }
   else if (ret == 2)
   {
-    printf("Controled Exit\n");
+    printf("Controlled Exit\n");
   }
   else
   {
     printf("Non Standard Exit\n");
   }
 
-  // Exit the program.
+  // Clean up and exit the program
   printf("RasFLED ... Exit\n");
   return ret;
-  
 }
 
 

@@ -54,6 +54,19 @@ bool vector4_is_same(ImVec4 V1, ImVec4 V2);
 
 // ---------------------------------------------------------------------------------------
 
+ImVec2 text_size(string Text);
+
+ImVec4 get_working_area();
+// must be called before other drawing is done.
+// X = x starting pos (position of left most window, if no write)
+// Y = y starting pos (position of left most window, if no write)
+// Z = x size
+// W = y size
+
+bool button_area(ImVec4 Working_Area);
+
+// ---------------------------------------------------------------------------------------
+
 class WIDGET_DEFAULTS
 {
   public:

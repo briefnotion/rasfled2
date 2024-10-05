@@ -16,44 +16,6 @@
 
 // ---------------------------------------------------------------------------------------
 
-ImVec2 text_size(string Text)
-{
-  return ImGui::CalcTextSize(Text.c_str());
-}
-
-ImVec4 get_working_area()
-// must be called before other drawing is done.
-// X = x starting pos (position of left most window, if no write)
-// Y = y starting pos (position of top most window, if no write)
-// Z = x size
-// W = y size
-{
-  ImVec4 working_area;
-
-  working_area.x = ImGui::GetCursorScreenPos().x;
-  working_area.y = ImGui::GetCursorScreenPos().y;
-  working_area.z = ImGui::GetContentRegionAvail().x;
-  working_area.w = ImGui::GetContentRegionAvail().y;
-
-  return working_area;
-}
-
-bool button_area(ImVec4 Working_Area)
-{
-  ImGui::SetCursorScreenPos(ImVec2(Working_Area.x, Working_Area.y));
-
-  if (ImGui::InvisibleButton("Clickable Area", ImVec2(Working_Area.z, Working_Area.w)))
-  {
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
-// ---------------------------------------------------------------------------------------
-
 ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigned long Duration, 
                       ImColor Start_Color, ImColor End_Color)
 {

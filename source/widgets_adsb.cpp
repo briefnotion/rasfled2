@@ -641,6 +641,82 @@ void ADSB_RANGE::create()
   RANGE_IMP.set_alive_time(500);
 }
 
+void ADSB_RANGE::update_range_block_size()
+{
+  if (RANGE_IMP_LATEST < 0.01f)
+  {
+    RANGE_BLOCK_CURRENT = 0.005f;
+  }
+  else if (RANGE_IMP_LATEST < 0.03f)
+  {
+    RANGE_BLOCK_CURRENT = 0.01f;
+  }
+  else if (RANGE_IMP_LATEST < 0.05f)
+  {
+    RANGE_BLOCK_CURRENT = 0.03f;
+  }
+  else if (RANGE_IMP_LATEST < 0.1f)
+  {
+    RANGE_BLOCK_CURRENT = 0.05f;
+  }
+  else if (RANGE_IMP_LATEST < 0.25f)
+  {
+    RANGE_BLOCK_CURRENT = 0.1f;
+  }
+  else if (RANGE_IMP_LATEST < 0.5f)
+  {
+    RANGE_BLOCK_CURRENT = 0.25f;
+  }
+  else if (RANGE_IMP_LATEST < 1.0f)
+  {
+    RANGE_BLOCK_CURRENT = 0.5f;
+  }
+  else if (RANGE_IMP_LATEST < 2.0f)
+  {
+    RANGE_BLOCK_CURRENT = 1.0f;
+  }
+  else if (RANGE_IMP_LATEST < 5.0f)
+  {
+    RANGE_BLOCK_CURRENT = 2.0f;
+  }
+  else if (RANGE_IMP_LATEST < 7.0f)
+  {
+    RANGE_BLOCK_CURRENT = 5.0f;
+  }
+  else if (RANGE_IMP_LATEST < 10.0f)
+  {
+    RANGE_BLOCK_CURRENT = 7.0f;
+  }
+  else if (RANGE_IMP_LATEST < 15.0f)
+  {
+    RANGE_BLOCK_CURRENT = 10.0f;
+  }
+  else if (RANGE_IMP_LATEST < 25.0f)
+  {
+    RANGE_BLOCK_CURRENT = 15.0f;
+  }
+  else if (RANGE_IMP_LATEST < 35.0f)
+  {
+    RANGE_BLOCK_CURRENT = 25.0f;
+  }
+  else if (RANGE_IMP_LATEST < 50.0f)
+  {
+    RANGE_BLOCK_CURRENT = 35.0f;
+  }
+  else if (RANGE_IMP_LATEST < 75.0f)
+  {
+    RANGE_BLOCK_CURRENT = 50.0f;
+  }
+  else if (RANGE_IMP_LATEST < 100.0f)
+  {
+    RANGE_BLOCK_CURRENT = 75.0f;
+  }
+  else //if (RANGE_IMP_LATEST < 100.0f)
+  {
+    RANGE_BLOCK_CURRENT = 100.0f;
+  }
+}
+
 void ADSB_RANGE::range_update(unsigned long Frame_Time)
 {
   RANGE_IMP.set_value(Frame_Time, RANGE);
@@ -648,6 +724,14 @@ void ADSB_RANGE::range_update(unsigned long Frame_Time)
   if (RANGE_IMP_LATEST != RANGE)
   {
     RANGE_IMP_LATEST = RANGE_IMP.impact(Frame_Time);
+    update_range_block_size();
+
+    bool draw = true;
+    ImVec2 point_distance = point_position_lat_lon(WORKING_AREA, LAT_LON_TO_POINT_SCALE, GPS_POS_LAT_LON, 
+                                                  get_coords_x_miles_from_coords(GPS_POS_LAT_LON.x, GPS_POS_LAT_LON.y, RANGE_BLOCK_CURRENT, 0.0f), 
+                                                  180.0f, draw);
+    RANGE_POINT_DISTANCE = abs(point_distance.y - CENTER.y);
+
     calculate_lat_lon_to_point_scale();
   }
 }
@@ -675,29 +759,30 @@ void ADSB_RANGE::zoom_out()
   }
 }
 
-void ADSB_RANGE::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area)
+void ADSB_RANGE::draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area)
 {
+  WORKING_AREA = Working_Area;
+
+  // initial start
   if (ZOOM_LEVEL == -1)
   {
-    RADIUS_CIRCLE_POINT_SIZE = Working_Area.w / 2.0f * 0.6f;
+    RADIUS_CIRCLE_POINT_SIZE = WORKING_AREA.w / 2.0f * 0.6f;
 
     ZOOM_LEVEL = 13;     // Default start zoom level
     set_zoom_level();
   }
 
-  ImVec2 center = point_position_center(Working_Area);
-  
-  Draw_List->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)), 32, 1.5f);
-  Draw_List->AddNgon(center, RADIUS_CIRCLE_POINT_SIZE * 2.0f, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)), 32, 1.5f);
-  
-  ImGui::SetCursorScreenPos(ImVec2(center.x, center.y - RADIUS_CIRCLE_POINT_SIZE + 5));
+  CENTER = point_position_center(WORKING_AREA);
+      
+  Draw_List->AddNgon(CENTER, RANGE_POINT_DISTANCE, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)), 32, 1.5f);
+  Draw_List->AddNgon(CENTER, RANGE_POINT_DISTANCE * 2.0f, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)), 32, 1.5f);
+
+  ImGui::SetCursorScreenPos(ImVec2(CENTER.x, CENTER.y - RANGE_POINT_DISTANCE + 5));
   
   // Text Range
-  //ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color(PROPS.COLOR).STANDARD_V));
-
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)));
 
-  ImGui::Text("%.2f mi", RANGE_IMP_LATEST);
+  ImGui::Text("%.2f mi", RANGE_BLOCK_CURRENT);
   ImGui::PopStyleColor();
 }
 
@@ -760,6 +845,386 @@ void ADSB_MAP::add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type)
   LANDMARKS.push_back(new_landmark);
 }
 
+void ADSB_MAP::screen_buttons(system_data &sdSysData)
+{
+  // Range and Location Buttons
+  
+  // MAX Airplane
+  if (ACTIVE_ADSB && ACTIVE_GPS)
+  {
+    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                      WORKING_AREA.y + WORKING_AREA.w - (4.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+    if (BC_MAX.button_toggle_color(sdSysData, "MAX\n(On)", "MAX", RANGE_INDICATOR.ZOOM_MIN_MAX == 2, 
+                                      RAS_GREEN, RAS_BLUE, 
+                                      sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+
+      if (RANGE_INDICATOR.ZOOM_MIN_MAX == 2)
+      {
+        RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+      }
+      else
+      {
+        RANGE_INDICATOR.ZOOM_MIN_MAX = 2;
+      }
+    }
+    
+    // MIN Airplane
+    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                      WORKING_AREA.y + WORKING_AREA.w - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+    if (BC_MIN.button_toggle_color(sdSysData, "MIN\n(On)", "MIN", RANGE_INDICATOR.ZOOM_MIN_MAX == 1, 
+                                      RAS_GREEN, RAS_BLUE, 
+                                      sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+
+      if (RANGE_INDICATOR.ZOOM_MIN_MAX == 1)
+      {
+        RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+      }
+      else
+      {
+        RANGE_INDICATOR.ZOOM_MIN_MAX = 1;
+      }
+    }
+  }
+  
+  // Zoom Out
+  ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                    WORKING_AREA.y + WORKING_AREA.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+  if (BC_PLUS.button_color(sdSysData, "+", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  {
+    SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+    RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+    RANGE_INDICATOR.zoom_out();
+  }
+
+  // North Up
+  ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                    WORKING_AREA.y + WORKING_AREA.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+  if (BTC_NORTH_UP.button_toggle_color(sdSysData, "NORTH\nUP", "DIR\nUP", NORTH_UP,
+                                  RAS_GREEN, RAS_BLUE, 
+                                  sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  {
+    SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+    NORTH_UP = !NORTH_UP;
+  }
+
+  // Zoom In
+  ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                    WORKING_AREA.y + WORKING_AREA.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
+
+  if (BC_MINUS.button_color(sdSysData, "-", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  {
+    SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+    RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+    RANGE_INDICATOR.zoom_in();
+  }
+
+  // Center on location
+  if (ACTIVE_GPS && RANGE_INDICATOR.CENTER_ON_LOCATION != 1)
+  {
+    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)), 
+                                    WORKING_AREA.y));
+
+
+    if (BC_CENT_LOCATION.button_color(sdSysData, "CENT\nLOC", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+      RANGE_INDICATOR.CENTER_ON_LOCATION = 1;
+    }
+  }
+
+  // Current Location Toggle
+  if (ACTIVE_GPS)
+  {
+    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                    WORKING_AREA.y));
+    if (BTC_CENT.button_toggle_color(sdSysData, "CENT\n(On)", "CENT\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
+                                    RAS_GREEN, RAS_BLUE, 
+                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+      RANGE_INDICATOR.gps_display_current_location_toggle();
+    }
+  }
+  else
+  {
+    button_simple_enabled(sdSysData, "GPS\n", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
+  }
+
+  // Compass Calibration
+  if (ACTIVE_COMPASS)
+  {
+    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                  WORKING_AREA.y + sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f));
+
+    if (BTC_CALI.button_toggle_color(sdSysData, "CALI\n(On)", "CALI\n(Off)", sdSysData.COMMS_COMPASS.calibrate_on(),
+                                    RAS_GREEN, RAS_BLUE, 
+                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.COMMS_COMPASS.calibrate_toggle();
+    }
+
+    if (sdSysData.COMMS_COMPASS.calibrate_on())
+    {
+      ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                              WORKING_AREA.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
+      if (BTC_LOCK.button_toggle_color(sdSysData, "LOCK\n(On)", "LOCK\n(Off)", sdSysData.COMMS_COMPASS.calibrate_lock_on(),
+                                    RAS_GREEN, RAS_BLUE, 
+                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        sdSysData.COMMS_COMPASS.calibrate_lock_toggle();
+      }
+
+      ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                              WORKING_AREA.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
+      if (BC_BEAR_RESET.button_color(sdSysData, "BEAR\nRESET", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        if (ACTIVE_GPS)
+        {
+          sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+        }
+        else
+        {
+          sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(0.0f);
+        }
+      }
+
+      ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                              WORKING_AREA.y + 3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
+      if (BC_CALI_RESET.button_color(sdSysData, "CALI\nRESET", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        sdSysData.COMMS_COMPASS.calibrateion_reset();
+      }
+    }
+  }
+}
+
+void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSysData)
+{
+  ImVec2 center = point_position_center(WORKING_AREA);
+  
+  ImVec2 p1;
+  ImVec2 p2;
+  ImVec2 p3;
+  ImVec2 p4;
+
+  ImVec2 r1;
+  ImVec2 r2;
+  ImVec2 c1;
+  ImVec2 c2;
+  
+  // level 0 and level 1
+
+  for (int quad = 1; quad < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quad++)
+  {
+    for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS.size(); pos++)
+    {
+      p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS[pos].X / 4.0f), 
+                          center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS[pos].Y / 4.0f));
+
+      draw_marker(Draw_List, sdSysData, p1, RAS_ORANGE);
+    }
+
+    for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED.size(); pos++)
+    {
+      p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED[pos].X / 4.0f), 
+                          center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED[pos].Y / 4.0f));
+
+      draw_marker(Draw_List, sdSysData, p1, RAS_BLUE);
+    }
+  }
+
+  // draw quad calibration
+  if (sdSysData.COMMS_COMPASS.calibration_points_active_quad_overflow() == false)
+  {
+    for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS.size(); pos++)
+    {
+      p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS[pos].X / 4.0f), 
+                          center.y + (sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS[pos].Y / 4.0f));
+
+      draw_marker(Draw_List, sdSysData, p1, RAS_GREEN);
+    }
+  }
+
+  // draw outlining box
+  r1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_min_max_x().MIN_VALUE / 4.0f), 
+                                  center.y + (sdSysData.COMMS_COMPASS.calibration_min_max_y().MIN_VALUE / 4.0f));
+  r2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_min_max_x().MAX_VALUE / 4.0f), 
+                                  center.y + (sdSysData.COMMS_COMPASS.calibration_min_max_y().MAX_VALUE / 4.0f));
+  
+  draw_box(Draw_List, sdSysData, r1, r2, RAS_ORANGE, 2.0f);
+
+  c1 = ImVec2(center.x + ((sdSysData.COMMS_COMPASS.calibration_min_max_x().MIN_VALUE - 
+                                  sdSysData.COMMS_COMPASS.calibration_offset().X) / 4.0f), 
+                      center.y + ((sdSysData.COMMS_COMPASS.calibration_min_max_y().MIN_VALUE - 
+                                  sdSysData.COMMS_COMPASS.calibration_offset().Y) / 4.0f));
+  c2 = ImVec2(center.x + ((sdSysData.COMMS_COMPASS.calibration_min_max_x().MAX_VALUE - 
+                                  sdSysData.COMMS_COMPASS.calibration_offset().X) / 4.0f), 
+                      center.y + ((sdSysData.COMMS_COMPASS.calibration_min_max_y().MAX_VALUE - 
+                                  sdSysData.COMMS_COMPASS.calibration_offset().Y) / 4.0f));
+
+  draw_box(Draw_List, sdSysData, c1, c2, RAS_WHITE, 2.0f);
+
+  draw_line(Draw_List, sdSysData, r1, c1, RAS_WHITE, 2.0f);
+  draw_line(Draw_List, sdSysData, r2, c2, RAS_WHITE, 2.0f);
+
+  // level 2
+  // A
+  if (sdSysData.COMMS_COMPASS.calibration_simple() == false)
+  {
+    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[1].OFFSET_POINT.X/ 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[1].OFFSET_POINT.Y / 4.0f));
+    p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[2].OFFSET_POINT.X / 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[2].OFFSET_POINT.Y / 4.0f));
+    p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[3].OFFSET_POINT.X / 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[3].OFFSET_POINT.Y / 4.0f));
+    p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].OFFSET_POINT.X / 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].OFFSET_POINT.Y / 4.0f));
+
+    draw_line(Draw_List, sdSysData, p1, p2, RAS_GREEN, 2.0f);
+    draw_line(Draw_List, sdSysData, p2, p3, RAS_GREEN, 2.0f);
+    draw_line(Draw_List, sdSysData, p3, p4, RAS_GREEN, 2.0f);
+    draw_line(Draw_List, sdSysData, p4, p1, RAS_GREEN, 2.0f);
+
+    draw_marker_filled(Draw_List, sdSysData, p1, RAS_WHITE);
+    draw_marker_filled(Draw_List, sdSysData, p2, RAS_WHITE);
+    draw_marker_filled(Draw_List, sdSysData, p3, RAS_WHITE);
+    draw_marker_filled(Draw_List, sdSysData, p4, RAS_WHITE);
+  }
+}
+
+void ADSB_MAP::screen_text(system_data &sdSysData)
+{
+  //Put cursor in upper left
+  ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x, WORKING_AREA.y));
+
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_RED)));
+  ImGui::Text("WARNING: Information may be considered CONFIDENTIAL");
+  ImGui::PopStyleColor();
+
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_GREY)));
+  {
+    ImGui::Text("TIME: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TIME_OF_SIGNAL.c_str());
+    ImGui::Text("COUNT: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_COUNT.c_str());
+    ImGui::Text("  POS: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_AIRCRAFT.c_str());
+
+    // Maps and Other Information
+    RANGE_INDICATOR.draw_info();
+
+    // GPS Information
+    if (ACTIVE_GPS)
+    {
+      ImGui::NewLine();
+
+      ImGui::Text("GPS POSITION");
+      ImGui::Text("   SPEED: %.1f", sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph());
+      ImGui::Text("ALTITUDE: %.1f", sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val());
+      ImGui::Text(" HEADING: %.1f", sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+
+      if (SHOW_BUTTONS)
+      {
+        ImGui::Text("P:%.1f H:%.1f V:%.1f", sdSysData.GPS_SYSTEM.pdop(), sdSysData.GPS_SYSTEM.hdop(), sdSysData.GPS_SYSTEM.vdop());
+      }
+    }
+
+    // Compass Information
+    if (ACTIVE_COMPASS)
+    {
+      ImGui::NewLine();
+
+      ImGui::Text("COMPASS");
+
+      ImGui::Text("BEARING: %.1f", sdSysData.COMMS_COMPASS.bearing());
+
+      if (sdSysData.COMMS_COMPASS.calibrate_on())
+      {
+        for (int quads = 1; quads < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quads++)
+        {
+          ImGui::Text("CAL PT %d | %d | %.0f, %.0f: %.3f", quads,
+                                                      sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT_LIST.size(), 
+                                                      sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.X, 
+                                                      sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.Y, 
+                                                      sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].VARIANCE);
+        }
+
+        ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.3f  OFFSET: %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, 
+                                                                          sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance(), 
+                                                                          sdSysData.COMMS_COMPASS.bearing_known_offset());
+      }
+    }
+  }
+  ImGui::PopStyleColor();
+}
+
+void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &sdSysData)
+{
+  // Draw track of GPS Position.
+  if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
+  {
+    draw_track(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 2.5f, 
+                GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.GPS_SYSTEM.TRACK);
+  }
+
+  bool draw = false;
+  ImVec2 gps_pos = point_position_lat_lon(WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.get_center_lat_lon(), 
+                                          RANGE_INDICATOR.get_gps_lat_lon(), MAP_HEADING_DEGREES_LATEST, draw);
+
+  // Draw point position compass
+  if (draw)
+  {
+    if (RANGE_INDICATOR.CENTER_ON_LOCATION == 1)
+    {
+      // draw compass at center location
+      CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 2, gps_pos, WORKING_AREA.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                          sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
+                          ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, 
+                          true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), MAP_HEADING_DEGREES_LATEST);
+    }
+    else
+    {
+      // draw compass at gps pos
+      CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
+                          sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
+                          ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, MAP_HEADING_DEGREES_LATEST);
+    }
+
+    ImGui::SetCursorScreenPos(ImVec2(gps_pos.x - 20.0f, gps_pos.y - 20.0f));
+    if (ImGui::InvisibleButton("GPS CURRENT POSITION COMPASS", ImVec2(40.0f, 40.0f)))
+    {
+      RANGE_INDICATOR.CENTER_ON_LOCATION = 1;
+    }
+  }
+}
+
+void ADSB_MAP::screen_draw_aircraft(ImDrawList *Draw_List, system_data &sdSysData)
+{
+  for (int aircraft = 0; aircraft < (int)sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size(); aircraft ++)
+  {
+    if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].active())
+    {
+      AIRCRAFT tmp_clicked_aircraft = draw_aircraft_map_marker(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft], 
+                                                                Draw_List, sdSysData, WORKING_AREA, 
+                                                                RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 
+                                                                RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, 
+                                                                ALTITUDE_COLOR_SCALE);
+      
+      if (tmp_clicked_aircraft.HEX.get_str_value() != "")
+      {
+        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT = tmp_clicked_aircraft;
+        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT_HEX = tmp_clicked_aircraft.HEX.get_str_value();
+        RANGE_INDICATOR.CENTER_ON_LOCATION = 2;
+      }
+    }
+  }
+}
+  
 void ADSB_MAP::create()
 {
   // Prepare Map Orientation with Impact Resistance
@@ -1567,16 +2032,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // ADSB Draw List
   ImDrawList* draw_list_map = ImGui::GetWindowDrawList();
 
-  // working area, xy start position; zw, size.
-  //    or
-  //  xy is offset
-  //  zw is screen size.
-  ImVec4 working_area;
-
-  working_area.x = ImGui::GetCursorScreenPos().x;
-  working_area.y = ImGui::GetCursorScreenPos().y;
-  working_area.z = ImGui::GetContentRegionAvail().x;
-  working_area.w = ImGui::GetContentRegionAvail().y;
+  WORKING_AREA = get_working_area();
 
   // -------------------------------------------------------------------------------------
 
@@ -1641,16 +2097,10 @@ void ADSB_MAP::draw(system_data &sdSysData)
                                                   sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.POSITION.LONGITUDE.get_float_value()));
     }
   }
-  
-  // No pos has no store point other than direct
-  {
-    // No Pos
-  }
 
   // -------------------------------------------------------------------------------------
 
   // Before drawing the map, get map heading in degrees from sources Compass or GPS or both
-  float map_heading_degrees = 0.0f;
 
   if (!NORTH_UP)
   {
@@ -1699,7 +2149,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
     MAP_HEADING_DEGREES.set_value(0.0f);
   }
 
-  map_heading_degrees = MAP_HEADING_DEGREES.value_no_roll(360.0f);
+  MAP_HEADING_DEGREES_LATEST = MAP_HEADING_DEGREES.value_no_roll(360.0f);
 
   // -------------------------------------------------------------------------------------
 
@@ -1715,11 +2165,11 @@ void ADSB_MAP::draw(system_data &sdSysData)
 
   // Button for Hide Buttons
   //Put cursor in upper left
-  ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y));
+  ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x, WORKING_AREA.y));
 
   if (SHOW_BUTTONS == false)
   {
-    if (ImGui::InvisibleButton("Hide Buttons", ImVec2(working_area.z, working_area.w)))
+    if (ImGui::InvisibleButton("Hide Buttons", ImVec2(WORKING_AREA.z, WORKING_AREA.w)))
     {
       SHOW_BUTTONS = !SHOW_BUTTONS;
 
@@ -1731,407 +2181,43 @@ void ADSB_MAP::draw(system_data &sdSysData)
   }
 
   // All Text Below Here
-
-  //Put cursor in upper left
-  ImGui::SetCursorScreenPos(ImVec2(working_area.x, working_area.y));
-
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_RED)));
-
-  ImGui::Text("WARNING: Information may be considered CONFIDENTIAL");
-  ImGui::PopStyleColor();
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_GREY)));
-  ImGui::Text("TIME: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TIME_OF_SIGNAL.c_str());
-  ImGui::Text("COUNT: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_COUNT.c_str());
-  ImGui::Text("  POS: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_AIRCRAFT.c_str());
-
-  // Maps and Other Information
-  RANGE_INDICATOR.draw_info();
-
-  // GPS Information
-  if (ACTIVE_GPS)
-  {
-    ImGui::NewLine();
-
-    ImGui::Text("GPS POSITION");
-    ImGui::Text("   SPEED: %.1f", sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph());
-    ImGui::Text("ALTITUDE: %.1f", sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val());
-    ImGui::Text(" HEADING: %.1f", sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
-
-    if (SHOW_BUTTONS)
-    {
-      ImGui::Text("P:%.1f H:%.1f V:%.1f", sdSysData.GPS_SYSTEM.pdop(), sdSysData.GPS_SYSTEM.hdop(), sdSysData.GPS_SYSTEM.vdop());
-    }
-  }
-
-  // Compass Information
-  if (ACTIVE_COMPASS)
-  {
-    ImGui::NewLine();
-
-    ImGui::Text("COMPASS");
-
-    ImGui::Text("BEARING: %.1f", sdSysData.COMMS_COMPASS.bearing());
-
-    if (sdSysData.COMMS_COMPASS.calibrate_on())
-    {
-      for (int quads = 1; quads < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quads++)
-      {
-        ImGui::Text("CAL PT %d | %d | %.0f, %.0f: %.3f", quads,
-                                                    sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT_LIST.size(), 
-                                                    sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.X, 
-                                                    sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.Y, 
-                                                    sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].VARIANCE);
-      }
-
-      ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.3f  OFFSET: %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, 
-                                                                        sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance(), 
-                                                                        sdSysData.COMMS_COMPASS.bearing_known_offset());
-    }
-  }
-
-  ImGui::PopStyleColor();
+  screen_text(sdSysData);
 
   // All Buttons
   if (SHOW_BUTTONS)
   {
-    // Range and Location Buttons
-    
-    // MAX Airplane
-    if (ACTIVE_ADSB && ACTIVE_GPS)
-    {
-      ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                        working_area.y + working_area.w - (4.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
-
-      if (BC_MAX.button_toggle_color(sdSysData, "MAX\n(On)", "MAX", RANGE_INDICATOR.ZOOM_MIN_MAX == 2, 
-                                        RAS_GREEN, RAS_BLUE, 
-                                        sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-      {
-        SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-
-        if (RANGE_INDICATOR.ZOOM_MIN_MAX == 2)
-        {
-          RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
-        }
-        else
-        {
-          RANGE_INDICATOR.ZOOM_MIN_MAX = 2;
-        }
-      }
-      
-      // MIN Airplane
-      ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                        working_area.y + working_area.w - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
-
-      if (BC_MIN.button_toggle_color(sdSysData, "MIN\n(On)", "MIN", RANGE_INDICATOR.ZOOM_MIN_MAX == 1, 
-                                        RAS_GREEN, RAS_BLUE, 
-                                        sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-      {
-        SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-
-        if (RANGE_INDICATOR.ZOOM_MIN_MAX == 1)
-        {
-          RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
-        }
-        else
-        {
-          RANGE_INDICATOR.ZOOM_MIN_MAX = 1;
-        }
-      }
-    }
-    
-    // Zoom Out
-    ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                      working_area.y + working_area.w - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
-
-    if (BC_PLUS.button_color(sdSysData, "+", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-      RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
-      RANGE_INDICATOR.zoom_out();
-    }
-
-    // North Up
-    ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                      working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
-
-    if (BTC_NORTH_UP.button_toggle_color(sdSysData, "NORTH\nUP", "DIR\nUP", NORTH_UP,
-                                    RAS_GREEN, RAS_BLUE, 
-                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-      NORTH_UP = !NORTH_UP;
-    }
-
-    // Zoom In
-    ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                      working_area.y + working_area.w - (1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f))));
-
-    if (BC_MINUS.button_color(sdSysData, "-", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-      RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
-      RANGE_INDICATOR.zoom_in();
-    }
-
-    // Center on location
-    if (ACTIVE_GPS && RANGE_INDICATOR.CENTER_ON_LOCATION != 1)
-    {
-      ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)), 
-                                      working_area.y));
-
-
-      if (BC_CENT_LOCATION.button_color(sdSysData, "CENT\nLOC", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-      {
-        SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-        RANGE_INDICATOR.CENTER_ON_LOCATION = 1;
-      }
-    }
-
-    // Current Location Toggle
-    if (ACTIVE_GPS)
-    {
-      ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                      working_area.y));
-      if (BTC_CENT.button_toggle_color(sdSysData, "CENT\n(On)", "CENT\n(Off)", RANGE_INDICATOR.gps_display_current_location(),
-                                      RAS_GREEN, RAS_BLUE, 
-                                      sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-      {
-        SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-        RANGE_INDICATOR.gps_display_current_location_toggle();
-      }
-    }
-    else
-    {
-      button_simple_enabled(sdSysData, "GPS\n", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
-    }
-
-    // Compass Calibration
-    if (ACTIVE_COMPASS)
-    {
-      ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                    working_area.y + sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f));
-
-      if (BTC_CALI.button_toggle_color(sdSysData, "CALI\n(On)", "CALI\n(Off)", sdSysData.COMMS_COMPASS.calibrate_on(),
-                                      RAS_GREEN, RAS_BLUE, 
-                                      sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-      {
-        sdSysData.COMMS_COMPASS.calibrate_toggle();
-      }
-
-      if (sdSysData.COMMS_COMPASS.calibrate_on())
-      {
-        ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                working_area.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
-        if (BTC_LOCK.button_toggle_color(sdSysData, "LOCK\n(On)", "LOCK\n(Off)", sdSysData.COMMS_COMPASS.calibrate_lock_on(),
-                                      RAS_GREEN, RAS_BLUE, 
-                                      sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-        {
-          sdSysData.COMMS_COMPASS.calibrate_lock_toggle();
-        }
-
-        ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                working_area.y + 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
-        if (BC_BEAR_RESET.button_color(sdSysData, "BEAR\nRESET", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-        {
-          if (ACTIVE_GPS)
-          {
-            sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
-          }
-          else
-          {
-            sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(0.0f);
-          }
-        }
-
-        ImGui::SetCursorScreenPos(ImVec2(working_area.x + working_area.z - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
-                                working_area.y + 3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f)));
-        if (BC_CALI_RESET.button_color(sdSysData, "CALI\nRESET", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-        {
-          sdSysData.COMMS_COMPASS.calibrateion_reset();
-        }
-      }
-    }
+    screen_buttons(sdSysData);
   }
 
   // All Text Above Here
   // -------------------------------------------------------------------------------------
-  RANGE_INDICATOR.draw(draw_list_map, sdSysData, working_area);
+  RANGE_INDICATOR.draw_scale(draw_list_map, sdSysData, WORKING_AREA);
 
   // Draw Compass Calibration
   if (ACTIVE_COMPASS)
   {
     if (sdSysData.COMMS_COMPASS.calibrate_on())
     {
-      ImVec2 center = point_position_center(working_area);
-      
-      ImVec2 p1;
-      ImVec2 p2;
-      ImVec2 p3;
-      ImVec2 p4;
-
-      ImVec2 r1;
-      ImVec2 r2;
-      ImVec2 c1;
-      ImVec2 c2;
-      
-      // level 0 and level 1
-
-      for (int quad = 1; quad < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quad++)
-      {
-        for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS.size(); pos++)
-        {
-          p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS[pos].X / 4.0f), 
-                              center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS[pos].Y / 4.0f));
-
-          draw_marker(draw_list_map, sdSysData, p1, RAS_ORANGE);
-        }
-
-        for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED.size(); pos++)
-        {
-          p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED[pos].X / 4.0f), 
-                              center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quad].QUAD_DATA.DATA_POINTS_CALIBRATED[pos].Y / 4.0f));
-
-          draw_marker(draw_list_map, sdSysData, p1, RAS_BLUE);
-        }
-      }
-
-      // draw quad calibration
-      if (sdSysData.COMMS_COMPASS.calibration_points_active_quad_overflow() == false)
-      {
-        for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS.size(); pos++)
-        {
-          p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS[pos].X / 4.0f), 
-                              center.y + (sdSysData.COMMS_COMPASS.calibration_points_active_quad_data().DATA_POINTS[pos].Y / 4.0f));
-
-          draw_marker(draw_list_map, sdSysData, p1, RAS_GREEN);
-        }
-      }
-
-      // draw outlining box
-      r1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_min_max_x().MIN_VALUE / 4.0f), 
-                                      center.y + (sdSysData.COMMS_COMPASS.calibration_min_max_y().MIN_VALUE / 4.0f));
-      r2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.calibration_min_max_x().MAX_VALUE / 4.0f), 
-                                      center.y + (sdSysData.COMMS_COMPASS.calibration_min_max_y().MAX_VALUE / 4.0f));
-      
-      draw_box(draw_list_map, sdSysData, r1, r2, RAS_ORANGE, 2.0f);
-
-      c1 = ImVec2(center.x + ((sdSysData.COMMS_COMPASS.calibration_min_max_x().MIN_VALUE - 
-                                      sdSysData.COMMS_COMPASS.calibration_offset().X) / 4.0f), 
-                          center.y + ((sdSysData.COMMS_COMPASS.calibration_min_max_y().MIN_VALUE - 
-                                      sdSysData.COMMS_COMPASS.calibration_offset().Y) / 4.0f));
-      c2 = ImVec2(center.x + ((sdSysData.COMMS_COMPASS.calibration_min_max_x().MAX_VALUE - 
-                                      sdSysData.COMMS_COMPASS.calibration_offset().X) / 4.0f), 
-                          center.y + ((sdSysData.COMMS_COMPASS.calibration_min_max_y().MAX_VALUE - 
-                                      sdSysData.COMMS_COMPASS.calibration_offset().Y) / 4.0f));
-
-      draw_box(draw_list_map, sdSysData, c1, c2, RAS_WHITE, 2.0f);
-
-      draw_line(draw_list_map, sdSysData, r1, c1, RAS_WHITE, 2.0f);
-      draw_line(draw_list_map, sdSysData, r2, c2, RAS_WHITE, 2.0f);
-
-      // level 2
-      // A
-      if (sdSysData.COMMS_COMPASS.calibration_simple() == false)
-      {
-        p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[1].OFFSET_POINT.X/ 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[1].OFFSET_POINT.Y / 4.0f));
-        p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[2].OFFSET_POINT.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[2].OFFSET_POINT.Y / 4.0f));
-        p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[3].OFFSET_POINT.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[3].OFFSET_POINT.Y / 4.0f));
-        p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].OFFSET_POINT.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[4].OFFSET_POINT.Y / 4.0f));
-
-        draw_line(draw_list_map, sdSysData, p1, p2, RAS_GREEN, 2.0f);
-        draw_line(draw_list_map, sdSysData, p2, p3, RAS_GREEN, 2.0f);
-        draw_line(draw_list_map, sdSysData, p3, p4, RAS_GREEN, 2.0f);
-        draw_line(draw_list_map, sdSysData, p4, p1, RAS_GREEN, 2.0f);
-
-        draw_marker_filled(draw_list_map, sdSysData, p1, RAS_WHITE);
-        draw_marker_filled(draw_list_map, sdSysData, p2, RAS_WHITE);
-        draw_marker_filled(draw_list_map, sdSysData, p3, RAS_WHITE);
-        draw_marker_filled(draw_list_map, sdSysData, p4, RAS_WHITE);
-      }
+      screen_draw_calibration(draw_list_map, sdSysData);
     }
   }
 
   // Draw Landmarks
   for (int landmark = 0; landmark < (int)LANDMARKS.size(); landmark++)
   {
-    LANDMARKS[landmark].draw(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.get_center_lat_lon(), map_heading_degrees, RANGE_INDICATOR.range());
+    LANDMARKS[landmark].draw(draw_list_map, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.get_center_lat_lon(), 
+                              MAP_HEADING_DEGREES_LATEST, RANGE_INDICATOR.range());
   }
 
   // Draw Current Position Marker
   if (ACTIVE_GPS && sdSysData.GPS_SYSTEM.current_position().VALID_COORDS)
   {
-    // Draw track of GPS Position.
-    if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
-    {
-      draw_track(draw_list_map, sdSysData, working_area, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 2.5f, GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), map_heading_degrees, sdSysData.GPS_SYSTEM.TRACK);
-    }
-
-    bool draw = false;
-    ImVec2 gps_pos = point_position_lat_lon(working_area, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.get_center_lat_lon(), RANGE_INDICATOR.get_gps_lat_lon(), map_heading_degrees, draw);
-
-    // Draw point position compass
-    if (draw)
-    {
-      if (RANGE_INDICATOR.CENTER_ON_LOCATION == 1)
-      {
-        // draw compass at center location
-        CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, gps_pos, working_area.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                            sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                            ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, 
-                            true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), map_heading_degrees);
-      }
-      else
-      {
-        // draw compass at gps pos
-        CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                            sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                            ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, map_heading_degrees);
-      }
-  
-      ImGui::SetCursorScreenPos(ImVec2(gps_pos.x - 20.0f, gps_pos.y - 20.0f));
-      if (ImGui::InvisibleButton("GPS CURRENT POSITION COMPASS", ImVec2(40.0f, 40.0f)))
-      {
-        RANGE_INDICATOR.CENTER_ON_LOCATION = 1;
-      }
-    }
+    screen_draw_position_marker(draw_list_map, sdSysData);
   }
   
-  /*
-  else if (active_compass)
-  {
-    CURRENT_POSITION_COMPASS.draw(draw_list_map, sdSysData, 2, ImVec2(working_area.x + working_area.z / 2.0f, working_area.y + working_area.w / 2.0f), 
-                    working_area.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                    sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                    active_compass, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, 
-                    true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), map_heading_degrees);
-  }
-  */
-  
-  // -------------------------------------------------------------------------------------
-
   // Draw Aircraft
-  for (int aircraft = 0; aircraft < (int)sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size(); aircraft ++)
-  {
-    if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].active())
-    {
-      AIRCRAFT tmp_clicked_aircraft = draw_aircraft_map_marker(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft], 
-                                                                draw_list_map, sdSysData, working_area, 
-                                                                RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 
-                                                                RANGE_INDICATOR.get_center_lat_lon(), map_heading_degrees, 
-                                                                ALTITUDE_COLOR_SCALE);
-      
-      if (tmp_clicked_aircraft.HEX.get_str_value() != "")
-      {
-        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT = tmp_clicked_aircraft;
-        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT_HEX = tmp_clicked_aircraft.HEX.get_str_value();
-        RANGE_INDICATOR.CENTER_ON_LOCATION = 2;
-      }
-    }
-  }
+  screen_draw_aircraft(draw_list_map, sdSysData);
+
 }
 
 void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
