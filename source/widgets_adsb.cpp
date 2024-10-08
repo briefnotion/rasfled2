@@ -637,81 +637,83 @@ void ADSB_RANGE::create()
 {
   PROPS.COLOR = RAS_ORANGE;
   set_range(25.0f);
-  RANGE_IMP.set_size(15);
-  RANGE_IMP.set_alive_time(500);
+  RANGE_IMP.set_size(45);
+  RANGE_IMP.set_alive_time(1500);
 }
 
+/// Updates the current range block size based on the latest range impact value.
+/// The range block size is adjusted in discrete steps to provide a smooth visual representation of the range.
+/// The range block size is used to determine the spacing and size of the range markers on the display.
 void ADSB_RANGE::update_range_block_size()
 {
-  if (RANGE_IMP_LATEST < 0.01f)
-  {
-    RANGE_BLOCK_CURRENT = 0.005f;
-  }
-  else if (RANGE_IMP_LATEST < 0.03f)
+  
+  float range_imp_adjustment = RANGE_IMP_LATEST * 0.75;
+
+  if (range_imp_adjustment < 0.01f)
   {
     RANGE_BLOCK_CURRENT = 0.01f;
   }
-  else if (RANGE_IMP_LATEST < 0.05f)
+  else if (range_imp_adjustment < 0.03f)
   {
     RANGE_BLOCK_CURRENT = 0.03f;
   }
-  else if (RANGE_IMP_LATEST < 0.1f)
+  else if (range_imp_adjustment < 0.05f)
   {
     RANGE_BLOCK_CURRENT = 0.05f;
   }
-  else if (RANGE_IMP_LATEST < 0.25f)
+  else if (range_imp_adjustment < 0.1f)
   {
     RANGE_BLOCK_CURRENT = 0.1f;
   }
-  else if (RANGE_IMP_LATEST < 0.5f)
+  else if (range_imp_adjustment < 0.25f)
   {
     RANGE_BLOCK_CURRENT = 0.25f;
   }
-  else if (RANGE_IMP_LATEST < 1.0f)
+  else if (range_imp_adjustment < 0.5f)
   {
     RANGE_BLOCK_CURRENT = 0.5f;
   }
-  else if (RANGE_IMP_LATEST < 2.0f)
+  else if (range_imp_adjustment < 1.0f)
   {
     RANGE_BLOCK_CURRENT = 1.0f;
   }
-  else if (RANGE_IMP_LATEST < 5.0f)
+  else if (range_imp_adjustment < 2.0f)
   {
     RANGE_BLOCK_CURRENT = 2.0f;
   }
-  else if (RANGE_IMP_LATEST < 7.0f)
+  else if (range_imp_adjustment < 5.0f)
   {
     RANGE_BLOCK_CURRENT = 5.0f;
   }
-  else if (RANGE_IMP_LATEST < 10.0f)
+  else if (range_imp_adjustment < 7.0f)
   {
     RANGE_BLOCK_CURRENT = 7.0f;
   }
-  else if (RANGE_IMP_LATEST < 15.0f)
+  else if (range_imp_adjustment < 10.0f)
   {
     RANGE_BLOCK_CURRENT = 10.0f;
   }
-  else if (RANGE_IMP_LATEST < 25.0f)
+  else if (range_imp_adjustment < 15.0f)
   {
     RANGE_BLOCK_CURRENT = 15.0f;
   }
-  else if (RANGE_IMP_LATEST < 35.0f)
+  else if (range_imp_adjustment < 25.0f)
   {
     RANGE_BLOCK_CURRENT = 25.0f;
   }
-  else if (RANGE_IMP_LATEST < 50.0f)
+  else if (range_imp_adjustment < 35.0f)
   {
     RANGE_BLOCK_CURRENT = 35.0f;
   }
-  else if (RANGE_IMP_LATEST < 75.0f)
+  else if (range_imp_adjustment < 50.0f)
   {
     RANGE_BLOCK_CURRENT = 50.0f;
   }
-  else if (RANGE_IMP_LATEST < 100.0f)
+  else if (range_imp_adjustment < 75.0f)
   {
     RANGE_BLOCK_CURRENT = 75.0f;
   }
-  else //if (RANGE_IMP_LATEST < 100.0f)
+  else //if (range_imp_adjustment < 100.0f)
   {
     RANGE_BLOCK_CURRENT = 100.0f;
   }

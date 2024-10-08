@@ -1062,7 +1062,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           // Restack windows placed here to complete cycle.
           RESTACK_WINDOWS = false;
 
-          ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x - 215.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x - sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB.x - 15.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
 
             if (BTC_TAB_CONSOLE.button_toggle_color(sdSysData, "Console", "Console", DISPLAY_SCREEN == 0, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
@@ -1108,6 +1108,21 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             {
               DISPLAY_SCREEN = 5;
             }
+
+            ImGui::SameLine();
+            //ImGui::BeginChild("Info Bar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+            {        
+              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_RED)));
+              ImGui::PushFont(io.Fonts->Fonts.Data[2]);
+
+              ImGui::Text("  Legal_Mode = On");
+              //Text_Rotate("hgzsfkzxsfkzs", 90.0f, BB_BL);
+
+              ImGui::PopFont();
+              ImGui::PopStyleColor();
+            }
+            //ImGui::EndChild();
+
           }
           ImGui::EndChild();
 
@@ -1281,14 +1296,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           }
         }
         ImGui::EndChild();
-        
-        ImGui::End();
       }
       else
       {
         sdSysData.SCREEN_COMMS.WINDOW_CLOSE = true;
       }
 
+      ImGui::End();
 
       // ---------------------------------------------------------------------------------------
       // Debug Window
