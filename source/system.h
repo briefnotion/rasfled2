@@ -135,7 +135,7 @@ class system_data
   FILES           FILE_NAMES;
 
   // Primary Variables
-  FledTime        PROGRAM_TIME;
+  FLED_TIME       PROGRAM_TIME;
 
   // Main Reset
   bool            booREBOOT = false;
@@ -146,13 +146,8 @@ class system_data
   configuration   CONFIG;
 
   // System Timing
-  STAT_DATA_DOUBLE dblCOMPUTETIME;   // Loop time spent while only proceessing.
-  STAT_DATA_DOUBLE dblCYCLETIME;     // Amount of time to complete an entire cycle.
-  STAT_DATA_DOUBLE dblPREVSLEEPTIME; // Stored value returned on pref sleep cycle.
   STAT_DATA_DOUBLE dblSCREEN_RENDER_TIME; // Stored value returned on pref sleep cycle.
   STAT_DATA_DOUBLE dblCOMMS_TRANSFER_TIME; // Stored value returned on pref sleep cycle.
-
-  //ALERT_SYSTEM ALERTS;
   
   ALERT_SYSTEM_2 ALERTS_AUTO;
 
@@ -254,10 +249,6 @@ class system_data
   void set_running_color(CRGB Running_Color, string strColor);
 
   void start_timer(int Seconds);
-
-  double store_sleep_time(double tmeSleep);
-  
-  double get_sleep_time(double Current_Time, unsigned long Wake_Time);
 
   void read_hardware_status(int Milis_Frequency);
 

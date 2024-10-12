@@ -964,6 +964,8 @@ class AUTOMOBILE
 
   public:
 
+  bool STREET_LEGAL_MODE = true;
+
   bool CHANGED = false;
 
   AUTOMOBILE_DATA DATA;

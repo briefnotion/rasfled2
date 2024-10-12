@@ -21,6 +21,78 @@
 
 using namespace std;
 
+// ---------------------------------------------------------------------------------------
+
+
+void STAT_DATA_DOUBLE::set_data(double data)
+// Provide minor min max stats over time of resets.
+// I real stats ever necessary, then weighted average 
+//  routine needed.
+{
+  DATA = data;
+  
+  if (set == false)
+  {
+    set = true;
+    MIN = DATA;
+    MAX = DATA;
+  }
+  else if (data < MIN)
+  {
+    MIN = data;
+  }
+  else if (data > MAX)
+  {
+    MAX = data;
+  }
+}
+
+double STAT_DATA_DOUBLE::get_data()
+{
+  return DATA;
+}
+
+  double STAT_DATA_DOUBLE::get_min()
+{
+  return MIN;
+}
+
+  double STAT_DATA_DOUBLE::get_max()
+{
+  return MAX;
+}
+
+void STAT_DATA_DOUBLE::reset_minmax()
+{
+  set = false;
+  MIN = DATA;
+  MAX = DATA;
+}
+
+// ---------------------------------------------------------------------------------------
+
+void EFFICIANTCY_TIMER::start_timer(double dblCurrent_Time)
+{
+  TIMER_STARTED = dblCurrent_Time;
+}
+
+double EFFICIANTCY_TIMER::elapsed_timer_time(double dblCurrent_Time)
+{
+  return dblCurrent_Time - TIMER_STARTED;
+}
+
+double EFFICIANTCY_TIMER::elapsed_time(double dblCurrent_Time)
+{
+  double time_elapsed = dblCurrent_Time - LAST_ASKED_TIME;
+  LAST_ASKED_TIME = dblCurrent_Time;
+  return time_elapsed;
+}
+
+double EFFICIANTCY_TIMER::simple_elapsed_time(double dblCurrent_Time)
+{
+  return dblCurrent_Time - TIMER_STARTED;
+}
+
 // -------------------------------------------------------------------------------------
 // Time Variable
 
@@ -128,29 +200,52 @@ int FLED_TIME_VAR::get_second()
 
 // -------------------------------------------------------------------------------------
 // Keeps track of timing variables
+double FLED_TIME::store_sleep_time(double tmeSleep)
+// Pass through variable
+// Stores the Sleep time to be displayed in diag, then returns the same value.
+{
+  PREVSLEEPTIME.set_data(tmeSleep);
+  return tmeSleep;
+}
 
-double FledTime::error()
+double FLED_TIME::get_sleep_time(double Current_Time, unsigned long Wake_Time)
+{
+  // Return, in microseconds, the amount of time required to sleep.
+  
+  double sleeptime = 0;
+
+  if(Current_Time < Wake_Time)
+  {
+    sleeptime = (unsigned long)Wake_Time - Current_Time;
+  }
+
+  return sleeptime;
+}
+
+void FLED_TIME::request_ready_time(unsigned long Ready_Time)
+{
+  if (Ready_Time < SLEEP_WAKE_TIME)
+  {
+    SLEEP_WAKE_TIME = Ready_Time;
+  }
+}
+
+double FLED_TIME::error()
 {
   return ERROR;
 }
 
-void FledTime::clear_error()
+void FLED_TIME::clear_error()
 {
   ERROR_EXIST = false;
 }
 
-void FledTime::create()
-{
-  // Initialize as Start of Program Time.
-  tmeStart = std::chrono::system_clock::now();
-}
-
-unsigned long FledTime::now()
+unsigned long FLED_TIME::now()
 {
   // Returns now time in milliseconds.
   // Should be Unsigned Long.
   std::chrono::time_point<std::chrono::system_clock> tmeNow = std::chrono::system_clock::now();
-  std::chrono::duration<double>  dur = tmeNow - tmeStart;
+  std::chrono::duration<double>  dur = tmeNow - TIME_START;
 
   double nowtime = dur.count();
 
@@ -172,14 +267,22 @@ unsigned long FledTime::now()
   return (unsigned long)nowtime;
 }
 
-bool FledTime::setframetime()
+void FLED_TIME::create()
+{
+  // Initialize as Start of Program Time.
+  TIME_START = std::chrono::system_clock::now();
+
+  EFFIC_TIMER.start_timer(now());
+}
+
+bool FLED_TIME::setframetime()
 {
   CURRENT_FRAME_TIME = now();
 
   return ERROR_EXIST;
 }
 
-double FledTime::tmeFrameElapse()
+double FLED_TIME::tmeFrameElapse()
 {
   // Returns, in milliseconds, the amount of time passed since frame time.
   double elapsed = (double)now()- CURRENT_FRAME_TIME;
@@ -187,9 +290,29 @@ double FledTime::tmeFrameElapse()
   return elapsed;
 }
 
-unsigned long FledTime::current_frame_time()
+unsigned long FLED_TIME::current_frame_time()
 {
   return (unsigned long)CURRENT_FRAME_TIME;
+}
+
+void FLED_TIME::sleep_till_next_frame()
+{
+  // Measure how much time has passed since the previous time the program was at 
+  //  this point and store that value to be displayed in diag.
+  CYCLETIME.set_data(EFFIC_TIMER.elapsed_time(now()));
+
+  // Reset the the compute timer (stopwatch) and store the value before the program sleeps. 
+  COMPUTETIME.set_data(EFFIC_TIMER.elapsed_timer_time(now()));
+
+  // Sleep until the next frame.
+  usleep ((int)(1000 * store_sleep_time(get_sleep_time(now(), SLEEP_WAKE_TIME))));
+  
+  // Reset to 1 second
+  SLEEP_WAKE_TIME = 1000;
+
+  // Start the the compute timer (stopwatch) before the program as the program wakes to measure the amount of 
+  //  time the compute cycle is.
+  EFFIC_TIMER.start_timer(now());
 }
   
 // ---------------------------------------------------------------------------------------

@@ -109,6 +109,7 @@
 #include "LEDstuff.h"
 #include "fled_time.h"
 #include "fledcore.h"
+#include "hardware_monitor.h"
 #include "hardware_module_door.h"
 #include "interface.h"
 #include "animations_handler.h"

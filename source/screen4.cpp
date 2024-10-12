@@ -1112,10 +1112,17 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             ImGui::SameLine();
             //ImGui::BeginChild("Info Bar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
             {        
-              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_RED)));
+              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_GREEN)));
               ImGui::PushFont(io.Fonts->Fonts.Data[2]);
 
-              ImGui::Text("  Legal_Mode = On");
+              if (sdSysData.CAR_INFO.STREET_LEGAL_MODE == true)
+              {
+                ImGui::Text("Street_Legal_Md=ON");
+              }
+              else
+              {
+                 ImGui::Text("Street_Legal_Md=OFF");
+              }
               //Text_Rotate("hgzsfkzxsfkzs", 90.0f, BB_BL);
 
               ImGui::PopFont();
@@ -1373,9 +1380,9 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           button_simple_enabled(sdSysData, to_string(sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(2)).c_str(), false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL);
 
           // Rasfled Stats
-          ImGui::Text("   Compute Time: %6.2lf ms", sdSysData.dblCOMPUTETIME.get_data());
-          ImGui::Text("     Cycle Time: %6.2lf ms", sdSysData.dblCYCLETIME.get_data());
-          ImGui::Text("Prev Sleep Time: %6.2lf ms", sdSysData.dblPREVSLEEPTIME.get_data());
+          ImGui::Text("   Compute Time: %6.2lf ms", sdSysData.PROGRAM_TIME.COMPUTETIME.get_data());
+          ImGui::Text("     Cycle Time: %6.2lf ms", sdSysData.PROGRAM_TIME.CYCLETIME.get_data());
+          ImGui::Text("Prev Sleep Time: %6.2lf ms", sdSysData.PROGRAM_TIME.PREVSLEEPTIME.get_data());
           ImGui::Text("     Comms Time: %6.2lf ms", sdSysData.dblCOMMS_TRANSFER_TIME.get_data());
           ImGui::Text("    Screen Time: %6.2lf ms", sdSysData.dblSCREEN_RENDER_TIME.get_data());
         }

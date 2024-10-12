@@ -15,6 +15,7 @@
 // RASFled related header files
 #include "definitions.h"
 #include "hardware_status.h"
+#include "hardware_monitor.h"
 #include "LEDstuff.h"
 
 using namespace std;

@@ -245,9 +245,7 @@ int loop_2(bool TTY_Only)
                                           //  serial comms.
   TIMED_IS_READY  compass_timer;          // Delay for communicating with compass 
                                           // serial comms.
-  unsigned long   tmeSleep_Wake_time = 0; // Will contain time the cycle sleeper wakes.
 
-  EFFICIANTCY_TIMER effi_timer;           // Diagnostic timer to measure cycle times.
   EFFICIANTCY_TIMER effi_timer_screen;    // Diagnostic timer to measure cycle times.
   EFFICIANTCY_TIMER effi_timer_comms;     // Diagnostic timer to measure cycle times.
 
@@ -756,9 +754,6 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
 
   sdSystem.SCREEN_COMMS.printw("Starting System ...");
-
-  // Start the the compute timer (stopwatch) for first iteration. 
-  effi_timer.start_timer(sdSystem.PROGRAM_TIME.current_frame_time());
   
   // **************************************************************************************
   // **************************************************************************************
@@ -1321,42 +1316,14 @@ int loop_2(bool TTY_Only)
 
     // Determine how long to sleep and then sleep by 
     //  finding the earliest sleep wake time.
-    tmeSleep_Wake_time = input_from_switches.get_ready_time();   
-    if (events_and_render.get_ready_time() < tmeSleep_Wake_time)
-    {
-      tmeSleep_Wake_time = events_and_render.get_ready_time();
-    }
-    if (input_from_user.get_ready_time() < tmeSleep_Wake_time)
-    {
-      tmeSleep_Wake_time = input_from_user.get_ready_time();
-    }
-    if (display.get_ready_time() < tmeSleep_Wake_time)
-    {
-      tmeSleep_Wake_time = display.get_ready_time();
-    }
-    if (comms_timer.get_ready_time() < tmeSleep_Wake_time)
-    {
-      tmeSleep_Wake_time = comms_timer.get_ready_time();
-    }
-    if (compass_timer.get_ready_time() < tmeSleep_Wake_time)
-    {
-      tmeSleep_Wake_time = comms_timer.get_ready_time();
-    }
+    sdSystem.PROGRAM_TIME.request_ready_time(input_from_switches.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(events_and_render.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(input_from_user.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(display.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(comms_timer.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(compass_timer.get_ready_time());
 
-    // Measure how much time has passed since the previous time the program was at 
-    //  this point and store that value to be displayed in diag.
-    sdSystem.dblCYCLETIME.set_data(effi_timer.elapsed_time(sdSystem.PROGRAM_TIME.now()));
-
-    // Reset the the compute timer (stopwatch) and store the value before the program sleeps. 
-    sdSystem.dblCOMPUTETIME.set_data(effi_timer.elapsed_timer_time(sdSystem.PROGRAM_TIME.now()));
-
-    // Determine how long the program will sleep, store the value to be displayed in diag, and put the cycle
-    //  to sleep.
-    usleep ((int)(1000 * sdSystem.store_sleep_time(sdSystem.get_sleep_time(sdSystem.PROGRAM_TIME.now(), tmeSleep_Wake_time))));
-
-    // Start the the compute timer (stopwatch) before the program as the program wakes to measure the amount of 
-    //  time the compute cycle is. 
-    effi_timer.start_timer(sdSystem.PROGRAM_TIME.now());
+    sdSystem.PROGRAM_TIME.sleep_till_next_frame();
 
   }// End MAIN CYCLE WHILE loop.
 

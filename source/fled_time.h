@@ -21,8 +21,62 @@
 #include <chrono>
 #include <ctime>
 #include <cmath>
+#include <unistd.h>
+
+#include "helper.h"
 
 using namespace std;
+
+// ---------------------------------------------------------------------------------------
+class STAT_DATA_DOUBLE
+// Provide minor min max stats over time of resets.
+// If real stats ever necessary, then weighted average 
+//  routine needed.
+{
+  private:
+
+  bool set = true;
+
+  double DATA  = 0;
+  double MIN   = 0;
+  double MAX   = 0;
+
+  public:
+  void set_data(double data);
+
+  double get_data();
+
+  double get_min();
+
+  double get_max();
+
+  void reset_minmax();
+};
+// ---------------------------------------------------------------------------------------
+
+class EFFICIANTCY_TIMER
+// Measures time passed between calls. 
+{
+  private:
+  double LAST_ASKED_TIME = 0;
+  double TIMER_STARTED   = 0;
+
+  public:
+
+  void start_timer(double dblCurrent_Time);
+  // Start the timer (stopwatch) by setting its the stopwatch time.
+  //  The timer is a simple and can be considered always active. 
+
+  double elapsed_timer_time(double dblCurrent_Time);
+  //  Returns the amount of time passed since the reset. 
+
+  double elapsed_time(double dblCurrent_Time);
+  // Measures the amount of time elasped since the previous time the function was 
+  //  called, then returns the value, then resets for next time. 
+
+  double simple_elapsed_time(double dblCurrent_Time);
+  // Only returns the calc of current time - start timer time.
+};
 
 // -------------------------------------------------------------------------------------
 // Time Variable
@@ -41,9 +95,7 @@ class FLED_TIME_VAR
 
   public:
   void put_seconds(unsigned long Seconds);
-
   void put_deciseconds(int Deciseconds);
-
   void put_miliseconds(int Miliseconds);
 
   unsigned long get_seconds();
@@ -68,11 +120,13 @@ class FLED_TIME_VAR
 
 // -------------------------------------------------------------------------------------
 // Keeps track of timing variables
-class FledTime
+class FLED_TIME
 {
   private:
-  std::chrono::time_point<std::chrono::system_clock> tmeStart;
-  std::chrono::time_point<std::chrono::system_clock> tmeFrame;
+  std::chrono::time_point<std::chrono::system_clock> TIME_START;
+  //std::chrono::time_point<std::chrono::system_clock> tmeFrame;
+
+  EFFICIANTCY_TIMER EFFIC_TIMER;           // Diagnostic timer to measure cycle times.
 
   double ERROR_TOLERANCE = 1.0;
   double ERROR = 0.0;
@@ -83,21 +137,37 @@ class FledTime
 
   bool test = false;
 
-  public:
+  // How long sleep will occure
+  unsigned long   SLEEP_WAKE_TIME = 0; // Will contain time the cycle sleeper wakes.
 
+  public:
+  STAT_DATA_DOUBLE COMPUTETIME;   // Loop time spent while only proceessing.
+  STAT_DATA_DOUBLE CYCLETIME;     // Amount of time to complete an entire cycle.
+  STAT_DATA_DOUBLE PREVSLEEPTIME; // Stored value returned on pref sleep cycle.
+
+  private:
+  double store_sleep_time(double tmeSleep);
+
+  double get_sleep_time(double Current_Time, unsigned long Wake_Time);
+
+  public:
+  void request_ready_time(unsigned long Ready_Time);
+ 
   double error();
 
   void clear_error();
 
-  void create();
-
   unsigned long now();
+
+  void create();
 
   bool setframetime();
 
   double tmeFrameElapse();
 
   unsigned long current_frame_time();
+
+  void sleep_till_next_frame();
 };
 
 // ---------------------------------------------------------------------------------------
@@ -128,6 +198,9 @@ class TIMED_IS_READY
 };
 
 // ---------------------------------------------------------------------------------------
+
+//  PHASE OUT
+
 class TIMED_PING
 // Class to manage conditions of when something needs to be ran.
 //  Simplified version of is_ready_timer.

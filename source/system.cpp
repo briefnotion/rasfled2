@@ -250,28 +250,6 @@ void system_data::start_timer(int Seconds)
   cdTIMER.set_timer(PROGRAM_TIME.current_frame_time(), Seconds);
 }
 
-double system_data::store_sleep_time(double tmeSleep)
-// Pass through variable
-// Stores the Sleep time to be displayed in diag, then returns the same value.
-{
-  dblPREVSLEEPTIME.set_data(tmeSleep);
-  return tmeSleep;
-}
-
-double system_data::get_sleep_time(double Current_Time, unsigned long Wake_Time)
-{
-  // Return, in microseconds, the amount of time required to sleep.
-  
-  double sleeptime = 0;
-
-  if(Current_Time < Wake_Time)
-  {
-    sleeptime = (unsigned long)Wake_Time - Current_Time;
-  }
-
-  return sleeptime;
-}
-
 void system_data::read_hardware_status(int Milis_Frequency)
 {
   hsHardware_Status.read_hardware_status(PROGRAM_TIME.current_frame_time(), Milis_Frequency);
