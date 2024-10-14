@@ -820,6 +820,7 @@ int loop_2(bool TTY_Only)
     // Signal to RasCAM to get data on next read comm cycle.  
     //  Screen draw cycle may be to much of a delay to handle?
     //  A half milsec delay after the send in the req is an alt.
+    //  Never comment this out or the system will never sleep
     if (comms_timer.is_ready_no_reset(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       sdSystem.COMMS_AUTO.request_to_send();
@@ -828,7 +829,8 @@ int loop_2(bool TTY_Only)
     // ---------------------------------------------------------------------------------------
     // --- Read Switchs --- 
 
-     // Are switches ready -----------------
+    // Are switches ready -----------------
+    //  Never comment this out or the system will never sleep
     if (input_from_switches.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {    
       // Read values of switches
@@ -902,6 +904,7 @@ int loop_2(bool TTY_Only)
     // --- Check and Execute Timed Events That Are Ready ---
 
     // Is Events and Render ready -----------------
+    //  Never comment this out or the system will never sleep
     if (events_and_render.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       // MOVE RENAME ELIMINATE ??? !!!
@@ -1066,6 +1069,7 @@ int loop_2(bool TTY_Only)
     // console with status and so on.
 
     // Is Keyboard or Mouse read ready -----------------
+    //  Never comment this out or the system will never sleep
     if (input_from_user.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       // Read Hardware Status before printing to screen.
@@ -1189,6 +1193,7 @@ int loop_2(bool TTY_Only)
       //cons_2.update_GPS_gadgets(sdSystem);
     }
 
+    //  Never comment this out or the system will never sleep
     if (compass_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       // Compass Serial Communications
@@ -1225,6 +1230,7 @@ int loop_2(bool TTY_Only)
 
     // ---------------------------------------------------------------------------------------
     // Is display to console ready -----------------
+    //  Never comment this out or the system will never sleep
     if (display.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       // Call the Interface routine. (IO from user)
@@ -1316,6 +1322,7 @@ int loop_2(bool TTY_Only)
 
     // Determine how long to sleep and then sleep by 
     //  finding the earliest sleep wake time.
+    // Make sure non of these are commented out, or the system will never sleep.
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_switches.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(events_and_render.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_user.get_ready_time());
