@@ -1,4 +1,9 @@
-2.216_2401012
+2.218_2401018
+  - Changed coolant alert values to 100C for clear, and 110C for Alert.
+  - Default ADS-B screen changed to Map instead of Table
+  - Render thread now controled by threading library.
+
+2.217_2401013
   - Updated fled_time.
 
 2.216_2401012

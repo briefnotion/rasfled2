@@ -23,6 +23,7 @@
 #include "commands.h"
 #include "hardware_status.h"
 
+#include "threading.h"
 #include "aircraft_coordinator.h"
 #include "alert_system_2.h"
 #include "dnfwts.h"
@@ -130,6 +131,11 @@ class system_data
   };
 
   public:
+
+  // Threading 
+  //THREADING_INFO  THREAD_COMMAND;     // This handling called system commands.
+  THREADING_INFO  THREAD_RENDER;      // The thread containing function to send the led color array 
+                                      //  to the leds.
 
   // Files
   FILES           FILE_NAMES;

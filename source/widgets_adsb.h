@@ -291,8 +291,8 @@ class ADSB_SCREEN
   BUTTON_COLOR BC_VIEW;
 
   // Screens
-  bool DISPLAY_TABLE = true;
-  bool DISPLAY_MAP = false;
+  bool DISPLAY_TABLE = false;
+  bool DISPLAY_MAP = true;
 
   // Map Variables
   ADSB_MAP ADSB_MAP_DISPLAY;

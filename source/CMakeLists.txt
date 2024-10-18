@@ -45,6 +45,7 @@ target_sources(rasfled PRIVATE
   helper.cpp
   globe_helper.cpp
   screen4_helper.cpp
+  threading.cpp
   hardware_monitor.cpp
   alert_system_2.cpp
   dnfwts.cpp

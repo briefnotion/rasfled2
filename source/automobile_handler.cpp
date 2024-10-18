@@ -285,7 +285,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 
     // Coolant alert
     if (sdSysData.ALERTS_AUTO.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_COOLANT, 
-                                      sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c(), 100.0f, 80.0f))
+                                      sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c(), 110.0f, 100.0f))
     {
       sdSysData.ALERTS_AUTO.res_update_alert_text_line(AUTO_RESERVE_ALERT_TEMP_COOLANT, "Coolant Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.c());
       sdSysData.ALERTS_AUTO.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_TEMP_COOLANT);

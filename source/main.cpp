@@ -238,7 +238,6 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
   // Is_Ready varibles for main loop.
   TIMED_IS_READY  input_from_switches;    // Delay for the hardware switches.
-  TIMED_IS_READY  events_and_render;      // Delay for the events and render system.
   TIMED_IS_READY  input_from_user;        // Delay for the input from mouse and keyboard.
   TIMED_IS_READY  display;                // Delay for displaying information on the console.
   TIMED_IS_READY  comms_timer;            // Delay for communicating with Automobile and GPS
@@ -249,26 +248,14 @@ int loop_2(bool TTY_Only)
   EFFICIANTCY_TIMER effi_timer_screen;    // Diagnostic timer to measure cycle times.
   EFFICIANTCY_TIMER effi_timer_comms;     // Diagnostic timer to measure cycle times.
 
-  // Create Threads
-  future<void> thread_render; // The thread containing function to send the led color array 
-                              //  to the leds.
-  bool thread_render_running = false; // Set to true when thread is active.
-
-  // Control for the output thread. 
-  //  The only part of output asynced is the printf function of the player 1001 type.
-  //  Everything else in output will be paused if async is actively running and does 
-  //  not need to be asynced because the interface is fast enough to run within one 
-  //  cycle.
-  future<void> thread_output;         // The thread containing function to printf a large 
-                                      //  string.
-  //bool thread_output_running = false; // Set to true when thread is active.
-  string raw_string_buffer = "";      // A string buffer to contain the Screen buffer. 
-                                      //  Redundant. Possibly consolidate the line. 
-
   // Define System Data and Console
   int return_code = 0;
   system_data sdSystem;
   sdSystem.TTY_ONLY = TTY_Only;
+
+  // Control for threads. 
+  //THREAD_COMMAND.create();
+  sdSystem.THREAD_RENDER.create(get_frame_interval(sdSystem.CONFIG.iFRAMES_PER_SECOND));
 
   // Load Windows or Console
   sdSystem.COLOR_SELECT.init(sdSystem.PROGRAM_TIME.current_frame_time(), 1.0f);
@@ -294,7 +281,6 @@ int loop_2(bool TTY_Only)
 
   // Set is_ready variables
   input_from_switches.set(20);
-  events_and_render.set(get_frame_interval(sdSystem.CONFIG.iFRAMES_PER_SECOND));
   input_from_user.set(65);
   display.set(SCREENUPDATEDELAY);
 
@@ -766,32 +752,7 @@ int loop_2(bool TTY_Only)
     // Thread Management
 
     // Close all completed and active threads after sleep cycle is complete.
-
-    // Before starting a new loop, close the render thread from the previous loop, if 
-    //  render is complete
-    if(thread_render_running == true)
-    // Check to see if render thread was started before checking the completion status.
-    {
-      if(thread_render.wait_for(0ms) == future_status::ready)
-      // Check to verify the thread is complete before allowing the render to start again. 
-      {
-        thread_render_running = false;
-      }
-    }
-
-    /*
-    // Before starting a new loop, close the console thread from the previous loop, if 
-    //  data being printed to the screen has completed.
-    if(thread_output_running == true)
-    // Check to see if output thread was started before checking the completion status.
-    {
-      if(thread_output.wait_for(0ms) == future_status::ready)
-      // Check to verify thte thread is complete before allowing the console to be updated again. 
-      {
-        thread_output_running = false;
-      }
-    }
-    */
+    sdSystem.THREAD_RENDER.check_for_completition();    
 
     // ---------------------------------------------------------------------------------------
     // --- Prpare the Loop ---
@@ -904,8 +865,8 @@ int loop_2(bool TTY_Only)
     // --- Check and Execute Timed Events That Are Ready ---
 
     // Is Events and Render ready -----------------
-    //  Never comment this out or the system will never sleep
-    if (events_and_render.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
+    //  Never comment this out or the system will never sleep   
+    if(sdSystem.THREAD_RENDER.check_to_run_routine_on_thread(sdSystem.PROGRAM_TIME.current_frame_time()))
     {
       // MOVE RENAME ELIMINATE ??? !!!
       bool booUpdate = false;
@@ -970,7 +931,7 @@ int loop_2(bool TTY_Only)
       else // lights are off, blank values if neccessary.
       {
         // make sure the thread is free, otherwise the blank will be thrown away.
-        if (thread_render_running == false)
+        if (sdSystem.THREAD_RENDER.is_running() == false)
         {
           // only actively blank if the bounce of lights off was detected.
           if (sdSystem.Lights_On.bounce() == true)
@@ -1054,11 +1015,11 @@ int loop_2(bool TTY_Only)
         //  completion, so that the loop can restart and begin computing its values and colors 
         //  again. 
         // A render thread should not be created if no changes have been made to the led values.
-        if (thread_render_running == false)
-        {
-          thread_render = async(proc_render_thread);
-          thread_render_running = true;
-        }
+
+        // Be careful with this because it looks like black magic to me.
+        sdSystem.THREAD_RENDER.start_render_thread([&]() 
+                      {  proc_render_thread();  });
+
       }
     
     } // Is Events and Render ready -----------------
@@ -1233,23 +1194,14 @@ int loop_2(bool TTY_Only)
     //  Never comment this out or the system will never sleep
     if (display.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
-      // Call the Interface routine. (IO from user)
-      //if (thread_output_running == false)
-      // If thread is not running, then update the screen display terminal interface.
-      //  After the interface has an update, see if the player has a frame left over inside.
-      //  the buffer. 
-      //  Only start a thread and pause future screen updateas if the buffer contains a movie 
-      //  frame to be displayed.
 
+      // if condition no longer needed.
       {
         // Refresh console data storeage from main program. This will be a pass through buffer. 
         // so the console will not have to access any real data. 
         sdSystem.store_door_switch_states();
 
         store_event_counts(sdSystem, animations);
-
-        // ADS-B - Update all ADS-B gadgets with new data.
-        //cons_2.update_ADS_B_gadgets(sdSystem);
 
         // Automobile - Update all automobile Reference Data
         sdSystem.CAR_INFO.translate(sdSystem.DNFWTS, sdSystem.PROGRAM_TIME.current_frame_time());
@@ -1269,40 +1221,13 @@ int loop_2(bool TTY_Only)
             sdSystem.SOUND_SYSTEM.set_mute(false);
           }
         }
-
-        // Update Switches to Alert system.
-        /*
-        for (int door=0; door < sdSystem.CONFIG.vhwDOORS.size(); door++)
-        {
-          sdSystem.ALERTS.update_switch(door, sdSystem.CONFIG.vhwDOORS.at(door).booVALUE);
-        }
-        */
-        
-        
+       
         // Redraw the console screen with what the screen determines needs to be displayed.
         //cons.display(fsPlayer, sdSystem, sdSystem.PROGRAM_TIME.current_frame_time());
         effi_timer_screen.start_timer(sdSystem.PROGRAM_TIME.now());
         cons_2.draw(sdSystem, animations);
         sdSystem.dblSCREEN_RENDER_TIME.set_data(effi_timer_screen.simple_elapsed_time(sdSystem.PROGRAM_TIME.now()));
 
-        /*
-        if (cons.the_player.get_next_frame_draw_time() > 0)
-        {
-          display.set_earliest_ready_time(cons.the_player.get_next_frame_draw_time());
-        }
-
-        // If anything in the screen buffer is waiting to be displayed, start a new thread 
-        //  then print out the data. Likely to take a long time so pause further screen 
-        //  updates while thread is running.
-        if (cons.Screen.buffer_active == true)
-        {
-          raw_string_buffer = cons.Screen.buffer();
-          thread_output = async(raw_window_player_draw_frame, raw_string_buffer);
-
-          thread_output_running = true;
-          cons.Screen.buffer_active = false;     
-        }
-        */
       }
   
       // Alert system checks
@@ -1324,7 +1249,7 @@ int loop_2(bool TTY_Only)
     //  finding the earliest sleep wake time.
     // Make sure non of these are commented out, or the system will never sleep.
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_switches.get_ready_time());
-    sdSystem.PROGRAM_TIME.request_ready_time(events_and_render.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.THREAD_RENDER.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_user.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(display.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(comms_timer.get_ready_time());
@@ -1338,28 +1263,7 @@ int loop_2(bool TTY_Only)
   // If we are here, then we are closing the program.
   
   // Wait for threads to end before continuing to shutdown.
-
-  if(thread_render_running == true)
-  // Check to see if render thread was started before checking the completion status.
-  {
-    while(thread_render.wait_for(10ms) != future_status::ready)
-    {
-      sdSystem.SCREEN_COMMS.printw("Shutting thread down.");
-    }
-    thread_render_running = false;
-  }
-
-  /*
-  if(thread_output_running == true)
-  // Check to see if output thread was started before checking the completion status.
-  {
-    while(thread_output.wait_for(10ms) != future_status::ready)
-    {
-      cons_2.SCREEN_COMMS.printw("Shutting thread down.");
-    }
-    thread_output_running = false;
-  }
-  */
+  sdSystem.THREAD_RENDER.wait_for_thread_to_finish();
   
   // Shutdown RPI.
   shutdown();
