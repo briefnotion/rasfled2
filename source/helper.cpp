@@ -837,9 +837,9 @@ int millis_to_time_seconds(long millis_time)
   return abs((millis_time % 60000)/1000);
 }
 
-int get_frame_interval(int Frames_Per_Second)
+int get_frame_interval(int Every_X_ms)
 {
-  return (1000 / Frames_Per_Second);
+  return (1000 / Every_X_ms);
 }
 
 int radio_translate_to_frequency_6(float Frequency)

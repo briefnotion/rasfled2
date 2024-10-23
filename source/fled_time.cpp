@@ -23,6 +23,35 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
+double EFFICIANTCY_TIMER_2::start_to_start_time()
+{
+  return START_TO_START_TIME;
+}
+
+void EFFICIANTCY_TIMER_2::start_timer(double dblCurrent_Time)
+{
+  START_TO_START_TIME = dblCurrent_Time - TIMER_STARTED;
+  TIMER_STARTED = dblCurrent_Time;
+}
+
+double EFFICIANTCY_TIMER_2::elapsed_timer_time(double dblCurrent_Time)
+{
+  return dblCurrent_Time - TIMER_STARTED;
+}
+
+double EFFICIANTCY_TIMER_2::elapsed_time(double dblCurrent_Time)
+{
+  double time_elapsed = dblCurrent_Time - LAST_ASKED_TIME;
+  LAST_ASKED_TIME = dblCurrent_Time;
+  return time_elapsed;
+}
+
+double EFFICIANTCY_TIMER_2::simple_elapsed_time(double dblCurrent_Time)
+{
+  return dblCurrent_Time - TIMER_STARTED;
+}
+
+// ---------------------------------------------------------------------------------------
 
 void STAT_DATA_DOUBLE::set_data(double data)
 // Provide minor min max stats over time of resets.
@@ -69,28 +98,19 @@ void STAT_DATA_DOUBLE::reset_minmax()
   MAX = DATA;
 }
 
-// ---------------------------------------------------------------------------------------
-
-void EFFICIANTCY_TIMER::start_timer(double dblCurrent_Time)
+void STAT_DATA_DOUBLE::start_timer(double dblCurrent_Time)
 {
-  TIMER_STARTED = dblCurrent_Time;
+  TIMER.start_timer(dblCurrent_Time);
 }
 
-double EFFICIANTCY_TIMER::elapsed_timer_time(double dblCurrent_Time)
+void STAT_DATA_DOUBLE::end_timer(double dblCurrent_Time)
 {
-  return dblCurrent_Time - TIMER_STARTED;
+  set_data(TIMER.simple_elapsed_time(dblCurrent_Time));
 }
 
-double EFFICIANTCY_TIMER::elapsed_time(double dblCurrent_Time)
+double STAT_DATA_DOUBLE::start_to_start_time()
 {
-  double time_elapsed = dblCurrent_Time - LAST_ASKED_TIME;
-  LAST_ASKED_TIME = dblCurrent_Time;
-  return time_elapsed;
-}
-
-double EFFICIANTCY_TIMER::simple_elapsed_time(double dblCurrent_Time)
-{
-  return dblCurrent_Time - TIMER_STARTED;
+  return TIMER.start_to_start_time();
 }
 
 // -------------------------------------------------------------------------------------
@@ -258,8 +278,6 @@ void FLED_TIME::create()
 {
   // Initialize as Start of Program Time.
   TIME_START = std::chrono::system_clock::now();
-
-  EFFIC_TIMER.start_timer(now());
 }
 
 bool FLED_TIME::setframetime()
@@ -284,20 +302,25 @@ unsigned long FLED_TIME::current_frame_time()
 
 void FLED_TIME::sleep_till_next_frame()
 {
+  // just get now to keep things simple
+  unsigned long nowtime = now();
+
   // Measure how much time has passed since the previous time the program was at 
   //  this point and store that value to be displayed in diag.
-  CYCLETIME.set_data(EFFIC_TIMER.elapsed_time(now()));
+  CYCLETIME.end_timer(nowtime);
+  CYCLETIME.start_timer(nowtime);
 
   // Reset the the compute timer (stopwatch) and store the value before the program sleeps. 
-  COMPUTETIME.set_data(EFFIC_TIMER.elapsed_timer_time(now()));
+  COMPUTETIME.end_timer(nowtime);
 
-  // Store Sleep time, probably doesnt need to be before, but here it is.
-  PREVSLEEPTIME.set_data(SLEEP_TIME);
 
   if (SLEEP_TIME > 1000 || SLEEP_TIME < 0)
   {
     SLEEP_TIME = 1000;
   }
+
+  // Store Sleep time sleep time.
+  PREVSLEEPTIME.start_timer(nowtime);
 
   // Sleep until the next frame.
   if (SLEEP_TIME > 0 && SLEEP_TIME < 1000 )
@@ -305,12 +328,15 @@ void FLED_TIME::sleep_till_next_frame()
     usleep ((1000 * SLEEP_TIME));
   }
 
+  // Store Sleep time wake time.
+  PREVSLEEPTIME.end_timer(now());
+
+  // Start Compute Timer cycle.
+  COMPUTETIME.start_timer(nowtime);
+
   // Reset to 1 second
   SLEEP_TIME = 1000;
 
-  // Start the the compute timer (stopwatch) before the program as the program wakes to measure the amount of 
-  //  time the compute cycle is.
-  EFFIC_TIMER.start_timer(now());
 }
   
 // ---------------------------------------------------------------------------------------

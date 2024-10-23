@@ -28,40 +28,20 @@
 using namespace std;
 
 // ---------------------------------------------------------------------------------------
-class STAT_DATA_DOUBLE
-// Provide minor min max stats over time of resets.
-// If real stats ever necessary, then weighted average 
-//  routine needed.
-{
-  private:
 
-  bool set = true;
-
-  double DATA  = 0;
-  double MIN   = 0;
-  double MAX   = 0;
-
-  public:
-  void set_data(double data);
-
-  double get_data();
-
-  double get_min();
-
-  double get_max();
-
-  void reset_minmax();
-};
-// ---------------------------------------------------------------------------------------
-
-class EFFICIANTCY_TIMER
+class EFFICIANTCY_TIMER_2
 // Measures time passed between calls. 
 {
   private:
   double LAST_ASKED_TIME = 0;
   double TIMER_STARTED   = 0;
 
+  double START_TO_START_TIME = 0;
+
   public:
+
+  double start_to_start_time();
+  // Measure full round trip time.
 
   void start_timer(double dblCurrent_Time);
   // Start the timer (stopwatch) by setting its the stopwatch time.
@@ -76,6 +56,41 @@ class EFFICIANTCY_TIMER
 
   double simple_elapsed_time(double dblCurrent_Time);
   // Only returns the calc of current time - start timer time.
+};
+
+// ---------------------------------------------------------------------------------------
+class STAT_DATA_DOUBLE
+// Provide minor min max stats over time of resets.
+// If real stats ever necessary, then weighted average 
+//  routine needed.
+{
+  private:
+
+  EFFICIANTCY_TIMER_2 TIMER;
+
+  bool set = true;
+
+  double DATA  = 0;
+  double MIN   = 0;
+  double MAX   = 0;
+
+  void set_data(double data);
+
+  public:
+
+  double get_data();
+
+  double get_min();
+
+  double get_max();
+
+  void reset_minmax();
+
+  void start_timer(double dblCurrent_Time);
+
+  void end_timer(double dblCurrent_Time);
+
+  double start_to_start_time();
 };
 
 // -------------------------------------------------------------------------------------
@@ -128,8 +143,6 @@ class FLED_TIME
 {
   private:
   std::chrono::time_point<std::chrono::system_clock> TIME_START;
-
-  EFFICIANTCY_TIMER EFFIC_TIMER;           // Diagnostic timer to measure cycle times.
 
   double ERROR_TOLERANCE = 1.0;
   double ERROR = 0.0;

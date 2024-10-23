@@ -152,8 +152,9 @@ class system_data
   configuration   CONFIG;
 
   // System Timing
-  STAT_DATA_DOUBLE dblSCREEN_RENDER_TIME; // Stored value returned on pref sleep cycle.
-  STAT_DATA_DOUBLE dblCOMMS_TRANSFER_TIME; // Stored value returned on pref sleep cycle.
+  STAT_DATA_DOUBLE dblSCREEN_RENDER_TIME;     // Stored value returned on pref sleep cycle.
+  STAT_DATA_DOUBLE dblCOMMS_TRANSFER_TIME;    // Stored value returned on pref sleep cycle.
+  STAT_DATA_DOUBLE dblCOMMS_LED_RENDER_TIME;  // Stored value returned on pref sleep cycle.
   
   ALERT_SYSTEM_2 ALERTS_AUTO;
 

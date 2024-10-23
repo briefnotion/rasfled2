@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.218_2401018"
+#define Revision "2.219_241022"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -167,7 +167,7 @@
 // Default Timer
 #define DEFAULTTIMER      5   //Minutes
 
-#define LED_FPS           50  // Compile time LED Frames per Second, frams/second.
+#define LED_FPS           15  // Compile time LED, delay in ms.
 
 // -------------------------------------------------------------------------------------
 // Door Switches

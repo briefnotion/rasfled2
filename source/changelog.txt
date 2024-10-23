@@ -1,95 +1,99 @@
-2.218_2401018
+2.219_241022
+  - Corrected the LED render from onece every 50ms to onece every 15ms.
+  - Added round trip times for functions in the debug window.
+
+2.218_241018
   - Changed coolant alert values to 100C for clear, and 110C for Alert.
   - Default ADS-B screen changed to Map instead of Table
   - Render thread now controled by threading library.
 
-2.217_2401013
+2.217_241013
   - Updated fled_time.
 
-2.216_2401012
+2.216_241012
   - Made a few changes to the FLED_TIME and helper library.
 
-2.215_2401009
+2.215_241009
   - Small Changes.
 
-2.214_2401007
+2.214_241007
   - Small Changes.
   
-2.212_2401005
+2.212_241005
   - Made a few changes to the ADS-B Map.
 
-2.211_2400931
+2.211_240931
   - Alerts will resize vertically depending on the amount of 
       lines to display. 
 
-2.210_2400930
+2.210_240930
   - Small Adjustments. 
 
-2.209_2400928
+2.209_24928
   - Made zooming in and out of the ADS-B map look better. 
   - Added a Min and Max button to set zoom level of ADS-B map to 
       closest or furthest aircraft currently read into the system. 
 
-2.208_2400927
+2.208_240927
   - Made the Alert pop ups smaller. 
   - Corrected some "Map Center On" problems. 
 
-2.207_2400925
+2.207_240925
   - Made a few changes to the way the Blinker and Door indicators 
       are displayed. 
 
-2.206_2400922
+2.206_240922
   - Changed the blinker indicator colors to neo_color.
   - Added fahrenheit values to ambiant and intake value 
       display on the automobile screen.
 
-2.205_2400920
+2.205_240920
   - Made changes to the COLOR_SELECT routines.
 
-2.204_2400919
+2.204_240919
   - Shifted the temp scale by 5 degrees. 
   - Corrected a few errors.
   - NeoColor debugging.
 
-2.203_2400916
+2.203_240916
   - Small changes to ADS-B Alerts. 
   - NeoColor debugging.
 
-2.202_2400915
+2.202_240915
   - Changed the compass again. 
   - Changed the ADS-B Alert System. 
 
-2.201_2400914
+2.201_240914
   - Made the main compass smaller.
   - ADS-B Alert changes.
 
-2.200_2400912
+2.200_240912
   - Moved the components that stored the ADS-B aircraft tracks out 
       of the ads-b widgets screen and into the aircraft coordinator. 
       Aircraft_coordinator's current lack of dependancies should be 
       retained.  Except for, maybe, ImVec2.
 
-2.199_2400911
+2.199_240911
   - Aircraft can be centered on the map by clicking on the aircraft 
       compass.
 
-2.198_2400910
+2.198_240910
   - Small adjustments.
 
-2.197_2400909
+2.197_240909
   - Changed the way the ADS-B Aircraft Info is displayed again.
 
-2.196_2400908
+2.196_240908
   - Changed the temp colors.
   - Changed the way Fuel Level is displayes so that sloshing shouldn't 
       be as appearant.
   - Changed the ADS-B Aircraft info to be on one line.      
 
-2.195_2400907
+2.195_240907
   - Corrected a few problems related to the Overhead Animations not 
       having the correct colors.
 
-2.194_2400904
+2.194_240904
   - Smoothed out the temperture custom color to go from blue, to green, 
       to red with stemps from 0 to 70.  White on both ends.  Probably needs 
       to be dialed back the ends to a cold white grey and a hot white grey.
@@ -98,7 +102,7 @@
       drive. 
   - Corrected problem with LED Temp lights getting stuck on monochrome. 
 
-2.190_2400903
+2.190_240903
   - Small adjustments.
   - Changed the Temp Vcolor Scheme.
 

@@ -476,7 +476,7 @@ int millis_to_time_minutes(long millis_time);
 
 int millis_to_time_seconds(long millis_time);
 
-int get_frame_interval(int Frames_Per_Second);
+int get_frame_interval(int Every_X_ms);
 
 int radio_translate_to_frequency_6(float Frequency);
 

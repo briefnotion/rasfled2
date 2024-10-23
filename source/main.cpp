@@ -245,9 +245,6 @@ int loop_2(bool TTY_Only)
   TIMED_IS_READY  compass_timer;          // Delay for communicating with compass 
                                           // serial comms.
 
-  EFFICIANTCY_TIMER effi_timer_screen;    // Diagnostic timer to measure cycle times.
-  EFFICIANTCY_TIMER effi_timer_comms;     // Diagnostic timer to measure cycle times.
-
   // Define System Data and Console
   int return_code = 0;
   system_data sdSystem;
@@ -1016,10 +1013,15 @@ int loop_2(bool TTY_Only)
         //  again. 
         // A render thread should not be created if no changes have been made to the led values.
 
+        // Get timer for render thread.
+        sdSystem.dblCOMMS_LED_RENDER_TIME.start_timer(sdSystem.PROGRAM_TIME.current_frame_time());
+
         // Be careful with this because it looks like black magic to me.
         sdSystem.THREAD_RENDER.start_render_thread([&]() 
                       {  proc_render_thread();  });
 
+        
+        sdSystem.dblCOMMS_LED_RENDER_TIME.end_timer(sdSystem.PROGRAM_TIME.current_frame_time());
       }
     
     } // Is Events and Render ready -----------------
@@ -1070,7 +1072,7 @@ int loop_2(bool TTY_Only)
     // Automobile Data Process.
     // No need to thread. Comms are actually much faster than I was led to believe.
 
-    effi_timer_comms.start_timer(sdSystem.PROGRAM_TIME.now());
+    sdSystem.dblCOMMS_TRANSFER_TIME.start_timer(sdSystem.PROGRAM_TIME.now());
 
     if (comms_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
@@ -1186,7 +1188,7 @@ int loop_2(bool TTY_Only)
       }
     }
     
-    sdSystem.dblCOMMS_TRANSFER_TIME.set_data(effi_timer_comms.simple_elapsed_time(sdSystem.PROGRAM_TIME.now()));
+    sdSystem.dblCOMMS_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
       
 
     // ---------------------------------------------------------------------------------------
@@ -1224,9 +1226,9 @@ int loop_2(bool TTY_Only)
        
         // Redraw the console screen with what the screen determines needs to be displayed.
         //cons.display(fsPlayer, sdSystem, sdSystem.PROGRAM_TIME.current_frame_time());
-        effi_timer_screen.start_timer(sdSystem.PROGRAM_TIME.now());
+        sdSystem.dblSCREEN_RENDER_TIME.start_timer(sdSystem.PROGRAM_TIME.now());
         cons_2.draw(sdSystem, animations);
-        sdSystem.dblSCREEN_RENDER_TIME.set_data(effi_timer_screen.simple_elapsed_time(sdSystem.PROGRAM_TIME.now()));
+        sdSystem.dblSCREEN_RENDER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
 
       }
   
