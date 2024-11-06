@@ -240,7 +240,9 @@ int loop_2(bool TTY_Only)
   TIMED_IS_READY  input_from_switches;    // Delay for the hardware switches.
   TIMED_IS_READY  input_from_user;        // Delay for the input from mouse and keyboard.
   TIMED_IS_READY  display;                // Delay for displaying information on the console.
-  TIMED_IS_READY  comms_timer;            // Delay for communicating with Automobile and GPS
+  TIMED_IS_READY  comms_auto_timer;       // Delay for communicating with Automobile and GPS
+                                          //  serial comms.
+  TIMED_IS_READY  comms_gps_timer;        // Delay for communicating with Automobile and GPS
                                           //  serial comms.
   TIMED_IS_READY  compass_timer;          // Delay for communicating with compass 
                                           // serial comms.
@@ -296,7 +298,7 @@ int loop_2(bool TTY_Only)
   int count  = 0;
 
   // ---------------------------------------------------------------------------------------
-  comms_timer.set(2);
+  comms_auto_timer.set(20);
   
   // Can Bus Comm Port Setup
   sdSystem.COMMS_AUTO.PROPS.PORT = sdSystem.FILE_NAMES.CAN_BUS_DEVICE_FILE;
@@ -328,6 +330,10 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
   // GPS Comm Port Setup
   compass_timer.set( 1000 / COMMS_COMPASS_POLLING_RATE_FPS );
+
+  // ---------------------------------------------------------------------------------------
+  // GPS Comm Port Setup
+  comms_gps_timer.set( 100 );
 
   sdSystem.COMMS_GPS.PROPS.PORT = sdSystem.FILE_NAMES.GPS_DEVICE_FILE;
 
@@ -779,7 +785,7 @@ int loop_2(bool TTY_Only)
     //  Screen draw cycle may be to much of a delay to handle?
     //  A half milsec delay after the send in the req is an alt.
     //  Never comment this out or the system will never sleep
-    if (comms_timer.is_ready_no_reset(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
+    if (comms_auto_timer.is_ready_no_reset(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       sdSystem.COMMS_AUTO.request_to_send();
     }
@@ -1070,12 +1076,11 @@ int loop_2(bool TTY_Only)
     // ---------------------------------------------------------------------------------------
     // Comm Port Read
     // Automobile Data Process.
-    // No need to thread. Comms are actually much faster than I was led to believe.
 
-    sdSystem.dblCOMMS_TRANSFER_TIME.start_timer(sdSystem.PROGRAM_TIME.now());
-
-    if (comms_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
+    if (comms_auto_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
+      sdSystem.dblCOMMS_AUTO_TRANSFER_TIME.start_timer(sdSystem.PROGRAM_TIME.now());
+
       // CAN_Bus Serial Communications
       if (sdSystem.COMMS_AUTO.cycle(sdSystem.PROGRAM_TIME.current_frame_time()))
       {
@@ -1107,6 +1112,26 @@ int loop_2(bool TTY_Only)
           sdSystem.SCREEN_COMMS.printw("Automobile COMMS changed to: BAUD RATE CHECK");
         }
       }
+
+      // ---------------------------------------------------------------------------------------
+      // CAN Bus Process
+
+      // Process info from comm port int automobile system.
+      sdSystem.CAR_INFO.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_AUTO, sdSystem.PROGRAM_TIME.current_frame_time());
+
+      // Process Automobile Lights
+      automobile_handler.update_events(sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
+      
+      sdSystem.dblCOMMS_AUTO_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
+    }
+
+    // ---------------------------------------------------------------------------------------
+    // Comm Port Read
+    // GPS Data Process.
+    
+    if (comms_gps_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
+    {
+      sdSystem.dblCOMMS_GPS_TRANSFER_TIME.start_timer(sdSystem.PROGRAM_TIME.now());
 
       // GPS Serial Communications
       if (sdSystem.COMMS_GPS.cycle(sdSystem.PROGRAM_TIME.current_frame_time()))
@@ -1141,24 +1166,23 @@ int loop_2(bool TTY_Only)
       }
 
       // ---------------------------------------------------------------------------------------
-      // CAN Bus Process
-
-      // Process info from comm port int automobile system.
-      sdSystem.CAR_INFO.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_AUTO, sdSystem.PROGRAM_TIME.current_frame_time());
-
-      // Process Automobile Lights
-      automobile_handler.update_events(sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
-
-      // ---------------------------------------------------------------------------------------
       // GPS Process
       
       sdSystem.GPS_SYSTEM.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
       //cons_2.update_GPS_gadgets(sdSystem);
+      
+      sdSystem.dblCOMMS_GPS_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
     }
 
+    // ---------------------------------------------------------------------------------------
+    // Comm Port Read
+    // Compass Data Process.
+    
     //  Never comment this out or the system will never sleep
     if (compass_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
+      sdSystem.dblCOMMS_COMPASS_DATA_READ_TIME.start_timer(sdSystem.PROGRAM_TIME.now());
+
       // Compass Serial Communications
       if (sdSystem.COMMS_COMPASS.cycle(sdSystem.GPS_SYSTEM, sdSystem.PROGRAM_TIME.current_frame_time()))
       {
@@ -1186,10 +1210,8 @@ int loop_2(bool TTY_Only)
           sdSystem.ALERTS_AUTO.sound_alert(2);
         }
       }
+      sdSystem.dblCOMMS_COMPASS_DATA_READ_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
     }
-    
-    sdSystem.dblCOMMS_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
-      
 
     // ---------------------------------------------------------------------------------------
     // Is display to console ready -----------------
@@ -1254,7 +1276,8 @@ int loop_2(bool TTY_Only)
     sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.THREAD_RENDER.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_user.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(display.get_ready_time());
-    sdSystem.PROGRAM_TIME.request_ready_time(comms_timer.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(comms_auto_timer.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(comms_gps_timer.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(compass_timer.get_ready_time());
 
     sdSystem.PROGRAM_TIME.sleep_till_next_frame();

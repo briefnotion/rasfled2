@@ -1,3 +1,7 @@
+2.221_241105
+  - Changed timings and added timer monitoring for GPS, Auto, and Compass 
+      processes.
+
 2.219_241022
   - Corrected the LED render from onece every 50ms to onece every 15ms.
   - Added round trip times for functions in the debug window.

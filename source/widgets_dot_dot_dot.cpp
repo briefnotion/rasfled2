@@ -375,13 +375,24 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
         ImGui::SameLine();
         ImGui::BeginChild("Debug", ImVec2(ImGui::GetContentRegionAvail().x, (2.0f * (over_size * pixel_step) - 40.0f)), true, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
+          // Rasfled Stats
+          ImGui::Text("         PRC RND");
+          ImGui::Text("  Sleep: %3.0lf %3.0lf ms", sdSysData.PROGRAM_TIME.PREVSLEEPTIME.get_data(), sdSysData.PROGRAM_TIME.PREVSLEEPTIME.start_to_start_time());
+          ImGui::Text("Compute: %3.0lf %3.0lf ms", sdSysData.PROGRAM_TIME.COMPUTETIME.get_data(), sdSysData.PROGRAM_TIME.COMPUTETIME.start_to_start_time());
+          ImGui::Text("  Cycle: %3.0lf %3.0lf ms", sdSysData.PROGRAM_TIME.CYCLETIME.get_data(), sdSysData.PROGRAM_TIME.CYCLETIME.start_to_start_time());
+          ImGui::NewLine();
+          ImGui::Text("   AUTO: %3.0lf %3.0lf ms", sdSysData.dblCOMMS_AUTO_TRANSFER_TIME.get_data(), sdSysData.dblCOMMS_AUTO_TRANSFER_TIME.start_to_start_time());
+          ImGui::Text("    GPS: %3.0lf %3.0lf ms", sdSysData.dblCOMMS_GPS_TRANSFER_TIME.get_data(), sdSysData.dblCOMMS_GPS_TRANSFER_TIME.start_to_start_time());
+          ImGui::Text("COMPASS: %3.0lf %3.0lf ms", sdSysData.dblCOMMS_COMPASS_DATA_READ_TIME.get_data(), sdSysData.dblCOMMS_COMPASS_DATA_READ_TIME.start_to_start_time());
+          ImGui::Text(" Screen: %3.0lf %3.0lf ms", sdSysData.dblSCREEN_RENDER_TIME.get_data(), sdSysData.dblSCREEN_RENDER_TIME.start_to_start_time());
+          ImGui::Text(" Render: %3.0lf %3.0lf ms", sdSysData.dblCOMMS_LED_RENDER_TIME.get_data(), sdSysData.dblCOMMS_LED_RENDER_TIME.start_to_start_time());
+
+          /*
           ImGui::Text("NEO Changing:\n %d", 
           sdSysData.COLOR_SELECT.neo_color_is_changing());
           
-          /*
-          ImGui::Text("Walker:\n %f", 
-            walker_float(sdSysData.PROGRAM_TIME.current_frame_time(), 0.20f, 70.0f));
-          */
+          //ImGui::Text("Walker:\n %f", 
+          //  walker_float(sdSysData.PROGRAM_TIME.current_frame_time(), 0.20f, 70.0f));
 
           ImGui::Text("NEO RGB:\n %d : %d : %d", 
             sdSysData.COLOR_SELECT.neo_color_SIMPLE_RGB(RAS_CUSTOM).r, 
@@ -405,6 +416,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
             sdSysData.CUSTOM_COLOR.r, 
             sdSysData.CUSTOM_COLOR.g, 
             sdSysData.CUSTOM_COLOR.b);
+          */
 
           ImGui::EndChild();
         }

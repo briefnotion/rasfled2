@@ -1316,7 +1316,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       
       if (DISPLAY_DEBUG == true)
       {
-        ImGui::SetNextWindowSize(ImVec2(266, 300));
+        ImGui::SetNextWindowSize(ImVec2(266, 345));
         if (ImGui::Begin("Debug", &DISPLAY_DEBUG, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           ImGui::Text("%.3f ms/frame  %.1f FPS", 1000.0f / io.Framerate, io.Framerate);
@@ -1380,13 +1380,15 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           button_simple_enabled(sdSysData, to_string(sdSysData.intCHANNEL_GROUP_EVENTS_COUNTS.at(2)).c_str(), false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL);
 
           // Rasfled Stats
-          ImGui::Text("Prev Sleep Time: %3.0lf %3.0lf ms", sdSysData.PROGRAM_TIME.PREVSLEEPTIME.get_data(), sdSysData.PROGRAM_TIME.PREVSLEEPTIME.start_to_start_time());
-          ImGui::Text("   Compute Time: %3.0lf %3.0lf ms", sdSysData.PROGRAM_TIME.COMPUTETIME.get_data(), sdSysData.PROGRAM_TIME.COMPUTETIME.start_to_start_time());
-          ImGui::Text("     Cycle Time: %3.0lf %3.0lf ms", sdSysData.PROGRAM_TIME.CYCLETIME.get_data(), sdSysData.PROGRAM_TIME.CYCLETIME.start_to_start_time());
+          ImGui::Text("Prev Sleep : %3.0lf %3.0lf ms", sdSysData.PROGRAM_TIME.PREVSLEEPTIME.get_data(), sdSysData.PROGRAM_TIME.PREVSLEEPTIME.start_to_start_time());
+          ImGui::Text("   Compute : %3.0lf %3.0lf ms", sdSysData.PROGRAM_TIME.COMPUTETIME.get_data(), sdSysData.PROGRAM_TIME.COMPUTETIME.start_to_start_time());
+          ImGui::Text("     Cycle : %3.0lf %3.0lf ms", sdSysData.PROGRAM_TIME.CYCLETIME.get_data(), sdSysData.PROGRAM_TIME.CYCLETIME.start_to_start_time());
           ImGui::NewLine();
-          ImGui::Text("     Comms Time: %3.0lf %3.0lf ms", sdSysData.dblCOMMS_TRANSFER_TIME.get_data(), sdSysData.dblCOMMS_TRANSFER_TIME.start_to_start_time());
-          ImGui::Text("    Screen Time: %3.0lf %3.0lf ms", sdSysData.dblSCREEN_RENDER_TIME.get_data(), sdSysData.dblSCREEN_RENDER_TIME.start_to_start_time());
-          ImGui::Text("LED Render Time: %3.0lf %3.0lf ms", sdSysData.dblCOMMS_LED_RENDER_TIME.get_data(), sdSysData.dblCOMMS_LED_RENDER_TIME.start_to_start_time());
+          ImGui::Text("AUTO Comms : %3.0lf %3.0lf ms", sdSysData.dblCOMMS_AUTO_TRANSFER_TIME.get_data(), sdSysData.dblCOMMS_AUTO_TRANSFER_TIME.start_to_start_time());
+          ImGui::Text(" GPS Comms : %3.0lf %3.0lf ms", sdSysData.dblCOMMS_GPS_TRANSFER_TIME.get_data(), sdSysData.dblCOMMS_GPS_TRANSFER_TIME.start_to_start_time());
+          ImGui::Text("   COMPASS : %3.0lf %3.0lf ms", sdSysData.dblCOMMS_COMPASS_DATA_READ_TIME.get_data(), sdSysData.dblCOMMS_COMPASS_DATA_READ_TIME.start_to_start_time());
+          ImGui::Text("    Screen : %3.0lf %3.0lf ms", sdSysData.dblSCREEN_RENDER_TIME.get_data(), sdSysData.dblSCREEN_RENDER_TIME.start_to_start_time());
+          ImGui::Text("LED Render : %3.0lf %3.0lf ms", sdSysData.dblCOMMS_LED_RENDER_TIME.get_data(), sdSysData.dblCOMMS_LED_RENDER_TIME.start_to_start_time());
         }
         ImGui::End();
       }
