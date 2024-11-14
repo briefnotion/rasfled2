@@ -173,6 +173,8 @@ class ADSB_RANGE
   // 1  - MIN
   // 2  - MAX
 
+  bool AIRCRAFT_COUNT_ZERO = false;
+
   ImVec2 ll_2_pt_scale();
 
   void gps_display_current_location_toggle();
@@ -209,6 +211,9 @@ class ADSB_RANGE
   void zoom_out();
   // Increase the distance in miles, the range is set at for viewing, 
   //  by one.
+
+  void zoom_return();
+  // Set the zoom scale back to level.
   
   void draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area);
 

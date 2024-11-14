@@ -761,6 +761,11 @@ void ADSB_RANGE::zoom_out()
   }
 }
 
+void ADSB_RANGE::zoom_return()
+{
+  set_zoom_level();
+}
+
 void ADSB_RANGE::draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area)
 {
   WORKING_AREA = Working_Area;
@@ -784,7 +789,14 @@ void ADSB_RANGE::draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec
   // Text Range
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)));
 
-  ImGui::Text("%.2f mi", RANGE_BLOCK_CURRENT);
+  if (RANGE_BLOCK_CURRENT < 1.0f)
+  {
+    ImGui::Text("%.2f mi", RANGE_BLOCK_CURRENT);
+  }
+  else
+  {
+    ImGui::Text("%.0f mi", RANGE_BLOCK_CURRENT);
+  }
   ImGui::PopStyleColor();
 }
 
@@ -2048,19 +2060,36 @@ void ADSB_MAP::draw(system_data &sdSysData)
   {
     if (RANGE_INDICATOR.ZOOM_MIN_MAX > 0)
     {
-      if (RANGE_INDICATOR.ZOOM_MIN_MAX == 1)
+      // If, for whatever reason, there are no aircfaft seen, set the zoom level as if Min and Max aircraft 
+      //  distance is off.
+
+      // Check to see if the amount of aircraft tracked is changed to or from zero.
+      if (sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT == 0)
       {
-        RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_CLOSEST * 0.75f);
+        if (RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO == false)
+        {
+          RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO = true;
+          RANGE_INDICATOR.zoom_return();
+        }
       }
-      else if (RANGE_INDICATOR.ZOOM_MIN_MAX == 2)
+      else
       {
-        RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_FURTHEST * 0.75f);
+        // Set zoom level to range.
+        RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO = false;
+        if (RANGE_INDICATOR.ZOOM_MIN_MAX == 1)        // Zoom at MIN aircraft distance
+        {
+          RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_CLOSEST * 0.75f);
+        }
+        else if (RANGE_INDICATOR.ZOOM_MIN_MAX == 2)   // Zoom at MAX aircraft distance
+        {
+          RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_FURTHEST * 0.75f);
+        }
       }
     }
   }
   else
   {
-    if (RANGE_INDICATOR.ZOOM_MIN_MAX > 0)
+    if (RANGE_INDICATOR.ZOOM_MIN_MAX > 0)           // Zoom at zoom level distance
     {
       RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
     }

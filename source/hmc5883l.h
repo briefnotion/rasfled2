@@ -165,8 +165,8 @@ class CAL_LEVEL_2_QUAD_RECORD
 {
   private:
 
-  int VARIANCE_COLLECTION_SIZE_SIMPLE = 60 * COMMS_COMPASS_POLLING_RATE_FPS;
-  int VARIANCE_COLLECTION_SIZE_COMPLEX = 30 * COMMS_COMPASS_POLLING_RATE_FPS;
+  int VARIANCE_COLLECTION_SIZE_SIMPLE = 60 * COMMS_COMPASS_POLLING_RATE_MS;
+  int VARIANCE_COLLECTION_SIZE_COMPLEX = 30 * COMMS_COMPASS_POLLING_RATE_MS;
   // To assist with first round calibration times, the larger 
   //  VARIANCE_COLLECTION_SIZE_SIMPLE will be the collection size, 
   //  and the system will return to VARIANCE_COLLECTION_SIZE_COMPLEX 
@@ -380,8 +380,8 @@ class HMC5883L
 
   FLOAT_XYZ RAW_XYZ;            // Temporary storage of XYZ before process;
 
-  int CALIBRATED_BEARINGS_SIZE = COMMS_COMPASS_POLLING_RATE_FPS / 2; 
-  // Half a second of data.
+  int CALIBRATED_BEARINGS_SIZE = 31;  // Calculated by: COMMS_COMPASS_HISTORY_TIME_SPAN_MS / 
+                                      //                COMMS_COMPASS_POLLING_RATE_MS
   // CALIBRATED_BEARINGS_SIZE stores a history of calculated bearing, to 
   //  be average to return the indicated bearing.
 

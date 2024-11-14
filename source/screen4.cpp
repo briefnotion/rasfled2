@@ -798,8 +798,16 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 AUTO.draw(sdSysData);
 
                 ADSB_IND.update_tf(sdSysData.AIRCRAFT_COORD.is_active());
-                ADSB_IND.update_text(center_justify(7, "(" + to_string(sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT) + ")"), 
-                                      " ADS-B ");
+                if (sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT == 0)
+                {
+                  ADSB_IND.update_text(center_justify(7, "(-)"), 
+                                        " ADS-B ");
+                }
+                else
+                {
+                  ADSB_IND.update_text(center_justify(7, "(" + to_string(sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT) + ")"), 
+                                        " ADS-B ");
+                }
                 ADSB_IND.draw(sdSysData);
               }
               ImGui::EndGroup();

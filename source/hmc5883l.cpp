@@ -189,7 +189,7 @@ float CALIBRATION_DATA::variance_from_offset(FLOAT_XYZ Offset, FLOAT_XYZ Skew, b
     // Set to false if fail, keep same (false or true) if true.
     bool good_data = false;
 
-    good_data = emperical_mean(variance_collection, 3.0, 1 * COMMS_COMPASS_POLLING_RATE_FPS, mean, qualifying_value_for_variance);
+    good_data = emperical_mean(variance_collection, 3.0, 1 * COMMS_COMPASS_POLLING_RATE_MS, mean, qualifying_value_for_variance);
     // X * COMMS_COMPASS_POLLING_RATE_FPS - refers to how much good data is the bottom limit - X is X seconds of good data
 
     if (good_data == false)
@@ -256,7 +256,7 @@ bool CALIBRATION_DATA::stick_the_landing(FLOAT_XYZ Current_Offset, int Quadrant)
   // Set to false if fail, keep same (false or true) if true.
   bool good_data = false;
 
-  good_data = emperical_mean(variance_collection, 2.0, 1 * COMMS_COMPASS_POLLING_RATE_FPS, mean, mean_difference_from_variance);
+  good_data = emperical_mean(variance_collection, 2.0, 1 * COMMS_COMPASS_POLLING_RATE_MS, mean, mean_difference_from_variance);
   // Good data count of 2 seconds worth of valid points.
 
   if (good_data)
@@ -1075,6 +1075,8 @@ bool HMC5883L::register_write(char Register, char Value)
 bool HMC5883L::create(string Offset_History_Filename)
 {
   bool ret_success = false;
+
+  CALIBRATED_BEARINGS_SIZE = (int)(COMMS_COMPASS_HISTORY_TIME_SPAN_MS / COMMS_COMPASS_POLLING_RATE_MS); 
 
   CALIBRATED_BEARINGS.clear();
   CALIBRATED_BEARINGS.reserve(CALIBRATED_BEARINGS_SIZE + 1);

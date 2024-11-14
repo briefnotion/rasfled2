@@ -1,3 +1,9 @@
+2.222_241113
+- Added 1ms sleep time to end of the led render proc.
+- Created definition of COMMS_COMPASS_HISTORY_TIME_SPAN_MS to adjust 
+    history size in ms, of compass bearings, at compile tine.
+- Readjusted the Compass to get sample every 15ms.
+
 2.221_241105
   - Changed timings and added timer monitoring for GPS, Auto, and Compass 
       processes.

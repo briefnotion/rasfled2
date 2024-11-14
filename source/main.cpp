@@ -221,6 +221,11 @@ void proc_render_thread()
   //int ret = 0;  // contains fail or pass status of the render routine.
   //ret = ws2811_render(&ledstring);  // Send values of ledstring to hardware.
   ws2811_render(&ledstring);  // Send values of ledstring to hardware.
+
+  // Sleep the task for 1 milisecond to make sure the lights are drawn before 
+  //  running the routine again.
+  usleep ((1000 * 1));
+
 }
 
 // ---------------------------------------------------------------------------------------
@@ -329,7 +334,7 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   // GPS Comm Port Setup
-  compass_timer.set( 1000 / COMMS_COMPASS_POLLING_RATE_FPS );
+  compass_timer.set( COMMS_COMPASS_POLLING_RATE_MS );
 
   // ---------------------------------------------------------------------------------------
   // GPS Comm Port Setup
