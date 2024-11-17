@@ -31,6 +31,9 @@
 float calculate_distance(float lat1, float long1, float lat2, float long2);
 // Returns distance in miles from first and second lat lon coords.
 
+float calculate_angle(float Distance, float Height);
+// Returns angle in degrees. Distance and Height need to be same unit type. 
+
 ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees);
 // Returns latitude and longitude coordinates at Distance_Miles on Bearing.
 

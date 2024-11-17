@@ -221,11 +221,6 @@ void proc_render_thread()
   //int ret = 0;  // contains fail or pass status of the render routine.
   //ret = ws2811_render(&ledstring);  // Send values of ledstring to hardware.
   ws2811_render(&ledstring);  // Send values of ledstring to hardware.
-
-  // Sleep the task for 1 milisecond to make sure the lights are drawn before 
-  //  running the routine again.
-  usleep ((1000 * 1));
-
 }
 
 // ---------------------------------------------------------------------------------------

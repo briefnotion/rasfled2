@@ -82,6 +82,7 @@ class AIRCRAFT_META_DATA
   string COMPASS_INFO_DISP_ALTITUDE = "";
   string COMPASS_INFO_DISP_SPEED = "";
   string COMPASS_INFO_DISP_DISTANCE_FROM_BASE = "";
+  string COMPASS_INFO_DISP_ANGLE_FROM_BASE = "";
 
   /*
   int DISP_FLIGHT_PIXEL_SIZE = 0;
@@ -95,6 +96,7 @@ class AIRCRAFT_META_DATA
   ImVec2 POSITION_SPEED;
   ImVec2 POSITION_ALTITUDE;
   ImVec2 POSITION_DISTANCE;
+  ImVec2 POSITION_ANGLE;
 };
 
 class AIRCRAFT
@@ -161,6 +163,7 @@ class AIRCRAFT
 
   // Alternate Data
   float DISTANCE_FROM_BASE = -1;  // Distance from received antenna. -1 if data not avail.
+  float ANGLE_FROM_BASE = -1;     // Angle from received antenna relative to horizon . -1 if data not avail.
 
   string simple_float_to_string(int Decimal_Positions, float Number);
 

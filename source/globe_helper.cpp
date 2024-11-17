@@ -41,6 +41,10 @@ float calculate_distance(float lat1, float lon1, float lat2, float lon2)
   return (float)distance;
 }
 
+float calculate_angle(float Distance, float Height) 
+{
+  return ((atan2(Height, Distance) * 180.0f) / float_PI);
+}
 
 ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees) 
 {

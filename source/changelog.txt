@@ -1,3 +1,8 @@
+2.223_241116
+  - Small adjustments to zoom range settings. 
+  - Added Angle (0 - 90 degrees over horizon) to aircraft data, then to 
+      the proximity alert.
+
 2.222_241113
 - Added 1ms sleep time to end of the led render proc.
 - Created definition of COMMS_COMPASS_HISTORY_TIME_SPAN_MS to adjust 

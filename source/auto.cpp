@@ -625,10 +625,12 @@ void AUTOMOBILE_INDICATORS::store_signal(int Signal_Lights)
     if (bit_value(Signal_Lights, 5))
     {
       SIGNAL_RIGHT = true;
+      SIGNAL_LEFT = false;
     }
     else
     {
       SIGNAL_LEFT = true;
+      SIGNAL_RIGHT = false;
     }
   }
   else

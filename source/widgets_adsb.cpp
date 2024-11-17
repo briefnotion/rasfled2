@@ -646,74 +646,71 @@ void ADSB_RANGE::create()
 /// The range block size is used to determine the spacing and size of the range markers on the display.
 void ADSB_RANGE::update_range_block_size()
 {
-  
-  float range_imp_adjustment = RANGE_IMP_LATEST * 0.75;
-
-  if (range_imp_adjustment < 0.01f)
+  if (RANGE_IMP_LATEST <= 0.01f + ((0.03f - 0.01f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 0.01f;
   }
-  else if (range_imp_adjustment < 0.03f)
+  else if (RANGE_IMP_LATEST <= 0.03f + ((0.05f - 0.03f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 0.03f;
   }
-  else if (range_imp_adjustment < 0.05f)
+  else if (RANGE_IMP_LATEST <= 0.05f + ((0.1f - 0.05f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 0.05f;
   }
-  else if (range_imp_adjustment < 0.1f)
+  else if (RANGE_IMP_LATEST <= 0.1f + ((0.25f -  0.1f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 0.1f;
   }
-  else if (range_imp_adjustment < 0.25f)
+  else if (RANGE_IMP_LATEST <= 0.25f + ((0.5f - 0.25f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 0.25f;
   }
-  else if (range_imp_adjustment < 0.5f)
+  else if (RANGE_IMP_LATEST <= 0.5f + ((1.0f - 0.5f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 0.5f;
   }
-  else if (range_imp_adjustment < 1.0f)
+  else if (RANGE_IMP_LATEST <= 1.0f + ((2.0f - 1.0f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 1.0f;
   }
-  else if (range_imp_adjustment < 2.0f)
+  else if (RANGE_IMP_LATEST <= 2.0f + ((5.0f - 2.0f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 2.0f;
   }
-  else if (range_imp_adjustment < 5.0f)
+  else if (RANGE_IMP_LATEST <= 5.0f + ((7.0f - 5.0f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 5.0f;
   }
-  else if (range_imp_adjustment < 7.0f)
+  else if (RANGE_IMP_LATEST <= 7.0f + ((10.0f - 7.0f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 7.0f;
   }
-  else if (range_imp_adjustment < 10.0f)
+  else if (RANGE_IMP_LATEST <= 10.0f + ((15.0f - 10.0f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 10.0f;
   }
-  else if (range_imp_adjustment < 15.0f)
+  else if (RANGE_IMP_LATEST <= 15.0f + ((25.0f - 15.0f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 15.0f;
   }
-  else if (range_imp_adjustment < 25.0f)
+  else if (RANGE_IMP_LATEST <= 25.0f + ((35.0f - 25.0f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 25.0f;
   }
-  else if (range_imp_adjustment < 35.0f)
+  else if (RANGE_IMP_LATEST <= 35.0f + ((50.0f - 35.0f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 35.0f;
   }
-  else if (range_imp_adjustment < 50.0f)
+  else if (RANGE_IMP_LATEST <= 50.0f + ((75.0f - 50.0f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 50.0f;
   }
-  else if (range_imp_adjustment < 75.0f)
+  else if (RANGE_IMP_LATEST <= 75.0f + ((100.0f - 75.0f) / 2.0f))
   {
     RANGE_BLOCK_CURRENT = 75.0f;
   }
-  else //if (range_imp_adjustment < 100.0f)
+  else //if (RANGE_IMP_LATEST < 100.0f)
   {
     RANGE_BLOCK_CURRENT = 100.0f;
   }
@@ -2266,7 +2263,7 @@ void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
     //      ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
     //                              ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar;
 
-    if (ImGui::BeginTable("Aircraft Data", 12, sdSysData.SCREEN_DEFAULTS.flags_t))
+    if (ImGui::BeginTable("Aircraft Data", 13, sdSysData.SCREEN_DEFAULTS.flags_t))
     {
       {
         ImGui::TableSetupColumn(" ");
@@ -2279,6 +2276,7 @@ void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
         ImGui::TableSetupColumn("HDG");
         ImGui::TableSetupColumn("HDG NAV");
         ImGui::TableSetupColumn("DIST");
+        ImGui::TableSetupColumn("ANG");
         ImGui::TableSetupColumn("SEEN");  // seen p
         //ImGui::TableSetupColumn("SEEN");
         ImGui::TableSetupColumn("RSSI");
@@ -2310,14 +2308,27 @@ void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
           ImGui::TableNextColumn();
           ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.NAV_HEADING.get_str_value().c_str());
           ImGui::TableNextColumn();
+          
           if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.DISTANCE_FROM_BASE != -1.0f)
           {
-          ImGui::Text("%.2f", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.DISTANCE_FROM_BASE);
+            ImGui::Text("%.2f", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.DISTANCE_FROM_BASE);
           }
           else
           {
             ImGui::Text(" ");
           }
+
+          ImGui::TableNextColumn();
+
+          if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.ANGLE_FROM_BASE != -1.0f)
+          {
+            ImGui::Text("%.0f", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.ANGLE_FROM_BASE);
+          }
+          else
+          {
+            ImGui::Text(" ");
+          }
+
           ImGui::TableNextColumn();
           ImGui::Text("%s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].AIRCRAFT_ITEM.SEEN_POS.get_str_value().c_str());
           ImGui::TableNextColumn();
@@ -2331,6 +2342,8 @@ void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
           sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[pos].clear();  // CLEAR NEEDS CLEANING
 
           ImGui::TableNextRow();
+          ImGui::TableNextColumn();
+          ImGui::Text(" ");
           ImGui::TableNextColumn();
           ImGui::Text(" ");
           ImGui::TableNextColumn();

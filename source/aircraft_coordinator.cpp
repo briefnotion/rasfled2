@@ -373,7 +373,8 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
                                                               "SQK: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
                                                               "  FLT: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value() +
                                                               "\nALT: " + Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_str_value() +
-                                                              "  SPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
+                                                              "  ANG: " + to_string_round_to_nth(Aircraft_Deets.AIRCRAFT_ITEM.ANGLE_FROM_BASE, 1) +
+                                                              "\nSPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
       Aircraft_Deets.ALERTS_ADSB.res_update_additional_line_with_conditions(ADSB_RESERVE_ALERT_PROXIMITY);
       Aircraft_Deets.ALERTS_ADSB.ALERTS_RESERVE[ADSB_RESERVE_ALERT_PROXIMITY].set_show_value_bar(true);
     }
@@ -494,16 +495,21 @@ void AIRCRAFT_COORDINATOR::post_post_process()
                                   DATA.AIRCRAFTS[aircraft].POSITION.LONGITUDE.get_float_value(), 
                                   DATA.CURRENT_LAT, 
                                   DATA.CURRENT_LON);
+
+      DATA.AIRCRAFTS[aircraft].ANGLE_FROM_BASE = calculate_angle(DATA.AIRCRAFTS[aircraft].DISTANCE_FROM_BASE * 5280.0f, 
+                                                            (float)DATA.AIRCRAFTS[aircraft].ALTITUDE.get_int_value());                                 
     }
     else
     {
       DATA.AIRCRAFTS[aircraft].DISTANCE_FROM_BASE = -1;
+      DATA.AIRCRAFTS[aircraft].ANGLE_FROM_BASE = -1;
     }
     
     // Meta
     DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_FLIGHT = " " + trim(DATA.AIRCRAFTS[aircraft].FLIGHT.get_str_value());
     DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_SQUAWK = trim(DATA.AIRCRAFTS[aircraft].SQUAWK.get_str_value());
     DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_ALTITUDE = "  " + to_string_round_to_nth(float(DATA.AIRCRAFTS[aircraft].ALTITUDE.get_int_value() / 1000.0f), 1) + " kft";
+    //DATA.AIRCRAFTS[aircraft].META.POSITION_ANGLE = to_string(DATA.AIRCRAFTS[aircraft].ANGLE_FROM_BASE);
     DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_SPEED = trim(DATA.AIRCRAFTS[aircraft].SPEED.get_str_value());
     DATA.AIRCRAFTS[aircraft].META.COMPASS_INFO_DISP_DISTANCE_FROM_BASE = to_string_round_to_nth(DATA.AIRCRAFTS[aircraft].DISTANCE_FROM_BASE, 1) + " mi";
 
