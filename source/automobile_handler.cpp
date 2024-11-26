@@ -18,6 +18,24 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
+float weird_curve(float Value)
+{
+  if (Value <= 0.0)
+  {
+    return 0.0f;
+  }
+  if (Value < 2.0f) 
+  {
+    return (10 - (10 * sin ( (Value/2) * (float_PI/2) )));
+  }
+  else
+  {
+    return Value;
+  }
+}
+
+// -------------------------------------------------------------------------------------
+
 void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, float S_Temp)
 {
   // Simple temp color set.
@@ -700,7 +718,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
                                               .brightness(brightness_LF * 0.04f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_LF", speed_tire_LF * 0.5f);
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LF", speed_tire_LF * 0.5f);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LF", weird_curve(speed_tire_LF) * 0.5f);
         
         // RF
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_RF", 
@@ -711,7 +729,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
                                               .brightness(brightness_RF * 0.04f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_RF", speed_tire_RF * 0.5f);
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RF", speed_tire_RF * 0.5f);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RF", weird_curve(speed_tire_RF) * 0.5f);
         
         // LB
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_LB", 
@@ -722,7 +740,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
                                               .brightness(brightness_LB * 0.04f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_LB", speed_tire_LB * 0.5f);
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LB", speed_tire_LB * 0.5f);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LB", weird_curve(speed_tire_LB) * 0.5f);
         
         // RB
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_RB", 
@@ -733,7 +751,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
                                               .brightness(brightness_RB * 0.04f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_RB", speed_tire_RB * 0.5f);
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RB", speed_tire_RB * 0.5f);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RB", weird_curve(speed_tire_RB) * 0.5f);
         
         // Keep?
         Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_PULSE", DRIVE_PULSE_COLOR.brightness(multiplier));

@@ -142,7 +142,7 @@ class FLED_TIME_VAR
 class FLED_TIME
 {
   private:
-  std::chrono::time_point<std::chrono::system_clock> TIME_START;
+  std::chrono::time_point<std::chrono::steady_clock> TIME_START;
 
   double ERROR_TOLERANCE = 1.0;
   double ERROR = 0.0;

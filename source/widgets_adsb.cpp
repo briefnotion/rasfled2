@@ -2092,13 +2092,13 @@ void ADSB_MAP::draw(system_data &sdSysData)
     }
   }
 
-  RANGE_INDICATOR.range_update(sdSysData.PROGRAM_TIME.current_frame_time());
-
   // turn on if not set and gps turn active
   if (RANGE_INDICATOR.CENTER_ON_LOCATION == -9 && ACTIVE_GPS)
   {
     RANGE_INDICATOR.CENTER_ON_LOCATION = 1;
   }
+
+  RANGE_INDICATOR.range_update(sdSysData.PROGRAM_TIME.current_frame_time());
 
   // -------------------------------------------------------------------------------------
 

@@ -36,6 +36,12 @@
 using namespace std;
 
 // -------------------------------------------------------------------------------------
+
+float weird_curve(float Value);
+// good for values between 0 and 10
+// bottoms out at 2
+
+// -------------------------------------------------------------------------------------
 //  
 
 class AUTOMOBILE_HANDLER

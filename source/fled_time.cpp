@@ -251,8 +251,8 @@ unsigned long FLED_TIME::now()
 {
   // Returns now time in milliseconds.
   // Should be Unsigned Long.
-  std::chrono::time_point<std::chrono::system_clock> tmeNow = std::chrono::system_clock::now();
-  std::chrono::duration<double>  dur = tmeNow - TIME_START;
+  auto tmeNow = std::chrono::steady_clock::now();
+  std::chrono::duration<double> dur = tmeNow - TIME_START;
 
   double nowtime = dur.count();
 
@@ -277,7 +277,7 @@ unsigned long FLED_TIME::now()
 void FLED_TIME::create()
 {
   // Initialize as Start of Program Time.
-  TIME_START = std::chrono::system_clock::now();
+  TIME_START = std::chrono::steady_clock::now();
 }
 
 bool FLED_TIME::setframetime()
