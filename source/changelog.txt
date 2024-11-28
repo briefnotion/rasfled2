@@ -1,3 +1,6 @@
+2.225_241128
+  - Small adjustments.
+
 2.224_241126
   - Program clock has been replaced by a steady_clock to prevent time 
       from running backwards or skipping forward.

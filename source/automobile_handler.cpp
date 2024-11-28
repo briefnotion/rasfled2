@@ -26,7 +26,7 @@ float weird_curve(float Value)
   }
   if (Value < 2.0f) 
   {
-    return (10 - (10 * sin ( (Value/2) * (float_PI/2) )));
+    return ((10 - (10 * sin ( (Value/2) * (float_PI/2) ))) + 1);
   }
   else
   {
