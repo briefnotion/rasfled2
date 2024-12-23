@@ -71,6 +71,8 @@ class AUTOMOBILE_HANDLER
   bool LIGHT_VELOCITY_ON = false;
   bool LIGHT_DOOR_HANDLE_ON = false;
 
+  bool CUISE_CONTROL = false;
+
   TIMED_PING ALERT_TIMER;   // Restrict multiple sequential alerts
 
   CRGB DRIVE_PULSE_COLOR = CRGB(30, 30, 30);

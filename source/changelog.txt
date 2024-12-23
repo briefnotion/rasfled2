@@ -1,3 +1,10 @@
+2.226_241223
+  - Removed automobile strange funcution and added an extra animation 
+      for velocity under 2mph.
+  - Adjusted the fuel alert to display at 3 gallons and clear at 6 gallons.
+  - Created a tire differental of speed indicator in the led lights.
+  - Cruise Control on or off will generate an audiable sound.
+
 2.225_241128
   - Small adjustments.
 

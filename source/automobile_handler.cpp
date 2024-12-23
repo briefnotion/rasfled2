@@ -18,24 +18,6 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
-float weird_curve(float Value)
-{
-  if (Value <= 0.0)
-  {
-    return 0.0f;
-  }
-  if (Value < 2.0f) 
-  {
-    return ((10 - (10 * sin ( (Value/2) * (float_PI/2) ))) + 1);
-  }
-  else
-  {
-    return Value;
-  }
-}
-
-// -------------------------------------------------------------------------------------
-
 void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, float S_Temp)
 {
   // Simple temp color set.
@@ -247,6 +229,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
       Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Gear Select_Drive_Off");
       Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Velocity_Off");
       Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Door Handle Running Off");
+      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Allways_On_Off");
 
       GEAR_PARK = false;
       GEAR_NEUTRAL = false;
@@ -254,6 +237,14 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
       GEAR_DRIVE = false;
       LIGHT_VELOCITY_ON = false;
       LIGHT_DOOR_HANDLE_ON = false;
+    }
+    else
+    {
+      // Turn on always on animations when automobile is available.
+      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Allways_On_LF", 1);
+      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Allways_On_RF", 3);
+      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Allways_On_LB", 0);
+      Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Allways_On_RB", 2);
     }
   }
 
@@ -269,6 +260,37 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     float speed_average_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph();
 
     float s_temp = sdSysData.CAR_INFO.CALCULATED.s_temp();
+
+    // Velocity - Must always get.
+    // Gather data for tire speed for velocity animations.
+    float adjustment = 1.0f;  // Simple way to adjust the speed of the animations.
+
+    float speed_tire_LF = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LF_TIRE.val_mph() * adjustment;
+    float speed_tire_RF = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RF_TIRE.val_mph() * adjustment;
+    float speed_tire_LB = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LB_TIRE.val_mph() * adjustment;
+    float speed_tire_RB = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RB_TIRE.val_mph() * adjustment;
+
+    // Speed Testing
+    //speed_tire_LF = 1.0f;
+    //speed_tire_RF = 1.0f;
+    //speed_tire_LB = 1.0f;
+    //speed_tire_RB = 1.0f;
+
+    // Difererential
+    // Find lowest tire speed
+    //float speed_tire_lowest = min({speed_tire_RF, speed_tire_RF, speed_tire_LB, speed_tire_RB});
+
+    // Create speed differentials for each tire.
+    float speed_tire_LF_diff = speed_tire_LF - speed_lowest_tire_speed;
+    float speed_tire_RF_diff = speed_tire_RF - speed_lowest_tire_speed;
+    float speed_tire_LB_diff = speed_tire_RB - speed_lowest_tire_speed;
+    float speed_tire_RB_diff = speed_tire_LB - speed_lowest_tire_speed;
+
+    // Differential - Animations
+    Animations.mod_run_anim_velocity("AUTO_DIFFERENTIAL_O_LF", speed_tire_LF_diff);
+    Animations.mod_run_anim_velocity("AUTO_DIFFERENTIAL_O_RF", speed_tire_RF_diff);
+    Animations.mod_run_anim_velocity("AUTO_DIFFERENTIAL_O_LB", speed_tire_LB_diff);
+    Animations.mod_run_anim_velocity("AUTO_DIFFERENTIAL_O_RB", speed_tire_RB_diff);
 
     // Check alerts
 
@@ -332,16 +354,27 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 
     // Fuel Level alert
     if (sdSysData.ALERTS_AUTO.res_alert_condition_less_than(AUTO_RESERVE_ALERT_FUEL_LEVEL, 
-                                      sdSysData.CAR_INFO.CALCULATED.fuel_level_emperical_val(), 1.0f, 5.0f))
+                                      sdSysData.CAR_INFO.CALCULATED.fuel_level_emperical_val(), 3.0f, 6.0f))
     {
       sdSysData.ALERTS_AUTO.res_update_alert_text_line(AUTO_RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + sdSysData.CAR_INFO.CALCULATED.fuel_level_emperical());
       sdSysData.ALERTS_AUTO.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_FUEL_LEVEL);
       sdSysData.ALERTS_AUTO.ALERTS_RESERVE[AUTO_RESERVE_ALERT_FUEL_LEVEL].set_show_value_bar(true);
     }
 
+    // Cruese Control On Off
+    if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control(), CUISE_CONTROL) == true)
+    {
+      if (sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control())
+      {
+        sdSysData.SOUND_SYSTEM.add_note_to_queue(sdSysData.COMMAND_THREADS, "g6");
+      }
+      else
+      {
+        sdSysData.SOUND_SYSTEM.add_note_to_queue(sdSysData.COMMAND_THREADS, "f6");
+      }
+    }
 
     // Gear Selection
-
     // Changing Gear to Park
     if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_park(), GEAR_PARK) == true)
     {
@@ -512,10 +545,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     float multiplier_caution = 0;
 
     // Tire Values
-    float brightness_LF = 0;
-    float brightness_RF = 0;
-    float brightness_LB = 0;
-    float brightness_RB = 0;
+    float brightness_LF       = 0;
+    float brightness_LF_slow  = 0;
+    float brightness_RF       = 0;
+    float brightness_RF_slow  = 0;
+    float brightness_LB       = 0;
+    float brightness_RB       = 0;
 
     // -------------------------------------------------------------------------------------
     // Alerts at non stops at low speed
@@ -601,20 +636,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
       // Set colors if Velocity lights are on.  They could be off if in reverse or park.
       if (LIGHT_VELOCITY_ON == true)
       {
-        // Gather data for tire speed for velocity animations.
-        float adjustment = 1.0f;  // Simple way to adjust the speed of the animations.
-
-        float speed_tire_LF = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LF_TIRE.val_mph() * adjustment;
-        float speed_tire_RF = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RF_TIRE.val_mph() * adjustment;
-        float speed_tire_LB = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LB_TIRE.val_mph() * adjustment;
-        float speed_tire_RB = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RB_TIRE.val_mph() * adjustment;
-
-        // Speed Testing
-        //speed_tire_LF = 1.0f;
-        //speed_tire_RF = 1.0f;
-        //speed_tire_LB = 1.0f;
-        //speed_tire_RB = 1.0f;
-
+        // ---------------------------------------------
+        // Calculations
         // Keep velocity animations running unless all tires have stopped.
         bool all_tires_stopped = (speed_tire_LF == 0.0f && speed_tire_RF == 0.0f && 
                                   speed_tire_LB == 0.0f && speed_tire_RB == 0.0f);
@@ -660,8 +683,18 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         {
           brightness_LF = 0;
         }
-        // RF
 
+        // LF Slow
+        if (speed_tire_LF < 2.0f)
+        {
+          brightness_LF_slow = 1 - (speed_tire_LF / 2.0f);
+        }
+        else 
+        {
+          brightness_LF_slow = 0;
+        }
+
+        // RF
         if (speed_tire_RF < ACTIVATE_SPEED)
         {
           brightness_RF = 1 - (speed_tire_RF / ACTIVATE_SPEED);
@@ -669,6 +702,16 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         else 
         {
           brightness_RF = 0;
+        }
+
+        // RF Slow
+        if (speed_tire_RF < 2.0f)
+        {
+          brightness_RF_slow = 1 - (speed_tire_RF / 2.0f);
+        }
+        else 
+        {
+          brightness_RF_slow = 0;
         }
 
         // LB
@@ -700,7 +743,9 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         {
           multiplier_caution = 0;
         }
-        
+      
+        // ---------------------------------------------
+        // Calculations done, call anims
 
         CRGB drive_color = CRGB(32, (int)(16 * multiplier_caution), 0);
         // Adjust light colors and atttributes
@@ -716,9 +761,13 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_LF",
                                               (VELOCITY_COLOR.color())
                                               .brightness(brightness_LF * 0.04f));
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_LF_SLOW",
+                                              (CRGB(10,10,10))
+                                              .brightness(brightness_LF_slow));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_LF", speed_tire_LF * 0.5f);
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LF", weird_curve(speed_tire_LF) * 0.5f);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LF", speed_tire_LF * 0.5f);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LF_SLOW", speed_tire_LF * 10.0f * 0.5f);
         
         // RF
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_RF", 
@@ -727,9 +776,13 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_RF", 
                                               (VELOCITY_COLOR.color())
                                               .brightness(brightness_RF * 0.04f));
+        Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_O_RF_SLOW", 
+                                              (CRGB(10,10,10))
+                                              .brightness(brightness_RF_slow));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_RF", speed_tire_RF * 0.5f);
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RF", weird_curve(speed_tire_RF) * 0.5f);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RF", speed_tire_RF * 0.5f);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RF_SLOW", speed_tire_RF * 10.0f * 0.5f);
         
         // LB
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_LB", 
@@ -740,7 +793,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
                                               .brightness(brightness_LB * 0.04f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_LB", speed_tire_LB * 0.5f);
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LB", weird_curve(speed_tire_LB) * 0.5f);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_LB", speed_tire_LB * 0.5f);
         
         // RB
         Animations.mod_run_anim_color_dest_1("AUGEAR_VELOCITY_D_RB", 
@@ -751,7 +804,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
                                               .brightness(brightness_RB * 0.04f));
 
         Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_D_RB", speed_tire_RB * 0.5f);
-        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RB", weird_curve(speed_tire_RB) * 0.5f);
+        Animations.mod_run_anim_velocity("AUGEAR_VELOCITY_O_RB", speed_tire_RB * 0.5f);
         
         // Keep?
         Animations.mod_run_anim_color_dest_1("AUGEAR_DRIVE_PULSE", DRIVE_PULSE_COLOR.brightness(multiplier));

@@ -634,6 +634,51 @@
         }
       ],
 
+      "Automobile - Allways_On_LF" : 
+      [
+        {
+          "Label" : "AUTO_ALWAYS_ON", 
+          "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUTO_ALWAYS_ON_OVERHEAD_LF"
+        }
+      ],
+
+      "Automobile - Allways_On_RF" : 
+      [
+        {
+          "Label" : "AUTO_ALWAYS_ON", 
+          "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUTO_ALWAYS_ON_OVERHEAD_RF"
+        }
+      ],
+
+      "Automobile - Allways_On_LB" : 
+      [
+        {
+          "Label" : "AUTO_ALWAYS_ON", 
+          "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUTO_ALWAYS_ON_OVERHEAD_LB"
+        }
+      ],
+
+      "Automobile - Allways_On_RB" : 
+      [
+        {
+          "Label" : "AUTO_ALWAYS_ON", 
+          "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUTO_ALWAYS_ON_OVERHEAD_RB"
+        }
+      ],
+
+      "Automobile - Allways_On_Off" : 
+      [
+        {
+          "Label" : "AUTO_ALWAYS_ON", 
+          "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "AUTO_ALWAYS_ON_OFF"
+        }
+      ],
+
       "This Door Opened - Exterior" : 
       [
         {
@@ -2348,6 +2393,33 @@
           "LED_Start_Pos" : "from_1/3|0", "LED_End_Pos" : "from_start|0",  
           "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
           "Velocity" : true
+        },
+        {
+          "Label" : "AUGEAR_VELOCITY_O_LF_SLOW",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "5,5,5",
+          "LED_Start_Pos" : "from_end|0", "LED_End_Pos" : "from_2/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUGEAR_VELOCITY_O_LF_SLOW",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "5,5,5",
+          "LED_Start_Pos" : "from_2/3|0", "LED_End_Pos" : "from_1/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUGEAR_VELOCITY_O_LF_SLOW",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "5,5,5",
+          "LED_Start_Pos" : "from_1/3|0", "LED_End_Pos" : "from_start|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
         }
       ],
 
@@ -2417,6 +2489,33 @@
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 75, 
           "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
           "Dest_1" : "15,0,0",
+          "LED_Start_Pos" : "from_1/3|0", "LED_End_Pos" : "from_start|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUGEAR_VELOCITY_O_RF_SLOW",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "5,5,5",
+          "LED_Start_Pos" : "from_end|0", "LED_End_Pos" : "from_2/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUGEAR_VELOCITY_O_RF_SLOW",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "5,5,5",
+          "LED_Start_Pos" : "from_2/3|0", "LED_End_Pos" : "from_1/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUGEAR_VELOCITY_O_RF_SLOW",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 250, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "5,5,5",
           "LED_Start_Pos" : "from_1/3|0", "LED_End_Pos" : "from_start|0",  
           "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
           "Velocity" : true
@@ -2666,6 +2765,12 @@
           "Label" : "AUGEAR_VELOCITY",  
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
           "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
+          "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUGEAR_VELOCITY_O_LF_SLOW"
+        },
+        {
+          "Label" : "AUGEAR_VELOCITY",  
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
           "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUGEAR_VELOCITY_D_RF"
         },
         {
@@ -2673,6 +2778,12 @@
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
           "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
           "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUGEAR_VELOCITY_O_RF"
+        },
+        {
+          "Label" : "AUGEAR_VELOCITY",  
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
+          "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUGEAR_VELOCITY_O_RF_SLOW"
         },
         {
           "Label" : "AUGEAR_VELOCITY",  
@@ -2697,6 +2808,178 @@
           "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
           "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
           "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUGEAR_VELOCITY_O_RB"
+        }
+      ],
+
+      "AUTO_ALWAYS_ON_OVERHEAD_LF" : 
+      [
+        {
+          "Comment_1" : "AUTO_DIFFERENTIAL_O_LF",
+          "Run_On_LED_LED_Strip_Name" : "Overhead"
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_LF",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_end|0", "LED_End_Pos" : "from_2/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_LF",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_2/3|0", "LED_End_Pos" : "from_1/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_LF",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_1/3|0", "LED_End_Pos" : "from_start|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        }
+      ],
+
+      "AUTO_ALWAYS_ON_OVERHEAD_RF" : 
+      [
+        {
+          "Comment_1" : "AUTO_DIFFERENTIAL_O_RF",
+          "Run_On_LED_LED_Strip_Name" : "Overhead"
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_RF",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_end|0", "LED_End_Pos" : "from_2/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_RF",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_2/3|0", "LED_End_Pos" : "from_1/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_RF",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_1/3|0", "LED_End_Pos" : "from_start|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        }
+      ],
+
+      "AUTO_ALWAYS_ON_OVERHEAD_LB" : 
+      [
+        {
+          "Comment_1" : "AUTO_DIFFERENTIAL_O_LB",
+          "Run_On_LED_LED_Strip_Name" : "Overhead"
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_LB",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_end|0", "LED_End_Pos" : "from_2/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_LB",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_2/3|0", "LED_End_Pos" : "from_1/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_LB",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_1/3|0", "LED_End_Pos" : "from_start|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        }
+      ],
+
+      "AUTO_ALWAYS_ON_OVERHEAD_RB" : 
+      [
+        {
+          "Comment_1" : "AUTO_DIFFERENTIAL_O_RB",
+          "Run_On_LED_LED_Strip_Name" : "Overhead"
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_RB",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_end|0", "LED_End_Pos" : "from_2/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_RB",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_2/3|0", "LED_End_Pos" : "from_1/3|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        },
+        {
+          "Label" : "AUTO_DIFFERENTIAL_O_RB",
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 150, "Speed_Of_LED_Walk" : 75, 
+          "Animation_Walk_Type" : "AnEvSweep", "Animation_Of_LED" : "AnPiPulse", 
+          "Dest_1" : "3,0,0",
+          "LED_Start_Pos" : "from_1/3|0", "LED_End_Pos" : "from_start|0",  
+          "Repeat" : true, "Clear_On_End" : false, "Off_During_Day" : false, 
+          "Velocity" : true
+        }
+      ],
+
+      "AUTO_ALWAYS_ON_OFF" : 
+      [
+        {
+          "Comment_1" : "Labels: AUTO_ALWAYS_ON",
+          "Comment_2" : "Turn off all Always On Animations"
+        },
+        {
+          "Label" : "AUTO_ALWAYS_ON",  
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
+          "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUTO_DIFFERENTIAL_O_LF"
+        },
+        {
+          "Label" : "AUTO_ALWAYS_ON",  
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
+          "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUTO_DIFFERENTIAL_O_RF"
+        },
+        {
+          "Label" : "AUTO_ALWAYS_ON",  
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
+          "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUTO_DIFFERENTIAL_O_LB"
+        },
+        {
+          "Label" : "AUTO_ALWAYS_ON",  
+          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
+          "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "AUTO_DIFFERENTIAL_O_RB"
         }
       ]
     }
