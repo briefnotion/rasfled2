@@ -1,4 +1,8 @@
 2.226_241223
+  - Corrected problem where the range ledgend was incorrectly drawing the 
+      wrong range scale when range change was large.
+
+2.226_241223
   - Removed automobile strange funcution and added an extra animation 
       for velocity under 2mph.
   - Adjusted the fuel alert to display at 3 gallons and clear at 6 gallons.

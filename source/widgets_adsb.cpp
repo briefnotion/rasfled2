@@ -433,119 +433,102 @@ void ADSB_RANGE::set_zoom_level()
     case 0:
     {
       set_range(0.01f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
 
     case 1:
     {
       set_range(0.03f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
 
     case 2:
     {
       set_range(0.05f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 3:
     {
       set_range(0.1f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 4:
     {
       set_range(0.25f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 5:
     {
       set_range(0.5f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
 
     case 6:
     {
       set_range(1.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
 
     case 7:
     {
       set_range(2.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
 
     case 8:
     {
       set_range(5.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 9:
     {
       set_range(7.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 10:
     {
       set_range(10.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 11:
     {
       set_range(15.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 12:
     {
       set_range(25.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 13:
     {
       set_range(35.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 14:
     {
       set_range(50.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 15:
     {
       set_range(75.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
     
     case 16:
     {
       set_range(100.0f);
-      calculate_lat_lon_to_point_scale();
       break;
     }
   }
@@ -723,6 +706,7 @@ void ADSB_RANGE::range_update(unsigned long Frame_Time)
   if (RANGE_IMP_LATEST != RANGE)
   {
     RANGE_IMP_LATEST = RANGE_IMP.impact(Frame_Time);
+    calculate_lat_lon_to_point_scale();
     update_range_block_size();
 
     bool draw = true;
@@ -731,13 +715,14 @@ void ADSB_RANGE::range_update(unsigned long Frame_Time)
                                                   180.0f, draw);
     RANGE_POINT_DISTANCE = abs(point_distance.y - CENTER.y);
 
-    calculate_lat_lon_to_point_scale();
+    //calculate_lat_lon_to_point_scale();
   }
 }
 
 void ADSB_RANGE::set_range(float Range_Miles)
 {
   RANGE = Range_Miles;
+  //calculate_lat_lon_to_point_scale();
 }
 
 void ADSB_RANGE::zoom_in()

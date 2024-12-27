@@ -216,8 +216,11 @@ class ADSB_RANGE
   // Set the zoom scale back to level.
   
   void draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area);
+  // Draws range circle onto the screen.
 
   void draw_info();
+  // Draws ledgend info onto the screen
+  //  Text Lat Lon Range
 };
 
 // ---------------------------------------------------------------------------------------
@@ -264,16 +267,28 @@ class ADSB_MAP
   COMPASS_WIDGET CURRENT_POSITION_COMPASS;
 
   void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
+  // Adds landmark to vector list.
 
   void screen_buttons(system_data &sdSysData);
+  // Draws buttons onto the screen
 
   void screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSysData);
+  // Draws compass calibration data onto the screen
 
   void screen_text(system_data &sdSysData);
+  // Draws text onto the screen
+  //  Warining
+  //  ADSB info
+  //  GPS info
+  //  Compass info
 
   void screen_draw_position_marker(ImDrawList *Draw_List, system_data &sdSysData);
+  //  Draw map position marker onto the screen
+  //    Draws Tracks
 
   void screen_draw_aircraft(ImDrawList *Draw_List, system_data &sdSysData);
+  //  Draw aircraft markers onto the screen
+  //    Draws Tracks
 
   public:
 
