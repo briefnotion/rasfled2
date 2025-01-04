@@ -256,8 +256,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     VELOCITY_COLOR.set_current_frame_time(sdSysData.PROGRAM_TIME.current_frame_time());
 
     // Variable Reuse
-    float speed_lowest_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_LOWEST.val_mph();
-    float speed_average_tire_speed = sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph();
+    float speed_lowest_tire_speed = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_LOWEST.val_mph();
+    float speed_average_tire_speed = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph();
 
     float s_temp = sdSysData.CAR_INFO.CALCULATED.s_temp();
 
@@ -277,9 +277,6 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     //speed_tire_RB = 1.0f;
 
     // Difererential
-    // Find lowest tire speed
-    //float speed_tire_lowest = min({speed_tire_RF, speed_tire_RF, speed_tire_LB, speed_tire_RB});
-
     // Create speed differentials for each tire.
     float speed_tire_LF_diff = speed_tire_LF - speed_lowest_tire_speed;
     float speed_tire_RF_diff = speed_tire_RF - speed_lowest_tire_speed;

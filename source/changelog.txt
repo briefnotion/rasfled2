@@ -1,4 +1,9 @@
-2.226_241223
+2.228_250103
+  - Moved the average and lowest tire speed calculations from compute_low to 
+      at the time the tire speeds are read, avoiding errors caused when 
+      current tire speed is calculated with average or lowest speed.
+
+2.227_241227
   - Corrected problem where the range ledgend was incorrectly drawing the 
       wrong range scale when range change was large.
 

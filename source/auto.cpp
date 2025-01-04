@@ -1580,26 +1580,8 @@ void AUTOMOBILE_CALCULATED::compute_low(DNFWTS_ &Dnfwts, AUTOMOBILE_TRANSLATED_D
   //unsigned long speed_timestamp = Status.SPEED.SPEED_TRANS.time_stamp_time_sent();
 
   if (speed_timestamp != PREVIOUS_TIME_FOR_ACC)
-  {
-    SPEED_ALL_TIRES_AVERAGE.store_meters_per_second(((Status.SPEED.SPEED_LF_TIRE.val_meters_per_second() + 
-                                                      Status.SPEED.SPEED_RF_TIRE.val_meters_per_second() +
-                                                      Status.SPEED.SPEED_LB_TIRE.val_meters_per_second() + 
-                                                      Status.SPEED.SPEED_RB_TIRE.val_meters_per_second()) / 4), 
-                                                      tmeFrame_Time,
-                                                      Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent());
-
-    // Find slowest tire
-    {
-      float lowest_tire_speed = min({Status.SPEED.SPEED_LF_TIRE.val_meters_per_second(), 
-                                    Status.SPEED.SPEED_RF_TIRE.val_meters_per_second(), 
-                                    Status.SPEED.SPEED_LB_TIRE.val_meters_per_second(), 
-                                    Status.SPEED.SPEED_RB_TIRE.val_meters_per_second()});
-
-      SPEED_ALL_TIRES_LOWEST.store_meters_per_second(lowest_tire_speed, Status.SPEED.SPEED_LB_TIRE.time_stamp(), 
-                                                      Status.SPEED.SPEED_LB_TIRE.time_stamp_time_sent());
-    }                                                      
-
-    float current_velocity = SPEED_ALL_TIRES_AVERAGE.val_meters_per_second();
+  {                                               
+    float current_velocity =  Status.SPEED.SPEED_ALL_TIRES_AVERAGE.val_meters_per_second();
 
     //float current_velocity = Status.SPEED.SPEED_TRANS.val_meters_per_second();
 
@@ -2823,6 +2805,27 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigne
               STATUS.SPEED.store_RF((DATA.AD_190.DATA[2] *256) + DATA.AD_190.DATA[3], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
               STATUS.SPEED.store_LB((DATA.AD_190.DATA[4] *256) + DATA.AD_190.DATA[5], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
               STATUS.SPEED.store_RB((DATA.AD_190.DATA[6] *256) + DATA.AD_190.DATA[7], tmeFrame_Time, DATA.AD_190.TIMESTAMP_MESSAGE_SENT);
+
+              // Average Tire Speed
+              {
+                STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.store_meters_per_second(((STATUS.SPEED.SPEED_LF_TIRE.val_meters_per_second() + 
+                                                                  STATUS.SPEED.SPEED_RF_TIRE.val_meters_per_second() +
+                                                                  STATUS.SPEED.SPEED_LB_TIRE.val_meters_per_second() + 
+                                                                  STATUS.SPEED.SPEED_RB_TIRE.val_meters_per_second()) / 4), 
+                                                                  tmeFrame_Time,
+                                                                  STATUS.SPEED.SPEED_LB_TIRE.time_stamp_time_sent());    
+              }
+
+              // Find slowest tire
+              {
+                float lowest_tire_speed = min({STATUS.SPEED.SPEED_LF_TIRE.val_meters_per_second(), 
+                                              STATUS.SPEED.SPEED_RF_TIRE.val_meters_per_second(), 
+                                              STATUS.SPEED.SPEED_LB_TIRE.val_meters_per_second(), 
+                                              STATUS.SPEED.SPEED_RB_TIRE.val_meters_per_second()});
+
+                STATUS.SPEED.SPEED_ALL_TIRES_LOWEST.store_meters_per_second(lowest_tire_speed, STATUS.SPEED.SPEED_LB_TIRE.time_stamp(), 
+                                                                STATUS.SPEED.SPEED_LB_TIRE.time_stamp_time_sent());
+              }   
             }
           
             AVAILABILITY.set_active(STATUS, true, tmeFrame_Time);
@@ -2938,6 +2941,7 @@ void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, unsigned long tmeFrame_Time)
       DATA.AD_360.CHANGED = false;
     }
 
+    // LIGHTS, IGNITION SWITCH
     if (DATA.AD_C8.CHANGED)
     {
       STATUS.INDICATORS.store_on(DATA.AD_C8.DATA[3]);
@@ -2947,18 +2951,21 @@ void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, unsigned long tmeFrame_Time)
       DATA.AD_C8.CHANGED = false;
     }
 
+    // CRUISE CONTROL
     if (DATA.AD_200.CHANGED)
     {
       STATUS.INDICATORS.store_cruise_control(DATA.AD_200.DATA[6], DATA.AD_200.DATA[7], .312);
       DATA.AD_200.CHANGED = false;
     }
 
+    // SIGNAL LIGHTS
     if (DATA.AD_260.CHANGED)
     {
       STATUS.INDICATORS.store_signal(DATA.AD_260.DATA[3]);
       DATA.AD_260.CHANGED = false;
     }
 
+    // HAZARD LIGHTS
     if (DATA.AD_310.CHANGED)
     {
       STATUS.INDICATORS.store_hazards(tmeFrame_Time, DATA.AD_310.DATA[4]);
@@ -2980,12 +2987,14 @@ void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, unsigned long tmeFrame_Time)
     //  DATA.AD_200.CHANGED = false;
     //}
     
+    // FUEL LEVEL PERCENTAGE
     if (DATA.AD_C0.CHANGED)
     {
       STATUS.FUEL.store_percentage(DATA.AD_C0.DATA[7]);
       DATA.AD_C0.CHANGED = false;
     }
     
+    // FUEL LEVEL GALLONS
     if (DATA.AD_380.CHANGED)
     {
       STATUS.FUEL.store_level(DATA.AD_380.DATA[7]);

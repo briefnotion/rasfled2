@@ -126,7 +126,7 @@ void ADVERTISEMENT_SCREENS::draw(system_data &sdSysData)
             line_start_1 = ImVec2(working_area.x, working_area.y + SCAN_LINE + 4.0f);
             line_end_1 = ImVec2(line_start_1.x + sdSysData.GPS_SYSTEM.current_position().LATITUDE, working_area.y + (float)SCAN_LINE + 4.0f);
             
-            line_start_2 = ImVec2(line_end_1.x + (sdSysData.CAR_INFO.CALCULATED.SPEED_ALL_TIRES_AVERAGE.val_mph() * 3.0f), working_area.y + (float)SCAN_LINE + 4.0f);
+            line_start_2 = ImVec2(line_end_1.x + (sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() * 3.0f), working_area.y + (float)SCAN_LINE + 4.0f);
             line_end_2 = ImVec2(line_start_2.x + sdSysData.GPS_SYSTEM.current_position().LONGITUDE, working_area.y + (float)SCAN_LINE + 4.0f);
 
             draw_list_advertisement->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.color(RAS_BLACK).STANDARD, 2.0f);
