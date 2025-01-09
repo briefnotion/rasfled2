@@ -1,3 +1,6 @@
+2.229_250109
+  - Started building a Nova screen 2 to display all automotive raw values.
+
 2.228_250103
   - Moved the average and lowest tire speed calculations from compute_low to 
       at the time the tire speeds are read, avoiding errors caused when 

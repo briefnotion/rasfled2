@@ -672,6 +672,161 @@ void T_DATA_DISPLAY::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
 // ---------------------------------------------------------------------------------------
 
+void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
+{
+  ImDrawList* draw_list_nova = ImGui::GetWindowDrawList();
+
+  ImGui::Text("AUTOMOBILE_VELOCITY");
+
+  NOVA_2_SPEED_TRANS.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph()));
+  NOVA_2_SPEED_TRANS.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_SPEED_DASH.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_DASH.val_mph()));
+  NOVA_2_SPEED_DASH.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  NOVA_2_SPEED_LF_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LF_TIRE.val_mph()));
+  NOVA_2_SPEED_LF_TIRE.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_SPEED_RF_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RF_TIRE.val_mph()));
+  NOVA_2_SPEED_RF_TIRE.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  NOVA_2_SPEED_LB_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LB_TIRE.val_mph()));
+  NOVA_2_SPEED_LB_TIRE.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_SPEED_RB_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RB_TIRE.val_mph()));
+  NOVA_2_SPEED_RB_TIRE.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  NOVA_2_SPEED_ALL_TIRES_AVERAGE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph()));
+  NOVA_2_SPEED_ALL_TIRES_AVERAGE.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_SPEED_ALL_TIRES_LOWEST.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_LOWEST.val_mph()));
+  NOVA_2_SPEED_ALL_TIRES_LOWEST.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  ImGui::Text("AUTOMOBILE_TEMPATURE");
+
+  NOVA_2_COOLANT_05.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c()));
+  NOVA_2_COOLANT_05.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_AIR_INTAKE_0f.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c()));
+  NOVA_2_AIR_INTAKE_0f.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  NOVA_2_AMBIANT_AIR_46.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c()));
+  NOVA_2_AMBIANT_AIR_46.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_OIL_5c.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.OIL_5c.val_c()));
+  NOVA_2_OIL_5c.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  NOVA_2_EXHAUST_GAS_6b.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.EXHAUST_GAS_6b.val_c()));
+  NOVA_2_EXHAUST_GAS_6b.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_MANIFOLD_SURFACE_84.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.MANIFOLD_SURFACE_84.val_c()));
+  NOVA_2_MANIFOLD_SURFACE_84.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  NOVA_2_CATALYST_3C.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.CATALYST_3C.val_c()));
+  NOVA_2_CATALYST_3C.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_BARO_33.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.BARO_33.val_inHg()));
+  NOVA_2_BARO_33.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  ImGui::Text("AUTOMOBILE_ELECTRICAL");
+
+  NOVA_2_CONTROL_UNIT_42.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v()));
+  NOVA_2_CONTROL_UNIT_42.draw(draw_list_nova, sdSysData);
+
+
+
+
+
+
+
+
+
+}
+
+void AUTOMOBILE_SCREEN::nova_2(system_data &sdSysData)
+{
+  ImDrawList* draw_list_nova = ImGui::GetWindowDrawList();
+
+  ImVec2 button_adjust;
+
+  for(int items = 0; items < (int)sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size(); items++)
+  {
+    if (sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NON_CONSISTANT == false)
+    {
+      button_adjust = ImGui::GetCursorScreenPos();
+
+      // Rudimentry does it fit on screen comparison
+      if (button_adjust.y < 1024.0f)
+      {  
+        if(sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS)
+        {
+          // Determini if expanded view is on or off.
+          if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,27.0f)))
+          {
+            sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
+          }
+        }
+        else
+        {
+          if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,7.0f)))
+          {
+            sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
+          }
+        
+          // If hovered, draw id.
+          if (ImGui::IsItemHovered())
+          {
+            ImGui::Text("%X", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.ID);
+          }
+        }
+
+        ImGui::SetCursorScreenPos(button_adjust);
+
+        // Draw bit info.
+        nova_draw(draw_list_nova, sdSysData, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
+
+        //if expanded, draw window with values.
+        if (sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS)
+        {
+          draw_nova_detail(sdSysData, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE, items);
+        }
+      }
+    }
+  }
+}
+
 void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 {
   ImGui::BeginChild("Nova Display Buttons", ImVec2(90.0f, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
@@ -688,6 +843,8 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
       NOVA_CLIP_DETAIL = !NOVA_CLIP_DETAIL;
     }
 
+    /*
+    // Show some statistics on errors and comm data.
     ImGui::Text("Size: %d", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size());
 
     ImGui::Text("CMQ: %d", sdSysData.CAR_INFO.STATISTICS.can_max_queue());
@@ -708,65 +865,34 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 
     ImGui::Text("ERR:");
     ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.errors());
+    */
+    if (BTC_NOVA_SCREEN.button_toggle_color(sdSysData, "Screen\n1", "Screen\n2", DISPLAY_NOVA_SCREEN, RAS_BLUE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    {
+      DISPLAY_NOVA_SCREEN = !DISPLAY_NOVA_SCREEN;
+    }
 
     if (BC_NOVA_1.button_color(sdSysData, "NOVA", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       DISPLAY_NOVA = false;
     }
+
   }
   ImGui::EndChild();
 
   ImGui::SameLine();
 
-  ImGui::BeginChild("Nova Display Bit View", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+  if (DISPLAY_NOVA_SCREEN)
   {
-    ImDrawList* draw_list_nova = ImGui::GetWindowDrawList();
-
-    ImVec2 button_adjust;
-
-    for(int items = 0; items < (int)sdSysData.CAR_INFO.NOVA.NOVA_ITEMS.size(); items++)
+    ImGui::BeginChild("Nova Display Data", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
-      if (sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.NON_CONSISTANT == false)
-      {
-        button_adjust = ImGui::GetCursorScreenPos();
-
-        // Rudimentry does it fit on screen comparison
-        if (button_adjust.y < 1024.0f)
-        {  
-          if(sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS)
-          {
-            // Determini if expanded view is on or off.
-            if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,27.0f)))
-            {
-              sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
-            }
-          }
-          else
-          {
-            if (ImGui::InvisibleButton(("InvisibleButton" + to_string(items)).c_str(), ImVec2(650.0f ,7.0f)))
-            {
-              sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS = !sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS;
-            }
-          
-            // If hovered, draw id.
-            if (ImGui::IsItemHovered())
-            {
-              ImGui::Text("%X", sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.ID);
-            }
-          }
-
-          ImGui::SetCursorScreenPos(button_adjust);
-
-          // Draw bit info.
-          nova_draw(draw_list_nova, sdSysData, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE);
-
-          //if expanded, draw window with values.
-          if (sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE.DETAILS)
-          {
-            draw_nova_detail(sdSysData, sdSysData.CAR_INFO.NOVA.NOVA_ITEMS[items].NOVA_VALUE, items);
-          }
-        }
-      }
+      nova_1(sdSysData);
+    }
+  }
+  else
+  {
+    ImGui::BeginChild("Nova Display Bit View", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+    {
+      nova_2(sdSysData);
     }
   }
   
@@ -1471,6 +1597,99 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
         SDATA.VB_POWER_SYSTEM_VAPER_P.create();
       }
     }
+  }
+
+  // NOVA SCREEN 2 VARIABLES
+  {
+    // Default Props
+    T_DATA_DISPLAY_PROPERTIES tmp_defalt_props;
+
+    tmp_defalt_props.COLOR = RAS_WHITE;
+    tmp_defalt_props.LABEL_TEXT_SIZE = 7;
+
+    // AUTOMOBILE_VELOCITY
+
+    NOVA_2_SPEED_TRANS.PROPS = tmp_defalt_props;
+    NOVA_2_SPEED_TRANS.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Trans ");
+    NOVA_2_SPEED_TRANS.create(sdSysData);
+
+    NOVA_2_SPEED_DASH.PROPS = tmp_defalt_props;
+    NOVA_2_SPEED_DASH.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Dash ");
+    NOVA_2_SPEED_DASH.create(sdSysData);
+
+    NOVA_2_SPEED_LF_TIRE.PROPS = tmp_defalt_props;
+    NOVA_2_SPEED_LF_TIRE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "LF ");
+    NOVA_2_SPEED_LF_TIRE.create(sdSysData);
+
+    NOVA_2_SPEED_RF_TIRE.PROPS = tmp_defalt_props;
+    NOVA_2_SPEED_RF_TIRE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "RF ");
+    NOVA_2_SPEED_RF_TIRE.create(sdSysData);
+
+    NOVA_2_SPEED_LB_TIRE.PROPS = tmp_defalt_props;
+    NOVA_2_SPEED_LB_TIRE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "LB ");
+    NOVA_2_SPEED_LB_TIRE.create(sdSysData);
+
+    NOVA_2_SPEED_RB_TIRE.PROPS = tmp_defalt_props;
+    NOVA_2_SPEED_RB_TIRE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "RB ");
+    NOVA_2_SPEED_RB_TIRE.create(sdSysData);
+
+    NOVA_2_SPEED_ALL_TIRES_AVERAGE.PROPS = tmp_defalt_props;
+    NOVA_2_SPEED_ALL_TIRES_AVERAGE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Averag ");
+    NOVA_2_SPEED_ALL_TIRES_AVERAGE.create(sdSysData);
+
+    NOVA_2_SPEED_ALL_TIRES_LOWEST.PROPS = tmp_defalt_props;
+    NOVA_2_SPEED_ALL_TIRES_LOWEST.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Lowest ");
+    NOVA_2_SPEED_ALL_TIRES_LOWEST.create(sdSysData);
+
+    // AUTOMOBILE_TEMPATURE
+
+    NOVA_2_COOLANT_05.PROPS = tmp_defalt_props;
+    NOVA_2_COOLANT_05.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Coolan ");
+    NOVA_2_COOLANT_05.create(sdSysData);
+
+    NOVA_2_AIR_INTAKE_0f.PROPS = tmp_defalt_props;
+    NOVA_2_AIR_INTAKE_0f.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Intake ");
+    NOVA_2_AIR_INTAKE_0f.create(sdSysData);
+
+    NOVA_2_AMBIANT_AIR_46.PROPS = tmp_defalt_props;
+    NOVA_2_AMBIANT_AIR_46.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Ambien ");
+    NOVA_2_AMBIANT_AIR_46.create(sdSysData);
+
+    NOVA_2_OIL_5c.PROPS = tmp_defalt_props;
+    NOVA_2_OIL_5c.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Oil ");
+    NOVA_2_OIL_5c.create(sdSysData);
+
+    NOVA_2_EXHAUST_GAS_6b.PROPS = tmp_defalt_props;
+    NOVA_2_EXHAUST_GAS_6b.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Exahau ");
+    NOVA_2_EXHAUST_GAS_6b.create(sdSysData);
+
+    NOVA_2_MANIFOLD_SURFACE_84.PROPS = tmp_defalt_props;
+    NOVA_2_MANIFOLD_SURFACE_84.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Manifo ");
+    NOVA_2_MANIFOLD_SURFACE_84.create(sdSysData);
+
+    NOVA_2_CATALYST_3C.PROPS = tmp_defalt_props;
+    NOVA_2_CATALYST_3C.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Cataly ");
+    NOVA_2_CATALYST_3C.create(sdSysData);
+
+    NOVA_2_BARO_33.PROPS = tmp_defalt_props;
+    NOVA_2_BARO_33.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Baro ");
+    NOVA_2_BARO_33.create(sdSysData);
+
+    // AUTOMOBILE_ELECTRICAL
+
+    NOVA_2_CONTROL_UNIT_42.PROPS = tmp_defalt_props;
+    NOVA_2_CONTROL_UNIT_42.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Voltag ");
+    NOVA_2_CONTROL_UNIT_42.create(sdSysData);
+
+    // AUTOMOBILE_TRANSMISSION_GEAR
+
+
+
+
+
+
+
+
   }
 }
 
