@@ -1,3 +1,6 @@
+2.230_250110
+  - Continued building a Nova screen 2 to display all automotive raw values.
+
 2.229_250109
   - Started building a Nova screen 2 to display all automotive raw values.
 

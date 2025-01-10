@@ -765,13 +765,159 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
   NOVA_2_CONTROL_UNIT_42.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v()));
   NOVA_2_CONTROL_UNIT_42.draw(draw_list_nova, sdSysData);
 
+  // ---
 
+  ImGui::Text("AUTOMOBILE_TRANSMISSION_GEAR");
 
+  NOVA_2_GEAR.update_value(sdSysData, (sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_short_desc() + to_string(sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_reported())));
+  NOVA_2_GEAR.draw(draw_list_nova, sdSysData);
 
+  // ---
 
+  ImGui::Text("AUTOMOBILE_ACCELERATOR / AUTOMOBILE_BRAKE");
 
+  NOVA_2_ACCELERATOR.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.ACCELERATOR.val_value()));
+  NOVA_2_ACCELERATOR.draw(draw_list_nova, sdSysData);
 
+  ImGui::SameLine();
 
+  NOVA_2_BRAKE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.BRAKE.val_value()));
+  NOVA_2_BRAKE.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  ImGui::Text("AUTOMOBILE_SYSTEM");
+
+  NOVA_2_MIL.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light()));
+  NOVA_2_MIL.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  ImGui::Text("AUTOMOBILE_DOORS");
+
+  NOVA_2_DOOR_LF.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.lf_door_open()));
+  NOVA_2_DOOR_LF.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_DOOR_RF.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.rf_door_open()));
+  NOVA_2_DOOR_RF.draw(draw_list_nova, sdSysData);
+  
+  ImGui::SameLine();
+
+  NOVA_2_DOOR_HOOD.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.hood_door_open()));
+  NOVA_2_DOOR_HOOD.draw(draw_list_nova, sdSysData);
+
+  // NL
+
+  NOVA_2_DOOR_LB.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.lb_door_open()));
+  NOVA_2_DOOR_LB.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_DOOR_RB.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.rb_door_open()));
+  NOVA_2_DOOR_RB.draw(draw_list_nova, sdSysData);
+
+  ImGui::SameLine();
+
+  NOVA_2_DOOR_HATCHBACK.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.hatchback_door_open()));
+  NOVA_2_DOOR_HATCHBACK.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  ImGui::Text("AUTOMOBILE_GUAGES");
+
+  NOVA_2_GUAGE_COOLANT.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.GUAGES.coolant());
+  NOVA_2_GUAGE_COOLANT.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  ImGui::Text("AUTOMOBILE_FUEL");
+
+  NOVA_2_FUEL_CONSUMED.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.consumed());
+  NOVA_2_FUEL_CONSUMED.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_FUEL_PERCENTAGE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.percentage());
+  NOVA_2_FUEL_PERCENTAGE.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_FUEL_LEVEL_RAW.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.level_raw());
+  NOVA_2_FUEL_LEVEL_RAW.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  ImGui::Text("AUTOMOBILE_INDICATORS");
+
+  NOVA_2_INDICATOR_LIGHTS_POS.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_pos()));
+  NOVA_2_INDICATOR_LIGHTS_POS.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_LIGHT_SWITCH.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.INDICATORS.lights_switch());
+  NOVA_2_INDICATOR_LIGHT_SWITCH.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_LIGHTS_HIGH_BEAM.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_high_beam_on()));
+  NOVA_2_INDICATOR_LIGHTS_HIGH_BEAM.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_LIGHTS_ON.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on()));
+  NOVA_2_INDICATOR_LIGHTS_ON.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_LIGHTS_PARKING_ON.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_parking_on()));
+  NOVA_2_INDICATOR_LIGHTS_PARKING_ON.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_SIGNAL_LEFT.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left()));
+  NOVA_2_INDICATOR_SIGNAL_LEFT.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_SIGNAL_RIGHT.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right()));
+  NOVA_2_INDICATOR_SIGNAL_RIGHT.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_HAZARDS.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards()));
+  NOVA_2_INDICATOR_HAZARDS.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_IGNITION_SWITCH.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition_switch()));
+  NOVA_2_INDICATOR_IGNITION_SWITCH.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_PARKING_BRAKE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.INDICATORS.parking_brake());
+  NOVA_2_INDICATOR_PARKING_BRAKE.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_IGNITION.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.INDICATORS.ignition());
+  NOVA_2_INDICATOR_IGNITION.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_CRUISE_CONTROL.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control()));
+  NOVA_2_INDICATOR_CRUISE_CONTROL.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_INDICATOR_CRUISE_CONTROL_SPEED.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control_speed()));
+  NOVA_2_INDICATOR_CRUISE_CONTROL_SPEED.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  ImGui::Text("AUTOMOBILE_POWER");
+
+  NOVA_2_POWER.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.POWER.load());
+  NOVA_2_POWER.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  ImGui::Text("AUTOMOBILE_RPM");
+
+  NOVA_2_RPM.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.RPM.rpm());
+  NOVA_2_RPM.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_RPM_2.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.RPM.rpm_2());
+  NOVA_2_RPM_2.draw(draw_list_nova, sdSysData);
+
+  // ---
+
+  ImGui::Text("AUTOMOBILE_RPM");
+
+  NOVA_2_STEERING_WHEEL_ANGLE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.steering_wheel_angle());
+  NOVA_2_STEERING_WHEEL_ANGLE.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_STEERING_DIRECTION.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.turning_direction());
+  NOVA_2_STEERING_DIRECTION.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_STEERING_CLOCKWISE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.STEERING.clockwise()));
+  NOVA_2_STEERING_CLOCKWISE.draw(draw_list_nova, sdSysData);
+
+  NOVA_2_STEERING_LEFT_OF_CENTER.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.left_of_center());
+  NOVA_2_STEERING_LEFT_OF_CENTER.draw(draw_list_nova, sdSysData);
 
 }
 
@@ -1683,12 +1829,161 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
 
     // AUTOMOBILE_TRANSMISSION_GEAR
 
+    NOVA_2_GEAR.PROPS = tmp_defalt_props;
+    NOVA_2_GEAR.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Gear ");
+    NOVA_2_GEAR.create(sdSysData);
 
+    // AUTOMOBILE_ACCELERATOR
 
+    NOVA_2_ACCELERATOR.PROPS = tmp_defalt_props;
+    NOVA_2_ACCELERATOR.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Accel ");
+    NOVA_2_ACCELERATOR.create(sdSysData);
 
+    // AUTOMOBILE_BRAKE
 
+    NOVA_2_BRAKE.PROPS = tmp_defalt_props;
+    NOVA_2_BRAKE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Brake ");
+    NOVA_2_BRAKE.create(sdSysData);
 
+    // AUTOMOBILE_SYSTEM
 
+    NOVA_2_MIL.PROPS = tmp_defalt_props;
+    NOVA_2_MIL.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "MIL ");
+    NOVA_2_MIL.create(sdSysData);
+
+    // AUTOMOBILE_DOORS
+
+    NOVA_2_DOOR_LF.PROPS = tmp_defalt_props;
+    NOVA_2_DOOR_LF.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "LF ");
+    NOVA_2_DOOR_LF.create(sdSysData);
+
+    NOVA_2_DOOR_RF.PROPS = tmp_defalt_props;
+    NOVA_2_DOOR_RF.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "RF ");
+    NOVA_2_DOOR_RF.create(sdSysData);
+
+    NOVA_2_DOOR_LB.PROPS = tmp_defalt_props;
+    NOVA_2_DOOR_LB.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "LB ");
+    NOVA_2_DOOR_LB.create(sdSysData);
+
+    NOVA_2_DOOR_RB.PROPS = tmp_defalt_props;
+    NOVA_2_DOOR_RB.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "RB ");
+    NOVA_2_DOOR_RB.create(sdSysData);
+
+    NOVA_2_DOOR_HATCHBACK.PROPS = tmp_defalt_props;
+    NOVA_2_DOOR_HATCHBACK.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "HATCH ");
+    NOVA_2_DOOR_HATCHBACK.create(sdSysData);
+
+    NOVA_2_DOOR_HOOD.PROPS = tmp_defalt_props;
+    NOVA_2_DOOR_HOOD.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "HOOD ");
+    NOVA_2_DOOR_HOOD.create(sdSysData);
+
+    // AUTOMOBILE_GUAGES
+
+    NOVA_2_GUAGE_COOLANT.PROPS = tmp_defalt_props;
+    NOVA_2_GUAGE_COOLANT.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "COOLAN ");
+    NOVA_2_GUAGE_COOLANT.create(sdSysData);
+
+    // AUTOMOBILE_FUEL
+
+    NOVA_2_FUEL_CONSUMED.PROPS = tmp_defalt_props;
+    NOVA_2_FUEL_CONSUMED.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "CONSUM ");
+    NOVA_2_FUEL_CONSUMED.create(sdSysData);
+
+    NOVA_2_FUEL_PERCENTAGE.PROPS = tmp_defalt_props;
+    NOVA_2_FUEL_PERCENTAGE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "PERCEN ");
+    NOVA_2_FUEL_PERCENTAGE.create(sdSysData);
+
+    NOVA_2_FUEL_LEVEL_RAW.PROPS = tmp_defalt_props;
+    NOVA_2_FUEL_LEVEL_RAW.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "LEVEL ");
+    NOVA_2_FUEL_LEVEL_RAW.create(sdSysData);
+
+    // AUTOMOBILE_INDICATORS
+
+    NOVA_2_INDICATOR_LIGHTS_POS.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_LIGHTS_POS.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "L POS ");
+    NOVA_2_INDICATOR_LIGHTS_POS.create(sdSysData);
+
+    NOVA_2_INDICATOR_LIGHT_SWITCH.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_LIGHT_SWITCH.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "L SWIT ");
+    NOVA_2_INDICATOR_LIGHT_SWITCH.create(sdSysData);
+
+    NOVA_2_INDICATOR_LIGHTS_HIGH_BEAM.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_LIGHTS_HIGH_BEAM.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "HIGH ");
+    NOVA_2_INDICATOR_LIGHTS_HIGH_BEAM.create(sdSysData);
+
+    NOVA_2_INDICATOR_LIGHTS_ON.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_LIGHTS_ON.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "L ON ");
+    NOVA_2_INDICATOR_LIGHTS_ON.create(sdSysData);
+
+    NOVA_2_INDICATOR_LIGHTS_PARKING_ON.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_LIGHTS_PARKING_ON.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "L PARK ");
+    NOVA_2_INDICATOR_LIGHTS_PARKING_ON.create(sdSysData);
+
+    NOVA_2_INDICATOR_SIGNAL_LEFT.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_SIGNAL_LEFT.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "SIG L ");
+    NOVA_2_INDICATOR_SIGNAL_LEFT.create(sdSysData);
+
+    NOVA_2_INDICATOR_SIGNAL_RIGHT.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_SIGNAL_RIGHT.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "SIG R ");
+    NOVA_2_INDICATOR_SIGNAL_RIGHT.create(sdSysData);
+
+    NOVA_2_INDICATOR_HAZARDS.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_HAZARDS.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "HAZARD ");
+    NOVA_2_INDICATOR_HAZARDS.create(sdSysData);
+
+    NOVA_2_INDICATOR_IGNITION_SWITCH.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_IGNITION_SWITCH.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "IGNITI ");
+    NOVA_2_INDICATOR_IGNITION_SWITCH.create(sdSysData);
+
+    NOVA_2_INDICATOR_PARKING_BRAKE.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_PARKING_BRAKE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "P BRAKE ");
+    NOVA_2_INDICATOR_PARKING_BRAKE.create(sdSysData);
+
+    NOVA_2_INDICATOR_IGNITION.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_IGNITION.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "IGNIT ");
+    NOVA_2_INDICATOR_IGNITION.create(sdSysData);
+
+    NOVA_2_INDICATOR_CRUISE_CONTROL.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_CRUISE_CONTROL.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "CC ON ");
+    NOVA_2_INDICATOR_CRUISE_CONTROL.create(sdSysData);
+
+    NOVA_2_INDICATOR_CRUISE_CONTROL_SPEED.PROPS = tmp_defalt_props;
+    NOVA_2_INDICATOR_CRUISE_CONTROL_SPEED.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "CC SPD ");
+    NOVA_2_INDICATOR_CRUISE_CONTROL_SPEED.create(sdSysData);
+
+    // AUTOMOBILE_POWER
+
+    NOVA_2_POWER.PROPS = tmp_defalt_props;
+    NOVA_2_POWER.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "LOAD ");
+    NOVA_2_POWER.create(sdSysData);
+
+    // AUTOMOBILE_POWER
+
+    NOVA_2_RPM.PROPS = tmp_defalt_props;
+    NOVA_2_RPM.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "RPM ");
+    NOVA_2_RPM.create(sdSysData);
+
+    NOVA_2_RPM_2.PROPS = tmp_defalt_props;
+    NOVA_2_RPM_2.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "RPM 2 ");
+    NOVA_2_RPM_2.create(sdSysData);
+
+    // AUTOMOBILE_RPM
+
+    NOVA_2_STEERING_WHEEL_ANGLE.PROPS = tmp_defalt_props;
+    NOVA_2_STEERING_WHEEL_ANGLE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "ANGLE ");
+    NOVA_2_STEERING_WHEEL_ANGLE.create(sdSysData);
+
+    NOVA_2_STEERING_DIRECTION.PROPS = tmp_defalt_props;
+    NOVA_2_STEERING_DIRECTION.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "DIR ");
+    NOVA_2_STEERING_DIRECTION.create(sdSysData);
+
+    NOVA_2_STEERING_CLOCKWISE.PROPS = tmp_defalt_props;
+    NOVA_2_STEERING_CLOCKWISE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "CLOCKW ");
+    NOVA_2_STEERING_CLOCKWISE.create(sdSysData);
+
+    NOVA_2_STEERING_LEFT_OF_CENTER.PROPS = tmp_defalt_props;
+    NOVA_2_STEERING_LEFT_OF_CENTER.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "LEFTOC ");
+    NOVA_2_STEERING_LEFT_OF_CENTER.create(sdSysData);
 
   }
 }
