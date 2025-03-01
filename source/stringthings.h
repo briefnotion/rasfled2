@@ -18,7 +18,7 @@
 #include <algorithm>
 
 // Optional Includes
-#include <ncurses.h>
+//#include <ncurses.h>
 
 // Rasfled Includes
 #include "helper.h"

@@ -110,7 +110,7 @@ class timed_event
 {
   public:
   std::deque<timed_event_data> teDATA;
-  int      intLEDCOUNT;
+  int      intLEDCOUNT = 100;
 
   void create(int intLedCount);
 

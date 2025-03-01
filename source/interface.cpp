@@ -679,7 +679,7 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS, " airstop", "Airband Stop"))
       { 
         // Call command.
-        sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_airstop.sh");
+        sdSysData.COMMAND_THREADS.run_command("/home/delmane/rtlsdr/ras_airstop.sh");
 
         // Start Power Down Animation
         process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
@@ -689,7 +689,7 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS, " lafm", "Airband Lafayette Multi"))
       {
         // Call command.
-        sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_lafm.sh");
+        sdSysData.COMMAND_THREADS.run_command("/home/delmane/rtlsdr/ras_lafm.sh");
 
         // Start Power Down Animation
         process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
@@ -699,7 +699,7 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS, " lafs", "Airband Lafayette Scan"))
       {
         // Call command.
-        sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_lafs.sh");
+        sdSysData.COMMAND_THREADS.run_command("/home/delmane/rtlsdr/ras_lafs.sh");
 
         // Start Power Down Animation
         process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
@@ -709,7 +709,7 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS, " cbs", "CB Channel Scan"))
       {
         // Call command.
-        sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_cbs.sh");
+        sdSysData.COMMAND_THREADS.run_command("/home/delmane/rtlsdr/ras_cbs.sh");
 
         // Start Power Down Animation
         process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
@@ -719,7 +719,7 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS, " rnoaa", "NOAA Channel Scan"))
       {
         // Call command.
-        sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_noaa.sh");
+        sdSysData.COMMAND_THREADS.run_command("/home/delmane/rtlsdr/ras_noaa.sh");
 
         // Start Power Down Animation
         process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
@@ -729,7 +729,7 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS, " remergenc", "Emergency Channel Scan"))
       {
         // Call command.
-        sdSysData.COMMAND_THREADS.run_command("/home/pi/rtlsdr/ras_emergency.sh");
+        sdSysData.COMMAND_THREADS.run_command("/home/delmane/rtlsdr/ras_emergency.sh");
 
         // Start Power Down Animation
         process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
@@ -757,7 +757,7 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS, " startadsb", "ABS-B On"))
       { 
         // Call command.
-        sdSysData.COMMAND_THREADS.run_command("/home/pi/flightaware/fastart.sh");
+        sdSysData.COMMAND_THREADS.run_command("/home/delmane/flightaware/fastart.sh");
 
         // Start Power Down Animation
         process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(15, 15, 0));
@@ -767,7 +767,7 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS, " stopadsb", "ABS-B Off"))
       {
         // Call command.
-        sdSysData.COMMAND_THREADS.run_command("/home/pi/flightaware/fastop.sh");
+        sdSysData.COMMAND_THREADS.run_command("/home/delmane/flightaware/fastop.sh");
 
         // Start Power Down Animation
         process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(15, 15, 0));
@@ -778,7 +778,7 @@ void processcommandlineinput(system_data &sdSysData,
       {
         // Call command.
         //cons.printw("cp -r /run/dump1090-fa/ ~/flightaware/snapshot." + to_string(tmeCurrentTime));
-        sdSysData.COMMAND_THREADS.run_command("cp -r /run/dump1090-fa/ /home/pi/flightaware/snapshot." + sdSysData.AIRCRAFT_COORD.DATA.NOW.get_str_value());
+        sdSysData.COMMAND_THREADS.run_command("cp -r /run/dump1090-fa/ /home/delmane/flightaware/snapshot." + sdSysData.AIRCRAFT_COORD.DATA.NOW.get_str_value());
 
         // Start Power Down Animation
         process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(0, 30, 0));

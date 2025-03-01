@@ -575,11 +575,12 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
     // Check for keybaord input
     {
-      char character_pressed = 0;
+      int character_pressed = 0;
       bool shift_pressed = false;
       bool backspace_pressed = false;
       bool enter_pressed = false;
 
+      /*
       for (int i = 0; i < IM_ARRAYSIZE(io.KeysDown); i++)
       {
         if (io.KeysDown[i])
@@ -607,6 +608,52 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           }
         }
       }
+      */
+
+      for (int i = ImGuiKey_NamedKey_BEGIN; i < ImGuiKey_NamedKey_END; i++) 
+      {
+        if (ImGui::IsKeyDown((ImGuiKey)i)) {
+          // Check for backspace
+          if ((i == ImGuiKey_Backspace) && !COMMAND_TEXT.empty()) 
+          {
+              character_pressed = i;
+              backspace_pressed = true;
+          }
+          // Check for enter key
+          if (i == ImGuiKey_Enter || i == ImGuiKey_KeypadEnter) 
+          {
+              character_pressed = i;
+              enter_pressed = true;
+          }
+          // Check for shift key
+          if (i == ImGuiKey_LeftShift || i == ImGuiKey_RightShift || i == ImGuiKey_ModShift) 
+          {
+              shift_pressed = true;
+          }
+          // Check for printable characters
+          if (i >= ImGuiKey_0 && i <= ImGuiKey_9)
+          {
+            //ImGuiKey_0 = 536 
+            //ImGuiKey_1 = 537;
+            //ImGuiKey_9 = 545
+            character_pressed = i - 488;
+          }
+          // Check for printable characters
+          if (i >= ImGuiKey_A && i <= ImGuiKey_Z)
+          {
+            //ImGuiKey_A = 546
+            //ImGuiKey_Y   
+            //ImGuiKey_Z = 571
+            character_pressed = i - 481;
+          }
+          // Check for printable characters
+          if (i == ImGuiKey_Space)
+          {
+            character_pressed = 32;
+          }
+        }
+      }
+
 
       if (character_pressed > 0 && character_pressed != PREV_FRAME_KEY_DOWN)
       {

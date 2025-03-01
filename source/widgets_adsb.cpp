@@ -1144,7 +1144,7 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
         for (int quads = 1; quads < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quads++)
         {
           ImGui::Text("CAL PT %d | %d | %.0f, %.0f: %.3f", quads,
-                                                      sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT_LIST.size(), 
+                                                      (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT_LIST.size(), 
                                                       sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.X, 
                                                       sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.Y, 
                                                       sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].VARIANCE);

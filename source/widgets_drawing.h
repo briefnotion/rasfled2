@@ -22,9 +22,12 @@
 //#include "../../imgui/misc/cpp/imgui_stdlib.h"
 #include "../../imgui/backends/imgui_impl_opengl2.h"
 #include "../../imgui/backends/imgui_impl_glfw.h"
+
 #include <GLFW/glfw3.h>
 
-#include "imgui_internal.h"
+//#include "imgui_internal.h"
+#include "../../imgui/imgui_internal.h"
+
 
 // STB Includes
 #include "../../stb/stb_image.h"

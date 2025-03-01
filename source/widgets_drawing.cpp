@@ -268,7 +268,8 @@ ImVec2 TEXTURE_IMAGE::get_should_be_window_size()
 
 void TEXTURE_IMAGE::draw()
 {
-  ImGui::Image((void*)(intptr_t)IMAGE_TEXTURE, IMAGE_SIZE);
+  //ImGui::Image((void*)(intptr_t)IMAGE_TEXTURE, IMAGE_SIZE);
+  ImGui::Image((ImTextureID)(intptr_t)IMAGE_TEXTURE, IMAGE_SIZE);
 }
 
 // ---------------------------------------------------------------------------------------

@@ -1,3 +1,7 @@
+2.231_250301
+  - Created build instructions "build.md"
+  - Made some changes to adjust to changes in backends and dependencies.
+
 2.230_250110
   - Continued building a Nova screen 2 to display all automotive raw values.
 

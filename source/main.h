@@ -93,12 +93,12 @@
 #include <getopt.h>
 
 //#include "clk.h"
-#include "../../rpi_ws281x-master/gpio.h"
-#include "../../rpi_ws281x-master/dma.h"
-#include "../../rpi_ws281x-master/pwm.h"
+#include "../../rpi_ws281x/gpio.h"
+#include "../../rpi_ws281x/dma.h"
+#include "../../rpi_ws281x/pwm.h"
 //#include "version.h"
 
-#include "../../rpi_ws281x-master/ws2811.h"
+#include "../../rpi_ws281x/ws2811.h"
 
 // RASFled related header files
 #include "definitions.h"
