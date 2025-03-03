@@ -73,6 +73,22 @@ sudo cp the_etc_slash_RasFLED_directory/* /etc/rasfled/
 sudo cp the_etc_slash_RasFLED_directory/* /etc/rasfled-t/
 
 
+PI Configuration:
+  Interface:
+    I2C -> ON
+
+Ensure I2c:
+  i2cdetect -y 1
+    or
+  i2cdetect -y 2
+
+  For the HMC5883l chip, with channel 1e, output should look like:
+        0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+    00:                         -- -- -- -- -- -- -- --
+    10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- 1e --
+    20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
+
+
 Change to build dir and compile
 ./cmake.sh
 ./m

@@ -1,3 +1,7 @@
+2.232_250302
+  - Corrected a problem that would cause an invalid "compass_offset_history.json" 
+      file to prevent the compass from working without reseting the calibration.
+
 2.231_250301
   - Created build instructions "build.md"
   - Made some changes to adjust to changes in backends and dependencies.

@@ -603,6 +603,14 @@ bool CAL_LEVEL_2::offset_history_read()
                 CALIBRATION_QUADS[group].add_point_to_offset_point_list(point);
               }
             }
+            else
+            {
+              ret_success = false;
+            }
+          }
+          else
+          {
+            ret_success = false;
           }
         }
       }
@@ -1099,22 +1107,35 @@ bool HMC5883L::create(string Offset_History_Filename)
   {
     if (ioctl(DEVICE, I2C_SLAVE, PROPS.I2C_ID) >= 0)
     {
+      FALSE_CATCH write_success;
+
       //register_write(0x00, 0x20); // Register A
       //                            // Sample of 1  (default)
       //                            // Output rate of 15 Hz  (default)
       //                            // Normal Measurtement configuration  (default)
 
-      register_write(0x01, 0x20);   // Register B  (00100000)
+      write_success.catch_false(register_write(0x01, 0x20));   // Register B  (00100000)
                                     // 1090 Gauss  (default)
 
-      register_write(0x02, 0x00);   // Mode Register
+      write_success.catch_false(register_write(0x02, 0x00));   // Mode Register
                                     // Continuous Measurement Mode
+
+      if (write_success.has_false())
+      {
+        // Errored
+        //exit(0);
+      }
       
       ret_success = true;
       CONNECTED = true;
 
       calibration_preload_set();
     }
+  }
+  else
+  {
+    // Program error correct if needed
+    //exit(0);
   }
 
   return ret_success;

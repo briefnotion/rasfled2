@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.231_250301"
+#define Revision "2.232_250302"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -83,6 +83,8 @@
 
 // Compass
 #define DEF_COMPASS_DEV_NAME              "/dev/i2c-1"                                    // System File
+//#define DEF_COMPASS_DEV_NAME              "/dev/i2c-2"                                    // System File
+
 #define DEF_COMPASS_OFFSET_HISTORY        "compass_offset_history.json"
 
 // COMMS Settings CAN Bus
