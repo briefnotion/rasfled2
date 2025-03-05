@@ -92,8 +92,8 @@ void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, f
   {
     running_temperature_color_rank = rank;
     
-    sdSysData.COLOR_SELECT.set_neo_duration(20000.0f);
-    VELOCITY_COLOR.PROPS.DURATION = 20000.0f;
+    sdSysData.COLOR_SELECT.set_neo_duration(10000.0f);
+    VELOCITY_COLOR.PROPS.DURATION = 10000.0f;
 
     switch (running_temperature_color_rank)
     {
@@ -309,7 +309,16 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     {
       sdSysData.COLOR_SELECT.set_neo_duration(2000.0f);
       VELOCITY_COLOR.PROPS.DURATION = 2000.0f;
-      VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pure_color(sdSysData.RUNNING_COLOR).SIMPLE_RGB);
+
+      if (sdSysData.RUNNING_COLOR == RAS_RED || sdSysData.RUNNING_COLOR == RAS_BLUE)
+      {
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pure_color(RAS_BLACK).SIMPLE_RGB);
+      }
+      else
+      {
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pure_color(sdSysData.RUNNING_COLOR).SIMPLE_RGB);
+      }
+
     }
 
     // MIL alert

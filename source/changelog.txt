@@ -1,3 +1,8 @@
+2.233_250305
+  - Setting the Running Color to Blue or Red should cause the Velocity Color to 
+      not apear.
+  - Temperture color will change in 10 seconds instead of 20.
+
 2.232_250302
   - Corrected a problem that would cause an invalid "compass_offset_history.json" 
       file to prevent the compass from working without reseting the calibration.
