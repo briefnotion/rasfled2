@@ -641,11 +641,12 @@ int loop_2(bool TTY_Only)
   setup_handlers();
   if ((ret = ws2811_init(&ledstring)) != WS2811_SUCCESS)
   {
-    fprintf(stderr, "ws2811_init failed: %s\n", ws2811_get_return_t_str(ret));
-    //return ret;
-    //cons_2.SCREEN_COMMS.printw("ws2811_init failed: " + ws2811_get_return_t_str(ret))
-    return_code = (int)ret;
+      std::cerr << "ws2811_init failed: " << ws2811_get_return_t_str(ret) << std::endl;
+      //return ret;
+      //cons_2.SCREEN_COMMS.printw("ws2811_init failed: " + ws2811_get_return_t_str(ret))
+      return_code = (int)ret;
   }
+  
   else
   {
     sdSystem.SCREEN_COMMS.printw("  LED count: " + to_string(led_count));
@@ -1302,12 +1303,12 @@ int loop_2(bool TTY_Only)
   if(sdSystem.booREBOOT == false)
   {
     // Just print we have ended the program.
-    printf ("\nRasFLED Loop ... Exit\n");
+    cout << endl << "RasFLED Loop ... Exit" << endl;
   }
   else
   {
     // Just print are restarting the program.
-    printf ("\nRasFLED Loop ... Rebooting\n");
+    cout << endl << "RasFLED Loop ... Rebooting" << endl;
     return_code = 9999;
   }
 
@@ -1327,24 +1328,25 @@ int main(int argc, char *argv[])
   // Parse command-line arguments to configure the program's behavior
   for (int pos = 1; pos < argc; pos++)
   {
-      // Check for help or usage options
-      if (strcmp(argv[pos], "-h") == 0 || strcmp(argv[pos], "--help") == 0)
-      {
-          ret = 2;
-          printf("\n-tty  :Load in Terminal\n");
-          printf("        Warning - Command line input not yet implemented.\n");
-          printf("                  There is no way of safely exiting the program.\n");
-          printf("-gfx  :Load Graphics Window (default)\n\n");
-      }
-      // Check for terminal or graphics window loading options
-      else if (strcmp(argv[pos], "-tty") == 0)
-      {
-          load_gfx_window = false;
-      }
-      else if (strcmp(argv[pos], "-gfx") == 0)
-      {
-          load_gfx_window = true;
-      }
+    // Check for help or usage options
+    if (strcmp(argv[pos], "-gfx") == 0)
+    {
+      load_gfx_window = true;
+    }
+    // Check for terminal or graphics window loading options
+    else if (strcmp(argv[pos], "-tty") == 0)
+    {
+      load_gfx_window = false;
+    }
+    else //if (strcmp(argv[pos], "-h") == 0 || strcmp(argv[pos], "--help") == 0)
+    {
+      ret = 2;
+      cout << "\n-tty    :Load in Terminal" << endl;
+      cout << "             Warning - Command line input not yet implemented." << endl;
+      cout << "                 There is no way of safely exiting the program." << endl;
+      cout << "-gfx      :Load Graphics Window (default)\n" << endl << endl;
+      cout << "-h --help :Load Graphics Window (default)\n" << endl << endl;
+    }
   }
 
   // Perform initial setup for the program
@@ -1353,59 +1355,61 @@ int main(int argc, char *argv[])
   // Main loop that runs until a termination condition is met
   while (ret == 1)
   {
-    printf("RasFLED Start ... \n");
+    cout << "RasFLED Start ... " << endl;
+    cout << "  (The program needs to be started with SUDO otherwise a segmentation" << endl;
+    cout << "   fault will occur.  Admin access is needed for the IRQ access)" << endl;
 
     try
     {
       // Run the main application logic with graphics window loading enabled or disabled
       if (load_gfx_window == true)
       {
-          ret = loop_2(false);
-          printf("Load Graphics Window\n");
+        ret = loop_2(false);
+        cout << "Load Graphics Window" << endl;
       }
       else
       {
-          ret = loop_2(true);  // To be phased out?
-          printf("Do Not Load Graphics Window\n");
+        ret = loop_2(true);  // To be phased out?
+        cout << "Do Not Load Graphics Window" << endl;
       }
     } 
     catch (std::exception const& e)
     {
       // Handle unexpected exceptions during the main loop
-      printf("An Error has occured in the main loop.\n");
-      printf("Error Code: %d\n", ret);
+      cout << "An Error has occured in the main loop." << endl;
+      cout << "Error Code: " << ret << endl;
       ret = 0;
     }
 
-  // Check for a reboot condition and restart the main loop if necessary
-  if (ret == 9999)
-  {
+    // Check for a reboot condition and restart the main loop if necessary
+    if (ret == 9999)
+    {
       ret = 1;
-  }
+    }
   }
 
   // Print exit code information based on the program's termination reason
-  printf("Exit Code: %d: ", ret);
+  cout << "Exit Code: " << ret << " : " << endl;
 
   if (ret == 0)
   {
-    printf("Standard Exit\n");
+    cout << "Standard Exit" << endl;
   }
   else if (ret == 1)
   {
-    printf("Exit For Reboot\n");
+    cout << "Exit For Reboot" << endl;
   }
   else if (ret == 2)
   {
-    printf("Controlled Exit\n");
+    cout << "Controlled Exit" << endl;
   }
   else
   {
-    printf("Non Standard Exit\n");
+    cout << "Non Standard Exit" << endl;
   }
 
   // Clean up and exit the program
-  printf("RasFLED ... Exit\n");
+  cout << "RasFLED ... Exit" << endl;
   return ret;
 }
 

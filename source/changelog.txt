@@ -1,3 +1,6 @@
+2.234_250306
+  - Made a few changes to the program start in main.cpp
+
 2.233_250305
   - Setting the Running Color to Blue or Red should cause the Velocity Color to 
       not apear.
