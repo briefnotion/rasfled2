@@ -2,7 +2,7 @@
 
 This is a smiple list of instructions that guide me on installing Rasfled on a new RPI system.
 
-Not all, but most, items used to create rasfled is available through Amazon and is on the rasfled list: https://www.amazon.com/hz/wishlist/ls/12PBNFZNUHIIO/ref=nav_wishlist_lists_2
+Not all, but most, items used to create rasfled is available through Amazon and is on the rasfled list: https://www.amazon.com/hz/wishlist/ls/12PBNFZNUHIIO?ref_=wl_share
 
 ## Install Build Essentials and Manuals
 Necessay for compiler and building tools
