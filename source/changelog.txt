@@ -1,3 +1,22 @@
+2.235_250328
+ - Added start_at_boot in the source folder with a few files that may help 
+    starting rasfled in a headless mode.
+    Includes: 
+      myscript.services - service file that needs to be copied to service directory 
+                            as /etc/systemd/system/myscript.service
+      home directory needs to contain startup folder
+      progs.sh and start.sh needs to copied to the startup folder.
+        progs.sh has 3 line of specifically for the raspberry pi 5
+          insmod, dtoverlay and pinctrl can be commented out for rpi 3.
+      startup folder needs a rasfled folder created in it to contain the 
+        rasfled executable.
+  - Set the TTL_Top_Percentage and TTL_Low_Percentage to be the same on 
+      all 4 tires.  TTL for the tires  isnt really working out well and may 
+      be removed because even tires of the same make and models seem to be 
+      slightly different, depending on when and where they were made.
+  - Modified the build.md file.
+  - Modified the Arduino RasCAN.ino file to run properly with longan-labs.cc CANBED v1.2e.
+
 2.234_250306
   - Made a few changes to the program start in main.cpp
 

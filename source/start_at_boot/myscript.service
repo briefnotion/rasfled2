@@ -1,0 +1,22 @@
+[Unit]
+Description=Run My Script
+After=graphical.target
+
+[Service]
+ExecStartPre=/bin/sleep 10
+ExecStart=/home/delmane/startup/start.sh
+Type=oneshot
+RemainAfterExit=no
+User=delmane
+Environment=DISPLAY=:0
+Environment=XAUTHORITY=/home/delmane/.Xauthority
+StandardOutput=file:/home/delmane/systemd_log.txt
+StandardError=file:/home/delmane/systemd_error_log.txt
+
+[Install]
+WantedBy=graphical.target
+
+[Unit]
+DefaultDependencies=no
+After=graphical.target
+Description=Run My Script

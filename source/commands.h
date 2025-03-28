@@ -22,6 +22,7 @@
 //#include <deque>
 
 // Rasfled includes
+#include "definitions.h"
 #include "fled_time.h"
 
 using namespace std;

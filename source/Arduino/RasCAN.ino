@@ -4,7 +4,7 @@
 
 // -----------------------------------------------------
 
-#define Revision "2.145_240321"
+#define Revision "2.146_250325"
 
 // -----------------------------------------------------
 // Definitions
@@ -12,6 +12,20 @@
 #define CANint 2
 //#define LED2 8
 //#define LED3 7
+
+#define SPI_CS_PIN                        17      //  * 
+// #define SPI_CS_PIN = 17;                       // CANBed V1
+// #define SPI_CS_PIN = 3;                        // CANBed M0
+// #define SPI_CS_PIN = 9;                        // CAN Bus Shield
+
+#define CAN_ID_PID                        0x7DF   //  * CAN_ID
+
+// LED Light
+#define LED01                             13      //  * 
+// #define LED01 = 23  Hobby Tronics: https://www.hobbytronics.co.uk/product/leonardo-can-bus
+// #define LED01 = 13  CANBED V1    : https://docs.longan-labs.cc/1030008/
+
+// -----------------------------------------------------
 
 // Message
 
@@ -107,8 +121,6 @@
 #define PID_ABS_DISABLE_SWITCH_STATE      0xA9  //  
 
 // ---
-
-#define CAN_ID_PID                        0x7DF //  *
 
 // Reducing Can Message Count
 // Normal opperation is 165msg/sec with max queue size of 15.
@@ -1269,7 +1281,7 @@ unsigned long ID = 0;
 unsigned long CAN_ID = 0;
 unsigned long MESSAGE_TIME = 0;
 
-MCP_CAN CAN0(17); // Set CS to pin 17
+MCP_CAN CAN0(SPI_CS_PIN); // Set CS to pin 17
 
 CONTROL ctrl;
 
@@ -1293,7 +1305,7 @@ void setup()
   
   // Prep Pins
   pinMode(23, OUTPUT);
-  digitalWrite(23, HIGH); // led
+  digitalWrite(LED01, HIGH); // led
 
   //pinMode(LED2, OUTPUT);
   //pinMode(LED3, OUTPUT);
@@ -1319,7 +1331,7 @@ void setup()
 
   Serial.println("CAN:Good to go!");
 
-  digitalWrite(23, LOW); // led
+  digitalWrite(LED01, LOW); // led
 }
 
 
@@ -1331,9 +1343,9 @@ void blink(bool Blink)
   // If system is paused then blink the lights
   if(Blink)
   {
-    digitalWrite(23, HIGH);  // LED OFF
+    digitalWrite(LED01, HIGH);  // LED OFF
     delay(100); 
-    digitalWrite(23, LOW); // LED ON
+    digitalWrite(LED01, LOW); // LED ON
     delay(900); 
   }
 }
@@ -1711,11 +1723,11 @@ void version_5()
       {
         if (filter(ID) == true)
         {
-          digitalWrite(23, HIGH); // LED ON
+          digitalWrite(LED01, HIGH); // LED ON
 
           messages_to_send.store(ID, len, buf, MESSAGE_TIME);
 
-          digitalWrite(23, LOW);  // LED OFF
+          digitalWrite(LED01, LOW);  // LED OFF
 
           if (messages_to_send.message_count() > messages_max_queue)
           {
@@ -1725,11 +1737,11 @@ void version_5()
       }
       else
       {
-        digitalWrite(23, HIGH); // LED ON
+        digitalWrite(LED01, HIGH); // LED ON
 
         messages_to_send.store(ID, len, buf, MESSAGE_TIME);
 
-        digitalWrite(23, LOW);  // LED OFF
+        digitalWrite(LED01, LOW);  // LED OFF
 
         if (messages_to_send.message_count() > messages_max_queue)
         {
@@ -1785,18 +1797,18 @@ void version_5()
     // send command to CAN
     if (ctrl.send_command == true)
     {
-      digitalWrite(23, HIGH); // LED ON
+      digitalWrite(LED01, HIGH); // LED ON
 
       ctrl.send_command = false;
       sendPid(ctrl.command);
       
-      digitalWrite(23, LOW);  // LED OFF
+      digitalWrite(LED01, LOW);  // LED OFF
     }
 
     // send command to CAN
     if (ctrl.send_service_command_2 == true)
     {
-      digitalWrite(23, HIGH); // LED ON
+      digitalWrite(LED01, HIGH); // LED ON
 
       ctrl.send_service_command_2 = false;
 
@@ -1815,19 +1827,19 @@ void version_5()
       ctrl.service_command_2_data_06 = 0x00;
       ctrl.service_command_2_data_07 = 0x00;
       
-      digitalWrite(23, LOW);  // LED OFF
+      digitalWrite(LED01, LOW);  // LED OFF
     }
 
     // send test resonse
     if (ctrl.send_test_response == true)
     {
-      digitalWrite(23, HIGH); // LED ON
+      digitalWrite(LED01, HIGH); // LED ON
 
       ctrl.send_test_response = false;
 
       Serial.println("07 e9 06 41 00 98 18 00 13 00 018e398b");
       
-      digitalWrite(23, LOW);  // LED OFF
+      digitalWrite(LED01, LOW);  // LED OFF
     }
 
     // Blink and Time

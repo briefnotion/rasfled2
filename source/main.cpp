@@ -973,38 +973,6 @@ int loop_2(bool TTY_Only)
             }
           }
         }
-        /*
-        else
-        {
-          // Build TEST array to display
-          int selected_test_array = cons.keywatch.get(KEYLEDDRCYCL) - 1;
-          int pos = 0;
-          int g = 0; 
-          int s = 0;
-
-          // Find Strip
-          for(int group=0; group < sdSystem.CONFIG.LED_MAIN.at(0).g_size(); group++)
-          {
-            for(int strip=0; strip < sdSystem.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
-            {
-              if (selected_test_array == pos)
-              {
-                g = group;
-                s = strip;
-                sdSystem.t_group = group;
-                sdSystem.t_strip = strip;
-              }
-              pos++;
-            }
-          }
-
-          // Draw found strip
-          MatrixPrepare(cons, sdSystem, 
-                            sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(g).vLED_STRIPS.at(s).crgbARRAY, 
-                            sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(g).vLED_STRIPS.at(s).led_count(), 
-                            matrix, mcount);
-        }
-        */
 
         //  Are the lights enable to display.       
         //    Lights off will not turn the lights off and clear their values.  
@@ -1026,7 +994,6 @@ int loop_2(bool TTY_Only)
         // Be careful with this because it looks like black magic to me.
         sdSystem.THREAD_RENDER.start_render_thread([&]() 
                       {  proc_render_thread();  });
-
         
         sdSystem.dblCOMMS_LED_RENDER_TIME.end_timer(sdSystem.PROGRAM_TIME.current_frame_time());
       }
@@ -1355,7 +1322,7 @@ int main(int argc, char *argv[])
   // Main loop that runs until a termination condition is met
   while (ret == 1)
   {
-    cout << "RasFLED Start ... " << endl;
+    cout << "RasFLED Start (Rev: " << Revision << ") ... " << endl;
     cout << "  (The program needs to be started with SUDO otherwise a segmentation" << endl;
     cout << "   fault will occur.  Admin access is needed for the IRQ access)" << endl;
 

@@ -125,7 +125,10 @@ void COMMAND_THREAD::execute()
         }
 
         PENDING_COMMANDS[0].COMMAND_STR.clear();
-        COMMAND_THREADS[0].run_command(command_string);
+        if (DEF_ENABLE_AUDIO)
+        {
+          COMMAND_THREADS[0].run_command(command_string);
+        }
       }
     }
   }

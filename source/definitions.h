@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.234_250306"
+#define Revision "2.235_250328"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -38,6 +38,9 @@
 #define TEST_DATA_CAN_BUS   false
 #define TEST_DATA_AIRCRAFT  false
 #define TEST_DATA_GPS       false
+
+// Enable disable calling "aplay" for audio.
+#define DEF_ENABLE_AUDIO    false
 
 // Files
 
@@ -98,7 +101,7 @@
 #define COMMS_XONXOFF                         false
 
 // COMMS Settings GPS
-#define COMMS_AUTOSTART_GPS                   true
+#define COMMS_AUTOSTART_GPS                   false
 #define COMMS_BAUD_GPS                        9600
 #define COMMS_BAUD_BAUD_RATE_CHANGE_TO_GPS    true
 #define COMMS_BAUD_TARGET_GPS                 115200
@@ -111,8 +114,8 @@
 #define CONTINUOUS_DATA_GPS                   true
 
 // COMMS Settings Compass
+#define COMMS_AUTOSTART_COMPASS               false
 #define COMMS_ID_COMPASS                      0x1E
-#define COMMS_AUTOSTART_COMPASS               true
 #define CONTINUOUS_DATA_COMPASS               true
 
 #define COMMS_COMPASS_POLLING_RATE_MS         15
@@ -140,11 +143,11 @@
 #define COMMS_COMPASS_CAL_OFFSET              0.0f - 160.0f
 
 // TTL Values - Individually adjust the TTL values of the auto.
-#define TTL_LF_Top_Percentage   100.15
-#define TTL_LF_Low_Percentage   99.6
+#define TTL_LF_Top_Percentage   99.37
+#define TTL_LF_Low_Percentage   98.92
 
-#define TTL_RF_Top_Percentage   100.15
-#define TTL_RF_Low_Percentage   99.6
+#define TTL_RF_Top_Percentage   99.37
+#define TTL_RF_Low_Percentage   98.92
 
 #define TTL_LB_Top_Percentage   99.37 // Same Tire, Different Specs?
 #define TTL_LB_Low_Percentage   98.92
