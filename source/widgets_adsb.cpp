@@ -2385,7 +2385,7 @@ void ADSB_SCREEN::display(system_data &sdSysData)
     }
   }
 
-  ImGui::BeginChild("ADSB Buttons", ImVec2(90, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+  ImGui::BeginChild("ADSB Buttons", ImVec2(90 * DEF_SCREEN_SIZE_X_MULTIPLIER, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
     if (BTC_ADSB.button_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", sdSysData.AIRCRAFT_COORD.is_active(), RAS_RED, RAS_GREY, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {

@@ -101,12 +101,12 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
     ImVec4 working_area = get_working_area();
     ImDrawList* draw_list_screen = ImGui::GetWindowDrawList();
 
-    int pixel_step = 4;
+    int pixel_step = 4 * DEF_SCREEN_SIZE_X_MULTIPLIER;
 
     int door_size = sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(0).vLED_STRIPS.at(0).led_count();
     int over_size = sdSysData.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(1).vLED_STRIPS.at(0).led_count();
 
-    ImVec2 start_pos = ImVec2(20, 20);
+    ImVec2 start_pos = ImVec2(20 * DEF_SCREEN_SIZE_X_MULTIPLIER, 20 * DEF_SCREEN_SIZE_Y_MULTIPLIER);
     start_pos = start_pos + ImVec2(working_area.x,  working_area.y);
 
     // ---
@@ -117,7 +117,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
     int top       = start_pos.y;
     int botom     = start_pos.y + (over_size * pixel_step * 2);
 
-    int right       = left + 20;
+    int right       = left + (20  * DEF_SCREEN_SIZE_X_MULTIPLIER);
     int right_right = right + (door_size * pixel_step);
 
     // LED Simulator
@@ -262,7 +262,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
     {
       ImGui::SetNextWindowPos(ImVec2(left_left, top + 20.0f));
       
-      ImGui::BeginChild("Communications", ImVec2((door_size * pixel_step) - 20.0f, (2.0f * (over_size * pixel_step) - 40.0f)), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      ImGui::BeginChild("Communications", ImVec2((door_size * pixel_step) - (20.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), (2.0f * (over_size * pixel_step) - (40.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER))), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
       // Comms
         {
@@ -330,7 +330,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
     {
       ImGui::SetNextWindowPos(ImVec2(right + 20.0f, top + 20.0f));
       
-      ImGui::BeginChild("Events", ImVec2((door_size * pixel_step) - 20.0f, (2.0f * (over_size * pixel_step) - 40.0f)), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+      ImGui::BeginChild("Events", ImVec2((door_size * pixel_step) - (20.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), (2.0f * (over_size * pixel_step) - (40.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER))), true, sdSysData.SCREEN_DEFAULTS.flags_c);
       {
         int event_count_total = 0;
 
@@ -373,7 +373,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
       // Debug area
       {
         ImGui::SameLine();
-        ImGui::BeginChild("Debug", ImVec2(ImGui::GetContentRegionAvail().x, (2.0f * (over_size * pixel_step) - 40.0f)), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+        ImGui::BeginChild("Debug", ImVec2(ImGui::GetContentRegionAvail().x, (2.0f * (over_size * pixel_step) - (40.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER))), true, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
           // Rasfled Stats
           ImGui::Text("         PRC RND");

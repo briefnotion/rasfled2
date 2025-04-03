@@ -1,5 +1,14 @@
+2.236_250401
+  - Started working on a simple compile time solution that allowed the screen to be 
+      resized to another resolution while still preserving all initial sizes and 
+      positions.  Stopped short of adapting the gadgets when I realized the new monitor 
+      size isn't much different than the old one.
+  - Added the ImGuiKey_GraveAccent to the accepted character key map. 
+  - Adjusted the IMPACT_RESISTANCE_FLOAT_FRAME_COUNT routine to account for 
+      other frame rates via the DEF_FRAME_RATE_DELAY_MULTIPLIER definition. 
+
 2.235_250328
- - Added start_at_boot in the source folder with a few files that may help 
+  - Added start_at_boot in the source folder with a few files that may help 
     starting rasfled in a headless mode.
     Includes: 
       myscript.services - service file that needs to be copied to service directory 

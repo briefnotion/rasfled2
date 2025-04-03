@@ -105,7 +105,7 @@ void IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::first_run()
 
 void IMPACT_RESISTANCE_FLOAT_FRAME_COUNT::set_size(int Size)
 {
-  SIZE = Size;
+  SIZE = (int)(Size * DEF_FRAME_RATE_DELAY_MULTIPLIER);
   FIRST_RUN = true;
 }
 

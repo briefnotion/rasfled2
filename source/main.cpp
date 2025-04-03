@@ -281,7 +281,7 @@ int loop_2(bool TTY_Only)
   // Set is_ready variables
   input_from_switches.set(20);
   input_from_user.set(65);
-  display.set(SCREENUPDATEDELAY);
+  display.set(DEF_FRAME_RATE_DELAY);
 
   // System LogFile Variables
   FILE_WATCH watcher_daemon_log;

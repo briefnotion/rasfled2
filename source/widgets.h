@@ -62,7 +62,11 @@ class IMPACT_RESISTANCE_FLOAT_FRAME_COUNT
 {
   private:
 
-  int SIZE = 6;   // 6 - about 200ms at 30fps
+  int SIZE = (int)(6 * DEF_FRAME_RATE_DELAY_MULTIPLIER);   // 6 - about 200ms at 30fps
+
+  // Because IMPACT_RESISTANCE_FLOAT_FRAME_COUNT is frame rate based, it will be setting
+  //  itself based on the DEF_FRAME_RATE_DELAY_MULTIPLIER.  Standard 1 to 1 will be at 30fps
+
   vector<float> VALUE_COLLECTION_LOWER;
   vector<float> VALUE_COLLECTION_UPPER;
 

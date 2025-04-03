@@ -28,8 +28,8 @@ void ALERT_WIDGET_WIDGTS::create(string Name)
   // Value Bar
   {
   VALUES.PROPS.LABEL = Name + " Value";
-  VALUES.PROPS.BAR_HEIGHT = 18.0f;
-  VALUES.PROPS.MARKER_SIZE = 15.0f;
+  VALUES.PROPS.BAR_HEIGHT = 18.0f * DEF_SCREEN_SIZE_X_MULTIPLIER;
+  VALUES.PROPS.MARKER_SIZE = 15.0f * DEF_SCREEN_SIZE_X_MULTIPLIER;
   VALUES.PROPS.COLOR_BACKGROUND = RAS_BLUE;
   VALUES.PROPS.COLOR_MARKER = RAS_YELLOW;
   VALUES.PROPS.DRAW_MIN_MAX_ON_TOP = false;
@@ -73,8 +73,8 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
       PROPERTIES_RESERVE_LIST.check_properties_list(alert_num, "Reserve Alert ");
 
       string title = Alerts_List.PROPS.ALERT_SYSTEM_NAME;
-      float text_size_height = 58.0f + (sdSysData.SCREEN_META_DATA.TYPICAL_PIXEL_LINE_HEIGHT * (float)(Alerts_List.res_text_line_count(alert_num)));
-      ImGui::SetNextWindowSize(ImVec2(255, text_size_height));
+      float text_size_height = (58.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER) + (sdSysData.SCREEN_META_DATA.TYPICAL_PIXEL_LINE_HEIGHT * (float)(Alerts_List.res_text_line_count(alert_num)));
+      ImGui::SetNextWindowSize(ImVec2(255 * DEF_SCREEN_SIZE_X_MULTIPLIER, text_size_height));
 
       int alert_type = 0;
 
@@ -192,8 +192,8 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
         //PROPERTIES_GENERAL_LIST.check_properties_list(sdSysData, alert_num, "General Alert ");
 
         string title = Alerts_List.PROPS.ALERT_SYSTEM_NAME;
-        float text_size_height = 58.0f + (sdSysData.SCREEN_META_DATA.TYPICAL_PIXEL_LINE_HEIGHT * (float)(Alerts_List.gen_text_line_count(alert_num)));
-        ImGui::SetNextWindowSize(ImVec2(255, text_size_height));
+        float text_size_height = (58.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER) + (sdSysData.SCREEN_META_DATA.TYPICAL_PIXEL_LINE_HEIGHT * (float)(Alerts_List.gen_text_line_count(alert_num)));
+        ImGui::SetNextWindowSize(ImVec2(255 * DEF_SCREEN_SIZE_X_MULTIPLIER, text_size_height));
 
         if (Alerts_List.gen_warning(alert_num))
         {

@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+// Rasfled Includes
+#include "definitions.h"
 #include "fled_time.h"
 #include "LEDstuff.h"
 
@@ -71,10 +73,10 @@ class WIDGET_DEFAULTS
 {
   public:
 
-  ImVec2 SIZE_BUTTON_TAB = ImVec2(100, 43);
-  ImVec2 SIZE_BUTTON = ImVec2(75, 75);
-  ImVec2 SIZE_BUTTON_MEDIUM = ImVec2(60, 60);
-  ImVec2 SIZE_BUTTON_SMALL = ImVec2(43, 43);
+  ImVec2 SIZE_BUTTON_TAB = ImVec2(100.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, 43.0f * DEF_SCREEN_SIZE_X_MULTIPLIER);
+  ImVec2 SIZE_BUTTON = ImVec2(75.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, 75.0f * DEF_SCREEN_SIZE_X_MULTIPLIER);
+  ImVec2 SIZE_BUTTON_MEDIUM = ImVec2(60.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, 60.0f * DEF_SCREEN_SIZE_X_MULTIPLIER);
+  ImVec2 SIZE_BUTTON_SMALL = ImVec2(43.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, 43.0f * DEF_SCREEN_SIZE_X_MULTIPLIER);
   
   // Main Window
   ImGuiWindowFlags flags =        ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoDecoration | 

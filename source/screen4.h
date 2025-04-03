@@ -61,13 +61,7 @@ class SCREEN4
 
   GLFWmonitor * monitor = nullptr;
   const GLFWvidmode * mode = nullptr;
-  //ImGuiIO& io = ImGui::GetIO(); //(void)io;
   
-  int width = 1280;
-  int height = 720;
-
-  // Windows Screen Variables
-
   // HIDDEN BUTTONS
   BUTTON_INVISIBLE COROP_VOID;
   BUTTON_INVISIBLE RUNNING_COLOR;

@@ -289,8 +289,8 @@ int SCREEN4::create(system_data &sdSysData)
     }
 
     // Create window with graphics context
-    int width = 1280;
-    int height = 720;
+    int width = DEF_SCREEN_WIDTH;
+    int height = DEF_SCREEN_HEIGHT;
 
     window = glfwCreateWindow(width, height, "OGL window", nullptr, nullptr);
     monitor = glfwGetPrimaryMonitor();
@@ -346,10 +346,10 @@ int SCREEN4::create(system_data &sdSysData)
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 100.0f);
 
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 18.0f);
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 57.0f);
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 28.0f);
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 100.0f);
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 57.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 28.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
+    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 100.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
     // Will track as "io.Fonts->Fonts.Data[1]" manually, for now.
 
     // Start the Dear ImGui frame
@@ -435,8 +435,8 @@ int SCREEN4::create(system_data &sdSysData)
 
     {
       BAR_TIMER.PROPS.LABEL = "Timer";
-      BAR_TIMER.PROPS.BAR_HEIGHT = 20.0f;
-      BAR_TIMER.PROPS.MARKER_SIZE = 15.0f;
+      BAR_TIMER.PROPS.BAR_HEIGHT = 20.0f * DEF_SCREEN_SIZE_X_MULTIPLIER;
+      BAR_TIMER.PROPS.MARKER_SIZE = 15.0f * DEF_SCREEN_SIZE_X_MULTIPLIER;
       BAR_TIMER.PROPS.COLOR_BACKGROUND = RAS_BLUE;
       BAR_TIMER.PROPS.COLOR_MARKER = RAS_YELLOW;
       BAR_TIMER.PROPS.DRAW_MIN_MAX_ON_TOP = false;
@@ -580,45 +580,18 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       bool backspace_pressed = false;
       bool enter_pressed = false;
 
-      /*
-      for (int i = 0; i < IM_ARRAYSIZE(io.KeysDown); i++)
-      {
-        if (io.KeysDown[i])
-        {
-          if ((i == 259 || i == ImGuiKey_Backspace) && COMMAND_TEXT.length() > 0)
-          // Check for backspace
-          {
-            character_pressed = i;
-            backspace_pressed = true;
-          }
-          if ( i == 257 || i == ImGuiKey_Enter || i == ImGuiKey_KeypadEnter)
-          // Check for enter key
-          {
-            character_pressed = i;
-            enter_pressed = true;
-          }
-          if (i == 340 || i == ImGuiKey_ModShift || i == ImGuiKey_LeftShift || i == ImGuiKey_RightShift)
-          // Check for shift key and characters
-          {
-            shift_pressed = true;
-          }
-          if (i >= 32 && i < 128)
-          {
-            character_pressed = i;
-          }
-        }
-      }
-      */
-
       for (int i = ImGuiKey_NamedKey_BEGIN; i < ImGuiKey_NamedKey_END; i++) 
       {
-        if (ImGui::IsKeyDown((ImGuiKey)i)) {
+        if (ImGui::IsKeyDown((ImGuiKey)i))
+        {  
+          
           // Check for backspace
           if ((i == ImGuiKey_Backspace) && !COMMAND_TEXT.empty()) 
           {
               character_pressed = i;
               backspace_pressed = true;
           }
+
           // Check for enter key
           if (i == ImGuiKey_Enter || i == ImGuiKey_KeypadEnter) 
           {
@@ -630,7 +603,8 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           {
               shift_pressed = true;
           }
-          // Check for printable characters
+
+          // Check for 0 through 9
           if (i >= ImGuiKey_0 && i <= ImGuiKey_9)
           {
             //ImGuiKey_0 = 536 
@@ -638,7 +612,8 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             //ImGuiKey_9 = 545
             character_pressed = i - 488;
           }
-          // Check for printable characters
+
+          // Check for A through Z
           if (i >= ImGuiKey_A && i <= ImGuiKey_Z)
           {
             //ImGuiKey_A = 546
@@ -646,10 +621,17 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             //ImGuiKey_Z = 571
             character_pressed = i - 481;
           }
-          // Check for printable characters
+
+          // Check for space
           if (i == ImGuiKey_Space)
           {
             character_pressed = 32;
+          }
+
+          // Check for special characters
+          if (i == ImGuiKey_GraveAccent)
+          {
+            character_pressed = 96;
           }
         }
       }
@@ -729,13 +711,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
         door_lights(draw_list_window_background, sdSysData, viewport->Size);
         signal_lights(draw_list_window_background, sdSysData, viewport->Size);
 
-        ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - 85.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+        ImGui::BeginChild("Main", ImVec2(ImGui::GetContentRegionAvail().x - (85.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
         {
           // ---------------------------------------------------------------------------------------
           // Status Sub Window
 
           //ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-          ImGui::BeginChild("Status", ImVec2(ImGui::GetContentRegionAvail().x, 60.0f), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+          ImGui::BeginChild("Status", ImVec2(ImGui::GetContentRegionAvail().x, 60.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER), true, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
             float region_div_4 = ImGui::GetContentRegionAvail().x / 4.0f;
 
@@ -776,7 +758,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             // Mid
             ImGui::SameLine();
 
-            ImGui::BeginChild("Status Mid", ImVec2((region_div_4 * 2.0f) - 45.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+            ImGui::BeginChild("Status Mid", ImVec2((region_div_4 * 2.0f) - (45.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
             {
               ImVec4 working_area_status_mid = get_working_area();
               ImDrawList* draw_list_status_mid = ImGui::GetWindowDrawList();
@@ -872,7 +854,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             // Mid Right
             ImGui::SameLine();
 
-            ImGui::BeginChild("Status Right", ImVec2(ImGui::GetContentRegionAvail().x - 90.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+            ImGui::BeginChild("Status Right", ImVec2(ImGui::GetContentRegionAvail().x - (90.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
             {
               // Assign Draw List
               ImVec4 working_area_status_right = get_working_area();
@@ -928,13 +910,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           // ---------------------------------------------------------------------------------------
           // Console Sub Window
 
-          ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - 48), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - (48 * DEF_SCREEN_SIZE_Y_MULTIPLIER)), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
             if (DISPLAY_SCREEN == 0)
             {
               if (sdSysData.CAR_INFO.active())
               {
-                ImGui::BeginChild("CONSOLE_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+                ImGui::BeginChild("CONSOLE_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
                 {
                   ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
                   ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
@@ -983,7 +965,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             {
               if (sdSysData.CAR_INFO.active())
               {
-                ImGui::BeginChild("ADSB_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+                ImGui::BeginChild("ADSB_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
                 {
                   ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
                   ADSB.display(sdSysData);
@@ -1043,7 +1025,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             {
               if (sdSysData.CAR_INFO.active())
               {
-                ImGui::BeginChild("LOGS_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+                ImGui::BeginChild("LOGS_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
                 {
                   ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
                   ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
@@ -1075,7 +1057,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             {
               if (sdSysData.CAR_INFO.active())
               {
-                ImGui::BeginChild("...", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+                ImGui::BeginChild("...", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
                 {
                   ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
                   DOT_DOT_DOT.display(sdSysData, Animations);
@@ -1117,7 +1099,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           // Restack windows placed here to complete cycle.
           RESTACK_WINDOWS = false;
 
-          ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x - sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB.x - 15.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+          ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x - sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB.x - (15.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
 
             if (BTC_TAB_CONSOLE.button_toggle_color(sdSysData, "Console", "Console", DISPLAY_SCREEN == 0, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
@@ -1371,7 +1353,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       
       if (DISPLAY_DEBUG == true)
       {
-        ImGui::SetNextWindowSize(ImVec2(266, 345));
+        ImGui::SetNextWindowSize(ImVec2(266 * DEF_SCREEN_SIZE_X_MULTIPLIER, 345 * DEF_SCREEN_SIZE_Y_MULTIPLIER));
         if (ImGui::Begin("Debug", &DISPLAY_DEBUG, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           ImGui::Text("%.3f ms/frame  %.1f FPS", 1000.0f / io.Framerate, io.Framerate);
@@ -1453,7 +1435,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
       if (DISPLAY_TIMER == true && RESTACK_WINDOWS == false)
       {
-        ImGui::SetNextWindowSize(ImVec2(250, 90));
+        ImGui::SetNextWindowSize(ImVec2(250 * DEF_SCREEN_SIZE_X_MULTIPLIER, 90 * DEF_SCREEN_SIZE_Y_MULTIPLIER));
         if (ImGui::Begin("Timer", &DISPLAY_TIMER, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           ImDrawList* draw_list_timer = ImGui::GetWindowDrawList();
@@ -1485,7 +1467,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       
       if (DISPLAY_OVERHEAD_COLOR == true && RESTACK_WINDOWS == false)
       {
-        ImGui::SetNextWindowSize(ImVec2(143, 292));
+        ImGui::SetNextWindowSize(ImVec2(143 * DEF_SCREEN_SIZE_X_MULTIPLIER, 292 * DEF_SCREEN_SIZE_Y_MULTIPLIER));
         if (ImGui::Begin("Overhead Color", &DISPLAY_OVERHEAD_COLOR, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           if (BT_OVER_RED.button_color(sdSysData, "Red", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -1737,7 +1719,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       {
         if (sdSysData.COMMS_COMPASS.connected())
         {
-          ImGui::SetNextWindowSize(ImVec2(140.0f, 210.0f));
+          ImGui::SetNextWindowSize(ImVec2(140.0f * DEF_SCREEN_SIZE_X_MULTIPLIER, 210.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER));
 
           ImGui::Begin("Compass", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
           {
@@ -1766,7 +1748,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
       
       if (DISPLAY_CARDS_WINDOW == true)
       {
-          ImGui::SetNextWindowSize(ImVec2(90.0f, 195.0f));
+          ImGui::SetNextWindowSize(ImVec2(90.0f * DEF_SCREEN_SIZE_X_MULTIPLIER, 195.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER));
 
           ImGui::Begin("Cards", nullptr, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar);
           {

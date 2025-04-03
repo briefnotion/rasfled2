@@ -21,28 +21,63 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.235_250328"
+#define Revision "2.236_250401"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
-// CONSOLE AND INTEFACE SETUP
-
-// Variable Redraw Rates
-// 60 - 15 fps
-// 30 - 30 fps
-// 15 - 60 fps
-#define SCREENUPDATEDELAY 30  // in milliseconds 
-
+// TEST MODES
 #define TEST_MODE           false
 
 #define TEST_DATA_CAN_BUS   false
 #define TEST_DATA_AIRCRAFT  false
 #define TEST_DATA_GPS       false
 
-// Enable disable calling "aplay" for audio.
-#define DEF_ENABLE_AUDIO    false
+// -------------------------------------------------------------------------------------
+// CONSOLE AND INTEFACE SETUP
+//  Defined here for simplicity.  All set during compile
+//  Affects:
+//    Button sizes
+//    Gadget Animations
+//    Font Sizes
+//    Gadget Sizes
 
-// Files
+#define DEF_FRAME_RATE 3
+// Variable Redraw Rates
+// 1: 60 ms - 15 fps
+// 2: 30 ms - 30 fps
+// 3: 15 ms - 60 fps
+
+#if DEF_FRAME_RATE == 3
+  #define DEF_FRAME_RATE_DELAY 15
+  #define DEF_FRAME_RATE_DELAY_MULTIPLIER 2.0f
+#elif DEF_FRAME_RATE == 2
+  #define DEF_FRAME_RATE_DELAY 30
+  #define DEF_FRAME_RATE_DELAY_MULTIPLIER 1.0f
+#else // DEF_FRAME_RATE == 1
+  #define DEF_FRAME_RATE_DELAY 60
+  #define DEF_FRAME_RATE_DELAY_MULTIPLIER 0.5f
+#endif
+
+//---
+
+#define DEF_SCREEN_SIZE 2
+// Size 1 = 1280 x 720
+// Size 2 = 1920 x 1080
+
+#if DEF_SCREEN_SIZE == 1
+  #define DEF_SCREEN_WIDTH 1920
+  #define DEF_SCREEN_HEIGHT 1080
+  #define DEF_SCREEN_SIZE_X_MULTIPLIER 1.5f
+  #define DEF_SCREEN_SIZE_Y_MULTIPLIER 1.5f
+#else
+  #define DEF_SCREEN_WIDTH 1280
+  #define DEF_SCREEN_HEIGHT 720
+  #define DEF_SCREEN_SIZE_X_MULTIPLIER 1.0f
+  #define DEF_SCREEN_SIZE_Y_MULTIPLIER 1.0f
+#endif
+
+// -------------------------------------------------------------------------------------
+// FILES SETUP
 
 // Specific Directories
 #define DEF_USB_DEV_DIR                   "/dev/serial/by-id/"     // Not Created
@@ -90,6 +125,16 @@
 
 #define DEF_COMPASS_OFFSET_HISTORY        "compass_offset_history.json"
 
+
+// -------------------------------------------------------------------------------------
+// AUDIO SETUP
+
+// Enable disable calling "aplay" for audio.
+#define DEF_ENABLE_AUDIO    false
+
+// -------------------------------------------------------------------------------------
+// CAN BUS COMMS SETUP
+
 // COMMS Settings CAN Bus
 #define COMMS_AUTOSTART                       true
 #define COMMS_BAUD                            115200
@@ -100,7 +145,9 @@
 #define COMMS_DISABLE_CANONICAL_MODE          false
 #define COMMS_XONXOFF                         false
 
-// COMMS Settings GPS
+// -------------------------------------------------------------------------------------
+// GPS COMMS SETUP
+
 #define COMMS_AUTOSTART_GPS                   false
 #define COMMS_BAUD_GPS                        9600
 #define COMMS_BAUD_BAUD_RATE_CHANGE_TO_GPS    true
@@ -113,7 +160,9 @@
 #define COMMS_XONXOFF_GPS                     false
 #define CONTINUOUS_DATA_GPS                   true
 
-// COMMS Settings Compass
+// -------------------------------------------------------------------------------------
+// COMPASS COMMS SETUP
+
 #define COMMS_AUTOSTART_COMPASS               false
 #define COMMS_ID_COMPASS                      0x1E
 #define CONTINUOUS_DATA_COMPASS               true
@@ -142,6 +191,9 @@
 
 #define COMMS_COMPASS_CAL_OFFSET              0.0f - 160.0f
 
+// -------------------------------------------------------------------------------------
+// AUTO TIRE TTL SETUP
+
 // TTL Values - Individually adjust the TTL values of the auto.
 #define TTL_LF_Top_Percentage   99.37
 #define TTL_LF_Low_Percentage   98.92
@@ -155,7 +207,11 @@
 #define TTL_RB_Top_Percentage   99.37
 #define TTL_RB_Low_Percentage   98.92
 
+// -------------------------------------------------------------------------------------
 #define COMMS_FLASH_DATA_RECORDER_ACTIVE  true
+
+// -------------------------------------------------------------------------------------
+// DEBUG HOTKEY SETUP (no longer active)
 
 // Key Mapping
 #define KEYEXIT           'X'
@@ -167,12 +223,15 @@
 #define KEYLEDDRCYCL      't' // Cycle through the doors
 #define KEYTESTANIM       'a' // Cycle Upper or Lower limits of LEDs
 
+// -------------------------------------------------------------------------------------
 // Testing and Debugging
 #define BOOTEST       false       // Not Implemented - Fading Away
 
+// -------------------------------------------------------------------------------------
 // Default Timer
 #define DEFAULTTIMER      5   //Minutes
 
+// -------------------------------------------------------------------------------------
 #define LED_FPS           15  // Compile time LED, delay in ms.
 
 // -------------------------------------------------------------------------------------
