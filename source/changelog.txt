@@ -1,3 +1,7 @@
+2.238_250405
+  - Changed the DRAW_D2_PLOT graph to adjust according to different frame rates during compile.
+  - Various other minor changes made. 
+
 2.236_250401
   - Started working on a simple compile time solution that allowed the screen to be 
       resized to another resolution while still preserving all initial sizes and 

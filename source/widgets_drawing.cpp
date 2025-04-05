@@ -677,6 +677,9 @@ ImVec2 DRAW_D2_PLOT::position_on_plot_at_start(float Y, DRAW_D2_PLOT_SUB_GRAPH_P
   return ret_vec;
 }
 
+
+
+
 ImVec2 DRAW_D2_PLOT::position_on_plot(float X, float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X)
 {
   ImVec2 ret_vec;
@@ -720,15 +723,45 @@ ImVec2 DRAW_D2_PLOT::position_on_plot(float X, float Y, DRAW_D2_PLOT_SUB_GRAPH_P
   return ret_vec;
 }
 
-void DRAW_D2_PLOT::create_subgraph(int Max_Data_Point_Count, unsigned long Duration_Span_ms, string Label)
+void DRAW_D2_PLOT::create_subgraph(unsigned long Duration_Span_ms, string Label)
 {
   DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES tmp_sub_graph;
   
   tmp_sub_graph.LABEL = Label;
-  tmp_sub_graph.DATA_POINTS_COUNT_MAX = Max_Data_Point_Count;
+
+  if (SUB_GRAPHS.size() > 0)
+  { 
+    //  (I dont feel like thinking about the details of full time span of previous graphs and 
+    //      how often it updates.  Maybe later if memory is an issue.  After all, its only max size.)
+    tmp_sub_graph.DATA_POINTS_COUNT_MAX = SUB_GRAPHS.back().DATA_POINTS_COUNT_MAX;
+  }
+  else
+  {
+    // Max amount of points calculated by frames per second * duration.
+    float fps = (float)(1000 / DEF_FRAME_RATE_DELAY);
+    float duration = (float)Duration_Span_ms;
+    int max_count = (int)(duration * fps / 1000.0f);
+    tmp_sub_graph.DATA_POINTS_COUNT_MAX = max_count;
+  }
+
   tmp_sub_graph.DURATION_SPAN = Duration_Span_ms;
 
   SUB_GRAPHS.push_back(tmp_sub_graph);
+
+  // Adjust max count to be graph size first divided by amount of sub graphs.
+  // Recalculate at each create subgraph.  Done at each subgraph create beyond the first.
+
+  //  (I dont feel like thinking about the details of full time span of previous graphs and 
+  //      how often it updates.  Maybe later if memory is an issue.  After all, its only max size.
+  //      Theoreticlly, this should be based on the amount of time in the subgraph time span relative 
+  //      to all the previous graphs variable time spans.  Also, size of graph in pixels should be considered.)
+  if (SUB_GRAPHS.size() > 0)
+  {
+    for (int graph = 1; graph < (int)SUB_GRAPHS.size(); graph++)
+    {
+      SUB_GRAPHS[graph].DATA_POINTS_COUNT_MAX = SUB_GRAPHS[0].DATA_POINTS_COUNT_MAX / (int)SUB_GRAPHS.size();
+    }
+  }
 }
 
 void DRAW_D2_PLOT::create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor, bool Single_Value)
@@ -771,8 +804,8 @@ void DRAW_D2_PLOT::create(unsigned long Start_Plot_Time)
 
   for (int sub_graph = 0; sub_graph < (int)SUB_GRAPHS.size(); sub_graph++)
   {
-    SUB_GRAPHS[sub_graph].TIME_PER_POINT_F = float(SUB_GRAPHS[sub_graph].DURATION_SPAN / SUB_GRAPHS[sub_graph].DATA_POINTS_COUNT_MAX);
-    SUB_GRAPHS[sub_graph].TIME_PER_POINT_UL = (SUB_GRAPHS[sub_graph].DURATION_SPAN / SUB_GRAPHS[sub_graph].DATA_POINTS_COUNT_MAX);
+    SUB_GRAPHS[sub_graph].TIME_PER_POINT_F = float(SUB_GRAPHS[sub_graph].DURATION_SPAN) / (float)(SUB_GRAPHS[sub_graph].DATA_POINTS_COUNT_MAX);
+    SUB_GRAPHS[sub_graph].TIME_PER_POINT_UL = (SUB_GRAPHS[sub_graph].DURATION_SPAN / (unsigned long)(SUB_GRAPHS[sub_graph].DATA_POINTS_COUNT_MAX));
   }
 }
 
@@ -877,6 +910,9 @@ void DRAW_D2_PLOT::update_timed(unsigned long Time, int Line_Number, float Value
   }
 }
 
+
+
+
 //void DRAW_D2_PLOT::draw_graph(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)
 void DRAW_D2_PLOT::draw_graph(ImDrawList *Draw_List, system_data &sdSysData)
 {
@@ -971,9 +1007,9 @@ void DRAW_D2_PLOT::draw_graph(ImDrawList *Draw_List, system_data &sdSysData)
       }
 
       // Draw holdover values, if exist
-      if (SUB_GRAPHS[graph].LINE[line].DISPLAY_MIN_MAX && 
-          graph > 0 &&  
-          SUB_GRAPHS[graph - 1].LINE[line].HOLDOVER_COUNT > 0)
+      if ((SUB_GRAPHS[graph].LINE[line].DISPLAY_MIN_MAX) && 
+          (graph > 0) &&  
+          (SUB_GRAPHS[graph - 1].LINE[line].HOLDOVER_COUNT > 0))
       {
 
         min = position_on_plot_at_start(SUB_GRAPHS[graph - 1].LINE[line].HOLDOVER_MIN, SUB_GRAPHS[graph]);
@@ -988,6 +1024,9 @@ void DRAW_D2_PLOT::draw_graph(ImDrawList *Draw_List, system_data &sdSysData)
     }
   }
 }
+
+
+
 
 bool DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)
 {

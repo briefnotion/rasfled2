@@ -352,7 +352,7 @@ class DRAW_D2_PLOT
 
   DRAW_D2_PLOT_PROPERTIES PROPS;
 
-  void create_subgraph(int Max_Data_Point_Count, unsigned long Duration_Span_ms, string Label);
+  void create_subgraph(unsigned long Duration_Span_ms, string Label);
 
   void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor, bool Single_Value);
   // Prepare line for drawing

@@ -21,16 +21,16 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.236_250401"
+#define Revision "2.238_250405"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
 // TEST MODES
-#define TEST_MODE           false
+#define TEST_MODE           false   // file accessed will be the in test dir, "~/rasfled-t"
 
-#define TEST_DATA_CAN_BUS   false
-#define TEST_DATA_AIRCRAFT  false
-#define TEST_DATA_GPS       false
+#define TEST_DATA_CAN_BUS   false   // "rascomms.txt" in the auto dir
+#define TEST_DATA_AIRCRAFT  false   //
+#define TEST_DATA_GPS       false   //
 
 // -------------------------------------------------------------------------------------
 // CONSOLE AND INTEFACE SETUP
