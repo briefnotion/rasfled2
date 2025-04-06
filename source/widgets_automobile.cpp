@@ -676,249 +676,280 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
 {
   ImDrawList* draw_list_nova = ImGui::GetWindowDrawList();
 
-  ImGui::Text("AUTOMOBILE_VELOCITY");
-
-  NOVA_2_SPEED_TRANS.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph()));
-  NOVA_2_SPEED_TRANS.draw(draw_list_nova, sdSysData);
-
-  ImGui::SameLine();
-
-  NOVA_2_SPEED_DASH.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_DASH.val_mph()));
-  NOVA_2_SPEED_DASH.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  NOVA_2_SPEED_LF_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LF_TIRE.val_mph()));
-  NOVA_2_SPEED_LF_TIRE.draw(draw_list_nova, sdSysData);
+  if (BTC_NOVA_2_DRIVE.button_toggle_color(sdSysData, "Drive", "Drive", NOVA_2_SELECTION == 0, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  {
+    NOVA_2_SELECTION = 0;
+  }
 
   ImGui::SameLine();
 
-  NOVA_2_SPEED_RF_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RF_TIRE.val_mph()));
-  NOVA_2_SPEED_RF_TIRE.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  NOVA_2_SPEED_LB_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LB_TIRE.val_mph()));
-  NOVA_2_SPEED_LB_TIRE.draw(draw_list_nova, sdSysData);
+  if (BTC_NOVA_2_P_AND_T.button_toggle_color(sdSysData, "P & T", "P & T", NOVA_2_SELECTION == 1, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  {
+    NOVA_2_SELECTION = 1;
+  }
 
   ImGui::SameLine();
-
-  NOVA_2_SPEED_RB_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RB_TIRE.val_mph()));
-  NOVA_2_SPEED_RB_TIRE.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  NOVA_2_SPEED_ALL_TIRES_AVERAGE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph()));
-  NOVA_2_SPEED_ALL_TIRES_AVERAGE.draw(draw_list_nova, sdSysData);
-
-  ImGui::SameLine();
-
-  NOVA_2_SPEED_ALL_TIRES_LOWEST.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_LOWEST.val_mph()));
-  NOVA_2_SPEED_ALL_TIRES_LOWEST.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  ImGui::Text("AUTOMOBILE_TEMPATURE");
-
-  NOVA_2_COOLANT_05.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c()));
-  NOVA_2_COOLANT_05.draw(draw_list_nova, sdSysData);
-
-  ImGui::SameLine();
-
-  NOVA_2_AIR_INTAKE_0f.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c()));
-  NOVA_2_AIR_INTAKE_0f.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  NOVA_2_AMBIANT_AIR_46.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c()));
-  NOVA_2_AMBIANT_AIR_46.draw(draw_list_nova, sdSysData);
-
-  ImGui::SameLine();
-
-  NOVA_2_OIL_5c.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.OIL_5c.val_c()));
-  NOVA_2_OIL_5c.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  NOVA_2_EXHAUST_GAS_6b.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.EXHAUST_GAS_6b.val_c()));
-  NOVA_2_EXHAUST_GAS_6b.draw(draw_list_nova, sdSysData);
-
-  ImGui::SameLine();
-
-  NOVA_2_MANIFOLD_SURFACE_84.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.MANIFOLD_SURFACE_84.val_c()));
-  NOVA_2_MANIFOLD_SURFACE_84.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  NOVA_2_CATALYST_3C.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.CATALYST_3C.val_c()));
-  NOVA_2_CATALYST_3C.draw(draw_list_nova, sdSysData);
-
-  ImGui::SameLine();
-
-  NOVA_2_BARO_33.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.BARO_33.val_inHg()));
-  NOVA_2_BARO_33.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  ImGui::Text("AUTOMOBILE_ELECTRICAL");
-
-  NOVA_2_CONTROL_UNIT_42.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v()));
-  NOVA_2_CONTROL_UNIT_42.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  ImGui::Text("AUTOMOBILE_TRANSMISSION_GEAR");
-
-  NOVA_2_GEAR.update_value(sdSysData, (sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_short_desc() + to_string(sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_reported())));
-  NOVA_2_GEAR.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  ImGui::Text("AUTOMOBILE_ACCELERATOR / AUTOMOBILE_BRAKE");
-
-  NOVA_2_ACCELERATOR.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.ACCELERATOR.val_value()));
-  NOVA_2_ACCELERATOR.draw(draw_list_nova, sdSysData);
-
-  ImGui::SameLine();
-
-  NOVA_2_BRAKE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.BRAKE.val_value()));
-  NOVA_2_BRAKE.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  ImGui::Text("AUTOMOBILE_SYSTEM");
-
-  NOVA_2_MIL.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light()));
-  NOVA_2_MIL.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  ImGui::Text("AUTOMOBILE_DOORS");
-
-  NOVA_2_DOOR_LF.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.lf_door_open()));
-  NOVA_2_DOOR_LF.draw(draw_list_nova, sdSysData);
-
-  ImGui::SameLine();
-
-  NOVA_2_DOOR_RF.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.rf_door_open()));
-  NOVA_2_DOOR_RF.draw(draw_list_nova, sdSysData);
   
-  ImGui::SameLine();
-
-  NOVA_2_DOOR_HOOD.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.hood_door_open()));
-  NOVA_2_DOOR_HOOD.draw(draw_list_nova, sdSysData);
-
-  // NL
-
-  NOVA_2_DOOR_LB.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.lb_door_open()));
-  NOVA_2_DOOR_LB.draw(draw_list_nova, sdSysData);
+  if (BTC_NOVA_2_INDICATORS.button_toggle_color(sdSysData, "Indicators", "Indicators", NOVA_2_SELECTION == 2, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  {
+    NOVA_2_SELECTION = 2;
+  }
 
   ImGui::SameLine();
-
-  NOVA_2_DOOR_RB.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.rb_door_open()));
-  NOVA_2_DOOR_RB.draw(draw_list_nova, sdSysData);
+  
+  if (BTC_NOVA_2_ENGINE.button_toggle_color(sdSysData, "Engine", "Engine", NOVA_2_SELECTION == 3, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  {
+    NOVA_2_SELECTION = 3;
+  }
 
   ImGui::SameLine();
+  
+  if (BTC_NOVA_2_OTHER.button_toggle_color(sdSysData, "Other", "Other", NOVA_2_SELECTION == 4, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  {
+    NOVA_2_SELECTION = 4;
+  }
+  
+  if (NOVA_2_SELECTION < 0 || NOVA_2_SELECTION > 4)
+  {
+    NOVA_2_SELECTION = 0;
+  }
 
-  NOVA_2_DOOR_HATCHBACK.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.hatchback_door_open()));
-  NOVA_2_DOOR_HATCHBACK.draw(draw_list_nova, sdSysData);
+  if (NOVA_2_SELECTION == 0)  // Drive
+  {
+    ImGui::Text("          VELOCITY");
+
+    NOVA_2_SPEED_TRANS.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph()));
+    NOVA_2_SPEED_TRANS.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_SPEED_DASH.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_DASH.val_mph()));
+    NOVA_2_SPEED_DASH.draw(draw_list_nova, sdSysData);
+
+    // ---
+
+    NOVA_2_SPEED_LF_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LF_TIRE.val_mph()));
+    NOVA_2_SPEED_LF_TIRE.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_SPEED_RF_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RF_TIRE.val_mph()));
+    NOVA_2_SPEED_RF_TIRE.draw(draw_list_nova, sdSysData);
+
+    // ---
+
+    NOVA_2_SPEED_LB_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_LB_TIRE.val_mph()));
+    NOVA_2_SPEED_LB_TIRE.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_SPEED_RB_TIRE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_RB_TIRE.val_mph()));
+    NOVA_2_SPEED_RB_TIRE.draw(draw_list_nova, sdSysData);
+
+    // ---
+
+    NOVA_2_SPEED_ALL_TIRES_AVERAGE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph()));
+    NOVA_2_SPEED_ALL_TIRES_AVERAGE.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_SPEED_ALL_TIRES_LOWEST.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_LOWEST.val_mph()));
+    NOVA_2_SPEED_ALL_TIRES_LOWEST.draw(draw_list_nova, sdSysData);
+
+    // ---
+    ImGui::NewLine();
+    ImGui::Text("          TRANSMISSION_GEAR");
+  
+    NOVA_2_GEAR.update_value(sdSysData, (sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_short_desc() + to_string(sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_reported())));
+    NOVA_2_GEAR.draw(draw_list_nova, sdSysData);
+  
+    // ---
+  
+    ImGui::NewLine();
+    ImGui::Text("          ACCELERATOR / BRAKE");
+  
+    NOVA_2_ACCELERATOR.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.ACCELERATOR.val_value()));
+    NOVA_2_ACCELERATOR.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_BRAKE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.BRAKE.val_value()));
+    NOVA_2_BRAKE.draw(draw_list_nova, sdSysData);
+  }
+
+  // ---
+  if (NOVA_2_SELECTION == 1)  // P & T
+  {
+    ImGui::Text("          TEMPATURE");
+
+    NOVA_2_COOLANT_05.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c()));
+    NOVA_2_COOLANT_05.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_AIR_INTAKE_0f.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c()));
+    NOVA_2_AIR_INTAKE_0f.draw(draw_list_nova, sdSysData);
+
+    NOVA_2_AMBIANT_AIR_46.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c()));
+    NOVA_2_AMBIANT_AIR_46.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_OIL_5c.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.OIL_5c.val_c()));
+    NOVA_2_OIL_5c.draw(draw_list_nova, sdSysData);
+
+    NOVA_2_EXHAUST_GAS_6b.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.EXHAUST_GAS_6b.val_c()));
+    NOVA_2_EXHAUST_GAS_6b.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_MANIFOLD_SURFACE_84.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.MANIFOLD_SURFACE_84.val_c()));
+    NOVA_2_MANIFOLD_SURFACE_84.draw(draw_list_nova, sdSysData);
+
+    NOVA_2_CATALYST_3C.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.CATALYST_3C.val_c()));
+    NOVA_2_CATALYST_3C.draw(draw_list_nova, sdSysData);
+    
+    ImGui::NewLine();
+    ImGui::Text("          PRESSURE");
+    NOVA_2_BARO_33.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.TEMPS.BARO_33.val_inHg()));
+    NOVA_2_BARO_33.draw(draw_list_nova, sdSysData);
+  }
 
   // ---
 
-  ImGui::Text("AUTOMOBILE_GUAGES");
+  if (NOVA_2_SELECTION == 2)  // Indicators
+  {
+    ImGui::Text("          SYSTEM");
+  
+    NOVA_2_MIL.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light()));
+    NOVA_2_MIL.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_GUAGE_COOLANT.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.GUAGES.coolant());
+    NOVA_2_GUAGE_COOLANT.draw(draw_list_nova, sdSysData);
+  
+    // ---
+  
+    ImGui::NewLine();
+    ImGui::Text("          INDICATORS");
+  
+    NOVA_2_INDICATOR_LIGHTS_POS.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_pos()));
+    NOVA_2_INDICATOR_LIGHTS_POS.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_INDICATOR_LIGHT_SWITCH.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.INDICATORS.lights_switch());
+    NOVA_2_INDICATOR_LIGHT_SWITCH.draw(draw_list_nova, sdSysData);
+  
+    NOVA_2_INDICATOR_LIGHTS_HIGH_BEAM.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_high_beam_on()));
+    NOVA_2_INDICATOR_LIGHTS_HIGH_BEAM.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();  
+    NOVA_2_INDICATOR_LIGHTS_ON.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on()));
+    NOVA_2_INDICATOR_LIGHTS_ON.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_INDICATOR_LIGHTS_PARKING_ON.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_parking_on()));
+    NOVA_2_INDICATOR_LIGHTS_PARKING_ON.draw(draw_list_nova, sdSysData);
+  
+    NOVA_2_INDICATOR_SIGNAL_LEFT.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left()));
+    NOVA_2_INDICATOR_SIGNAL_LEFT.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_INDICATOR_SIGNAL_RIGHT.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right()));
+    NOVA_2_INDICATOR_SIGNAL_RIGHT.draw(draw_list_nova, sdSysData);
+  
+    NOVA_2_INDICATOR_HAZARDS.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards()));
+    NOVA_2_INDICATOR_HAZARDS.draw(draw_list_nova, sdSysData);
+  
+    NOVA_2_INDICATOR_IGNITION_SWITCH.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition_switch()));
+    NOVA_2_INDICATOR_IGNITION_SWITCH.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_INDICATOR_IGNITION.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.INDICATORS.ignition());
+    NOVA_2_INDICATOR_IGNITION.draw(draw_list_nova, sdSysData);
 
-  NOVA_2_GUAGE_COOLANT.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.GUAGES.coolant());
-  NOVA_2_GUAGE_COOLANT.draw(draw_list_nova, sdSysData);
-
+    NOVA_2_INDICATOR_PARKING_BRAKE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.INDICATORS.parking_brake());
+    NOVA_2_INDICATOR_PARKING_BRAKE.draw(draw_list_nova, sdSysData);
+  
+    NOVA_2_INDICATOR_CRUISE_CONTROL.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control()));
+    NOVA_2_INDICATOR_CRUISE_CONTROL.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_INDICATOR_CRUISE_CONTROL_SPEED.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control_speed()));
+    NOVA_2_INDICATOR_CRUISE_CONTROL_SPEED.draw(draw_list_nova, sdSysData);
+  
+    // ---
+  
+    ImGui::NewLine();
+    ImGui::Text("          STEERING");
+  
+    NOVA_2_STEERING_WHEEL_ANGLE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.steering_wheel_angle());
+    NOVA_2_STEERING_WHEEL_ANGLE.draw(draw_list_nova, sdSysData);
+    ImGui::SameLine();
+    NOVA_2_STEERING_LEFT_OF_CENTER.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.left_of_center());
+    NOVA_2_STEERING_LEFT_OF_CENTER.draw(draw_list_nova, sdSysData);
+  
+    NOVA_2_STEERING_DIRECTION.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.turning_direction());
+    NOVA_2_STEERING_DIRECTION.draw(draw_list_nova, sdSysData);
+  
+    NOVA_2_STEERING_CLOCKWISE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.STEERING.clockwise()));
+    NOVA_2_STEERING_CLOCKWISE.draw(draw_list_nova, sdSysData);
+  }
+  
   // ---
 
-  ImGui::Text("AUTOMOBILE_FUEL");
+  if (NOVA_2_SELECTION == 3)  // Engine
+  {
+    ImGui::Text("          POWER");
+  
+    NOVA_2_POWER.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.POWER.load());
+    NOVA_2_POWER.draw(draw_list_nova, sdSysData);
+  
+    // ---
+  
+    ImGui::NewLine();
+    ImGui::Text("          RPM");
+  
+    NOVA_2_RPM.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.RPM.rpm());
+    NOVA_2_RPM.draw(draw_list_nova, sdSysData);
+  
+    NOVA_2_RPM_2.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.RPM.rpm_2());
+    NOVA_2_RPM_2.draw(draw_list_nova, sdSysData);
 
-  NOVA_2_FUEL_CONSUMED.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.consumed());
-  NOVA_2_FUEL_CONSUMED.draw(draw_list_nova, sdSysData);
+    // ---
 
-  NOVA_2_FUEL_PERCENTAGE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.percentage());
-  NOVA_2_FUEL_PERCENTAGE.draw(draw_list_nova, sdSysData);
+    ImGui::NewLine();
+    ImGui::Text("          ELECTRICAL");
 
-  NOVA_2_FUEL_LEVEL_RAW.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.level_raw());
-  NOVA_2_FUEL_LEVEL_RAW.draw(draw_list_nova, sdSysData);
-
+    NOVA_2_CONTROL_UNIT_42.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v()));
+    NOVA_2_CONTROL_UNIT_42.draw(draw_list_nova, sdSysData);
+  }
+  
   // ---
 
-  ImGui::Text("AUTOMOBILE_INDICATORS");
+  if (NOVA_2_SELECTION == 4)  // Other
+  {
+    ImGui::Text("          DOORS");
+  
+    NOVA_2_DOOR_LF.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.lf_door_open()));
+    NOVA_2_DOOR_LF.draw(draw_list_nova, sdSysData);
+  
+    ImGui::SameLine();
+  
+    NOVA_2_DOOR_RF.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.rf_door_open()));
+    NOVA_2_DOOR_RF.draw(draw_list_nova, sdSysData);
+    
+    ImGui::SameLine();
+  
+    NOVA_2_DOOR_HOOD.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.hood_door_open()));
+    NOVA_2_DOOR_HOOD.draw(draw_list_nova, sdSysData);
+  
+    // NL
+  
+    NOVA_2_DOOR_LB.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.lb_door_open()));
+    NOVA_2_DOOR_LB.draw(draw_list_nova, sdSysData);
+  
+    ImGui::SameLine();
+  
+    NOVA_2_DOOR_RB.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.rb_door_open()));
+    NOVA_2_DOOR_RB.draw(draw_list_nova, sdSysData);
+  
+    ImGui::SameLine();
+  
+    NOVA_2_DOOR_HATCHBACK.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.hatchback_door_open()));
+    NOVA_2_DOOR_HATCHBACK.draw(draw_list_nova, sdSysData);
 
-  NOVA_2_INDICATOR_LIGHTS_POS.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_pos()));
-  NOVA_2_INDICATOR_LIGHTS_POS.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_LIGHT_SWITCH.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.INDICATORS.lights_switch());
-  NOVA_2_INDICATOR_LIGHT_SWITCH.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_LIGHTS_HIGH_BEAM.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_high_beam_on()));
-  NOVA_2_INDICATOR_LIGHTS_HIGH_BEAM.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_LIGHTS_ON.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on()));
-  NOVA_2_INDICATOR_LIGHTS_ON.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_LIGHTS_PARKING_ON.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_parking_on()));
-  NOVA_2_INDICATOR_LIGHTS_PARKING_ON.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_SIGNAL_LEFT.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left()));
-  NOVA_2_INDICATOR_SIGNAL_LEFT.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_SIGNAL_RIGHT.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right()));
-  NOVA_2_INDICATOR_SIGNAL_RIGHT.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_HAZARDS.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards()));
-  NOVA_2_INDICATOR_HAZARDS.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_IGNITION_SWITCH.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.val_ignition_switch()));
-  NOVA_2_INDICATOR_IGNITION_SWITCH.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_PARKING_BRAKE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.INDICATORS.parking_brake());
-  NOVA_2_INDICATOR_PARKING_BRAKE.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_IGNITION.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.INDICATORS.ignition());
-  NOVA_2_INDICATOR_IGNITION.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_CRUISE_CONTROL.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control()));
-  NOVA_2_INDICATOR_CRUISE_CONTROL.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_INDICATOR_CRUISE_CONTROL_SPEED.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control_speed()));
-  NOVA_2_INDICATOR_CRUISE_CONTROL_SPEED.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  ImGui::Text("AUTOMOBILE_POWER");
-
-  NOVA_2_POWER.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.POWER.load());
-  NOVA_2_POWER.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  ImGui::Text("AUTOMOBILE_RPM");
-
-  NOVA_2_RPM.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.RPM.rpm());
-  NOVA_2_RPM.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_RPM_2.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.RPM.rpm_2());
-  NOVA_2_RPM_2.draw(draw_list_nova, sdSysData);
-
-  // ---
-
-  ImGui::Text("AUTOMOBILE_RPM");
-
-  NOVA_2_STEERING_WHEEL_ANGLE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.steering_wheel_angle());
-  NOVA_2_STEERING_WHEEL_ANGLE.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_STEERING_DIRECTION.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.turning_direction());
-  NOVA_2_STEERING_DIRECTION.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_STEERING_CLOCKWISE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.STEERING.clockwise()));
-  NOVA_2_STEERING_CLOCKWISE.draw(draw_list_nova, sdSysData);
-
-  NOVA_2_STEERING_LEFT_OF_CENTER.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.left_of_center());
-  NOVA_2_STEERING_LEFT_OF_CENTER.draw(draw_list_nova, sdSysData);
-
+    // ---
+  
+    ImGui::NewLine();
+    ImGui::Text("          FUEL");
+  
+    NOVA_2_FUEL_CONSUMED.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.consumed());
+    NOVA_2_FUEL_CONSUMED.draw(draw_list_nova, sdSysData);
+  
+    NOVA_2_FUEL_PERCENTAGE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.percentage());
+    NOVA_2_FUEL_PERCENTAGE.draw(draw_list_nova, sdSysData);
+  
+    NOVA_2_FUEL_LEVEL_RAW.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.level_raw());
+    NOVA_2_FUEL_LEVEL_RAW.draw(draw_list_nova, sdSysData);
+  }
 }
 
 void AUTOMOBILE_SCREEN::nova_2(system_data &sdSysData)
@@ -1751,7 +1782,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     T_DATA_DISPLAY_PROPERTIES tmp_defalt_props;
 
     tmp_defalt_props.COLOR = RAS_WHITE;
-    tmp_defalt_props.LABEL_TEXT_SIZE = 7;
+    tmp_defalt_props.LABEL_TEXT_SIZE = 10;
 
     // AUTOMOBILE_VELOCITY
 

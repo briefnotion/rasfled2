@@ -431,7 +431,7 @@ void AUTOMOBILE_FUEL::store_percentage(int Percentage)
 {
   PERCENTAGE = ((float)Percentage * 100) / 256 ;
 
-  PERCENTAGE_DISP = to_string_round_to_nth(PERCENTAGE, 1) + " %";
+  PERCENTAGE_DISP = to_string_round_to_nth(PERCENTAGE, 1) + " %%";
 }
 
 void AUTOMOBILE_FUEL::store_level(int Level)

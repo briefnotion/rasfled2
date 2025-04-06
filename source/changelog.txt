@@ -1,3 +1,6 @@
+2.239_250406
+  - Cleaned up the Nova Screen 2, (somewhat).
+
 2.238_250405
   - Changed the DRAW_D2_PLOT graph to adjust according to different frame rates during compile.
   - Various other minor changes made. 
