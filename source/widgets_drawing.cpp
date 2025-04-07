@@ -1085,6 +1085,16 @@ bool DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
 
   return ret_clicked;
 }
+
+float DRAW_D2_PLOT_DEGENERATE::solve_for_y(float x)
+{
+  return (x * (x + 1.0f)) / 2.0f;
+}
+
+float DRAW_D2_PLOT_DEGENERATE::solve_for_x(float y)
+{
+  return (-1.0f + sqrt(1.0f + 8.0f * y)) / 2.0f;
+}
 // ---------------------------------------------------------------------------------------
 
 #endif

@@ -263,7 +263,8 @@ class MIN_MAX_TIME_SLICE
 {
   private:
 
-  unsigned long TIME_CREATED;
+  unsigned long TIME_CREATED = 0;
+  unsigned long TIME_ENDED   = 0;
   bool ACTIVE = false;
   float VALUE = 0;
   int SAMPLES = 0;
@@ -279,8 +280,12 @@ class MIN_MAX_TIME_SLICE
   void clear(unsigned long tmeFrame_Time);
   // Resets value to be used again as new.
 
+  void store_value(float Value, unsigned long tmeFrame_Time);
   void store_value(float Value);
   // Store value and updates min max.
+
+  void merge(MIN_MAX_TIME_SLICE &Other_Time_Slice);
+  // Merges another MIN_MAX_TIME_SLICE into this one.
 
   float total();
   // Total Value of all samples

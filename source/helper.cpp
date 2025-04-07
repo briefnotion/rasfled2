@@ -346,10 +346,20 @@ void MIN_MAX_TIME_SLICE::clear(unsigned long tmeFrame_Time)
   MAX_VALUE = 0;
 }
 
-void MIN_MAX_TIME_SLICE::store_value(float Value)
+void MIN_MAX_TIME_SLICE::store_value(float Value, unsigned long tmeFrame_Time)
 {
   VALUE = VALUE + Value;
   SAMPLES++;
+
+  if (tmeFrame_Time != 0)
+  {
+    if (TIME_CREATED != 0)
+    {
+      TIME_CREATED = tmeFrame_Time;
+    }
+
+    TIME_ENDED = tmeFrame_Time;
+  }
 
   if (ACTIVE == false)
   {
@@ -368,6 +378,17 @@ void MIN_MAX_TIME_SLICE::store_value(float Value)
       MAX_VALUE = Value;
     }
   }
+}
+
+void MIN_MAX_TIME_SLICE::store_value(float Value)
+{
+  store_value(Value, 0);
+}
+
+void MIN_MAX_TIME_SLICE::merge(MIN_MAX_TIME_SLICE &Other_Time_Slice)
+{
+  int del = Other_Time_Slice.samples();
+  (void) del;
 }
 
 float MIN_MAX_TIME_SLICE::total()

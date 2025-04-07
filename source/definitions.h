@@ -21,12 +21,12 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.239_250406"
+#define Revision "2.240_250407"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
 // TEST MODES
-#define TEST_MODE           false   // file accessed will be the in test dir, "~/rasfled-t"
+#define TEST_MODE           true   // file accessed will be the in test dir, "~/rasfled-t"
 
 #define TEST_DATA_CAN_BUS   false   // "rascomms.txt" in the auto dir
 #define TEST_DATA_AIRCRAFT  false   //
@@ -136,7 +136,7 @@
 // CAN BUS COMMS SETUP
 
 // COMMS Settings CAN Bus
-#define COMMS_AUTOSTART                       true
+#define COMMS_AUTOSTART                       false
 #define COMMS_BAUD                            115200
 #define COMMS_BIT_COUNT                       8
 #define COMMS_BIT_PARITY                      false

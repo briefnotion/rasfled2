@@ -382,5 +382,88 @@ class DRAW_D2_PLOT
   bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };
 
+
+
+
+class DRAW_D2_PLOT_DEGENERATE_PROPERTIES
+{
+  public:
+
+  string LABEL = "Label";
+  
+  int COLOR_GRID;                   // Color of grid
+  float POINT_SIZE_GRID = 1.0f;             // Size of grid lines
+  int GRID_SEPERATOR_COUNT_HORIZONTAL = 5;  // Horizontal grid line count
+  int GRID_SEPERATOR_COUNT_VERTICAL = 5;    // Vertical grid line count
+
+  float DATA_POINTS_VALUE_MAX = 100;        // Max value, top of graph value.
+
+  bool LEFT_TO_RIGHT = TRUE;                // Defalt - plot points start on left side
+  bool BOTTOM_TO_TOP = TRUE;                // Defalt - 0 value points start on bottom
+};
+
+
+
+
+class DRAW_D2_PLOT_DEGENERATE
+{
+  private:
+
+  DRAW_GRID GRID;
+
+  ImVec2 PREV_START_POS;
+  ImVec2 PREV_END_POS;
+
+  float FULL_X_SIZE = 0.0f;
+  float FULL_Y_SIZE = 0.0f;
+
+  unsigned long TIME_START = 0;
+
+  vector<D2_PLOT_LINE> LINE;
+  
+  // Formulas:
+  //  y = (x * (x + 1)) / 2
+  //  x = (-1 + sqrt(1 + 8y)) / 2)
+
+  // Triangular Number and Inverse Triangular Number
+  float solve_for_y(float x);
+  float solve_for_x(float y);
+
+  vector<DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES> SUB_GRAPHS;
+  void merge(unsigned long Time, int Sub_Graph, int Line_Number);
+
+  ImVec2 position_on_plot(float X, float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X);
+  // Internal
+
+  public:
+
+  DRAW_D2_PLOT_PROPERTIES PROPS;
+
+  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor, bool Single_Value);
+  // Prepare line for drawing
+  //  Color of line
+  //  Show Mean Value
+  //  Show Min Max Values
+  //  Point_Size - Mean value line point size
+  //  Min_Max_Overlap_Factor - Size of min_max is calculated. Value of 2.0f will double
+  //                            the size and cause min_max lines to overlap.
+  //                            Overlapped areas should be brighter.
+
+  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor);
+  // Same as before, without single value option.
+
+  void create(unsigned long Start_Plot_Time);
+
+  void update(unsigned long Time, int Line_Number, float Value);
+
+  void update(unsigned long Time, int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample);
+
+  void update_timed(unsigned long Time, int Line_Number, float Value);
+
+  void draw_graph(ImDrawList *Draw_List, system_data &sdSysData);
+
+  bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
+};
+
 // ---------------------------------------------------------------------------------------
 #endif
