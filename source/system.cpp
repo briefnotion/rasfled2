@@ -118,7 +118,8 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
 
 
     // GPS
-    GPS_DEVICE_FILE = USB_DEV_DIR + (string)DEF_GPS_USB_DEV_NAME;
+    //GPS_DEVICE_FILE = USB_DEV_DIR + (string)DEF_GPS_USB_DEV_NAME;
+    GPS_DEVICE_FILE = "/dev/serial0";
     cons.printw("  " + GPS_DEVICE_FILE);
 
     GPS_LOG_FILE = LOGS_GPS_DIR + (string)DEF_GPS_SAVE_LOG_NAME;

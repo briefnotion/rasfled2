@@ -128,6 +128,13 @@ bool COMPORT::create()
 
     USB = open(port, O_RDWR| O_NOCTTY| O_NONBLOCK );
 
+    /*
+    if (USB == -1)
+    {
+      exit(0);
+    }
+    */
+
     /* Error Handling */
     if ( tcgetattr ( USB, &tty ) != 0 ) 
     {

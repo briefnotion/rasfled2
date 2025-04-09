@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.240_250407"
+#define Revision "2.241_250408"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -133,10 +133,14 @@
 #define DEF_ENABLE_AUDIO    false
 
 // -------------------------------------------------------------------------------------
+// WS2811 LEDs SETUP
+#define DEF_WS2811_ENABLED  true
+
+// -------------------------------------------------------------------------------------
 // CAN BUS COMMS SETUP
 
 // COMMS Settings CAN Bus
-#define COMMS_AUTOSTART                       false
+#define COMMS_AUTOSTART                       true
 #define COMMS_BAUD                            115200
 #define COMMS_BIT_COUNT                       8
 #define COMMS_BIT_PARITY                      false
@@ -148,7 +152,7 @@
 // -------------------------------------------------------------------------------------
 // GPS COMMS SETUP
 
-#define COMMS_AUTOSTART_GPS                   false
+#define COMMS_AUTOSTART_GPS                   true
 #define COMMS_BAUD_GPS                        9600
 #define COMMS_BAUD_BAUD_RATE_CHANGE_TO_GPS    true
 #define COMMS_BAUD_TARGET_GPS                 115200
@@ -163,7 +167,7 @@
 // -------------------------------------------------------------------------------------
 // COMPASS COMMS SETUP
 
-#define COMMS_AUTOSTART_COMPASS               false
+#define COMMS_AUTOSTART_COMPASS               true
 #define COMMS_ID_COMPASS                      0x1E
 #define CONTINUOUS_DATA_COMPASS               true
 

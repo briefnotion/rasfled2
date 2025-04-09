@@ -222,7 +222,13 @@ void proc_render_thread()
 {
   //int ret = 0;  // contains fail or pass status of the render routine.
   //ret = ws2811_render(&ledstring);  // Send values of ledstring to hardware.
+
+
+
   ws2811_render(&ledstring);  // Send values of ledstring to hardware.
+
+
+
 }
 
 // ---------------------------------------------------------------------------------------
@@ -625,63 +631,49 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   // LED Library Vars and Init
-  sdSystem.SCREEN_COMMS.printw("Initializing LEDS ...");
 
+  sdSystem.WS2811_ENABLED = DEF_WS2811_ENABLED;
   int led_count = sdSystem.CONFIG.LED_MAIN.at(0).led_count();
-
-  ledstring.freq = TARGET_FREQ;
-  ledstring.dmanum = DMA;
-  ledstring.channel[0].gpionum = GPIO_PIN;
-  ledstring.channel[0].count = led_count;
-  ledstring.channel[0].brightness = 255;
-  ledstring.channel[0].invert = 0;
-  ledstring.channel[0].strip_type = STRIP_TYPE;
-
-  ws2811_return_t ret;
-  ledprep(&ledstring, led_count);
-  matrix = (int*)malloc(sizeof(ws2811_led_t) * led_count);
-  setup_handlers();
-  if ((ret = ws2811_init(&ledstring)) != WS2811_SUCCESS)
+  if (sdSystem.WS2811_ENABLED)
   {
-      std::cerr << "ws2811_init failed: " << ws2811_get_return_t_str(ret) << std::endl;
-      //return ret;
-      //cons_2.SCREEN_COMMS.printw("ws2811_init failed: " + ws2811_get_return_t_str(ret))
+    sdSystem.SCREEN_COMMS.printw("Initializing LEDS ...");
+
+    ledstring.freq = TARGET_FREQ;
+    ledstring.dmanum = DMA;
+    ledstring.channel[0].gpionum = GPIO_PIN;
+    ledstring.channel[0].count = led_count;
+    ledstring.channel[0].brightness = 255;
+    ledstring.channel[0].invert = 0;
+    ledstring.channel[0].strip_type = STRIP_TYPE;
+
+    ws2811_return_t ret;
+    ledprep(&ledstring, led_count);
+    matrix = (int*)malloc(sizeof(ws2811_led_t) * led_count);
+    setup_handlers();
+    if ((ret = ws2811_init(&ledstring)) != WS2811_SUCCESS)
+    {
+      sdSystem.SCREEN_COMMS.printw("");
+      sdSystem.SCREEN_COMMS.printw("FAILURE:");
+      //std::cerr << "ws2811_init failed: " << ws2811_get_return_t_str(ret) << std::endl;
+      string return_description = ws2811_get_return_t_str(ret);
+      sdSystem.SCREEN_COMMS.printw("     ws2811_init failed: " + return_description);
+      sdSystem.SCREEN_COMMS.printw("");
+
       return_code = (int)ret;
-  }
+
+      sdSystem.WS2811_ENABLED = false;
+    }
   
-  else
-  {
-    sdSystem.SCREEN_COMMS.printw("  LED count: " + to_string(led_count));
+    else
+    {
+      sdSystem.SCREEN_COMMS.printw("  LED count: " + to_string(led_count));
+    }
   }
 
   // ---------------------------------------------------------------------------------------
   // Automobile Handler
 
   AUTOMOBILE_HANDLER automobile_handler;
-
-  // ---------------------------------------------------------------------------------------
-  // The Player
-  /*
-  fstream fsPlayer;
-  bool sucess = false;
-
-  string Playlist_Filename = Working_Directory + FILES_PLAYLIST;
-
-  cons_2.SCREEN_COMMS.printw("Initializing Player ...");
-  if (load_playlist_json(cons, sdSystem, Playlist_Filename) == true)
-  {
-    if (cons.play_next_movie(fsPlayer) == true)
-    {
-      //cons_2.SCREEN_COMMS.printw("  Loading Reel");
-    }
-    else
-    { 
-      cons.the_player.booDisable = true;
-      cons_2.SCREEN_COMMS.printw("FAILED - (Initializing Player)");
-      sdSystem.ALERTS.add_generic_alert("FAILED - (Initializing Player)");
-    }
-  }
-  */
 
   // ---------------------------------------------------------------------------------------
   // Define the Supid Random Numbers
@@ -893,6 +885,10 @@ int loop_2(bool TTY_Only)
         }
       }
       
+
+
+
+
       // ---------------------------------------------------------------------------------------
       // Render all the LEDs if changes have been made.
 
@@ -914,25 +910,6 @@ int loop_2(bool TTY_Only)
             }
           }
         }
-
-        /*
-        // If debug mode Display all lights static color are selectted, replace all generated led colors
-        // with a static color
-        if ((cons.keywatch.getnoreset(KEYDEBUG) != 0) && (cons.keywatch.get(KEYLEDTEST) !=0))
-        {
-          for(int group=0; group < sdSystem.CONFIG.LED_MAIN.at(0).g_size(); group++)
-          {
-            for(int strip=0; strip < sdSystem.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
-            {
-              MatxixFill(sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY, 
-              sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(), 
-              CRGB(25,25,25));
-            }
-          }
-
-          booUpdate = true;
-        }
-        */
       }
       else // lights are off, blank values if neccessary.
       {
@@ -980,26 +957,28 @@ int loop_2(bool TTY_Only)
         //    Lights off will not turn the lights off and clear their values.  
         //      Instead, transmitting those color are to the lights disabled.
         
-        // LED Library Renderer -- Recommend: DON'T TOUCH
-        matrix_render(led_count);
-        
-        // Create a seperate thread only to render the LEDs with the hardware.  This process
-        //  is very intensive for the system and is only one way.  The render thread only needs 
-        //  to rejoin with the main program, at the end of the main loop, to signify its 
-        //  completion, so that the loop can restart and begin computing its values and colors 
-        //  again. 
-        // A render thread should not be created if no changes have been made to the led values.
+        if (sdSystem.WS2811_ENABLED)
+        {
+          // LED Library Renderer -- Recommend: DON'T TOUCH
+          matrix_render(led_count);
 
-        // Get timer for render thread.
-        sdSystem.dblCOMMS_LED_RENDER_TIME.start_timer(sdSystem.PROGRAM_TIME.current_frame_time());
+          // Create a seperate thread only to render the LEDs with the hardware.  This process
+          //  is very intensive for the system and is only one way.  The render thread only needs 
+          //  to rejoin with the main program, at the end of the main loop, to signify its 
+          //  completion, so that the loop can restart and begin computing its values and colors 
+          //  again. 
+          // A render thread should not be created if no changes have been made to the led values.
 
-        // Be careful with this because it looks like black magic to me.
-        sdSystem.THREAD_RENDER.start_render_thread([&]() 
-                      {  proc_render_thread();  });
-        
-        sdSystem.dblCOMMS_LED_RENDER_TIME.end_timer(sdSystem.PROGRAM_TIME.current_frame_time());
+          // Get timer for render thread.
+          sdSystem.dblCOMMS_LED_RENDER_TIME.start_timer(sdSystem.PROGRAM_TIME.current_frame_time());
+
+          // Be careful with this because it looks like black magic to me.
+          sdSystem.THREAD_RENDER.start_render_thread([&]() 
+                        {  proc_render_thread();  });
+          
+          sdSystem.dblCOMMS_LED_RENDER_TIME.end_timer(sdSystem.PROGRAM_TIME.current_frame_time());
+        }
       }
-    
     } // Is Events and Render ready -----------------
      
     // ---------------------------------------------------------------------------------------
@@ -1188,7 +1167,6 @@ int loop_2(bool TTY_Only)
     //  Never comment this out or the system will never sleep
     if (display.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
-
       // if condition no longer needed.
       {
         // Refresh console data storeage from main program. This will be a pass through buffer. 
@@ -1261,10 +1239,16 @@ int loop_2(bool TTY_Only)
   sdSystem.THREAD_RENDER.wait_for_thread_to_finish();
   
   // Shutdown RPI.
-  shutdown();
+  if (sdSystem.WS2811_ENABLED)
+  {
+    shutdown();
+  }
 
   // Shutdown Graphical Window
-  cons_2.shutdown(sdSystem);
+  if (TTY_Only == false)
+  {
+    cons_2.shutdown(sdSystem);
+  }
 
   // close open files
   watcher_daemon_log.stop();
