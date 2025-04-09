@@ -39,7 +39,12 @@ The booste libraries are used to show the core temps on the main screen.
 WiringPi is, last I checked, required to run the rpi_ws281x LED drivers.  
 https://github.com/WiringPi/WiringPi?form=MG0AV3
 
-`sudo apt install wiringpi`
+`sudo apt install wiringpi` likely doesn't work.
+
+I followed these steps:  
+`wget https://github.com/WiringPi/WiringPi/releases/download/3.14/wiringpi_3.14_arm64.deb`  
+`sudo chmod 644 /home/delmane/work/wiringpi_3.14_arm64.deb`  
+`sudo apt install ./wiringpi_3.14_arm64.deb`
 
 ## Clone and build rpi_ws281x repo to source dir
 Repository containing the LED light drivers. Instalation can be conveluted so follow the instructions well.  
