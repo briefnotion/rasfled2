@@ -69,7 +69,8 @@ by adding the following line to the file
 `blacklist snd_bcm2835`
 
 ### For installing on RPI 5 follow these instructions
-https://github.com/jgarff/rpi_ws281x/wiki/Raspberry-Pi-5-Support
+https://github.com/jgarff/rpi_ws281x/wiki/Raspberry-Pi-5-Support  
+my post: https://github.com/jgarff/rpi_ws281x/issues/528#issuecomment-2784422523
 
 Dont forget to run (as is not part of the instructions but necessary or Segmentation fault will occur):
 
