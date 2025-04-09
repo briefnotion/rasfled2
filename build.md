@@ -151,3 +151,24 @@ There are additional instructions to get rasfled to run in a headless mode in th
 
 ## After first run
 copy the adverts to the `~/rasfled/adverts directory`
+
+## Setting up the service
+`mkdir ~/startup`
+
+move *.sh to ~/startup
+
+Check their permissions with because the scripts need to have executable status.
+
+Add the service file to the system directory and continue.  
+`sudo cp myscript.service /etc/systemd/system/`
+`sudo systemctl daemon-reload`
+`sudo systemctl enable myscript.service`
+
+Test  
+`sudo systemctl start myscript.service`
+
+Verify  
+`sudo systemctl status myscript.service`
+
+Inspect  
+`journalctl -u myscript.service`
