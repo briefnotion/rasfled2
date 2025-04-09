@@ -160,8 +160,8 @@ move *.sh to ~/startup
 Check their permissions with because the scripts need to have executable status.
 
 Add the service file to the system directory and continue.  
-`sudo cp myscript.service /etc/systemd/system/`
-`sudo systemctl daemon-reload`
+`sudo cp myscript.service /etc/systemd/system/`  
+`sudo systemctl daemon-reload`  
 `sudo systemctl enable myscript.service`
 
 Test  
