@@ -23,7 +23,7 @@ using namespace std;
 bool FILES::assign(CONSOLE_COMMUNICATION &cons)
 {
   FALSE_CATCH ret_success;
-  USB_DEV_DIR = (string)DEF_USB_DEV_DIR;
+  //USB_DEV_DIR = (string)DEF_USB_DEV_DIR;
   AIRCRAFT_1090_DIR = (string)DEF_AIRCRAFT_1090_DIR;
 
   // Check Directories
@@ -101,7 +101,7 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
 
 
     // // CAN Bus
-    CAN_BUS_DEVICE_FILE = USB_DEV_DIR + (string)DEF_CAN_BUS_USB_DEV_NAME;
+    CAN_BUS_DEVICE_FILE = (string)DEF_CAN_BUS_DEV_NAME;
     cons.printw("  " + CAN_BUS_DEVICE_FILE);
 
     CAN_BUS_HISTORY_FILE = LOGS_CAN_BUS_HISTORY_SUB_DIR + (string)DEF_CAN_BUS_SAVE_LOG_NAME;
@@ -118,8 +118,7 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
 
 
     // GPS
-    //GPS_DEVICE_FILE = USB_DEV_DIR + (string)DEF_GPS_USB_DEV_NAME;
-    GPS_DEVICE_FILE = "/dev/serial0";
+    GPS_DEVICE_FILE = (string)DEF_GPS_DEV_NAME;
     cons.printw("  " + GPS_DEVICE_FILE);
 
     GPS_LOG_FILE = LOGS_GPS_DIR + (string)DEF_GPS_SAVE_LOG_NAME;

@@ -26,7 +26,7 @@
 
 // -------------------------------------------------------------------------------------
 // TEST MODES
-#define TEST_MODE           true   // file accessed will be the in test dir, "~/rasfled-t"
+#define TEST_MODE           false   // file accessed will be the in test dir, "~/rasfled-t"
 
 #define TEST_DATA_CAN_BUS   false   // "rascomms.txt" in the auto dir
 #define TEST_DATA_AIRCRAFT  false   //
@@ -80,7 +80,7 @@
 // FILES SETUP
 
 // Specific Directories
-#define DEF_USB_DEV_DIR                   "/dev/serial/by-id/"     // Not Created
+//#define DEF_USB_DEV_DIR                   "/dev/serial/by-id/"     // Not Created
 #define DEF_DEAMON_LOG                    "/var/log/daemon.log"   // Not Created
 
 #define DEF_AIRCRAFT_1090_DIR             "/run/dump1090-fa/"     // Not Created
@@ -108,14 +108,15 @@
 #define DEF_ADVERTS_SUB_DIR               "adverts/"              // Create Directory
 
 // CAN Bus
-#define DEF_CAN_BUS_USB_DEV_NAME          "usb-Arduino_LLC_Arduino_Leonardo-if00"         // System File
+#define DEF_CAN_BUS_DEV_NAME              "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"         // System File
 #define DEF_CAN_BUS_HISTORY_LOG_SUB_DIR   "history/"
 #define DEF_CAN_BUS_SAVE_LOG_NAME         "rascomms"
 #define DEF_CAN_BUS_TEST_DATA_NAME        "rascomms.txt"
 #define DEF_CAN_BUS_ERROR_LOG             "error_log.txt"
 
 // GPS
-#define DEF_GPS_USB_DEV_NAME              "usb-FTDI_FT232R_USB_UART_B001JKAO-if00-port0"  // System File
+//#define DEF_GPS_DEV_NAME                "/dev/serial/by-id/usb-FTDI_FT232R_USB_UART_B001JKAO-if00-port0"  // GPS via serial dongle
+#define DEF_GPS_DEV_NAME                  "/dev/ttyAMA0"                                                    // GPS via ttyAMA0  
 #define DEF_GPS_SAVE_LOG_NAME             "gpscomms"
 #define DEF_GPS_TEST_DATA_NAME            "gpscomms_test.txt"
 
@@ -131,10 +132,6 @@
 
 // Enable disable calling "aplay" for audio.
 #define DEF_ENABLE_AUDIO    false
-
-// -------------------------------------------------------------------------------------
-// WS2811 LEDs SETUP
-#define DEF_WS2811_ENABLED  true
 
 // -------------------------------------------------------------------------------------
 // CAN BUS COMMS SETUP
@@ -154,7 +151,7 @@
 
 #define COMMS_AUTOSTART_GPS                   true
 #define COMMS_BAUD_GPS                        9600
-#define COMMS_BAUD_BAUD_RATE_CHANGE_TO_GPS    true
+#define COMMS_BAUD_BAUD_RATE_CHANGE_TO_GPS    false
 #define COMMS_BAUD_TARGET_GPS                 115200
 #define COMMS_BIT_COUNT_GPS                   8
 #define COMMS_BIT_PARITY_GPS                  false
@@ -247,7 +244,9 @@
 #define DOOR_SWITCH_LEEWAY_TIME 480   // Debounce - Leeway time for door switches in ms.
 
 // -------------------------------------------------------------------------------------
-// LED Strip Declarations
+// LED Strip Declarations  (WS2811 LEDs SETUP)
+
+#define DEF_WS2811_ENABLED      true
 
 #define TARGET_FREQ             WS2811_TARGET_FREQ
 #define GPIO_PIN                18

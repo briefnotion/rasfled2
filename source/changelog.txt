@@ -1,3 +1,9 @@
+2.242_250409
+  - Added #define DEF_WS2811_ENABLED to turn on or off the LED routines.
+  - Changed the GPS serial bus to "/dev/ttyAMA0" to get GPS data over the 
+      RPI's GPIO pins, instead of the serial dongle.
+  - Made a few other changes.
+
 2.241_250408
   - DOES NOT WORK (OS Reinstall)
 
