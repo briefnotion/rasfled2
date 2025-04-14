@@ -385,6 +385,55 @@ class DRAW_D2_PLOT
 
 
 
+class D2_VECTOR_POSITION_REFERENCE
+{
+  public:
+
+  double GRAPH_START_TIME;
+  double GRAPH_END_TIME;
+};
+
+class D2_PLOT_LINE_DEGENERATE
+{
+  public:
+
+  int PIVOT_POINT = 0;
+  //int RESERVE_SIZE = 0;
+  //int RESERVE_SIZE_CUTOFF = 0;
+  //int RESERVE_SIZE_TRIM_AMOUNT = 0;
+
+  int LINE_COLOR;
+  float POINT_SIZE = 2.0f;
+
+  bool DISPLAY_MEAN = true;
+  bool DISPLAY_MIN_MAX = false;
+  //float MIN_MAX_OVERLAP_FACTOR = 1.0f;
+
+  //MIN_MAX_TIME_SLICE VALUES;
+  //TIMED_PING UPDATE_SIMPLE_VALUES;
+  
+  //TIMED_PING MERGE_TIMER;
+  //float HOLDOVER_TOTAL = 0.0f;
+  //float HOLDOVER_MAX = 0.0f;
+  //float HOLDOVER_MIN = 0.0f;
+  //float HOLDOVER_COUNT = 0.0f;
+
+  //bool SINGLE_VALUE = false;
+
+  vector<D2_VECTOR_POSITION_REFERENCE>  POSITION_INFO;
+  deque<MIN_MAX_TIME_SLICE_DOUBLE>     DATA_POINT_TILL_PIVOT;
+  vector<MIN_MAX_TIME_SLICE_DOUBLE>     DATA_POINT;
+
+  //void holdover_clear();
+
+  //void holdover_update(MIN_MAX_TIME_SLICE_SIMPLE Slice_Value);
+
+  void reorganize_line_data(double Time);
+};
+
+
+
+
 class DRAW_D2_PLOT_DEGENERATE_PROPERTIES
 {
   public:
@@ -392,24 +441,27 @@ class DRAW_D2_PLOT_DEGENERATE_PROPERTIES
   string LABEL = "Label";
   
   int COLOR_GRID;                   // Color of grid
-  float POINT_SIZE_GRID = 1.0f;             // Size of grid lines
-  int GRID_SEPERATOR_COUNT_HORIZONTAL = 5;  // Horizontal grid line count
-  int GRID_SEPERATOR_COUNT_VERTICAL = 5;    // Vertical grid line count
+  //float POINT_SIZE_GRID = 1.0f;             // Size of grid lines
+  //int GRID_SEPERATOR_COUNT_HORIZONTAL = 5;  // Horizontal grid line count
+  //int GRID_SEPERATOR_COUNT_VERTICAL = 5;    // Vertical grid line count
 
   float DATA_POINTS_VALUE_MAX = 100;        // Max value, top of graph value.
+
+  //float TIME_SPAN_MS = 8.0f * 60.0f * 60.0f * 1000.0f;      // Time span in milliseconds
+  double TIME_SPAN_MS = 8.0 * 60.0 * 60.0;
 
   bool LEFT_TO_RIGHT = TRUE;                // Defalt - plot points start on left side
   bool BOTTOM_TO_TOP = TRUE;                // Defalt - 0 value points start on bottom
 };
 
-
-
-
 class DRAW_D2_PLOT_DEGENERATE
 {
   private:
 
-  DRAW_GRID GRID;
+  //DRAW_GRID GRID;
+  
+  ImVec2 START_POS;
+  ImVec2 END_POS;
 
   ImVec2 PREV_START_POS;
   ImVec2 PREV_END_POS;
@@ -417,27 +469,73 @@ class DRAW_D2_PLOT_DEGENERATE
   float FULL_X_SIZE = 0.0f;
   float FULL_Y_SIZE = 0.0f;
 
-  unsigned long TIME_START = 0;
+  float MAX_POINT_SIZE_ACCUM = 0.0f;
+  float DEGEN_POINT_TO_SIZE_RATIO = 0.0f;
+  int   DEGEN_POINT_SIZE = 0;
 
-  vector<D2_PLOT_LINE> LINE;
+  double TIME_START = 0;
+
+  vector<D2_PLOT_LINE_DEGENERATE> LINE;
   
+  // ---
   // Formulas:
-  //  y = (x * (x + 1)) / 2
-  //  x = (-1 + sqrt(1 + 8y)) / 2)
 
   // Triangular Number and Inverse Triangular Number
-  float solve_for_y(float x);
-  float solve_for_x(float y);
+  float triangular_number(float X);             //  y = (x * (x + 1)) / 2
+  float triangular_number_accum(float F_of_y);  //  x = (-1 + sqrt(1 + 8y)) / 2)
+  
+  // Linear and Inverse Linear
+  float linear_number(float X);                 //  y = x
+  float linear_accum(float F_of_y);             //  x = (-1.0f + std::sqrt(1.0f + 8.0f * targetSum)) / 2.0f;
 
-  vector<DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES> SUB_GRAPHS;
-  void merge(unsigned long Time, int Sub_Graph, int Line_Number);
+  // Exponential Growth and Inverse Exponential Growth
+  float exp_growth_number(float X);       
+  float exp_growth_accum(float F_of_y);
+  
+  // Exponential Growth and Inverse Exponential Growth with Scale
+  float exp_growth_accum_scale_seconds(double F_of_y);
+  //float exp_growth_accum_scale_miliseconds(double F_of_y);
 
-  ImVec2 position_on_plot(float X, float Y, DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES &Graph, bool &Out_Of_Bounds_X);
+  double exp_growth_number_scale_seconds(float X);
+  //double exp_growth_number_scale_miliseconds(float X);
+
+  // ---
+
+  float value_of_accumulated_time(double Time);
+  //float accum_to_x_miliseconds(double Time);
+
+  float position_in_time_to_x_coord(double Time);
+  //float degen_time_scale_to_x_miliseconds(double Time);
+
+  double value_at_position_in_time(float X);
+  //double time_at_position_miliseconds(float X);
+
+  double x_coord_to_position_in_time(int X);
+
+  // ---
+
+  //vector<DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES> SUB_GRAPHS;
+  //void merge(double Time, int Sub_Graph, int Line_Number);
+
+  ImVec2 position_on_plot(ImVec2 &Point);
   // Internal
+
+  float time_scale_to_x(float Time);
+  // Looks at class vars TIME_START and PROPS.TIME_SPAN_MS to determine pos of x on graph.
+
+  float value_to_y(float Value);
+  // Looks at class vars to determine y on graph.
+
+  //void draw_min_max_at_point();
+  //void draw_point_to_point();
+  void draw_lines(ImDrawList *Draw_List, system_data &sdSysData);
+
+  void first_run();
+  bool FIRST_RUN_COMPLETE = false;
 
   public:
 
-  DRAW_D2_PLOT_PROPERTIES PROPS;
+  DRAW_D2_PLOT_DEGENERATE_PROPERTIES PROPS;
 
   void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor, bool Single_Value);
   // Prepare line for drawing
@@ -449,18 +547,14 @@ class DRAW_D2_PLOT_DEGENERATE
   //                            the size and cause min_max lines to overlap.
   //                            Overlapped areas should be brighter.
 
-  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor);
+  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size);
   // Same as before, without single value option.
 
-  void create(unsigned long Start_Plot_Time);
+  void create(double Start_Plot_Time);
 
-  void update(unsigned long Time, int Line_Number, float Value);
+  void update(double Time, int Line_Number, float Value);
 
-  void update(unsigned long Time, int Line_Number, MIN_MAX_TIME_SLICE_SIMPLE Sample);
-
-  void update_timed(unsigned long Time, int Line_Number, float Value);
-
-  void draw_graph(ImDrawList *Draw_List, system_data &sdSysData);
+  //void reorganize_graph_data(double Time);
 
   bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };

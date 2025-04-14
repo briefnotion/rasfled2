@@ -1,3 +1,8 @@
+2.243_250410
+  - Working on a new graph type to replace DRAW_D2_PLOT.  DRAW_D2_PLOT_DEGENERATE is 
+      more of what i envisioned when creating the graph.  This is only a test build.  
+      The code is very dirty and much of the graph is incomplete.
+
 2.242_250409
   - Added #define DEF_WS2811_ENABLED to turn on or off the LED routines.
   - Changed the GPS serial bus to "/dev/ttyAMA0" to get GPS data over the 

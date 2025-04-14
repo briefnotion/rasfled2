@@ -284,7 +284,60 @@ class MIN_MAX_TIME_SLICE
   void store_value(float Value);
   // Store value and updates min max.
 
-  void merge(MIN_MAX_TIME_SLICE &Other_Time_Slice);
+  //void merge(MIN_MAX_TIME_SLICE &Other_Time_Slice);
+  // Merges another MIN_MAX_TIME_SLICE into this one.
+
+  float total();
+  // Total Value of all samples
+
+  int samples();
+  // Number of samples in slice.
+
+  float mean();
+  // Returns mean value of stored data points.
+
+  float min();
+  // Returns min value of data point.
+
+  float max();
+  // Returns max value of data point.
+};
+
+// ---------------------------------------------------------------------------------------
+
+class MIN_MAX_TIME_SLICE_DOUBLE
+// Simple min max data point.
+{
+  private:
+
+  double TIME_CREATED = 0;
+  double TIME_ENDED   = 0;
+  bool ACTIVE = false;
+  float VALUE = 0;
+  int SAMPLES = 0;
+  float MIN_VALUE = 0;
+  float MAX_VALUE = 0;
+
+  bool PLACEHOLDER = false;
+
+  public:
+
+  void set_as_placeholder();
+  // Retains the data if true but will clear data if updated
+  //  Allows time slice to still exist briefly if all its data 
+  //  is merged out.  Only set to true by external merge.
+
+  double time_created();
+  double time_ended();
+
+  void clear(double tmeFrame_Time);
+  // Resets value to be used again as new.
+
+  void store_value(float Value, double tmeFrame_Time);
+  void store_value(float Value);
+  // Store value and updates min max.
+
+  void merge_into(MIN_MAX_TIME_SLICE_DOUBLE &Other_Time_Slice);
   // Merges another MIN_MAX_TIME_SLICE into this one.
 
   float total();

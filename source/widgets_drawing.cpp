@@ -1086,15 +1086,725 @@ bool DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
   return ret_clicked;
 }
 
-float DRAW_D2_PLOT_DEGENERATE::solve_for_y(float x)
+
+
+
+void D2_PLOT_LINE_DEGENERATE::reorganize_line_data(double Time)
 {
-  return (x * (x + 1.0f)) / 2.0f;
+  //double q = Time;(void)q;
+  if (DATA_POINT.size() > 0)
+  { 
+    // start at newest.   // if pos = size, nothing above to merge to so avoid
+    for (int position = 0; position < ((int)DATA_POINT.size() -1); position++) 
+    {
+      if (DATA_POINT[position].samples() > 0)
+      {
+        if ((Time - DATA_POINT[position].time_created()) > POSITION_INFO[position].GRAPH_END_TIME)
+        {
+          DATA_POINT[position + 1].merge_into(DATA_POINT[position]);
+        }
+      }  
+    }
+  }
 }
 
-float DRAW_D2_PLOT_DEGENERATE::solve_for_x(float y)
+
+
+
+float DRAW_D2_PLOT_DEGENERATE::triangular_number(float X)
 {
-  return (-1.0f + sqrt(1.0f + 8.0f * y)) / 2.0f;
+  //  y = (x * (x + 1)) / 2
+  return (X * (X + 1.0f)) / 2.0f;
 }
+
+float DRAW_D2_PLOT_DEGENERATE::triangular_number_accum(float F_of_y)
+{
+  //  x = (-1 + sqrt(1 + 8y)) / 2)
+  return (-1.0f + sqrt(1.0f + 8.0f * F_of_y));
+}
+
+float DRAW_D2_PLOT_DEGENERATE::linear_number(float X)
+{
+  //  y = x
+  return X;
+}
+
+float DRAW_D2_PLOT_DEGENERATE::linear_accum(float F_of_y)
+{
+  //  x = (-1.0f + std::sqrt(1.0f + 8.0f * targetSum)) / 2.0f;
+  return (-1.0f + std::sqrt(1.0f + 8.0f * F_of_y)) / 2.0f;
+}
+
+float DRAW_D2_PLOT_DEGENERATE::exp_growth_number(float X)
+{
+  return std::pow(2.0f, X) - 1.0f;
+}
+
+float DRAW_D2_PLOT_DEGENERATE::exp_growth_accum(float F_of_y)
+{
+  return std::log2(F_of_y + 1.0f);
+}
+
+float DRAW_D2_PLOT_DEGENERATE::exp_growth_accum_scale_seconds(double F_of_y)
+{
+  const double TIME_SCALE = 1.2f; // makes 10s ≈ 1/4 of full time
+  return log2(F_of_y * TIME_SCALE + 1.0f);
+}
+
+/*
+float DRAW_D2_PLOT_DEGENERATE::exp_growth_accum_scale_miliseconds(double F_of_y)
+{
+  const double TIME_SCALE = 0.0012f;; // makes 10s ≈ 1/4 of full time
+  return log2(F_of_y * TIME_SCALE + 1.0f);
+}
+*/
+
+double DRAW_D2_PLOT_DEGENERATE::exp_growth_number_scale_seconds(float X)
+{
+  const double TIME_SCALE = 1.2f;
+  return  (pow(2.0f, (double)X) - 1.0f) / TIME_SCALE;
+}
+
+/*
+double DRAW_D2_PLOT_DEGENERATE::exp_growth_number_scale_miliseconds(float X)
+{
+  const double TIME_SCALE = 0.0012f;
+  return  (pow(2.0f, (double)X) - 1.0f) / TIME_SCALE;
+}
+*/
+
+// ---
+
+float DRAW_D2_PLOT_DEGENERATE::value_of_accumulated_time(double Time)
+{
+  return exp_growth_accum_scale_seconds(Time);
+}
+
+/*
+float DRAW_D2_PLOT_DEGENERATE::accum_to_x_miliseconds(double Time)
+{
+  return exp_growth_accum_scale_miliseconds(Time);
+}
+*/
+
+float DRAW_D2_PLOT_DEGENERATE::position_in_time_to_x_coord(double Time)
+{
+  return value_of_accumulated_time(Time) * DEGEN_POINT_TO_SIZE_RATIO;
+}
+
+/*
+float DRAW_D2_PLOT_DEGENERATE::degen_time_scale_to_x_miliseconds(double Time)
+{
+  return accum_to_x_miliseconds(Time) * DEGEN_POINT_TO_SIZE_RATIO;
+}
+*/
+
+double DRAW_D2_PLOT_DEGENERATE::value_at_position_in_time(float X)
+{
+  return exp_growth_number_scale_seconds(X);
+}
+
+/*
+double DRAW_D2_PLOT_DEGENERATE::time_at_position_miliseconds(float X)
+{
+  return exp_growth_number_scale_miliseconds(X);
+}
+*/
+
+double DRAW_D2_PLOT_DEGENERATE::x_coord_to_position_in_time(int X)
+{
+  return value_at_position_in_time((float)X / DEGEN_POINT_TO_SIZE_RATIO);
+}
+
+ImVec2 DRAW_D2_PLOT_DEGENERATE::position_on_plot(ImVec2 &Point)
+{
+  ImVec2 ret_vec;
+
+  // Calc
+  if (PROPS.LEFT_TO_RIGHT)
+  {
+    ret_vec.x = START_POS.x + Point.x;
+  }
+  else
+  {
+    ret_vec.x = END_POS.x - Point.x;
+  }
+
+  if (PROPS.BOTTOM_TO_TOP)
+  {
+    ret_vec.y = END_POS.y - Point.y;
+  }
+  else
+  {
+    ret_vec.y = START_POS.y + Point.y;
+  }
+
+  // Return
+  return ret_vec;
+}
+
+
+float DRAW_D2_PLOT_DEGENERATE::time_scale_to_x(float Time)
+{
+  return Time * FULL_X_SIZE /PROPS.TIME_SPAN_MS;
+}
+
+float DRAW_D2_PLOT_DEGENERATE::value_to_y(float Value)
+{
+  return Value * FULL_Y_SIZE / PROPS.DATA_POINTS_VALUE_MAX;
+}
+
+void DRAW_D2_PLOT_DEGENERATE::first_run()
+{
+  // Max Point Size - Calculate full size points
+  MAX_POINT_SIZE_ACCUM = value_of_accumulated_time(PROPS.TIME_SPAN_MS);
+
+  // Calculate DEGEN_POINT_TO_SIZE_RATIO
+  DEGEN_POINT_TO_SIZE_RATIO = FULL_X_SIZE / MAX_POINT_SIZE_ACCUM;
+  DEGEN_POINT_SIZE = (int)(DEGEN_POINT_TO_SIZE_RATIO * MAX_POINT_SIZE_ACCUM); // Could just set as FULL_X_SIZE, but verify ratio instead
+
+  // Build Vectors for each line
+  if (LINE.size() > 0)
+  {
+    for (int line = 0; line < (int)LINE.size(); line++)
+    {
+      int number_of_points = (int)FULL_X_SIZE +1;
+
+      // Build and Reserve Reference Vectors and  Build and Reserve Time Slice Vectors
+
+      LINE[line].POSITION_INFO.reserve(number_of_points);
+      LINE[line].DATA_POINT.reserve(number_of_points);
+
+      D2_VECTOR_POSITION_REFERENCE tmp_position_info;
+      MIN_MAX_TIME_SLICE_DOUBLE tmp_empty_time_slice;
+
+      for (int point = 0; point < number_of_points; point++)
+      {
+        tmp_position_info.GRAPH_START_TIME = x_coord_to_position_in_time((float)point);
+        tmp_position_info.GRAPH_END_TIME = x_coord_to_position_in_time((float)point + 1.0f);
+
+        // Point where mergers start
+        if (LINE[line].PIVOT_POINT == 0)
+        {
+          if ((tmp_position_info.GRAPH_END_TIME -tmp_position_info.GRAPH_START_TIME) > 1.0)
+          {
+            LINE[line].PIVOT_POINT = point;
+          }
+        }
+
+        LINE[line].POSITION_INFO.push_back(tmp_position_info);
+        LINE[line].DATA_POINT.push_back(tmp_empty_time_slice);
+      }
+    }
+  }
+
+  FIRST_RUN_COMPLETE = true;
+}
+
+/*
+void DRAW_D2_PLOT_DEGENERATE::draw_point_to_point(ImDrawList *Draw_List, ImVec2 &Start_Point, ImVec2 &End_Point, ImU32 &Line_Color)
+{
+  Draw_List->AddLine(Start_Point, End_Point, Line_Color, LINE[line_number].POINT_SIZE);
+}
+*/
+
+void DRAW_D2_PLOT_DEGENERATE::draw_lines(ImDrawList *Draw_List, system_data &sdSysData)
+{
+  if (LINE.size() > 0)
+  {
+
+    //float determine_size_in_x = solve_for_y(PROPS.TIME_SPAN_MS);
+    //ImGui::Text("draw  size: %f", determine_size_in_x);
+
+    /*
+    float test1 = solve_for_y(100);
+    ImGui::Text("solve_for_x(100): %f", test1);
+    float test2 = solve_for_x(test1);
+    ImGui::Text("solve_for_y(%f): %f", test1, test2);
+    */
+
+    //float test3 = degen_time_scale_to_x(PROPS.TIME_SPAN_MS);
+    //ImGui::Text("degen_time_scale_to_x(%f): %f", PROPS.TIME_SPAN_MS, test3);
+
+    //float test3 = value_of_accumulated_time(PROPS.TIME_SPAN_MS);           // get full size of points from time
+    //ImGui::Text("value_of_accumulated_time(%f): %f", PROPS.TIME_SPAN_MS, test3);
+    //double test4 = value_at_position_in_time(test3);                 // get time at full size points
+    //ImGui::Text("value_at_position_in_time(%f): %f", test3, test4);
+    
+    // calculated full size point to vector point, and ratio
+    //ImGui::Text("MAX_POINT_SIZE_ACCUM: %f\nDEGEN_POINT_TO_SIZE_RATIO: %f", MAX_POINT_SIZE_ACCUM, DEGEN_POINT_TO_SIZE_RATIO);
+    //ImGui::Text("FULL_X_SIZE: %f,   DEGEN_POINT_SIZE: %d", DEGEN_POINT_TO_SIZE_RATIO, DEGEN_POINT_SIZE);
+    //ImGui::NewLine();
+    
+    //float value5 = (float)DEGEN_POINT_SIZE / DEGEN_POINT_TO_SIZE_RATIO;
+    //ImGui::Text("%d / %f = %f", DEGEN_POINT_SIZE, DEGEN_POINT_TO_SIZE_RATIO, value5);
+    //float value6 = value_at_position_in_time(value5);   
+    //ImGui::Text("value_at_position_in_time(%f): %f", value5, value6);
+
+    //ImGui::NewLine();
+    //ImGui::Text("x_coord_to_position_in_time(%d): %f", DEGEN_POINT_SIZE, x_coord_to_position_in_time(DEGEN_POINT_SIZE));
+    //ImGui::Text("x_coordinat_to_position_in_time(%f): %f", test3, test4);
+
+    //ImGui::NewLine();
+    //ImGui::Text("FULL_X_SIZE: %f", FULL_X_SIZE);
+    //ImGui::Text("FULL_X_SIZE / accum_to_x: %f", FULL_X_SIZE/ test3);
+
+    //ImGui::Text("value at (%d): %f", (int)1.0f, value_at_position_in_time(1.0f));
+
+    //ImGui::Text("SIZ L(     : %ld %ld", LINE.size(), LINE[0].POSITION_INFO.size());
+    //ImGui::Text("REF L(0)(0): %f %f", LINE[0].POSITION_INFO[0].GRAPH_START_TIME, LINE[0].POSITION_INFO[0].GRAPH_END_TIME);
+    //ImGui::Text("REF L(0)(1): %f %f", LINE[0].POSITION_INFO[1].GRAPH_START_TIME, LINE[0].POSITION_INFO[1].GRAPH_END_TIME);
+    //ImGui::Text("REF L(0)(%d): %f %f", (int)FULL_X_SIZE -1, LINE[0].POSITION_INFO[FULL_X_SIZE -1].GRAPH_START_TIME, LINE[0].POSITION_INFO[FULL_X_SIZE -1].GRAPH_END_TIME);
+    //ImGui::Text("REF L(0)(%d): %f %f", (int)FULL_X_SIZE,    LINE[0].POSITION_INFO[FULL_X_SIZE].GRAPH_START_TIME, LINE[0].POSITION_INFO[FULL_X_SIZE].GRAPH_END_TIME);
+
+    //ImGui::Text("degen_time_scale_to_x(%f): %f", PROPS.TIME_SPAN_MS, degen_time_scale_to_x(PROPS.TIME_SPAN_MS));
+
+    //--------------------
+
+    // Test Positions
+
+    // draw simple scale (every 10 seconds to a minute)
+    for (int timepoint = 0; timepoint <= 6; timepoint++)
+    {
+      ImVec2 point_start;
+      ImVec2 point_end;
+      ImColor color_line_dim = sdSysData.COLOR_SELECT.neo_color_DIM(3);
+      point_start.y = value_to_y(0.0f);
+      //point_start.x = time_scale_to_x(timepoint * 1000 * 10);
+      point_start.x = position_in_time_to_x_coord(timepoint * 10);
+
+      point_end.y = value_to_y(80.0f);
+      //point_end.x = time_scale_to_x(timepoint * 1000 * 10);
+      point_end.x = position_in_time_to_x_coord(timepoint * 10);
+
+      Draw_List->AddLine(position_on_plot(point_start), position_on_plot(point_end), color_line_dim, FULL_X_SIZE / PROPS.TIME_SPAN_MS);
+    }
+
+    // draw simple scale (every 10 min to an hour)
+    for (int timepoint = 0; timepoint <= 6; timepoint++)
+    {
+      ImVec2 point_start;
+      ImVec2 point_end;
+      ImColor color_line_dim = sdSysData.COLOR_SELECT.neo_color_DIM(1);
+      point_start.y = value_to_y(0.0f);
+      //point_start.x = time_scale_to_x(timepoint * 1000 * 10);
+      point_start.x = position_in_time_to_x_coord(timepoint * 60 * 10);
+
+      point_end.y = value_to_y(80.0f);
+      //point_end.x = time_scale_to_x(timepoint * 1000 * 10);
+      point_end.x = position_in_time_to_x_coord(timepoint * 60 * 10);
+
+      Draw_List->AddLine(position_on_plot(point_start), position_on_plot(point_end), color_line_dim, FULL_X_SIZE / PROPS.TIME_SPAN_MS);
+    }
+
+
+    // draw simple scale (hours)
+    for (int timepoint = 0; timepoint <= 8; timepoint++)
+    {
+      ImVec2 point_start;
+      ImVec2 point_end;
+      ImColor color_line_dim = sdSysData.COLOR_SELECT.neo_color_DIM(2);
+
+      point_start.y = value_to_y(0.0f);
+      //point_start.x = time_scale_to_x(timepoint * 1000 * 10);
+      point_start.x = position_in_time_to_x_coord(timepoint * 60 * 60);
+
+      point_end.y = value_to_y(80.0f);
+      //point_end.x = time_scale_to_x(timepoint * 1000 * 10);
+      point_end.x = position_in_time_to_x_coord(timepoint * 60 * 60);
+
+      Draw_List->AddLine(position_on_plot(point_start), position_on_plot(point_end), color_line_dim, FULL_X_SIZE / PROPS.TIME_SPAN_MS);
+    }
+
+    /*
+    {
+      ImVec2 point_start;
+      ImVec2 point_end;
+
+      vector<float> position;
+
+      ImColor color_line_dim = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(1);
+
+      float tmp_position;
+      for (int xpos = 0; xpos < DEGEN_POINT_SIZE; xpos++)
+      {
+        if (x_coord_to_position_in_time(xpos) < 10.0)
+        {
+          tmp_position = 0.0;
+        }
+        else if (x_coord_to_position_in_time(xpos) < 60 * 10)
+        {
+          tmp_position = 20.0;
+        }
+        else if (x_coord_to_position_in_time(xpos) < 60 * 60)
+        {
+          tmp_position = 40.0;
+        }
+        else
+        {
+          tmp_position = 60.0;
+        }
+
+        position.push_back(tmp_position);
+      }
+
+      for (int xpos = 0; xpos < DEGEN_POINT_SIZE - 1; xpos++)
+      {
+        point_start = ImVec2(xpos, position[xpos]);
+        point_end = ImVec2(xpos + 1, position[xpos + 1]);
+        Draw_List->AddLine(position_on_plot(point_start), position_on_plot(point_end), color_line_dim, 1.0f);
+      }
+
+    }
+    */
+    //--------------------
+
+    //for every line
+    for (int line_number = 0; line_number < (int)LINE.size(); line_number++)
+    { 
+      // for every point
+      if (LINE[line_number].DATA_POINT_TILL_PIVOT.size() > 1)
+      {
+        // Screen Draw Points
+        ImVec2 screen_point_start;
+        ImVec2 screen_point_end;
+
+        // Point to point start and end
+        ImVec2 point_start;
+        ImVec2 point_end;
+
+        // Point Min Max
+        ImVec2 point_min;
+        ImVec2 point_max;
+
+        // Values
+        float value_mean = 0.0f;
+        float value_min = 0.0f;
+        float value_max = 0.0f;
+        double value_time_elapsed = 0.0f;
+
+        ImColor color_line = sdSysData.COLOR_SELECT.neo_color_STANDARD(LINE[line_number].LINE_COLOR);
+        ImColor color_line_dim = sdSysData.COLOR_SELECT.neo_color_DIM(LINE[line_number].LINE_COLOR);
+
+        // Populate values
+        
+        //value_min = LINE[line_number].DATA_POINT[0].min();
+        //value_max = LINE[line_number].DATA_POINT[0].max();
+
+
+        //value_time_elapsed = ((double)(sdSysData.PROGRAM_TIME.current_frame_time() - LINE[line_number].DATA_POINT_TILL_PIVOT[(int)LINE[line_number].DATA_POINT_TILL_PIVOT.size() - 1].time_created()) / 1000) - TIME_START;
+        
+        // Draw min max of first point
+        //draw_min_max_at_point
+
+        //ImGui::Text("draw  e: %f %f", point_end.x, point_end.y);
+
+      
+        //cout << "point: " << point << endl;
+        
+        /*
+        // First Draw DATA_POINT_TILL_PIVOT  (start with last added)
+        // Load first point
+        value_mean = LINE[line_number].DATA_POINT_TILL_PIVOT[(int)LINE[line_number].DATA_POINT_TILL_PIVOT.size() - 1].mean();
+        point_end.x = 0;
+        point_end.y = value_to_y(value_mean);
+        screen_point_end = position_on_plot(point_end);
+        for (int point = (int)LINE[line_number].DATA_POINT_TILL_PIVOT.size() - 1; point >= 0; point--)
+        {
+          screen_point_start = screen_point_end;
+
+          value_mean = LINE[line_number].DATA_POINT_TILL_PIVOT[point].mean();
+          value_time_elapsed = ((double)(sdSysData.PROGRAM_TIME.current_frame_time() - LINE[line_number].DATA_POINT_TILL_PIVOT[point].time_created()) / 1000) - TIME_START;
+          
+          point_end.y = value_to_y(value_mean);
+          point_end.x = position_in_time_to_x_coord(value_time_elapsed);
+
+          screen_point_end = position_on_plot(point_end);
+
+          Draw_List->AddLine(screen_point_start, screen_point_end, color_line, LINE[line_number].POINT_SIZE);
+        }
+        */
+
+        // Draw everything before pivot point
+        value_time_elapsed = ((double)sdSysData.PROGRAM_TIME.current_frame_time() / 1000) - LINE[line_number].DATA_POINT_TILL_PIVOT[0].time_created();
+        point_end.x = position_in_time_to_x_coord(value_time_elapsed);
+        value_mean = LINE[line_number].DATA_POINT_TILL_PIVOT[0].mean();
+        point_end.y = value_to_y(value_mean);
+        screen_point_end = position_on_plot(point_end);
+        for (int point = 1; point < (int)LINE[line_number].DATA_POINT_TILL_PIVOT.size(); point++)
+        {
+          screen_point_start = screen_point_end;
+
+          value_time_elapsed = ((double)sdSysData.PROGRAM_TIME.current_frame_time() / 1000) - LINE[line_number].DATA_POINT_TILL_PIVOT[point].time_created();
+          point_end.x = position_in_time_to_x_coord(value_time_elapsed);
+          value_mean = LINE[line_number].DATA_POINT_TILL_PIVOT[point].mean();
+          point_end.y = value_to_y(value_mean);
+          screen_point_end = position_on_plot(point_end);
+
+          Draw_List->AddLine(screen_point_start, screen_point_end, color_line, LINE[line_number].POINT_SIZE);
+        }
+
+        // Reset start position
+        value_time_elapsed = ((double)sdSysData.PROGRAM_TIME.current_frame_time() / 1000) - LINE[line_number].DATA_POINT_TILL_PIVOT[0].time_created();
+        point_end.x = position_in_time_to_x_coord(value_time_elapsed);
+        value_mean = LINE[line_number].DATA_POINT_TILL_PIVOT[0].mean();
+        point_end.y = value_to_y(value_mean);
+        screen_point_end = position_on_plot(point_end);
+
+        // Draw everything after pivot point
+        for (int point = 0; point < (int)LINE[line_number].DATA_POINT.size(); point++)
+        {
+          if (LINE[line_number].DATA_POINT[point].samples() > 0)
+          {
+            screen_point_start = screen_point_end;
+
+            // draw_min max
+            value_min = LINE[line_number].DATA_POINT[point].min();
+            value_max = LINE[line_number].DATA_POINT[point].max();
+            point_min.x = point;
+            point_min.y = value_to_y(value_min);
+            point_max.x = point;
+            point_max.y = value_to_y(value_max);
+            Draw_List->AddLine(position_on_plot(point_min), position_on_plot(point_max), color_line_dim, 1.0f);
+
+            // draw point to point
+            point_end.x = point;
+            value_mean = LINE[line_number].DATA_POINT[point].mean();
+            point_end.y = value_to_y(value_mean);
+            screen_point_end = position_on_plot(point_end);
+  
+            Draw_List->AddLine(screen_point_start, screen_point_end, color_line, LINE[line_number].POINT_SIZE);
+          }  
+        }
+/*
+        for (int point = 1; point < (int)LINE[line_number].DATA_POINT.size(); point++)
+        {
+          //bool min_max_out_of_bounds_x = false;
+
+          // Load previous point
+          screen_point_start = screen_point_end;
+
+          // Populate values
+          value_mean = LINE[line_number].DATA_POINT[point].mean();
+          value_min = LINE[line_number].DATA_POINT[point].min();
+          value_max = LINE[line_number].DATA_POINT[point].max();
+          //value_time_elapsed = (((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0) - LINE[line_number].DATA_POINT[point].time_created() - TIME_START;
+
+          // if less than pivot point, get time as x, otherwise x is the position
+          if (LINE[line_number].PIVOT_POINT < point)
+          {
+
+          }
+          else
+          {
+            point_end.x = point;
+          }
+
+
+          // Draw min max
+          {
+            point_min.x = point_end.x;
+            point_min.y = value_to_y(value_min);
+            //point_min.y = value_to_y(value_mean + 10.0f);
+
+            point_max.x = point_end.x;
+            point_max.y = value_to_y(value_max);
+            //point_max.y = value_to_y(value_mean + 5.0f);
+
+            //(void)color_line_dim;
+            Draw_List->AddLine(position_on_plot(point_min), position_on_plot(point_max), color_line_dim, FULL_X_SIZE / PROPS.TIME_SPAN_MS);  // ***
+          }
+
+          // Draw Point to point
+          {
+            point_end.y = value_to_y(value_mean);
+
+            screen_point_end = position_on_plot(point_end);
+            
+            //if (min_max_out_of_bounds_x == false)
+            //{
+            
+            Draw_List->AddLine(screen_point_start, screen_point_end, color_line, LINE[line_number].POINT_SIZE);
+
+            
+          //}
+          }
+
+*/
+
+          /*
+          // Min Max
+          if (minmax)
+          {
+
+          position_on_plot(LINE[line_number].DATA_POINT[point].);
+
+
+          // New plot points are added to front, plot scrolls from front
+          min = position_on_plot(
+                ((float)(sdSysData.PROGRAM_TIME.current_frame_time() - SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].TIME_CREATED) / SUB_GRAPHS[graph].TIME_PER_POINT_F), 
+                SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].MIN_VALUE, SUB_GRAPHS[graph], min_max_out_of_bounds_x);
+          max = position_on_plot(
+                ((float)(sdSysData.PROGRAM_TIME.current_frame_time() - SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].TIME_CREATED) / SUB_GRAPHS[graph].TIME_PER_POINT_F), 
+                SUB_GRAPHS[graph].LINE[line].DATA_POINT[point].MAX_VALUE, SUB_GRAPHS[graph], min_max_out_of_bounds_x);
+          */
+/*
+          //if (min_max_out_of_bounds_x == false)
+          //{
+          //  Draw_List->AddLine(min, max, sdSysData.COLOR_SELECT.neo_color_DIM(SUB_GRAPHS[graph].LINE[line].LINE_COLOR), SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
+          //}
+
+          // Single Point
+
+
+
+        }
+*/
+
+        //ImGui::Text("ps: %lu %f", (LINE[line_number].DATA_POINT[0].time_created()), point_start.y);
+        //ImGui::Text("pe: %lu %f", (LINE[line_number].DATA_POINT[LINE[(int)line_number].DATA_POINT.size() -1].time_created()), point_end.y);
+        
+        //ImGui::Text("ps: %f %f", (float)(LINE[line_number].DATA_POINT[0].time_created()) - TIME_START, point_start.y);
+        //ImGui::Text("pe: %f %f", (float)(LINE[line_number].DATA_POINT[0].time_created()) - TIME_START, point_end.y);
+
+        //ImGui::Text("point e: %f %f", point_end.x, point_end.y);
+        //ImGui::Text("draw  e: %f %f", point_end.x, point_end.y);
+      }
+
+    }
+  }
+}
+
+void DRAW_D2_PLOT_DEGENERATE::create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size)
+{
+  D2_PLOT_LINE_DEGENERATE tmp_line;
+  
+  tmp_line.LINE_COLOR = Color;
+  tmp_line.DISPLAY_MEAN = Display_Mean;
+  tmp_line.DISPLAY_MIN_MAX = Display_Min_Max;
+  tmp_line.POINT_SIZE = Point_Size;
+
+  LINE.push_back(tmp_line);
+}
+
+void DRAW_D2_PLOT_DEGENERATE::create(double Start_Plot_Time)
+{
+  //GRID.PROPS.COLOR = PROPS.COLOR_GRID;
+  //GRID.PROPS.POINT_SIZE = PROPS.POINT_SIZE_GRID;
+  //GRID.PROPS.SEPERATOR_COUNT_HORIZONTAL = PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL;
+  //GRID.PROPS.SEPERATOR_COUNT_VERTICAL = PROPS.GRID_SEPERATOR_COUNT_VERTICAL;
+
+  TIME_START = Start_Plot_Time;
+}
+
+void DRAW_D2_PLOT_DEGENERATE::update(double Time, int Line_Number, float Value)
+{
+  if (FIRST_RUN_COMPLETE)
+  {
+    MIN_MAX_TIME_SLICE_DOUBLE tmp_time_slice;
+    tmp_time_slice.store_value(Value, Time);
+    LINE[Line_Number].DATA_POINT_TILL_PIVOT.push_back(tmp_time_slice);
+    
+    // Check Pivot
+    int new_time_spot = -1;
+    if ((int)LINE[Line_Number].DATA_POINT_TILL_PIVOT.size() >= LINE[Line_Number].PIVOT_POINT)
+    {
+      // lookup where to put the points following points
+      double elapsed_time = Time - LINE[Line_Number].DATA_POINT_TILL_PIVOT.front().time_created();
+
+      for (int time_spot = 0; new_time_spot == -1 && time_spot < (int)LINE[Line_Number].POSITION_INFO.size(); time_spot++)
+      {
+        if (elapsed_time < LINE[Line_Number].POSITION_INFO[time_spot].GRAPH_START_TIME)
+        {
+          new_time_spot = time_spot;
+        }
+      }
+
+      if (new_time_spot == -1)
+      {
+        new_time_spot = 0;
+      }
+
+      while ((int)LINE[Line_Number].DATA_POINT_TILL_PIVOT.size() > LINE[Line_Number].PIVOT_POINT)
+      {
+        // put the point in the right place
+        LINE[Line_Number].DATA_POINT[new_time_spot].store_value(LINE[Line_Number].DATA_POINT_TILL_PIVOT.front().mean(), 
+                                                LINE[Line_Number].DATA_POINT_TILL_PIVOT.front().time_created());
+
+        LINE[Line_Number].DATA_POINT_TILL_PIVOT.pop_front();
+      }
+
+      LINE[Line_Number].reorganize_line_data(Time);
+    }
+  }
+}
+
+/*
+void DRAW_D2_PLOT_DEGENERATE::reorganize_graph_data(double Time)
+{
+  if (FIRST_RUN_COMPLETE)
+  {
+    if (LINE.size() > 0)
+    {
+      for (int line = 0; line < (int)LINE.size(); line++)
+      {
+        LINE[line].reorganize_line_data(Time);
+      }
+    }
+  }
+}
+*/
+
+bool DRAW_D2_PLOT_DEGENERATE::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)
+{
+  bool ret_clicked = false;
+
+  //ImGui::Text("%ld", sdSysData.PROGRAM_TIME.current_frame_time());
+
+  // If graph is resized.
+  if (PREV_START_POS.x != Start_Position.x || PREV_START_POS.y != Start_Position.y || 
+      PREV_END_POS.x != End_Position.x || PREV_END_POS.y != End_Position.y)
+  {
+    START_POS = Start_Position;
+    END_POS = End_Position;
+
+    FULL_X_SIZE = (End_Position.x - Start_Position.x);
+    FULL_Y_SIZE = (End_Position.y - Start_Position.y);
+
+    PREV_START_POS = Start_Position;
+    PREV_END_POS = End_Position;
+
+    if (FIRST_RUN_COMPLETE == false)
+    {
+      first_run();
+    }
+  }
+
+  ImGui::BeginChild(PROPS.LABEL.c_str(), ImVec2(FULL_X_SIZE, FULL_Y_SIZE), false, 
+                                    ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
+                                    ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
+  {
+    ImDrawList* draw_list_graph = ImGui::GetWindowDrawList();
+    
+    // Draw Grid
+    //GRID.draw(draw_list_graph, sdSysData, Start_Position, End_Position);
+
+    // Draw lines
+    draw_lines(draw_list_graph, sdSysData);
+
+    // Is gadget clicked
+    ImGui::SetCursorScreenPos(Start_Position);
+    if (ImGui::InvisibleButton("InvisibleButton", ImVec2(FULL_X_SIZE, FULL_Y_SIZE)))
+    {
+      ret_clicked = true;
+    }
+
+  }
+  ImGui::EndChild();
+
+  return ret_clicked;
+}
+
 // ---------------------------------------------------------------------------------------
 
 #endif

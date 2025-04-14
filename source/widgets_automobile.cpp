@@ -1309,8 +1309,9 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     SDATA.L_SPEED_OUTSIDE.create();
   }
 
-  // Slow Plot line
+  // Slow Plot Segmented Scale
   {
+    // plot voltage, speed, temperature, fuel level
     SDATA.PLOT_SLOW.PROPS.LABEL = "Speed Plot";
     SDATA.PLOT_SLOW.PROPS.COLOR_GRID = RAS_WHITE;
     SDATA.PLOT_SLOW.PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL = 4;
@@ -1325,14 +1326,33 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     SDATA.PLOT_SLOW.create_subgraph(    140 * 60 * 1000, "3h (2:20m)");
     SDATA.PLOT_SLOW.create_subgraph( 5 * 60 * 60 * 1000, "8h (5h)"); 
 
-    SDATA.PLOT_SLOW.create_line(RAS_GREEN, false, false, 2.0f, 1.0f, true);
-    SDATA.PLOT_SLOW.create_line(RAS_ORANGE, false, false, 2.0f, 1.0f, true);
-    SDATA.PLOT_SLOW.create_line(RAS_RED, true, true, 2.0f, 1.0f);
-    SDATA.PLOT_SLOW.create_line(RAS_WHITE, true, true, 2.0f, 1.0f);
-    SDATA.PLOT_SLOW.create_line(RAS_ORANGE, true, true, 2.0f, 1.0f);
-    SDATA.PLOT_SLOW.create_line(RAS_CYAN, true, true, 2.0f, 1.0f);
+    SDATA.PLOT_SLOW.create_line(RAS_GREEN, false, false, 2.0f, 1.0f, true);   // Error
+    SDATA.PLOT_SLOW.create_line(RAS_ORANGE, false, false, 2.0f, 1.0f, true);  // STemp
+    SDATA.PLOT_SLOW.create_line(RAS_RED, true, true, 2.0f, 1.0f);             // Voltage
+    SDATA.PLOT_SLOW.create_line(RAS_WHITE, true, true, 2.0f, 1.0f);           // Speed
+    SDATA.PLOT_SLOW.create_line(RAS_ORANGE, true, true, 2.0f, 1.0f);          // S Temp
+    SDATA.PLOT_SLOW.create_line(RAS_CYAN, true, true, 2.0f, 1.0f);            // Fuel
     
     SDATA.PLOT_SLOW.create(sdSysData.PROGRAM_TIME.current_frame_time());
+  }
+  // Slow Plot Degenerate Scale
+  {
+    // plot voltage, speed, temperature, fuel level
+    SDATA.PLOT_SLOW_DEGEN.PROPS.LABEL = "Speed Plot";
+    //SDATA.PLOT_SLOW_DEGEN.PROPS.COLOR_GRID = RAS_WHITE;
+    //SDATA.PLOT_SLOW_DEGEN.PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL = 4;
+    SDATA.PLOT_SLOW_DEGEN.PROPS.DATA_POINTS_VALUE_MAX = 80;        // 80mph
+    SDATA.PLOT_SLOW_DEGEN.PROPS.LEFT_TO_RIGHT = false;
+    SDATA.PLOT_SLOW_DEGEN.PROPS.BOTTOM_TO_TOP = true;
+
+    SDATA.PLOT_SLOW_DEGEN.create_line(RAS_GREEN, true, true, 2.0f);   // Error
+    SDATA.PLOT_SLOW_DEGEN.create_line(RAS_ORANGE, true, true, 2.0f);  // STemp
+    SDATA.PLOT_SLOW_DEGEN.create_line(RAS_RED, true, true, 2.0f);     // Voltage
+    SDATA.PLOT_SLOW_DEGEN.create_line(RAS_WHITE, true, true, 2.0f);   // Speed
+    SDATA.PLOT_SLOW_DEGEN.create_line(RAS_ORANGE, true, true, 2.0f);  // S Temp
+    SDATA.PLOT_SLOW_DEGEN.create_line(RAS_CYAN, true, true, 2.0f);    // Fuel
+
+    SDATA.PLOT_SLOW_DEGEN.create(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0);
   }
 
   // Vertical Bars
@@ -1517,52 +1537,7 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     }
   }
 
-  /*
-  // DISPLAY_MID_BOTTOM = 1
-  {
-    {
-      SDATA.PLOT_VOLTAGE.PROPS.LABEL = "Voltage Plot";
-      SDATA.PLOT_VOLTAGE.PROPS.COLOR_GRID = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
-      SDATA.PLOT_VOLTAGE.PROPS.GRID_SEPERATOR_COUNT_HORIZONTAL = 4;
-      SDATA.PLOT_VOLTAGE.PROPS.DATA_POINTS_VALUE_MAX = 15;        // 80mph
-      SDATA.PLOT_VOLTAGE.PROPS.LEFT_TO_RIGHT = false;
-      SDATA.PLOT_VOLTAGE.PROPS.BOTTOM_TO_TOP = true;
-      
-      SDATA.PLOT_VOLTAGE.PROPS.GRID_SEPERATOR_COUNT_VERTICAL = 5;
-      SDATA.PLOT_VOLTAGE.create_subgraph(300,         10 * 1000, "10s");
-      SDATA.PLOT_VOLTAGE.create_subgraph(58,         290 * 1000, "5m (4:50m)");
-      SDATA.PLOT_VOLTAGE.create_subgraph(60,     40 * 60 * 1000, "45m (40m)");
-      SDATA.PLOT_VOLTAGE.create_subgraph(60,    140 * 60 * 1000, "3h (2:20m)");
-      SDATA.PLOT_VOLTAGE.create_subgraph(60, 5 * 60 * 60 * 1000, "8h (5h)"); 
-
-      // Plot Voltage Line
-      SDATA.PLOT_VOLTAGE.create_line(sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW, true, true, 2.0f, 1.0f);
-
-      SDATA.PLOT_VOLTAGE.create(sdSysData.PROGRAM_TIME.current_frame_time());
-    }
-
-    // Vertical Bars
-    {
-      {
-        SDATA.VB_VOLTAGE.PROPS.LABEL = "Voltage Vertical";
-        SDATA.VB_VOLTAGE.PROPS.BAR_HEIGHT = 30;
-        SDATA.VB_VOLTAGE.PROPS.MARKER_SIZE = 5;
-        SDATA.VB_VOLTAGE.PROPS.COLOR_BACKGROUND = sdSysData.COLOR_SELECT.COLOR_COMB_BLUE;
-        SDATA.VB_VOLTAGE.PROPS.COLOR_MARKER = sdSysData.COLOR_SELECT.COLOR_COMB_YELLOW;
-        SDATA.VB_VOLTAGE.PROPS.DISPLAY_SINGLE_POINT_FLOAT = true;
-        SDATA.VB_VOLTAGE.PROPS.DRAW_MIN_MAX = true;
-        SDATA.VB_VOLTAGE.PROPS.MAX = 15;
-        SDATA.VB_VOLTAGE.PROPS.HORIZONTAL = false;
-        SDATA.VB_VOLTAGE.PROPS.DRAW_RULER = true;
-        SDATA.VB_VOLTAGE.PROPS.COLOR_RULER = sdSysData.COLOR_SELECT.COLOR_COMB_WHITE;
-        SDATA.VB_VOLTAGE.PROPS.MAX_TICK_LEVEL = 4;
-        SDATA.VB_VOLTAGE.create();
-      }
-    }
-  }
-  */
-
-    // DISPLAY_MID_BOTTOM = 2 -- Temperature
+  // DISPLAY_MID_BOTTOM = 2 -- Temperature
   {
     {
       SDATA.PLOT_TEMPERATURE.PROPS.LABEL = "Temperature Plot";
@@ -2231,7 +2206,10 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
   // ------------------------------------------
   // Mid Top
+
+  // Segmented Graph
   {
+    // plot voltage, speed, temperature, fuel level
     if (SDATA.CAM_COMM_ERR > SDATA.PREV_D_CAM_COMM_ERROR)
     {
       SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, 1.0f);
@@ -2250,7 +2228,19 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, SDATA.SPEED_IMPRES);
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, SDATA.TEMP_S_TEMP);
     SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 5, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
+  }
 
+  // Degnerating Graph
+  {
+    // plot voltage, speed, temperature, fuel level
+    SDATA.PLOT_SLOW_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 2, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
+    SDATA.PLOT_SLOW_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 3, SDATA.SPEED_IMPRES);
+    SDATA.PLOT_SLOW_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 4, SDATA.TEMP_S_TEMP);
+    SDATA.PLOT_SLOW_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 5, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
+  }
+
+  // Vertical Bars
+  {
     SDATA.VB_SPEED.update_value(sdSysData, SDATA.SPEED);
     SDATA.VB_S_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);
     SDATA.VB_S_FUEL.update_value(sdSysData, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
@@ -2326,6 +2316,12 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
       SDATA.VB_POWER_FUEL_RAIL_P.update_value(sdSysData, (SDATA.FUEL_RAIL_PRESSURE_VAL / 40.0f) + 50.0f);
       SDATA.VB_POWER_SYSTEM_VAPER_P.update_value(sdSysData, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
     }
+  }
+
+  // Cleanup and process any post processing data
+  {
+    // Reorganize Degen Graph Data
+    //SDATA.PLOT_SLOW_DEGEN.reorganize_graph_data(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0);
   }
 }
 
@@ -2438,9 +2434,20 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
         ImVec2 pos1 = ImGui::GetCursorScreenPos();
         ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
         
-        if (SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2))
+        // plot speed, voltage, temperature, fuel level
+        if (SDATA.PLOT_SLOW_CHOICE == 0)
         {
-          //
+          if (SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2))
+          {
+            SDATA.PLOT_SLOW_CHOICE = 1;
+          }
+        }
+        else
+        {
+          if (SDATA.PLOT_SLOW_DEGEN.draw(sdSysData, pos1, pos2))
+          {
+            SDATA.PLOT_SLOW_CHOICE = 0;
+          }
         }
 
         ImGui::SameLine();

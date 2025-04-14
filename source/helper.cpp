@@ -353,7 +353,7 @@ void MIN_MAX_TIME_SLICE::store_value(float Value, unsigned long tmeFrame_Time)
 
   if (tmeFrame_Time != 0)
   {
-    if (TIME_CREATED != 0)
+    if (TIME_CREATED == 0)
     {
       TIME_CREATED = tmeFrame_Time;
     }
@@ -385,11 +385,13 @@ void MIN_MAX_TIME_SLICE::store_value(float Value)
   store_value(Value, 0);
 }
 
+/*
 void MIN_MAX_TIME_SLICE::merge(MIN_MAX_TIME_SLICE &Other_Time_Slice)
 {
   int del = Other_Time_Slice.samples();
   (void) del;
 }
+*/
 
 float MIN_MAX_TIME_SLICE::total()
 {
@@ -419,6 +421,156 @@ float MIN_MAX_TIME_SLICE::min()
 }
 
 float MIN_MAX_TIME_SLICE::max()
+{
+  return MAX_VALUE;
+}
+
+// ---------------------------------------------------------------------------------------
+// Min Max Time Classes double
+
+void MIN_MAX_TIME_SLICE_DOUBLE::set_as_placeholder()
+{
+  PLACEHOLDER = true;
+}
+
+double MIN_MAX_TIME_SLICE_DOUBLE::time_created()
+{
+  return TIME_CREATED;
+}
+
+double MIN_MAX_TIME_SLICE_DOUBLE::time_ended()
+{
+  return TIME_ENDED;
+}
+
+void MIN_MAX_TIME_SLICE_DOUBLE::clear(double tmeFrame_Time)
+{
+  TIME_CREATED = tmeFrame_Time;
+  ACTIVE = false;
+  VALUE = 0;
+  SAMPLES = 0;
+  MIN_VALUE = 0;
+  MAX_VALUE = 0;
+}
+
+void MIN_MAX_TIME_SLICE_DOUBLE::store_value(float Value, double tmeFrame_Time)
+{
+  if (PLACEHOLDER)
+  {
+    clear(0.0);
+    PLACEHOLDER = false;
+  }
+
+  VALUE = VALUE + Value;
+  SAMPLES++;
+
+  if (tmeFrame_Time != 0)
+  {
+    if (TIME_CREATED == 0)
+    {
+      TIME_CREATED = tmeFrame_Time;
+    }
+
+    TIME_ENDED = tmeFrame_Time;
+  }
+
+  if (ACTIVE == false)
+  {
+    MIN_VALUE = Value;
+    MAX_VALUE = Value;
+    ACTIVE = true;
+  }
+  else
+  {
+    if (Value < MIN_VALUE)
+    {
+      MIN_VALUE = Value;
+    }
+    if (Value > MAX_VALUE)
+    {
+      MAX_VALUE = Value;
+    }
+  }
+}
+
+void MIN_MAX_TIME_SLICE_DOUBLE::store_value(float Value)
+{
+  store_value(Value, 0);
+}
+
+void MIN_MAX_TIME_SLICE_DOUBLE::merge_into(MIN_MAX_TIME_SLICE_DOUBLE &Other_Time_Slice)
+{
+  if (Other_Time_Slice.PLACEHOLDER == false)
+  {
+    // If merging into a placeholder.
+    if (PLACEHOLDER)
+    {
+      clear(0.0);
+      PLACEHOLDER = false;
+    }
+
+    // Created Time
+    if (Other_Time_Slice.time_created() < TIME_CREATED  || 
+          TIME_CREATED == 0)
+    {
+      TIME_CREATED = Other_Time_Slice.time_created();
+    }
+
+    // Ended Time
+    if (Other_Time_Slice.time_ended() > TIME_ENDED)
+    {
+      TIME_ENDED = Other_Time_Slice.time_ended();
+    }
+
+    // Min Value
+    if (Other_Time_Slice.min() < MIN_VALUE)
+    {
+      MIN_VALUE = Other_Time_Slice.min();
+    }
+
+    // Max Value
+    if (Other_Time_Slice.max() < MAX_VALUE)
+    {
+      MAX_VALUE = Other_Time_Slice.max();
+    }
+
+    // Merge Values
+    VALUE += Other_Time_Slice.total();
+    SAMPLES += Other_Time_Slice.samples();
+
+    // Set placeholder
+    Other_Time_Slice.set_as_placeholder();
+  }
+}
+
+float MIN_MAX_TIME_SLICE_DOUBLE::total()
+{
+  return VALUE;
+}
+
+int MIN_MAX_TIME_SLICE_DOUBLE::samples()
+{
+  return SAMPLES;
+}
+
+float MIN_MAX_TIME_SLICE_DOUBLE::mean()
+{
+  if (SAMPLES > 0)
+  {
+    return VALUE / SAMPLES;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+float MIN_MAX_TIME_SLICE_DOUBLE::min()
+{
+  return MIN_VALUE;
+}
+
+float MIN_MAX_TIME_SLICE_DOUBLE::max()
 {
   return MAX_VALUE;
 }
