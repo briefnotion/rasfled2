@@ -12,6 +12,7 @@
 #ifndef HELPER_H
 #define HELPER_H
 
+#include <iostream>
 #include <deque>
 #include <vector>
 #include <string>
@@ -312,7 +313,6 @@ class MIN_MAX_TIME_SLICE_DOUBLE
 
   double TIME_CREATED = 0;
   double TIME_ENDED   = 0;
-  bool ACTIVE = false;
   float VALUE = 0;
   int SAMPLES = 0;
   float MIN_VALUE = 0;

@@ -1,3 +1,29 @@
+2.244_250411
+  - DRAW_D2_PLOT_DEGENERATE:
+      - Code added so that Min Max lines will now draw.
+      - Code added for top to bottom and left to right properties.
+      - Code added to handle window resizing.
+      - Problem: window will not start taking in data until drawn for the first time.
+      - Code added to show Horizontal and Vertical Grid with labels
+      - Problem: Labels likely to not show or show on wrong side of line if orientation is 
+          not right to left and botom to top.
+      - Frame is drawn around the graph. 
+      - Problem: Error or single point entries haven't been coded.
+        - At (widgets_automobile.cpp):
+            if (SDATA.CAM_COMM_ERR > SDATA.PREV_D_CAM_COMM_ERROR)
+              and 
+            if (SDATA.CAM_STAT_ERR != SDATA.PREV_D_CAM_STAT_ERROR)
+          Commented out for now
+      - Needs:
+        - More optimazation?
+        - PROPS.COLOR_GRID
+        - PROPS.POINT_SIZE_GRID
+        - PROPS.TIME_SCALE for exp_growth_number_scale_seconds(float X)
+        - Labels for grid vertical bars.
+        - Start receiving data at app load.
+  - Replaced old Graphs with the New one.
+
+
 2.243_250410
   - Working on a new graph type to replace DRAW_D2_PLOT.  DRAW_D2_PLOT_DEGENERATE is 
       more of what i envisioned when creating the graph.  This is only a test build.  

@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-#include<cmath>
+#include <cmath>
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
@@ -398,41 +398,29 @@ class D2_PLOT_LINE_DEGENERATE
   public:
 
   int PIVOT_POINT = 0;
-  //int RESERVE_SIZE = 0;
-  //int RESERVE_SIZE_CUTOFF = 0;
-  //int RESERVE_SIZE_TRIM_AMOUNT = 0;
 
   int LINE_COLOR;
   float POINT_SIZE = 2.0f;
 
   bool DISPLAY_MEAN = true;
   bool DISPLAY_MIN_MAX = false;
-  //float MIN_MAX_OVERLAP_FACTOR = 1.0f;
-
-  //MIN_MAX_TIME_SLICE VALUES;
-  //TIMED_PING UPDATE_SIMPLE_VALUES;
-  
-  //TIMED_PING MERGE_TIMER;
-  //float HOLDOVER_TOTAL = 0.0f;
-  //float HOLDOVER_MAX = 0.0f;
-  //float HOLDOVER_MIN = 0.0f;
-  //float HOLDOVER_COUNT = 0.0f;
-
-  //bool SINGLE_VALUE = false;
 
   vector<D2_VECTOR_POSITION_REFERENCE>  POSITION_INFO;
-  deque<MIN_MAX_TIME_SLICE_DOUBLE>     DATA_POINT_TILL_PIVOT;
+  deque<MIN_MAX_TIME_SLICE_DOUBLE>      DATA_POINT_TILL_PIVOT;
   vector<MIN_MAX_TIME_SLICE_DOUBLE>     DATA_POINT;
-
-  //void holdover_clear();
-
-  //void holdover_update(MIN_MAX_TIME_SLICE_SIMPLE Slice_Value);
 
   void reorganize_line_data(double Time);
 };
 
 
+class DRAW_D2_PLOT_DEGENERATE_GRID_PROPERTIES
+{
+  public:
 
+  float   TIME_END_LOCATION = 0;
+  int     DIVIDEND_COUNT    = 0;
+  string  LABEL             = "";
+};
 
 class DRAW_D2_PLOT_DEGENERATE_PROPERTIES
 {
@@ -440,14 +428,12 @@ class DRAW_D2_PLOT_DEGENERATE_PROPERTIES
 
   string LABEL = "Label";
   
-  int COLOR_GRID;                   // Color of grid
+  //int COLOR_GRID;                   // Color of grid
   //float POINT_SIZE_GRID = 1.0f;             // Size of grid lines
-  //int GRID_SEPERATOR_COUNT_HORIZONTAL = 5;  // Horizontal grid line count
-  //int GRID_SEPERATOR_COUNT_VERTICAL = 5;    // Vertical grid line count
+  int GRID_SEPERATOR_SEGMENTS = 5;  // Horizontal grid line count
 
   float DATA_POINTS_VALUE_MAX = 100;        // Max value, top of graph value.
 
-  //float TIME_SPAN_MS = 8.0f * 60.0f * 60.0f * 1000.0f;      // Time span in milliseconds
   double TIME_SPAN_MS = 8.0 * 60.0 * 60.0;
 
   bool LEFT_TO_RIGHT = TRUE;                // Defalt - plot points start on left side
@@ -457,14 +443,15 @@ class DRAW_D2_PLOT_DEGENERATE_PROPERTIES
 class DRAW_D2_PLOT_DEGENERATE
 {
   private:
-
-  //DRAW_GRID GRID;
   
   ImVec2 START_POS;
   ImVec2 END_POS;
 
   ImVec2 PREV_START_POS;
   ImVec2 PREV_END_POS;
+
+  ImVec2 RESIZE_MULTI;
+  ImVec2 ORIGINAL_SIZE;
 
   float FULL_X_SIZE = 0.0f;
   float FULL_Y_SIZE = 0.0f;
@@ -476,10 +463,14 @@ class DRAW_D2_PLOT_DEGENERATE
   double TIME_START = 0;
 
   vector<D2_PLOT_LINE_DEGENERATE> LINE;
+  vector<DRAW_D2_PLOT_DEGENERATE_GRID_PROPERTIES> GRID_PROPERTIES;
   
   // ---
   // Formulas:
 
+  /*
+  // A few graph charting formulas i was experimenting with.
+  
   // Triangular Number and Inverse Triangular Number
   float triangular_number(float X);             //  y = (x * (x + 1)) / 2
   float triangular_number_accum(float F_of_y);  //  x = (-1 + sqrt(1 + 8y)) / 2)
@@ -491,6 +482,7 @@ class DRAW_D2_PLOT_DEGENERATE
   // Exponential Growth and Inverse Exponential Growth
   float exp_growth_number(float X);       
   float exp_growth_accum(float F_of_y);
+  */
   
   // Exponential Growth and Inverse Exponential Growth with Scale
   float exp_growth_accum_scale_seconds(double F_of_y);
@@ -514,9 +506,6 @@ class DRAW_D2_PLOT_DEGENERATE
 
   // ---
 
-  //vector<DRAW_D2_PLOT_SUB_GRAPH_PROPERTIES> SUB_GRAPHS;
-  //void merge(double Time, int Sub_Graph, int Line_Number);
-
   ImVec2 position_on_plot(ImVec2 &Point);
   // Internal
 
@@ -526,9 +515,9 @@ class DRAW_D2_PLOT_DEGENERATE
   float value_to_y(float Value);
   // Looks at class vars to determine y on graph.
 
-  //void draw_min_max_at_point();
-  //void draw_point_to_point();
   void draw_lines(ImDrawList *Draw_List, system_data &sdSysData);
+
+  void draw_grid(ImDrawList *Draw_List, system_data &sdSysData);
 
   void first_run();
   bool FIRST_RUN_COMPLETE = false;
@@ -537,24 +526,16 @@ class DRAW_D2_PLOT_DEGENERATE
 
   DRAW_D2_PLOT_DEGENERATE_PROPERTIES PROPS;
 
-  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size, float Min_Max_Overlap_Factor, bool Single_Value);
+  void create_grid_divider(float Time_End_Location, int Divider_Count, string Label);
+
+  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size);
   // Prepare line for drawing
   //  Color of line
   //  Show Mean Value
   //  Show Min Max Values
   //  Point_Size - Mean value line point size
-  //  Min_Max_Overlap_Factor - Size of min_max is calculated. Value of 2.0f will double
-  //                            the size and cause min_max lines to overlap.
-  //                            Overlapped areas should be brighter.
-
-  void create_line(int Color, bool Display_Mean, bool Display_Min_Max, float Point_Size);
-  // Same as before, without single value option.
-
-  void create(double Start_Plot_Time);
 
   void update(double Time, int Line_Number, float Value);
-
-  //void reorganize_graph_data(double Time);
 
   bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };
