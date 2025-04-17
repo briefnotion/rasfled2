@@ -1363,6 +1363,16 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     SDATA.PLOT_SLOW_DEGEN.create_line(RAS_CYAN, true, true, 2.0f);    // Fuel
   }
 
+  // Power Curve Properties
+  {
+    SDATA.PLOT_POWER_CURVE.PROPS.LABEL = "Power Curve Plot";
+    SDATA.PLOT_POWER_CURVE.PROPS.ORIENTATION.BOTTOM_TO_TOP = true;
+    SDATA.PLOT_POWER_CURVE.PROPS.ORIENTATION.LEFT_TO_RIGHT = true;
+    SDATA.PLOT_POWER_CURVE.PROPS.MAX_SPEED = 80;
+
+    SDATA.PLOT_POWER_CURVE.create();
+  }
+
   // Vertical Bars
   {
     {
@@ -2300,6 +2310,12 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     SDATA.PLOT_SLOW_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 5, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
   }
 
+  // Power Curve Graph
+  {
+    SDATA.PLOT_POWER_CURVE.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 
+                                    SDATA.SPEED, SDATA.ACCELERATION);
+  }
+
   // Vertical Bars
   {
     SDATA.VB_SPEED.update_value(sdSysData, SDATA.SPEED);
@@ -2523,24 +2539,19 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
         ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
         
         // plot speed, voltage, temperature, fuel level
-        /*
         if (SDATA.PLOT_SLOW_CHOICE == 0)
         {
-          if (SDATA.PLOT_SLOW.draw(sdSysData, pos1, pos2))
+          if (SDATA.PLOT_SLOW_DEGEN.draw(sdSysData, pos1, pos2))
           {
             SDATA.PLOT_SLOW_CHOICE = 1;
           }
         }
         else
         {
-          if (SDATA.PLOT_SLOW_DEGEN.draw(sdSysData, pos1, pos2))
+          if (SDATA.PLOT_POWER_CURVE.draw(sdSysData, pos1, pos2))
           {
             SDATA.PLOT_SLOW_CHOICE = 0;
           }
-        }
-        */
-        if (SDATA.PLOT_SLOW_DEGEN.draw(sdSysData, pos1, pos2))
-        {
         }
 
         ImGui::SameLine();

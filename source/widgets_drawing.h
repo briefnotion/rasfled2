@@ -70,6 +70,20 @@ void Graphical_Number(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Posi
 
 // ---------------------------------------------------------------------------------------
 
+class PROPERTY_ORIENTATION
+{
+  public:
+  bool LEFT_TO_RIGHT = TRUE;                // Defalt - plot points start on left side
+  bool BOTTOM_TO_TOP = TRUE;                // Defalt - 0 value points start on bottom
+};
+
+// ---------------------------------------------------------------------------------------
+
+//ImVec2 position_on_plot(PROPERTY_ORIENTATION &Orientation, ImVec2 &Point, ImVec2 &Resize_Multiplier);
+
+// ---------------------------------------------------------------------------------------
+
+
 class MARKER_GADGET_PROPERTIES
 {
   public:
@@ -398,6 +412,7 @@ class D2_PLOT_LINE_DEGENERATE
   public:
 
   int PIVOT_POINT = 0;
+  double PIVOT_TIME = 0.0f;
 
   int LINE_COLOR;
   float POINT_SIZE = 2.0f;
@@ -465,6 +480,29 @@ class DRAW_D2_PLOT_DEGENERATE
   vector<D2_PLOT_LINE_DEGENERATE> LINE;
   vector<DRAW_D2_PLOT_DEGENERATE_GRID_PROPERTIES> GRID_PROPERTIES;
   
+  /*
+  To Do:
+
+  - Problem: window will not start taking in data until drawn for the first time.
+      Attempted to correct  but failed
+  - Problem: Labels likely to not show or show on wrong side of line if orientation is 
+      not right to left and botom to top.
+  - Problem: Error or single point entries haven't been coded.
+    - At (widgets_automobile.cpp):
+        if (SDATA.CAM_COMM_ERR > SDATA.PREV_D_CAM_COMM_ERROR)
+          and 
+        if (SDATA.CAM_STAT_ERR != SDATA.PREV_D_CAM_STAT_ERROR)
+      Commented out for now
+  - Needs:
+    - More optimazation?
+        Some progress made. Some progress lost
+    - PROPS.COLOR_GRID
+    - PROPS.POINT_SIZE_GRID
+    - PROPS.TIME_SCALE for exp_growth_number_scale_seconds(float X)
+    - Labels for grid vertical bars.
+    - Start receiving data at app load.
+  */
+
   // ---
   // Formulas:
 
@@ -506,7 +544,7 @@ class DRAW_D2_PLOT_DEGENERATE
 
   // ---
 
-  ImVec2 position_on_plot(ImVec2 &Point);
+  bool position_on_plot(ImVec2 &Point, ImVec2 &Position_Point);
   // Internal
 
   float time_scale_to_x(float Time);
@@ -519,6 +557,10 @@ class DRAW_D2_PLOT_DEGENERATE
 
   void draw_grid(ImDrawList *Draw_List, system_data &sdSysData);
 
+  void build_data_point_vectors();
+
+  void build_reference_vectors();
+  
   void first_run();
   bool FIRST_RUN_COMPLETE = false;
 
@@ -539,6 +581,89 @@ class DRAW_D2_PLOT_DEGENERATE
 
   bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };
+
+
+
+class DRAW_D2_PLOT_POWER_CURVE_PROPERTIES
+{
+  public:
+
+  string LABEL = "Label";
+  
+  //int COLOR_GRID;                   // Color of grid
+  //float POINT_SIZE_GRID = 1.0f;     // Size of grid lines
+
+  PROPERTY_ORIENTATION ORIENTATION;
+  
+  int MAX_SPEED = 80;
+};
+
+class DRAW_D2_PLOT_POWER_CURVE
+/*
+To Do:
+  - Needs: Reset Button
+  - Problem: Grids have no labels.
+  - Problem: Accel grid disapears on resize
+  - Needs: Smoothing of the marker.
+  - Needs: Deceleration Graph as well.
+  - Needs: Rescale at speed like with accel
+*/
+{
+  private:
+  
+  ImVec2 START_POS;
+  ImVec2 END_POS;
+
+  ImVec2 PREV_START_POS;
+  ImVec2 PREV_END_POS;
+
+  ImVec2 RESIZE_MULTI;
+  ImVec2 ORIGINAL_SIZE;
+
+  ImVec2 FULL_SIZE;
+
+  //---
+
+  float CURRENT_ACCELERATION_MAX = 0.1f;
+
+  //---
+
+  double TIME_START = 0;
+
+  ImVec2 LAST_ACCELERATION_READ;
+  vector<MIN_MAX_TIME_SLICE_DOUBLE> SPEED_VECTORS;
+
+
+  bool position_on_plot(ImVec2 &Point, ImVec2 &Position_Point);
+  // Internal
+
+  float value_to_x(float Value);
+  // Looks at class vars to determine y on graph.
+
+  float value_to_y(float Value);
+  // Looks at class vars to determine y on graph.
+
+  void draw_lines(ImDrawList *Draw_List, system_data &sdSysData);
+
+  void draw_grid(ImDrawList *Draw_List, system_data &sdSysData);
+
+  void build_speed_vectors();
+
+  bool FIRST_RUN_COMPLETE = false;
+
+  public:
+
+  DRAW_D2_PLOT_POWER_CURVE_PROPERTIES PROPS;
+
+  void create();
+
+  void update(double Time, float Speed, float Acceleration);
+
+  bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
+};
+
+
+
 
 // ---------------------------------------------------------------------------------------
 #endif

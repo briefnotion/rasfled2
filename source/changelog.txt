@@ -1,3 +1,7 @@
+2.245_250416
+  - Created and added Power curve graph.
+  - Made some changes to the degen graph.
+
 2.244_250411
   - DRAW_D2_PLOT_DEGENERATE:
       - Code added so that Min Max lines will now draw.

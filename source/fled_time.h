@@ -215,6 +215,14 @@ class TIMED_IS_READY
 class TIMED_PING
 // Class to manage conditions of when something needs to be ran.
 //  Simplified version of is_ready_timer.
+
+// Possible (untested) example:
+//  if (test.ping_down((unsigned long)(Time / 1000)) == false)
+//  {
+//    test.ping_up((unsigned long)(Time / 1000), 10000);
+//    ... code ...
+//  }
+
 {
   private:
   unsigned long START_TIME      = 0;  //  Calculated time of when variable will be ready.
