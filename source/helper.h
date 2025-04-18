@@ -470,6 +470,12 @@ class IMPACT_RESISTANCE_FLOAT_PROPERTIES
 class IMPACT_RESISTANCE_FLOAT
 // Floating Point varibale designed to average out the previos X entries into one
 //  value.  For fast and sparatic values.
+// Average value is calculated at read time via impact(Time).
+// Should not need to recalculate answer if New Time of impact read is not significant 
+//  or data hasnt changed.
+//
+// Problem: If SIZE = 3 and ALIVE_TIME = 150 and entries are very 10 ms, then 
+//  impact calls will only return average over previous 30 ms.
 // Problem: CPU INTENSIVE. Does not have a simple routine to get the value.  Value 
 //  is calculated via for loop where all values must be read to deteimine answer.
 //  Cant change the size without reconstructing the entire variable.

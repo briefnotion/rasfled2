@@ -596,6 +596,9 @@ class DRAW_D2_PLOT_POWER_CURVE_PROPERTIES
   PROPERTY_ORIENTATION ORIENTATION;
   
   int MAX_SPEED = 80;
+
+  int MPH_DIVISION =  3;  // 10 - Every mph has 10 points within. 10.0, 10.1, 10.2, ...
+                          //  3 - Every mph has 10 points within. 10.0, 10.333, 10.666, ...
 };
 
 class DRAW_D2_PLOT_POWER_CURVE
@@ -617,30 +620,34 @@ To Do:
   ImVec2 PREV_START_POS;
   ImVec2 PREV_END_POS;
 
-  ImVec2 RESIZE_MULTI;
   ImVec2 ORIGINAL_SIZE;
 
   ImVec2 FULL_SIZE;
 
   //---
 
-  float CURRENT_ACCELERATION_MAX = 0.1f;
+  float CURRENT_ACCELERATION_MAX = 0.0f;
+  float CURRENT_DECELERATION_MAX = 0.0f;  // Deceleration included.
 
   //---
 
   double TIME_START = 0;
 
-  ImVec2 LAST_ACCELERATION_READ;
-  vector<MIN_MAX_TIME_SLICE_DOUBLE> SPEED_VECTORS;
+  ImVec2 LAST_SPEED_ACCELERATION_READ;
+  vector<MIN_MAX_TIME_SLICE_DOUBLE> SPEED_VECTORS_ACCELERATION;
+  vector<MIN_MAX_TIME_SLICE_DOUBLE> SPEED_VECTORS_DECELERATION;
 
 
   bool position_on_plot(ImVec2 &Point, ImVec2 &Position_Point);
   // Internal
 
-  float value_to_x(float Value);
+  float value_to_x(float Speed);
   // Looks at class vars to determine y on graph.
 
-  float value_to_y(float Value);
+  float value_to_y_accel(float Acceleration);
+  // Looks at class vars to determine y on graph.
+
+  float value_to_y_decel(float Deceleration);
   // Looks at class vars to determine y on graph.
 
   void draw_lines(ImDrawList *Draw_List, system_data &sdSysData);

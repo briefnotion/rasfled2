@@ -124,10 +124,12 @@ float VELOCITY::val_mph()
   return velocity_translate_kmph_to_mph(KMPH.latest());
 }
 
+/*
 float VELOCITY::val_mph_impres(unsigned long tmeFrame_Time)
 {
   return velocity_translate_kmph_to_mph(KMPH.impact(tmeFrame_Time));
 }
+*/
 
 string VELOCITY::kmph()
 {

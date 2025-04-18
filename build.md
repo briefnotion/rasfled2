@@ -4,6 +4,9 @@ This is a smiple list of instructions that guide me on installing Rasfled on a n
 
 Not all, but most, items used to create rasfled is available through Amazon and is on the rasfled list: https://www.amazon.com/hz/wishlist/ls/12PBNFZNUHIIO?ref_=wl_share
 
+Consider:  
+https://github.com/PlummersSoftwareLLC/NightDriverStrip
+
 ## Install Build Essentials and Manuals
 Necessay for compiler and building tools
 ```

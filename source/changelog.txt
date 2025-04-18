@@ -1,3 +1,16 @@
+2.246_250418
+  - Changed some values in the automible screen to use the more accurate average tire speed 
+      instead of the reported transmission velocity speed.
+  - Changed the auto acceleration to calculate on 100 samples instead of 25.  Smoothed out 
+      the jittery of the acceleration data.  Bumps in the road should't show up as much.
+  - Made improvements to Power Curve:
+      Precision property added and lableled PROPS.MPH_DIVISION
+      Precision changed from 10 (.1) to 3 (.333...)
+  - Added a Deceleration power curve, although, its likely to not have much meaning other 
+      that to track at what speed the maximum braking was.  It may be more important to only 
+      turn on if brakes are applied and then get the braking mean.
+  - Learned a few things that I can apply to the degen graph.
+
 2.245_250416
   - Created and added Power curve graph.
   - Made some changes to the degen graph.

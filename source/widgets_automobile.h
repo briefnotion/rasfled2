@@ -224,9 +224,10 @@ class DISPLAY_DATA_AUTOMOBILE
 
   int MESSAGES = -1;
   
-  float SPEED = 0.0f;
-  float SPEED_IMPRES = 0.0f;
-  float ACCELERATION = 0.0f;
+  float                   SPEED_RAW               = 0.0f;   // Good for Objects that have their own post processing
+  float                   ACCELERATION_IMPACT     = 0.0f;   // Good for Objects that have their own post processing
+                                                            // Uses Imperical Rule, but value is still eratic.
+  IMPACT_RESISTANCE_FLOAT ACCELERATION_IMPACT_MAG;          // Magnifying Impact Resistance
 
   float CRUISE_CONTROL_SPEED = 0.0f;
   bool CRUISE_CONTROL_SET = false;
@@ -457,6 +458,9 @@ class AUTOMOBILE_SCREEN
 
   // AUTOMOBILE_ELECTRICAL
   T_DATA_DISPLAY NOVA_2_CONTROL_UNIT_42;
+
+  // AUTOMOBILE CALCULATED ACCELERATION
+  T_DATA_DISPLAY NOVA_2_ACCELERATION_IMPACT;
 
   // AUTOMOBILE_TRANSMISSION_GEAR
   T_DATA_DISPLAY NOVA_2_GEAR;

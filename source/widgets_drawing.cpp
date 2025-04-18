@@ -1761,20 +1761,20 @@ bool DRAW_D2_PLOT_POWER_CURVE::position_on_plot(ImVec2 &Point, ImVec2 &Position_
   // Calc
   if (PROPS.ORIENTATION.LEFT_TO_RIGHT)
   {
-    Position_Point.x = START_POS.x + (Point.x  *  RESIZE_MULTI.x);
+    Position_Point.x = START_POS.x + (Point.x);
   }
   else
   {
-    Position_Point.x = END_POS.x - (Point.x  *  RESIZE_MULTI.x);
+    Position_Point.x = END_POS.x - (Point.x);
   }
 
   if (PROPS.ORIENTATION.BOTTOM_TO_TOP)
   {
-    Position_Point.y = END_POS.y - (Point.y *  RESIZE_MULTI.y);
+    Position_Point.y = END_POS.y - (Point.y);
   }
   else
   {
-    Position_Point.y = START_POS.y + (Point.y *  RESIZE_MULTI.y);
+    Position_Point.y = START_POS.y + (Point.y);
   }
 
   // Return
@@ -1789,77 +1789,111 @@ bool DRAW_D2_PLOT_POWER_CURVE::position_on_plot(ImVec2 &Point, ImVec2 &Position_
   }
 }
 
-float DRAW_D2_PLOT_POWER_CURVE::value_to_x(float Value)
+float DRAW_D2_PLOT_POWER_CURVE::value_to_x(float Speed)
 {
-  return Value * FULL_SIZE.x / ((float)(PROPS.MAX_SPEED * 10));
+  return Speed * (FULL_SIZE.x / (float)(PROPS.MAX_SPEED));
 }
 
-float DRAW_D2_PLOT_POWER_CURVE::value_to_y(float Value)
+float DRAW_D2_PLOT_POWER_CURVE::value_to_y_accel(float Acceleration)
 {
-  return Value * FULL_SIZE.y / CURRENT_ACCELERATION_MAX;
+  return Acceleration * FULL_SIZE.y / (CURRENT_ACCELERATION_MAX * 1.2f);
+}
+
+float DRAW_D2_PLOT_POWER_CURVE::value_to_y_decel(float Deceleration)
+{
+  return Deceleration * FULL_SIZE.y / (CURRENT_DECELERATION_MAX * 1.2f);
 }
 
 void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sdSysData)
 {
-  if (SPEED_VECTORS.size() > 0)
+  
+  // Draw Frame and Grid
+  draw_grid(Draw_List, sdSysData);
+
+  // Simple Label
+  ImGui::Text("                                MAX: %.2f      MIN: %.2f", CURRENT_ACCELERATION_MAX, CURRENT_DECELERATION_MAX);
+  ImGui::Text("                                v %.2f : a %.2f", LAST_SPEED_ACCELERATION_READ.x, LAST_SPEED_ACCELERATION_READ.y);
+  // Spaces are the temporary solution.  :)
+
+  // Commonly used varables
+
+  // Screen Draw Points
+  ImVec2 screen_position_start;
+  ImVec2 screen_position_end;
+
+  // Point to point start and end
+  ImVec2 point_start;
+  ImVec2 point_end;
+
+  // Values
+  ImColor color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
+  ImColor color_line_decel = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
+
+  ImColor color_marker = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
+  ImColor color_marker_fill = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
+  ImColor color_marker_fill_decel = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
+
+  // Draw DECELERATION
+  if (SPEED_VECTORS_DECELERATION.size() > 0)
   {
-    // Draw Frame and Grid
-    draw_grid(Draw_List, sdSysData);
-
-    // Screen Draw Points
-    ImVec2 screen_position_start;
-    ImVec2 screen_position_end;
-
-    // Point to point start and end
-    ImVec2 point_start;
-    ImVec2 point_end;
-
-    // Values
-    ImColor color_line = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
-
-    ImColor color_marker = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
-    ImColor color_marker_fill = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
-    ImColor color_marker_fill_decel = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
-
-    //
     point_end.x = value_to_x(0);
-    point_end.y = value_to_y(SPEED_VECTORS[0].max());
-
-    for (int speed_point = 1; speed_point < (int)SPEED_VECTORS.size(); speed_point++)
+    point_end.y = value_to_y_decel(SPEED_VECTORS_DECELERATION[0].max());
+    float speed = 0.0f;
+    for (int speed_point = 1; speed_point < (int)SPEED_VECTORS_DECELERATION.size(); speed_point++)
     {
+      speed = (float)speed_point / (float)PROPS.MPH_DIVISION;
       point_start = point_end;
-
-      point_end.x = value_to_x(speed_point);
-      point_end.y = value_to_y(SPEED_VECTORS[speed_point].max());
-      
+      point_end.x = value_to_x(speed);
+      point_end.y = value_to_y_decel(SPEED_VECTORS_DECELERATION[speed_point].max());
       if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
       {
-        Draw_List->AddLine(screen_position_start, screen_position_end, color_line, 1.0f);
-      }
-
-    }
-
-    // Draw Current pos
-    point_start.x = value_to_x(LAST_ACCELERATION_READ.x * 10.0f);
-    point_start.y = value_to_y(abs(LAST_ACCELERATION_READ.y));
-
-    ImGui::Text("v %.2f : a %.2f", LAST_ACCELERATION_READ.x, LAST_ACCELERATION_READ.y);
-
-    if (LAST_ACCELERATION_READ.y >= 0.0f)
-    {      
-      if (position_on_plot(point_start, screen_position_start))
-      {
-        Draw_List->AddCircleFilled(screen_position_start, 5.0f, color_marker_fill);
-        Draw_List->AddCircleFilled(screen_position_start, 5.0f, color_marker);
+        Draw_List->AddLine(screen_position_start, screen_position_end, color_line_decel, 3.0f);
       }
     }
-    else
-    {      
-      if (position_on_plot(point_start, screen_position_start))
+  }
+
+  // Draw Acceleration
+  if (SPEED_VECTORS_ACCELERATION.size() > 0)
+  {
+    point_end.x = value_to_x(0);
+    point_end.y = value_to_y_accel(SPEED_VECTORS_ACCELERATION[0].max());
+    float speed = 0.0f;
+    for (int speed_point = 1; speed_point < (int)SPEED_VECTORS_ACCELERATION.size(); speed_point++)
+    {
+      speed = (float)speed_point / (float)PROPS.MPH_DIVISION;
+      point_start = point_end;
+      point_end.x = value_to_x(speed);
+      point_end.y = value_to_y_accel(SPEED_VECTORS_ACCELERATION[speed_point].max());
+      if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
       {
-        Draw_List->AddCircleFilled(screen_position_start, 5.0f, color_marker_fill_decel);
-        Draw_List->AddCircle(screen_position_start, 5.0f, color_marker);
+        Draw_List->AddLine(screen_position_start, screen_position_end, color_line_accel, 3.0f);
       }
+    }
+  }
+
+  // Draw Indicator
+  if (LAST_SPEED_ACCELERATION_READ.y >= 0.0f)
+  {    
+    // Draw Current Acceleration pos indicator
+    point_start.x = value_to_x(LAST_SPEED_ACCELERATION_READ.x);
+    point_start.y = value_to_y_accel(LAST_SPEED_ACCELERATION_READ.y);
+
+    if (position_on_plot(point_start, screen_position_start))
+    {
+      Draw_List->AddCircleFilled(screen_position_start, 5.0f, color_marker_fill);
+      Draw_List->AddCircle(screen_position_start, 5.0f, color_marker, 0, 2.0f);
+    }
+  }
+  else
+  {         
+    // Draw Current Deceleration pos indicator
+    point_start.x = value_to_x(LAST_SPEED_ACCELERATION_READ.x);
+    point_start.y = value_to_y_decel(abs(LAST_SPEED_ACCELERATION_READ.y)); 
+
+    if (position_on_plot(point_start, screen_position_start))
+    {
+      Draw_List->AddCircleFilled(screen_position_start, 5.0f, color_marker_fill_decel);
+      Draw_List->AddCircle(screen_position_start, 5.0f, color_marker);
     }
   }
 }
@@ -1867,8 +1901,10 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
 void DRAW_D2_PLOT_POWER_CURVE::draw_grid(ImDrawList *Draw_List, system_data &sdSysData)
 {
   // Assign Colors
-  ImColor color_border = sdSysData.COLOR_SELECT.neo_color_DIM(RAS_BLUE);
-  ImColor color_grid   = sdSysData.COLOR_SELECT.neo_color_DIM(RAS_WHITE);
+  ImColor color_border        = sdSysData.COLOR_SELECT.neo_color_DIM(RAS_BLUE);
+  ImColor color_grid_speed    = sdSysData.COLOR_SELECT.neo_color_DIM(RAS_WHITE);
+  ImColor color_grid_accel    = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
+  ImColor color_grid_decel    = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
 
   ImVec2 point_start;
   ImVec2 point_end;
@@ -1876,60 +1912,81 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_grid(ImDrawList *Draw_List, system_data &sdS
   ImVec2 screen_position_start;
   ImVec2 screen_position_end;
   
-  int step = 0;
-
   // Draw Frame around graph
   Draw_List->AddRect(START_POS, END_POS, color_border, 8.0f , 0, 1.0f);
 
   // Draw Speed
-  step = PROPS.MAX_SPEED / 10;
-
-  for (int speed_line = 1; speed_line <= step; speed_line++)
+  for (int speed_line = 1; speed_line <= PROPS.MAX_SPEED / 10; speed_line++)
   {
-    point_start.x = value_to_x((float)speed_line * 10.0f * 10.0f);
-    point_start.y = value_to_y(0.0f);
-    point_end.x = value_to_x((float)speed_line * 10.0f * 10.0f);
-    point_end.y = value_to_y(CURRENT_ACCELERATION_MAX);
+    point_start.x = value_to_x((float)speed_line * 10.0f);
+    point_start.y = 0.0f;
+    point_end.x = value_to_x((float)speed_line * 10.0f);
+    point_end.y = 0.0f;
 
-    if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
-    {
-      Draw_List->AddLine(screen_position_start, screen_position_end, 
-                          color_grid, 1.0f);
-    }
+    position_on_plot(point_start, screen_position_start);
+    position_on_plot(point_end, screen_position_end);
+
+    screen_position_start.y = START_POS.y;
+    screen_position_end.y   = END_POS.y;
+
+    Draw_List->AddLine(screen_position_start, screen_position_end, 
+                        color_grid_speed, 1.0f);
   }
 
   // Draw Accel
-  step = (int)CURRENT_ACCELERATION_MAX;
-
-  for (int accel_line = 1; accel_line <= step; accel_line++)
+  for (int accel_line = 1; accel_line <= (int)CURRENT_ACCELERATION_MAX; accel_line++)
   {
-    point_start.x = value_to_x(0.0f);
-    point_start.y = value_to_y((float)accel_line);
-    point_end.x = value_to_x((float)(PROPS.MAX_SPEED * 10));
-    point_end.y = value_to_y((float)accel_line);
+    point_start.x = 0.0f;
+    point_start.y = value_to_y_accel((float)accel_line);
+    point_end.x = 0.0f;
+    point_end.y = value_to_y_accel((float)accel_line);
 
-    if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
-    {
-      Draw_List->AddLine(screen_position_start, screen_position_end, 
-                          color_grid, 1.0f);
-    }
+    position_on_plot(point_start, screen_position_start);
+    position_on_plot(point_end, screen_position_end);
+
+    screen_position_start.x = START_POS.x;
+    screen_position_end.x   = END_POS.x;
+
+    Draw_List->AddLine(screen_position_start, screen_position_end, 
+                        color_grid_accel, 1.0f);
+  
   }
 
-  ImGui::Text ("MAX: %.2f", CURRENT_ACCELERATION_MAX);
+  // Draw Decel
+  for (int decel_line = 1; decel_line <= (int)(CURRENT_DECELERATION_MAX); decel_line++)
+  {
+    point_start.x = 0.0f;
+    point_start.y = value_to_y_decel((float)decel_line);
+    point_end.x = 0.0f;
+    point_end.y = value_to_y_decel((float)decel_line);
+
+    position_on_plot(point_start, screen_position_start);
+    position_on_plot(point_end, screen_position_end);
+
+    screen_position_start.x = START_POS.x;
+    screen_position_end.x   = END_POS.x;
+
+    Draw_List->AddLine(screen_position_start, screen_position_end, 
+                        color_grid_decel, 1.0f);
+  
+  }
+  
 }
 
 void DRAW_D2_PLOT_POWER_CURVE::build_speed_vectors()
 {
   // Calculate the size of the speed vectors
   // 1 per tenth of a mph
-  int size = PROPS.MAX_SPEED * 10;
+  int size = PROPS.MAX_SPEED * PROPS.MPH_DIVISION;
 
-  SPEED_VECTORS.reserve(size);
+  SPEED_VECTORS_ACCELERATION.reserve(size);
+  SPEED_VECTORS_DECELERATION.reserve(size);
 
   MIN_MAX_TIME_SLICE_DOUBLE tmp_empty_slice;
   for (int pos = 0; pos < size; pos++)
   {
-    SPEED_VECTORS.push_back(tmp_empty_slice);
+    SPEED_VECTORS_ACCELERATION.push_back(tmp_empty_slice);
+    SPEED_VECTORS_DECELERATION.push_back(tmp_empty_slice);
   }
 }
 
@@ -1940,20 +1997,30 @@ void DRAW_D2_PLOT_POWER_CURVE::create()
 
 void DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Acceleration)
 {
-  LAST_ACCELERATION_READ.x = Speed;
-  LAST_ACCELERATION_READ.y = Acceleration;
+  LAST_SPEED_ACCELERATION_READ.x = Speed;
+  LAST_SPEED_ACCELERATION_READ.y = Acceleration;
 
-  if (Acceleration > 0.0f && (int)Speed < PROPS.MAX_SPEED)
-  {
-    int converted_speed = int(Speed * 10.0);
+  float storage_point = Speed * (float)PROPS.MPH_DIVISION;
     
-    if (converted_speed < (int)SPEED_VECTORS.size())
+  if (Acceleration > 0.0f && Speed < PROPS.MAX_SPEED)
+  {
+    if ((int)storage_point < (int)SPEED_VECTORS_ACCELERATION.size())
     {
-      SPEED_VECTORS[converted_speed].store_value(Acceleration, Time);
-
+      SPEED_VECTORS_ACCELERATION[(int)storage_point].store_value(Acceleration, Time);
       if (Acceleration > CURRENT_ACCELERATION_MAX)
       {
         CURRENT_ACCELERATION_MAX = Acceleration;
+      }
+    }
+  }
+  else if (Acceleration < 0.0f && Speed < PROPS.MAX_SPEED)
+  {
+    if ((int)storage_point < (int)SPEED_VECTORS_DECELERATION.size())
+    {
+      SPEED_VECTORS_DECELERATION[(int)storage_point].store_value(abs(Acceleration), Time);
+      if (abs(Acceleration) > CURRENT_DECELERATION_MAX)
+      {
+        CURRENT_DECELERATION_MAX = abs(Acceleration);
       }
     }
   }
@@ -1978,14 +2045,7 @@ bool DRAW_D2_PLOT_POWER_CURVE::draw(system_data &sdSysData, ImVec2 Start_Positio
     {
       FIRST_RUN_COMPLETE = true;
       ORIGINAL_SIZE = FULL_SIZE;
-      RESIZE_MULTI.x = 1.0f;
-      RESIZE_MULTI.y = 1.0f;
       TIME_START = (((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0);
-    }
-    else
-    {
-      RESIZE_MULTI.x = FULL_SIZE.x / ORIGINAL_SIZE.x;
-      RESIZE_MULTI.y = FULL_SIZE.y / ORIGINAL_SIZE.y;
     }
   }
   

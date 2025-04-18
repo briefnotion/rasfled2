@@ -750,6 +750,15 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
 
     // ---
     ImGui::NewLine();
+    ImGui::Text("          ACCELERATION");
+
+    NOVA_2_ACCELERATION_IMPACT.update_value(sdSysData, to_string(sdSysData.CAR_INFO.CALCULATED.acceleration(sdSysData.PROGRAM_TIME.current_frame_time())));
+    NOVA_2_ACCELERATION_IMPACT.draw(draw_list_nova, sdSysData);
+  
+    // ---
+
+    // ---
+    ImGui::NewLine();
     ImGui::Text("          TRANSMISSION_GEAR");
   
     NOVA_2_GEAR.update_value(sdSysData, (sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_short_desc() + to_string(sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_reported())));
@@ -1906,6 +1915,12 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     NOVA_2_GEAR.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Gear ");
     NOVA_2_GEAR.create(sdSysData);
 
+    // AUTOMOBILE CALCULATED ACCELERATION
+
+    NOVA_2_ACCELERATION_IMPACT.PROPS = tmp_defalt_props;
+    NOVA_2_ACCELERATION_IMPACT.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "Accel ");
+    NOVA_2_ACCELERATION_IMPACT.create(sdSysData);
+
     // AUTOMOBILE_ACCELERATOR
 
     NOVA_2_ACCELERATOR.PROPS = tmp_defalt_props;
@@ -2063,15 +2078,19 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
 
 void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 {
+  // Commonly used values
+  unsigned long current_frame_time_lu = sdSysData.PROGRAM_TIME.current_frame_time();
+  double        current_frame_time_db = (double)sdSysData.PROGRAM_TIME.current_frame_time();
+
   // Gather Data
 
   SDATA.MESSAGES = sdSysData.CAR_INFO.message_count;
   SDATA.LATEST_UNKNOWN_MESSAGE = sdSysData.CAR_INFO.DATA.AD_UNKNOWN.ORIG;
 
-  SDATA.SPEED = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph();
-  //SDATA.SPEED_IMPRES = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_TRANS.val_mph_impres(sdSysData.tmeCURRENT_FRAME_TIME);
-  SDATA.SPEED_IMPRES = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph();
-  SDATA.ACCELERATION = sdSysData.CAR_INFO.CALCULATED.ACCELERATION_QUICK_MEAN_HISTORY.impact(sdSysData.PROGRAM_TIME.current_frame_time());
+  SDATA.SPEED_RAW     = sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph();
+
+  SDATA.ACCELERATION_IMPACT     = sdSysData.CAR_INFO.CALCULATED.acceleration(current_frame_time_lu);
+  SDATA.ACCELERATION_IMPACT_MAG.set_value(current_frame_time_lu, SDATA.ACCELERATION_IMPACT);
 
   SDATA.CRUISE_CONTROL_SET = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control();
   SDATA.CRUISE_CONTROL_SPEED = sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control_speed();
@@ -2079,7 +2098,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   if (SDATA.GEAR_VAL != sdSysData.CAR_INFO.STATUS.GEAR.reported())
   {
     SDATA.GEAR_VAL = sdSysData.CAR_INFO.STATUS.GEAR.reported();
-    SDATA.GEAR_SWITCH_DELAY.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 500);
+    SDATA.GEAR_SWITCH_DELAY.ping_up(current_frame_time_lu, 500);
   }
 
   if (sdSysData.CAR_INFO.STATUS.GEAR.reported() > 0 && sdSysData.CAR_INFO.STATUS.GEAR.reported() < 10)
@@ -2191,8 +2210,8 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   // Update Widgets ------
 
   // Large Displays on Main Sidebar Screen
-  SDATA.L_SPEED_SB.update_value(sdSysData, SDATA.SPEED_IMPRES, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
-  SDATA.L_ACCELERATION_SB.update_value(sdSysData, 10.0f * SDATA.ACCELERATION);
+  SDATA.L_SPEED_SB.update_value(sdSysData, SDATA.SPEED_RAW, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
+  SDATA.L_ACCELERATION_SB.update_value(sdSysData, 10.0f * SDATA.ACCELERATION_IMPACT);
   SDATA.L_GEAR_SB.update_value((SDATA.GEAR_SELECTION.c_str() + SDATA.GEAR));
   SDATA.L_TACH_SB.update_value(sdSysData, (float)SDATA.RPM / 100.0f);
   SDATA.L_VOLTAGE_SB.update_value(sdSysData, SDATA.VOLTAGE_VAL);
@@ -2268,7 +2287,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   // ------------------------------------------
   // Outside
   {
-    SDATA.L_SPEED_OUTSIDE.update_value(sdSysData, SDATA.SPEED_IMPRES, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
+    SDATA.L_SPEED_OUTSIDE.update_value(sdSysData, SDATA.SPEED_RAW, SDATA.CRUISE_CONTROL_SPEED, SDATA.CRUISE_CONTROL_SET);
   }
 
   // ------------------------------------------
@@ -2280,45 +2299,45 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     /*
     if (SDATA.CAM_COMM_ERR > SDATA.PREV_D_CAM_COMM_ERROR)
     {
-      SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, 1.0f);
+      SDATA.PLOT_SLOW.update(current_frame_time_lu, 0, 1.0f);
       SDATA.PREV_D_CAM_COMM_ERROR = SDATA.CAM_COMM_ERR;
       sdSysData.ALERTS_AUTO.sound_alert(2);
     }
 
     if (SDATA.CAM_STAT_ERR != SDATA.PREV_D_CAM_STAT_ERROR)
     {
-      SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, 1.0f);
+      SDATA.PLOT_SLOW.update(current_frame_time_lu, 1, 1.0f);
       SDATA.PREV_D_CAM_STAT_ERROR = SDATA.CAM_STAT_ERR;
       sdSysData.ALERTS_AUTO.sound_alert(1);
     }
     */
 
     /*
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, SDATA.SPEED_IMPRES);
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, SDATA.TEMP_S_TEMP);
-    SDATA.PLOT_SLOW.update(sdSysData.PROGRAM_TIME.current_frame_time(), 5, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
+    SDATA.PLOT_SLOW.update(current_frame_time_lu, 2, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
+    SDATA.PLOT_SLOW.update(current_frame_time_lu, 3, SDATA.SPEED_IMPRES);
+    SDATA.PLOT_SLOW.update(current_frame_time_lu, 4, SDATA.TEMP_S_TEMP);
+    SDATA.PLOT_SLOW.update(current_frame_time_lu, 5, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
     */
   }
 
   // Degnerating Graph
   {
     // plot voltage, speed, temperature, fuel level
-    SDATA.PLOT_SLOW_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 2, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
-    SDATA.PLOT_SLOW_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 3, SDATA.SPEED_IMPRES);
-    SDATA.PLOT_SLOW_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 4, SDATA.TEMP_S_TEMP);
-    SDATA.PLOT_SLOW_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 5, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
+    SDATA.PLOT_SLOW_DEGEN.update((current_frame_time_db) / 1000.0, 2, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
+    SDATA.PLOT_SLOW_DEGEN.update((current_frame_time_db) / 1000.0, 3, SDATA.SPEED_RAW);
+    SDATA.PLOT_SLOW_DEGEN.update((current_frame_time_db) / 1000.0, 4, SDATA.TEMP_S_TEMP);
+    SDATA.PLOT_SLOW_DEGEN.update((current_frame_time_db) / 1000.0, 5, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
   }
 
   // Power Curve Graph
   {
-    SDATA.PLOT_POWER_CURVE.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 
-                                    SDATA.SPEED, SDATA.ACCELERATION);
+    SDATA.PLOT_POWER_CURVE.update((current_frame_time_db) / 1000.0, 
+                                    SDATA.SPEED_RAW, SDATA.ACCELERATION_IMPACT_MAG.impact(current_frame_time_lu));
   }
 
   // Vertical Bars
   {
-    SDATA.VB_SPEED.update_value(sdSysData, SDATA.SPEED);
+    SDATA.VB_SPEED.update_value(sdSysData, SDATA.SPEED_RAW);
     SDATA.VB_S_TEMP.update_value(sdSysData, SDATA.TEMP_S_TEMP);
     SDATA.VB_S_FUEL.update_value(sdSysData, SDATA.FUEL_LEVEL_VAL * 10.0f / 2.0f);
     SDATA.VB_S_VOLTAGE.update_value(sdSysData, SDATA.VOLTAGE_VAL * 10.0f / 2.0f);
@@ -2338,14 +2357,14 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
         SDATA.TB_STEERING.update_value(sdSysData, (SDATA.STEERING_WHEEL_ANGLE_VAL) + 180.0f);
       }
 
-      SDATA.TB_SPEED.update_value(sdSysData, SDATA.SPEED);
-      SDATA.TB_ACCELERATION.update_value(sdSysData, SDATA.ACCELERATION);
+      SDATA.TB_SPEED.update_value(sdSysData, SDATA.SPEED_RAW);
+      SDATA.TB_ACCELERATION.update_value(sdSysData, SDATA.ACCELERATION_IMPACT);
       SDATA.TB_RPM.update_value(sdSysData, SDATA.RPM);
       SDATA.TB_TORQUE.update_value(sdSysData, (float)SDATA.TORQUE_DEMANDED);
 
-      if (SDATA.ACCELERATION < 0)
+      if (SDATA.ACCELERATION_IMPACT < 0)
       {
-        SDATA.VB_DECELERATOR.update_value(sdSysData, -(float)SDATA.ACCELERATION);
+        SDATA.VB_DECELERATOR.update_value(sdSysData, -(float)SDATA.ACCELERATION_IMPACT);
       }
       else
       {
@@ -2359,7 +2378,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     /*
     // DISPLAY_MID_BOTTOM = 1 - Voltage
     {
-      SDATA.PLOT_VOLTAGE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, SDATA.VOLTAGE_VAL);
+      SDATA.PLOT_VOLTAGE.update(current_frame_time_lu, 0, SDATA.VOLTAGE_VAL);
       SDATA.VB_VOLTAGE.update_value(sdSysData, SDATA.VOLTAGE_VAL);
     }
     */
@@ -2367,11 +2386,11 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     /*
     // DISPLAY_MID_BOTTOM = 2 - Temperature
     {
-      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, SDATA.TEMP_CATALYST / 10.0f);
-      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, SDATA.TEMP_S_TEMP);
-      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, SDATA.TEMP_AIR_INTAKE);
-      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, SDATA.TEMP_AMBIANT);
-      SDATA.PLOT_TEMPERATURE.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, SDATA.TEMP_COOLANT);
+      SDATA.PLOT_TEMPERATURE.update(current_frame_time_lu, 0, SDATA.TEMP_CATALYST / 10.0f);
+      SDATA.PLOT_TEMPERATURE.update(current_frame_time_lu, 1, SDATA.TEMP_S_TEMP);
+      SDATA.PLOT_TEMPERATURE.update(current_frame_time_lu, 2, SDATA.TEMP_AIR_INTAKE);
+      SDATA.PLOT_TEMPERATURE.update(current_frame_time_lu, 3, SDATA.TEMP_AMBIANT);
+      SDATA.PLOT_TEMPERATURE.update(current_frame_time_lu, 4, SDATA.TEMP_COOLANT);
 
       SDATA.VB_TEMPERATURE_COOLANT.update_value(sdSysData, SDATA.TEMP_COOLANT);
       SDATA.VB_TEMPERATURE_INTAKE.update_value(sdSysData, SDATA.TEMP_AIR_INTAKE);
@@ -2382,11 +2401,11 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     */
     // DISPLAY_MID_BOTTOM = 2 - Temperature Degenerating
     {
-      SDATA.PLOT_TEMPERATURE_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 0, SDATA.TEMP_CATALYST / 10.0f);
-      SDATA.PLOT_TEMPERATURE_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 1, SDATA.TEMP_S_TEMP);
-      SDATA.PLOT_TEMPERATURE_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 2, SDATA.TEMP_AIR_INTAKE);
-      SDATA.PLOT_TEMPERATURE_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 3, SDATA.TEMP_AMBIANT);
-      SDATA.PLOT_TEMPERATURE_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 4, SDATA.TEMP_COOLANT);
+      SDATA.PLOT_TEMPERATURE_DEGEN.update((current_frame_time_db) / 1000.0, 0, SDATA.TEMP_CATALYST / 10.0f);
+      SDATA.PLOT_TEMPERATURE_DEGEN.update((current_frame_time_db) / 1000.0, 1, SDATA.TEMP_S_TEMP);
+      SDATA.PLOT_TEMPERATURE_DEGEN.update((current_frame_time_db) / 1000.0, 2, SDATA.TEMP_AIR_INTAKE);
+      SDATA.PLOT_TEMPERATURE_DEGEN.update((current_frame_time_db) / 1000.0, 3, SDATA.TEMP_AMBIANT);
+      SDATA.PLOT_TEMPERATURE_DEGEN.update((current_frame_time_db) / 1000.0, 4, SDATA.TEMP_COOLANT);
 
       SDATA.VB_TEMPERATURE_COOLANT.update_value(sdSysData, SDATA.TEMP_COOLANT);
       SDATA.VB_TEMPERATURE_INTAKE.update_value(sdSysData, SDATA.TEMP_AIR_INTAKE);
@@ -2398,15 +2417,15 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     /*
     // DISPLAY_MID_BOTTOM = 3 - Power
     {
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 0, (SDATA.FUEL_RAIL_PRESSURE_VAL / 25.0f) + 50.0f);
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 1, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 2, (float)SDATA.RPM/50);
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 3, ((float)SDATA.TORQUE_DEMANDED / 40.0f) + 50.0f);
-      SDATA.PLOT_POWER.update(sdSysData.PROGRAM_TIME.current_frame_time(), 4, (SDATA.ACCELERATION * 10.0f) + 50.0f);
+      SDATA.PLOT_POWER.update(current_frame_time_lu, 0, (SDATA.FUEL_RAIL_PRESSURE_VAL / 25.0f) + 50.0f);
+      SDATA.PLOT_POWER.update(current_frame_time_lu, 1, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
+      SDATA.PLOT_POWER.update(current_frame_time_lu, 2, (float)SDATA.RPM/50);
+      SDATA.PLOT_POWER.update(current_frame_time_lu, 3, ((float)SDATA.TORQUE_DEMANDED / 40.0f) + 50.0f);
+      SDATA.PLOT_POWER.update(current_frame_time_lu, 4, (SDATA.ACCELERATION_IMPACT * 10.0f) + 50.0f);
 
       SDATA.VB_POWER_TACH.update_value(sdSysData, (float)SDATA.RPM/50);
       SDATA.VB_POWER_TORQE.update_value(sdSysData, ((float)SDATA.TORQUE_DEMANDED / 25.0f) + 50.0f);
-      SDATA.VB_POWER_ACCELERATION.update_value(sdSysData, (SDATA.ACCELERATION * 10.0f) + 50.0f);
+      SDATA.VB_POWER_ACCELERATION.update_value(sdSysData, (SDATA.ACCELERATION_IMPACT * 10.0f) + 50.0f);
       SDATA.VB_POWER_FUEL_RAIL_P.update_value(sdSysData, (SDATA.FUEL_RAIL_PRESSURE_VAL / 40.0f) + 50.0f);
       SDATA.VB_POWER_SYSTEM_VAPER_P.update_value(sdSysData, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
     }
@@ -2414,15 +2433,15 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
     
     // DISPLAY_MID_BOTTOM = 3 - Power Degenerating
     {
-      SDATA.PLOT_POWER_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 0, (SDATA.FUEL_RAIL_PRESSURE_VAL / 25.0f) + 50.0f);
-      SDATA.PLOT_POWER_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 1, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
-      SDATA.PLOT_POWER_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 2, (float)SDATA.RPM/50);
-      SDATA.PLOT_POWER_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 3, ((float)SDATA.TORQUE_DEMANDED / 40.0f) + 50.0f);
-      SDATA.PLOT_POWER_DEGEN.update(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0, 4, (SDATA.ACCELERATION * 10.0f) + 50.0f);
+      SDATA.PLOT_POWER_DEGEN.update((current_frame_time_db) / 1000.0, 0, (SDATA.FUEL_RAIL_PRESSURE_VAL / 25.0f) + 50.0f);
+      SDATA.PLOT_POWER_DEGEN.update((current_frame_time_db) / 1000.0, 1, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
+      SDATA.PLOT_POWER_DEGEN.update((current_frame_time_db) / 1000.0, 2, (float)SDATA.RPM/50);
+      SDATA.PLOT_POWER_DEGEN.update((current_frame_time_db) / 1000.0, 3, ((float)SDATA.TORQUE_DEMANDED / 40.0f) + 50.0f);
+      SDATA.PLOT_POWER_DEGEN.update((current_frame_time_db) / 1000.0, 4, (SDATA.ACCELERATION_IMPACT * 10.0f) + 50.0f);
 
       SDATA.VB_POWER_TACH.update_value(sdSysData, (float)SDATA.RPM/50);
       SDATA.VB_POWER_TORQE.update_value(sdSysData, ((float)SDATA.TORQUE_DEMANDED / 25.0f) + 50.0f);
-      SDATA.VB_POWER_ACCELERATION.update_value(sdSysData, (SDATA.ACCELERATION * 10.0f) + 50.0f);
+      SDATA.VB_POWER_ACCELERATION.update_value(sdSysData, (SDATA.ACCELERATION_IMPACT * 10.0f) + 50.0f);
       SDATA.VB_POWER_FUEL_RAIL_P.update_value(sdSysData, (SDATA.FUEL_RAIL_PRESSURE_VAL / 40.0f) + 50.0f);
       SDATA.VB_POWER_SYSTEM_VAPER_P.update_value(sdSysData, (SDATA.EVAP_SYSTEM_VAP_PRESSURE_VAL / 50.0f) + 50.0f);
     }
