@@ -1093,6 +1093,13 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
   }
 }
 
+void AUTOMOBILE_SCREEN::set_reorganize_data_flag_on()
+{
+  SDATA.PLOT_SLOW_DEGEN.set_reorganize_data_flag_on();
+  SDATA.PLOT_TEMPERATURE_DEGEN.set_reorganize_data_flag_on();
+  SDATA.PLOT_POWER_DEGEN.set_reorganize_data_flag_on();
+}
+
 void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
 {
   // Large Displays on Main Sidebar Screen
@@ -1370,6 +1377,8 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     SDATA.PLOT_SLOW_DEGEN.create_line(RAS_WHITE, true, true, 2.0f);   // Speed
     SDATA.PLOT_SLOW_DEGEN.create_line(RAS_ORANGE, true, true, 2.0f);  // S Temp
     SDATA.PLOT_SLOW_DEGEN.create_line(RAS_CYAN, true, true, 2.0f);    // Fuel
+
+    SDATA.PLOT_SLOW_DEGEN.create(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0);
   }
 
   // Power Curve Properties
@@ -1614,6 +1623,8 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       SDATA.PLOT_TEMPERATURE_DEGEN.create_line(RAS_YELLOW, true, true, 2.0f);
       SDATA.PLOT_TEMPERATURE_DEGEN.create_line(RAS_CYAN, true, true, 2.0f);
       SDATA.PLOT_TEMPERATURE_DEGEN.create_line(RAS_WHITE, true, true, 2.0f);
+
+      SDATA.PLOT_TEMPERATURE_DEGEN.create(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0);
     }
 
     // Vertical Bars
@@ -1745,6 +1756,8 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
       SDATA.PLOT_POWER_DEGEN.create_line(RAS_GREEN, true, true, 2.0f);
       SDATA.PLOT_POWER_DEGEN.create_line(RAS_RED, true, true, 2.0f);
       SDATA.PLOT_POWER_DEGEN.create_line(RAS_CYAN, true, true, 2.0f);
+
+      SDATA.PLOT_POWER_DEGEN.create(((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0);
     }
 
     // Vertical Bars

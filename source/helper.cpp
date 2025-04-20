@@ -572,6 +572,11 @@ int MIN_MAX_TIME_SLICE_DOUBLE::samples()
   return SAMPLES;
 }
 
+bool MIN_MAX_TIME_SLICE_DOUBLE::is_placeholder()
+{
+  return PLACEHOLDER;
+}
+
 float MIN_MAX_TIME_SLICE_DOUBLE::mean()
 {
   if (SAMPLES > 0)

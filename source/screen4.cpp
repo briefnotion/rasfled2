@@ -652,6 +652,11 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
     // ---------------------------------------------------------------------------------------
 
+    // Set the Reorganize all data flag to be true on the next automobile update.
+    AUTOMOBILE.set_reorganize_data_flag_on();
+
+    // ---------------------------------------------------------------------------------------
+
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplGlfw_NewFrame();

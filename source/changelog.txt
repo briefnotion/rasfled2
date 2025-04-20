@@ -1,3 +1,6 @@
+2.247_250419
+  - Put some worki into the Degen graph.
+
 2.246_250418
   - Changed some values in the automible screen to use the more accurate average tire speed 
       instead of the reported transmission velocity speed.

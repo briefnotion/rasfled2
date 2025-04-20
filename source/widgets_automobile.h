@@ -553,6 +553,8 @@ class AUTOMOBILE_SCREEN
   void nova(system_data &sdSysData);
 
   public:
+
+  void set_reorganize_data_flag_on();
   
   void create(system_data &sdSysData);
 

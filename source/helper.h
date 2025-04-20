@@ -346,6 +346,9 @@ class MIN_MAX_TIME_SLICE_DOUBLE
   int samples();
   // Number of samples in slice.
 
+  bool is_placeholder();
+  // Returns true if placeholder flag is set.
+
   float mean();
   // Returns mean value of stored data points.
 

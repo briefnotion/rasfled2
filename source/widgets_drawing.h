@@ -396,24 +396,47 @@ class DRAW_D2_PLOT
   bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };
 
-
-
+// ---------------------------------------------------------------------------------------
 
 class D2_VECTOR_POSITION_REFERENCE
 {
   public:
 
-  double GRAPH_START_TIME;
-  double GRAPH_END_TIME;
+  double  GRAPH_START_TIME;
+  double  GRAPH_END_TIME;
+  bool    ARBITRARY_FLAG = false;
 };
 
+// ---------------------------------------------------------------------------------------
+
 class D2_PLOT_LINE_DEGENERATE
+  
+/*
+To Do:
+
+- Problem: The entire vector doesnt need to be reorganized at 60fps
+- Problem: Labels likely to not show or show on wrong side of line if orientation is 
+    not right to left and botom to top.
+- Problem: Error or single point entries haven't been coded.
+  - At (widgets_automobile.cpp):
+      if (SDATA.CAM_COMM_ERR > SDATA.PREV_D_CAM_COMM_ERROR)
+        and 
+      if (SDATA.CAM_STAT_ERR != SDATA.PREV_D_CAM_STAT_ERROR)
+    Commented out for now
+- Problem.  A Better way to set reorganize data flag.
+- Problem.  Scaling not completely done if 
+- Needs:
+  - More optimazation?
+      Some progress made.
+  - PROPS.COLOR_GRID
+  - PROPS.POINT_SIZE_GRID
+  - PROPS.TIME_SCALE for exp_growth_number_scale_seconds(float X)
+  - Labels for grid vertical bars.
+*/
+
 {
   public:
-
-  int PIVOT_POINT = 0;
-  double PIVOT_TIME = 0.0f;
-
+  
   int LINE_COLOR;
   float POINT_SIZE = 2.0f;
 
@@ -421,12 +444,10 @@ class D2_PLOT_LINE_DEGENERATE
   bool DISPLAY_MIN_MAX = false;
 
   vector<D2_VECTOR_POSITION_REFERENCE>  POSITION_INFO;
-  deque<MIN_MAX_TIME_SLICE_DOUBLE>      DATA_POINT_TILL_PIVOT;
   vector<MIN_MAX_TIME_SLICE_DOUBLE>     DATA_POINT;
 
   void reorganize_line_data(double Time);
 };
-
 
 class DRAW_D2_PLOT_DEGENERATE_GRID_PROPERTIES
 {
@@ -451,6 +472,8 @@ class DRAW_D2_PLOT_DEGENERATE_PROPERTIES
 
   double TIME_SPAN_MS = 8.0 * 60.0 * 60.0;
 
+  int VECTOR_SIZE = 557;    // !!!!!!!!!!!!
+
   bool LEFT_TO_RIGHT = TRUE;                // Defalt - plot points start on left side
   bool BOTTOM_TO_TOP = TRUE;                // Defalt - 0 value points start on bottom
 };
@@ -458,51 +481,6 @@ class DRAW_D2_PLOT_DEGENERATE_PROPERTIES
 class DRAW_D2_PLOT_DEGENERATE
 {
   private:
-  
-  ImVec2 START_POS;
-  ImVec2 END_POS;
-
-  ImVec2 PREV_START_POS;
-  ImVec2 PREV_END_POS;
-
-  ImVec2 RESIZE_MULTI;
-  ImVec2 ORIGINAL_SIZE;
-
-  float FULL_X_SIZE = 0.0f;
-  float FULL_Y_SIZE = 0.0f;
-
-  float MAX_POINT_SIZE_ACCUM = 0.0f;
-  float DEGEN_POINT_TO_SIZE_RATIO = 0.0f;
-  int   DEGEN_POINT_SIZE = 0;
-
-  double TIME_START = 0;
-
-  vector<D2_PLOT_LINE_DEGENERATE> LINE;
-  vector<DRAW_D2_PLOT_DEGENERATE_GRID_PROPERTIES> GRID_PROPERTIES;
-  
-  /*
-  To Do:
-
-  - Problem: window will not start taking in data until drawn for the first time.
-      Attempted to correct  but failed
-  - Problem: Labels likely to not show or show on wrong side of line if orientation is 
-      not right to left and botom to top.
-  - Problem: Error or single point entries haven't been coded.
-    - At (widgets_automobile.cpp):
-        if (SDATA.CAM_COMM_ERR > SDATA.PREV_D_CAM_COMM_ERROR)
-          and 
-        if (SDATA.CAM_STAT_ERR != SDATA.PREV_D_CAM_STAT_ERROR)
-      Commented out for now
-  - Needs:
-    - More optimazation?
-        Some progress made. Some progress lost
-    - PROPS.COLOR_GRID
-    - PROPS.POINT_SIZE_GRID
-    - PROPS.TIME_SCALE for exp_growth_number_scale_seconds(float X)
-    - Labels for grid vertical bars.
-    - Start receiving data at app load.
-  */
-
   // ---
   // Formulas:
 
@@ -528,6 +506,32 @@ class DRAW_D2_PLOT_DEGENERATE
 
   double exp_growth_number_scale_seconds(float X);
   //double exp_growth_number_scale_miliseconds(float X);
+  ImVec2 START_POS;
+  ImVec2 END_POS;
+
+  ImVec2 PREV_START_POS;
+  ImVec2 PREV_END_POS;
+
+  ImVec2 RESIZE_MULTI;
+  ImVec2 ORIGINAL_SIZE;
+
+  ImVec2 FULL_SIZE;
+
+  float MAX_POINT_SIZE_ACCUM = 0.0f;
+  float DEGEN_POINT_TO_SIZE_RATIO = 0.0f;
+  // Calculated value at create, representing the scale of vector size 
+  //  to Full Time Accumulation point size.
+  //  PROPS.VECTOR_SIZE / MAX_POINT_SIZE_ACCUM;
+  
+  int   DEGEN_POINT_SIZE = 0;
+  // Calculates the size in pixel width of each point on the 
+  //  Full Time Accumulation Scale.
+  //  DEGEN_POINT_TO_SIZE_RATIO * MAX_POINT_SIZE_ACCUM
+
+  double TIME_START = 0;
+
+  vector<D2_PLOT_LINE_DEGENERATE> LINE;
+  vector<DRAW_D2_PLOT_DEGENERATE_GRID_PROPERTIES> GRID_PROPERTIES;
 
   // ---
 
@@ -557,16 +561,20 @@ class DRAW_D2_PLOT_DEGENERATE
 
   void draw_grid(ImDrawList *Draw_List, system_data &sdSysData);
 
-  void build_data_point_vectors();
+  void build_vectors();
 
-  void build_reference_vectors();
-  
-  void first_run();
+  void reorganize_all_line_data(double Time);
+  bool reorganize_all_line_data_flag = true;
+
   bool FIRST_RUN_COMPLETE = false;
 
   public:
 
   DRAW_D2_PLOT_DEGENERATE_PROPERTIES PROPS;
+
+  void set_reorganize_data_flag_on();
+  
+  void create(double Time);
 
   void create_grid_divider(float Time_End_Location, int Divider_Count, string Label);
 
@@ -582,7 +590,7 @@ class DRAW_D2_PLOT_DEGENERATE
   bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };
 
-
+// ---------------------------------------------------------------------------------------
 
 class DRAW_D2_PLOT_POWER_CURVE_PROPERTIES
 {

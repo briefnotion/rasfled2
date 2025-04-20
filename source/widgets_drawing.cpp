@@ -1120,51 +1120,99 @@ bool DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
   return ret_clicked;
 }
 
-
-
+// ---------------------------------------------------------------------------------------
 
 void D2_PLOT_LINE_DEGENERATE::reorganize_line_data(double Time)
 {
-  //double q = Time;(void)q;
-  if (DATA_POINT.size() > 0)
-  { 
-    // start at newest.   // if pos = size, nothing above to merge to so avoid
-
-    // Only merge up entire sequence if first elegible entry in list moves up.
-    int carry_on = 0;
-
-    for (int position = 0; carry_on == 0 && position < ((int)DATA_POINT.size() - 1); position++) 
+  if (POSITION_INFO.size() > 0 && DATA_POINT.size() > 0 && POSITION_INFO.size() ==  DATA_POINT.size())
+  {
+    for (int position = 0; position < (int)POSITION_INFO.size() -1; position++)
     {
-      if (DATA_POINT[position].samples() > 0)
+      if (DATA_POINT[position].samples() > 0 && DATA_POINT[position].is_placeholder() == false)
       {
         if ((Time - DATA_POINT[position].time_created()) > POSITION_INFO[position].GRAPH_END_TIME)
         {
-          DATA_POINT[position + 1].merge_into(DATA_POINT[position]);
-          carry_on = position + 1;
-        }
-        else
-        {
-          carry_on = -1;
+          POSITION_INFO[position].ARBITRARY_FLAG = true;
         }
       }
     }
 
-    if (carry_on > 0 && carry_on < (int)DATA_POINT.size() - 1) 
+    for (int position = 0; position < ((int)DATA_POINT.size() - 1); position++) 
     {
-      for (int position = carry_on; position < ((int)DATA_POINT.size() - 1); position++) 
+      if (POSITION_INFO[position].ARBITRARY_FLAG)
       {
-        {
-          if ((Time - DATA_POINT[position].time_created()) > POSITION_INFO[position].GRAPH_END_TIME)
-          {
-            DATA_POINT[position + 1].merge_into(DATA_POINT[position]);
-          }
-        }  
+        DATA_POINT[position + 1].merge_into(DATA_POINT[position]);
+        POSITION_INFO[position].ARBITRARY_FLAG = false;
       }
     }
   }
 }
 
 
+/*
+void D2_PLOT_LINE_DEGENERATE::reorganize_line_data(double Time)
+{
+  // Flags used for controlling loop behavior:
+  // 'complete': Stops processing once the end of the list is reached.
+  // 'merge_occured': Tracks whether a merge happened during this iteration.
+  // 'ignore_no_samples': Skips items with no samples until the first valid item is found.
+  bool complete = false;
+  bool merge_occured = true;
+  bool ignore_no_samples = true;
+
+  // Range of positions to process:
+  // 'pos_start' marks the beginning of the current range.
+  // 'pos_end' marks the end of the current range (doubles each iteration for scaling).
+  int pos_start = 0;
+  int pos_end = 1;
+
+  // Ensure there are data points to process before proceeding.
+  if (DATA_POINT.size() > 0) 
+  {
+    // Iterate through merging logic as long as merges occur and the range is not complete.
+    while (merge_occured && complete == false)
+    {
+      merge_occured = false; // Reset merge flag for this iteration.
+
+      // If 'pos_end' exceeds the last valid position, limit it and mark the process as complete.
+      if (pos_end >= ((int)DATA_POINT.size() - 1))
+      {
+        pos_end = ((int)DATA_POINT.size() - 1); // Cap 'pos_end' to prevent out-of-bounds access.
+        complete = true; // Flag completion to exit the loop in the next iteration.
+      }
+
+      // Process data points within the current range [pos_start, pos_end).
+      for (int position = pos_start; position < pos_end; position++) 
+      {
+        // Skip processing empty samples unless 'ignore_no_samples' is true.
+        if (ignore_no_samples || DATA_POINT[position].samples() > 0)
+        {
+          // Stop ignoring empty samples once a valid item is found.
+          if (ignore_no_samples)
+          {
+            if (DATA_POINT[position].samples() > 0)
+            {
+              ignore_no_samples = false; // Disable the ignore flag.
+            }
+          }
+
+          // Check if the data point is eligible for merging based on time span conditions.
+          if ((Time - DATA_POINT[position].time_created()) > POSITION_INFO[position].GRAPH_END_TIME) 
+          {
+            // Perform the merge operation and flag that a merge occurred.
+            DATA_POINT[position + 1].merge_into(DATA_POINT[position]);
+            merge_occured = true;
+          }
+        } 
+      }
+
+      // Update range to process in the next iteration.
+      pos_start = pos_end;      // Move the start of the range forward.
+      pos_end = pos_start * 2;  // Double the range size for scaling.
+    }
+  } 
+}
+*/
 
 /*
 float DRAW_D2_PLOT_DEGENERATE::triangular_number(float X)
@@ -1309,12 +1357,12 @@ bool DRAW_D2_PLOT_DEGENERATE::position_on_plot(ImVec2 &Point, ImVec2 &Position_P
 
 float DRAW_D2_PLOT_DEGENERATE::time_scale_to_x(float Time)
 {
-  return Time * FULL_X_SIZE /PROPS.TIME_SPAN_MS;
+  return Time * PROPS.VECTOR_SIZE /PROPS.TIME_SPAN_MS;
 }
 
 float DRAW_D2_PLOT_DEGENERATE::value_to_y(float Value)
 {
-  return Value * FULL_Y_SIZE / PROPS.DATA_POINTS_VALUE_MAX;
+  return Value * FULL_SIZE.y / PROPS.DATA_POINTS_VALUE_MAX;
 }
 
 void DRAW_D2_PLOT_DEGENERATE::draw_grid(ImDrawList *Draw_List, system_data &sdSysData)
@@ -1450,13 +1498,14 @@ void DRAW_D2_PLOT_DEGENERATE::draw_grid(ImDrawList *Draw_List, system_data &sdSy
   */
 }
 
-void DRAW_D2_PLOT_DEGENERATE::build_data_point_vectors()
+void DRAW_D2_PLOT_DEGENERATE::build_vectors()
 {
   if(LINE.size() > 0)
   {
-    MIN_MAX_TIME_SLICE_DOUBLE tmp_empty_time_slice;
-    int number_of_points = (int)FULL_X_SIZE;
+    int number_of_points = PROPS.VECTOR_SIZE;
 
+    // Build Data_Point Vectors
+    MIN_MAX_TIME_SLICE_DOUBLE tmp_empty_time_slice;
     for(int line = 0; line < (int)LINE.size(); line++)
     {
       LINE[line].DATA_POINT.reserve(number_of_points);
@@ -1466,16 +1515,9 @@ void DRAW_D2_PLOT_DEGENERATE::build_data_point_vectors()
         LINE[line].DATA_POINT.push_back(tmp_empty_time_slice);
       }
     }
-  }
-}
 
-void DRAW_D2_PLOT_DEGENERATE::build_reference_vectors()
-{
-  if(LINE.size() > 0)
-  {
+    // Build Reference Vectors
     D2_VECTOR_POSITION_REFERENCE tmp_position_info;
-    int number_of_points = (int)FULL_X_SIZE;
-
     for(int line = 0; line < (int)LINE.size(); line++)
     {
       LINE[line].POSITION_INFO.reserve(number_of_points);
@@ -1485,43 +1527,10 @@ void DRAW_D2_PLOT_DEGENERATE::build_reference_vectors()
         tmp_position_info.GRAPH_START_TIME = x_coord_to_position_in_time((float)point);
         tmp_position_info.GRAPH_END_TIME = x_coord_to_position_in_time((float)point + 1.0f);
     
-        // Point where mergers start
-        if (LINE[line].PIVOT_POINT == 0)
-        {
-          if ((tmp_position_info.GRAPH_END_TIME -tmp_position_info.GRAPH_START_TIME) > 1.0)
-          {
-            LINE[line].PIVOT_POINT = point;
-            LINE[line].PIVOT_TIME = tmp_position_info.GRAPH_END_TIME;
-          }
-        }
-    
         LINE[line].POSITION_INFO.push_back(tmp_position_info);
       }
     }
   }
-}
-
-void DRAW_D2_PLOT_DEGENERATE::first_run()
-{
-  // Max Point Size - Calculate full size points
-  MAX_POINT_SIZE_ACCUM = value_of_accumulated_time(PROPS.TIME_SPAN_MS);
-
-  // Calculate DEGEN_POINT_TO_SIZE_RATIO
-  DEGEN_POINT_TO_SIZE_RATIO = FULL_X_SIZE / MAX_POINT_SIZE_ACCUM;
-  DEGEN_POINT_SIZE = (int)(DEGEN_POINT_TO_SIZE_RATIO * MAX_POINT_SIZE_ACCUM); // Could just set as FULL_X_SIZE, but verify ratio instead
-
-  // Build Vectors for each line
-  if (LINE.size() > 0)
-  {
-    for (int line = 0; line < (int)LINE.size(); line++)
-    {
-    }
-  
-    build_reference_vectors();
-    build_data_point_vectors();
-  }
-
-  FIRST_RUN_COMPLETE = true;
 }
 
 void DRAW_D2_PLOT_DEGENERATE::draw_lines(ImDrawList *Draw_List, system_data &sdSysData)
@@ -1533,9 +1542,10 @@ void DRAW_D2_PLOT_DEGENERATE::draw_lines(ImDrawList *Draw_List, system_data &sdS
 
     //for every line
     for (int line_number = 0; line_number < (int)LINE.size(); line_number++)
-    { 
+    {
       // for every point
-      if (LINE[line_number].DATA_POINT_TILL_PIVOT.size() > 1)
+      //if (LINE[line_number].DATA_POINT_TILL_PIVOT.size() > 1)
+      if (LINE[line_number].DATA_POINT.size() > 0)
       {
         // Screen Draw Points
         ImVec2 screen_position_start;
@@ -1553,45 +1563,18 @@ void DRAW_D2_PLOT_DEGENERATE::draw_lines(ImDrawList *Draw_List, system_data &sdS
         float value_mean = 0.0f;
         float value_min = 0.0f;
         float value_max = 0.0f;
-        double value_time_elapsed = 0.0f;
+        //double value_time_elapsed = 0.0f;
+
+        bool start_drawing = false;
 
         ImColor color_line = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(LINE[line_number].LINE_COLOR);
         ImColor color_line_dim = sdSysData.COLOR_SELECT.neo_color_DIM(LINE[line_number].LINE_COLOR);
 
-        // Draw line before pivot point
-        value_time_elapsed = ((double)sdSysData.PROGRAM_TIME.current_frame_time() / 1000) - LINE[line_number].DATA_POINT_TILL_PIVOT[0].time_created();
-        point_end.x = position_in_time_to_x_coord(value_time_elapsed);
-        value_mean = LINE[line_number].DATA_POINT_TILL_PIVOT[0].mean();
-        point_end.y = value_to_y(value_mean);
-        for (int point = 1; point < (int)LINE[line_number].DATA_POINT_TILL_PIVOT.size(); point++)
-        {
-          point_start = point_end;
-
-          value_time_elapsed = ((double)sdSysData.PROGRAM_TIME.current_frame_time() / 1000) - LINE[line_number].DATA_POINT_TILL_PIVOT[point].time_created();
-          point_end.x = position_in_time_to_x_coord(value_time_elapsed);
-          value_mean = LINE[line_number].DATA_POINT_TILL_PIVOT[point].mean();
-          point_end.y = value_to_y(value_mean);
-
-          if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
-          {
-            Draw_List->AddLine(screen_position_start, screen_position_end, color_line, LINE[line_number].POINT_SIZE);
-          }
-        }
-
-        // Reset start position to pivot point location
-        value_time_elapsed = ((double)sdSysData.PROGRAM_TIME.current_frame_time() / 1000) - LINE[line_number].DATA_POINT_TILL_PIVOT[0].time_created();
-        point_end.x = position_in_time_to_x_coord(value_time_elapsed);
-        value_mean = LINE[line_number].DATA_POINT_TILL_PIVOT[0].mean();
-        point_end.y = value_to_y(value_mean);
-        //screen_point_end = position_on_plot(point_end);
-
-        // Draw line after pivot point
+        // Draw line
         for (int point = 0; point < (int)LINE[line_number].DATA_POINT.size(); point++)
         {
           if (LINE[line_number].DATA_POINT[point].samples() > 0)
           {
-            point_start = point_end;
-
             // draw_min max
             value_min = LINE[line_number].DATA_POINT[point].min();
             value_max = LINE[line_number].DATA_POINT[point].max();
@@ -1604,20 +1587,59 @@ void DRAW_D2_PLOT_DEGENERATE::draw_lines(ImDrawList *Draw_List, system_data &sdS
               Draw_List->AddLine(screen_position_start, screen_position_end, color_line_dim, 1.0f);
             }
 
-            // draw point to point
             point_end.x = point;
             value_mean = LINE[line_number].DATA_POINT[point].mean();
             point_end.y = value_to_y(value_mean);
 
-            if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
+            if (start_drawing)
             {
-              Draw_List->AddLine(screen_position_start, screen_position_end, color_line, LINE[line_number].POINT_SIZE);
+              if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
+              {
+                Draw_List->AddLine(screen_position_start, screen_position_end, color_line, LINE[line_number].POINT_SIZE);
+              }
             }
+
+            start_drawing = true;
+            point_start = point_end;
           }  
         }
       }
     }
   }
+}
+
+void DRAW_D2_PLOT_DEGENERATE::reorganize_all_line_data(double Time)
+{
+  if (LINE.size() > 0)
+  {
+    for (int line = 0; line < (int)LINE.size(); line++)
+    {
+      LINE[line].reorganize_line_data(Time);
+    }
+  }
+
+  reorganize_all_line_data_flag = false;
+}
+
+void DRAW_D2_PLOT_DEGENERATE::set_reorganize_data_flag_on()
+{
+  reorganize_all_line_data_flag = true;
+}
+
+void DRAW_D2_PLOT_DEGENERATE::create(double Time)
+{
+  // Max Point Size - Calculate full size points
+  MAX_POINT_SIZE_ACCUM = value_of_accumulated_time(PROPS.TIME_SPAN_MS);
+
+  // Calculate DEGEN_POINT_TO_SIZE_RATIO
+  DEGEN_POINT_TO_SIZE_RATIO = PROPS.VECTOR_SIZE / MAX_POINT_SIZE_ACCUM;
+  DEGEN_POINT_SIZE = (int)(DEGEN_POINT_TO_SIZE_RATIO * MAX_POINT_SIZE_ACCUM); // Could just set as FULL_SIZE.x, but verify ratio instead
+
+  // Build Vectors for each line
+  build_vectors();
+
+  TIME_START = (Time);
+
 }
 
 void DRAW_D2_PLOT_DEGENERATE::create_grid_divider(float Time_End_Location, int Divider_Count, string Label)
@@ -1646,58 +1668,23 @@ void DRAW_D2_PLOT_DEGENERATE::create_line(int Color, bool Display_Mean, bool Dis
 
 void DRAW_D2_PLOT_DEGENERATE::update(double Time, int Line_Number, float Value)
 {
-  if (FIRST_RUN_COMPLETE)
+  if (reorganize_all_line_data_flag)
   {
-    MIN_MAX_TIME_SLICE_DOUBLE tmp_time_slice;
-    tmp_time_slice.store_value(Value, Time);
-    LINE[Line_Number].DATA_POINT_TILL_PIVOT.push_back(tmp_time_slice);
-    
-    // Check Pivot
-    int new_time_spot = -1;
-    if ((int)LINE[Line_Number].DATA_POINT_TILL_PIVOT.size() >= LINE[Line_Number].PIVOT_POINT)
-    {
-      // lookup where to put the points following points
-      double elapsed_time = Time - LINE[Line_Number].DATA_POINT_TILL_PIVOT.front().time_created();
-
-      
-      
-
-      for (int time_spot = 0; new_time_spot == -1 && time_spot < (int)LINE[Line_Number].POSITION_INFO.size(); time_spot++)
-      {
-        if (elapsed_time < LINE[Line_Number].POSITION_INFO[time_spot].GRAPH_START_TIME)
-        {
-          new_time_spot = time_spot;
-        }
-      }
-
-      if (new_time_spot == -1)
-      {
-        new_time_spot = 0;
-      }
-
-
-
-
-      while ((int)LINE[Line_Number].DATA_POINT_TILL_PIVOT.size() > LINE[Line_Number].PIVOT_POINT)
-      {
-        // put the point in the right place
-        LINE[Line_Number].DATA_POINT[new_time_spot].store_value(LINE[Line_Number].DATA_POINT_TILL_PIVOT.front().mean(), 
-                                                LINE[Line_Number].DATA_POINT_TILL_PIVOT.front().time_created());
-
-        LINE[Line_Number].DATA_POINT_TILL_PIVOT.pop_front();
-      }
-
-
-
-
-      LINE[Line_Number].reorganize_line_data(Time);
-    }
+    reorganize_all_line_data(Time);
   }
+
+  LINE[Line_Number].DATA_POINT[Line_Number].store_value(Value, Time);
 }
 
 bool DRAW_D2_PLOT_DEGENERATE::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)
 {
   bool ret_clicked = false;
+
+
+
+
+
+
 
   // If graph is resized.
   if (PREV_START_POS.x != Start_Position.x || PREV_START_POS.y != Start_Position.y || 
@@ -1706,33 +1693,30 @@ bool DRAW_D2_PLOT_DEGENERATE::draw(system_data &sdSysData, ImVec2 Start_Position
     START_POS = Start_Position;
     END_POS = End_Position;
 
-    FULL_X_SIZE = (End_Position.x - Start_Position.x);
-    FULL_Y_SIZE = (End_Position.y - Start_Position.y);
+    FULL_SIZE.x = (End_Position.x - Start_Position.x);
+    FULL_SIZE.y = (End_Position.y - Start_Position.y);
 
     PREV_START_POS = Start_Position;
     PREV_END_POS = End_Position;
 
     if (FIRST_RUN_COMPLETE == false)
     {
-      ORIGINAL_SIZE.x = FULL_X_SIZE;
-      ORIGINAL_SIZE.y = FULL_Y_SIZE;
+      ORIGINAL_SIZE = FULL_SIZE;
 
       RESIZE_MULTI.x = 1.0f;
       RESIZE_MULTI.y = 1.0f;
 
-      TIME_START = (((double)sdSysData.PROGRAM_TIME.current_frame_time()) / 1000.0);
-
-      first_run();
+      FIRST_RUN_COMPLETE = true;
     }
     else
     {
-      RESIZE_MULTI.x = FULL_X_SIZE / ORIGINAL_SIZE.x;
-      RESIZE_MULTI.y = FULL_Y_SIZE / ORIGINAL_SIZE.y;
+      RESIZE_MULTI.x = FULL_SIZE.x / ORIGINAL_SIZE.x;
+      RESIZE_MULTI.y = FULL_SIZE.y / ORIGINAL_SIZE.y;
     }
 
   }
 
-  ImGui::BeginChild(PROPS.LABEL.c_str(), ImVec2(FULL_X_SIZE, FULL_Y_SIZE), false, 
+  ImGui::BeginChild(PROPS.LABEL.c_str(), FULL_SIZE, false, 
                                     ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | 
                                     ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoScrollbar);
   {
@@ -1743,7 +1727,7 @@ bool DRAW_D2_PLOT_DEGENERATE::draw(system_data &sdSysData, ImVec2 Start_Position
 
     // Is gadget clicked
     ImGui::SetCursorScreenPos(Start_Position);
-    if (ImGui::InvisibleButton("InvisibleButton", ImVec2(FULL_X_SIZE, FULL_Y_SIZE)))
+    if (ImGui::InvisibleButton("InvisibleButton", FULL_SIZE))
     {
       ret_clicked = true;
     }
