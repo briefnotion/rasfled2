@@ -70,6 +70,33 @@ void Graphical_Number(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Posi
 
 // ---------------------------------------------------------------------------------------
 
+// Untested Idea for later.
+class VECTOR_DEQUE_IMVEC2
+{
+  vector<ImVec2> Data;
+
+  int FRONT = 0;
+  int BACK = 0;
+
+  int FULL_SIZE = 0;
+
+  int get_vector_position(int Position);
+
+  public:
+
+  void reserve(int Size);
+
+  //void pop_front();
+
+  int size();
+
+  void push_back(ImVec2 Value);
+
+  ImVec2 value(int Position);
+
+};
+
+
 class PROPERTY_ORIENTATION
 {
   public:
@@ -471,11 +498,27 @@ class DRAW_D2_PLOT_DEGENERATE_PROPERTIES
   float DATA_POINTS_VALUE_MAX = 100;        // Max value, top of graph value.
 
   double TIME_SPAN_MS = 8.0 * 60.0 * 60.0;
+  //double TIME_SPAN_MS = 60.0; // Testing Extreme case scenario: 60 seconds
 
-  int VECTOR_SIZE = 557;    // !!!!!!!!!!!!
+  int VECTOR_SIZE = 600;
+  //int VECTOR_SIZE = 50;     // Testing Extreme case scenario: 50 points
+  //int VECTOR_SIZE = 100;    // Testing Extreme case scenario: 100 points
+  //int VECTOR_SIZE = 3000;    // Testing Extreme case scenario: 3000 points
 
-  bool LEFT_TO_RIGHT = TRUE;                // Defalt - plot points start on left side
-  bool BOTTOM_TO_TOP = TRUE;                // Defalt - 0 value points start on bottom
+  bool LEFT_TO_RIGHT = TRUE;  // Defalt - plot points start on left side
+  bool BOTTOM_TO_TOP = TRUE;  // Defalt - 0 value points start on bottom
+  
+  float TIME_SCALE   = 0.355f;  // 1.2  - first quarter 10 seconds
+                                // .355 - first 10% 10 seconds
+                                // .071 - first 50% 10 seconds
+
+  // THIS IS WRONG:
+  //  PROPS.TIME_SCALE = (pow(2.0, 10) - 1.0) / (desired_percentage * total_time);
+  //                      (2^10 -1) / (.1 * 28800000)
+  //    10 corresponds to the first 10 seconds
+  //
+  //    desired_percentage is the portion of the graph you want the 10 seconds 
+  //    to occupy, expressed as a fraction (e.g., 0.1 for 10%, 0.25 for 25%)
 };
 
 class DRAW_D2_PLOT_DEGENERATE
@@ -551,8 +594,7 @@ class DRAW_D2_PLOT_DEGENERATE
   bool position_on_plot(ImVec2 &Point, ImVec2 &Position_Point);
   // Internal
 
-  float time_scale_to_x(float Time);
-  // Looks at class vars TIME_START and PROPS.TIME_SPAN_MS to determine pos of x on graph.
+  //float time_scale_to_x(float Time);
 
   float value_to_y(float Value);
   // Looks at class vars to determine y on graph.
@@ -607,6 +649,8 @@ class DRAW_D2_PLOT_POWER_CURVE_PROPERTIES
 
   int MPH_DIVISION =  3;  // 10 - Every mph has 10 points within. 10.0, 10.1, 10.2, ...
                           //  3 - Every mph has 10 points within. 10.0, 10.333, 10.666, ...
+
+  int HISTORY_SIZE = 100;
 };
 
 class DRAW_D2_PLOT_POWER_CURVE
@@ -644,6 +688,8 @@ To Do:
   ImVec2 LAST_SPEED_ACCELERATION_READ;
   vector<MIN_MAX_TIME_SLICE_DOUBLE> SPEED_VECTORS_ACCELERATION;
   vector<MIN_MAX_TIME_SLICE_DOUBLE> SPEED_VECTORS_DECELERATION;
+  deque<ImVec2>                     SPEED_VECTORS_HISTORY;
+  int SPEED_VECTORS_HISTORY_UPDATE_COUNTER = 0;
 
 
   bool position_on_plot(ImVec2 &Point, ImVec2 &Position_Point);

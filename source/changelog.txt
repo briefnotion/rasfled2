@@ -1,3 +1,6 @@
+2.248_250421
+  - Made some improvements to Power Curve and Degen graphs.
+
 2.247_250419
   - Put some worki into the Degen graph.
 

@@ -152,6 +152,70 @@ bool Load_Texture_From_File(const char* filename, GLuint* out_texture, int* out_
 }
 
 // ---------------------------------------------------------------------------------------
+// Vector Deque
+
+int VECTOR_DEQUE_IMVEC2::get_vector_position(int Position)
+{
+  int vec_pos = BACK + Position;
+
+  if (vec_pos < FULL_SIZE)
+  {
+    return vec_pos;
+  }
+  else
+  {
+    return vec_pos - FULL_SIZE;
+  }
+}
+
+void VECTOR_DEQUE_IMVEC2::reserve(int Size)
+{
+  FULL_SIZE = Size;
+  Data.reserve(Size);
+}
+
+int VECTOR_DEQUE_IMVEC2::size()
+{
+  if (FRONT == BACK)
+  {
+    return 0;
+  }
+  else if (BACK < FRONT)
+  {
+    return FRONT - BACK;
+  }
+  else 
+  {
+    return ((FULL_SIZE -1) - BACK) + (FRONT + 1);
+  }
+}
+
+void VECTOR_DEQUE_IMVEC2::push_back(ImVec2 Value)
+{
+  BACK++;
+  if (BACK >= FULL_SIZE)
+  {
+    BACK = 0;
+  }
+
+  if (BACK == FRONT)
+  {
+    FRONT++;
+    if (FRONT >= FULL_SIZE)
+    {
+      FRONT = 0;
+    }
+  }
+
+  Data[BACK] = Value;
+}
+
+ImVec2 VECTOR_DEQUE_IMVEC2::value(int Position)
+{
+  return Data[get_vector_position(Position)];
+}
+
+// ---------------------------------------------------------------------------------------
 
 void Graphical_Number(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Position, float Width, int Number)
 {
@@ -1252,8 +1316,7 @@ float DRAW_D2_PLOT_DEGENERATE::exp_growth_accum(float F_of_y)
 
 float DRAW_D2_PLOT_DEGENERATE::exp_growth_accum_scale_seconds(double F_of_y)
 {
-  const double TIME_SCALE = 1.2f; // makes 10s ≈ 1/4 of full time
-  return log2(F_of_y * TIME_SCALE + 1.0f);
+  return log2(F_of_y * PROPS.TIME_SCALE + 1.0f);
 }
 
 /*
@@ -1266,8 +1329,7 @@ float DRAW_D2_PLOT_DEGENERATE::exp_growth_accum_scale_miliseconds(double F_of_y)
 
 double DRAW_D2_PLOT_DEGENERATE::exp_growth_number_scale_seconds(float X)
 {
-  const double TIME_SCALE = 1.2f;
-  return  (pow(2.0f, (double)X) - 1.0f) / TIME_SCALE;
+  return  (pow(2.0f, (double)X) - 1.0f) / PROPS.TIME_SCALE;
 }
 
 /*
@@ -1354,11 +1416,12 @@ bool DRAW_D2_PLOT_DEGENERATE::position_on_plot(ImVec2 &Point, ImVec2 &Position_P
   }
 }
 
-
+/*
 float DRAW_D2_PLOT_DEGENERATE::time_scale_to_x(float Time)
 {
-  return Time * PROPS.VECTOR_SIZE /PROPS.TIME_SPAN_MS;
+  return Time * PROPS.VECTOR_SIZE / PROPS.TIME_SPAN_MS;
 }
+*/
 
 float DRAW_D2_PLOT_DEGENERATE::value_to_y(float Value)
 {
@@ -1679,13 +1742,7 @@ void DRAW_D2_PLOT_DEGENERATE::update(double Time, int Line_Number, float Value)
 bool DRAW_D2_PLOT_DEGENERATE::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)
 {
   bool ret_clicked = false;
-
-
-
-
-
-
-
+  
   // If graph is resized.
   if (PREV_START_POS.x != Start_Position.x || PREV_START_POS.y != Start_Position.y || 
       PREV_END_POS.x != End_Position.x || PREV_END_POS.y != End_Position.y)
@@ -1703,14 +1760,14 @@ bool DRAW_D2_PLOT_DEGENERATE::draw(system_data &sdSysData, ImVec2 Start_Position
     {
       ORIGINAL_SIZE = FULL_SIZE;
 
-      RESIZE_MULTI.x = 1.0f;
-      RESIZE_MULTI.y = 1.0f;
+      RESIZE_MULTI.x = (FULL_SIZE.x / ORIGINAL_SIZE.x) * (ORIGINAL_SIZE.x / PROPS.VECTOR_SIZE);
+      RESIZE_MULTI.y = FULL_SIZE.y / ORIGINAL_SIZE.y;
 
       FIRST_RUN_COMPLETE = true;
     }
     else
     {
-      RESIZE_MULTI.x = FULL_SIZE.x / ORIGINAL_SIZE.x;
+      RESIZE_MULTI.x = (FULL_SIZE.x / ORIGINAL_SIZE.x) * (ORIGINAL_SIZE.x / PROPS.VECTOR_SIZE);
       RESIZE_MULTI.y = FULL_SIZE.y / ORIGINAL_SIZE.y;
     }
 
@@ -1813,6 +1870,9 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
   ImColor color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
   ImColor color_line_decel = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
 
+  ImColor color_line_accel_history = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
+  ImColor color_line_decel_history = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_GREY);
+
   ImColor color_marker = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
   ImColor color_marker_fill = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
   ImColor color_marker_fill_decel = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
@@ -1831,7 +1891,7 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
       point_end.y = value_to_y_decel(SPEED_VECTORS_DECELERATION[speed_point].max());
       if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
       {
-        Draw_List->AddLine(screen_position_start, screen_position_end, color_line_decel, 3.0f);
+        Draw_List->AddLine(screen_position_start, screen_position_end, color_line_decel, 2.0f);
       }
     }
   }
@@ -1850,10 +1910,59 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
       point_end.y = value_to_y_accel(SPEED_VECTORS_ACCELERATION[speed_point].max());
       if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
       {
-        Draw_List->AddLine(screen_position_start, screen_position_end, color_line_accel, 3.0f);
+        Draw_List->AddLine(screen_position_start, screen_position_end, color_line_accel, 2.0f);
       }
     }
   }
+
+  // Draw_history
+  if (SPEED_VECTORS_HISTORY.size() > 0)
+  {
+    bool acceleration_start = true;
+    bool acceleration_end   = true;
+
+    for (int position = 0; position < (int)SPEED_VECTORS_HISTORY.size(); position++)
+    {
+      point_end.x = value_to_x(SPEED_VECTORS_HISTORY[position].x);
+      point_end.y = SPEED_VECTORS_HISTORY[position].y;
+
+      if (point_end.y >= 0.0f)
+      {
+        acceleration_end = true;
+        point_end.y = value_to_y_accel(point_end.y);
+      }
+      else
+      {
+        acceleration_end = false;
+        point_end.y = value_to_y_decel(abs(point_end.y));
+      }
+
+      if (acceleration_start == acceleration_end)
+      {
+        if (position > 0)
+        {
+          if (acceleration_start)
+          {
+            if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
+            {
+              Draw_List->AddLine(screen_position_start, screen_position_end, color_line_accel_history, 3.0f);
+            }
+          }
+          else
+          {
+            if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
+            {
+              Draw_List->AddLine(screen_position_start, screen_position_end, color_line_decel_history, 3.0f);
+            }
+          }
+        }
+      }
+
+      point_start = point_end;
+      acceleration_start = acceleration_end;
+    }
+  }
+
 
   // Draw Indicator
   if (LAST_SPEED_ACCELERATION_READ.y >= 0.0f)
@@ -2006,6 +2115,18 @@ void DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Accelerati
       {
         CURRENT_DECELERATION_MAX = abs(Acceleration);
       }
+    }
+  }
+
+  SPEED_VECTORS_HISTORY_UPDATE_COUNTER++;
+  if (SPEED_VECTORS_HISTORY_UPDATE_COUNTER >= 10)
+  {
+    SPEED_VECTORS_HISTORY_UPDATE_COUNTER = 0;
+    ImVec2 speed_acceleration = ImVec2(Speed, Acceleration);
+    SPEED_VECTORS_HISTORY.push_back(speed_acceleration);
+    while ((int)SPEED_VECTORS_HISTORY.size() > PROPS.HISTORY_SIZE)
+    {
+      SPEED_VECTORS_HISTORY.pop_front();
     }
   }
 }
