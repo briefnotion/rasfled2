@@ -1,3 +1,8 @@
+2.249_250422
+  - Added some optimizations to the DEGEN plot update function.
+  - Power curve history line doubled in time (halved the update speed)
+  - Other minor changes to the power curve plot.
+
 2.248_250421
   - Made some improvements to Power Curve and Degen graphs.
 

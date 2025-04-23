@@ -1186,11 +1186,51 @@ bool DRAW_D2_PLOT::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 En
 
 // ---------------------------------------------------------------------------------------
 
+int D2_PLOT_LINE_DEGENERATE::position_in_reference_vector_from_time_span(double Time_Span)
+{
+  int ret_found_postion = -1;
+
+  for (int pos = 0; pos < (int)DATA_POINT.size() -1; pos++)
+  {
+    if (Time_Span > POSITION_INFO[pos].GRAPH_END_TIME - POSITION_INFO[pos].GRAPH_START_TIME)
+    {
+      ret_found_postion = pos;
+    }
+  }
+
+  return ret_found_postion;
+}
+
 void D2_PLOT_LINE_DEGENERATE::reorganize_line_data(double Time)
 {
+  int working_size = 0;
+  
+  //working_size = (int)POSITION_INFO.size() -1;
+  working_size = 0;
+
+  if (Time > LEVEL_3_TIME_TO_REORGANIZE)
+  {
+    LEVEL_3_TIME_TO_REORGANIZE = Time + LEVEL_3_TIME;
+    working_size = (int)POSITION_INFO.size() -1;
+  }
+  else if (Time > LEVEL_2_TIME_TO_REORGANIZE)
+  {
+    LEVEL_2_TIME_TO_REORGANIZE = Time + LEVEL_2_TIME;
+    working_size = LEVEL_3_WORKING_SIZE;
+  }
+  else if (Time > LEVEL_1_TIME_TO_REORGANIZE)
+  {
+    LEVEL_1_TIME_TO_REORGANIZE = Time + LEVEL_1_TIME;
+    working_size = LEVEL_2_WORKING_SIZE;
+  }
+  else
+  {
+    working_size = LEVEL_1_WORKING_SIZE;
+  }
+
   if (POSITION_INFO.size() > 0 && DATA_POINT.size() > 0 && POSITION_INFO.size() ==  DATA_POINT.size())
   {
-    for (int position = 0; position < (int)POSITION_INFO.size() -1; position++)
+    for (int position = 0; position < working_size; position++)
     {
       if (DATA_POINT[position].samples() > 0 && DATA_POINT[position].is_placeholder() == false)
       {
@@ -1201,7 +1241,7 @@ void D2_PLOT_LINE_DEGENERATE::reorganize_line_data(double Time)
       }
     }
 
-    for (int position = 0; position < ((int)DATA_POINT.size() - 1); position++) 
+    for (int position = 0; position < working_size; position++) 
     {
       if (POSITION_INFO[position].ARBITRARY_FLAG)
       {
@@ -1212,71 +1252,6 @@ void D2_PLOT_LINE_DEGENERATE::reorganize_line_data(double Time)
   }
 }
 
-
-/*
-void D2_PLOT_LINE_DEGENERATE::reorganize_line_data(double Time)
-{
-  // Flags used for controlling loop behavior:
-  // 'complete': Stops processing once the end of the list is reached.
-  // 'merge_occured': Tracks whether a merge happened during this iteration.
-  // 'ignore_no_samples': Skips items with no samples until the first valid item is found.
-  bool complete = false;
-  bool merge_occured = true;
-  bool ignore_no_samples = true;
-
-  // Range of positions to process:
-  // 'pos_start' marks the beginning of the current range.
-  // 'pos_end' marks the end of the current range (doubles each iteration for scaling).
-  int pos_start = 0;
-  int pos_end = 1;
-
-  // Ensure there are data points to process before proceeding.
-  if (DATA_POINT.size() > 0) 
-  {
-    // Iterate through merging logic as long as merges occur and the range is not complete.
-    while (merge_occured && complete == false)
-    {
-      merge_occured = false; // Reset merge flag for this iteration.
-
-      // If 'pos_end' exceeds the last valid position, limit it and mark the process as complete.
-      if (pos_end >= ((int)DATA_POINT.size() - 1))
-      {
-        pos_end = ((int)DATA_POINT.size() - 1); // Cap 'pos_end' to prevent out-of-bounds access.
-        complete = true; // Flag completion to exit the loop in the next iteration.
-      }
-
-      // Process data points within the current range [pos_start, pos_end).
-      for (int position = pos_start; position < pos_end; position++) 
-      {
-        // Skip processing empty samples unless 'ignore_no_samples' is true.
-        if (ignore_no_samples || DATA_POINT[position].samples() > 0)
-        {
-          // Stop ignoring empty samples once a valid item is found.
-          if (ignore_no_samples)
-          {
-            if (DATA_POINT[position].samples() > 0)
-            {
-              ignore_no_samples = false; // Disable the ignore flag.
-            }
-          }
-
-          // Check if the data point is eligible for merging based on time span conditions.
-          if ((Time - DATA_POINT[position].time_created()) > POSITION_INFO[position].GRAPH_END_TIME) 
-          {
-            // Perform the merge operation and flag that a merge occurred.
-            DATA_POINT[position + 1].merge_into(DATA_POINT[position]);
-            merge_occured = true;
-          }
-        } 
-      }
-
-      // Update range to process in the next iteration.
-      pos_start = pos_end;      // Move the start of the range forward.
-      pos_end = pos_start * 2;  // Double the range size for scaling.
-    }
-  } 
-}
-*/
 
 /*
 float DRAW_D2_PLOT_DEGENERATE::triangular_number(float X)
@@ -1519,6 +1494,24 @@ void DRAW_D2_PLOT_DEGENERATE::draw_grid(ImDrawList *Draw_List, system_data &sdSy
   }
 
   /*
+  ImGui::Text("16 ms: %d", LINE[0].position_in_reference_vector_from_time_span(0.016f));
+  ImGui::Text("30 ms: %d", LINE[0].position_in_reference_vector_from_time_span(0.030f));
+  ImGui::Text("52 ms: %d", LINE[0].position_in_reference_vector_from_time_span(0.045f));  //60
+  ImGui::Text("112 ms: %d", LINE[0].position_in_reference_vector_from_time_span(0.112f)); //120
+  ImGui::Text("240 ms: %d", LINE[0].position_in_reference_vector_from_time_span(0.240f));
+  ImGui::Text("472 ms: %d", LINE[0].position_in_reference_vector_from_time_span(0.472f)); //480
+  ImGui::Text("1 s: %d", LINE[0].position_in_reference_vector_from_time_span(0.992f));       //1s
+  ImGui::Text("10 s: %d", LINE[0].position_in_reference_vector_from_time_span(09.992f));     //10s
+  ImGui::Text("1 m: %d", LINE[0].position_in_reference_vector_from_time_span(59.992f));      //1m
+  ImGui::Text("1 h: %d", LINE[0].position_in_reference_vector_from_time_span((60.0f * 60.0f) - .008));      //1m
+  ImGui::Text("TIME_FRAME_TIME: %f", LINE[0].TIME_FRAME_TIME);
+  ImGui::Text("TIME_HALF_FRAME_TIME: %f", LINE[0].TIME_HALF_FRAME_TIME);
+  ImGui::Text("LEVEL_1_TIME_TO_REORGANIZE: %f", LINE[0].LEVEL_1_TIME_TO_REORGANIZE);
+  ImGui::Text("LEVEL_2_TIME_TO_REORGANIZE: %f", LINE[0].LEVEL_2_TIME_TO_REORGANIZE);
+  ImGui::Text("LEVEL_3_TIME_TO_REORGANIZE: %f", LINE[0].LEVEL_3_TIME_TO_REORGANIZE);
+  */
+ 
+  /*
   // Test Point poition for debugging and accuracy
   {
     ImVec2 point_start;
@@ -1592,6 +1585,16 @@ void DRAW_D2_PLOT_DEGENERATE::build_vectors()
     
         LINE[line].POSITION_INFO.push_back(tmp_position_info);
       }
+    }
+
+    for(int line = 0; line < (int)LINE.size(); line++)
+    {
+      // Set Timing of reorganize.
+      LINE[line].TIME_FRAME_TIME = DEF_FRAME_RATE_DELAY / 1000.0f;
+
+      LINE[line].LEVEL_1_WORKING_SIZE = LINE[line].position_in_reference_vector_from_time_span(LINE[line].LEVEL_1_TIME);
+      LINE[line].LEVEL_2_WORKING_SIZE = LINE[line].position_in_reference_vector_from_time_span(LINE[line].LEVEL_2_TIME);
+      LINE[line].LEVEL_2_WORKING_SIZE = LINE[line].position_in_reference_vector_from_time_span(LINE[line].LEVEL_3_TIME);
     }
   }
 }
@@ -1871,7 +1874,7 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
   ImColor color_line_decel = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
 
   ImColor color_line_accel_history = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
-  ImColor color_line_decel_history = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_GREY);
+  ImColor color_line_decel_history = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_PINK);
 
   ImColor color_marker = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
   ImColor color_marker_fill = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
@@ -2119,7 +2122,7 @@ void DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Accelerati
   }
 
   SPEED_VECTORS_HISTORY_UPDATE_COUNTER++;
-  if (SPEED_VECTORS_HISTORY_UPDATE_COUNTER >= 10)
+  if (SPEED_VECTORS_HISTORY_UPDATE_COUNTER >= 20)
   {
     SPEED_VECTORS_HISTORY_UPDATE_COUNTER = 0;
     ImVec2 speed_acceleration = ImVec2(Speed, Acceleration);

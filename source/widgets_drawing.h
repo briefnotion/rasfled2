@@ -473,6 +473,25 @@ To Do:
   vector<D2_VECTOR_POSITION_REFERENCE>  POSITION_INFO;
   vector<MIN_MAX_TIME_SLICE_DOUBLE>     DATA_POINT;
 
+  // Contains calculation values for when and how much of the dataset 
+  //  will merge its values up.
+  double TIME_FRAME_TIME = 30.0f / 1000.0; // Default frame rate delay in seconds
+
+  double LEVEL_1_TIME = 0.100;
+  double LEVEL_2_TIME = 0.500;
+  double LEVEL_3_TIME = 10.0;
+
+  double LEVEL_1_TIME_TO_REORGANIZE = 0.0;
+  double LEVEL_2_TIME_TO_REORGANIZE = 0.0;
+  double LEVEL_3_TIME_TO_REORGANIZE = 0.0;
+
+  int LEVEL_1_WORKING_SIZE = 0;
+  int LEVEL_2_WORKING_SIZE = 0;
+  int LEVEL_3_WORKING_SIZE = 0;
+  // More than that then Reorganize all.
+
+  int position_in_reference_vector_from_time_span(double Time_Span);
+
   void reorganize_line_data(double Time);
 };
 

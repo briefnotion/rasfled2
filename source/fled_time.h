@@ -211,6 +211,8 @@ class TIMED_IS_READY
 // ---------------------------------------------------------------------------------------
 
 //  PHASE OUT
+//  (with what?  Did I write a replacement?)
+//    Maybe TIMED_IS_READY?
 
 class TIMED_PING
 // Class to manage conditions of when something needs to be ran.
