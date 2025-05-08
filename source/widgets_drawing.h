@@ -665,6 +665,8 @@ class DRAW_D2_PLOT_POWER_CURVE_PROPERTIES
   PROPERTY_ORIENTATION ORIENTATION;
   
   int MAX_SPEED = 80;
+  //bool MAX_SPEED_DISPLAY_AUTO_ADJUST = true;
+  //  Always on for now. Code not written to support false value.
 
   int MPH_DIVISION =  3;  // 10 - Every mph has 10 points within. 10.0, 10.1, 10.2, ...
                           //  3 - Every mph has 10 points within. 10.0, 10.333, 10.666, ...
@@ -697,8 +699,9 @@ To Do:
 
   //---
 
-  float CURRENT_ACCELERATION_MAX = 0.0f;
-  float CURRENT_DECELERATION_MAX = 0.0f;  // Deceleration included.
+  float CURRENT_SPEED_MAX = 0.0f;         // Speed max read value.
+  float CURRENT_ACCELERATION_MAX = 0.0f;  // Acceleration max read value.
+  float CURRENT_DECELERATION_MAX = 0.0f;  // Deceleration max read value.
 
   //---
 
@@ -706,6 +709,7 @@ To Do:
 
   ImVec2 LAST_SPEED_ACCELERATION_READ;
   vector<MIN_MAX_TIME_SLICE_DOUBLE> SPEED_VECTORS_ACCELERATION;
+  vector<int>                       SPEED_VECTORS_ACCELERATION_GEAR;
   vector<MIN_MAX_TIME_SLICE_DOUBLE> SPEED_VECTORS_DECELERATION;
   deque<ImVec2>                     SPEED_VECTORS_HISTORY;
   int SPEED_VECTORS_HISTORY_UPDATE_COUNTER = 0;
@@ -737,7 +741,7 @@ To Do:
 
   void create();
 
-  void update(double Time, float Speed, float Acceleration);
+  void update(double Time, float Speed, float Acceleration, int Gear);
 
   bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };

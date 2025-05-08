@@ -676,45 +676,45 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
 {
   ImDrawList* draw_list_nova = ImGui::GetWindowDrawList();
 
-  if (BTC_NOVA_2_DRIVE.button_toggle_color(sdSysData, "Drive", "Drive", NOVA_2_SELECTION == 0, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  if (BTC_NOVA_2_DRIVE.button_toggle_color(sdSysData, "Drive", "Drive", sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION == 0, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
   {
-    NOVA_2_SELECTION = 0;
+    sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION = 0;
   }
 
   ImGui::SameLine();
 
-  if (BTC_NOVA_2_P_AND_T.button_toggle_color(sdSysData, "P & T", "P & T", NOVA_2_SELECTION == 1, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  if (BTC_NOVA_2_P_AND_T.button_toggle_color(sdSysData, "P & T", "P & T", sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION == 1, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
   {
-    NOVA_2_SELECTION = 1;
+    sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION = 1;
   }
 
   ImGui::SameLine();
   
-  if (BTC_NOVA_2_INDICATORS.button_toggle_color(sdSysData, "Indicators", "Indicators", NOVA_2_SELECTION == 2, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  if (BTC_NOVA_2_INDICATORS.button_toggle_color(sdSysData, "Indicators", "Indicators", sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION == 2, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
   {
-    NOVA_2_SELECTION = 2;
+    sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION = 2;
   }
 
   ImGui::SameLine();
   
-  if (BTC_NOVA_2_ENGINE.button_toggle_color(sdSysData, "Engine", "Engine", NOVA_2_SELECTION == 3, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  if (BTC_NOVA_2_ENGINE.button_toggle_color(sdSysData, "Engine", "Engine", sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION == 3, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
   {
-    NOVA_2_SELECTION = 3;
+    sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION = 3;
   }
 
   ImGui::SameLine();
   
-  if (BTC_NOVA_2_OTHER.button_toggle_color(sdSysData, "Other", "Other", NOVA_2_SELECTION == 4, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  if (BTC_NOVA_2_OTHER.button_toggle_color(sdSysData, "Other", "Other", sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION == 4, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
   {
-    NOVA_2_SELECTION = 4;
+    sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION = 4;
   }
   
-  if (NOVA_2_SELECTION < 0 || NOVA_2_SELECTION > 4)
+  if (sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION < 0 || sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION > 4)
   {
-    NOVA_2_SELECTION = 0;
+    sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION = 0;
   }
 
-  if (NOVA_2_SELECTION == 0)  // Drive
+  if (sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION == 0)  // Drive
   {
     ImGui::Text("          VELOCITY");
 
@@ -777,7 +777,7 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
   }
 
   // ---
-  if (NOVA_2_SELECTION == 1)  // P & T
+  if (sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION == 1)  // P & T
   {
     ImGui::Text("          TEMPATURE");
 
@@ -810,7 +810,7 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
 
   // ---
 
-  if (NOVA_2_SELECTION == 2)  // Indicators
+  if (sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION == 2)  // Indicators
   {
     ImGui::Text("          SYSTEM");
   
@@ -884,7 +884,7 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
   
   // ---
 
-  if (NOVA_2_SELECTION == 3)  // Engine
+  if (sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION == 3)  // Engine
   {
     ImGui::Text("          POWER");
   
@@ -913,7 +913,7 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
   
   // ---
 
-  if (NOVA_2_SELECTION == 4)  // Other
+  if (sdSysData.PANEL_CONTROL.AUTOMOBILE_NOVA_2_SELECTION == 4)  // Other
   {
     ImGui::Text("          DOORS");
   
@@ -1052,14 +1052,14 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
     ImGui::Text("ERR:");
     ImGui::Text(" %d", sdSysData.CAR_INFO.STATISTICS.errors());
     */
-    if (BTC_NOVA_SCREEN.button_toggle_color(sdSysData, "Screen\n1", "Screen\n2", DISPLAY_NOVA_SCREEN, RAS_BLUE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (BTC_NOVA_SCREEN.button_toggle_color(sdSysData, "Screen\n1", "Screen\n2", sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_NOVA_SCREEN, RAS_BLUE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
-      DISPLAY_NOVA_SCREEN = !DISPLAY_NOVA_SCREEN;
+      sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_NOVA_SCREEN = !sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_NOVA_SCREEN;
     }
 
     if (BC_NOVA_1.button_color(sdSysData, "NOVA", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
-      DISPLAY_NOVA = false;
+      sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_NOVA = false;
     }
 
   }
@@ -1067,7 +1067,7 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 
   ImGui::SameLine();
 
-  if (DISPLAY_NOVA_SCREEN)
+  if (sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_NOVA_SCREEN)
   {
     ImGui::BeginChild("Nova Display Data", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
@@ -2345,7 +2345,10 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   // Power Curve Graph
   {
     SDATA.PLOT_POWER_CURVE.update((current_frame_time_db) / 1000.0, 
-                                    SDATA.SPEED_RAW, SDATA.ACCELERATION_IMPACT_MAG.impact(current_frame_time_lu));
+                                    SDATA.SPEED_RAW, 
+                                    SDATA.ACCELERATION_IMPACT_MAG.impact(current_frame_time_lu), 
+                                    sdSysData.CAR_INFO.STATUS.GEAR.reported() 
+                                  );
   }
 
   // Vertical Bars
@@ -2490,18 +2493,18 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
       ImGui::Separator();
 
       {
-        SDATA.D_TEMP_COOLANT.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 2);
-        SDATA.D_TEMP_INTAKE.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 2);
-        SDATA.D_TEMP_AMBIANT.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 2);
-        SDATA.D_TEMP_CATALYST.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_COOLANT.draw(draw_list_all_data, sdSysData, sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_INTAKE.draw(draw_list_all_data, sdSysData, sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_AMBIANT.draw(draw_list_all_data, sdSysData, sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM == 2);
+        SDATA.D_TEMP_CATALYST.draw(draw_list_all_data, sdSysData, sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM == 2);
         SDATA.D_TEMP_SUPER_TEMP.draw(draw_list_all_data, sdSysData, true);
       }
 
       ImGui::Separator();
 
       {
-        SDATA.D_FUEL_RAIL_PRESSURE.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 3);
-        SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(draw_list_all_data, sdSysData, DISPLAY_MID_BOTTOM == 3);
+        SDATA.D_FUEL_RAIL_PRESSURE.draw(draw_list_all_data, sdSysData, sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM == 3);
+        SDATA.D_EVAP_SYSTEM_VAP_PRESSURE.draw(draw_list_all_data, sdSysData, sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM == 3);
         SDATA.D_BAROMETER.draw(draw_list_all_data, sdSysData);
         SDATA.D_CAM_COMM_ERROR.draw(draw_list_all_data, sdSysData);
       }
@@ -2549,7 +2552,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
   ImGui::SameLine();
 
   // Show Center Region
-  if (DISPLAY_NOVA)
+  if (sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_NOVA)
   {
     ImGui::BeginChild("Nova", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
     {
@@ -2571,18 +2574,18 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
         ImVec2 pos2 = ImVec2(pos1.x + size_1_3, pos1.y + ImGui::GetContentRegionAvail().y);
         
         // plot speed, voltage, temperature, fuel level
-        if (SDATA.PLOT_SLOW_CHOICE == 0)
+        if (sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_TOP == 0)
         {
           if (SDATA.PLOT_SLOW_DEGEN.draw(sdSysData, pos1, pos2))
           {
-            SDATA.PLOT_SLOW_CHOICE = 1;
+            sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_TOP = 1;
           }
         }
         else
         {
           if (SDATA.PLOT_POWER_CURVE.draw(sdSysData, pos1, pos2))
           {
-            SDATA.PLOT_SLOW_CHOICE = 0;
+            sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_TOP = 0;
           }
         }
 
@@ -2600,7 +2603,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
       {
         ImDrawList* draw_list_data_auto_data = ImGui::GetWindowDrawList();
 
-        if (DISPLAY_MID_BOTTOM == 0)
+        if (sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM == 0)
         // Show bars
         {
           ImGui::BeginChild("Auto Data Long Bars Left", ImVec2(ImGui::GetContentRegionAvail().x - (70.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y - 50.0f), false, sdSysData.SCREEN_DEFAULTS.flags_c);
@@ -2622,7 +2625,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
             ImGui::SetCursorScreenPos(pos1);
             if (ImGui::InvisibleButton("InvisibleButton", ImGui::GetContentRegionAvail()))
             {
-              DISPLAY_MID_BOTTOM++;
+              sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM++;
             }
           }
           ImGui::EndChild();
@@ -2644,7 +2647,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
           {
             if (BC_NOVA_2.button_color(sdSysData, "NOVA", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              DISPLAY_NOVA = true;
+              sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_NOVA = true;
             }
           }
           ImGui::EndChild();
@@ -2684,14 +2687,14 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
           ImGui::EndChild();
         }
 
-        else if (DISPLAY_MID_BOTTOM == 1)
+        else if (sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM == 1)
         // Show Voltage
         {
           // advance
-          DISPLAY_MID_BOTTOM++;
+          sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM++;
         }
 
-        else if (DISPLAY_MID_BOTTOM == 2)
+        else if (sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM == 2)
         // Show Temperature
         {
           float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
@@ -2708,7 +2711,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
           // Change Screens
           if (SDATA.PLOT_TEMPERATURE_DEGEN.draw(sdSysData, pos1, pos2))
           {
-            DISPLAY_MID_BOTTOM++;
+            sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM++;
           }
 
           ImGui::SameLine();
@@ -2721,7 +2724,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
 
         }
 
-        else if (DISPLAY_MID_BOTTOM == 3)
+        else if (sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM == 3)
         // Show Power
         {
           float size_1_3 = ImGui::GetContentRegionAvail().x - 35.0f;
@@ -2739,7 +2742,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
           // Change Screens
           if (SDATA.PLOT_POWER_DEGEN.draw(sdSysData, pos1, pos2))
           {
-            DISPLAY_MID_BOTTOM++;
+            sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM++;
           }
 
           ImGui::SameLine();
@@ -2754,7 +2757,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
         else
         {
           // reset
-          DISPLAY_MID_BOTTOM = 0;
+          sdSysData.PANEL_CONTROL.AUTOMOBILE_DISPLAY_MID_BOTTOM = 0;
         }
       }
       ImGui::EndChild();

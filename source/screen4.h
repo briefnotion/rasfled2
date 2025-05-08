@@ -143,14 +143,6 @@ class SCREEN4
   bool DISPLAY_CONFIRM = false;
 
   int DISPLAY_MENU = 0;
-  int DISPLAY_SCREEN = 0;
-  // Screen:
-  //  0 - Console
-  //  1 - Automobile
-  //  2 - ADSB
-  //  3 - not coded
-  //  4 - Logs
-  //  5 - Dot Dot Dot
 
   bool RESET_KEYBOARD_FOCUS = true;
 

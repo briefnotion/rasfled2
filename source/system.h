@@ -222,10 +222,11 @@ class system_data
   HMC5883L        COMMS_COMPASS;
 
   // Screen Settings
-  bool            TTY_ONLY = false;
-  COLOR_COMBOS    COLOR_SELECT;
-  WIDGET_DEFAULTS SCREEN_DEFAULTS;
-  META_SCREEN     SCREEN_META_DATA;
+  bool                  TTY_ONLY = false;
+  COLOR_COMBOS          COLOR_SELECT;
+  WIDGET_DEFAULTS       SCREEN_DEFAULTS;
+  META_SCREEN           SCREEN_META_DATA;
+  SCREEN4_PANEL_CONTROL PANEL_CONTROL;
 
   // Advertisements
   string          DIRECTORY_ADVERTISEMENTS = "";

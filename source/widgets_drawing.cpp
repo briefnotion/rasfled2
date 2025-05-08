@@ -1835,7 +1835,15 @@ bool DRAW_D2_PLOT_POWER_CURVE::position_on_plot(ImVec2 &Point, ImVec2 &Position_
 
 float DRAW_D2_PLOT_POWER_CURVE::value_to_x(float Speed)
 {
-  return Speed * (FULL_SIZE.x / (float)(PROPS.MAX_SPEED));
+  if (CURRENT_SPEED_MAX < PROPS.MAX_SPEED)
+  {
+    return Speed * (FULL_SIZE.x / CURRENT_SPEED_MAX);
+  }
+  else
+  {
+    return Speed * (FULL_SIZE.x / (float)(PROPS.MAX_SPEED));
+  }
+
 }
 
 float DRAW_D2_PLOT_POWER_CURVE::value_to_y_accel(float Acceleration)
@@ -1907,13 +1915,42 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
     float speed = 0.0f;
     for (int speed_point = 1; speed_point < (int)SPEED_VECTORS_ACCELERATION.size(); speed_point++)
     {
+      if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 0)
+      {
+        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_GREY);
+      }
+      else if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 1)
+      {
+        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
+      }
+      else if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 2)
+      {
+        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_ORANGE);
+      }
+      else if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 3)
+      {
+        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_BLUE);
+      }
+      else if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 4)
+      {
+        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_GREEN);
+      }
+      else if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 5)
+      {
+        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
+      }
+      else
+      {
+        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_PURPLE);
+      }
+
       speed = (float)speed_point / (float)PROPS.MPH_DIVISION;
       point_start = point_end;
       point_end.x = value_to_x(speed);
       point_end.y = value_to_y_accel(SPEED_VECTORS_ACCELERATION[speed_point].max());
       if (position_on_plot(point_start, screen_position_start) && position_on_plot(point_end, screen_position_end))
       {
-        Draw_List->AddLine(screen_position_start, screen_position_end, color_line_accel, 2.0f);
+        Draw_List->AddLine(screen_position_start, screen_position_end, color_line_accel, 4.0f);
       }
     }
   }
@@ -2027,6 +2064,11 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_grid(ImDrawList *Draw_List, system_data &sdS
 
     Draw_List->AddLine(screen_position_start, screen_position_end, 
                         color_grid_speed, 1.0f);
+
+    ImGui::SetCursorScreenPos(screen_position_start);
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE)));
+    ImGui::Text("%d", (int)(speed_line * 10.0f));
+    ImGui::PopStyleColor();
   }
 
   // Draw Accel
@@ -2076,12 +2118,14 @@ void DRAW_D2_PLOT_POWER_CURVE::build_speed_vectors()
   int size = PROPS.MAX_SPEED * PROPS.MPH_DIVISION;
 
   SPEED_VECTORS_ACCELERATION.reserve(size);
+  SPEED_VECTORS_ACCELERATION_GEAR.reserve(size);
   SPEED_VECTORS_DECELERATION.reserve(size);
 
   MIN_MAX_TIME_SLICE_DOUBLE tmp_empty_slice;
   for (int pos = 0; pos < size; pos++)
   {
     SPEED_VECTORS_ACCELERATION.push_back(tmp_empty_slice);
+    SPEED_VECTORS_ACCELERATION_GEAR.push_back(0);
     SPEED_VECTORS_DECELERATION.push_back(tmp_empty_slice);
   }
 }
@@ -2091,18 +2135,24 @@ void DRAW_D2_PLOT_POWER_CURVE::create()
   build_speed_vectors();
 }
 
-void DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Acceleration)
+void DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Acceleration, int Gear)
 {
   LAST_SPEED_ACCELERATION_READ.x = Speed;
   LAST_SPEED_ACCELERATION_READ.y = Acceleration;
 
   float storage_point = Speed * (float)PROPS.MPH_DIVISION;
+
+  if (Speed > CURRENT_SPEED_MAX)
+  {
+    CURRENT_SPEED_MAX = Speed;
+  }
     
   if (Acceleration > 0.0f && Speed < PROPS.MAX_SPEED)
   {
     if ((int)storage_point < (int)SPEED_VECTORS_ACCELERATION.size())
     {
       SPEED_VECTORS_ACCELERATION[(int)storage_point].store_value(Acceleration, Time);
+      SPEED_VECTORS_ACCELERATION_GEAR[(int)storage_point] = Gear;
       if (Acceleration > CURRENT_ACCELERATION_MAX)
       {
         CURRENT_ACCELERATION_MAX = Acceleration;

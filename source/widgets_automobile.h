@@ -363,8 +363,6 @@ class DISPLAY_DATA_AUTOMOBILE
   DRAW_D2_PLOT_DEGENERATE   PLOT_SLOW_DEGEN;  // PLOT_SLOW_CHOICE = 1
   DRAW_D2_PLOT_POWER_CURVE  PLOT_POWER_CURVE; // PLOT_SLOW_CHOICE = 0
 
-  int PLOT_SLOW_CHOICE = 0;
-
   BAR_TECH VB_SPEED;
   //BAR_TECH VB_TACH;
   BAR_TECH VB_S_TEMP;
@@ -433,7 +431,6 @@ class AUTOMOBILE_SCREEN
   BUTTON_TOGGLE_COLOR BTC_NOVA_2_INDICATORS;  // NOVA_2_SELECTION = 2;
   BUTTON_TOGGLE_COLOR BTC_NOVA_2_ENGINE;      // NOVA_2_SELECTION = 3;
   BUTTON_TOGGLE_COLOR BTC_NOVA_2_OTHER;       // NOVA_2_SELECTION = 4;
-  int NOVA_2_SELECTION = 0;
 
   // NOVA SCREEN 2 VARIABLES
   //AUTOMOBILE_VELOCITY
@@ -533,19 +530,8 @@ class AUTOMOBILE_SCREEN
   bool DISPLAY_DATA = true;
 
   bool DISPLAY_CONFIRM = false;
-  
-  bool DISPLAY_NOVA = false;
-  bool DISPLAY_NOVA_SCREEN = true;
-    // false - nova screen 1
-    // true  - nova screen 2
 
   bool NOVA_CLIP_DETAIL = false;
-
-  int DISPLAY_MID_BOTTOM = 0; // 0 - Large Horizontal Bars
-                              // 1 - Unused
-                              // 2 - Temp Graph
-                              // 3 - Power Graph
-
 
   void nova_1(system_data &sdSysData);
   void nova_2(system_data &sdSysData);

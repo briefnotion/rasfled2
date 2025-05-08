@@ -1,3 +1,10 @@
+2.250_250507
+  - Corrected running color changes so that color changes from the keyboard works correctly.
+  - Added speed indicators to the power grid.
+  - Power grid will auto adjust grid to max speed.  Props added but not coded.
+  - Power curve shows gear by color.  Currently 0 - 6.
+  - Moved the map view control buttons to different locations on the map.
+
 2.249_250422
   - Added some optimizations to the DEGEN plot update function.
   - Power curve history line doubled in time (halved the update speed)
