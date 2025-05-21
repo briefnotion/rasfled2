@@ -116,6 +116,9 @@ Settings:
 
 Enable modules by removing the #.
 
+Restart with:  
+`sudo systemctl restart rsyslog`
+
 ## Set the program up
 The `definitions.h` file will contain most of the setting that need to be made for your build.  Most things can be left as is, but for live build, `TEST` vars should be false, and anything with a `COMMS_AUTOSTART_...` should be set to false if system isn't available, or true if it is.
 
