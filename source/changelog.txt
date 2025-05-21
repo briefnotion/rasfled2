@@ -1,3 +1,12 @@
+2.251_250520
+  - Started consolidating Alerts into a coordinator so that I can manage them in a central 
+      location.
+  - More changes made to Panal Control system.
+  - Enabled a work around so that logs can return.  Requires installation of:
+      sudo apt update && sudo apt install rsyslog
+      settings:  sudo nano /etc/rsyslog.conf
+  - Swapped position of Min and Max aircraft display range. 
+  
 2.250_250507
   - Corrected running color changes so that color changes from the keyboard works correctly.
   - Added speed indicators to the power grid.

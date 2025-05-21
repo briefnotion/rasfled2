@@ -415,7 +415,7 @@ class CONSOLE_COMMUNICATION
 
 // ---------------------------------------------------------------------------------------
 
-class SCREEN4_PANEL_CONTROL
+class SCREEN4_PANELS
 {
   public:
 
@@ -463,6 +463,13 @@ class SCREEN4_PANEL_CONTROL
   bool ADSB_DISPLAY_MAP = true;
 };
 
+
+
+class SCREEN4_PANEL_CONTROL
+{
+  public:
+  SCREEN4_PANELS PANELS;
+};
 
 // ---------------------------------------------------------------------------------------
 

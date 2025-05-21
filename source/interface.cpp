@@ -1126,34 +1126,34 @@ void processcommandlineinput(system_data &sdSysData,
       // Alert Test
       if (check_command(sdSysData.SCREEN_COMMS, " alert", "Alert"))
       {
-        sdSysData.ALERTS_AUTO.add_generic_alert("ALERT", "Alert");
+        sdSysData.ALL_ALERTS.add_generic_alert("ALERT", "Alert");
       }
 
       /*
       if (check_command(sdSysData.SCREEN_COMMS, " sound0", "Alert Sound 0"))
       {
-        sdSysData.ALERTS_AUTO.sound_alert(0);
+        sdSysData.ALL_ALERTS.sound_alert(0);
       }
       */
 
       //if (check_command(sdSysData.SCREEN_COMMS, " sounda6", "Alert Sound 1"))
       //{
-      //  sdSysData.ALERTS_AUTO.sound_alert(1);
+      //  sdSysData.ALL_ALERTS.sound_alert(1);
       //}
 
       if (check_command(sdSysData.SCREEN_COMMS, " sound1", "Alert Sound 1"))
       {
-        sdSysData.ALERTS_AUTO.sound_alert(1);
+        sdSysData.ALL_ALERTS.sound_alert(1);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, " sound2", "Alert Sound 2"))
       {
-        sdSysData.ALERTS_AUTO.sound_alert(2);
+        sdSysData.ALL_ALERTS.sound_alert(2);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, " sound3", "Alert Sound 3"))
       {
-        sdSysData.ALERTS_AUTO.sound_alert(3);
+        sdSysData.ALL_ALERTS.sound_alert(3);
       }
 
       /*

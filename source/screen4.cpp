@@ -917,7 +917,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - (48 * DEF_SCREEN_SIZE_Y_MULTIPLIER)), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
-            if (sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN == 0)
+            if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 0)
             {
               if (sdSysData.CAR_INFO.active())
               {
@@ -949,7 +949,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               }
             }
 
-            else if (sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN == 1)
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 1)
             {
               ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
               AUTOMOBILE.display(sdSysData, DISPLAY_CONFIRM);
@@ -966,7 +966,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               ImGui::PopStyleColor();
             }
 
-            else if (sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN == 2)
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 2)
             {
               if (sdSysData.CAR_INFO.active())
               {
@@ -1026,7 +1026,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             }
             */
 
-            else if (sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN == 4)
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 4)
             {
               if (sdSysData.CAR_INFO.active())
               {
@@ -1058,7 +1058,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               }
             }
 
-            else if (sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN == 5)
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 5)
             {
               if (sdSysData.CAR_INFO.active())
               {
@@ -1091,7 +1091,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               ImGui::Begin(" ", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
               {
                 // Show set screen to console.
-                sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN = 0;
+                sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 0;
               }
               ImGui::End();
             }
@@ -1107,24 +1107,24 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x - sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB.x - (15.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
 
-            if (BTC_TAB_CONSOLE.button_toggle_color(sdSysData, "Console", "Console", sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN == 0, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_CONSOLE.button_toggle_color(sdSysData, "Console", "Console", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 0, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN = 0;
+              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 0;
               RESTACK_WINDOWS = true;
             }
 
             ImGui::SameLine();
 
-            if (BTC_TAB_AUTOMOBILE.button_toggle_color(sdSysData, "Automobile", "Automobile", sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN == 1, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_AUTOMOBILE.button_toggle_color(sdSysData, "Automobile", "Automobile", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 1, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN = 1;
+              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 1;
             }
 
             ImGui::SameLine();
 
-            if (BTC_TAB_ADSB.button_toggle_color(sdSysData, "ADSB", "ADSB", sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN == 2, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_ADSB.button_toggle_color(sdSysData, "ADSB", "ADSB", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 2, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN = 2;
+              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 2;
             }
 
             ImGui::SameLine();
@@ -1138,17 +1138,17 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             ImGui::SameLine();
             */
 
-            if (BTC_TAB_LOGS.button_toggle_color(sdSysData, "LOGS", "LOGS", sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN == 4, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_LOGS.button_toggle_color(sdSysData, "LOGS", "LOGS", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 4, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN = 4;
+              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 4;
               RESTACK_WINDOWS = true;
             }
 
             ImGui::SameLine();
 
-            if (BTC_TAB_DOTDOTDOT.button_toggle_color(sdSysData, "...", "...", sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN == 5, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_DOTDOTDOT.button_toggle_color(sdSysData, "...", "...", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 5, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              sdSysData.PANEL_CONTROL.MAIN_DISPLAY_SCREEN = 5;
+              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 5;
             }
 
             ImGui::SameLine();
@@ -1175,13 +1175,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           }
           ImGui::EndChild();
 
-          if (sdSysData.ALERTS_AUTO.alert_count() > 0  || sdSysData.AIRCRAFT_COORD.ADSB_ALERT_COUNT > 0)
+          if (sdSysData.ALL_ALERTS.alert_count() > 0  || sdSysData.AIRCRAFT_COORD.ADSB_ALERT_COUNT > 0)
           {
             ImGui::SameLine();
 
             if (BT_DISPLAY_ALERTS.button_color(sdSysData, "DISPLAY\nALERTS", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              sdSysData.ALERTS_AUTO.display_active_alerts();
+              sdSysData.ALL_ALERTS.display_active_alerts();
 
               for (int adsb_alert = 0; adsb_alert < (int)sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST.size(); adsb_alert++)
               {
@@ -1661,7 +1661,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
       if (RESTACK_WINDOWS == false)
       {
-        AUTOMOBILE_ALERTS.draw(sdSysData, sdSysData.ALERTS_AUTO);
+        AUTOMOBILE_ALERTS.draw(sdSysData, sdSysData.ALL_ALERTS);
         for (int alert = 0; alert < (int)ADSB_ALERTS.size(); alert++)
         {
           ADSB_ALERTS[alert].draw(sdSysData, sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[alert].ALERTS_ADSB);
@@ -1903,7 +1903,7 @@ void SCREEN4::update_daemon_log(system_data &sdSysData, string Text)
 {
   if (sdSysData.TTY_ONLY == false)
   {
-    DAEMON_LOG.add_line(Text);
+    DAEMON_LOG.add_line_with_indent(Text);
   }
 }
 

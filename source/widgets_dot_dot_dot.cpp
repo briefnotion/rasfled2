@@ -354,6 +354,20 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
           }
         }
 
+        //ImGui::SameLine();
+
+        if (AUTO_TO_CONSOLE.button_color(sdSysData, "AUTO\nCONS", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" autop");
+        }
+
+        ImGui::SameLine();
+
+        if (GPS_TO_CONSOLE.button_color(sdSysData, "GPS\nCONS", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" gpsp");
+        }
+
         /*
         ImGui::SameLine();
 

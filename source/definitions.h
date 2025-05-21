@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.250_250507"
+#define Revision "2.251_250520"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -81,7 +81,15 @@
 
 // Specific Directories
 //#define DEF_USB_DEV_DIR                   "/dev/serial/by-id/"     // Not Created
-#define DEF_DEAMON_LOG                    "/var/log/daemon.log"   // Not Created
+
+// not supported anymore: #define DEF_DEAMON_LOG                    "/var/log/daemon.log"   // Not Created
+// try:       sudo apt update && sudo apt install rsyslog
+// settings:  sudo nano /etc/rsyslog.conf
+//       add the following lines to make it move viewable:
+//            # Traditional Template
+//            $ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+
+#define DEF_DEAMON_LOG                    "/var/log/syslog"
 
 #define DEF_AIRCRAFT_1090_DIR             "/run/dump1090-fa/"     // Not Created
 #define DEF_AIRCRAFT_FA_JSON_FILE         "aircraft.json"         // Not Created
@@ -207,6 +215,19 @@
 
 #define TTL_RB_Top_Percentage   99.37
 #define TTL_RB_Low_Percentage   98.92
+
+// -------------------------------------------------------------------------------------
+// Reserved Alert List
+
+// AUTO
+#define AUTO_RESERVE_ALERT_TEMP_S_TEMP     0
+#define AUTO_RESERVE_ALERT_TEMP_COOLANT    1
+#define AUTO_RESERVE_ALERT_ELEC_VOLTAGE    2
+#define AUTO_RESERVE_ALERT_FUEL_LEVEL      3
+#define AUTO_RESERVE_ALERT_TEMP_INTAKE     4
+#define AUTO_RESERVE_ALERT_UNKNOWN_MESSAGE 5
+#define AUTO_RESERVE_ALERT_MIL             6
+
 
 // -------------------------------------------------------------------------------------
 #define COMMS_FLASH_DATA_RECORDER_ACTIVE  true

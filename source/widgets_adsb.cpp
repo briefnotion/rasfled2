@@ -912,11 +912,31 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
       RANGE_INDICATOR.CENTER_ON_LOCATION = 1;
     }
   }
+    
+  // MIN Airplane
+  ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (6.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
+                                    WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
+
+  if (BC_MIN.button_toggle_color(sdSysData, "MIN\n(On)", "MIN", RANGE_INDICATOR.ZOOM_MIN_MAX == 1, 
+                                    RAS_GREEN, RAS_BLUE, 
+                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  {
+    SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+
+    if (RANGE_INDICATOR.ZOOM_MIN_MAX == 1)
+    {
+      RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+    }
+    else
+    {
+      RANGE_INDICATOR.ZOOM_MIN_MAX = 1;
+    }
+  }
 
   // MAX Airplane
   if (ACTIVE_ADSB && ACTIVE_GPS)
   {
-    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (6.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
+    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (7.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
 
     if (BC_MAX.button_toggle_color(sdSysData, "MAX\n(On)", "MAX", RANGE_INDICATOR.ZOOM_MIN_MAX == 2, 
@@ -932,26 +952,6 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
       else
       {
         RANGE_INDICATOR.ZOOM_MIN_MAX = 2;
-      }
-    }
-    
-    // MIN Airplane
-    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (7.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
-                                      WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
-
-    if (BC_MIN.button_toggle_color(sdSysData, "MIN\n(On)", "MIN", RANGE_INDICATOR.ZOOM_MIN_MAX == 1, 
-                                      RAS_GREEN, RAS_BLUE, 
-                                      sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-
-      if (RANGE_INDICATOR.ZOOM_MIN_MAX == 1)
-      {
-        RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
-      }
-      else
-      {
-        RANGE_INDICATOR.ZOOM_MIN_MAX = 1;
       }
     }
   }
@@ -2408,15 +2408,15 @@ void ADSB_SCREEN::display(system_data &sdSysData)
 
     if (BC_VIEW.button_color(sdSysData, "VIEW", RAS_ORANGE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
-      if (sdSysData.PANEL_CONTROL.ADSB_DISPLAY_TABLE)
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE)
       {
-        sdSysData.PANEL_CONTROL.ADSB_DISPLAY_TABLE = false;
-        sdSysData.PANEL_CONTROL.ADSB_DISPLAY_MAP = true;
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE = false;
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_MAP = true;
       }
       else
       {
-        sdSysData.PANEL_CONTROL.ADSB_DISPLAY_TABLE = true;
-        sdSysData.PANEL_CONTROL.ADSB_DISPLAY_MAP = false;
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE = true;
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_MAP = false;
       }
     }
   }
@@ -2424,11 +2424,11 @@ void ADSB_SCREEN::display(system_data &sdSysData)
 
   ImGui::SameLine();
   
-  if (sdSysData.PANEL_CONTROL.ADSB_DISPLAY_TABLE)
+  if (sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE)
   {
     adsb_table_draw(sdSysData);
   }
-  else if (sdSysData.PANEL_CONTROL.ADSB_DISPLAY_MAP)
+  else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_MAP)
   {
     ImGui::BeginChild("ADSB Map", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
     {

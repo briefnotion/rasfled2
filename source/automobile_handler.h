@@ -15,6 +15,7 @@
 // Standard Header Files
 #include <stdio.h>
 
+#include "definitions.h"
 #include "screen4_helper.h"
 #include "auto.h"
 #include "animations_handler.h"
@@ -23,15 +24,6 @@
 #include "alert_system_2.h"
 
 // -------------------------------------------------------------------------------------
-
-// Reserved Alert List
-#define AUTO_RESERVE_ALERT_TEMP_S_TEMP     0
-#define AUTO_RESERVE_ALERT_TEMP_COOLANT    1
-#define AUTO_RESERVE_ALERT_ELEC_VOLTAGE    2
-#define AUTO_RESERVE_ALERT_FUEL_LEVEL      3
-#define AUTO_RESERVE_ALERT_TEMP_INTAKE     4
-#define AUTO_RESERVE_ALERT_UNKNOWN_MESSAGE 5
-#define AUTO_RESERVE_ALERT_MIL             6
 
 using namespace std;
 
@@ -47,7 +39,6 @@ float weird_curve(float Value);
 class AUTOMOBILE_HANDLER
 {
   private:
-  // 
 
   bool AUTO_ACTIVE = false;
 
@@ -90,6 +81,8 @@ class AUTOMOBILE_HANDLER
   // Flash lights
 
   public:
+
+  bool CHANGED = false;
 
   void update_events(system_data &sdSysData, ANIMATION_HANDLER &Animations, unsigned long tmeCurrentTime);
 };

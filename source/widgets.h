@@ -198,6 +198,7 @@ class TEXT_CONSOLE
   public:
 
   void add_line(string Text);
+  void add_line_with_indent(string Text);
   void display(system_data &sdSysData, const char *name, bool *p_open, ImGuiWindowFlags flags);
 };
 

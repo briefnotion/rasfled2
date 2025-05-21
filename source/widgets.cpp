@@ -365,6 +365,12 @@ void TEXT_CONSOLE::add_line(string Text)
   } 
 }
 
+void TEXT_CONSOLE::add_line_with_indent(string Text)
+{
+  add_line("    " + Text);
+}
+
+/*
 void TEXT_CONSOLE::display(system_data &sdSysData, const char *name, bool *p_open, ImGuiWindowFlags flags)
 { 
   ImGui::Begin(name, p_open, flags);
@@ -378,6 +384,30 @@ void TEXT_CONSOLE::display(system_data &sdSysData, const char *name, bool *p_ope
       CONSOLE_SCROLL_TO_BOTTOM = false;
     }
     
+    ImGui::PopStyleColor();
+  }
+  ImGui::End();
+}
+*/
+
+void TEXT_CONSOLE::display(system_data &sdSysData, const char *name, bool *p_open, ImGuiWindowFlags flags)
+{ 
+  ImGui::Begin(name, p_open, flags);
+  {
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
+
+    // Enable text wrapping
+    ImGui::PushTextWrapPos(ImGui::GetWindowContentRegionMax().x - 10); 
+    ImGui::TextUnformatted(CONSOLE_TEXT.c_str());
+    ImGui::PopTextWrapPos(); // Restore wrap settings
+
+    // Auto-scroll logic
+    if (CONSOLE_SCROLL_TO_BOTTOM && ImGui::GetScrollMaxY() > 0)
+    {
+        ImGui::SetScrollHereY(1.0f);
+        CONSOLE_SCROLL_TO_BOTTOM = false;
+    }
+
     ImGui::PopStyleColor();
   }
   ImGui::End();

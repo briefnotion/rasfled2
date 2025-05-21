@@ -107,6 +107,15 @@ For the HMC5883l chip, with channel 1e, output should look like:
 20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 ```
 
+## To get logs to work
+Install:  
+`sudo apt install rsyslog`
+
+Settings:  
+`settings:  sudo nano /etc/rsyslog.conf`
+
+Enable modules by removing the #.
+
 ## Set the program up
 The `definitions.h` file will contain most of the setting that need to be made for your build.  Most things can be left as is, but for live build, `TEST` vars should be false, and anything with a `COMMS_AUTOSTART_...` should be set to false if system isn't available, or true if it is.
 

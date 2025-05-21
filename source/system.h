@@ -26,6 +26,7 @@
 #include "threading.h"
 #include "aircraft_coordinator.h"
 #include "alert_system_2.h"
+#include "alert_system_coordinator.h"
 #include "dnfwts.h"
 #include "comport.h"
 #include "auto.h"
@@ -161,7 +162,7 @@ class system_data
   STAT_DATA_DOUBLE dblCOMMS_GPS_TRANSFER_TIME;      // Stored value returned on GPS Serial Transfer time.
   STAT_DATA_DOUBLE dblCOMMS_COMPASS_DATA_READ_TIME; // Stored value returned on Compass Data Transfer time.
   
-  ALERT_SYSTEM_2 ALERTS_AUTO;
+  ALERT_SYSTEM_2            ALL_ALERTS;
 
   // For Debuging Gadgets
   //bool DEBUG_COUNTER = false;
