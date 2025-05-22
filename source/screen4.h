@@ -41,6 +41,14 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
+// Button Color Guide
+// Blue = OFF
+// Red = ON
+// YELLOW = Confirm Buttons (Warning)
+// WHITE = ACTIVE (or next level of on)
+// GREY = MENU ITEM (not window)
+
+
 class SCREEN4
 {
   private:
@@ -80,7 +88,6 @@ class SCREEN4
   BUTTON_TOGGLE_COLOR BTC_OVER_HEAD_LIGHTS;
   BUTTON_TOGGLE_COLOR BTC_LIGHTS;
   BUTTON_TOGGLE_COLOR BTC_HAZARD;
-  BUTTON_TOGGLE_COLOR BTC_NIGHT_MODE;
   BUTTON_TOGGLE_COLOR BTC_RUNNING_COLOR;
 
   BUTTON_TOGGLE_COLOR BTC_DEBUG;
@@ -102,6 +109,8 @@ class SCREEN4
   BUTTON_COLOR BT_REBOOT;
   BUTTON_COLOR BT_DEBUG;
   BUTTON_COLOR BT_BACK_2;
+  BUTTON_COLOR BT_AUTONOMOUS;
+  BUTTON_COLOR BT_NIGHT_MODE;
   
   BUTTON_COLOR BT_OVER_RED;
   BUTTON_COLOR BT_OVER_GREEN;

@@ -366,8 +366,9 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
 
   if (Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE >= 0.0f)
   {
-    if (Aircraft_Deets.ALERTS_ADSB.res_alert_condition_less_than(ADSB_RESERVE_ALERT_PROXIMITY, 
-        Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE, 1.0f, 2.0f))
+    if (Aircraft_Deets.ALERTS_ADSB.res_alert_condition(ADSB_RESERVE_ALERT_PROXIMITY, 
+        (Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE < 1.0f) && (Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_int_value() < 5000),
+        (Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE > 1.0f) || (Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_int_value() > 5000)))
     {
       Aircraft_Deets.ALERTS_ADSB.res_update_alert_text_line(ADSB_RESERVE_ALERT_PROXIMITY, 
                                                               "SQK: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 

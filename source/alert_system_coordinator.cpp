@@ -31,7 +31,7 @@ void ALERT_SYSTEM_COORDINATOR::create(ALERT_SYSTEM_2 &All_Alerts)
 }
 
 
-void ALERT_SYSTEM_COORDINATOR::check_for_alerts(ALERT_SYSTEM_2 &All_Alerts, AUTOMOBILE &Car_Info, bool Auto_Changed)
+void ALERT_SYSTEM_COORDINATOR::check_for_alerts(SCREEN4_PANEL_CONTROL &Panel_Control, ALERT_SYSTEM_2 &All_Alerts, AUTOMOBILE &Car_Info, bool Auto_Changed)
 {
   if (Auto_Changed)
   {
@@ -93,12 +93,25 @@ void ALERT_SYSTEM_COORDINATOR::check_for_alerts(ALERT_SYSTEM_2 &All_Alerts, AUTO
       All_Alerts.ALERTS_RESERVE[AUTO_RESERVE_ALERT_FUEL_LEVEL].set_show_value_bar(true);
     }
 
+    // Autonomous
 
+    // Temperature Screen
+    if ((Car_Info.STATUS.TEMPS.AIR_INTAKE_0f.val_c() > Car_Info.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 25.0f) ||
+          (Car_Info.STATUS.TEMPS.COOLANT_05.val_c() > 110.0f) ||
+          (s_temp > 65.0f))
+    {
+      Panel_Control.AUTO_TEMPERATURE.request();
+    }
 
-
-
-
+    // Malfunction Screen
+    if ((Car_Info.STATUS.SYSTEM.malfunction_indicator_light() == true) ||
+          Car_Info.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f)
+    {
+      Panel_Control.AUTO_MALFUNCTION.request();
+    }
   }
+
+  Panel_Control.activate();
 
 }
 

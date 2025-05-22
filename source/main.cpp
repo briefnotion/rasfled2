@@ -1160,7 +1160,7 @@ int loop_2(bool TTY_Only)
     // Process Alerts
     if (automobile_handler.CHANGED)
     {
-      ALERTS_COORDINATOR.check_for_alerts(sdSystem.ALL_ALERTS, sdSystem.CAR_INFO, automobile_handler.CHANGED);
+      ALERTS_COORDINATOR.check_for_alerts(sdSystem.PANEL_CONTROL, sdSystem.ALL_ALERTS, sdSystem.CAR_INFO, automobile_handler.CHANGED);
       
       automobile_handler.CHANGED = false;
     }

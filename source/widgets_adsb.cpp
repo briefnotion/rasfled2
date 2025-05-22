@@ -852,7 +852,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
   if (BC_MINUS.button_color(sdSysData, "-", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
   {
     SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-    RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
     RANGE_INDICATOR.zoom_in();
   }
 
@@ -863,7 +863,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
   if (BC_PLUS.button_color(sdSysData, "+", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
   {
     SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-    RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
     RANGE_INDICATOR.zoom_out();
   }
 
@@ -912,46 +912,49 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
       RANGE_INDICATOR.CENTER_ON_LOCATION = 1;
     }
   }
-    
-  // MIN Airplane
-  ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (6.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
-                                    WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
-
-  if (BC_MIN.button_toggle_color(sdSysData, "MIN\n(On)", "MIN", RANGE_INDICATOR.ZOOM_MIN_MAX == 1, 
-                                    RAS_GREEN, RAS_BLUE, 
-                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-  {
-    SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-
-    if (RANGE_INDICATOR.ZOOM_MIN_MAX == 1)
-    {
-      RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
-    }
-    else
-    {
-      RANGE_INDICATOR.ZOOM_MIN_MAX = 1;
-    }
-  }
-
-  // MAX Airplane
+  
   if (ACTIVE_ADSB && ACTIVE_GPS)
   {
-    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (7.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
+    // MIN Airplane
+    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (6.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
 
-    if (BC_MAX.button_toggle_color(sdSysData, "MAX\n(On)", "MAX", RANGE_INDICATOR.ZOOM_MIN_MAX == 2, 
+    if (BC_MIN.button_toggle_color(sdSysData, "MIN\n(On)", "MIN", sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 1, 
                                       RAS_GREEN, RAS_BLUE, 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
 
-      if (RANGE_INDICATOR.ZOOM_MIN_MAX == 2)
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 1)
       {
-        RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
+        RANGE_INDICATOR.zoom_return();
       }
       else
       {
-        RANGE_INDICATOR.ZOOM_MIN_MAX = 2;
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 1;
+      }
+    }
+
+    // MAX Airplane
+    ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (7.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
+                                      WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
+
+
+    if (BC_MAX.button_toggle_color(sdSysData, "MAX\n(On)", "MAX", sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 2, 
+                                      RAS_GREEN, RAS_BLUE, 
+                                      sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 2)
+      {
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
+        RANGE_INDICATOR.zoom_return();
+      }
+      else
+      {
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 2;
       }
     }
   }
@@ -2042,7 +2045,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // Update range if changing dynamicly with min max aircraft data.
   if (ACTIVE_ADSB && ACTIVE_GPS)
   {
-    if (RANGE_INDICATOR.ZOOM_MIN_MAX > 0)
+    if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX > 0)
     {
       // If, for whatever reason, there are no aircfaft seen, set the zoom level as if Min and Max aircraft 
       //  distance is off.
@@ -2060,11 +2063,11 @@ void ADSB_MAP::draw(system_data &sdSysData)
       {
         // Set zoom level to range.
         RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO = false;
-        if (RANGE_INDICATOR.ZOOM_MIN_MAX == 1)        // Zoom at MIN aircraft distance
+        if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 1)        // Zoom at MIN aircraft distance
         {
           RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_CLOSEST * 0.75f);
         }
-        else if (RANGE_INDICATOR.ZOOM_MIN_MAX == 2)   // Zoom at MAX aircraft distance
+        else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 2)   // Zoom at MAX aircraft distance
         {
           RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_FURTHEST * 0.75f);
         }
@@ -2073,9 +2076,9 @@ void ADSB_MAP::draw(system_data &sdSysData)
   }
   else
   {
-    if (RANGE_INDICATOR.ZOOM_MIN_MAX > 0)           // Zoom at zoom level distance
+    if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX > 0)           // Zoom at zoom level distance
     {
-      RANGE_INDICATOR.ZOOM_MIN_MAX = 0;
+      sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
     }
   }
 

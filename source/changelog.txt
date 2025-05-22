@@ -1,3 +1,14 @@
+2.252_250522
+  - Started changing button colors to follow some simple guidlines: 
+      Blue = OFF
+      Red = ON
+      YELLOW = Confirm Buttons (Warning)
+      WHITE = ACTIVE (or next level of on)
+      GREY = MENU ITEM (not window)
+  - Started implementing some screen automation to show releveant data.  Simple ATM for
+      testing.
+  - Made a few other changes.
+
 2.251_250520
   - Started consolidating Alerts into a coordinator so that I can manage them in a central 
       location.

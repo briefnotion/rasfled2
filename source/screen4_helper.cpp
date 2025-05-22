@@ -844,4 +844,77 @@ void CONSOLE_COMMUNICATION::printw(string Text)
 
 // ---------------------------------------------------------------------------------------
 
+void PANEL::request()
+{
+  REQUESTED = true;
+}
+
+bool PANEL::requested()
+{
+  if (REQUESTED)
+  {
+    REQUESTED = false;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
+void SCREEN4_PANEL_CONTROL::set_auto_temperature()
+{
+  PANELS.MAIN_DISPLAY_SCREEN = 1;
+  PANELS.AUTOMOBILE_DISPLAY_NOVA = false;
+  PANELS.AUTOMOBILE_DISPLAY_MID_BOTTOM = 2;
+}
+
+void SCREEN4_PANEL_CONTROL::set_auto_malfunction()
+{
+  PANELS.MAIN_DISPLAY_SCREEN = 1;
+  PANELS.AUTOMOBILE_DISPLAY_NOVA = false;
+  PANELS.AUTOMOBILE_DISPLAY_MID_BOTTOM = 0;
+}
+
+// --- 
+
+int SCREEN4_PANEL_CONTROL::autonomous_state()
+{
+  return ATONOMOUS;
+}
+
+void SCREEN4_PANEL_CONTROL::autonomous_on()
+{
+  ATONOMOUS = 1;
+  PANELS_UDEF = PANELS;
+}
+
+void SCREEN4_PANEL_CONTROL::autonomous_off()
+{
+  ATONOMOUS = 0;
+  PANELS = PANELS_UDEF;
+}
+
+
+void SCREEN4_PANEL_CONTROL::activate()
+{
+  if (ATONOMOUS > 0)
+  {
+    // Order priority is top most important.
+    if (AUTO_MALFUNCTION.requested())
+    {
+      set_auto_temperature();
+    }
+    else if (AUTO_MALFUNCTION.requested())
+    {
+      set_auto_malfunction();
+    }
+  }
+  
+}
+
+// ---------------------------------------------------------------------------------------
+
 #endif

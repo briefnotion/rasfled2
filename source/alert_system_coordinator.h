@@ -15,16 +15,19 @@
 #include "definitions.h"
 #include "auto.h"
 #include "alert_system_2.h"
+#include "screen4_helper.h"
 
 class ALERT_SYSTEM_COORDINATOR
 {
   private:
+
+  // Atonoumous Screens
   
   public:
 
   void create(ALERT_SYSTEM_2 &All_Alerts);
 
-  void check_for_alerts(ALERT_SYSTEM_2 &All_Alerts, AUTOMOBILE &Car_Info, bool Auto_Changed);
+  void check_for_alerts(SCREEN4_PANEL_CONTROL &Panel_Control, ALERT_SYSTEM_2 &All_Alerts, AUTOMOBILE &Car_Info, bool Auto_Changed);
 };
 
 #endif

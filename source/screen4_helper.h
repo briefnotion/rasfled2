@@ -451,7 +451,8 @@ class SCREEN4_PANELS
   // 0 - Speed slow degen
   // 1 - Power Curve
 
-  int AUTOMOBILE_DISPLAY_MID_BOTTOM = 0; // 0 - Large Horizontal Bars
+  int AUTOMOBILE_DISPLAY_MID_BOTTOM = 0; 
+  // 0 - Large Horizontal Bars
   // 1 - Unused
   // 2 - Temp Graph
   // 3 - Power Graph
@@ -461,14 +462,55 @@ class SCREEN4_PANELS
   // ADSB
   bool ADSB_DISPLAY_TABLE = false;
   bool ADSB_DISPLAY_MAP = true;
+
+  int ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
+  // 0  - OFF
+  // 1  - MIN (On)
+  // 2  - MAX (On)
 };
 
+
+class PANEL
+{
+  private:
+  bool REQUESTED = false;
+
+  public:
+
+
+  void request();
+  bool requested();
+};
 
 
 class SCREEN4_PANEL_CONTROL
 {
+  private:
+
+  int ATONOMOUS = 1;
+  // 0 - Off
+  // 1 - On
+  // 2 - Active
+
+  SCREEN4_PANELS PANELS_UDEF;
+
+  //bool AUTONOMOUS_CHANGED = false;
+
+  void set_auto_temperature();
+  void set_auto_malfunction();
+
   public:
+
   SCREEN4_PANELS PANELS;
+
+  PANEL AUTO_TEMPERATURE;
+  PANEL AUTO_MALFUNCTION;
+
+  int autonomous_state();
+  void autonomous_on();
+  void autonomous_off();
+
+  void activate();
 };
 
 // ---------------------------------------------------------------------------------------

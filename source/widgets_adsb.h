@@ -167,11 +167,6 @@ class ADSB_RANGE
     //  0 - No Location
     //  1 - Center on current location
     //  2 - Center on aircraft
-  
-  int ZOOM_MIN_MAX = 0;
-  // 0  - OFF
-  // 1  - MIN
-  // 2  - MAX
 
   bool AIRCRAFT_COUNT_ZERO = false;
 
