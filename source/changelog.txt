@@ -1,3 +1,7 @@
+2.253_250523
+  - Automated panel switching is coded.  Started adding basic panel changing for 
+      several adsb and automobile system changes.
+
 2.252_250522
   - Started changing button colors to follow some simple guidlines: 
       Blue = OFF

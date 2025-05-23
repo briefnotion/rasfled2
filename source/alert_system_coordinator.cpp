@@ -16,7 +16,6 @@
 
 using namespace std;
 
-/**/
 void ALERT_SYSTEM_COORDINATOR::create(ALERT_SYSTEM_2 &All_Alerts)
 {
   // Initialize AUTO Alert_2 System - Generate Reserve Alerts
@@ -30,90 +29,109 @@ void ALERT_SYSTEM_COORDINATOR::create(ALERT_SYSTEM_2 &All_Alerts)
   All_Alerts.generate_reserve_alert(AUTO_RESERVE_ALERT_MIL, "MALFUNTION INDICATOR LAMP");
 }
 
-
-void ALERT_SYSTEM_COORDINATOR::check_for_alerts(SCREEN4_PANEL_CONTROL &Panel_Control, ALERT_SYSTEM_2 &All_Alerts, AUTOMOBILE &Car_Info, bool Auto_Changed)
+void ALERT_SYSTEM_COORDINATOR::check_for_alerts(system_data &sdSysData, AUTOMOBILE_HANDLER &Automobile_Handler)
 {
-  if (Auto_Changed)
+  if (Automobile_Handler.CHANGED)
   {
-    float s_temp = Car_Info.CALCULATED.s_temp();
+    Automobile_Handler.CHANGED = false;
+
+    float s_temp = sdSysData.CAR_INFO.CALCULATED.s_temp();
 
     // S-Temp alert
-    if (All_Alerts.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_S_TEMP, 
+    if (sdSysData.ALL_ALERTS.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_S_TEMP, 
       s_temp, 65.0f, 50.0f))
     {
-      All_Alerts.res_update_alert_text_line(AUTO_RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)s_temp));
-      All_Alerts.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_TEMP_S_TEMP);
-      All_Alerts.ALERTS_RESERVE[AUTO_RESERVE_ALERT_TEMP_S_TEMP].set_show_value_bar(true);
+      sdSysData.ALL_ALERTS.res_update_alert_text_line(AUTO_RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)s_temp));
+      sdSysData.ALL_ALERTS.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_TEMP_S_TEMP);
+      sdSysData.ALL_ALERTS.ALERTS_RESERVE[AUTO_RESERVE_ALERT_TEMP_S_TEMP].set_show_value_bar(true);
     }
 
 
     // MIL alert
-    if (All_Alerts.res_alert_condition(AUTO_RESERVE_ALERT_MIL, 
-      Car_Info.STATUS.SYSTEM.malfunction_indicator_light() == true , 
-      Car_Info.STATUS.SYSTEM.malfunction_indicator_light() == false))
+    if (sdSysData.ALL_ALERTS.res_alert_condition(AUTO_RESERVE_ALERT_MIL, 
+      sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == true , 
+      sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == false))
     {
-      All_Alerts.res_update_alert_text_line(AUTO_RESERVE_ALERT_MIL, "Malfunction Indicator Lamp is " + to_string(Car_Info.STATUS.SYSTEM.malfunction_indicator_light()));
+      sdSysData.ALL_ALERTS.res_update_alert_text_line(AUTO_RESERVE_ALERT_MIL, "Malfunction Indicator Lamp is " + to_string(sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light()));
     }
 
     // Coolant alert
-    if (All_Alerts.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_COOLANT, 
-          Car_Info.STATUS.TEMPS.COOLANT_05.val_c(), 110.0f, 100.0f))
+    if (sdSysData.ALL_ALERTS.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_COOLANT, 
+          sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c(), 110.0f, 100.0f))
     {
-      All_Alerts.res_update_alert_text_line(AUTO_RESERVE_ALERT_TEMP_COOLANT, "Coolant Temp Value is " + Car_Info.STATUS.TEMPS.COOLANT_05.c());
-      All_Alerts.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_TEMP_COOLANT);
-      All_Alerts.ALERTS_RESERVE[AUTO_RESERVE_ALERT_TEMP_COOLANT].set_show_value_bar(true);
+      sdSysData.ALL_ALERTS.res_update_alert_text_line(AUTO_RESERVE_ALERT_TEMP_COOLANT, "Coolant Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.c());
+      sdSysData.ALL_ALERTS.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_TEMP_COOLANT);
+      sdSysData.ALL_ALERTS.ALERTS_RESERVE[AUTO_RESERVE_ALERT_TEMP_COOLANT].set_show_value_bar(true);
     }
 
     // Air Intake Temp alert
-    if (All_Alerts.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_INTAKE, 
-          Car_Info.STATUS.TEMPS.AIR_INTAKE_0f.val_c(), 
-          Car_Info.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 25.0f, 
-          Car_Info.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 15.0f))
+    if (sdSysData.ALL_ALERTS.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_INTAKE, 
+          sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c(), 
+          sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 25.0f, 
+          sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 15.0f))
     {
-      All_Alerts.res_update_alert_text_line(AUTO_RESERVE_ALERT_TEMP_INTAKE, "Intake Temp Value is " + Car_Info.STATUS.TEMPS.AIR_INTAKE_0f.c());
-      All_Alerts.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_TEMP_INTAKE);
-      All_Alerts.ALERTS_RESERVE[AUTO_RESERVE_ALERT_TEMP_INTAKE].set_show_value_bar(true);
+      sdSysData.ALL_ALERTS.res_update_alert_text_line(AUTO_RESERVE_ALERT_TEMP_INTAKE, "Intake Temp Value is " + sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.c());
+      sdSysData.ALL_ALERTS.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_TEMP_INTAKE);
+      sdSysData.ALL_ALERTS.ALERTS_RESERVE[AUTO_RESERVE_ALERT_TEMP_INTAKE].set_show_value_bar(true);
     }
 
     // Voltage alert
-    if (All_Alerts.res_alert_condition_less_than(AUTO_RESERVE_ALERT_ELEC_VOLTAGE, 
-          Car_Info.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v(), 11.5f, 12.0f))
+    if (sdSysData.ALL_ALERTS.res_alert_condition_less_than(AUTO_RESERVE_ALERT_ELEC_VOLTAGE, 
+          sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v(), 11.5f, 12.0f))
     {
-      All_Alerts.res_update_alert_text_line(AUTO_RESERVE_ALERT_ELEC_VOLTAGE, "Voltage Value is " + Car_Info.STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
-      All_Alerts.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_ELEC_VOLTAGE);
-      All_Alerts.ALERTS_RESERVE[AUTO_RESERVE_ALERT_ELEC_VOLTAGE].set_show_value_bar(true);
+      sdSysData.ALL_ALERTS.res_update_alert_text_line(AUTO_RESERVE_ALERT_ELEC_VOLTAGE, "Voltage Value is " + sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.v());
+      sdSysData.ALL_ALERTS.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_ELEC_VOLTAGE);
+      sdSysData.ALL_ALERTS.ALERTS_RESERVE[AUTO_RESERVE_ALERT_ELEC_VOLTAGE].set_show_value_bar(true);
     }
 
     // Fuel Level alert
-    if (All_Alerts.res_alert_condition_less_than(AUTO_RESERVE_ALERT_FUEL_LEVEL, 
-          Car_Info.CALCULATED.fuel_level_emperical_val(), 3.0f, 6.0f))
+    if (sdSysData.ALL_ALERTS.res_alert_condition_less_than(AUTO_RESERVE_ALERT_FUEL_LEVEL, 
+          sdSysData.CAR_INFO.CALCULATED.fuel_level_emperical_val(), 3.0f, 6.0f))
     {
-      All_Alerts.res_update_alert_text_line(AUTO_RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + Car_Info.CALCULATED.fuel_level_emperical());
-      All_Alerts.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_FUEL_LEVEL);
-      All_Alerts.ALERTS_RESERVE[AUTO_RESERVE_ALERT_FUEL_LEVEL].set_show_value_bar(true);
+      sdSysData.ALL_ALERTS.res_update_alert_text_line(AUTO_RESERVE_ALERT_FUEL_LEVEL, "Fuel Level is " + sdSysData.CAR_INFO.CALCULATED.fuel_level_emperical());
+      sdSysData.ALL_ALERTS.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_FUEL_LEVEL);
+      sdSysData.ALL_ALERTS.ALERTS_RESERVE[AUTO_RESERVE_ALERT_FUEL_LEVEL].set_show_value_bar(true);
     }
 
     // Autonomous
 
     // Temperature Screen
-    if ((Car_Info.STATUS.TEMPS.AIR_INTAKE_0f.val_c() > Car_Info.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 25.0f) ||
-          (Car_Info.STATUS.TEMPS.COOLANT_05.val_c() > 110.0f) ||
+    if ((sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c() > sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 25.0f) ||
+          (sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c() > 110.0f) ||
           (s_temp > 65.0f))
     {
-      Panel_Control.AUTO_TEMPERATURE.request();
+      sdSysData.PANEL_CONTROL.AUTO_TEMPERATURE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000);
     }
 
     // Malfunction Screen
-    if ((Car_Info.STATUS.SYSTEM.malfunction_indicator_light() == true) ||
-          Car_Info.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f)
+    if ((sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == true) ||
+          sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f)
     {
-      Panel_Control.AUTO_MALFUNCTION.request();
+      sdSysData.PANEL_CONTROL.AUTO_MALFUNCTION.request(sdSysData.PROGRAM_TIME.current_frame_time(), 60000);
+    }
+
+    // Pressure Screen
+    if ((sdSysData.CAR_INFO.STATUS.FUEL.FUEL_RAIL_PRESSURE.val_kPa() > 750.0f))
+    {
+      sdSysData.PANEL_CONTROL.AUTO_PRESSURE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000);
     }
   }
 
-  Panel_Control.activate();
+  // Aircraft
+  if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_CHANGED)
+  {
+    if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_EMERGENCY || 
+        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_PROXIMITY || 
+        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_LONG_DISTANCE)
+    {
+      sdSysData.PANEL_CONTROL.ADSB_MAP.request(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+    }
+    
+    sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.clear_panel_flags();
+  }
+
+  sdSysData.PANEL_CONTROL.activate(sdSysData.PROGRAM_TIME.current_frame_time());
 
 }
-
 
 #endif

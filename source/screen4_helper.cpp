@@ -844,22 +844,32 @@ void CONSOLE_COMMUNICATION::printw(string Text)
 
 // ---------------------------------------------------------------------------------------
 
-void PANEL::request()
+void PANEL::request(unsigned long Time, int Linger_Time)
 {
   REQUESTED = true;
+
+  TIMER.set(Time, Linger_Time);
 }
 
-bool PANEL::requested()
+void PANEL::requested(unsigned long Time, bool &Requested)
 {
-  if (REQUESTED)
+  if (REQUESTED == true)
   {
-    REQUESTED = false;
-    return true;
+    if (TIMER.is_ready(Time))
+    {
+      REQUESTED = false;
+    }
+    else
+    {
+      Requested = true;
+      REQUESTED = true;
+    }
   }
-  else
-  {
-    return false;
-  }
+}
+
+bool PANEL::display()
+{
+  return REQUESTED;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -878,6 +888,23 @@ void SCREEN4_PANEL_CONTROL::set_auto_malfunction()
   PANELS.AUTOMOBILE_DISPLAY_MID_BOTTOM = 0;
 }
 
+void SCREEN4_PANEL_CONTROL::set_auto_pressure()
+{
+  PANELS.MAIN_DISPLAY_SCREEN = 1;
+  PANELS.AUTOMOBILE_DISPLAY_NOVA = false;
+  PANELS.AUTOMOBILE_DISPLAY_MID_BOTTOM = 3;
+}
+
+void SCREEN4_PANEL_CONTROL::set_adsb_map()
+{
+  PANELS.MAIN_DISPLAY_SCREEN = 2;
+  PANELS.ADSB_DISPLAY_TABLE = false;
+  PANELS.ADSB_DISPLAY_MAP = true;
+
+  //needs recoding
+  //PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = ???
+}
+
 // --- 
 
 int SCREEN4_PANEL_CONTROL::autonomous_state()
@@ -888,29 +915,75 @@ int SCREEN4_PANEL_CONTROL::autonomous_state()
 void SCREEN4_PANEL_CONTROL::autonomous_on()
 {
   ATONOMOUS = 1;
-  PANELS_UDEF = PANELS;
+  PANELS_OFF = PANELS;
 }
 
 void SCREEN4_PANEL_CONTROL::autonomous_off()
 {
   ATONOMOUS = 0;
-  PANELS = PANELS_UDEF;
+  PANELS = PANELS_ON;
 }
 
-
-void SCREEN4_PANEL_CONTROL::activate()
+void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
 {
+  bool panel_requested = false;
+
+  // If Autonomous is on, check if the panels are requested.
   if (ATONOMOUS > 0)
   {
-    // Order priority is top most important.
-    if (AUTO_MALFUNCTION.requested())
+
+    // Check if the panels are requested.
+    AUTO_TEMPERATURE.requested(Time, panel_requested);
+    AUTO_MALFUNCTION.requested(Time, panel_requested);
+    AUTO_PRESSURE.requested(Time, panel_requested);
+    ADSB_MAP.requested(Time, panel_requested);
+
+    // If the panels are requested, set the autonomous state and remember the panels.
+    if (panel_requested)
     {
-      set_auto_temperature();
+      if (ATONOMOUS == 1)
+      {
+        ATONOMOUS = 2;
+        PANELS_OFF = PANELS;
+      }
     }
-    else if (AUTO_MALFUNCTION.requested())
+    else
     {
-      set_auto_malfunction();
+      if (ATONOMOUS == 2)
+      {
+        ATONOMOUS = 1;
+        PANELS = PANELS_OFF;
+      }
     }
+
+    // If the panels are requested, call the panels.
+    // Start with the least important first so that they can overlap and 
+    //  the most important one will be on prominant.
+    if (panel_requested)
+    {
+
+      if (ADSB_MAP.display())
+      {
+        set_adsb_map();
+      }
+
+      if (AUTO_PRESSURE.display())
+      {
+        set_auto_pressure();
+      }
+
+      if (AUTO_TEMPERATURE.display())
+      {
+        set_auto_temperature();
+      }
+
+      if (AUTO_MALFUNCTION.display())
+      {
+        set_auto_malfunction();
+      }
+
+    }
+
   }
   
 }

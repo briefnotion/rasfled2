@@ -350,6 +350,14 @@ void AIRCRAFT_MAP_INFO::update(unsigned long tmeCurrentTime, AIRCRAFT_DATA &DATA
   CHANGED = true;
 }
 
+void AIRCRAFT_MAP_INFO::clear_panel_flags()
+{
+  PANEL_FLAG_CHANGED = false;
+  PANEL_FLAG_PROXIMITY = false;
+  PANEL_FLAG_LONG_DISTANCE = false;
+  PANEL_FLAG_EMERGENCY = false;
+}
+
 // -------------------------------------------------------------------------------------
 
 void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
@@ -366,6 +374,7 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
 
   if (Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE >= 0.0f)
   {
+    /*
     if (Aircraft_Deets.ALERTS_ADSB.res_alert_condition(ADSB_RESERVE_ALERT_PROXIMITY, 
         (Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE < 1.0f) && (Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_int_value() < 5000),
         (Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE > 1.0f) || (Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_int_value() > 5000)))
@@ -378,6 +387,28 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
                                                               "\nSPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
       Aircraft_Deets.ALERTS_ADSB.res_update_additional_line_with_conditions(ADSB_RESERVE_ALERT_PROXIMITY);
       Aircraft_Deets.ALERTS_ADSB.ALERTS_RESERVE[ADSB_RESERVE_ALERT_PROXIMITY].set_show_value_bar(true);
+    }
+    */
+
+    //if (Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_int_value() < 5000)
+    {
+      if (Aircraft_Deets.ALERTS_ADSB.res_alert_condition_less_than(ADSB_RESERVE_ALERT_PROXIMITY, 
+          Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE, 1.0f, 2.0f))
+      {
+        Aircraft_Deets.ALERTS_ADSB.res_update_alert_text_line(ADSB_RESERVE_ALERT_PROXIMITY, 
+                                                                "SQK: " + Aircraft_Deets.AIRCRAFT_ITEM.SQUAWK.get_str_value() + 
+                                                                "  FLT: " + Aircraft_Deets.AIRCRAFT_ITEM.FLIGHT.get_str_value() +
+                                                                "\nALT: " + Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_str_value() +
+                                                                "  ANG: " + to_string_round_to_nth(Aircraft_Deets.AIRCRAFT_ITEM.ANGLE_FROM_BASE, 1) +
+                                                                "\nSPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
+        Aircraft_Deets.ALERTS_ADSB.res_update_additional_line_with_conditions(ADSB_RESERVE_ALERT_PROXIMITY);
+        Aircraft_Deets.ALERTS_ADSB.ALERTS_RESERVE[ADSB_RESERVE_ALERT_PROXIMITY].set_show_value_bar(true);
+      }
+
+      if ((Aircraft_Deets.AIRCRAFT_ITEM.DISTANCE_FROM_BASE < 1.0f) && (Aircraft_Deets.AIRCRAFT_ITEM.ALTITUDE.get_int_value() < 5000))
+      {
+        AIRCRAFTS_MAP.PANEL_FLAG_PROXIMITY = true;
+      }
     }
   }
 
@@ -418,6 +449,7 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
 
     Aircraft_Deets.ALERT_LEVEL = 3;
     Aircraft_Deets.COLOR = 3;
+    AIRCRAFTS_MAP.PANEL_FLAG_EMERGENCY = true;
   }
 
   // Check Squak Codes
@@ -436,6 +468,7 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
                                                               "  SPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
       Aircraft_Deets.ALERT_LEVEL = 3;
       Aircraft_Deets.COLOR = 3;
+      AIRCRAFTS_MAP.PANEL_FLAG_EMERGENCY = true;
     }
 
     // Radio Failure
@@ -451,6 +484,7 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
                                                               "  SPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
       Aircraft_Deets.ALERT_LEVEL = 3;
       Aircraft_Deets.COLOR = 3;
+      AIRCRAFTS_MAP.PANEL_FLAG_EMERGENCY = true;
     }
 
     // Emergency
@@ -466,6 +500,7 @@ void AIRCRAFT_COORDINATOR::check_alerts(AIRCRAFT_MAP_DETAILS &Aircraft_Deets)
                                                               "  SPD: " + Aircraft_Deets.AIRCRAFT_ITEM.SPEED.get_str_value());
       Aircraft_Deets.ALERT_LEVEL = 3;
       Aircraft_Deets.COLOR = 3;
+      AIRCRAFTS_MAP.PANEL_FLAG_EMERGENCY = true;
     }
   }
 }
@@ -572,9 +607,16 @@ void AIRCRAFT_COORDINATOR::post_post_post_process(COMMAND_THREAD &Thread, SOUNDS
         if (AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].AIRCRAFT_ITEM.DISTANCE_FROM_BASE > AIRCRAFTS_MAP.FURTHEST_AIRCRAFT_SINCE_START)
         {
           AIRCRAFTS_MAP.FURTHEST_AIRCRAFT_SINCE_START = AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft].AIRCRAFT_ITEM.DISTANCE_FROM_BASE;
+          AIRCRAFTS_MAP.PANEL_FLAG_LONG_DISTANCE = true;
         }
       }
     }
+
+    if (AIRCRAFTS_MAP.PANEL_FLAG_PROXIMITY || AIRCRAFTS_MAP.PANEL_FLAG_LONG_DISTANCE || AIRCRAFTS_MAP.PANEL_FLAG_EMERGENCY)
+    {
+      AIRCRAFTS_MAP.PANEL_FLAG_CHANGED = true;
+    }
+
   }
 }
 

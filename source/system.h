@@ -26,7 +26,6 @@
 #include "threading.h"
 #include "aircraft_coordinator.h"
 #include "alert_system_2.h"
-#include "alert_system_coordinator.h"
 #include "dnfwts.h"
 #include "comport.h"
 #include "auto.h"

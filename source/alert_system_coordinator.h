@@ -12,8 +12,9 @@
 #ifndef ALERT_SYSTEM_COORDINATOR_H
 #define ALERT_SYSTEM_COORDINATOR_H
 
-#include "definitions.h"
-#include "auto.h"
+//#include "definitions.h"
+#include "system.h"
+#include "automobile_handler.h"
 #include "alert_system_2.h"
 #include "screen4_helper.h"
 
@@ -27,7 +28,7 @@ class ALERT_SYSTEM_COORDINATOR
 
   void create(ALERT_SYSTEM_2 &All_Alerts);
 
-  void check_for_alerts(SCREEN4_PANEL_CONTROL &Panel_Control, ALERT_SYSTEM_2 &All_Alerts, AUTOMOBILE &Car_Info, bool Auto_Changed);
+  void check_for_alerts(system_data &sdSysData, AUTOMOBILE_HANDLER &Automobile_Handler);
 };
 
 #endif

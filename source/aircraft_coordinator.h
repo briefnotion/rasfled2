@@ -246,6 +246,12 @@ class AIRCRAFT_MAP_INFO
 
   bool CHANGED = false;
 
+  // Flags
+  bool PANEL_FLAG_CHANGED = false;
+  bool PANEL_FLAG_PROXIMITY = false;
+  bool PANEL_FLAG_LONG_DISTANCE = false;
+  bool PANEL_FLAG_EMERGENCY = false;
+
   deque<AIRCRAFT_MAP_DETAILS> AIRCRAFT_DETAIL_LIST;
 
   AIRCRAFT TRACKED_AIRCRAFT;
@@ -264,6 +270,7 @@ class AIRCRAFT_MAP_INFO
 
   void update(unsigned long tmeCurrentTime, AIRCRAFT_DATA &DATA);
 
+  void clear_panel_flags();
 };
 
 // -------------------------------------------------------------------------------------

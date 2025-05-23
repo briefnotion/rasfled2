@@ -475,11 +475,13 @@ class PANEL
   private:
   bool REQUESTED = false;
 
+  TIMED_IS_READY TIMER;
+
   public:
 
-
-  void request();
-  bool requested();
+  void request(unsigned long Time, int Linger_Time);
+  void requested(unsigned long Time, bool &Requested);
+  bool display();
 };
 
 
@@ -492,12 +494,14 @@ class SCREEN4_PANEL_CONTROL
   // 1 - On
   // 2 - Active
 
-  SCREEN4_PANELS PANELS_UDEF;
-
-  //bool AUTONOMOUS_CHANGED = false;
+  SCREEN4_PANELS PANELS_OFF;
+  SCREEN4_PANELS PANELS_ON;
+  SCREEN4_PANELS PANELS_ACTIVE;
 
   void set_auto_temperature();
   void set_auto_malfunction();
+  void set_auto_pressure();
+  void set_adsb_map();
 
   public:
 
@@ -505,12 +509,14 @@ class SCREEN4_PANEL_CONTROL
 
   PANEL AUTO_TEMPERATURE;
   PANEL AUTO_MALFUNCTION;
+  PANEL AUTO_PRESSURE;
+  PANEL ADSB_MAP;
 
   int autonomous_state();
   void autonomous_on();
   void autonomous_off();
 
-  void activate();
+  void activate(unsigned long Time);
 };
 
 // ---------------------------------------------------------------------------------------

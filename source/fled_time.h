@@ -184,6 +184,38 @@ class FLED_TIME
 // ---------------------------------------------------------------------------------------
 class TIMED_IS_READY
 // Class to manage conditions of when something needs to be ran.
+
+/*
+Example Usage:
+
+void PANEL::request(unsigned long Time)
+{
+  REQUESTED = true;
+
+  TIMER.set(Time, 500);
+}
+
+bool PANEL::requested(unsigned long Time)
+{
+  if  (REQUESTED == false)
+  {
+    return false;
+  }
+  else
+  {
+    if (TIMER.is_ready(Time))
+    {
+      REQUESTED = false;
+      return false;
+    }
+    else
+    {
+      return true;
+    }
+  }
+}
+*/
+
 {
   private:
   unsigned long TRIGGERED_TIME  = 0;  //  Most recent time the ready was activated
@@ -196,16 +228,34 @@ class TIMED_IS_READY
   bool is_set();
 
   void set(unsigned long current_time, int delay);
+  // Prep the TIMED_IS_READY varable
+  // delay is measured in ms.
 
   void set(int delay);
+  // Prep the TIMED_IS_READY varable
+  //  If current time isn't available
+  // delay is measured in ms.
 
   unsigned long get_ready_time();
+  // Return the time value of when the variable will be ready. 
 
   bool is_ready(unsigned long current_time);
+  // Check to see if enough time has passed.
+  //  Returns true if interval time has passed.
+  //    Resets timer if returned true.
+  //  Returns false if time has not elapsed.
+  //    Stores last asked time.
   
   bool is_ready_no_reset(unsigned long current_time);
+  // Check to see if enough time has passed.
+  //  Returns true if interval time has passed.
+  //    Does not resets timer if returned true.
+  //  Returns false if time has not elapsed.
+  //    Stores last asked time.
   
   void set_earliest_ready_time(unsigned long current_time);
+  // Manually set the ready time of the variable. 
+  // Does not change time if time to set is later than the already set time.
 };
 
 // ---------------------------------------------------------------------------------------
