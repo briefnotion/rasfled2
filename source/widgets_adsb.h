@@ -257,6 +257,9 @@ class ADSB_MAP
   bool ACTIVE_COMPASS = false;
   bool ACTIVE_ADSB = false;
 
+  int PREVIOUS_ZOOM_LEVEL = 0; // Used to determine if zoom level has changed
+                                // through the panels.
+
   ImVec4 WORKING_AREA;
 
   COMPASS_WIDGET CURRENT_POSITION_COMPASS;

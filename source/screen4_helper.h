@@ -24,6 +24,7 @@
 // IMGui Includes
 #include "../../imgui/imgui.h"
 #include "../../imgui/misc/cpp/imgui_stdlib.h"
+
 // -------------------------------------------------------------------------------------
 
 // COLOR_LIST
@@ -410,113 +411,6 @@ class CONSOLE_COMMUNICATION
   string printw_q_get();
   void printw(string Text);
   
-};
-
-
-// ---------------------------------------------------------------------------------------
-
-class SCREEN4_PANELS
-{
-  public:
-
-  //sdSysData.PANEL_CONTROL.
-
-  // Main Screen
-  int MAIN_DISPLAY_SCREEN = 0;
-  // Screen:
-  //  0 - Console
-  //  1 - Automobile
-  //  2 - ADSB
-  //  3 - not coded
-  //  4 - Logs
-  //  5 - Dot Dot Dot
-
-
-
-  // Automobile
-  bool AUTOMOBILE_DISPLAY_NOVA = false;
-  bool AUTOMOBILE_DISPLAY_NOVA_SCREEN = true;
-    // false - nova screen 1
-    // true  - nova screen 2
-
-  int  AUTOMOBILE_NOVA_2_SELECTION = 0;
-  // 0 - Drive
-  // 1 - P & T
-  // 2 - Indicators
-  // 3 - Engine
-  // 4 - Other
-
-
-  int AUTOMOBILE_DISPLAY_MID_TOP = 0;
-  // 0 - Speed slow degen
-  // 1 - Power Curve
-
-  int AUTOMOBILE_DISPLAY_MID_BOTTOM = 0; 
-  // 0 - Large Horizontal Bars
-  // 1 - Unused
-  // 2 - Temp Graph
-  // 3 - Power Graph
-
-
-
-  // ADSB
-  bool ADSB_DISPLAY_TABLE = false;
-  bool ADSB_DISPLAY_MAP = true;
-
-  int ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
-  // 0  - OFF
-  // 1  - MIN (On)
-  // 2  - MAX (On)
-};
-
-
-class PANEL
-{
-  private:
-  bool REQUESTED = false;
-
-  TIMED_IS_READY TIMER;
-
-  public:
-
-  void request(unsigned long Time, int Linger_Time);
-  void requested(unsigned long Time, bool &Requested);
-  bool display();
-};
-
-
-class SCREEN4_PANEL_CONTROL
-{
-  private:
-
-  int ATONOMOUS = 1;
-  // 0 - Off
-  // 1 - On
-  // 2 - Active
-
-  SCREEN4_PANELS PANELS_OFF;
-  SCREEN4_PANELS PANELS_ON;
-  SCREEN4_PANELS PANELS_ACTIVE;
-
-  void set_auto_temperature();
-  void set_auto_malfunction();
-  void set_auto_pressure();
-  void set_adsb_map();
-
-  public:
-
-  SCREEN4_PANELS PANELS;
-
-  PANEL AUTO_TEMPERATURE;
-  PANEL AUTO_MALFUNCTION;
-  PANEL AUTO_PRESSURE;
-  PANEL ADSB_MAP;
-
-  int autonomous_state();
-  void autonomous_on();
-  void autonomous_off();
-
-  void activate(unsigned long Time);
 };
 
 // ---------------------------------------------------------------------------------------

@@ -672,6 +672,8 @@ class DRAW_D2_PLOT_POWER_CURVE_PROPERTIES
                           //  3 - Every mph has 10 points within. 10.0, 10.333, 10.666, ...
 
   int HISTORY_SIZE = 100;
+
+  float INDICATOR_SIZE = 8.0f; // Size of the indicator marker on the graph.
 };
 
 class DRAW_D2_PLOT_POWER_CURVE
@@ -741,7 +743,8 @@ To Do:
 
   void create();
 
-  void update(double Time, float Speed, float Acceleration, int Gear);
+  bool update(double Time, float Speed, float Acceleration, int Gear);
+  // Returns true if Accel or Decel with 85% of max.
 
   bool draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position);
 };

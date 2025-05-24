@@ -48,6 +48,7 @@ target_sources(rasfled PRIVATE
   threading.cpp
   hardware_monitor.cpp
   alert_system_2.cpp
+  panels.cpp
   alert_system_coordinator.cpp
   dnfwts.cpp
   LEDstuff.cpp

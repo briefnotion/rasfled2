@@ -2385,11 +2385,14 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
 
   // Power Curve Graph
   {
-    SDATA.PLOT_POWER_CURVE.update((current_frame_time_db) / 1000.0, 
+    if(SDATA.PLOT_POWER_CURVE.update((current_frame_time_db) / 1000.0, 
                                     SDATA.SPEED_RAW, 
                                     SDATA.ACCELERATION_IMPACT_MAG.impact(current_frame_time_lu), 
                                     sdSysData.CAR_INFO.STATUS.GEAR.reported() 
-                                  );
+                                  ))
+    {
+      sdSysData.PANEL_CONTROL.FLAG_AUTO_ACCELERATION_DECELERATION = true;
+    }
   }
 
   // Vertical Bars

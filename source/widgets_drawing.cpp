@@ -2013,8 +2013,8 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
 
     if (position_on_plot(point_start, screen_position_start))
     {
-      Draw_List->AddCircleFilled(screen_position_start, 5.0f, color_marker_fill);
-      Draw_List->AddCircle(screen_position_start, 5.0f, color_marker, 0, 2.0f);
+      Draw_List->AddCircleFilled(screen_position_start, PROPS.INDICATOR_SIZE, color_marker_fill);
+      Draw_List->AddCircle(screen_position_start, PROPS.INDICATOR_SIZE, color_marker, 0, 2.0f);
     }
   }
   else
@@ -2025,8 +2025,8 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
 
     if (position_on_plot(point_start, screen_position_start))
     {
-      Draw_List->AddCircleFilled(screen_position_start, 5.0f, color_marker_fill_decel);
-      Draw_List->AddCircle(screen_position_start, 5.0f, color_marker);
+      Draw_List->AddCircleFilled(screen_position_start, PROPS.INDICATOR_SIZE, color_marker_fill_decel);
+      Draw_List->AddCircle(screen_position_start, PROPS.INDICATOR_SIZE, color_marker);
     }
   }
 }
@@ -2135,20 +2135,24 @@ void DRAW_D2_PLOT_POWER_CURVE::create()
   build_speed_vectors();
 }
 
-void DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Acceleration, int Gear)
+bool DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Acceleration, int Gear)
 {
+  bool ret_85percent_flag = false;
+
   LAST_SPEED_ACCELERATION_READ.x = Speed;
   LAST_SPEED_ACCELERATION_READ.y = Acceleration;
 
   float storage_point = Speed * (float)PROPS.MPH_DIVISION;
 
+  // Update Speed Range if needed
   if (Speed > CURRENT_SPEED_MAX)
   {
     CURRENT_SPEED_MAX = Speed;
   }
-    
+
   if (Acceleration > 0.0f && Speed < PROPS.MAX_SPEED)
   {
+    // Store Speed and Acceleration
     if ((int)storage_point < (int)SPEED_VECTORS_ACCELERATION.size())
     {
       SPEED_VECTORS_ACCELERATION[(int)storage_point].store_value(Acceleration, Time);
@@ -2157,10 +2161,18 @@ void DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Accelerati
       {
         CURRENT_ACCELERATION_MAX = Acceleration;
       }
+
+      // Check for 15% flag
+      if (Acceleration > SPEED_VECTORS_ACCELERATION[(int)storage_point].max() * 0.85f)
+      {
+        ret_85percent_flag = true;
+      }
+
     }
   }
   else if (Acceleration < 0.0f && Speed < PROPS.MAX_SPEED)
   {
+    // Store Speed and Deceleration
     if ((int)storage_point < (int)SPEED_VECTORS_DECELERATION.size())
     {
       SPEED_VECTORS_DECELERATION[(int)storage_point].store_value(abs(Acceleration), Time);
@@ -2168,9 +2180,17 @@ void DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Accelerati
       {
         CURRENT_DECELERATION_MAX = abs(Acceleration);
       }
+
+      // Check for 15% flag
+      if (abs(Acceleration) > SPEED_VECTORS_DECELERATION[(int)storage_point].max() * 0.85f)
+      {
+        ret_85percent_flag = true;
+      }
+
     }
   }
 
+  // Update history line
   SPEED_VECTORS_HISTORY_UPDATE_COUNTER++;
   if (SPEED_VECTORS_HISTORY_UPDATE_COUNTER >= 20)
   {
@@ -2182,6 +2202,8 @@ void DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Accelerati
       SPEED_VECTORS_HISTORY.pop_front();
     }
   }
+
+  return ret_85percent_flag;
 }
 
 bool DRAW_D2_PLOT_POWER_CURVE::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)

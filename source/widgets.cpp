@@ -1083,7 +1083,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
     }
     else
     {
-      Draw_List->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_DIM(RAS_RED)), 5.0f, ImDrawFlags_None);
+      Draw_List->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_RED)), 5.0f, ImDrawFlags_None);
       Draw_List->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_RED)), 5.0f, ImDrawFlags_None, 2.0f);
     }
   }
@@ -1096,7 +1096,7 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
     }
     else
     {
-      Draw_List->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_DIM(RAS_RED)), 5.0f, ImDrawFlags_None);
+      Draw_List->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_RED)), 5.0f, ImDrawFlags_None);
       Draw_List->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_RED)), 5.0f, ImDrawFlags_None, 2.0f);
     }
   }

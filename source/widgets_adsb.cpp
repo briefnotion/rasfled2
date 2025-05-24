@@ -928,7 +928,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
       if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 1)
       {
         sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
-        RANGE_INDICATOR.zoom_return();
+        //RANGE_INDICATOR.zoom_return();
       }
       else
       {
@@ -950,7 +950,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
       if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 2)
       {
         sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
-        RANGE_INDICATOR.zoom_return();
+        //RANGE_INDICATOR.zoom_return();
       }
       else
       {
@@ -2045,6 +2045,17 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // Update range if changing dynamicly with min max aircraft data.
   if (ACTIVE_ADSB && ACTIVE_GPS)
   {
+    // Monitor zoom level changes from internal or panel control.
+    // zoom return if min or max turned off.
+    if (PREVIOUS_ZOOM_LEVEL != sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX)
+    {
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 0)
+      {
+        RANGE_INDICATOR.zoom_return();
+      }
+      PREVIOUS_ZOOM_LEVEL = sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX;
+    }
+
     if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX > 0)
     {
       // If, for whatever reason, there are no aircfaft seen, set the zoom level as if Min and Max aircraft 

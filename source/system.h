@@ -32,6 +32,7 @@
 #include "nmea.h"
 #include "hmc5883l.h"
 #include "rasapi.h"
+#include "panels.h"
 
 #include "screen4_helper.h"
 

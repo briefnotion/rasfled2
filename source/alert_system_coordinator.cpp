@@ -115,16 +115,26 @@ void ALERT_SYSTEM_COORDINATOR::check_for_alerts(system_data &sdSysData, AUTOMOBI
     {
       sdSysData.PANEL_CONTROL.AUTO_PRESSURE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000);
     }
+
+    // Acceleration Screen
+    if (sdSysData.PANEL_CONTROL.FLAG_AUTO_ACCELERATION_DECELERATION)
+    {
+      sdSysData.PANEL_CONTROL.AUTO_ACCELERATION.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000);
+    }
   }
 
   // Aircraft
   if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_CHANGED)
   {
+    if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_PROXIMITY)
+    {
+      sdSysData.PANEL_CONTROL.ADSB_MAP_MIN_DISTANCE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000);
+    }
+
     if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_EMERGENCY || 
-        sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_PROXIMITY || 
         sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_LONG_DISTANCE)
     {
-      sdSysData.PANEL_CONTROL.ADSB_MAP.request(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+      sdSysData.PANEL_CONTROL.ADSB_MAP_MAX_DISTANCE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
     }
     
     sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.clear_panel_flags();

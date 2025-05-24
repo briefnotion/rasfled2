@@ -1,3 +1,10 @@
+2.254_250524
+  - Moved SCREEN4_PANEL_CONTROL out of the screen4_helper.
+  - Added Acceleration and Deceleration autonomous panel control.
+  - Added Min and Max distance to ADSB panel control.  May or may not work because its 
+      untested.
+  - Other small changes.
+
 2.253_250523
   - Automated panel switching is coded.  Started adding basic panel changing for 
       several adsb and automobile system changes.
