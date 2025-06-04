@@ -386,7 +386,7 @@ void processcommandlineinput(system_data &sdSysData,
       
       if (check_command(sdSysData.SCREEN_COMMS," 9999", "DFWTS OFF"))
       {
-        sdSysData.DNFWTS.trun_off();
+        sdSysData.DNFWTS.turn_off();
       }
 
       // -------------------------------------------------------------------------------------

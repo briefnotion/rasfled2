@@ -18,11 +18,11 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
-void PANEL::request(unsigned long Time, int Linger_Time)
+void PANEL::request(unsigned long Time, int Linger_Time, string Description)
 {
   REQUESTED = true;
-
   TIMER.set(Time, Linger_Time);
+  EXTRA.set_value(Description);
 }
 
 void PANEL::requested(unsigned long Time, bool &Requested)
@@ -32,6 +32,7 @@ void PANEL::requested(unsigned long Time, bool &Requested)
     if (TIMER.is_ready(Time))
     {
       REQUESTED = false;
+      EXTRA.set_value("");
     }
     else
     {
@@ -88,7 +89,7 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map()
 void SCREEN4_PANEL_CONTROL::set_adsb_map_min_distance()
 {
   PANELS.MAIN_DISPLAY_SCREEN = 2;
-  PANELS.ADSB_DISPLAY_TABLE = false;
+  //PANELS.ADSB_DISPLAY_TABLE = false;
   PANELS.ADSB_DISPLAY_MAP = true;
   
   PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 1;
@@ -97,7 +98,7 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_min_distance()
 void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
 {
   PANELS.MAIN_DISPLAY_SCREEN = 2;
-  PANELS.ADSB_DISPLAY_TABLE = false;
+  //PANELS.ADSB_DISPLAY_TABLE = false;
   PANELS.ADSB_DISPLAY_MAP = true;
   
   PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 2;
@@ -113,7 +114,7 @@ int SCREEN4_PANEL_CONTROL::autonomous_state()
 void SCREEN4_PANEL_CONTROL::autonomous_on()
 {
   ATONOMOUS = 1;
-  PANELS_OFF = PANELS;
+  PANELS_ON = PANELS;
 }
 
 void SCREEN4_PANEL_CONTROL::autonomous_off()
@@ -145,7 +146,7 @@ void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
       if (ATONOMOUS == 1)
       {
         ATONOMOUS = 2;
-        PANELS_OFF = PANELS;
+        PANELS_ON = PANELS;
       }
     }
     else
@@ -153,44 +154,53 @@ void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
       if (ATONOMOUS == 2)
       {
         ATONOMOUS = 1;
-        PANELS = PANELS_OFF;
+        PANELS = PANELS_ON;
       }
     }
 
     // If the panels are requested, call the panels.
-    // Start with the least important first so that they can overlap and 
-    //  the most important one will be on prominant.
+    // Start with the least important first so that they can be overlaped and 
+    //  the most important or least likely panels will be prominant.
+
+    EXTRA = "";
+
     if (panel_requested)
     {
-
-      if (ADSB_MAP_MIN_DISTANCE.display())
-      {
-        set_adsb_map_min_distance();
-      }
-
-      if (ADSB_MAP_MAX_DISTANCE.display())
-      {
-        set_adsb_map_max_distance();
-      }
 
       if (AUTO_PRESSURE.display())
       {
         set_auto_pressure();
+        EXTRA = AUTO_PRESSURE.EXTRA.value() + EXTRA;
       }
 
       if (AUTO_TEMPERATURE.display())
       {
         set_auto_temperature();
+        EXTRA = AUTO_TEMPERATURE.EXTRA.value() + EXTRA;
       }
 
       if (AUTO_ACCELERATION.display())
       {
         set_auto_acceleration();
+        EXTRA = AUTO_ACCELERATION.EXTRA.value() + EXTRA;
+      }
+
+      if (ADSB_MAP_MIN_DISTANCE.display())
+      {
+        set_adsb_map_min_distance();
+        EXTRA = ADSB_MAP_MIN_DISTANCE.EXTRA.value() + EXTRA;
+      }
+
+      if (ADSB_MAP_MAX_DISTANCE.display())
+      {
+        set_adsb_map_max_distance();
+        EXTRA = ADSB_MAP_MAX_DISTANCE.EXTRA.value() + EXTRA;
       }
 
       if (AUTO_MALFUNCTION.display())
       {
         set_auto_malfunction();
+        EXTRA = AUTO_MALFUNCTION.EXTRA.value() + EXTRA;
       }
 
     }

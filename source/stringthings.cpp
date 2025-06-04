@@ -653,7 +653,73 @@ bool STRING_FLOAT::conversion_success()
   return CONVERSION_SUCCESS;
 }
 
+bool isAlphaNumeric(char c)
+{
+  return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
+}
 
+char getRandomAlphaNumeric()
+{
+  int randomType = rand() % 3; // 0 = digit, 1 = uppercase, 2 = lowercase
+  
+  if (randomType == 0)
+  {
+    return static_cast<char>(rand() % 10 + '0');  // 0-9
+  }
+  else if (randomType == 1)
+  {
+    return static_cast<char>(rand() % 26 + 'A');  // A-Z
+  }
+  else
+  {
+    return static_cast<char>(rand() % 26 + 'a');  // a-z
+  }
+}
+
+
+string SEARCH_STRING::value()
+{
+  if (FOUND)
+  {
+    return DESTINATION;
+  }
+  else
+  {
+    FOUND = true;
+    for (size_t pos = 0; pos < DESTINATION.size(); pos++)
+    {
+      if (SEARCH[pos] != DESTINATION[pos])
+      {
+        if (!isAlphaNumeric(DESTINATION[pos])) 
+        {
+          SEARCH[pos] = DESTINATION[pos];
+        }
+        else
+        {
+          SEARCH[pos] = getRandomAlphaNumeric();
+        }
+        FOUND = false;
+      }
+    }
+    return SEARCH;
+  }
+}
+
+void SEARCH_STRING::set_value(string Value)
+{
+  if (Value != DESTINATION)
+  {
+    DESTINATION = Value;
+    FOUND = false;
+    SEARCH = string(DESTINATION.size(), ' ');
+  }
+}
+
+string SEARCH_STRING::value(string Value)
+{
+  set_value(Value);
+  return value();
+}
 
 
 #endif

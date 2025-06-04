@@ -229,5 +229,21 @@ class STRING_FLOAT
   bool conversion_success();
 };
 
+bool isAlphaNumeric(char c);
+char getRandomAlphaNumeric();
+
+class SEARCH_STRING
+{
+  private: 
+  string DESTINATION = "";
+  string SEARCH = "";
+  bool FOUND = false;
+
+  public:
+  string value();
+  void set_value(string Value);
+  string value(string Value);
+};
+
 
 #endif

@@ -1,3 +1,9 @@
+2.255_250603
+  - Updated text on the DNFWTS screen.
+  - Changed order of autonomous panels. 
+  - When autonomous sreen is active, a description will show the order and active 
+      panels modes.
+
 2.254_250524
   - Moved SCREEN4_PANEL_CONTROL out of the screen4_helper.
   - Added Acceleration and Deceleration autonomous panel control.

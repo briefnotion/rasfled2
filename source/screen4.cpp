@@ -690,9 +690,15 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           draw_list->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.pure_color(RAS_RED).STANDARD, 50.0f);
 
           ImGui::PushFont(io.Fonts->Fonts.Data[2]);
-          ImGui::SetCursorScreenPos(ImVec2(working_area.x + 50.0f, working_area.y + 150.0f));
           ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.pure_color(RAS_RED).STANDARD));
-          ImGui::Text("DO \nNOT FUCK \nWITH THE SYSTEM");
+
+          ImGui::SetCursorScreenPos(ImVec2(working_area.x + 50.0f, working_area.y + 150.0f));
+          ImGui::Text(sdSysData.DNFWTS.DNFWTS_TEXT_1.value().c_str());
+          
+          ImGui::SetCursorScreenPos(ImVec2(working_area.x + 200.0f, working_area.y + 50.0f));
+          ImGui::Text(sdSysData.DNFWTS.DNFWTS_TEXT_2.value().c_str());
+          
+          
           ImGui::PopStyleColor();
           ImGui::PopFont();
         }
@@ -1157,15 +1163,22 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_GREEN)));
               ImGui::PushFont(io.Fonts->Fonts.Data[2]);
 
-              if (sdSysData.CAR_INFO.STREET_LEGAL_MODE == true)
+              // Display the Autononomous State or Street Legal Mode
+              if (sdSysData.PANEL_CONTROL.autonomous_state() == 2)
               {
-                ImGui::Text("Street_Legal_Md=ON");
+                ImGui::Text(sdSysData.PANEL_CONTROL.EXTRA.c_str());
               }
               else
               {
-                 ImGui::Text("Street_Legal_Md=OFF");
+                if (sdSysData.CAR_INFO.STREET_LEGAL_MODE == true)
+                {
+                  ImGui::Text("Street_Legal_Md=ON");
+                }
+                else
+                {
+                  ImGui::Text("Street_Legal_Md=OFF");
+                }
               }
-              //Text_Rotate("hgzsfkzxsfkzs", 90.0f, BB_BL);
 
               ImGui::PopFont();
               ImGui::PopStyleColor();

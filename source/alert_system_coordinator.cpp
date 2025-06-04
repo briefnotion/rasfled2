@@ -100,26 +100,26 @@ void ALERT_SYSTEM_COORDINATOR::check_for_alerts(system_data &sdSysData, AUTOMOBI
           (sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c() > 110.0f) ||
           (s_temp > 65.0f))
     {
-      sdSysData.PANEL_CONTROL.AUTO_TEMPERATURE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000);
+      sdSysData.PANEL_CONTROL.AUTO_TEMPERATURE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000, "TMP ");
     }
 
     // Malfunction Screen
     if ((sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == true) ||
           sdSysData.CAR_INFO.STATUS.ELECTRICAL.CONTROL_UNIT_42.val_v() < 11.5f)
     {
-      sdSysData.PANEL_CONTROL.AUTO_MALFUNCTION.request(sdSysData.PROGRAM_TIME.current_frame_time(), 60000);
+      sdSysData.PANEL_CONTROL.AUTO_MALFUNCTION.request(sdSysData.PROGRAM_TIME.current_frame_time(), 60000, "MIL ");
     }
 
     // Pressure Screen
-    if ((sdSysData.CAR_INFO.STATUS.FUEL.FUEL_RAIL_PRESSURE.val_kPa() > 750.0f))
+    if ((sdSysData.CAR_INFO.STATUS.FUEL.FUEL_RAIL_PRESSURE.val_kPa() > 900.0f))
     {
-      sdSysData.PANEL_CONTROL.AUTO_PRESSURE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000);
+      sdSysData.PANEL_CONTROL.AUTO_PRESSURE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000, "PRS ");
     }
 
     // Acceleration Screen
     if (sdSysData.PANEL_CONTROL.FLAG_AUTO_ACCELERATION_DECELERATION)
     {
-      sdSysData.PANEL_CONTROL.AUTO_ACCELERATION.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000);
+      sdSysData.PANEL_CONTROL.AUTO_ACCELERATION.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000, "ACC ");
     }
   }
 
@@ -128,13 +128,13 @@ void ALERT_SYSTEM_COORDINATOR::check_for_alerts(system_data &sdSysData, AUTOMOBI
   {
     if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_PROXIMITY)
     {
-      sdSysData.PANEL_CONTROL.ADSB_MAP_MIN_DISTANCE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000);
+      sdSysData.PANEL_CONTROL.ADSB_MAP_MIN_DISTANCE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000, "ADS-B MIN ");
     }
 
     if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_EMERGENCY || 
         sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.PANEL_FLAG_LONG_DISTANCE)
     {
-      sdSysData.PANEL_CONTROL.ADSB_MAP_MAX_DISTANCE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+      sdSysData.PANEL_CONTROL.ADSB_MAP_MAX_DISTANCE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 30000, "ADS-B MAX ");
     }
     
     sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.clear_panel_flags();

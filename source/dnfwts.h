@@ -22,6 +22,7 @@
 //#include "commands.h"
 //#include "hardware_status.h"
 #include "fled_time.h"
+#include "stringthings.h"
 
 using namespace std;
 
@@ -43,9 +44,12 @@ class DNFWTS_
 
   public:
 
+  SEARCH_STRING DNFWTS_TEXT_1;
+  SEARCH_STRING DNFWTS_TEXT_2;
+
   bool check_for_change();
   void turn_on(unsigned long Time);
-  void trun_off();
+  void turn_off();
   bool active();
   bool active_update(unsigned long Time);
 

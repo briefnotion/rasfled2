@@ -494,6 +494,7 @@ bool BUTTON_COLOR::button_color(system_data &sdSysData, string Text, int Color, 
   ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_HOVERED(Color))));
   ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_ACTIVE(Color))));
 
+  //if (ImGui::Button(TEXT.value(Text).c_str(), ImVec2_Size))
   if (ImGui::Button(Text.c_str(), ImVec2_Size))
   {
     ret_value = true;
@@ -517,6 +518,7 @@ bool BUTTON_TOGGLE_COLOR::button_toggle_color(system_data &sdSysData, string Tru
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_HOVERED(False_Color))));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_ACTIVE(False_Color))));
 
+    //if (ImGui::Button(TEXT.value(False_Value_Text).c_str(), ImVec2_Size))
     if (ImGui::Button(False_Value_Text.c_str(), ImVec2_Size))
     {
       ret_value = true;
@@ -529,6 +531,7 @@ bool BUTTON_TOGGLE_COLOR::button_toggle_color(system_data &sdSysData, string Tru
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_HOVERED(True_Color))));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_ACTIVE(True_Color))));
 
+    //if (ImGui::Button(TEXT.value(True_Value_Text).c_str(), ImVec2_Size))
     if (ImGui::Button(True_Value_Text.c_str(), ImVec2_Size))
     {
       ret_value = true;
@@ -549,7 +552,7 @@ bool CONFIRM_DIALOG::confirm_dialog(system_data &sdSysData, bool &Choice)
   
   if (ImGui::Begin("Continue", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
   {
-    if (CONFIRM.button_color(sdSysData, "CONFIRM", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (CONFIRM.button_color(sdSysData, "CONFIRM", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       Choice = true;
       ret_choice_clicked = true;

@@ -21,6 +21,7 @@
 #include "../../imgui/misc/cpp/imgui_stdlib.h"
 
 #include "system.h"
+#include "stringthings.h"
 #include "screen4_helper.h"
 #include "widgets_drawing.h"
 
@@ -229,6 +230,8 @@ class BUTTON_COLOR
   NEO_COLOR BUTTON_HOVERED_COLOR;
   NEO_COLOR BUTTON_ACTIVE_COLOR;
 
+  //SEARCH_STRING TEXT;
+
   public:
 
   bool button_color(system_data &sdSysData, string Text, int Color, ImVec2 ImVec2_Size);
@@ -241,6 +244,8 @@ class BUTTON_TOGGLE_COLOR
   NEO_COLOR BUTTON_COLOR;
   NEO_COLOR BUTTON_HOVERED_COLOR;
   NEO_COLOR BUTTON_ACTIVE_COLOR;
+  
+  //SEARCH_STRING TEXT;
 
   public:
 

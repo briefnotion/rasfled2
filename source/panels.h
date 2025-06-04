@@ -13,6 +13,7 @@
 #define PANELS_H
 
 #include "fled_time.h"
+#include "stringthings.h"
 
 // ---------------------------------------------------------------------------------------
 
@@ -80,7 +81,9 @@ class PANEL
 
   public:
 
-  void request(unsigned long Time, int Linger_Time);
+  SEARCH_STRING EXTRA;
+
+  void request(unsigned long Time, int Linger_Time, string Description);
   void requested(unsigned long Time, bool &Requested);
   bool display();
 };
@@ -96,9 +99,7 @@ class SCREEN4_PANEL_CONTROL
   // 2 - Active
 
   // Panel backups
-  SCREEN4_PANELS PANELS_OFF;
   SCREEN4_PANELS PANELS_ON;
-  SCREEN4_PANELS PANELS_ACTIVE;
 
   // Set Panels
   void set_auto_temperature();
@@ -122,6 +123,9 @@ class SCREEN4_PANEL_CONTROL
   //PANEL ADSB_MAP;
   PANEL ADSB_MAP_MIN_DISTANCE;
   PANEL ADSB_MAP_MAX_DISTANCE;
+
+  // Notation 
+  string EXTRA;
 
   // Flags initiated from points other than alert system coordinator
   bool FLAG_AUTO_ACCELERATION_DECELERATION = false;

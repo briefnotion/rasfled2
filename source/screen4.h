@@ -224,7 +224,6 @@ class SCREEN4
   NEO_COLOR BLINKER_INDICATOR_RIGHT;
   NEO_COLOR BLINKER_INDICATOR_HAZARD;
 
-
   //bool CHANGED = false;
 
   void door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size);

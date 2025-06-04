@@ -2273,9 +2273,9 @@ void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)
         ImGui::TableSetupColumn("G SPD");
         ImGui::TableSetupColumn("V RTE");
         ImGui::TableSetupColumn("ALT");
-        ImGui::TableSetupColumn("ALT NAV");
+        ImGui::TableSetupColumn("ANAV");
         ImGui::TableSetupColumn("HDG");
-        ImGui::TableSetupColumn("HDG NAV");
+        ImGui::TableSetupColumn("HNAV");
         ImGui::TableSetupColumn("DIST");
         ImGui::TableSetupColumn("ANG");
         ImGui::TableSetupColumn("SEEN");  // seen p
@@ -2420,7 +2420,7 @@ void ADSB_SCREEN::display(system_data &sdSysData)
       sdSysData.SCREEN_COMMS.command_text_set(" adsbsnap");
     }
 
-    if (BC_VIEW.button_color(sdSysData, "VIEW", RAS_ORANGE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (BC_VIEW.button_color(sdSysData, "VIEW", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       if (sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE)
       {
