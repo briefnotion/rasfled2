@@ -1172,11 +1172,11 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               {
                 if (sdSysData.CAR_INFO.STREET_LEGAL_MODE == true)
                 {
-                  ImGui::Text("Street_Legal_Md=ON");
+                  ImGui::Text("%s", mask_string("Street_Legal_Md=ON").c_str());
                 }
                 else
                 {
-                  ImGui::Text("Street_Legal_Md=OFF");
+                  ImGui::Text("%s", mask_string("Street_Legal_Md=OFF").c_str());
                 }
               }
 

@@ -1468,5 +1468,112 @@ float EMPERICAL::mean()
 }
 
 
+// ---------------------------------------------------------------------------------------
+// VECTOR DEQUE
+
+int VECTOR_DEQUE_INT::get_vector_position(int Position)
+{
+  /*
+  int vec_pos = BACK + Position;
+
+  if (vec_pos < FULL_SIZE)
+  {
+    return vec_pos;
+  }
+  else
+  {
+    return vec_pos - FULL_SIZE;
+  }
+  */
+
+  return (BACK + Position) % FULL_SIZE;
+}
+
+void VECTOR_DEQUE_INT::set_size(int newCapacity)
+{
+  // Create a new vector of the desired size.
+  vector<int> newData(newCapacity);
+
+  // "currentCount" is the number of valid elements in your deque.
+  int currentCount = size(); // Assume size() returns the number of stored elements
+  
+  // Determine how many elements to copy.
+  int numElementsToCopy;
+  if (newCapacity < currentCount)
+  {
+      numElementsToCopy = newCapacity;
+  }
+  else
+  {
+      numElementsToCopy = currentCount;
+  }
+
+  // Copy the existing deque elements in proper order.
+  // Use your current "value(pos)" helper to get the logical element at position pos.
+  for (int pos = 0; pos < numElementsToCopy; pos++)
+  {
+      newData[pos] = value(pos);
+  }
+
+  // Replace the old data with the rebuilt, new vector.
+  Data = move(newData);
+  
+  // Update the capacity.
+  FULL_SIZE = newCapacity;
+
+  // Since the elements are now stored from index 0 to numElementsToCopy - 1,
+  // update FRONT to 0 and BACK accordingly. (BACK will be -1 if there are no elements.)
+  FRONT = 0;
+  if (numElementsToCopy > 0)
+  {
+      BACK = numElementsToCopy - 1;
+  }
+  else
+  {
+      BACK = 0;
+  }
+}
+
+int VECTOR_DEQUE_INT::size()
+{
+  if (FRONT == BACK)
+  {
+    return 0;
+  }
+  else if (BACK < FRONT)
+  {
+    return FRONT - BACK;
+  }
+  else 
+  {
+    return ((FULL_SIZE -1) - BACK) + (FRONT + 1);
+  }
+}
+
+void VECTOR_DEQUE_INT::push_back(int Value)
+{
+  BACK++;
+  if (BACK >= FULL_SIZE)
+  {
+    BACK = 0;
+  }
+
+  if (BACK == FRONT)
+  {
+    FRONT++;
+    if (FRONT >= FULL_SIZE)
+    {
+      FRONT = 0;
+    }
+  }
+
+  Data[BACK] = Value;
+}
+
+int VECTOR_DEQUE_INT::value(int Position)
+{
+  return Data[get_vector_position(Position)];
+}
+
 
 #endif

@@ -1,3 +1,6 @@
+2.256_250610
+  - Wrote some alternative compass code for testing.
+
 2.255_250603
   - Updated text on the DNFWTS screen.
   - Changed order of autonomous panels. 

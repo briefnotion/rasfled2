@@ -833,6 +833,95 @@ bool CAL_LEVEL_2::simple_calibration()
   return SIMPLE_CALIBRATION;
 }
 
+
+
+        // Testing ----------------------------------------
+
+
+        
+
+
+void CAL_LEVEL_2::removeNonExtremes() 
+{
+  if (calibrationData.empty())
+  {
+    return;
+  }
+  else
+  {
+    float x_min = calibrationData[0].X, x_max = calibrationData[0].X;
+    float y_min = calibrationData[0].Y, y_max = calibrationData[0].Y;
+    float z_min = calibrationData[0].Z, z_max = calibrationData[0].Z;
+
+    for (const auto& reading : calibrationData) 
+    {
+      if (reading.X < x_min) x_min = reading.X;
+      if (reading.X > x_max) x_max = reading.X;
+      if (reading.Y < y_min) y_min = reading.Y;
+      if (reading.Y > y_max) y_max = reading.Y;
+      if (reading.Z < z_min) z_min = reading.Z;
+      if (reading.Z > z_max) z_max = reading.Z;
+    }
+
+    // Now determine a threshold to keep readings near these extremes.
+    // For example, keep readings that are within 20% of the range from either extreme.
+    float x_range = x_max - x_min;
+    float y_range = y_max - y_min;
+    float z_range = z_max - z_min;
+
+    auto isExtreme = [&](const Vector3& reading) 
+    {
+      bool x_extreme = (reading.X <= x_min + 0.2f * x_range) || (reading.X >= x_max - 0.2f * x_range);
+      bool y_extreme = (reading.Y <= y_min + 0.2f * y_range) || (reading.Y >= y_max - 0.2f * y_range);
+      bool z_extreme = (reading.Z <= z_min + 0.2f * z_range) || (reading.Z >= z_max - 0.2f * z_range);
+      return x_extreme || y_extreme || z_extreme;
+    };
+
+    // Erase non-extreme readings:
+    calibrationData.erase(
+                          std::remove_if(calibrationData.begin(), calibrationData.end(),
+                                          [&](const Vector3& reading) { return !isExtreme(reading); }),
+                          calibrationData.end());
+
+  }      
+}
+
+Vector3 CAL_LEVEL_2::computeCalibrationOffsets() 
+{
+  Vector3 calib { calibrationData[0].X, calibrationData[0].Y, calibrationData[0].Z };
+  Vector3 calib_max = calib;
+
+  for (const auto& reading : calibrationData) 
+  {
+    calib.X = std::min(calib.X, reading.X);
+    calib_max.X = std::max(calib_max.X, reading.X);
+    calib.Y = std::min(calib.Y, reading.Y);
+    calib_max.Y = std::max(calib_max.Y, reading.Y);
+    calib.Z = std::min(calib.Z, reading.Z);
+    calib_max.Z = std::max(calib_max.Z, reading.Z);
+  }
+
+  // Calculate the center for each axis.
+  Vector3 center;
+  center.X = (calib.X + calib_max.X) / 2.0f;
+  center.Y = (calib.Y + calib_max.Y) / 2.0f;
+  center.Z = (calib.Z + calib_max.Z) / 2.0f;
+
+  return center;
+}
+
+Vector3 CAL_LEVEL_2::calibrateReading(const Vector3& raw, const Vector3& center) 
+{
+  return { raw.X - center.X, raw.Y - center.Y, raw.Z - center.Z };
+}
+
+
+
+        // Testing ----------------------------------------
+
+
+        
+
 void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Raw_XYZ)
 { 
 
@@ -1060,6 +1149,135 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
         }
       }
     } // Simple Filter
+  }
+
+
+
+        // Testing ----------------------------------------
+
+
+        
+
+
+
+
+  
+  // Alternative method of calibration
+  {
+    /*
+    // Initialization
+    if (CALIBRATION_DATA_A.size() < 5)
+    {
+      while (CALIBRATION_DATA_A.size() < 5)
+      {
+        CALIBRATION_DATA_ALTERNATIVE tmp_cal_data;
+        CALIBRATION_DATA_A.push_back(tmp_cal_data);
+      }
+    }
+    */
+
+    /*
+    // Startup
+    if ((CALIBRATION_DATA_A[1].VALUE.samples()  == 0) || 
+    (CALIBRATION_DATA_A[2].VALUE.samples()  == 0) || 
+    (CALIBRATION_DATA_A[3].VALUE.samples()  == 0) || 
+    (CALIBRATION_DATA_A[4].VALUE.samples()  == 0))
+    {
+      CALIBRATION_DATA_A[1].VALUE.store_value(Raw_XYZ.X);
+      CALIBRATION_DATA_A[3].VALUE.store_value(Raw_XYZ.X);
+      CALIBRATION_DATA_A[2].VALUE.store_value(Raw_XYZ.Y);
+      CALIBRATION_DATA_A[4].VALUE.store_value(Raw_XYZ.Y);
+    }
+    */
+
+
+    // Calculate Center of Compass
+    //   (disregard Z axis)
+    //CALIBRATION_DATA_A_CENTER.X = (CALIBRATION_DATA_A[2].VALUE.mean() +  CALIBRATION_DATA_A[4].VALUE.mean()) / 2.0f;
+    //CALIBRATION_DATA_A_CENTER.Y = (CALIBRATION_DATA_A[1].VALUE.mean() +  CALIBRATION_DATA_A[3].VALUE.mean()) / 2.0f;
+
+    /*
+    CALIBRATION_DATA_A[0].X_MIN_MAX.store_value(Raw_XYZ.X);
+    CALIBRATION_DATA_A[0].Y_MIN_MAX.store_value(Raw_XYZ.Y);
+    CALIBRATION_DATA_A[0].Z_MIN_MAX.store_value(Raw_XYZ.Z);
+
+    CALIBRATION_DATA_A_CENTER.X = (CALIBRATION_DATA_A[0].X_MIN_MAX.min() +  CALIBRATION_DATA_A[0].X_MIN_MAX.max()) / 2.0f;
+    CALIBRATION_DATA_A_CENTER.Y = (CALIBRATION_DATA_A[0].Y_MIN_MAX.min() +  CALIBRATION_DATA_A[0].Y_MIN_MAX.max()) / 2.0f;
+    CALIBRATION_DATA_A_CENTER.Z = (CALIBRATION_DATA_A[0].Z_MIN_MAX.min() +  CALIBRATION_DATA_A[0].Z_MIN_MAX.max()) / 2.0f;
+
+    if (Raw_XYZ.X < CALIBRATION_DATA_A_CENTER.X)
+    {
+      CALIBRATION_DATA_A[4].X_MIN_MAX.store_value(Raw_XYZ.X);
+      CALIBRATION_DATA_A[4].Y_MIN_MAX.store_value(Raw_XYZ.Y);
+      CALIBRATION_DATA_A[4].Z_MIN_MAX.store_value(Raw_XYZ.Z);
+    }
+    else
+    {
+      CALIBRATION_DATA_A[2].X_MIN_MAX.store_value(Raw_XYZ.X);
+      CALIBRATION_DATA_A[2].Y_MIN_MAX.store_value(Raw_XYZ.Y);
+      CALIBRATION_DATA_A[2].Z_MIN_MAX.store_value(Raw_XYZ.Z);
+    }
+
+    if (Raw_XYZ.Y < CALIBRATION_DATA_A_CENTER.Y)
+    {
+      CALIBRATION_DATA_A[1].X_MIN_MAX.store_value(Raw_XYZ.X);
+      CALIBRATION_DATA_A[1].Y_MIN_MAX.store_value(Raw_XYZ.Y);
+      CALIBRATION_DATA_A[1].Z_MIN_MAX.store_value(Raw_XYZ.Z);
+    }
+    else
+    {
+      CALIBRATION_DATA_A[3].X_MIN_MAX.store_value(Raw_XYZ.X);
+      CALIBRATION_DATA_A[3].Y_MIN_MAX.store_value(Raw_XYZ.Y);
+      CALIBRATION_DATA_A[3].Z_MIN_MAX.store_value(Raw_XYZ.Z);
+    }
+    */
+
+    /*
+    // Verify calibration data not too big.
+    for (size_t pos = 0; pos <= 5; pos++)
+    {
+      if (CALIBRATION_DATA_A[pos].DATA_POINTS.size() > CALIBRATION_DATA_A_DATA_SIZE)
+      {
+        while (CALIBRATION_DATA_A[pos].DATA_POINTS.size() > CALIBRATION_DATA_A_DATA_SIZE)
+        {
+          CALIBRATION_DATA_A[pos].DATA_POINTS.erase(CALIBRATION_DATA_A[pos].DATA_POINTS.begin());
+        }
+      }
+    }
+    */
+
+
+    Vector3 reading;
+    reading.X = Raw_XYZ.X;
+    reading.Y = Raw_XYZ.Y;
+    reading.Z = Raw_XYZ.Z;
+    calibrationData.push_back(reading);
+
+    if (calibrationData.size() > MAX_DATA_POINTS) 
+    {
+      // For example, remove the oldest quarter of entries:
+      calibrationData.erase(calibrationData.begin(), calibrationData.begin() + MAX_DATA_POINTS / 4);
+    }
+
+    removeNonExtremes();
+
+    center = computeCalibrationOffsets();
+
+    calibrated_reading = calibrateReading(reading, center);
+
+    heading = std::atan2(calibrated_reading.Y, calibrated_reading.X) * (180.0f / M_PI);
+
+
+
+
+
+        // Testing ----------------------------------------
+
+
+        
+
+
+
   }
   
 }
@@ -1584,6 +1802,25 @@ float HMC5883L::bearing()
   }
 }
 
+
+        // Testing ----------------------------------------
+
+
+        
+float HMC5883L::test_heading()
+{
+  float ret_heading = LEVEL_2.heading + KNOWN_DEVICE_DEGREE_OFFSET;
+    if (ret_heading < 0)
+        ret_heading += 360.0f;
+
+  return ret_heading;
+}
+
+
+        // Testing ----------------------------------------
+
+
+        
 float HMC5883L::bearing_jitter_min()
 {
   if (BEARING_JITTER_MIN < -0.0f)

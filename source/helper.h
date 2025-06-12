@@ -679,4 +679,36 @@ class EMPERICAL
   float mean();
 };
 
+
+// ---------------------------------------------------------------------------------------
+// VECTOR DEQUE
+
+// Untested Idea for later.
+class VECTOR_DEQUE_INT
+{
+  vector<int> Data;
+
+  int FRONT = 0;
+  int BACK = 0;
+
+  int FULL_SIZE = 0;
+
+  int get_vector_position(int Position);
+
+  public:
+
+  void set_size(int Size);
+
+  //void pop_front();
+
+  int size();
+
+  void push_back(int Value);
+
+  int value(int Position);
+
+};
+
+
+
 #endif

@@ -233,6 +233,7 @@ bool isAlphaNumeric(char c);
 char getRandomAlphaNumeric();
 
 class SEARCH_STRING
+// Slowly roles in string from initial random charters.
 {
   private: 
   string DESTINATION = "";
@@ -244,6 +245,11 @@ class SEARCH_STRING
   void set_value(string Value);
   string value(string Value);
 };
+
+string mask_string(string Text);
+// Randomizes every 4th character in Text.
+//  Only works with screen shots.  Will not thwart 
+//  off a camera.
 
 
 #endif

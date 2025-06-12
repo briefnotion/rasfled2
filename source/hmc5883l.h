@@ -241,6 +241,25 @@ class CALIBRATION_DATA
 
 // -------------------------------------------------------------------------------------
 
+class CALIBRATION_DATA_ALTERNATIVE
+{
+  public:
+
+  MIN_MAX_TIME_SLICE X_MIN_MAX;
+  MIN_MAX_TIME_SLICE Y_MIN_MAX;
+  MIN_MAX_TIME_SLICE Z_MIN_MAX;
+};
+
+
+
+struct Vector3 
+{
+  float X, Y, Z;
+};
+
+
+// -------------------------------------------------------------------------------------
+
 class CAL_LEVEL_2
 {
   private:
@@ -318,6 +337,36 @@ class CAL_LEVEL_2
   void offset_history_write();
 
   public:
+
+
+
+        // Testing ----------------------------------------
+
+
+        
+  
+  // Alternative method to calculate offset and skew
+  //vector<CALIBRATION_DATA_ALTERNATIVE> CALIBRATION_DATA_A;
+
+  //size_t CALIBRATION_DATA_A_DATA_SIZE = 20;
+  //FLOAT_XYZ CALIBRATION_DATA_A_CENTER;
+
+  std::vector<Vector3> calibrationData;
+  const size_t MAX_DATA_POINTS = 1000;
+  Vector3 center;
+  Vector3 calibrated_reading;
+  float heading = 0.0f;
+
+  Vector3 calibrateReading(const Vector3& raw, const Vector3& center);
+  void removeNonExtremes();
+  Vector3 computeCalibrationOffsets();
+
+
+
+        // Testing ----------------------------------------
+
+
+        
 
   void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
                             FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
@@ -526,6 +575,8 @@ class HMC5883L
 
   float bearing();
   // Direction Facing.
+
+  float test_heading();
 
   float bearing_jitter_min();
   float bearing_jitter_max();

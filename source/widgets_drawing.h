@@ -70,33 +70,6 @@ void Graphical_Number(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Posi
 
 // ---------------------------------------------------------------------------------------
 
-// Untested Idea for later.
-class VECTOR_DEQUE_IMVEC2
-{
-  vector<ImVec2> Data;
-
-  int FRONT = 0;
-  int BACK = 0;
-
-  int FULL_SIZE = 0;
-
-  int get_vector_position(int Position);
-
-  public:
-
-  void reserve(int Size);
-
-  //void pop_front();
-
-  int size();
-
-  void push_back(ImVec2 Value);
-
-  ImVec2 value(int Position);
-
-};
-
-
 class PROPERTY_ORIENTATION
 {
   public:
