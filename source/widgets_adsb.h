@@ -283,6 +283,8 @@ class ADSB_MAP
   void screen_draw_position_marker(ImDrawList *Draw_List, system_data &sdSysData);
   //  Draw map position marker onto the screen
   //    Draws Tracks
+  
+  void screen_draw_compass_center(ImDrawList *Draw_List, system_data &sdSysData);
 
   void screen_draw_aircraft(ImDrawList *Draw_List, system_data &sdSysData);
   //  Draw aircraft markers onto the screen

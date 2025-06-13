@@ -838,77 +838,119 @@ bool CAL_LEVEL_2::simple_calibration()
         // Testing ----------------------------------------
 
 
-        
-
-
 void CAL_LEVEL_2::removeNonExtremes() 
 {
-  if (calibrationData.empty())
-  {
-    return;
+  if (calibrationData.empty()) return;
+
+  // Determine min/max values
+  Vector3 minValues = calibrationData[0];
+  Vector3 maxValues = calibrationData[0];
+
+  for (const auto& reading : calibrationData) {
+      minValues.X = std::min(minValues.X, reading.X);
+      maxValues.X = std::max(maxValues.X, reading.X);
+      minValues.Y = std::min(minValues.Y, reading.Y);
+      maxValues.Y = std::max(maxValues.Y, reading.Y);
+      minValues.Z = std::min(minValues.Z, reading.Z);
+      maxValues.Z = std::max(maxValues.Z, reading.Z);
   }
-  else
+
+  // Apply threshold for filtering
+  auto isExtreme = [&](const Vector3& reading) {
+      return (reading.X <= minValues.X + 0.2f * (maxValues.X - minValues.X) ||
+              reading.X >= maxValues.X - 0.2f * (maxValues.X - minValues.X)) ||
+              (reading.Y <= minValues.Y + 0.2f * (maxValues.Y - minValues.Y) ||
+              reading.Y >= maxValues.Y - 0.2f * (maxValues.Y - minValues.Y)) ||
+              (reading.Z <= minValues.Z + 0.2f * (maxValues.Z - minValues.Z) ||
+              reading.Z >= maxValues.Z - 0.2f * (maxValues.Z - minValues.Z));
+  };
+
+  // Filter out non-extreme values
+  calibrationData.erase(
+      std::remove_if(calibrationData.begin(), calibrationData.end(),
+          [&](const Vector3& reading) { return !isExtreme(reading); }),
+      calibrationData.end());
+
+  if (calibrationData.size() > MAX_DATA_POINTS) 
   {
-    float x_min = calibrationData[0].X, x_max = calibrationData[0].X;
-    float y_min = calibrationData[0].Y, y_max = calibrationData[0].Y;
-    float z_min = calibrationData[0].Z, z_max = calibrationData[0].Z;
+    // Store the extreme values before trimming
+    Vector3 minValues = calibrationData.front(); // First element (oldest)
+    Vector3 maxValues = calibrationData.back();  // Last element (newest)
 
-    for (const auto& reading : calibrationData) 
-    {
-      if (reading.X < x_min) x_min = reading.X;
-      if (reading.X > x_max) x_max = reading.X;
-      if (reading.Y < y_min) y_min = reading.Y;
-      if (reading.Y > y_max) y_max = reading.Y;
-      if (reading.Z < z_min) z_min = reading.Z;
-      if (reading.Z > z_max) z_max = reading.Z;
+    // Trim the oldest entries while ensuring the dataset remains under 1000
+    int removeCount = MAX_DATA_POINTS / 4;
+    if (calibrationData.size() - removeCount < 6) {
+        removeCount = calibrationData.size() - 6; // Keep a minimum of 6 entries
     }
+    
+    calibrationData.erase(calibrationData.begin(), calibrationData.begin() + removeCount);
 
-    // Now determine a threshold to keep readings near these extremes.
-    // For example, keep readings that are within 20% of the range from either extreme.
-    float x_range = x_max - x_min;
-    float y_range = y_max - y_min;
-    float z_range = z_max - z_min;
+    // Reintroduce preserved extremes back into calibrationData
+    calibrationData.push_back(minValues);
+    calibrationData.push_back(maxValues);
+  }
 
-    auto isExtreme = [&](const Vector3& reading) 
-    {
-      bool x_extreme = (reading.X <= x_min + 0.2f * x_range) || (reading.X >= x_max - 0.2f * x_range);
-      bool y_extreme = (reading.Y <= y_min + 0.2f * y_range) || (reading.Y >= y_max - 0.2f * y_range);
-      bool z_extreme = (reading.Z <= z_min + 0.2f * z_range) || (reading.Z >= z_max - 0.2f * z_range);
-      return x_extreme || y_extreme || z_extreme;
-    };
-
-    // Erase non-extreme readings:
-    calibrationData.erase(
-                          std::remove_if(calibrationData.begin(), calibrationData.end(),
-                                          [&](const Vector3& reading) { return !isExtreme(reading); }),
-                          calibrationData.end());
-
-  }      
+  // for graphical representation
+  A_X_MAX = maxValues.X;
+  A_X_MIN = minValues.X;
+  A_Y_MAX = maxValues.Y;
+  A_Y_MIN = minValues.Y;
 }
 
 Vector3 CAL_LEVEL_2::computeCalibrationOffsets() 
 {
+
+  // Compute the latest calibration center from the collected data.
   Vector3 calib { calibrationData[0].X, calibrationData[0].Y, calibrationData[0].Z };
   Vector3 calib_max = calib;
 
   for (const auto& reading : calibrationData) 
   {
-    calib.X = std::min(calib.X, reading.X);
-    calib_max.X = std::max(calib_max.X, reading.X);
-    calib.Y = std::min(calib.Y, reading.Y);
-    calib_max.Y = std::max(calib_max.Y, reading.Y);
-    calib.Z = std::min(calib.Z, reading.Z);
-    calib_max.Z = std::max(calib_max.Z, reading.Z);
+      calib.X = std::min(calib.X, reading.X);
+      calib_max.X = std::max(calib_max.X, reading.X);
+      calib.Y = std::min(calib.Y, reading.Y);
+      calib_max.Y = std::max(calib_max.Y, reading.Y);
+      calib.Z = std::min(calib.Z, reading.Z);
+      calib_max.Z = std::max(calib_max.Z, reading.Z);
   }
 
-  // Calculate the center for each axis.
-  Vector3 center;
-  center.X = (calib.X + calib_max.X) / 2.0f;
-  center.Y = (calib.Y + calib_max.Y) / 2.0f;
-  center.Z = (calib.Z + calib_max.Z) / 2.0f;
+  // Compute the newly detected center.
+  Vector3 newCenter;
+  newCenter.X = (calib.X + calib_max.X) / 2.0f;
+  newCenter.Y = (calib.Y + calib_max.Y) / 2.0f;
+  newCenter.Z = (calib.Z + calib_max.Z) / 2.0f;
+
+  // Blend with previous calibration using a weight factor.
+  float weight = 0.1f; // Adjust this value for responsiveness vs. stability
+
+  center.X = (1 - weight) * center.X + weight * newCenter.X;
+  center.Y = (1 - weight) * center.Y + weight * newCenter.Y;
+  center.Z = (1 - weight) * center.Z + weight * newCenter.Z;
 
   return center;
+
+
+
 }
+
+void CAL_LEVEL_2::updateCalibrationCenter() 
+{
+    Vector3 newCenter = computeCalibrationOffsets();
+    
+    // Reduce threshold to allow more frequent recalibrations
+    float threshold = 0.2f;  
+
+    if (std::abs(newCenter.X - center.X) > threshold ||
+        std::abs(newCenter.Y - center.Y) > threshold ||
+        std::abs(newCenter.Z - center.Z) > threshold)
+    {
+        float weight = 0.2f;  // Slightly more aggressive adjustment
+        center.X = (1 - weight) * center.X + weight * newCenter.X;
+        center.Y = (1 - weight) * center.Y + weight * newCenter.Y;
+        center.Z = (1 - weight) * center.Z + weight * newCenter.Z;
+    }
+}
+
 
 Vector3 CAL_LEVEL_2::calibrateReading(const Vector3& raw, const Vector3& center) 
 {
@@ -918,6 +960,7 @@ Vector3 CAL_LEVEL_2::calibrateReading(const Vector3& raw, const Vector3& center)
 
 
         // Testing ----------------------------------------
+
 
 
         
@@ -1153,15 +1196,10 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
 
 
 
+
         // Testing ----------------------------------------
 
 
-        
-
-
-
-
-  
   // Alternative method of calibration
   {
     /*
@@ -1253,18 +1291,9 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
     reading.Z = Raw_XYZ.Z;
     calibrationData.push_back(reading);
 
-    if (calibrationData.size() > MAX_DATA_POINTS) 
-    {
-      // For example, remove the oldest quarter of entries:
-      calibrationData.erase(calibrationData.begin(), calibrationData.begin() + MAX_DATA_POINTS / 4);
-    }
-
-    removeNonExtremes();
-
-    center = computeCalibrationOffsets();
-
-    calibrated_reading = calibrateReading(reading, center);
-
+    removeNonExtremes();  
+    updateCalibrationCenter();  // This now updates 'center' conditionally  
+    calibrated_reading = calibrateReading(reading, center);  
     heading = std::atan2(calibrated_reading.Y, calibrated_reading.X) * (180.0f / M_PI);
 
 

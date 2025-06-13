@@ -246,8 +246,8 @@ class SEARCH_STRING
   string value(string Value);
 };
 
-string mask_string(string Text);
-// Randomizes every 4th character in Text.
+string mask_string(string Text, int n);
+// Randomizes every nth character in Text.
 //  Only works with screen shots.  Will not thwart 
 //  off a camera.
 

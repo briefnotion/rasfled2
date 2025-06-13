@@ -69,6 +69,7 @@ class SCREEN4_PANELS
   // 0  - OFF
   // 1  - MIN (On)
   // 2  - MAX (On)
+  // 3  - DRV (On)
 };
 
 

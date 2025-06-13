@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <string>
 #include <deque>
+#include <pwd.h>
 
 // RASFled related header files
 #include "configuration.h"

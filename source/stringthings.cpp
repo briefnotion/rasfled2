@@ -721,13 +721,13 @@ string SEARCH_STRING::value(string Value)
   return value();
 }
 
-string mask_string(string Text)
+string mask_string(string Text, int n)
 {
   string ret_string = "";
 
   for (size_t pos = 0; pos < Text.size(); pos++)
   {
-    if (rand() % 4 == 0 && isAlphaNumeric(Text[pos])) // 25% chance to mask
+    if (rand() % n == 0 && isAlphaNumeric(Text[pos])) // 25% chance to mask
     {
       ret_string += getRandomAlphaNumeric();
     }

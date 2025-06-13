@@ -357,9 +357,15 @@ class CAL_LEVEL_2
   Vector3 calibrated_reading;
   float heading = 0.0f;
 
+  float A_X_MAX = 0.0f;
+  float A_X_MIN = 0.0f;
+  float A_Y_MAX = 0.0f;
+  float A_Y_MIN = 0.0f;
+
   Vector3 calibrateReading(const Vector3& raw, const Vector3& center);
   void removeNonExtremes();
   Vector3 computeCalibrationOffsets();
+  void updateCalibrationCenter();
 
 
 

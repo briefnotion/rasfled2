@@ -23,6 +23,14 @@ using namespace std;
 bool FILES::assign(CONSOLE_COMMUNICATION &cons)
 {
   FALSE_CATCH ret_success;
+
+  // Get Home Directory
+  const char *username = getenv("SUDO_USER");
+  struct passwd *pw = username ? getpwnam(username) : nullptr;
+  const char *homedir = pw ? pw->pw_dir : nullptr;
+  string homedir_str = (string)homedir + "/";
+
+
   //USB_DEV_DIR = (string)DEF_USB_DEV_DIR;
   AIRCRAFT_1090_DIR = (string)DEF_AIRCRAFT_1090_DIR;
 
@@ -40,11 +48,11 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
 
   if (!TEST_MODE)
   {
-    LOGS_DIR = (string)DEF_LOGS_DIR;
+    LOGS_DIR = homedir_str + (string)DEF_LOGS_DIR;
   }
   else
   {
-    LOGS_DIR = (string)DEF_LOGS_DIR_TEST;
+    LOGS_DIR = homedir_str + (string)DEF_LOGS_DIR_TEST;
   }
 
   LOGS_CAN_BUS_DIR = LOGS_DIR +  (string)DEF_CAN_BUS_SUB_DIR;

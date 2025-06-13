@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.256_250610"
+#define Revision "2.257_250613"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -107,8 +107,8 @@
 #define DEF_REFERENCE_CARD                "refer_advert.png"
 
 // Rasfled logs and user files
-#define DEF_LOGS_DIR                       "/home/delmane/rasfled/"    // Create Directory
-#define DEF_LOGS_DIR_TEST                  "/home/delmane/rasfled-t/"  // Create Directory
+#define DEF_LOGS_DIR                       "rasfled/"    // Create Directory
+#define DEF_LOGS_DIR_TEST                  "rasfled-t/"  // Create Directory
 
 #define DEF_CAN_BUS_SUB_DIR               "auto/"                 // Create Directory
 #define DEF_AIRCRAFT_SUB_DIR              "adsb/"                 // Create Directory
