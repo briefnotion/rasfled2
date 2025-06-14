@@ -253,9 +253,11 @@ class ADSB_MAP
   float MAP_HEADING_DEGREES_LATEST = 0.0f;
 
   bool NORTH_UP = false;
+
   bool ACTIVE_GPS = false;
   bool ACTIVE_COMPASS = false;
   bool ACTIVE_ADSB = false;
+  bool ACTIVE_AUTOMOBILE = false;
 
   int PREVIOUS_ZOOM_LEVEL = 0; // Used to determine if zoom level has changed
                                 // through the panels.

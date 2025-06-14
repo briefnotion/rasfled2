@@ -709,6 +709,68 @@ class VECTOR_DEQUE_INT
 
 };
 
+// ---------------------------------------------------------------------------------------
+// VECTOR DEQUE 
+
+template <typename T>
+class VECTOR_DEQUE
+{
+  vector<T> Data;
+  int FRONT = 0;
+  int BACK = 0;
+  int COUNT = 0;
+  int FULL_SIZE = 10;
+
+  int get_vector_position(int Position)
+  {
+    return (FRONT + Position) % FULL_SIZE;
+  }
+
+public:
+  void set_size(int newCapacity)
+  {
+    vector<T> newData(newCapacity);
+    int numElementsToCopy = min(COUNT, newCapacity);
+
+    for (int pos = 0; pos < numElementsToCopy; pos++)
+    {
+      newData[pos] = value(pos);
+    }
+
+    Data = move(newData);
+    FULL_SIZE = newCapacity;
+    FRONT = 0;
+    BACK = numElementsToCopy % FULL_SIZE;
+    COUNT = numElementsToCopy;
+  }
+
+  int size()
+  {
+    return COUNT;
+  }
+
+  void push_back(const T& Value)
+  {
+    if (COUNT == FULL_SIZE)  // Full, overwrite oldest
+    {
+      FRONT = (FRONT + 1) % FULL_SIZE;
+    }
+    else
+    {
+      COUNT++;
+    }
+
+    Data[BACK] = Value;
+    BACK = (BACK + 1) % FULL_SIZE;
+  }
+
+  T value(int Position)
+  {
+    if (Position < 0 || Position >= COUNT)
+      throw out_of_range("Position out of range");
+    return Data[get_vector_position(Position)];
+  }
+};
 
 
 #endif

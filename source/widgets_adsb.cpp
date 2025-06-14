@@ -957,7 +957,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
     }
   }
 
-  if (ACTIVE_GPS)
+  if (ACTIVE_AUTOMOBILE && ACTIVE_GPS)
   {
     // Driving 
     ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (8.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
@@ -1202,7 +1202,7 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     }
     */
 
-
+    /*
     p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.A_X_MIN/ 4.0f), 
                   center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.A_Y_MIN / 4.0f));
     p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.A_X_MAX/ 4.0f), 
@@ -1221,7 +1221,11 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
                   center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.center.Y / 4.0f));
 
     draw_marker_filled(Draw_List, sdSysData, c1, RAS_YELLOW);
+    */
 
+    c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.X / 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.Y / 4.0f));
+    draw_marker_filled(Draw_List, sdSysData, c1, RAS_YELLOW);
 
 
         // Testing ----------------------------------------
@@ -1270,6 +1274,12 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
 
       ImGui::Text("BEARING: %.1f", sdSysData.COMMS_COMPASS.bearing());
     
+
+
+        // Testing ----------------------------------------
+
+
+      /*
       // Testing Alternative Method of compass calibration
       if (ACTIVE_GPS)
       {
@@ -1286,6 +1296,11 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
             sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.test_heading(), 
             sdSysData.COMMS_COMPASS.LEVEL_2.calibrationData.size());
       }
+      */
+
+
+      
+        // Testing ----------------------------------------
 
       if (sdSysData.COMMS_COMPASS.calibrate_on())
       {
@@ -1350,11 +1365,13 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
         ImGui::Text("%s", disp2.c_str());
         ImGui::Text("%s", disp3.c_str());
         ImGui::Text("%s", disp4.c_str());
-        */
 
         ImGui::Text("     Center: %f : %f", sdSysData.COMMS_COMPASS.LEVEL_2.center.X, sdSysData.COMMS_COMPASS.LEVEL_2.center.Y);
         ImGui::Text("Cal Reading: %f : %f", sdSysData.COMMS_COMPASS.LEVEL_2.calibrated_reading.X, sdSysData.COMMS_COMPASS.LEVEL_2.calibrated_reading.Y);
         
+        */
+
+
         
         // Testing ----------------------------------------
       }
@@ -2257,15 +2274,17 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // -------------------------------------------------------------------------------------
 
   // Gather some frequent variables
-  ACTIVE_GPS     = sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time());
-  ACTIVE_COMPASS = sdSysData.COMMS_COMPASS.connected();
-  ACTIVE_ADSB    = sdSysData.AIRCRAFT_COORD.is_active();
+  ACTIVE_GPS        = sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time());
+  ACTIVE_COMPASS    = sdSysData.COMMS_COMPASS.connected();
+  ACTIVE_ADSB       = sdSysData.AIRCRAFT_COORD.is_active();
+  ACTIVE_AUTOMOBILE = sdSysData.CAR_INFO.active();
   
   // Update range if changing dynamicly with min max aircraft data.
-  if (ACTIVE_ADSB && ACTIVE_GPS)
+  //if (ACTIVE_ADSB && ACTIVE_GPS)
   {
     // Monitor zoom level changes from internal or panel control.
-    // zoom return if min or max turned off.
+    // zoom return if min or max or drv turned off.
+
     if (PREVIOUS_ZOOM_LEVEL != sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX)
     {
       if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 0)
@@ -2275,40 +2294,64 @@ void ADSB_MAP::draw(system_data &sdSysData)
       PREVIOUS_ZOOM_LEVEL = sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX;
     }
 
-    if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX > 0)
+    // Check all ADSB_RANGE_INDICATOR for min or max adsb zooming
+    if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 1 || 
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 2)
     {
-      // If, for whatever reason, there are no aircfaft seen, set the zoom level as if Min and Max aircraft 
-      //  distance is off.
-
-      // Check to see if the amount of aircraft tracked is changed to or from zero.
-      if (sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT == 0)
+      if (ACTIVE_ADSB && ACTIVE_GPS)
       {
-        if (RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO == false)
+        // If, for whatever reason, there are no aircfaft seen, set the zoom level as if Min and Max aircraft 
+        //  distance is off.
+
+        // Check to see if the amount of aircraft tracked is changed to or from zero.
+        if (sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT == 0)
         {
-          RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO = true;
-          RANGE_INDICATOR.zoom_return();
+          if (RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO == false)
+          {
+            RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO = true;
+            RANGE_INDICATOR.zoom_return();
+          }
+        }
+        else
+        {
+          // Set zoom level to range.
+          RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO = false;
+          if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 1)        // Zoom at MIN aircraft distance
+          {
+            RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_CLOSEST * 0.75f);
+          }
+          else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 2)   // Zoom at MAX aircraft distance
+          {
+            RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_FURTHEST * 0.75f);
+          }
         }
       }
       else
       {
-        // Set zoom level to range.
-        RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO = false;
-        if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 1)        // Zoom at MIN aircraft distance
+        // turn off zoom if gps or adsb not active
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
+      }
+
+    }
+    else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 3)
+    {
+      // Check all ADSB_RANGE_INDICATOR driving zooming
+      if (ACTIVE_AUTOMOBILE && ACTIVE_GPS)
+      {
+        if (sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() < 10.0f)
         {
-          RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_CLOSEST * 0.75f);
+          RANGE_INDICATOR.set_range(.03f);   // 158 feet
         }
-        else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 2)   // Zoom at MAX aircraft distance
+        else 
         {
-          RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_FURTHEST * 0.75f);
+          RANGE_INDICATOR.set_range((sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() * (2.0f / 60.0f)) + 0.03f);
         }
       }
-    }
-  }
-  else
-  {
-    if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX > 0)           // Zoom at zoom level distance
-    {
-      sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
+      else
+      {
+        // turn off zoom if gps or adsb not active
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
+      }
     }
   }
 

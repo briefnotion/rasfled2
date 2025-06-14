@@ -821,6 +821,17 @@ void CAL_LEVEL_2::clear()
   }
 
   OFFSET_HISTORY_CHANGED = true;
+
+
+
+  // Testing ----------------------------------------
+
+
+  COMPASS_HISTORY.set_size(COMPASS_HISTORY_SIZE);
+
+
+  // Testing ----------------------------------------
+
 }
 
 float CAL_LEVEL_2::variance()
@@ -837,7 +848,7 @@ bool CAL_LEVEL_2::simple_calibration()
 
         // Testing ----------------------------------------
 
-
+/*
 void CAL_LEVEL_2::removeNonExtremes() 
 {
   if (calibrationData.empty()) return;
@@ -956,8 +967,36 @@ Vector3 CAL_LEVEL_2::calibrateReading(const Vector3& raw, const Vector3& center)
 {
   return { raw.X - center.X, raw.Y - center.Y, raw.Z - center.Z };
 }
+*/
 
+void CAL_LEVEL_2::add_reading(FLOAT_XYZ &Raw_XYZ)
+{
+  CALIBRATION_DATA_HISTORY tmp_history_point;
+  tmp_history_point.X = Raw_XYZ.X;
+  tmp_history_point.Y = Raw_XYZ.Y;
+  tmp_history_point.Z = Raw_XYZ.Z;
 
+  COMPASS_HISTORY.push_back(tmp_history_point);
+}
+
+void CAL_LEVEL_2::calculate_center()
+{
+  float X_sum = 0.0f;
+  float Y_sum = 0.0f;
+  float Z_sum = 0.0f;
+
+  for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
+  {
+    X_sum = X_sum + COMPASS_HISTORY.value(pos).X;
+    Y_sum = Y_sum + COMPASS_HISTORY.value(pos).Y;
+    Z_sum = Z_sum + COMPASS_HISTORY.value(pos).Z;
+  }
+
+  COMPASS_CENTER.X = X_sum / (float)COMPASS_HISTORY.size();
+  COMPASS_CENTER.Y = Y_sum / (float)COMPASS_HISTORY.size();
+  COMPASS_CENTER.Z = Z_sum / (float)COMPASS_HISTORY.size();
+
+}
 
         // Testing ----------------------------------------
 
@@ -1284,7 +1323,7 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
     }
     */
 
-
+    /*
     Vector3 reading;
     reading.X = Raw_XYZ.X;
     reading.Y = Raw_XYZ.Y;
@@ -1295,9 +1334,12 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
     updateCalibrationCenter();  // This now updates 'center' conditionally  
     calibrated_reading = calibrateReading(reading, center);  
     heading = std::atan2(calibrated_reading.Y, calibrated_reading.X) * (180.0f / M_PI);
+    */
 
 
-
+    
+    add_reading(Raw_XYZ);
+    calculate_center();
 
 
         // Testing ----------------------------------------
@@ -1835,7 +1877,7 @@ float HMC5883L::bearing()
         // Testing ----------------------------------------
 
 
-        
+/*
 float HMC5883L::test_heading()
 {
   float ret_heading = LEVEL_2.heading + KNOWN_DEVICE_DEGREE_OFFSET;
@@ -1844,7 +1886,7 @@ float HMC5883L::test_heading()
 
   return ret_heading;
 }
-
+*/        
 
         // Testing ----------------------------------------
 

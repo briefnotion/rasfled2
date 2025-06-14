@@ -241,6 +241,12 @@ class CALIBRATION_DATA
 
 // -------------------------------------------------------------------------------------
 
+
+
+        // Testing ----------------------------------------
+
+
+/*
 class CALIBRATION_DATA_ALTERNATIVE
 {
   public:
@@ -249,13 +255,32 @@ class CALIBRATION_DATA_ALTERNATIVE
   MIN_MAX_TIME_SLICE Y_MIN_MAX;
   MIN_MAX_TIME_SLICE Z_MIN_MAX;
 };
-
-
-
 struct Vector3 
 {
   float X, Y, Z;
 };
+*/
+
+class CALIBRATION_DATA_HISTORY
+{
+  public:
+
+  float X = 0;
+  float Y = 0;
+  float Z = 0;
+
+  bool SIGNIFICANT_X_MIN = false;
+  bool SIGNIFICANT_X_MAX = false;
+  bool SIGNIFICANT_Y_MIN = false;
+  bool SIGNIFICANT_Y_MAX = false;
+  bool SIGNIFICANT_Z_MIN = false;
+  bool SIGNIFICANT_Z_MAX = false;
+
+};
+
+
+        // Testing ----------------------------------------
+
 
 
 // -------------------------------------------------------------------------------------
@@ -351,6 +376,7 @@ class CAL_LEVEL_2
   //size_t CALIBRATION_DATA_A_DATA_SIZE = 20;
   //FLOAT_XYZ CALIBRATION_DATA_A_CENTER;
 
+  /*
   std::vector<Vector3> calibrationData;
   const size_t MAX_DATA_POINTS = 1000;
   Vector3 center;
@@ -366,7 +392,16 @@ class CAL_LEVEL_2
   void removeNonExtremes();
   Vector3 computeCalibrationOffsets();
   void updateCalibrationCenter();
+  */
 
+
+  VECTOR_DEQUE<CALIBRATION_DATA_HISTORY> COMPASS_HISTORY;
+  int COMPASS_HISTORY_SIZE = 100;
+
+  FLOAT_XYZ COMPASS_CENTER;
+
+  void add_reading(FLOAT_XYZ &Raw_XYZ);
+  void calculate_center();
 
 
         // Testing ----------------------------------------
