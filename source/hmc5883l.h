@@ -246,20 +246,7 @@ class CALIBRATION_DATA
         // Testing ----------------------------------------
 
 
-/*
-class CALIBRATION_DATA_ALTERNATIVE
-{
-  public:
 
-  MIN_MAX_TIME_SLICE X_MIN_MAX;
-  MIN_MAX_TIME_SLICE Y_MIN_MAX;
-  MIN_MAX_TIME_SLICE Z_MIN_MAX;
-};
-struct Vector3 
-{
-  float X, Y, Z;
-};
-*/
 
 class CALIBRATION_DATA_HISTORY
 {
@@ -269,12 +256,14 @@ class CALIBRATION_DATA_HISTORY
   float Y = 0;
   float Z = 0;
 
-  bool SIGNIFICANT_X_MIN = false;
-  bool SIGNIFICANT_X_MAX = false;
-  bool SIGNIFICANT_Y_MIN = false;
-  bool SIGNIFICANT_Y_MAX = false;
-  bool SIGNIFICANT_Z_MIN = false;
-  bool SIGNIFICANT_Z_MAX = false;
+  bool SIGNIFICANT_X_LOWER = false;
+  bool SIGNIFICANT_X_UPPER = false;
+  bool SIGNIFICANT_Y_LOWER = false;
+  bool SIGNIFICANT_Y_UPPER = false;
+  bool SIGNIFICANT_Z_LOWER = false;
+  bool SIGNIFICANT_Z_UPPER = false;
+
+
 
 };
 
@@ -371,28 +360,6 @@ class CAL_LEVEL_2
         
   
   // Alternative method to calculate offset and skew
-  //vector<CALIBRATION_DATA_ALTERNATIVE> CALIBRATION_DATA_A;
-
-  //size_t CALIBRATION_DATA_A_DATA_SIZE = 20;
-  //FLOAT_XYZ CALIBRATION_DATA_A_CENTER;
-
-  /*
-  std::vector<Vector3> calibrationData;
-  const size_t MAX_DATA_POINTS = 1000;
-  Vector3 center;
-  Vector3 calibrated_reading;
-  float heading = 0.0f;
-
-  float A_X_MAX = 0.0f;
-  float A_X_MIN = 0.0f;
-  float A_Y_MAX = 0.0f;
-  float A_Y_MIN = 0.0f;
-
-  Vector3 calibrateReading(const Vector3& raw, const Vector3& center);
-  void removeNonExtremes();
-  Vector3 computeCalibrationOffsets();
-  void updateCalibrationCenter();
-  */
 
 
   VECTOR_DEQUE<CALIBRATION_DATA_HISTORY> COMPASS_HISTORY;
@@ -400,8 +367,15 @@ class CAL_LEVEL_2
 
   FLOAT_XYZ COMPASS_CENTER;
 
+  float COMPASS_X_UPPER_MEAN = 0.0f;
+  float COMPASS_X_LOWER_MEAN = 0.0f;
+  float COMPASS_Y_UPPER_MEAN = 0.0f;
+  float COMPASS_Y_LOWER_MEAN = 0.0f;
+
   void add_reading(FLOAT_XYZ &Raw_XYZ);
   void calculate_center();
+
+
 
 
         // Testing ----------------------------------------

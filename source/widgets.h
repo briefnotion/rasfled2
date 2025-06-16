@@ -286,6 +286,10 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
 // Heading 1 - Track or Aircraft Nav Heading      (from GPS, normally slow)
 // Heading 2 - Compass or Aircraft Track Heading. (from hardware compass, normally fast)
 
+// Version 1 - Simple display a Circle
+
+// Version 2 - More advanced display with needle and heading text.
+
 class COMPASS_WIDGET_PROPERTIES
 {
   public:

@@ -1045,7 +1045,7 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
   
   // level 0 and level 1
 
-  if (false)    // Display calibration
+  if (true)    // Display calibration
   {
 
     for (int quad = 1; quad < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quad++)
@@ -1133,7 +1133,7 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
 
 
   // draw alternative calibration
-  if (true)    // Display calibration
+  if (false)    // Display calibration
   {
     /*
     p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.mean()/ 4.0f), 
@@ -1223,9 +1223,40 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     draw_marker_filled(Draw_List, sdSysData, c1, RAS_YELLOW);
     */
 
+    // Draw History
+    for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size(); pos++)
+    {
+
+      c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].X / 4.0f), 
+                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].Y / 4.0f));
+      draw_marker_filled(Draw_List, sdSysData, c1, RAS_BLUE);
+
+    }
+
+
+    // Draw Center
     c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.X / 4.0f), 
                   center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.Y / 4.0f));
-    draw_marker_filled(Draw_List, sdSysData, c1, RAS_YELLOW);
+    draw_marker_filled(Draw_List, sdSysData, c1, RAS_WHITE);
+
+    // Draw Upper and Lower Means
+    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_X_UPPER_MEAN/ 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.Y / 4.0f));
+
+    p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_X_LOWER_MEAN/ 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.Y / 4.0f));
+
+    p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.X/ 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_Y_UPPER_MEAN / 4.0f));
+
+    p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.X/ 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_Y_LOWER_MEAN / 4.0f));
+
+
+    draw_line(Draw_List, sdSysData, c1, p1, RAS_YELLOW, 2.0f);
+    draw_line(Draw_List, sdSysData, c1, p2, RAS_YELLOW, 2.0f);
+    draw_line(Draw_List, sdSysData, c1, p3, RAS_YELLOW, 2.0f);
+    draw_line(Draw_List, sdSysData, c1, p4, RAS_YELLOW, 2.0f);
 
 
         // Testing ----------------------------------------
@@ -2340,11 +2371,11 @@ void ADSB_MAP::draw(system_data &sdSysData)
       {
         if (sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() < 10.0f)
         {
-          RANGE_INDICATOR.set_range(.03f);   // 158 feet
+          RANGE_INDICATOR.set_range(.03f);
         }
         else 
         {
-          RANGE_INDICATOR.set_range((sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() * (2.0f / 60.0f)) + 0.03f);
+          RANGE_INDICATOR.set_range(((sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() - 10.0f) * (0.5f / 60.0f)) + 0.03f);
         }
       }
       else

@@ -848,126 +848,7 @@ bool CAL_LEVEL_2::simple_calibration()
 
         // Testing ----------------------------------------
 
-/*
-void CAL_LEVEL_2::removeNonExtremes() 
-{
-  if (calibrationData.empty()) return;
 
-  // Determine min/max values
-  Vector3 minValues = calibrationData[0];
-  Vector3 maxValues = calibrationData[0];
-
-  for (const auto& reading : calibrationData) {
-      minValues.X = std::min(minValues.X, reading.X);
-      maxValues.X = std::max(maxValues.X, reading.X);
-      minValues.Y = std::min(minValues.Y, reading.Y);
-      maxValues.Y = std::max(maxValues.Y, reading.Y);
-      minValues.Z = std::min(minValues.Z, reading.Z);
-      maxValues.Z = std::max(maxValues.Z, reading.Z);
-  }
-
-  // Apply threshold for filtering
-  auto isExtreme = [&](const Vector3& reading) {
-      return (reading.X <= minValues.X + 0.2f * (maxValues.X - minValues.X) ||
-              reading.X >= maxValues.X - 0.2f * (maxValues.X - minValues.X)) ||
-              (reading.Y <= minValues.Y + 0.2f * (maxValues.Y - minValues.Y) ||
-              reading.Y >= maxValues.Y - 0.2f * (maxValues.Y - minValues.Y)) ||
-              (reading.Z <= minValues.Z + 0.2f * (maxValues.Z - minValues.Z) ||
-              reading.Z >= maxValues.Z - 0.2f * (maxValues.Z - minValues.Z));
-  };
-
-  // Filter out non-extreme values
-  calibrationData.erase(
-      std::remove_if(calibrationData.begin(), calibrationData.end(),
-          [&](const Vector3& reading) { return !isExtreme(reading); }),
-      calibrationData.end());
-
-  if (calibrationData.size() > MAX_DATA_POINTS) 
-  {
-    // Store the extreme values before trimming
-    Vector3 minValues = calibrationData.front(); // First element (oldest)
-    Vector3 maxValues = calibrationData.back();  // Last element (newest)
-
-    // Trim the oldest entries while ensuring the dataset remains under 1000
-    int removeCount = MAX_DATA_POINTS / 4;
-    if (calibrationData.size() - removeCount < 6) {
-        removeCount = calibrationData.size() - 6; // Keep a minimum of 6 entries
-    }
-    
-    calibrationData.erase(calibrationData.begin(), calibrationData.begin() + removeCount);
-
-    // Reintroduce preserved extremes back into calibrationData
-    calibrationData.push_back(minValues);
-    calibrationData.push_back(maxValues);
-  }
-
-  // for graphical representation
-  A_X_MAX = maxValues.X;
-  A_X_MIN = minValues.X;
-  A_Y_MAX = maxValues.Y;
-  A_Y_MIN = minValues.Y;
-}
-
-Vector3 CAL_LEVEL_2::computeCalibrationOffsets() 
-{
-
-  // Compute the latest calibration center from the collected data.
-  Vector3 calib { calibrationData[0].X, calibrationData[0].Y, calibrationData[0].Z };
-  Vector3 calib_max = calib;
-
-  for (const auto& reading : calibrationData) 
-  {
-      calib.X = std::min(calib.X, reading.X);
-      calib_max.X = std::max(calib_max.X, reading.X);
-      calib.Y = std::min(calib.Y, reading.Y);
-      calib_max.Y = std::max(calib_max.Y, reading.Y);
-      calib.Z = std::min(calib.Z, reading.Z);
-      calib_max.Z = std::max(calib_max.Z, reading.Z);
-  }
-
-  // Compute the newly detected center.
-  Vector3 newCenter;
-  newCenter.X = (calib.X + calib_max.X) / 2.0f;
-  newCenter.Y = (calib.Y + calib_max.Y) / 2.0f;
-  newCenter.Z = (calib.Z + calib_max.Z) / 2.0f;
-
-  // Blend with previous calibration using a weight factor.
-  float weight = 0.1f; // Adjust this value for responsiveness vs. stability
-
-  center.X = (1 - weight) * center.X + weight * newCenter.X;
-  center.Y = (1 - weight) * center.Y + weight * newCenter.Y;
-  center.Z = (1 - weight) * center.Z + weight * newCenter.Z;
-
-  return center;
-
-
-
-}
-
-void CAL_LEVEL_2::updateCalibrationCenter() 
-{
-    Vector3 newCenter = computeCalibrationOffsets();
-    
-    // Reduce threshold to allow more frequent recalibrations
-    float threshold = 0.2f;  
-
-    if (std::abs(newCenter.X - center.X) > threshold ||
-        std::abs(newCenter.Y - center.Y) > threshold ||
-        std::abs(newCenter.Z - center.Z) > threshold)
-    {
-        float weight = 0.2f;  // Slightly more aggressive adjustment
-        center.X = (1 - weight) * center.X + weight * newCenter.X;
-        center.Y = (1 - weight) * center.Y + weight * newCenter.Y;
-        center.Z = (1 - weight) * center.Z + weight * newCenter.Z;
-    }
-}
-
-
-Vector3 CAL_LEVEL_2::calibrateReading(const Vector3& raw, const Vector3& center) 
-{
-  return { raw.X - center.X, raw.Y - center.Y, raw.Z - center.Z };
-}
-*/
 
 void CAL_LEVEL_2::add_reading(FLOAT_XYZ &Raw_XYZ)
 {
@@ -987,9 +868,9 @@ void CAL_LEVEL_2::calculate_center()
 
   for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
   {
-    X_sum = X_sum + COMPASS_HISTORY.value(pos).X;
-    Y_sum = Y_sum + COMPASS_HISTORY.value(pos).Y;
-    Z_sum = Z_sum + COMPASS_HISTORY.value(pos).Z;
+    X_sum = X_sum + COMPASS_HISTORY[pos].X;
+    Y_sum = Y_sum + COMPASS_HISTORY[pos].Y;
+    Z_sum = Z_sum + COMPASS_HISTORY[pos].Z;
   }
 
   COMPASS_CENTER.X = X_sum / (float)COMPASS_HISTORY.size();
@@ -997,6 +878,9 @@ void CAL_LEVEL_2::calculate_center()
   COMPASS_CENTER.Z = Z_sum / (float)COMPASS_HISTORY.size();
 
 }
+
+
+
 
         // Testing ----------------------------------------
 
@@ -1240,106 +1124,65 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
 
 
   // Alternative method of calibration
+  if (false)
   {
-    /*
-    // Initialization
-    if (CALIBRATION_DATA_A.size() < 5)
-    {
-      while (CALIBRATION_DATA_A.size() < 5)
-      {
-        CALIBRATION_DATA_ALTERNATIVE tmp_cal_data;
-        CALIBRATION_DATA_A.push_back(tmp_cal_data);
-      }
-    }
-    */
-
-    /*
-    // Startup
-    if ((CALIBRATION_DATA_A[1].VALUE.samples()  == 0) || 
-    (CALIBRATION_DATA_A[2].VALUE.samples()  == 0) || 
-    (CALIBRATION_DATA_A[3].VALUE.samples()  == 0) || 
-    (CALIBRATION_DATA_A[4].VALUE.samples()  == 0))
-    {
-      CALIBRATION_DATA_A[1].VALUE.store_value(Raw_XYZ.X);
-      CALIBRATION_DATA_A[3].VALUE.store_value(Raw_XYZ.X);
-      CALIBRATION_DATA_A[2].VALUE.store_value(Raw_XYZ.Y);
-      CALIBRATION_DATA_A[4].VALUE.store_value(Raw_XYZ.Y);
-    }
-    */
-
-
-    // Calculate Center of Compass
-    //   (disregard Z axis)
-    //CALIBRATION_DATA_A_CENTER.X = (CALIBRATION_DATA_A[2].VALUE.mean() +  CALIBRATION_DATA_A[4].VALUE.mean()) / 2.0f;
-    //CALIBRATION_DATA_A_CENTER.Y = (CALIBRATION_DATA_A[1].VALUE.mean() +  CALIBRATION_DATA_A[3].VALUE.mean()) / 2.0f;
-
-    /*
-    CALIBRATION_DATA_A[0].X_MIN_MAX.store_value(Raw_XYZ.X);
-    CALIBRATION_DATA_A[0].Y_MIN_MAX.store_value(Raw_XYZ.Y);
-    CALIBRATION_DATA_A[0].Z_MIN_MAX.store_value(Raw_XYZ.Z);
-
-    CALIBRATION_DATA_A_CENTER.X = (CALIBRATION_DATA_A[0].X_MIN_MAX.min() +  CALIBRATION_DATA_A[0].X_MIN_MAX.max()) / 2.0f;
-    CALIBRATION_DATA_A_CENTER.Y = (CALIBRATION_DATA_A[0].Y_MIN_MAX.min() +  CALIBRATION_DATA_A[0].Y_MIN_MAX.max()) / 2.0f;
-    CALIBRATION_DATA_A_CENTER.Z = (CALIBRATION_DATA_A[0].Z_MIN_MAX.min() +  CALIBRATION_DATA_A[0].Z_MIN_MAX.max()) / 2.0f;
-
-    if (Raw_XYZ.X < CALIBRATION_DATA_A_CENTER.X)
-    {
-      CALIBRATION_DATA_A[4].X_MIN_MAX.store_value(Raw_XYZ.X);
-      CALIBRATION_DATA_A[4].Y_MIN_MAX.store_value(Raw_XYZ.Y);
-      CALIBRATION_DATA_A[4].Z_MIN_MAX.store_value(Raw_XYZ.Z);
-    }
-    else
-    {
-      CALIBRATION_DATA_A[2].X_MIN_MAX.store_value(Raw_XYZ.X);
-      CALIBRATION_DATA_A[2].Y_MIN_MAX.store_value(Raw_XYZ.Y);
-      CALIBRATION_DATA_A[2].Z_MIN_MAX.store_value(Raw_XYZ.Z);
-    }
-
-    if (Raw_XYZ.Y < CALIBRATION_DATA_A_CENTER.Y)
-    {
-      CALIBRATION_DATA_A[1].X_MIN_MAX.store_value(Raw_XYZ.X);
-      CALIBRATION_DATA_A[1].Y_MIN_MAX.store_value(Raw_XYZ.Y);
-      CALIBRATION_DATA_A[1].Z_MIN_MAX.store_value(Raw_XYZ.Z);
-    }
-    else
-    {
-      CALIBRATION_DATA_A[3].X_MIN_MAX.store_value(Raw_XYZ.X);
-      CALIBRATION_DATA_A[3].Y_MIN_MAX.store_value(Raw_XYZ.Y);
-      CALIBRATION_DATA_A[3].Z_MIN_MAX.store_value(Raw_XYZ.Z);
-    }
-    */
-
-    /*
-    // Verify calibration data not too big.
-    for (size_t pos = 0; pos <= 5; pos++)
-    {
-      if (CALIBRATION_DATA_A[pos].DATA_POINTS.size() > CALIBRATION_DATA_A_DATA_SIZE)
-      {
-        while (CALIBRATION_DATA_A[pos].DATA_POINTS.size() > CALIBRATION_DATA_A_DATA_SIZE)
-        {
-          CALIBRATION_DATA_A[pos].DATA_POINTS.erase(CALIBRATION_DATA_A[pos].DATA_POINTS.begin());
-        }
-      }
-    }
-    */
-
-    /*
-    Vector3 reading;
-    reading.X = Raw_XYZ.X;
-    reading.Y = Raw_XYZ.Y;
-    reading.Z = Raw_XYZ.Z;
-    calibrationData.push_back(reading);
-
-    removeNonExtremes();  
-    updateCalibrationCenter();  // This now updates 'center' conditionally  
-    calibrated_reading = calibrateReading(reading, center);  
-    heading = std::atan2(calibrated_reading.Y, calibrated_reading.X) * (180.0f / M_PI);
-    */
 
 
     
     add_reading(Raw_XYZ);
     calculate_center();
+
+    // Identify point positions and get upper and lower sums
+
+    float X_upper_sum = 0.0f;
+    int X_upper_count = 0;
+
+    float X_lower_sum = 0.0f;
+    int X_lower_count = 0;
+
+    float Y_upper_sum = 0.0f;
+    int Y_upper_count = 0;
+
+    float Y_lower_sum = 0.0f;
+    int Y_lower_count = 0;
+
+    for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
+    {
+      if (COMPASS_HISTORY[pos].X < COMPASS_CENTER.X)
+      {
+        COMPASS_HISTORY[pos].SIGNIFICANT_X_LOWER = true;
+        X_lower_sum += COMPASS_HISTORY[pos].X;
+        X_lower_count++;
+      }
+      else
+      {
+        COMPASS_HISTORY[pos].SIGNIFICANT_X_UPPER = true;
+        X_upper_sum += COMPASS_HISTORY[pos].X;
+        X_upper_count++;
+      }
+
+      if (COMPASS_HISTORY[pos].Y < COMPASS_CENTER.Y)
+      {
+        COMPASS_HISTORY[pos].SIGNIFICANT_Y_LOWER = true;
+        Y_lower_sum += COMPASS_HISTORY[pos].Y;
+        Y_lower_count++;
+      }
+      else
+      {
+        COMPASS_HISTORY[pos].SIGNIFICANT_Y_UPPER = true;
+        Y_upper_sum += COMPASS_HISTORY[pos].Y;
+        Y_upper_count++;
+      }
+
+      COMPASS_X_LOWER_MEAN = X_lower_sum / (float)X_lower_count;
+      COMPASS_X_UPPER_MEAN = X_upper_sum / (float)X_upper_count;
+      COMPASS_Y_LOWER_MEAN = Y_lower_sum / (float)Y_lower_count;
+      COMPASS_Y_UPPER_MEAN = Y_upper_sum / (float)Y_upper_count;
+
+      // Pick out the extremes
+
+    }
+
 
 
         // Testing ----------------------------------------

@@ -571,6 +571,7 @@ bool CONFIRM_DIALOG::confirm_dialog(system_data &sdSysData, bool &Choice)
 
 // ---------------------------------------------------------------------------------------
 
+
 void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, ImVec2 Screen_Position, float Size, bool Main, bool Valid_Position, 
                   bool Valid_Heading_1, float Heading_1, bool Valid_Heading_2, float Heading_2, bool Draw_North_Pointer, 
                   bool Jitter_Active, float Jitter_Heading_Min, float Jitter_Heading_Max, float Map_Bearing, int Color)
@@ -668,20 +669,28 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         rad = (90.0f - Heading_2) * float_PI / 180.0f;
       }
 
+      // Calculate p1 (base) and p2 (tip) as before.
       p1 = Screen_Position;
-      p2 = ImVec2(Screen_Position.x + (Size + 15.0f) * cos(rad + float_PI), 
-                  Screen_Position.y + (Size + 15.0f) * sin(rad + float_PI));
+      p2 = ImVec2(Screen_Position.x + (Size) * cos(rad + float_PI),
+                  Screen_Position.y + (Size) * sin(rad + float_PI));
 
-      if (Valid_Position)
-      {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 4.0f - 2.0f);
-      }
-      else
-      {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 4.0f - 2.0f);
-      }
+      // Settings for the arrowhead.
+      const float headLength = (Size / 6.0f) + 10.0f;         // Length of the arrowhead lines
+      const float headAngle = 30.0f * float_PI / 180.0f;      // Arrowhead angle in radians
+
+      // The direction in which the arrow is pointing (same as the shaft).
+      float lineAngle = rad + float_PI;
+
+      // Calculate the positions of the two arrowhead endpoints.
+      ImVec2 arrowLeft = ImVec2(p2.x + headLength * cos(lineAngle - headAngle),
+                                p2.y + headLength * sin(lineAngle - headAngle));
+
+      ImVec2 arrowRight = ImVec2(p2.x + headLength * cos(lineAngle + headAngle),
+                                  p2.y + headLength * sin(lineAngle + headAngle));
+
+      // Draw the arrowhead lines.
+      Draw_List->AddLine(p2, arrowLeft, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 3.0f);
+      Draw_List->AddLine(p2, arrowRight, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 3.0f);
     }
 
     if (Jitter_Active)
@@ -696,7 +705,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         p2 = ImVec2(Screen_Position.x + (Size + (font_height * 1.25f)) * cos(rad + float_PI), 
                     Screen_Position.y + (Size + (font_height * 1.25f)) * sin(rad + float_PI));
         
-        // Draw the line
+        // Draw the jitter line
         if (Valid_Position)
         {
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 4.0f + 4.0f);
@@ -717,8 +726,8 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
                     Screen_Position.y + Size * sin(rad + float_PI));
         p2 = ImVec2(Screen_Position.x + (Size + (font_height * 1.25f)) * cos(rad + float_PI), 
                     Screen_Position.y + (Size + (font_height * 1.25f)) * sin(rad + float_PI));
-        
-        // Draw the line
+
+        // Draw the jitter line
         if (Valid_Position)
         {
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 4.0f + 4.0f);

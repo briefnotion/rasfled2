@@ -734,7 +734,8 @@ public:
 
     for (int pos = 0; pos < numElementsToCopy; pos++)
     {
-      newData[pos] = value(pos);
+      //newData = value(pos);
+      newData.push_back(Data[pos]);
     }
 
     Data = move(newData);
@@ -764,11 +765,13 @@ public:
     BACK = (BACK + 1) % FULL_SIZE;
   }
 
-  T value(int Position)
+  T& operator[](int pos) 
   {
-    if (Position < 0 || Position >= COUNT)
-      throw out_of_range("Position out of range");
-    return Data[get_vector_position(Position)];
+    if (pos < 0 || pos >= COUNT)
+    {
+      throw out_of_range("Index out of range in VECTOR_DEQUE");
+    }
+    return Data[get_vector_position(pos)];
   }
 };
 
