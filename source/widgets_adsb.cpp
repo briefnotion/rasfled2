@@ -964,7 +964,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
 
 
-    if (BC_MAX.button_toggle_color(sdSysData, "DRV\n(On)", "DRV", sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 3, 
+    if (BC_DRV.button_toggle_color(sdSysData, "DRV\n(On)", "DRV", sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 3, 
                                       RAS_GREEN, RAS_BLUE, 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
@@ -1232,6 +1232,40 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
       draw_marker_filled(Draw_List, sdSysData, c1, RAS_BLUE);
 
     }
+    for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size(); pos++)
+    {
+      if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].SIGNIFICANT_X_MIN_ZONE ||
+          sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].SIGNIFICANT_X_MAX_ZONE ||
+          sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].SIGNIFICANT_Y_MIN_ZONE ||
+          sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].SIGNIFICANT_Y_MAX_ZONE)
+      {
+
+        int color = RAS_GREEN;
+
+        if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].SIGNIFICANT_X_MIN_ZONE)
+        {
+          color = RAS_GREEN;
+        }
+        if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].SIGNIFICANT_X_MAX_ZONE)
+        {
+          color = RAS_CYAN;
+        }
+        if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].SIGNIFICANT_Y_MIN_ZONE)
+        {
+          color = RAS_RED;
+        }
+        if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].SIGNIFICANT_Y_MAX_ZONE)
+        {
+          color = RAS_ORANGE;
+        }
+
+
+
+        c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].X / 4.0f), 
+                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].Y / 4.0f));
+        draw_marker_filled(Draw_List, sdSysData, c1, color);
+      }
+    }
 
 
     // Draw Center
@@ -1413,6 +1447,8 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
 
 void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &sdSysData)
 {
+  // For Active GPS and Valid Coordinates
+
   // Draw track of GPS Position.
   if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
   {
@@ -1432,7 +1468,7 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
       // draw compass at center location
       CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 2, gps_pos, WORKING_AREA.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                           sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                          ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, 
+                          ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing(), true, 
                           true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), MAP_HEADING_DEGREES_LATEST);
     }
     /*
@@ -1455,14 +1491,23 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
 
 void ADSB_MAP::screen_draw_compass_center(ImDrawList *Draw_List, system_data &sdSysData)
 {
+  // For No Valid Coordinates
+
   ImVec2 screen_position;
   screen_position.x = WORKING_AREA.x + WORKING_AREA.z / 2.0f;
   screen_position.y = WORKING_AREA.y + WORKING_AREA.w / 2.0f;
 
+  CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 2, screen_position, WORKING_AREA.w / 2.0f * 0.66f, true, false, 
+                      false, 0.0f, 
+                      ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing(), false, 
+                      true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), 0.0f);
+
+  /*
   CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 2, screen_position, WORKING_AREA.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                       sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
-                      ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing(), !NORTH_UP, 
+                      ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing(), true, 
                       true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), MAP_HEADING_DEGREES_LATEST);
+  */
 
   /*
   CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 1, screen_position, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 

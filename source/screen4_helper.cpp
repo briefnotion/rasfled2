@@ -570,7 +570,7 @@ void COLOR_COMBOS::init(unsigned long Time, float Intensity)
     COLOR_COMBINATIONS_V[6].set_rgb_v(0.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Green
     COLOR_COMBINATIONS_V[7].set_rgb_v(0.0f, 1.0f, 1.0f, 1.0f, Intensity);  // Cyan
     COLOR_COMBINATIONS_V[8].set_rgb_v(0.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Blue
-    COLOR_COMBINATIONS_V[9].set_rgb_v(1.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
+    COLOR_COMBINATIONS_V[9].set_rgb_v(0.6f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
     COLOR_COMBINATIONS_V[10].set_rgb_v(1.0f, 0.5f, 1.0f, 1.0f, Intensity);  // Pink
     COLOR_COMBINATIONS_V[11].set_rgb_v(0.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Monochrome
 

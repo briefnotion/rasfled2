@@ -263,6 +263,13 @@ class CALIBRATION_DATA_HISTORY
   bool SIGNIFICANT_Z_LOWER = false;
   bool SIGNIFICANT_Z_UPPER = false;
 
+  bool SIGNIFICANT_X_MIN_ZONE = false;
+  bool SIGNIFICANT_X_MAX_ZONE = false;
+  bool SIGNIFICANT_Y_MIN_ZONE = false;
+  bool SIGNIFICANT_Y_MAX_ZONE = false;
+  bool SIGNIFICANT_Z_MIN_ZONE = false;
+  bool SIGNIFICANT_Z_MAX_ZONE = false;
+
 
 
 };
@@ -375,6 +382,7 @@ class CAL_LEVEL_2
   void add_reading(FLOAT_XYZ &Raw_XYZ);
   void calculate_center();
 
+  
 
 
 

@@ -1173,16 +1173,48 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
         Y_upper_sum += COMPASS_HISTORY[pos].Y;
         Y_upper_count++;
       }
-
-      COMPASS_X_LOWER_MEAN = X_lower_sum / (float)X_lower_count;
-      COMPASS_X_UPPER_MEAN = X_upper_sum / (float)X_upper_count;
-      COMPASS_Y_LOWER_MEAN = Y_lower_sum / (float)Y_lower_count;
-      COMPASS_Y_UPPER_MEAN = Y_upper_sum / (float)Y_upper_count;
-
-      // Pick out the extremes
-
     }
 
+    COMPASS_X_LOWER_MEAN = X_lower_sum / (float)X_lower_count;
+    COMPASS_X_UPPER_MEAN = X_upper_sum / (float)X_upper_count;
+    COMPASS_Y_LOWER_MEAN = Y_lower_sum / (float)Y_lower_count;
+    COMPASS_Y_UPPER_MEAN = Y_upper_sum / (float)Y_upper_count;
+
+    // Pick out the extremes
+    for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
+    {
+      if (COMPASS_HISTORY[pos].SIGNIFICANT_X_LOWER)
+      {
+        if (COMPASS_HISTORY[pos].X < COMPASS_X_LOWER_MEAN)
+        {
+          COMPASS_HISTORY[pos].SIGNIFICANT_X_MIN_ZONE = true;
+        }
+      }
+      
+      if (COMPASS_HISTORY[pos].SIGNIFICANT_X_UPPER)
+      {
+        if (COMPASS_HISTORY[pos].X > COMPASS_X_UPPER_MEAN)
+        {
+          COMPASS_HISTORY[pos].SIGNIFICANT_X_MAX_ZONE = true;
+        }
+      }
+
+      if (COMPASS_HISTORY[pos].SIGNIFICANT_Y_LOWER)
+      {
+        if (COMPASS_HISTORY[pos].Y < COMPASS_Y_LOWER_MEAN)
+        {
+          COMPASS_HISTORY[pos].SIGNIFICANT_Y_MIN_ZONE = true;
+        }
+      }
+
+      if (COMPASS_HISTORY[pos].SIGNIFICANT_Y_UPPER)
+      {
+        if (COMPASS_HISTORY[pos].Y > COMPASS_Y_UPPER_MEAN)
+        {
+          COMPASS_HISTORY[pos].SIGNIFICANT_Y_MAX_ZONE = true;
+        }
+      }
+    }
 
 
         // Testing ----------------------------------------

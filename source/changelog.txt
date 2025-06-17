@@ -1,3 +1,6 @@
+2.260_250617
+  - Several small changes.
+
 2.259_250616
   - Changed the North Pointer to be an inverse arrow instead of a line.
 

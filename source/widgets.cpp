@@ -658,6 +658,10 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     // North pointer drawn only if heading provided.
     if (Draw_North_Pointer)
     {
+
+
+      // This may be a problem
+
       if (Map_Bearing != 0.0f)
       {
         // Map is rotating. Point north up relative to map rotation.
@@ -669,6 +673,9 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         rad = (90.0f - Heading_2) * float_PI / 180.0f;
       }
 
+
+
+      
       // Calculate p1 (base) and p2 (tip) as before.
       p1 = Screen_Position;
       p2 = ImVec2(Screen_Position.x + (Size) * cos(rad + float_PI),
@@ -689,8 +696,16 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
                                   p2.y + headLength * sin(lineAngle + headAngle));
 
       // Draw the arrowhead lines.
-      Draw_List->AddLine(p2, arrowLeft, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 3.0f);
-      Draw_List->AddLine(p2, arrowRight, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 3.0f);
+      if (Valid_Position)
+      {
+        Draw_List->AddLine(p2, arrowLeft, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 3.0f);
+        Draw_List->AddLine(p2, arrowRight, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 3.0f);
+      }
+      else
+      {
+        Draw_List->AddLine(p2, arrowLeft, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 3.0f);
+        Draw_List->AddLine(p2, arrowRight, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 3.0f);
+      }
     }
 
     if (Jitter_Active)
@@ -700,8 +715,10 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         // Jitter 1
         rad = ((Jitter_Heading_Min) + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
-        p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
-                    Screen_Position.y + Size * sin(rad + float_PI));
+        //p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
+        //            Screen_Position.y + Size * sin(rad + float_PI));
+        p1 = ImVec2(Screen_Position.x + (Size - (font_height * 1.25f)) * cos(rad + float_PI), 
+                    Screen_Position.y + (Size - (font_height * 1.25f)) * sin(rad + float_PI));
         p2 = ImVec2(Screen_Position.x + (Size + (font_height * 1.25f)) * cos(rad + float_PI), 
                     Screen_Position.y + (Size + (font_height * 1.25f)) * sin(rad + float_PI));
         
@@ -710,20 +727,22 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         {
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 4.0f + 4.0f);
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 4.0f);
-          Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 1.5f);
+          //Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 1.5f);
         }
         else
         {
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 4.0f + 4.0f);
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 4.0f);
-          Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 1.25f);
+          //Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 1.25f);
         }
 
         // Jitter 2
         rad = ((Jitter_Heading_Max) + 90.0f - Map_Bearing) * float_PI / 180.0f;
 
-        p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
-                    Screen_Position.y + Size * sin(rad + float_PI));
+        //p1 = ImVec2(Screen_Position.x + Size * cos(rad + float_PI), 
+        //            Screen_Position.y + Size * sin(rad + float_PI));
+        p1 = ImVec2(Screen_Position.x + (Size - (font_height * 1.25f)) * cos(rad + float_PI), 
+                    Screen_Position.y + (Size - (font_height * 1.25f)) * sin(rad + float_PI));
         p2 = ImVec2(Screen_Position.x + (Size + (font_height * 1.25f)) * cos(rad + float_PI), 
                     Screen_Position.y + (Size + (font_height * 1.25f)) * sin(rad + float_PI));
 
@@ -732,13 +751,13 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         {
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 4.0f + 4.0f);
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 4.0f);
-          Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 1.25f);
+          //Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 1.25f);
         }
         else
         {
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 4.0f + 4.0f);
           Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 4.0f);
-          Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 1.25f);
+          //Draw_List->AddLine(Screen_Position, p1, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 1.25f);
         }
       }
     }
