@@ -2099,7 +2099,8 @@ bool DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Accelerati
       }
 
       // Check for 15% flag
-      if (Acceleration > SPEED_VECTORS_ACCELERATION[(int)storage_point].max() * 0.85f)
+      if (Acceleration > SPEED_VECTORS_ACCELERATION[(int)storage_point].max() * 0.85f &&
+          Speed > 10.0f)
       {
         ret_85percent_flag = true;
       }

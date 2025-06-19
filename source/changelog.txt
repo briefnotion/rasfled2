@@ -1,3 +1,6 @@
+2.261_250618
+  - Several small changes.
+
 2.260_250617
   - Several small changes.
 

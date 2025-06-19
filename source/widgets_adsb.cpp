@@ -1045,7 +1045,7 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
   
   // level 0 and level 1
 
-  if (true)    // Display calibration
+  if (!TEST_ALTERTATIVE_COMPASS)    // Display calibration
   {
 
     for (int quad = 1; quad < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quad++)
@@ -1133,7 +1133,7 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
 
 
   // draw alternative calibration
-  if (false)    // Display calibration
+  if (TEST_ALTERTATIVE_COMPASS)    // Display calibration
   {
     /*
     p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.mean()/ 4.0f), 

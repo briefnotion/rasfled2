@@ -260,17 +260,17 @@ class CALIBRATION_DATA_HISTORY
   bool SIGNIFICANT_X_UPPER = false;
   bool SIGNIFICANT_Y_LOWER = false;
   bool SIGNIFICANT_Y_UPPER = false;
-  bool SIGNIFICANT_Z_LOWER = false;
-  bool SIGNIFICANT_Z_UPPER = false;
+  //bool SIGNIFICANT_Z_LOWER = false;
+  //bool SIGNIFICANT_Z_UPPER = false;
 
   bool SIGNIFICANT_X_MIN_ZONE = false;
   bool SIGNIFICANT_X_MAX_ZONE = false;
   bool SIGNIFICANT_Y_MIN_ZONE = false;
   bool SIGNIFICANT_Y_MAX_ZONE = false;
-  bool SIGNIFICANT_Z_MIN_ZONE = false;
-  bool SIGNIFICANT_Z_MAX_ZONE = false;
+  //bool SIGNIFICANT_Z_MIN_ZONE = false;
+  //bool SIGNIFICANT_Z_MAX_ZONE = false;
 
-
+  bool KEEP = false;
 
 };
 
@@ -369,7 +369,7 @@ class CAL_LEVEL_2
   // Alternative method to calculate offset and skew
 
 
-  VECTOR_DEQUE<CALIBRATION_DATA_HISTORY> COMPASS_HISTORY;
+  VECTOR_DEQUE_NON_SEQUENTIAL<CALIBRATION_DATA_HISTORY> COMPASS_HISTORY;
   int COMPASS_HISTORY_SIZE = 100;
 
   FLOAT_XYZ COMPASS_CENTER;

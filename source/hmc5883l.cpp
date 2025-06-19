@@ -1124,7 +1124,7 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
 
 
   // Alternative method of calibration
-  if (false)
+  if (TEST_ALTERTATIVE_COMPASS)
   {
 
 
@@ -1146,8 +1146,12 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
     float Y_lower_sum = 0.0f;
     int Y_lower_count = 0;
 
+    // generate 4 means
+    // clear keep
     for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
     {
+      COMPASS_HISTORY[pos].KEEP = false;
+
       if (COMPASS_HISTORY[pos].X < COMPASS_CENTER.X)
       {
         COMPASS_HISTORY[pos].SIGNIFICANT_X_LOWER = true;
@@ -1180,6 +1184,9 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
     COMPASS_Y_LOWER_MEAN = Y_lower_sum / (float)Y_lower_count;
     COMPASS_Y_UPPER_MEAN = Y_upper_sum / (float)Y_upper_count;
 
+
+
+
     // Pick out the extremes
     for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
     {
@@ -1189,6 +1196,10 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
         {
           COMPASS_HISTORY[pos].SIGNIFICANT_X_MIN_ZONE = true;
         }
+        else
+        {
+          COMPASS_HISTORY[pos].SIGNIFICANT_X_MIN_ZONE = false;
+        }
       }
       
       if (COMPASS_HISTORY[pos].SIGNIFICANT_X_UPPER)
@@ -1196,6 +1207,10 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
         if (COMPASS_HISTORY[pos].X > COMPASS_X_UPPER_MEAN)
         {
           COMPASS_HISTORY[pos].SIGNIFICANT_X_MAX_ZONE = true;
+        }
+        else
+        {
+          COMPASS_HISTORY[pos].SIGNIFICANT_X_MAX_ZONE = false;
         }
       }
 
@@ -1205,6 +1220,10 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
         {
           COMPASS_HISTORY[pos].SIGNIFICANT_Y_MIN_ZONE = true;
         }
+        else
+        {
+          COMPASS_HISTORY[pos].SIGNIFICANT_Y_MIN_ZONE = false;
+        }
       }
 
       if (COMPASS_HISTORY[pos].SIGNIFICANT_Y_UPPER)
@@ -1213,16 +1232,85 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
         {
           COMPASS_HISTORY[pos].SIGNIFICANT_Y_MAX_ZONE = true;
         }
+        else
+        {
+          COMPASS_HISTORY[pos].SIGNIFICANT_Y_MAX_ZONE = false;
+        }
+      }
+    }
+
+
+
+
+
+    // keep extremes
+
+    //xmin
+    int XN = 0;
+    int XX = 0;
+    int YN = 0;
+    int YX = 0;
+    float value_XN = 0.0f;
+    float value_XX = 0.0f;
+    float value_YN = 0.0f;
+    float value_YX = 0.0f;
+
+    for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+    {
+      if (COMPASS_HISTORY.has_data(pos))
+      {
+        if (COMPASS_HISTORY[pos].X < value_XN)
+        {
+          XN = pos;
+          value_XN = COMPASS_HISTORY[pos].X;
+        }
+
+        if (COMPASS_HISTORY[pos].X > value_XX)
+        {
+          XX = pos;
+          value_XX = COMPASS_HISTORY[pos].X;
+        }
+
+        if (COMPASS_HISTORY[pos].Y < value_YN)
+        {
+          YN = pos;
+          value_YN = COMPASS_HISTORY[pos].Y;
+        }
+
+        if (COMPASS_HISTORY[pos].Y > value_YX)
+        {
+          YX = pos;
+          value_YX = COMPASS_HISTORY[pos].Y;
+        }
+      }
+    }
+
+    COMPASS_HISTORY[XN].KEEP = true;
+    COMPASS_HISTORY[XX].KEEP = true;
+    COMPASS_HISTORY[YN].KEEP = true;
+    COMPASS_HISTORY[YX].KEEP = true;
+
+
+    // Erase non zones
+    for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+    {
+      if (COMPASS_HISTORY.has_data(pos))
+      {  
+        if ((COMPASS_HISTORY[pos].SIGNIFICANT_X_MIN_ZONE == false && 
+            COMPASS_HISTORY[pos].SIGNIFICANT_X_MIN_ZONE == false && 
+            COMPASS_HISTORY[pos].SIGNIFICANT_X_MIN_ZONE == false && 
+            COMPASS_HISTORY[pos].SIGNIFICANT_X_MIN_ZONE == false))
+        {
+          if (COMPASS_HISTORY[pos].KEEP == false)
+          {
+            COMPASS_HISTORY.erase(pos);
+          }
+        }
       }
     }
 
 
         // Testing ----------------------------------------
-
-
-        
-
-
 
   }
   

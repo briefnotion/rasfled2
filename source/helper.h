@@ -715,7 +715,7 @@ class VECTOR_DEQUE_INT
 template <typename T>
 class VECTOR_DEQUE
 {
-  vector<T> Data;
+  vector<T> DATA;
   int FRONT = 0;
   int BACK = 0;
   int COUNT = 0;
@@ -727,22 +727,22 @@ class VECTOR_DEQUE
   }
 
 public:
-  void set_size(int newCapacity)
+  void set_size(int New_Capacity)
   {
-    vector<T> newData(newCapacity);
-    int numElementsToCopy = min(COUNT, newCapacity);
+    vector<T> new_data(New_Capacity);
+    int num_elements_to_copy = min(COUNT, New_Capacity);
 
-    for (int pos = 0; pos < numElementsToCopy; pos++)
+    for (int pos = 0; pos < num_elements_to_copy; pos++)
     {
-      //newData = value(pos);
-      newData.push_back(Data[pos]);
+      //new_data = value(pos);
+      new_data.push_back(DATA[pos]);
     }
 
-    Data = move(newData);
-    FULL_SIZE = newCapacity;
+    DATA = move(new_data);
+    FULL_SIZE = New_Capacity;
     FRONT = 0;
-    BACK = numElementsToCopy % FULL_SIZE;
-    COUNT = numElementsToCopy;
+    BACK = num_elements_to_copy % FULL_SIZE;
+    COUNT = num_elements_to_copy;
   }
 
   int size()
@@ -761,7 +761,7 @@ public:
       COUNT++;
     }
 
-    Data[BACK] = Value;
+    DATA[BACK] = Value;
     BACK = (BACK + 1) % FULL_SIZE;
   }
 
@@ -771,9 +771,107 @@ public:
     {
       throw out_of_range("Index out of range in VECTOR_DEQUE");
     }
-    return Data[get_vector_position(pos)];
+    return DATA[get_vector_position(pos)];
   }
 };
 
+// ---------------------------------------------------------------------------------------
+// VECTOR DEQUE NON SEQUENTIAL
+
+template <typename T>
+class VECTOR_DEQUE_NON_SEQUENTIAL
+{
+  vector<T>     DATA;
+  vector<bool>  RETAIN;
+  int BACK = 0;
+  int COUNT = 0;
+  int FULL_SIZE = 10;
+
+public:
+  void set_size(int New_Capacity)
+  {
+    vector<T>     new_data(New_Capacity);
+    vector<bool>  new_retain(New_Capacity);
+
+    int new_count = 0;
+
+    for (int pos = 0; pos < New_Capacity; pos++)
+    {
+      if (pos < (int)DATA.size())
+      {
+        new_data[pos] = DATA[pos];
+        new_retain[pos] = RETAIN[pos];
+        if (RETAIN[pos])
+        {
+          new_count++;
+        }
+      }
+      else
+      {
+        new_retain[pos] = false;
+      }
+    }
+
+    DATA    = move(new_data);
+    RETAIN  = move(new_retain);
+
+    FULL_SIZE = New_Capacity;
+    BACK = 0;
+    COUNT = new_count;
+  }
+
+  int size()
+  {
+    return COUNT;
+  }
+
+  void push_back(const T& Value)
+  {
+    if (COUNT == FULL_SIZE)  // Full, overwrite oldest
+    {
+      DATA[BACK] = Value;
+      RETAIN[BACK] = true;
+      BACK = (BACK + 1) % FULL_SIZE;
+    }
+    else
+    {
+      // Find first Deleted
+      bool replaced = false;
+      for (size_t pos = 0; (pos < DATA.size()) && (replaced == false); pos++)
+      {
+        if (RETAIN[pos] == false)
+        {
+          replaced = true;
+          DATA[pos] = Value;
+          RETAIN[pos] = true;
+          COUNT++;
+        }
+      }
+    }
+  }
+
+  bool has_data(int pos)
+  {
+    return RETAIN[pos];
+  }
+
+  void erase(int pos)
+  {
+    if (RETAIN[pos])
+    {
+      RETAIN[pos] = false;
+      COUNT--;
+    }
+  }
+
+  T& operator[](int pos) 
+  {
+    if (pos < 0 || pos >= COUNT)
+    {
+      throw out_of_range("Index out of range in VECTOR_DEQUE_NON_SEQUENTIAL");
+    }
+    return DATA[pos];
+  }
+};
 
 #endif
