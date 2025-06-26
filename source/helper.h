@@ -778,20 +778,28 @@ public:
 // ---------------------------------------------------------------------------------------
 // VECTOR DEQUE NON SEQUENTIAL
 
+class VECTOR_DEQUE_NON_SEQUENTIAL_FLAGS
+{
+  public:
+  bool HAS_DATA = false;
+  bool DO_NOT_OVERWRITE = false;
+};
+
 template <typename T>
 class VECTOR_DEQUE_NON_SEQUENTIAL
 {
   vector<T>     DATA;
-  vector<bool>  RETAIN;
   int BACK = 0;
   int COUNT = 0;
   int FULL_SIZE = 10;
 
-public:
+  public:
+  vector<VECTOR_DEQUE_NON_SEQUENTIAL_FLAGS>  FLAGS;
+
   void set_size(int New_Capacity)
   {
     vector<T>     new_data(New_Capacity);
-    vector<bool>  new_retain(New_Capacity);
+    vector<VECTOR_DEQUE_NON_SEQUENTIAL_FLAGS>  new_flags(New_Capacity);
 
     int new_count = 0;
 
@@ -800,25 +808,26 @@ public:
       if (pos < (int)DATA.size())
       {
         new_data[pos] = DATA[pos];
-        new_retain[pos] = RETAIN[pos];
-        if (RETAIN[pos])
+        new_flags[pos] = FLAGS[pos];
+        if (FLAGS[pos].HAS_DATA)
         {
           new_count++;
         }
       }
       else
       {
-        new_retain[pos] = false;
+        new_flags[pos].HAS_DATA = false;
+        new_flags[pos].DO_NOT_OVERWRITE = false;
       }
     }
 
-    DATA    = move(new_data);
-    RETAIN  = move(new_retain);
+    DATA  = move(new_data);
+    FLAGS = move(new_flags);
 
     FULL_SIZE = New_Capacity;
     BACK = 0;
     COUNT = new_count;
-  }
+  } 
 
   int size()
   {
@@ -829,9 +838,31 @@ public:
   {
     if (COUNT == FULL_SIZE)  // Full, overwrite oldest
     {
-      DATA[BACK] = Value;
-      RETAIN[BACK] = true;
+      int position_found = false;
+
+      for (size_t loc = 0; loc < DATA.size() && position_found == false; loc++)
+      {
+        if (FLAGS[(BACK + loc) %FULL_SIZE].DO_NOT_OVERWRITE == false)
+        {
+          position_found = true;
+
+          BACK = (BACK + loc) %FULL_SIZE;
+
+          DATA[BACK] = Value;
+          FLAGS[BACK].HAS_DATA = true;
+          FLAGS[BACK].DO_NOT_OVERWRITE = false;
+        }
+      }
+
+      if (position_found == false)
+      {
+        DATA[BACK] = Value;
+        FLAGS[BACK].HAS_DATA = true;
+        FLAGS[BACK].DO_NOT_OVERWRITE = false;
+      }
+      
       BACK = (BACK + 1) % FULL_SIZE;
+
     }
     else
     {
@@ -839,27 +870,24 @@ public:
       bool replaced = false;
       for (size_t pos = 0; (pos < DATA.size()) && (replaced == false); pos++)
       {
-        if (RETAIN[pos] == false)
+        if (FLAGS[pos].HAS_DATA == false)
         {
           replaced = true;
           DATA[pos] = Value;
-          RETAIN[pos] = true;
+          FLAGS[pos].HAS_DATA = true;
+          FLAGS[pos].DO_NOT_OVERWRITE = false;
           COUNT++;
         }
       }
     }
   }
 
-  bool has_data(int pos)
-  {
-    return RETAIN[pos];
-  }
-
   void erase(int pos)
   {
-    if (RETAIN[pos])
+    if (FLAGS[pos].HAS_DATA)
     {
-      RETAIN[pos] = false;
+      FLAGS[pos].HAS_DATA = false;
+      FLAGS[pos].DO_NOT_OVERWRITE = false;
       COUNT--;
     }
   }

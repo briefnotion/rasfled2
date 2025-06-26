@@ -25,12 +25,15 @@
 #include <linux/i2c-dev.h>  // LINUX i2c device libraries.
 #include <cmath>
 
+#include <Eigen/Dense>
+
 // RASFled related header files
 #include "definitions.h"
 #include "fled_time.h"
 #include "helper.h"
 #include "json_interface.h"
 #include "nmea.h"
+
 
 // -------------------------------------------------------------------------------------
 
@@ -245,35 +248,19 @@ class CALIBRATION_DATA
 
         // Testing ----------------------------------------
 
-
-
-
-class CALIBRATION_DATA_HISTORY
+class COMPASS_POINT
 {
   public:
+  FLOAT_XYZ POINT;
 
-  float X = 0;
-  float Y = 0;
-  float Z = 0;
+  bool X_LOWER = false;
+  bool X_UPPER = false;
+  bool Y_LOWER = false;
+  bool Y_UPPER = false;
 
-  bool SIGNIFICANT_X_LOWER = false;
-  bool SIGNIFICANT_X_UPPER = false;
-  bool SIGNIFICANT_Y_LOWER = false;
-  bool SIGNIFICANT_Y_UPPER = false;
-  //bool SIGNIFICANT_Z_LOWER = false;
-  //bool SIGNIFICANT_Z_UPPER = false;
-
-  bool SIGNIFICANT_X_MIN_ZONE = false;
-  bool SIGNIFICANT_X_MAX_ZONE = false;
-  bool SIGNIFICANT_Y_MIN_ZONE = false;
-  bool SIGNIFICANT_Y_MAX_ZONE = false;
-  //bool SIGNIFICANT_Z_MIN_ZONE = false;
-  //bool SIGNIFICANT_Z_MAX_ZONE = false;
-
-  bool KEEP = false;
 
 };
-
+ 
 
         // Testing ----------------------------------------
 
@@ -357,33 +344,52 @@ class CAL_LEVEL_2
   bool offset_history_read();
   void offset_history_write();
 
+
+
+        // Testing ----------------------------------------
+
+
+
+        
+        // Testing ----------------------------------------
+
+
   public:
 
 
 
         // Testing ----------------------------------------
 
-
         
-  
+  /*
   // Alternative method to calculate offset and skew
+ 
 
+  VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
+  int COMPASS_HISTORY_SIZE = 10;
 
-  VECTOR_DEQUE_NON_SEQUENTIAL<CALIBRATION_DATA_HISTORY> COMPASS_HISTORY;
-  int COMPASS_HISTORY_SIZE = 100;
+  float X_LOWER_MEAN = 0.0f;
+  float X_UPPER_MEAN = 0.0f;
+  float Y_LOWER_MEAN = 0.0f;
+  float Y_UPPER_MEAN = 0.0f;
 
   FLOAT_XYZ COMPASS_CENTER;
+  */
 
-  float COMPASS_X_UPPER_MEAN = 0.0f;
-  float COMPASS_X_LOWER_MEAN = 0.0f;
-  float COMPASS_Y_UPPER_MEAN = 0.0f;
-  float COMPASS_Y_LOWER_MEAN = 0.0f;
 
-  void add_reading(FLOAT_XYZ &Raw_XYZ);
-  void calculate_center();
+  //VECTOR_DEQUE_NON_SEQUENTIAL<FLOAT_XYZ> COMPASS_HISTORY;
+  vector<FLOAT_XYZ> COMPASS_HISTORY;
+  float heading = 0.0f;
 
-  
+  size_t MAX_HISTORY = 800;
+  float MIN_DIST = 8.0f;
 
+  FLOAT_XYZ ce;
+  FLOAT_XYZ m1;
+  FLOAT_XYZ m2;
+  FLOAT_XYZ m3;
+
+  string message = "";
 
 
         // Testing ----------------------------------------

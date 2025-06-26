@@ -1,3 +1,7 @@
+2.262_250620
+  - Moved the TEMP panel alert to lower priority.
+  - Added alternate compass trial code.
+
 2.261_250618
   - Several small changes.
 

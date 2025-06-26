@@ -167,16 +167,16 @@ void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
     if (panel_requested)
     {
 
-      if (AUTO_PRESSURE.display())
-      {
-        set_auto_pressure();
-        EXTRA = AUTO_PRESSURE.EXTRA.value() + EXTRA;
-      }
-
       if (AUTO_TEMPERATURE.display())
       {
         set_auto_temperature();
         EXTRA = AUTO_TEMPERATURE.EXTRA.value() + EXTRA;
+      }
+
+      if (AUTO_PRESSURE.display())
+      {
+        set_auto_pressure();
+        EXTRA = AUTO_PRESSURE.EXTRA.value() + EXTRA;
       }
 
       if (AUTO_ACCELERATION.display())

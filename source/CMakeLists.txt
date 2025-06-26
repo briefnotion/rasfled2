@@ -16,6 +16,8 @@ project(RasFled)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Boost COMPONENTS system thread filesystem REQUIRED)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+
 
 find_library(WIRINGPI_LIBRARIES NAMES wiringPi)
 find_library(WS2811_LIBRARIES NAMES ws2811)
@@ -31,6 +33,7 @@ target_include_directories(rasfled PRIVATE
   ../../imgui/backends
   ../../imgui/misc/cpp
   ${Boost_INCLUDE_DIR}
+  ${EIGEN3_INCLUDE_DIR}
 )
 
 target_sources(rasfled PRIVATE
