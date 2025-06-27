@@ -25,8 +25,6 @@
 #include <linux/i2c-dev.h>  // LINUX i2c device libraries.
 #include <cmath>
 
-#include <Eigen/Dense>
-
 // RASFled related header files
 #include "definitions.h"
 #include "fled_time.h"
@@ -348,7 +346,9 @@ class CAL_LEVEL_2
 
         // Testing ----------------------------------------
 
-
+  FLOAT_XYZ get_center_based_on_extremes();
+  void group_upper_lower();
+  void calculate_upper_lower_means();
 
         
         // Testing ----------------------------------------
@@ -360,8 +360,7 @@ class CAL_LEVEL_2
 
         // Testing ----------------------------------------
 
-        
-  /*
+      
   // Alternative method to calculate offset and skew
  
 
@@ -369,27 +368,23 @@ class CAL_LEVEL_2
   int COMPASS_HISTORY_SIZE = 10;
 
   float X_LOWER_MEAN = 0.0f;
+  float X_LOWER_SUM = 0.0f;
+  int X_LOWER_COUNT = 0;
+  
   float X_UPPER_MEAN = 0.0f;
+  float X_UPPER_SUM = 0.0f;
+  int X_UPPER_COUNT = 0;
+
   float Y_LOWER_MEAN = 0.0f;
+  float Y_LOWER_SUM = 0.0f;
+  int Y_LOWER_COUNT = 0;
+  
   float Y_UPPER_MEAN = 0.0f;
+  float Y_UPPER_SUM = 0.0f;
+  int Y_UPPER_COUNT = 0;
 
   FLOAT_XYZ COMPASS_CENTER;
-  */
 
-
-  //VECTOR_DEQUE_NON_SEQUENTIAL<FLOAT_XYZ> COMPASS_HISTORY;
-  vector<FLOAT_XYZ> COMPASS_HISTORY;
-  float heading = 0.0f;
-
-  size_t MAX_HISTORY = 800;
-  float MIN_DIST = 8.0f;
-
-  FLOAT_XYZ ce;
-  FLOAT_XYZ m1;
-  FLOAT_XYZ m2;
-  FLOAT_XYZ m3;
-
-  string message = "";
 
 
         // Testing ----------------------------------------

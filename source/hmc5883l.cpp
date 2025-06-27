@@ -677,6 +677,128 @@ void CAL_LEVEL_2::offset_history_write()
 
         // Testing ----------------------------------------
 
+FLOAT_XYZ CAL_LEVEL_2::get_center_based_on_extremes()
+{
+  FLOAT_XYZ ret_center;
+
+  int x_min = 0;
+  int x_max = 0;
+  
+  int y_min = 0;
+  int y_max = 0;
+
+  // pick out extremes
+  if (COMPASS_HISTORY.size() > 0)
+  {
+    for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+    {
+      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+      {
+        if (COMPASS_HISTORY[pos].POINT.X < COMPASS_HISTORY[x_min].POINT.X)
+        {
+          x_min = pos;
+        }
+        if (COMPASS_HISTORY[pos].POINT.X > COMPASS_HISTORY[x_max].POINT.X)
+        {
+          x_max = pos;
+        }
+        if (COMPASS_HISTORY[pos].POINT.Y < COMPASS_HISTORY[y_min].POINT.Y)
+        {
+          y_min = pos;
+        }
+        if (COMPASS_HISTORY[pos].POINT.Y > COMPASS_HISTORY[y_max].POINT.Y)
+        {
+          y_max = pos;
+        }
+      }
+    }
+
+    // get center of extremes
+    ret_center.X = (COMPASS_HISTORY[x_max].POINT.X + COMPASS_HISTORY[x_min].POINT.X) / 2.0f;
+    ret_center.Y = (COMPASS_HISTORY[y_max].POINT.Y + COMPASS_HISTORY[y_min].POINT.Y) / 2.0f;
+  }
+
+  return ret_center;
+}
+
+void CAL_LEVEL_2::group_upper_lower()
+{
+  for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+  {
+    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    {
+      if (COMPASS_HISTORY[pos].POINT.X <= COMPASS_CENTER.X)
+      {
+        COMPASS_HISTORY[pos].X_LOWER = true;
+      }
+
+      if (COMPASS_HISTORY[pos].POINT.X >= COMPASS_CENTER.X)
+      {
+        COMPASS_HISTORY[pos].X_UPPER = true;
+      }
+      
+      if (COMPASS_HISTORY[pos].POINT.Y <= COMPASS_CENTER.Y)
+      {
+        COMPASS_HISTORY[pos].Y_LOWER = true;
+      }
+
+      if (COMPASS_HISTORY[pos].POINT.Y >= COMPASS_CENTER.Y)
+      {
+        COMPASS_HISTORY[pos].Y_UPPER = true;
+      }
+    }
+  }
+}
+
+void CAL_LEVEL_2::calculate_upper_lower_means()
+{
+  X_LOWER_SUM = 0.0f;
+  X_LOWER_COUNT = 0;
+
+  X_UPPER_SUM = 0.0f;
+  X_UPPER_COUNT = 0;
+
+  Y_LOWER_SUM = 0.0f;
+  Y_LOWER_COUNT = 0;
+
+  Y_UPPER_SUM = 0.0f;
+  Y_UPPER_COUNT = 0;
+
+  for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+  {
+    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    {
+      if (COMPASS_HISTORY[pos].X_LOWER)
+      {
+        X_LOWER_COUNT++;
+        X_LOWER_SUM =+ COMPASS_HISTORY[pos].POINT.X;
+      }
+      if (COMPASS_HISTORY[pos].X_UPPER)
+      {
+        X_UPPER_COUNT++;
+        X_UPPER_SUM =+ COMPASS_HISTORY[pos].POINT.X;
+      }
+      if (COMPASS_HISTORY[pos].Y_LOWER)
+      {
+        Y_LOWER_COUNT++;
+        Y_LOWER_SUM =+ COMPASS_HISTORY[pos].POINT.Y;
+      }
+      if (COMPASS_HISTORY[pos].Y_UPPER)
+      {
+        Y_UPPER_COUNT++;
+        Y_UPPER_SUM =+ COMPASS_HISTORY[pos].POINT.Y;
+      }
+    }
+  }
+
+  X_LOWER_MEAN = X_LOWER_SUM / (float)X_LOWER_COUNT;
+  X_UPPER_MEAN = X_UPPER_SUM / (float)X_UPPER_COUNT;
+  Y_LOWER_MEAN = Y_LOWER_SUM / (float)Y_LOWER_COUNT;
+  Y_UPPER_MEAN = Y_UPPER_SUM / (float)Y_UPPER_COUNT;
+}
+
+
+
 
 
         // Testing ----------------------------------------
@@ -837,7 +959,7 @@ void CAL_LEVEL_2::clear()
   // Testing ----------------------------------------
 
 
-  //COMPASS_HISTORY.set_size(COMPASS_HISTORY_SIZE);
+  COMPASS_HISTORY.set_size(COMPASS_HISTORY_SIZE);
 
 
   // Testing ----------------------------------------
@@ -1090,11 +1212,9 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
 
 
   // Alternative method of calibration
-  //if (TEST_ALTERTATIVE_COMPASS)
+  if (TEST_ALTERTATIVE_COMPASS)
   {
 
-
-    /*
     // add reading
     {
       COMPASS_POINT tmp_compass_point;
@@ -1102,498 +1222,35 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
       COMPASS_HISTORY.push_back(tmp_compass_point);
     }
 
-    // reorganize
+    // catagorize
+
+
+    group_upper_lower();
+    calculate_upper_lower_means();
+
+    if (X_LOWER_COUNT == 0 || X_UPPER_COUNT == 0 || Y_LOWER_COUNT == 0 || Y_UPPER_COUNT == 0)
     {
-
-      int x_min = 0;
-      int x_max = 0;
-      
-      int y_min = 0;
-      int y_max = 0;
-
-      // pick out extremes
-      {
-        for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-        {
-          if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-          {
-            COMPASS_HISTORY.FLAGS[x_min].DO_NOT_OVERWRITE = false;
-
-            if (COMPASS_HISTORY[pos].POINT.X < COMPASS_HISTORY[x_min].POINT.X)
-            {
-              x_min = pos;
-            }
-            if (COMPASS_HISTORY[pos].POINT.X > COMPASS_HISTORY[x_max].POINT.X)
-            {
-              x_max = pos;
-            }
-            if (COMPASS_HISTORY[pos].POINT.Y < COMPASS_HISTORY[y_min].POINT.Y)
-            {
-              y_min = pos;
-            }
-            if (COMPASS_HISTORY[pos].POINT.Y > COMPASS_HISTORY[y_max].POINT.Y)
-            {
-              y_max = pos;
-            }
-          }
-        }
-      }
-
-      // do not overwrite extremes
-      // erase
-      COMPASS_HISTORY.FLAGS[x_min].DO_NOT_OVERWRITE = true;
-      COMPASS_HISTORY.FLAGS[x_max].DO_NOT_OVERWRITE = true;
-      COMPASS_HISTORY.FLAGS[y_min].DO_NOT_OVERWRITE = true;
-      COMPASS_HISTORY.FLAGS[y_max].DO_NOT_OVERWRITE = true;
-
-      // Reevalueate based on extremes
-      float x_mean = COMPASS_HISTORY[x_max].POINT.X - COMPASS_HISTORY[x_min].POINT.X;
-      float y_mean = COMPASS_HISTORY[y_max].POINT.Y - COMPASS_HISTORY[y_min].POINT.Y;
-
-      for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-      {
-        if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-        {
-          if (COMPASS_HISTORY[pos].POINT.X < x_mean)
-          {
-            COMPASS_HISTORY[pos].X_LOWER = true;
-          }
-          if (COMPASS_HISTORY[pos].POINT.X > x_mean)
-          {
-            COMPASS_HISTORY[pos].X_UPPER = true;
-          }
-          if (COMPASS_HISTORY[pos].POINT.Y < y_mean)
-          {
-            COMPASS_HISTORY[pos].Y_LOWER = true;
-          }
-          if (COMPASS_HISTORY[pos].POINT.Y > y_mean)
-          {
-            COMPASS_HISTORY[pos].Y_UPPER = true;
-          }
-        }
-      }
-
-
+      COMPASS_CENTER = get_center_based_on_extremes();
+      group_upper_lower();            // based on extremes
+      calculate_upper_lower_means();  // based on extremes
     }
-
-
-    // calculate means
-    {
-      int x_lower_count = 0;
-      float x_lower_sum = 0.0f;
-      int x_upper_count = 0;
-      float x_upper_sum = 0.0f;
-      int y_lower_count = 0;
-      float y_lower_sum = 0.0f;
-      int y_upper_count = 0;
-      float y_upper_sum = 0.0f;
-
-
-      for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-      {
-        if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-        {
-          if (COMPASS_HISTORY[pos].X_LOWER)
-          {
-            x_lower_count++;
-            x_lower_sum =+ COMPASS_HISTORY[pos].POINT.X;
-          }
-          if (COMPASS_HISTORY[pos].X_UPPER)
-          {
-            x_upper_count++;
-            x_upper_sum =+ COMPASS_HISTORY[pos].POINT.X;
-          }
-          if (COMPASS_HISTORY[pos].Y_LOWER)
-          {
-            y_lower_count++;
-            y_lower_sum =+ COMPASS_HISTORY[pos].POINT.Y;
-          }
-          if (COMPASS_HISTORY[pos].Y_UPPER)
-          {
-            y_upper_count++;
-            y_upper_sum =+ COMPASS_HISTORY[pos].POINT.Y;
-          }
-        }
-      }
-
-      X_LOWER_MEAN = x_lower_sum / (float)x_lower_count;
-      X_UPPER_MEAN = x_upper_sum / (float)x_upper_count;
-      Y_LOWER_MEAN = y_lower_sum / (float)y_lower_count;
-      Y_UPPER_MEAN = y_upper_sum / (float)y_upper_count;
-    }
-
-
-    // calculate center
+    else
     {
       COMPASS_CENTER.X = (X_UPPER_MEAN - X_LOWER_MEAN) / 2.0f;
       COMPASS_CENTER.Y = (Y_UPPER_MEAN - Y_LOWER_MEAN) / 2.0f;
     }
 
+
     cout << "s: " << COMPASS_HISTORY.size() << endl;
     cout << "X: " << COMPASS_CENTER.X << " : " << X_LOWER_MEAN << " : " << X_UPPER_MEAN << endl;
     cout << "Y: " << COMPASS_CENTER.Y << " : " << Y_LOWER_MEAN << " : " << Y_UPPER_MEAN << endl << endl;
     
-    //cout << COMPASS_HISTORY_X_LOWER.size() << " : " 
-    //      << COMPASS_HISTORY_X_UPPER.size() << " : "
-    //      << COMPASS_HISTORY_Y_LOWER.size() << " : "
-    //      << COMPASS_HISTORY_Y_UPPER.size() << endl;
-
-    
-
-
-    // set items to keep
-
-    */
-
-    /*
-    // Eliptical Tool
-    FLOAT_XYZ reading;
-    FLOAT_XYZ ce, m1, m2, m3;
-
-    ce.X = 99.7f;
-    ce.Y = -154.0f;
-    ce.Z = -22.7f;
-
-    m1.X = 0.952017f;
-    m1.Y = 0.00195895f;
-    m1.Z = 0.0139661f;
-
-    m2.X = 0.00195895f;
-    m2.Y = 0.882824f;
-    m2.Z = 0.00760243f;
-
-    m3.X = 0.0139661f;
-    m3.Y = 0.00760243f;
-    m3.Z = 0.995365f;
-
-    
-    // add reading
-    {
-      COMPASS_HISTORY.push_back(Raw_XYZ);
-    }
-
-    {
-      for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-      {
-        // Step 1: Offset correction
-        FLOAT_XYZ centered;
-        centered.X = COMPASS_HISTORY[pos].X - ce.X;
-        centered.Y = COMPASS_HISTORY[pos].Y - ce.Y;
-        centered.Z = COMPASS_HISTORY[pos].Z - ce.Z;
-
-        reading.X = (m1.X * centered.X) * (m1.Y * centered.Y) * (m1.Z * centered.Z);
-        reading.Y = (m2.X * centered.X) * (m2.Y * centered.Y) * (m2.Z * centered.Z);
-        reading.Z = (m3.X * centered.X) * (m3.Y * centered.Y) * (m3.Z * centered.Z);
-      }
-    }
-
-    if (COMPASS_HISTORY.size() > 0)
-    {
-      cout << reading.X << " : " << reading.Y << " : " << reading.Z << " || " << m1.X << " : " << COMPASS_HISTORY[0].X << endl;
-    }
-
-    heading = atan2f(reading.Y, reading.X) * (180.0f / M_PI);
-    if (heading < 0)
-    {
-      heading += 360.0f;
-    }
-
-    cout << heading << endl << endl;
-    */
-
-
-
-    /*
-    std::vector<FLOAT_XYZ> samples = {
-        {143.5f, -153.2f, -19.4f}, {100.2f, -120.9f, -22.1f}, {97.6f, -160.3f, -25.7f},
-        // Add your raw magnetometer readings here (the more varied, the better!)
-    };
-
-    Eigen::MatrixXf data(samples.size(), 3);
-    for (size_t i = 0; i < samples.size(); ++i) {
-        data(i, 0) = samples[i].X;
-        data(i, 1) = samples[i].Y;
-        data(i, 2) = samples[i].Z;
-    }
-
-    // Step 1: Compute mean (offset vector)
-    Eigen::RowVector3f offset = data.colwise().mean();
-    std::cout << "Offset (ce): " << offset << std::endl;
-
-    // Step 2: Subtract offset from each sample
-    Eigen::MatrixXf centered = data.rowwise() - offset;
-
-    // Step 3: Compute covariance matrix of centered data
-    Eigen::Matrix3f cov = (centered.transpose() * centered) / (samples.size() - 1);
-    std::cout << "Covariance matrix:\n" << cov << std::endl;
-
-    // Step 4: Eigen decomposition
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> solver(cov);
-    Eigen::Matrix3f eigenVectors = solver.eigenvectors();
-    Eigen::Vector3f eigenValues = solver.eigenvalues();
-
-    std::cout << "Eigenvalues: " << eigenValues.transpose() << std::endl;
-    std::cout << "Eigenvectors:\n" << eigenVectors << std::endl;
-
-    // Step 5: Whitening transform (scales and rotates data into a sphere)
-    Eigen::Matrix3f D = eigenValues.cwiseInverse().cwiseSqrt().asDiagonal(); // sqrt(inv(λ))
-    Eigen::Matrix3f whiteningMatrix = eigenVectors * D * eigenVectors.transpose();
-    std::cout << "Whitening (soft-iron) matrix:\n" << whiteningMatrix << std::endl;
-
-    // Optional: Apply transform to centered data for validation
-    Eigen::MatrixXf corrected = centered * whiteningMatrix.transpose();
-    std::cout << "Transformed point 0: " << corrected.row(0) << std::endl;
-
-
-    exit(0);
-    */
-
-
-    // Step 1: Load your raw magnetometer samples
-    //std::vector<FLOAT_XYZ> COMPASS_HISTORY = {
-    //    {143.5f, -153.2f, -19.4f}, {100.2f, -120.9f, -22.1f}, {97.6f, -160.3f, -25.7f},
-    //    {145.1f, -149.3f, -22.8f}, {91.2f, -130.1f, -23.5f}  // Add more diverse samples here
-    //};
-
-    /*
-    {
-      COMPASS_HISTORY.push_back(Raw_XYZ);
-    }
-
-    // Step 2: Convert to Eigen matrix
-    Eigen::MatrixXf data(COMPASS_HISTORY.size(), 3);
-    for (size_t i = 0; i < COMPASS_HISTORY.size(); ++i) 
-    {
-        data(i, 0) = COMPASS_HISTORY[i].X;
-        data(i, 1) = COMPASS_HISTORY[i].Y;
-        data(i, 2) = COMPASS_HISTORY[i].Z;
-    }
-
-    // Step 3: Compute the center offset (hard-iron)
-    Eigen::RowVector3f offset = data.colwise().mean();
-
-    // Step 4: Center the data
-    Eigen::MatrixXf centered = data.rowwise() - offset;
-
-    // Step 5: Compute covariance and perform eigen decomposition
-    Eigen::Matrix3f cov = (centered.transpose() * centered) / (data.rows() - 1);
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> solver(cov);
-    Eigen::Matrix3f eigenVectors = solver.eigenvectors();
-    Eigen::Vector3f eigenValues = solver.eigenvalues();
-
-    // Step 6: Create whitening transform (soft-iron correction)
-    Eigen::Matrix3f D = eigenValues.cwiseInverse().cwiseSqrt().asDiagonal();
-    Eigen::Matrix3f whiteningMatrix = eigenVectors * D * eigenVectors.transpose();
-
-    // Step 7: Copy Eigen results into usable C++ structs
-    ce = { offset(0), offset(1), offset(2) };
-    m1 = { whiteningMatrix(0, 0), whiteningMatrix(0, 1), whiteningMatrix(0, 2) };
-    m2 = { whiteningMatrix(1, 0), whiteningMatrix(1, 1), whiteningMatrix(1, 2) };
-    m3 = { whiteningMatrix(2, 0), whiteningMatrix(2, 1), whiteningMatrix(2, 2) };
-
-    std::cout << "Offset ce: {" << ce.X << ", " << ce.Y << ", " << ce.Z << "}\n";
-    std::cout << "Soft-iron matrix rows:\n";
-    std::cout << "m1: {" << m1.X << ", " << m1.Y << ", " << m1.Z << "}\n";
-    std::cout << "m2: {" << m2.X << ", " << m2.Y << ", " << m2.Z << "}\n";
-    std::cout << "m3: {" << m3.X << ", " << m3.Y << ", " << m3.Z << "}\n\n";
-
-
-
-
-    // Step 8: Apply calibration and compute heading
-    if (!COMPASS_HISTORY.empty()) 
-    {
-        const FLOAT_XYZ& raw = COMPASS_HISTORY.back();
-
-        // Step 1: Offset correction
-        FLOAT_XYZ centered;
-        centered.X = raw.X - ce.X;
-        centered.Y = raw.Y - ce.Y;
-        centered.Z = raw.Z - ce.Z;
-
-        // Step 2: Soft-iron matrix transform
-        FLOAT_XYZ reading;
-        reading.X = m1.X * centered.X + m1.Y * centered.Y + m1.Z * centered.Z;
-        reading.Y = m2.X * centered.X + m2.Y * centered.Y + m2.Z * centered.Z;
-        reading.Z = m3.X * centered.X + m3.Y * centered.Y + m3.Z * centered.Z;
-
-        // Step 3: Compute heading
-        heading = atan2f(reading.Y, reading.X) * (180.0f / M_PI);
-        if (heading < 0) heading += 360.0f;
-
-        std::cout << "Calibrated Heading: " << heading << "°" << std::endl;
-    }
-        */
-
-    /*
-    {
-      COMPASS_HISTORY.push_back(Raw_XYZ);
-    }
-
-    // Step 2: Convert to Eigen matrix
-    Eigen::MatrixXf data(COMPASS_HISTORY.size(), 3);
-    for (size_t i = 0; i < COMPASS_HISTORY.size(); ++i) {
-        data(i, 0) = COMPASS_HISTORY[i].X;
-        data(i, 1) = COMPASS_HISTORY[i].Y;
-        data(i, 2) = COMPASS_HISTORY[i].Z;
-    }
-
-    // Step 3: Compute the mean offset (hard-iron)
-    Eigen::RowVector3f offset = data.colwise().mean();
-
-    // Step 4: Center the data
-    Eigen::MatrixXf centered = data.rowwise() - offset;
-
-    // Step 5: Covariance matrix and whitening
-    Eigen::Matrix3f cov = (centered.transpose() * centered) / (centered.rows() - 1);
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> solver(cov);
-    Eigen::Matrix3f eigenVectors = solver.eigenvectors();
-    Eigen::Vector3f eigenValues = solver.eigenvalues();
-
-    // Step 6: Create the whitening matrix
-    Eigen::Matrix3f D = eigenValues.cwiseInverse().cwiseSqrt().asDiagonal();
-    Eigen::Matrix3f whiteningMatrix = eigenVectors * D * eigenVectors.transpose();
-
-    // Step 7: Apply calibration to centered data
-    Eigen::MatrixXf calibrated = centered * whiteningMatrix.transpose();
-
-    // Step 8: Get the final sample and compute heading
-    Eigen::Vector3f last = calibrated.row(calibrated.rows() - 1);
-    heading = atan2f(last(1), last(0)) * (180.0f / M_PI);
-    if (heading < 0) heading += 360.0f;
-
-    std::cout << "Calibrated heading from Eigen: " << heading << "°" << std::endl;
-    */
-
-
-    
-    /*
-    {
-      if (COMPASS_HISTORY.size() >= MAX_HISTORY) 
-      {
-          size_t nearestIndex = 0;
-          float minDistSq = std::numeric_limits<float>::max();
-
-          for (size_t i = 0; i < COMPASS_HISTORY.size(); ++i) {
-              float dx = COMPASS_HISTORY[i].X - Raw_XYZ.X;
-              float dy = COMPASS_HISTORY[i].Y - Raw_XYZ.Y;
-              float dz = COMPASS_HISTORY[i].Z - Raw_XYZ.Z;
-              float distSq = dx*dx + dy*dy + dz*dz;
-              if (distSq < minDistSq) {
-                  minDistSq = distSq;
-                  nearestIndex = i;
-              }
-          }
-          if (minDistSq < 8.0f * 8.0f)  // same threshold as before
-              COMPASS_HISTORY.erase(COMPASS_HISTORY.begin() + nearestIndex);
-      }
-
-      COMPASS_HISTORY.push_back(Raw_XYZ);
-    }
-    */
-
-    // Step 1: Add Compass Data to the Vector
-    {
-      if (COMPASS_HISTORY.size() < MAX_HISTORY) 
-      {
-        COMPASS_HISTORY.push_back(Raw_XYZ);
-      } 
-      else 
-      {
-        // Try to remove a point that's too similar
-        size_t nearestIndex = 0;
-        float minDistSq = std::numeric_limits<float>::max();
-
-        for (size_t i = 0; i < COMPASS_HISTORY.size(); ++i) 
-        {
-          float dx = COMPASS_HISTORY[i].X - Raw_XYZ.X;
-          float dy = COMPASS_HISTORY[i].Y - Raw_XYZ.Y;
-          float dz = COMPASS_HISTORY[i].Z - Raw_XYZ.Z;
-          float distSq = dx * dx + dy * dy + dz * dz;
-          if (distSq < minDistSq) 
-          {
-            minDistSq = distSq;
-            nearestIndex = i;
-          }
-        }
-
-        if (minDistSq < MIN_DIST * MIN_DIST) 
-        {
-          COMPASS_HISTORY.erase(COMPASS_HISTORY.begin() + nearestIndex);
-          COMPASS_HISTORY.push_back(Raw_XYZ);
-        } 
-        else 
-        {
-          // Fallback: remove oldest to maintain max size
-          COMPASS_HISTORY.erase(COMPASS_HISTORY.begin());
-          COMPASS_HISTORY.push_back(Raw_XYZ);
-        }
-      }
-    }
-
-    // Steps 2 though 8 needs process iteration restricions.
-  
-    // Step 2: Convert to Eigen matrix
-    Eigen::MatrixXf data(COMPASS_HISTORY.size(), 3);
-    for (size_t i = 0; i < COMPASS_HISTORY.size(); ++i) 
-    {
-      data(i, 0) = COMPASS_HISTORY[i].X;
-      data(i, 1) = COMPASS_HISTORY[i].Y;
-      data(i, 2) = COMPASS_HISTORY[i].Z;
-    }
-
-    // Step 3: Compute the mean offset (hard-iron)
-    Eigen::RowVector3f offset = data.colwise().mean();
-
-    // Step 4: Center the data
-    Eigen::MatrixXf centered = data.rowwise() - offset;
-
-    // Step 5: Covariance matrix and whitening
-    Eigen::Matrix3f cov = (centered.transpose() * centered) / (centered.rows() - 1);
-    Eigen::SelfAdjointEigenSolver<Eigen::Matrix3f> solver(cov);
-    Eigen::Matrix3f eigenVectors = solver.eigenvectors();
-    Eigen::Vector3f eigenValues = solver.eigenvalues();
-
-    // Step 6: Create the whitening matrix
-    Eigen::Matrix3f D = eigenValues.cwiseInverse().cwiseSqrt().asDiagonal();
-    Eigen::Matrix3f whiteningMatrix = eigenVectors * D * eigenVectors.transpose();
-
-    // Step 7: Apply calibration to centered data
-    Eigen::MatrixXf calibrated = centered * whiteningMatrix.transpose();
-
-    // Step 8: Get the final sample
-    Eigen::Vector3f last = calibrated.row(calibrated.rows() - 1);
-
-    /*
-    // ⏱️ NEW: Check magnetic magnitude for anomaly
-    float mag = last.norm();  // same as sqrt(x² + y² + z²)
-    static int anomalyCounter = 0;
-
-    if (mag < 0.85f || mag > 1.15f) 
-    {
-      anomalyCounter++;
-      message = "⚠️ Warning: Magnetic magnitude anomaly: " + to_string(mag) + " (" + to_string(anomalyCounter) + "/5)";
-      if (anomalyCounter >= 5) 
-      {
-        message =  "⚠️ Significant distortion detected — consider re-calibration.";
-        // Optionally trigger recalibration mode, reset COMPASS_HISTORY, etc.
-      }
-    } 
-    else 
-    {
-      anomalyCounter = 0;
-      message = "";
-    }
-    */
-
-    // Step 9: Compute heading
-    heading = atan2f(last(1), last(0)) * (180.0f / M_PI);
-    if (heading < 0)
-    {
-      heading += 360.0f;
-    }
-
-    //std::cout << "Calibrated heading from Eigen: " << heading << "°" << std::endl;
+    cout << X_LOWER_COUNT << " : " 
+          << X_UPPER_COUNT << " : "
+          << Y_LOWER_COUNT << " : "
+          << Y_UPPER_COUNT << endl;
+
+    cout << endl;
 
 
 

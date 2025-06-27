@@ -1235,7 +1235,6 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     }
     */
     
-    /*
     for (int pos = 0; pos < sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size(); pos++)
     {
       if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
@@ -1288,7 +1287,6 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     draw_line(Draw_List, sdSysData, c1, p2, RAS_YELLOW, 2.0f);
     draw_line(Draw_List, sdSysData, c1, p3, RAS_YELLOW, 2.0f);
     draw_line(Draw_List, sdSysData, c1, p4, RAS_YELLOW, 2.0f);
-    */
 
         // Testing ----------------------------------------
 
@@ -1362,25 +1360,34 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
       */
 
 
-      //if (TEST_ALTERTATIVE_COMPASS)    // Display calibration
+      if (TEST_ALTERTATIVE_COMPASS)    // Display calibration
       {
         //ImGui::NewLine();
 
-        ImGui::Text("BEAR (T): %4.1f  (%4.1f)", 
-          sdSysData.COMMS_COMPASS.LEVEL_2.heading, 
-          sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.LEVEL_2.heading);
+        //ImGui::Text("BEAR (T): %4.1f  (%4.1f)", 
+        //  sdSysData.COMMS_COMPASS.LEVEL_2.heading, 
+        //  sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.LEVEL_2.heading);
         
         //ImGui::NewLine();
 
-        /*
-        ImGui::Text("%s", 
-          sdSysData.COMMS_COMPASS.LEVEL_2.message.c_str());
+        ImGui::NewLine();
+        ImGui::Text("size : %d", 
+          sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size());
+        ImGui::Text("cent : (%4.1f : %4.1f)", 
+          sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.X, 
+          sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.Y
+        );
+        ImGui::Text("mean : %4.1f : %4.1f : %4.1f : %4.1f", 
+          sdSysData.COMMS_COMPASS.LEVEL_2.X_LOWER_MEAN, 
+          sdSysData.COMMS_COMPASS.LEVEL_2.X_UPPER_MEAN,
+          sdSysData.COMMS_COMPASS.LEVEL_2.Y_LOWER_MEAN, 
+          sdSysData.COMMS_COMPASS.LEVEL_2.Y_UPPER_MEAN
+        );
         
         ImGui::NewLine();
-        */
 
-        ImGui::Text("s: %ld", 
-          sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size());
+        //ImGui::Text("s: %ld", 
+        //  sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size());
 
         /*
         ImGui::NewLine();

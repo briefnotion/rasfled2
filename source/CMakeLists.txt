@@ -33,7 +33,6 @@ target_include_directories(rasfled PRIVATE
   ../../imgui/backends
   ../../imgui/misc/cpp
   ${Boost_INCLUDE_DIR}
-  ${EIGEN3_INCLUDE_DIR}
 )
 
 target_sources(rasfled PRIVATE

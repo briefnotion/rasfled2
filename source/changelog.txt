@@ -1,3 +1,7 @@
+2.263_250627
+  - Eigen::MatrixXf looks great but I want to stay with the previous method for now.
+      alternate Eigen compass test code removed.
+
 2.262_250620
   - Moved the TEMP panel alert to lower priority.
   - Added alternate compass trial code.
