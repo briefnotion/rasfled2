@@ -256,7 +256,12 @@ class COMPASS_POINT
   bool Y_LOWER = false;
   bool Y_UPPER = false;
 
+  bool X_LOWER_M = false;
+  bool X_UPPER_M = false;
+  bool Y_LOWER_M = false;
+  bool Y_UPPER_M = false;
 
+  //float DIST_ABOVE_MEAN = 0;
 };
  
 
@@ -341,14 +346,20 @@ class CAL_LEVEL_2
 
   bool offset_history_read();
   void offset_history_write();
-
+ 
 
 
         // Testing ----------------------------------------
+  FLOAT_XYZ fake_compass_input(unsigned long tmeFrame_Time);
 
+  void clear_all_flags();
+  void add_point(FLOAT_XYZ &Raw_XYZ);
   FLOAT_XYZ get_center_based_on_extremes();
   void group_upper_lower();
   void calculate_upper_lower_means();
+  void group_means();
+  void reinforce_means();
+  void delete_unnecessary_points();
 
         
         // Testing ----------------------------------------
@@ -359,13 +370,14 @@ class CAL_LEVEL_2
 
 
         // Testing ----------------------------------------
-
+ 
       
   // Alternative method to calculate offset and skew
  
-
   VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
-  int COMPASS_HISTORY_SIZE = 10;
+  int COMPASS_HISTORY_SIZE = 800;
+
+  float CLOSEST_ALLOWED = 3.0f;
 
   float X_LOWER_MEAN = 0.0f;
   float X_LOWER_SUM = 0.0f;
@@ -385,7 +397,10 @@ class CAL_LEVEL_2
 
   FLOAT_XYZ COMPASS_CENTER;
 
+  int ITERATION_COUNTER = 0;
+  int ITERATION_TRIGGER = 66;
 
+  float HEADING_DEGREES_TEST = 0.0f;
 
         // Testing ----------------------------------------
 

@@ -1235,31 +1235,34 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     }
     */
     
-    for (int pos = 0; pos < sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size(); pos++)
+    for (size_t pos = 0; pos < sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size(); pos++)
     {
       if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
       {
-        int color = RAS_BLUE;
-        if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].X_LOWER)
-        {
-          color = RAS_RED;
-        }
-        else if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].X_UPPER)
-        {
-          color = RAS_ORANGE;
-        }
-        if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].Y_LOWER)
+        int color = RAS_GREY;
+        if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].X_LOWER_M)
         {
           color = RAS_GREEN;
         }
-        else if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].Y_UPPER)
+        else if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].X_UPPER_M)
         {
           color = RAS_YELLOW;
         }
+        if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].Y_LOWER_M)
+        {
+          color = RAS_RED;
+        }
+        else if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].Y_UPPER_M)
+        {
+          color = RAS_CYAN;
+        }
 
-        c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].POINT.X / 4.0f), 
-                      center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].POINT.Y / 4.0f));
-        draw_marker_filled(Draw_List, sdSysData, c1, color);
+        //if (color != RAS_BLUE)
+        //{
+          c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].POINT.X / 4.0f), 
+                        center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].POINT.Y / 4.0f));
+          draw_marker_filled(Draw_List, sdSysData, c1, color);
+        //}
       }
     }
 
@@ -1362,16 +1365,18 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
 
       if (TEST_ALTERTATIVE_COMPASS)    // Display calibration
       {
-        //ImGui::NewLine();
-
-        //ImGui::Text("BEAR (T): %4.1f  (%4.1f)", 
-        //  sdSysData.COMMS_COMPASS.LEVEL_2.heading, 
-        //  sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.LEVEL_2.heading);
-        
-        //ImGui::NewLine();
-
         ImGui::NewLine();
-        ImGui::Text("size : %d", 
+
+        ImGui::Text("BEAR (T): %4.1f  (%4.1f)", 
+          sdSysData.COMMS_COMPASS.LEVEL_2.HEADING_DEGREES_TEST, 
+          sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.LEVEL_2.HEADING_DEGREES_TEST);
+        
+        ImGui::NewLine();
+      
+        /*
+        ImGui::NewLine();
+  
+        ImGui::Text("size : %ld", 
           sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size());
         ImGui::Text("cent : (%4.1f : %4.1f)", 
           sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.X, 
@@ -1385,6 +1390,7 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
         );
         
         ImGui::NewLine();
+        */
 
         //ImGui::Text("s: %ld", 
         //  sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size());
@@ -1407,7 +1413,7 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
 
       
         // Testing ----------------------------------------
-
+  
       if (sdSysData.COMMS_COMPASS.calibrate_on())
       {
         for (int quads = 1; quads < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quads++)
@@ -1423,7 +1429,7 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
                                                                           sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance(), 
                                                                           sdSysData.COMMS_COMPASS.bearing_known_offset());
         ImGui::NewLine();
-
+  
 
         // Testing ----------------------------------------
 

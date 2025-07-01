@@ -1644,10 +1644,11 @@ void AUTOMOBILE_CALCULATED::compute_low(DNFWTS_ &Dnfwts, AUTOMOBILE_TRANSLATED_D
   }
 
   // S-Temp
-  S_TEMP = (((Status.TEMPS.AMBIANT_AIR_46.val_c() + 
-              Status.TEMPS.AIR_INTAKE_0f.val_c() + 
-              Status.TEMPS.COOLANT_05.val_c() + 
-              (Status.TEMPS.CATALYST_3C.val_c() / 20.0f)) / 4.0f) - 30.0f) * 3.0f;
+  S_TEMP = (((1.0f * Status.TEMPS.AMBIANT_AIR_46.val_c() + 
+              2.0f * Status.TEMPS.AIR_INTAKE_0f.val_c() + 
+              2.0f * Status.TEMPS.COOLANT_05.val_c() + 
+              2.0f * (Status.TEMPS.CATALYST_3C.val_c() / 20.0f))
+              / 7.0f) - 30.0f) * 3.0f;
 }
 
 float AUTOMOBILE_CALCULATED::acceleration(unsigned long tmeFrame_Time)

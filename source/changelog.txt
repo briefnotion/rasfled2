@@ -1,3 +1,7 @@
+2.264_250628
+  - Added another Compass Test Routine to see how it behaves in the wild.
+  - Halved the weight of the ambiant temp while computing te s-temp.
+
 2.263_250627
   - Eigen::MatrixXf looks great but I want to stay with the previous method for now.
       alternate Eigen compass test code removed.

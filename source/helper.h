@@ -801,6 +801,14 @@ class VECTOR_DEQUE_NON_SEQUENTIAL
     vector<T>     new_data(New_Capacity);
     vector<VECTOR_DEQUE_NON_SEQUENTIAL_FLAGS>  new_flags(New_Capacity);
 
+    FULL_SIZE = New_Capacity;
+    BACK = 0;
+    COUNT = 0;
+    
+    DATA  = move(new_data);
+    FLAGS = move(new_flags);
+
+    /*
     int new_count = 0;
 
     for (int pos = 0; pos < New_Capacity; pos++)
@@ -827,11 +835,17 @@ class VECTOR_DEQUE_NON_SEQUENTIAL
     FULL_SIZE = New_Capacity;
     BACK = 0;
     COUNT = new_count;
+    */
   } 
 
-  int size()
+  int count()
   {
     return COUNT;
+  }
+
+  size_t size()
+  {
+    return DATA.size();
   }
 
   void push_back(const T& Value)
@@ -882,8 +896,16 @@ class VECTOR_DEQUE_NON_SEQUENTIAL
     }
   }
 
-  void erase(int pos)
-  {
+  void erase_p(int pos)
+  {  
+    /*
+    if (pos < 0 || pos >= (int)FLAGS.size())
+    {
+      cout << "Index out of range in erase_p" << endl;
+      throw out_of_range("Index out of range in erase_p");
+    }
+    */
+    
     if (FLAGS[pos].HAS_DATA)
     {
       FLAGS[pos].HAS_DATA = false;
@@ -894,10 +916,13 @@ class VECTOR_DEQUE_NON_SEQUENTIAL
 
   T& operator[](int pos) 
   {
+    /*
     if (pos < 0 || pos >= COUNT)
     {
+      cout << "Index out of range in VECTOR_DEQUE_NON_SEQUENTIAL" << endl;
       throw out_of_range("Index out of range in VECTOR_DEQUE_NON_SEQUENTIAL");
     }
+    */
     return DATA[pos];
   }
 };

@@ -677,6 +677,82 @@ void CAL_LEVEL_2::offset_history_write()
 
         // Testing ----------------------------------------
 
+FLOAT_XYZ CAL_LEVEL_2::fake_compass_input(unsigned long tmeFrame_Time)
+{
+  FLOAT_XYZ ret_point;
+
+  // parameters
+  float radius = 250.0f;
+  FLOAT_XYZ offset;
+  //offset.X = 0.0f;
+  //offset.Y = 0.0f;
+  //offset.Z = 0.0f;
+  offset.X = 100.0f;
+  offset.Y = 33.3f;
+  offset.Z = 0.0f;
+
+  int speed = 10;
+
+  // gen
+  float angle = (float)((tmeFrame_Time/speed) % 360);
+
+  angle = angle * (3.14159265f / 180.0f);
+
+  ret_point.X = radius * cos(angle) + offset.X;
+  ret_point.Y = radius * sin(angle) + offset.Y;
+  ret_point.Z = 0.0f + offset.Z;
+
+  return ret_point;
+}
+
+
+
+
+void CAL_LEVEL_2::clear_all_flags()
+{
+  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+  {
+    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    {
+      COMPASS_HISTORY[pos].X_LOWER = false;
+      COMPASS_HISTORY[pos].X_UPPER = false;
+      COMPASS_HISTORY[pos].Y_LOWER = false;
+      COMPASS_HISTORY[pos].Y_UPPER = false;
+
+      COMPASS_HISTORY[pos].X_LOWER_M = false;
+      COMPASS_HISTORY[pos].X_UPPER_M = false;
+      COMPASS_HISTORY[pos].Y_LOWER_M = false;
+      COMPASS_HISTORY[pos].Y_UPPER_M = false;
+    }
+  }
+}
+
+
+void CAL_LEVEL_2::add_point(FLOAT_XYZ &Raw_XYZ)
+{
+  float dist = 0.0f;
+
+  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+  {
+    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    {
+      dist = sqrt(
+      pow(Raw_XYZ.X - COMPASS_HISTORY[pos].POINT.X, 2) +
+      pow(Raw_XYZ.X - COMPASS_HISTORY[pos].POINT.X, 2) +
+      pow(Raw_XYZ.X - COMPASS_HISTORY[pos].POINT.X, 2));
+      
+      if (dist < CLOSEST_ALLOWED)
+      {
+        COMPASS_HISTORY.erase_p(pos);
+      }
+    }
+  }
+
+  COMPASS_POINT tmp_compass_point;
+  tmp_compass_point.POINT = Raw_XYZ;
+  COMPASS_HISTORY.push_back(tmp_compass_point);
+}
+
 FLOAT_XYZ CAL_LEVEL_2::get_center_based_on_extremes()
 {
   FLOAT_XYZ ret_center;
@@ -690,7 +766,7 @@ FLOAT_XYZ CAL_LEVEL_2::get_center_based_on_extremes()
   // pick out extremes
   if (COMPASS_HISTORY.size() > 0)
   {
-    for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+    for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
     {
       if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
       {
@@ -723,7 +799,7 @@ FLOAT_XYZ CAL_LEVEL_2::get_center_based_on_extremes()
 
 void CAL_LEVEL_2::group_upper_lower()
 {
-  for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
   {
     if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
     {
@@ -764,29 +840,29 @@ void CAL_LEVEL_2::calculate_upper_lower_means()
   Y_UPPER_SUM = 0.0f;
   Y_UPPER_COUNT = 0;
 
-  for (int pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
   {
     if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
     {
       if (COMPASS_HISTORY[pos].X_LOWER)
       {
         X_LOWER_COUNT++;
-        X_LOWER_SUM =+ COMPASS_HISTORY[pos].POINT.X;
+        X_LOWER_SUM += COMPASS_HISTORY[pos].POINT.X;
       }
       if (COMPASS_HISTORY[pos].X_UPPER)
       {
         X_UPPER_COUNT++;
-        X_UPPER_SUM =+ COMPASS_HISTORY[pos].POINT.X;
+        X_UPPER_SUM += COMPASS_HISTORY[pos].POINT.X;
       }
       if (COMPASS_HISTORY[pos].Y_LOWER)
       {
         Y_LOWER_COUNT++;
-        Y_LOWER_SUM =+ COMPASS_HISTORY[pos].POINT.Y;
+        Y_LOWER_SUM += COMPASS_HISTORY[pos].POINT.Y;
       }
       if (COMPASS_HISTORY[pos].Y_UPPER)
       {
         Y_UPPER_COUNT++;
-        Y_UPPER_SUM =+ COMPASS_HISTORY[pos].POINT.Y;
+        Y_UPPER_SUM += COMPASS_HISTORY[pos].POINT.Y;
       }
     }
   }
@@ -797,9 +873,185 @@ void CAL_LEVEL_2::calculate_upper_lower_means()
   Y_UPPER_MEAN = Y_UPPER_SUM / (float)Y_UPPER_COUNT;
 }
 
+void CAL_LEVEL_2::group_means()
+{
+  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+  {
+    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    {
+      if (COMPASS_HISTORY[pos].X_LOWER)
+      {
+        if (COMPASS_HISTORY[pos].POINT.X < X_LOWER_MEAN)
+        {
+          COMPASS_HISTORY[pos].X_LOWER_M = true;
+        }
+      }
+      
+      if (COMPASS_HISTORY[pos].X_UPPER)
+      {
+        if (COMPASS_HISTORY[pos].POINT.X > X_UPPER_MEAN)
+        {
+          COMPASS_HISTORY[pos].X_UPPER_M = true;
+        }
+      }
+
+      if (COMPASS_HISTORY[pos].Y_LOWER)
+      {
+        if (COMPASS_HISTORY[pos].POINT.Y < Y_LOWER_MEAN)
+        {
+          COMPASS_HISTORY[pos].Y_LOWER_M = true;
+        }
+      }
+
+      if (COMPASS_HISTORY[pos].Y_UPPER)
+      {
+        if (COMPASS_HISTORY[pos].POINT.Y > Y_UPPER_MEAN)
+        {
+          COMPASS_HISTORY[pos].Y_UPPER_M = true;
+        }
+      }
+    }
+  }
+
+}
+
+void CAL_LEVEL_2::reinforce_means()
+{
+  FLOAT_XYZ tmp_x_lower;
+  FLOAT_XYZ tmp_x_upper;
+  FLOAT_XYZ tmp_y_lower;
+  FLOAT_XYZ tmp_y_upper;
+
+  tmp_x_lower.X = X_LOWER_MEAN;
+  tmp_x_lower.Y = COMPASS_CENTER.Y;
+  tmp_x_lower.Z = 0.0f;
+
+  tmp_x_upper.X = X_UPPER_MEAN;
+  tmp_x_upper.Y = COMPASS_CENTER.Y;
+  tmp_x_upper.Z = 0.0f;
+
+  tmp_y_lower.X = COMPASS_CENTER.X;
+  tmp_y_lower.Y = Y_LOWER_MEAN;
+  tmp_y_lower.Z = 0.0f;
+
+  tmp_y_upper.X = COMPASS_CENTER.X;
+  tmp_y_upper.Y = Y_UPPER_MEAN;
+  tmp_y_upper.Z = 0.0f;
 
 
 
+  COMPASS_POINT tmp_x_upper_cp;
+  COMPASS_POINT tmp_x_lower_cp;
+  COMPASS_POINT tmp_y_upper_cp;
+  COMPASS_POINT tmp_y_lower_cp;
+
+  tmp_x_lower_cp.POINT = tmp_x_lower;
+  tmp_x_upper_cp.X_LOWER = true;
+  tmp_x_upper_cp.X_UPPER = false;
+  tmp_x_upper_cp.Y_LOWER = false;
+  tmp_x_upper_cp.Y_UPPER = false;
+  tmp_x_upper_cp.X_LOWER_M = true;
+  tmp_x_upper_cp.X_UPPER_M = false;
+  tmp_x_upper_cp.Y_LOWER_M = false;
+  tmp_x_upper_cp.Y_UPPER_M = false;
+
+  tmp_x_upper_cp.POINT = tmp_x_upper;
+  tmp_x_upper_cp.X_LOWER = false;
+  tmp_x_upper_cp.X_UPPER = true;
+  tmp_x_upper_cp.Y_LOWER = false;
+  tmp_x_upper_cp.Y_UPPER = false;
+  tmp_x_upper_cp.X_LOWER_M = false;
+  tmp_x_upper_cp.X_UPPER_M = true;
+  tmp_x_upper_cp.Y_LOWER_M = false;
+  tmp_x_upper_cp.Y_UPPER_M = false;
+
+  tmp_y_lower_cp.POINT = tmp_y_lower;
+  tmp_y_lower_cp.X_LOWER = false;
+  tmp_y_lower_cp.X_UPPER = false;
+  tmp_y_lower_cp.Y_LOWER = true;
+  tmp_y_lower_cp.Y_UPPER = false;
+  tmp_y_lower_cp.X_LOWER_M = false;
+  tmp_y_lower_cp.X_UPPER_M = false;
+  tmp_y_lower_cp.Y_LOWER_M = true;
+  tmp_y_lower_cp.Y_UPPER_M = false;
+
+  tmp_y_upper_cp.POINT = tmp_y_upper;
+  tmp_y_upper_cp.X_LOWER = false;
+  tmp_y_upper_cp.X_UPPER = false;
+  tmp_y_upper_cp.Y_LOWER = false;
+  tmp_y_upper_cp.Y_UPPER = true;
+  tmp_y_upper_cp.X_LOWER_M = false;
+  tmp_y_upper_cp.X_UPPER_M = false;
+  tmp_y_upper_cp.Y_LOWER_M = false;
+  tmp_y_upper_cp.Y_UPPER_M = true;
+
+  X_LOWER_COUNT++;
+  X_UPPER_COUNT++;
+  Y_LOWER_COUNT++;
+  Y_UPPER_COUNT++;
+
+  COMPASS_HISTORY.push_back(tmp_x_lower_cp);
+  COMPASS_HISTORY.push_back(tmp_x_upper_cp);
+  COMPASS_HISTORY.push_back(tmp_y_lower_cp);
+  COMPASS_HISTORY.push_back(tmp_y_upper_cp);
+
+  //add_point(tmp_x_lower);
+  //add_point(tmp_x_upper);
+  //add_point(tmp_y_lower);
+  //add_point(tmp_y_upper);
+}
+
+void CAL_LEVEL_2::delete_unnecessary_points()
+{
+  int max_size = COMPASS_HISTORY_SIZE / 5;
+
+  cout << "max_size: " << max_size << endl;
+  cout << "X_LOWER: " << X_LOWER_COUNT << " X_UPPER: " << X_UPPER_COUNT << " Y_LOWER: " << Y_LOWER_COUNT << " Y_UPPER: " << Y_UPPER_COUNT << endl;
+
+  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+  {
+    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    {
+      if (COMPASS_HISTORY[pos].X_LOWER_M == false && 
+          COMPASS_HISTORY[pos].X_UPPER_M == false &&
+          COMPASS_HISTORY[pos].Y_LOWER_M == false && 
+          COMPASS_HISTORY[pos].Y_UPPER_M == false)
+      {
+        bool del = false;
+
+        if (COMPASS_HISTORY[pos].X_LOWER && X_LOWER_COUNT > max_size)
+        {
+          X_LOWER_COUNT--;
+          del = true;
+        }
+        if (COMPASS_HISTORY[pos].X_UPPER && X_UPPER_COUNT > max_size)
+        {
+          X_UPPER_COUNT--;
+          del = true;
+        }
+        if (COMPASS_HISTORY[pos].Y_LOWER && Y_LOWER_COUNT > max_size)
+        {
+          Y_LOWER_COUNT--;
+          del = true;
+        }
+        if (COMPASS_HISTORY[pos].Y_UPPER && Y_UPPER_COUNT > max_size)
+        {
+          Y_UPPER_COUNT--;
+          del = true;
+        } 
+
+        if (del)
+        {
+          cout << pos << " ";
+          COMPASS_HISTORY.erase_p(pos);
+        }
+      }
+    }
+  }
+
+  cout << endl;
+  cout << "X_LOWER: " << X_LOWER_COUNT << " X_UPPER: " << X_UPPER_COUNT << " Y_LOWER: " << Y_LOWER_COUNT << " Y_UPPER: " << Y_UPPER_COUNT << endl << endl;
+}
 
         // Testing ----------------------------------------
 
@@ -1214,46 +1466,74 @@ void CAL_LEVEL_2::calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
   // Alternative method of calibration
   if (TEST_ALTERTATIVE_COMPASS)
   {
+    add_point(Raw_XYZ);
+    //FLOAT_XYZ fake_pt = fake_compass_input(tmeFrame_Time);
+    //add_point(fake_pt);
 
-    // add reading
+    ITERATION_COUNTER++;
+    if (ITERATION_COUNTER > ITERATION_TRIGGER)
     {
-      COMPASS_POINT tmp_compass_point;
-      tmp_compass_point.POINT = Raw_XYZ;
-      COMPASS_HISTORY.push_back(tmp_compass_point);
+      ITERATION_COUNTER = 0;
+
+      clear_all_flags();
+
+      group_upper_lower();
+      calculate_upper_lower_means();
+
+      if (X_LOWER_COUNT == 0 || X_UPPER_COUNT == 0 || Y_LOWER_COUNT == 0 || Y_UPPER_COUNT == 0)
+      {
+        COMPASS_CENTER = get_center_based_on_extremes();
+        group_upper_lower();            // based on extremes
+        calculate_upper_lower_means();  // based on extremes
+      }
+      else
+      {
+        COMPASS_CENTER.X = (X_UPPER_MEAN + X_LOWER_MEAN) / 2.0f;
+        COMPASS_CENTER.Y = (Y_UPPER_MEAN + Y_LOWER_MEAN) / 2.0f;
+      }
+
+      group_means();
+      reinforce_means();
+      delete_unnecessary_points();
     }
-
-    // catagorize
-
-
-    group_upper_lower();
-    calculate_upper_lower_means();
-
-    if (X_LOWER_COUNT == 0 || X_UPPER_COUNT == 0 || Y_LOWER_COUNT == 0 || Y_UPPER_COUNT == 0)
-    {
-      COMPASS_CENTER = get_center_based_on_extremes();
-      group_upper_lower();            // based on extremes
-      calculate_upper_lower_means();  // based on extremes
-    }
-    else
-    {
-      COMPASS_CENTER.X = (X_UPPER_MEAN - X_LOWER_MEAN) / 2.0f;
-      COMPASS_CENTER.Y = (Y_UPPER_MEAN - Y_LOWER_MEAN) / 2.0f;
-    }
-
-
-    cout << "s: " << COMPASS_HISTORY.size() << endl;
-    cout << "X: " << COMPASS_CENTER.X << " : " << X_LOWER_MEAN << " : " << X_UPPER_MEAN << endl;
-    cout << "Y: " << COMPASS_CENTER.Y << " : " << Y_LOWER_MEAN << " : " << Y_UPPER_MEAN << endl << endl;
     
-    cout << X_LOWER_COUNT << " : " 
-          << X_UPPER_COUNT << " : "
-          << Y_LOWER_COUNT << " : "
-          << Y_UPPER_COUNT << endl;
+    // calculat heading
+    {
+      /*
+      float dx =  Raw_XYZ.X - (X_UPPER_MEAN - X_LOWER_MEAN);
+      float dy = Raw_XYZ.Y - (Y_UPPER_MEAN - Y_LOWER_MEAN);
 
-    cout << endl;
+      HEADING_DEGREES_TEST = std::atan2(dy, dx);  // atan2 handles full 360° range
+      HEADING_DEGREES_TEST = HEADING_DEGREES_TEST * (180.0f / M_PI);
 
+      if (HEADING_DEGREES_TEST  < 0)
+      {
+        HEADING_DEGREES_TEST += 360.0f;  // Normalize to [0, 360)
+      }
+      */
 
+            
+      FLOAT_XYZ cent;
+      
+      cent.X = (X_LOWER_MEAN + X_UPPER_MEAN) * 0.5f;
+      cent.Y = (Y_LOWER_MEAN + Y_UPPER_MEAN) * 0.5f;
 
+      float dx = Raw_XYZ.X - cent.X;
+      float dy = Raw_XYZ.Y - cent.Y;
+      //float dx = fake_pt.X - cent.X;
+      //float dy = fake_pt.Y - cent.Y;
+
+      float heading_rad = std::atan2(dy, dx);
+      float heading_deg = heading_rad * (180.0f / M_PI);
+
+      if (heading_deg < 0.0f)
+          heading_deg += 360.0f;
+
+      HEADING_DEGREES_TEST = heading_deg;
+
+    }
+
+ 
       // Testing ----------------------------------------
 
   }

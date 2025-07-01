@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.263_250627"
+#define Revision "2.264_250628"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@
 #define TEST_DATA_AIRCRAFT  false   //
 #define TEST_DATA_GPS       false   //
 
-#define TEST_ALTERTATIVE_COMPASS  false
+#define TEST_ALTERTATIVE_COMPASS  true
 
 // -------------------------------------------------------------------------------------
 // CONSOLE AND INTEFACE SETUP
