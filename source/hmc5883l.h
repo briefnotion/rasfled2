@@ -136,15 +136,16 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
-float dist(float X, float Y);
+//float dist(float X, float Y);
 
-void calc_offset_and_skew(bool Simple, FLOAT_XYZ Top, FLOAT_XYZ Right, FLOAT_XYZ Bot, FLOAT_XYZ Left, 
-                          FLOAT_XYZ &Ret_Offset, FLOAT_XYZ &Ret_Skew);
+//void calc_offset_and_skew(bool Simple, FLOAT_XYZ Top, FLOAT_XYZ Right, FLOAT_XYZ Bot, FLOAT_XYZ Left, 
+//                          FLOAT_XYZ &Ret_Offset, FLOAT_XYZ &Ret_Skew);
 
-FLOAT_XYZ calculate_calibrated_xyz(FLOAT_XYZ &Raw_XYZ, FLOAT_XYZ Offset, FLOAT_XYZ Skew);
+//FLOAT_XYZ calculate_calibrated_xyz(FLOAT_XYZ &Raw_XYZ, FLOAT_XYZ Offset, FLOAT_XYZ Skew);
 
 // -------------------------------------------------------------------------------------
 
+/*
 class COMPASS_XY
 {
   public:
@@ -152,16 +153,18 @@ class COMPASS_XY
   float X = 0;
   float Y = 0;
 };
+*/
 
 // -------------------------------------------------------------------------------------
 
 // -------------------------------------------------------------------------------------
 
-bool four_point_check(FLOAT_XYZ Top, FLOAT_XYZ Bottom, 
-                      FLOAT_XYZ Left, FLOAT_XYZ Right);
+//bool four_point_check(FLOAT_XYZ Top, FLOAT_XYZ Bottom, 
+//                      FLOAT_XYZ Left, FLOAT_XYZ Right);
 
 // -------------------------------------------------------------------------------------
 
+/*
 class CAL_LEVEL_2_QUAD_RECORD
 {
   private:
@@ -191,7 +194,9 @@ class CAL_LEVEL_2_QUAD_RECORD
 
   void clear(bool Simple_Calibration);
 };
+*/
 
+/*
 class CALIBRATION_DATA
 {
   private:
@@ -239,12 +244,9 @@ class CALIBRATION_DATA
 
   void clear(bool Simple_Calibration);
 };
+*/
 
 // -------------------------------------------------------------------------------------
-
-
-
-        // Testing ----------------------------------------
 
 class COMPASS_POINT
 {
@@ -260,17 +262,86 @@ class COMPASS_POINT
   bool X_UPPER_M = false;
   bool Y_LOWER_M = false;
   bool Y_UPPER_M = false;
-
-  //float DIST_ABOVE_MEAN = 0;
 };
  
+// -------------------------------------------------------------------------------------
 
-        // Testing ----------------------------------------
+class CAL_LEVEL_3
+{
+  private:
+  FLOAT_XYZ fake_compass_input(unsigned long tmeFrame_Time);
 
+  void clear_all_flags();
+  void add_point(FLOAT_XYZ &Raw_XYZ);
+  FLOAT_XYZ get_center_based_on_extremes();
+  void group_upper_lower();
+  void calculate_upper_lower_means();
+  void group_means();
+  void reinforce_means();
+  void delete_unnecessary_points();
+
+  int COMPASS_HISTORY_SIZE = 800;
+
+  float CLOSEST_ALLOWED = 3.0f;
+
+  float X_LOWER_SUM = 0.0f;
+  int X_LOWER_COUNT = 0;
+  float X_UPPER_SUM = 0.0f;
+  int X_UPPER_COUNT = 0;
+  float Y_LOWER_SUM = 0.0f;
+  int Y_LOWER_COUNT = 0;
+  float Y_UPPER_SUM = 0.0f;
+  int Y_UPPER_COUNT = 0;
+
+  public:
+  string OFFSET_HISTORY_FILENAME = "";
+  // not coded
+
+  //int BEARING_OFFSET_LOAD = -1;
+ 
+  VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
+
+  float X_LOWER_MEAN = 0.0f;
+  float X_UPPER_MEAN = 0.0f;
+  float Y_LOWER_MEAN = 0.0f;
+  float Y_UPPER_MEAN = 0.0f;
+
+  FLOAT_XYZ COMPASS_CENTER;
+
+  int ITERATION_COUNTER = 0;
+  int ITERATION_TRIGGER = 66;
+
+  float HEADING_DEGREES_TEST = 0.0f;
+
+  FLOAT_XYZ LAST_READ_VALUE;
+
+  //void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
+  //                          FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
+  //                          FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
+  //                          FLOAT_XYZ Cal_Pt_4, float Cal_Var_4);
+
+  //void calibration_preload_set();
+
+  //MIN_MAX_SIMPLE x_min_max();
+  //MIN_MAX_SIMPLE y_min_max();
+  //MIN_MAX_SIMPLE z_min_max();
+
+  //FLOAT_XYZ offset();
+  //FLOAT_XYZ skew();
+  
+  void clear();
+
+  //float variance();
+  //bool simple_calibration();
+
+  void calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Raw_XYZ);
+  // Run Level 2 cal routines.
+};
 
 
 // -------------------------------------------------------------------------------------
 
+/*
 class CAL_LEVEL_2
 {
   private:
@@ -347,65 +418,7 @@ class CAL_LEVEL_2
   bool offset_history_read();
   void offset_history_write();
  
-
-
-        // Testing ----------------------------------------
-  FLOAT_XYZ fake_compass_input(unsigned long tmeFrame_Time);
-
-  void clear_all_flags();
-  void add_point(FLOAT_XYZ &Raw_XYZ);
-  FLOAT_XYZ get_center_based_on_extremes();
-  void group_upper_lower();
-  void calculate_upper_lower_means();
-  void group_means();
-  void reinforce_means();
-  void delete_unnecessary_points();
-
-        
-        // Testing ----------------------------------------
-
-
   public:
-
-
-
-        // Testing ----------------------------------------
- 
-      
-  // Alternative method to calculate offset and skew
- 
-  VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
-  int COMPASS_HISTORY_SIZE = 800;
-
-  float CLOSEST_ALLOWED = 3.0f;
-
-  float X_LOWER_MEAN = 0.0f;
-  float X_LOWER_SUM = 0.0f;
-  int X_LOWER_COUNT = 0;
-  
-  float X_UPPER_MEAN = 0.0f;
-  float X_UPPER_SUM = 0.0f;
-  int X_UPPER_COUNT = 0;
-
-  float Y_LOWER_MEAN = 0.0f;
-  float Y_LOWER_SUM = 0.0f;
-  int Y_LOWER_COUNT = 0;
-  
-  float Y_UPPER_MEAN = 0.0f;
-  float Y_UPPER_SUM = 0.0f;
-  int Y_UPPER_COUNT = 0;
-
-  FLOAT_XYZ COMPASS_CENTER;
-
-  int ITERATION_COUNTER = 0;
-  int ITERATION_TRIGGER = 66;
-
-  float HEADING_DEGREES_TEST = 0.0f;
-
-        // Testing ----------------------------------------
-
-
-        
 
   void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
                             FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
@@ -430,6 +443,7 @@ class CAL_LEVEL_2
   // Run Level 2 cal routines.
 
 };
+*/
 
 // -------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------
@@ -527,17 +541,18 @@ class HMC5883L
 
   HMC5883L_PROPERTIES PROPS;
 
-  CAL_LEVEL_2 LEVEL_2;
+  //CAL_LEVEL_2 LEVEL_2;
+  CAL_LEVEL_3 LEVEL_3;
 
-  void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
-                            FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
-                            FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
-                            FLOAT_XYZ Cal_Pt_4, float Cal_Var_4, 
-                            float Cal_Offset);
+  //void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
+  //                          FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
+  //                          FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
+  //                          FLOAT_XYZ Cal_Pt_4, float Cal_Var_4, 
+  //                          float Cal_Offset);
 
-  void calibration_preload_set();
+  //void calibration_preload_set();
 
-  int current_calibration_level();
+  //int current_calibration_level();
   // Not yet implemented
   //  0 - No calibration Done
   //  1 - Calibration of MIN MAX in progress.
@@ -551,29 +566,29 @@ class HMC5883L
   bool calibrate_on();
   // Returns true if calibration is displayed.
 
-  void calibrate_lock_toggle();
+  //void calibrate_lock_toggle();
   // Start / Stop Calibration
 
-  bool calibrate_lock_on();
+  //bool calibrate_lock_on();
   // Returns true if calibration in progress.
 
   // calibration
 
-  MIN_MAX_SIMPLE calibration_min_max_x();
-  MIN_MAX_SIMPLE calibration_min_max_y();
-  MIN_MAX_SIMPLE calibration_min_max_z();
-  FLOAT_XYZ calibration_offset();
+  //MIN_MAX_SIMPLE calibration_min_max_x();
+  //MIN_MAX_SIMPLE calibration_min_max_y();
+  //MIN_MAX_SIMPLE calibration_min_max_z();
+  //FLOAT_XYZ calibration_offset();
 
-  CAL_LEVEL_2_QUAD_RECORD calibration_points_active_quad_data();
-  bool calibration_points_active_quad_overflow();
+  //CAL_LEVEL_2_QUAD_RECORD calibration_points_active_quad_data();
+  //bool calibration_points_active_quad_overflow();
 
-  float calibration_variance();
-  bool calibration_simple();
+  //float calibration_variance();
+  //bool calibration_simple();
 
-  void calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
-                            FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
-                            FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
-                            FLOAT_XYZ D_Cal_Pt, float D_Cal_Var);
+  //void calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
+  //                          FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
+  //                          FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
+  //                          FLOAT_XYZ D_Cal_Pt, float D_Cal_Var);
 
   bool connected();
   // Returns true if hmc5883l is successfully connected.
@@ -615,7 +630,7 @@ class HMC5883L
   float bearing();
   // Direction Facing.
 
-  float test_heading();
+  //float test_heading();
 
   float bearing_jitter_min();
   float bearing_jitter_max();

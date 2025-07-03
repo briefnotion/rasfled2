@@ -379,6 +379,7 @@ int loop_2(bool TTY_Only)
   sdSystem.COMMS_COMPASS.PROPS.CALIBRATION_LOCK_AT_START = COMMS_COMPASS_CAL_LOCK_AT_START;
   sdSystem.COMMS_COMPASS.PROPS.OFFSET_HISTORY_FILE_NAME = sdSystem.FILE_NAMES.COMPASS_OFFSET_HISTROY_FILE;
 
+  /*
   {
     // Preload Calibration Data
     FLOAT_XYZ Cal_Pt_1;
@@ -406,6 +407,7 @@ int loop_2(bool TTY_Only)
 
     sdSystem.COMMS_COMPASS.calibration_preload(Cal_Pt_1, Cal_Var_1, Cal_Pt_2, Cal_Var_2, Cal_Pt_3, Cal_Var_3, Cal_Pt_4, Cal_Var_4, Cal_Offset);
   }
+  */
 
   // ---------------------------------------------------------------------------------------
   // The Advertisements

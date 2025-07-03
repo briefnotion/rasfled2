@@ -996,6 +996,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
 
     if (sdSysData.COMMS_COMPASS.calibrate_on())
     {
+      /*
       ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                         WORKING_AREA.y));
       if (BTC_LOCK.button_toggle_color(sdSysData, "LOCK\n(On)", "LOCK\n(Off)", sdSysData.COMMS_COMPASS.calibrate_lock_on(),
@@ -1004,6 +1005,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
       {
         sdSysData.COMMS_COMPASS.calibrate_lock_toggle();
       }
+      */
 
       ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                         WORKING_AREA.y));
@@ -1046,6 +1048,7 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
   // level 0 and level 1
 
   //if (!TEST_ALTERTATIVE_COMPASS)    // Display calibration
+  /*
   {
 
     for (int quad = 1; quad < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quad++)
@@ -1126,141 +1129,35 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     }
 
   }
+  */
 
-  
-        // Testing ----------------------------------------
-
-
-
-  // draw alternative calibration
-  if (TEST_ALTERTATIVE_COMPASS)    // Display calibration
   {
-    /*
-    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.mean()/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].VALUE.mean() / 4.0f));
-    p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.mean()/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].VALUE.mean() / 4.0f));
-    p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.mean()/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].VALUE.mean() / 4.0f));
-    p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.mean()/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].VALUE.mean() / 4.0f));
-    */
-
-    /*
-    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.min()/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].VALUE.min() / 4.0f));
-    p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.max()/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].VALUE.min() / 4.0f));
-    p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.max()/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].VALUE.max() / 4.0f));
-    p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.min()/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].VALUE.max() / 4.0f));
-    */
-
-    /*
-    draw_line(Draw_List, sdSysData, p1, p2, RAS_ORANGE, 8.0f);
-    draw_line(Draw_List, sdSysData, p2, p3, RAS_ORANGE, 8.0f);
-    draw_line(Draw_List, sdSysData, p3, p4, RAS_ORANGE, 8.0f);
-    draw_line(Draw_List, sdSysData, p4, p1, RAS_ORANGE, 8.0f);
-    */
-
-    /*
+    for (size_t pos = 0; pos < sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY.size(); pos++)
     {
-      p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[0].X_MIN_MAX.min()/ 4.0f), 
-                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[0].Y_MIN_MAX.min() / 4.0f));
-      p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[0].X_MIN_MAX.max()/ 4.0f), 
-                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[0].Y_MIN_MAX.min() / 4.0f));
-      p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[0].X_MIN_MAX.max()/ 4.0f), 
-                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[0].Y_MIN_MAX.max() / 4.0f));
-      p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[0].X_MIN_MAX.min()/ 4.0f), 
-                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[0].Y_MIN_MAX.max() / 4.0f));
-
-      c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A_CENTER.X / 4.0f), 
-                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A_CENTER.Y / 4.0f));
-
-      draw_line(Draw_List, sdSysData, p1, p2, RAS_YELLOW, 8.0f);
-      draw_line(Draw_List, sdSysData, p2, p3, RAS_YELLOW, 8.0f);
-      draw_line(Draw_List, sdSysData, p3, p4, RAS_YELLOW, 8.0f);
-      draw_line(Draw_List, sdSysData, p4, p1, RAS_YELLOW, 8.0f);
-
-      draw_marker_filled(Draw_List, sdSysData, c1, RAS_YELLOW);
-
-      p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].X_MIN_MAX.mean()/ 4.0f), 
-                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].Y_MIN_MAX.mean() / 4.0f));
-      p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].X_MIN_MAX.mean()/ 4.0f), 
-                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].Y_MIN_MAX.mean() / 4.0f));
-      p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].X_MIN_MAX.mean()/ 4.0f), 
-                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].Y_MIN_MAX.mean() / 4.0f));
-      p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].X_MIN_MAX.mean()/ 4.0f), 
-                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].Y_MIN_MAX.mean() / 4.0f));
-      
-      draw_line(Draw_List, sdSysData, p1, p2, RAS_YELLOW, 8.0f);
-      draw_line(Draw_List, sdSysData, p2, p3, RAS_YELLOW, 8.0f);
-      draw_line(Draw_List, sdSysData, p3, p4, RAS_YELLOW, 8.0f);
-      draw_line(Draw_List, sdSysData, p4, p1, RAS_YELLOW, 8.0f);
-
-    }
-    */
-
-    /*
-    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.A_X_MIN/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.A_Y_MIN / 4.0f));
-    p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.A_X_MAX/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.A_Y_MIN / 4.0f));
-    p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.A_X_MAX/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.A_Y_MAX / 4.0f));
-    p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.A_X_MIN/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.A_Y_MAX / 4.0f));
-    
-    draw_line(Draw_List, sdSysData, p1, p2, RAS_YELLOW, 8.0f);
-    draw_line(Draw_List, sdSysData, p2, p3, RAS_YELLOW, 8.0f);
-    draw_line(Draw_List, sdSysData, p3, p4, RAS_YELLOW, 8.0f);
-    draw_line(Draw_List, sdSysData, p4, p1, RAS_YELLOW, 8.0f);
-
-    c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.center.X / 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.center.Y / 4.0f));
-
-    draw_marker_filled(Draw_List, sdSysData, c1, RAS_YELLOW);
-    */
-
-    // Draw History
-    /*
-    for (int pos = 0; pos < (int)sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size(); pos++)
-    {
-
-      c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].X / 4.0f), 
-                    center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].Y / 4.0f));
-      draw_marker_filled(Draw_List, sdSysData, c1, RAS_BLUE);
-
-    }
-    */
-    
-    for (size_t pos = 0; pos < sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size(); pos++)
-    {
-      if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+      if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
       {
         int color = RAS_GREY;
-        if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].X_LOWER_M)
+        if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].X_LOWER_M)
         {
           color = RAS_GREEN;
         }
-        else if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].X_UPPER_M)
+        else if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].X_UPPER_M)
         {
           color = RAS_YELLOW;
         }
-        if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].Y_LOWER_M)
+        if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].Y_LOWER_M)
         {
           color = RAS_RED;
         }
-        else if (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].Y_UPPER_M)
+        else if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].Y_UPPER_M)
         {
           color = RAS_CYAN;
         }
 
         //if (color != RAS_BLUE)
         //{
-          c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].POINT.X / 4.0f), 
-                        center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY[pos].POINT.Y / 4.0f));
+          c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].POINT.X / 4.0f), 
+                        center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].POINT.Y / 4.0f));
           draw_marker_filled(Draw_List, sdSysData, c1, color);
         //}
       }
@@ -1268,22 +1165,22 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
 
 
     // Draw Center
-    c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.X / 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.Y / 4.0f));
+    c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.X / 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.Y / 4.0f));
     draw_marker_filled(Draw_List, sdSysData, c1, RAS_WHITE);
 
     // Draw Upper and Lower Means
-    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.X_LOWER_MEAN/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.Y / 4.0f));
+    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.X_LOWER_MEAN/ 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.Y / 4.0f));
 
-    p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.X_UPPER_MEAN/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.Y / 4.0f));
+    p2 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.X_UPPER_MEAN/ 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.Y / 4.0f));
 
-    p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.X/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.Y_LOWER_MEAN / 4.0f));
+    p3 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.X/ 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.Y_LOWER_MEAN / 4.0f));
 
-    p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.X/ 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_2.Y_UPPER_MEAN / 4.0f));
+    p4 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.X/ 4.0f), 
+                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.Y_UPPER_MEAN / 4.0f));
 
 
     draw_line(Draw_List, sdSysData, c1, p1, RAS_YELLOW, 2.0f);
@@ -1291,11 +1188,11 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     draw_line(Draw_List, sdSysData, c1, p3, RAS_YELLOW, 2.0f);
     draw_line(Draw_List, sdSysData, c1, p4, RAS_YELLOW, 2.0f);
 
-        // Testing ----------------------------------------
+    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.LAST_READ_VALUE.X/ 4.0f), 
+              center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.LAST_READ_VALUE.Y / 4.0f));
 
-
+    draw_line(Draw_List, sdSysData, c1, p1, RAS_WHITE, 2.0f);
   }
-  
 }
 
 void ADSB_MAP::screen_text(system_data &sdSysData)
@@ -1335,158 +1232,8 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
 
       ImGui::Text("COMPASS");
 
-      ImGui::Text("BEARING: %.1f", sdSysData.COMMS_COMPASS.bearing());
-    
-
-
-        // Testing ----------------------------------------
-
-
-      /*
-      // Testing Alternative Method of compass calibration
-      if (ACTIVE_GPS)
-      {
-        ImGui::Text("BEAR (T): %4.0f c(%4.0f) g(%4.0f) [%ld]", 
-                    sdSysData.COMMS_COMPASS.test_heading(),
-                    sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.test_heading(),
-                    sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING - sdSysData.COMMS_COMPASS.test_heading(), 
-                    sdSysData.COMMS_COMPASS.LEVEL_2.calibrationData.size());
-      }
-      else
-      {
-        ImGui::Text("BEAR (T): %4.0f c(%4.0f) [%ld]", 
-            sdSysData.COMMS_COMPASS.test_heading(),
-            sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.test_heading(), 
-            sdSysData.COMMS_COMPASS.LEVEL_2.calibrationData.size());
-      }
-
-      */
-
-
-      if (TEST_ALTERTATIVE_COMPASS)    // Display calibration
-      {
-        ImGui::NewLine();
-
-        ImGui::Text("BEAR (T): %4.1f  (%4.1f)", 
-          sdSysData.COMMS_COMPASS.LEVEL_2.HEADING_DEGREES_TEST, 
-          sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.LEVEL_2.HEADING_DEGREES_TEST);
-        
-        ImGui::NewLine();
-      
-        /*
-        ImGui::NewLine();
-  
-        ImGui::Text("size : %ld", 
-          sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size());
-        ImGui::Text("cent : (%4.1f : %4.1f)", 
-          sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.X, 
-          sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_CENTER.Y
-        );
-        ImGui::Text("mean : %4.1f : %4.1f : %4.1f : %4.1f", 
-          sdSysData.COMMS_COMPASS.LEVEL_2.X_LOWER_MEAN, 
-          sdSysData.COMMS_COMPASS.LEVEL_2.X_UPPER_MEAN,
-          sdSysData.COMMS_COMPASS.LEVEL_2.Y_LOWER_MEAN, 
-          sdSysData.COMMS_COMPASS.LEVEL_2.Y_UPPER_MEAN
-        );
-        
-        ImGui::NewLine();
-        */
-
-        //ImGui::Text("s: %ld", 
-        //  sdSysData.COMMS_COMPASS.LEVEL_2.COMPASS_HISTORY.size());
-
-        /*
-        ImGui::NewLine();
-        ImGui::Text("ce: %4.3f, %4.3f, %4.3f",
-          sdSysData.COMMS_COMPASS.LEVEL_2.ce.X, sdSysData.COMMS_COMPASS.LEVEL_2.ce.Y, sdSysData.COMMS_COMPASS.LEVEL_2.ce.Z);
-        ImGui::Text("m1: %4.3f, %4.3f, %4.3f",
-          sdSysData.COMMS_COMPASS.LEVEL_2.m1.X, sdSysData.COMMS_COMPASS.LEVEL_2.m1.Y, sdSysData.COMMS_COMPASS.LEVEL_2.m1.Z);
-        ImGui::Text("m2: %4.3f, %4.3f, %4.3f",
-          sdSysData.COMMS_COMPASS.LEVEL_2.m2.X, sdSysData.COMMS_COMPASS.LEVEL_2.m2.Y, sdSysData.COMMS_COMPASS.LEVEL_2.m2.Z);
-        ImGui::Text("m3: %4.3f, %4.3f, %4.3f",
-          sdSysData.COMMS_COMPASS.LEVEL_2.m3.X, sdSysData.COMMS_COMPASS.LEVEL_2.m3.Y, sdSysData.COMMS_COMPASS.LEVEL_2.m3.Z);
-        
-        ImGui::NewLine();
-        */
-      }
-
-
-      
-        // Testing ----------------------------------------
-  
-      if (sdSysData.COMMS_COMPASS.calibrate_on())
-      {
-        for (int quads = 1; quads < (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS.size(); quads++)
-        {
-          ImGui::Text("CAL PT %d | %d | %.0f, %.0f: %.3f", quads,
-                                                      (int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT_LIST.size(), 
-                                                      sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.X, 
-                                                      sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].OFFSET_POINT.Y, 
-                                                      sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_QUADS[quads].VARIANCE);
-        }
-
-        ImGui::Text("CAL OFFS: %.0f, %.0f  VARI: %d %.3f  OFFSET: %.0f", sdSysData.COMMS_COMPASS.calibration_offset().X, sdSysData.COMMS_COMPASS.calibration_offset().Y, 
-                                                                          sdSysData.COMMS_COMPASS.calibration_simple(), sdSysData.COMMS_COMPASS.calibration_variance(), 
-                                                                          sdSysData.COMMS_COMPASS.bearing_known_offset());
-        ImGui::NewLine();
-  
-
-        // Testing ----------------------------------------
-
-
-
-        /*
-        ImGui::NewLine();
-
-        ImGui::Text("                                  %d | %.3f, %.3f: %.3f", 
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].VALUE.samples(), 
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].VALUE.min(),
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].VALUE.mean(),
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].VALUE.max());
-
-        ImGui::Text("%d | %.3f, %.3f: %.3f", 
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.samples(), 
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.min(),
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.mean(),
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.max());
-
-        ImGui::SameLine();
-
-        ImGui::Text("%d | %.3f, %.3f: %.3f", 
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.samples(), 
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.min(),
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.mean(),
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.max());
-
-        ImGui::Text("                                  %d | %.3f, %.3f: %.3f", 
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].VALUE.samples(), 
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].VALUE.min(),
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].VALUE.mean(),
-                                            sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].VALUE.max());
-        */
-        
-        /*
-        ImGui::NewLine();
-
-        string disp1 = "     " + to_string(sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].VALUE.samples()) + " : " + to_string((int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[1].VALUE.min());
-        string disp2 = to_string(sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.samples()) + "              " + to_string(sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.samples());
-        string disp3 = to_string((int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[4].VALUE.min()) + "              " + to_string((int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[2].VALUE.max());
-        string disp4 = "     " + to_string(sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].VALUE.samples()) + " : " + to_string((int)sdSysData.COMMS_COMPASS.LEVEL_2.CALIBRATION_DATA_A[3].VALUE.max());
-
-        ImGui::Text("%s", disp1.c_str());
-        ImGui::Text("%s", disp2.c_str());
-        ImGui::Text("%s", disp3.c_str());
-        ImGui::Text("%s", disp4.c_str());
-
-        ImGui::Text("     Center: %f : %f", sdSysData.COMMS_COMPASS.LEVEL_2.center.X, sdSysData.COMMS_COMPASS.LEVEL_2.center.Y);
-        ImGui::Text("Cal Reading: %f : %f", sdSysData.COMMS_COMPASS.LEVEL_2.calibrated_reading.X, sdSysData.COMMS_COMPASS.LEVEL_2.calibrated_reading.Y);
-        
-        */
-
-
-        
-        // Testing ----------------------------------------
-      }
+      ImGui::Text("BEARING: %4.1f ", sdSysData.COMMS_COMPASS.bearing());
+      ImGui::Text("        (%4.1f)", sdSysData.COMMS_COMPASS.bearing_known_offset());
     }
   }
   ImGui::PopStyleColor();

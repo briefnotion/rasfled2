@@ -1,3 +1,10 @@
+2.265_250702
+  - For Testing
+  - Replaced the Compass Level 2 with Level 3 coded.  
+      Level 3 is not optimized or fully coded.
+      Level 3 does not retain calibration data.
+      Level 3 is not Hard Iron calibrating.
+
 2.264_250628
   - Added another Compass Test Routine to see how it behaves in the wild.
   - Halved the weight of the ambiant temp while computing te s-temp.
