@@ -270,9 +270,14 @@ class CAL_LEVEL_3
 {
   private:
   FLOAT_XYZ fake_compass_input(unsigned long tmeFrame_Time);
+  // Generates a fake compass input for testing purposes.
 
+  float dist_xyz(FLOAT_XYZ &A, FLOAT_XYZ &B);
+  // Calculates the distance between two points in 3D space.
+
+  // Functions to analyze the points in the history.
   void clear_all_flags();
-  void add_point(FLOAT_XYZ &Raw_XYZ);
+  bool add_point(FLOAT_XYZ &Raw_XYZ);
   FLOAT_XYZ get_center_based_on_extremes();
   void group_upper_lower();
   void calculate_upper_lower_means();
@@ -280,10 +285,17 @@ class CAL_LEVEL_3
   void reinforce_means();
   void delete_unnecessary_points();
 
+  void set_heading_degrees_report(FLOAT_XYZ &Raw_XYZ);
+  // Sets the heading degrees report based on the current raw XYZ values.
+
   int COMPASS_HISTORY_SIZE = 800;
+  // Size of the compass history, hardcoded for now.
 
+  // Constants for noise filtering
   float CLOSEST_ALLOWED = 3.0f;
+  float NOISE_FILTER_DISTANCE = 20.0f;
 
+  // Variables to hold the lower and upper sums and counts for X and Y axes
   float X_LOWER_SUM = 0.0f;
   int X_LOWER_COUNT = 0;
   float X_UPPER_SUM = 0.0f;
@@ -300,20 +312,28 @@ class CAL_LEVEL_3
   //int BEARING_OFFSET_LOAD = -1;
  
   VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
+  // Stores the history of compass points, using a non-sequential vector deque.
 
+  // Variables to hold the lower and upper means for X and Y axes
   float X_LOWER_MEAN = 0.0f;
   float X_UPPER_MEAN = 0.0f;
   float Y_LOWER_MEAN = 0.0f;
   float Y_UPPER_MEAN = 0.0f;
 
   FLOAT_XYZ COMPASS_CENTER;
+  // The center of the compass, calculated
 
+  // Contains iteration information
+  //  to determine when to perform calculations.
+  //  This is used to reduce the number of calculations performed.
   int ITERATION_COUNTER = 0;
   int ITERATION_TRIGGER = 66;
 
-  float HEADING_DEGREES_TEST = 0.0f;
-
+  float HEADING_DEGREES_REPORT = 0.0f;
+  // The heading degrees report, calculated based on the compass center and points.
   FLOAT_XYZ LAST_READ_VALUE;
+  // The last read value from the compass, used for noise filtering.
+
 
   //void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
   //                          FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
@@ -629,8 +649,6 @@ class HMC5883L
 
   float bearing();
   // Direction Facing.
-
-  //float test_heading();
 
   float bearing_jitter_min();
   float bearing_jitter_max();

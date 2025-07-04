@@ -369,13 +369,13 @@ FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
 {
   FLOAT_XYZ ret_point;
 
-  int speed = 10;  // 1 fastest
+  int speed = 5;  // 1 fastest
 
   //simulations
   bool noise = false;
   float noise_factor = 1.0f;
 
-  bool sparatic_random = false;
+  bool sparatic_random = true;
   float sparatic_random_factor = 2.0f;
   int sparatic_random_chance_percent = 5; // 5% chance of sparatic random jump
 
@@ -453,12 +453,17 @@ FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
     bool in_interference_zone = (tmeFrame_Time % 10000) < 2000; // 20% of the time
     if (in_interference_zone) 
     {
-        ret_point.X += 100.0f * sin(tmeFrame_Time * 0.05f);
-        ret_point.Y += 100.0f * cos(tmeFrame_Time * 0.05f);
+        ret_point.X += 50.0f * sin(tmeFrame_Time * 0.05f);
+        ret_point.Y += 50.0f * cos(tmeFrame_Time * 0.05f);
     }
   }
 
   return ret_point;
+}
+
+float CAL_LEVEL_3::dist_xyz(FLOAT_XYZ &A, FLOAT_XYZ &B)
+{
+  return sqrtf(powf(A.X - B.X, 2) + powf(A.Y - B.Y, 2) + powf(A.Z - B.Z, 2));
 }
 
 void CAL_LEVEL_3::clear_all_flags()
@@ -480,29 +485,41 @@ void CAL_LEVEL_3::clear_all_flags()
   }
 }
 
-void CAL_LEVEL_3::add_point(FLOAT_XYZ &Raw_XYZ)
+bool CAL_LEVEL_3::add_point(FLOAT_XYZ &Raw_XYZ)
 {
-  float dist = 0.0f;
 
-  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+  bool ret_pass_filter = false;
+
+  // Simple noise filter
+  if (dist_xyz(Raw_XYZ, LAST_READ_VALUE) < NOISE_FILTER_DISTANCE)
   {
-    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-    {
-      dist = sqrt(
-      pow(Raw_XYZ.X - COMPASS_HISTORY[pos].POINT.X, 2) +
-      pow(Raw_XYZ.X - COMPASS_HISTORY[pos].POINT.X, 2) +
-      pow(Raw_XYZ.X - COMPASS_HISTORY[pos].POINT.X, 2));
-      
-      if (dist < CLOSEST_ALLOWED)
-      {
-        COMPASS_HISTORY.erase_p(pos);
-      }
-    }
+    // If the new point is too far from the last read value, do not store it.
+    ret_pass_filter = true;
   }
 
-  COMPASS_POINT tmp_compass_point;
-  tmp_compass_point.POINT = Raw_XYZ;
-  COMPASS_HISTORY.push_back(tmp_compass_point);
+  if (ret_pass_filter)
+  {
+    float dist_newpoint_anyother = 0.0f;
+
+    for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+    {
+      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+      {
+        dist_newpoint_anyother = dist_xyz(Raw_XYZ, COMPASS_HISTORY[pos].POINT);
+        
+        if (dist_newpoint_anyother < CLOSEST_ALLOWED)
+        {
+          COMPASS_HISTORY.erase_p(pos);
+        }
+      }
+    }
+
+    COMPASS_POINT tmp_compass_point;
+    tmp_compass_point.POINT = Raw_XYZ;
+    COMPASS_HISTORY.push_back(tmp_compass_point);
+  }
+
+  return ret_pass_filter;
 }
 
 FLOAT_XYZ CAL_LEVEL_3::get_center_based_on_extremes()
@@ -798,6 +815,24 @@ void CAL_LEVEL_3::delete_unnecessary_points()
   }
 }
 
+void CAL_LEVEL_3::set_heading_degrees_report(FLOAT_XYZ &Raw_XYZ)
+{
+  FLOAT_XYZ cent;
+
+  float dx = Raw_XYZ.X - COMPASS_CENTER.X;
+  float dy = Raw_XYZ.Y - COMPASS_CENTER.Y;
+
+  float heading_rad = std::atan2(dy, dx);
+  float heading_deg = heading_rad * (180.0f / M_PI);
+
+  heading_deg -= 180.0f;
+
+  if (heading_deg < 0.0f)
+      heading_deg += 360.0f;
+
+  HEADING_DEGREES_REPORT = heading_deg;
+}
+
 void CAL_LEVEL_3::clear()
 {
   COMPASS_HISTORY.set_size(COMPASS_HISTORY_SIZE);
@@ -805,18 +840,22 @@ void CAL_LEVEL_3::clear()
 
 void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Raw_XYZ)
 {
-  //(void)tmeFrame_Time;  // Unused parameter, but kept for compatibility
-
+  // Set to true to use fake compass input for testing
   if (false)
   {
     Raw_XYZ = fake_compass_input(tmeFrame_Time);
   }
 
+  // Add point to history.  
+  // Includes a simple noise filter.
+  // Retain the last read value for future reference.
+  bool successful_add = add_point(Raw_XYZ);
   LAST_READ_VALUE = Raw_XYZ;
-  add_point(Raw_XYZ);
 
+  // Analyze the points in the history. Only performed during iterations.
+  // Analysis Determines Compass Center and Circle. 
   ITERATION_COUNTER++;
-  if (ITERATION_COUNTER > ITERATION_TRIGGER)
+  if (successful_add && ITERATION_COUNTER > ITERATION_TRIGGER)
   {
     ITERATION_COUNTER = 0;
 
@@ -833,8 +872,8 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
     }
     else
     {
-      COMPASS_CENTER.X = (X_UPPER_MEAN + X_LOWER_MEAN) / 2.0f;
-      COMPASS_CENTER.Y = (Y_UPPER_MEAN + Y_LOWER_MEAN) / 2.0f;
+      COMPASS_CENTER.X = (X_UPPER_MEAN + X_LOWER_MEAN) * 0.5f;
+      COMPASS_CENTER.Y = (Y_UPPER_MEAN + Y_LOWER_MEAN) * 0.5f;
     }
 
     group_means();
@@ -842,27 +881,9 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
     delete_unnecessary_points();
   }
   
-  // calculat heading
+  // Calculate heading
   // (simple)
-  {
-    FLOAT_XYZ cent;
-    
-    cent.X = (X_LOWER_MEAN + X_UPPER_MEAN) * 0.5f;
-    cent.Y = (Y_LOWER_MEAN + Y_UPPER_MEAN) * 0.5f;
-
-    float dx = Raw_XYZ.X - cent.X;
-    float dy = Raw_XYZ.Y - cent.Y;
-
-    float heading_rad = std::atan2(dy, dx);
-    float heading_deg = heading_rad * (180.0f / M_PI);
-
-    heading_deg += 90.0f;
-
-    if (heading_deg < 0.0f)
-        heading_deg += 360.0f;
-
-    HEADING_DEGREES_TEST = heading_deg;
-  }
+  set_heading_degrees_report(Raw_XYZ);
 }
 
 // -------------------------------------------------------------------------------------
@@ -1667,7 +1688,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 {
   //FLOAT_XYZ calibrated_bearing_xyz = calculate_calibrated_xyz(RAW_XYZ, LEVEL_2.offset(), LEVEL_2.skew());
   //RAW_BEARING = (atan2(calibrated_bearing_xyz.Y, calibrated_bearing_xyz.X) * 180 / M_PI);
-  RAW_BEARING = LEVEL_3.HEADING_DEGREES_TEST;
+  RAW_BEARING = LEVEL_3.HEADING_DEGREES_REPORT;
   
   float bearing = RAW_BEARING + KNOWN_DEVICE_DEGREE_OFFSET;
 
@@ -2092,7 +2113,16 @@ void HMC5883L::bearing_known_offset_calibration(float Known_Bearing)
 
 float HMC5883L::bearing_known_offset()
 {
-  return KNOWN_DEVICE_DEGREE_OFFSET;
+  if (KNOWN_DEVICE_DEGREE_OFFSET > 180.0f)
+  {
+    // If offset is greater than 180, then it is negative.
+    return KNOWN_DEVICE_DEGREE_OFFSET -= 360.0f;
+  }
+  else
+  {
+    // If offset is less than 180, then it is positive.
+    return KNOWN_DEVICE_DEGREE_OFFSET;
+  }
 }
 
 float HMC5883L::bearing()
@@ -2106,25 +2136,6 @@ float HMC5883L::bearing()
     return BEARING;
   }
 }
-
-
-        // Testing ----------------------------------------
-
-
-/*
-float HMC5883L::test_heading()
-{
-  float ret_heading = LEVEL_2.heading + KNOWN_DEVICE_DEGREE_OFFSET;
-    if (ret_heading < 0)
-        ret_heading += 360.0f;
-
-  return ret_heading;
-}
-*/        
-
-        // Testing ----------------------------------------
-
-
         
 float HMC5883L::bearing_jitter_min()
 {

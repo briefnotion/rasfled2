@@ -1,3 +1,23 @@
+2.266_250704
+  - Improved compass based on test.
+      The primary change was adding a simple noise filter.
+  - Corrected miscalculation of distance XYZ one of the routines.
+  - Reverted S-Temp back to the way it was.  It's not scientific, 
+      but works well as it was.
+  - Notes:
+      Level 3 is not optimized or fully coded.
+      Level 3 does not retain calibration data.
+      Level 3 is not Hard Iron calibrating.
+      Level 3 NOISE_FILTER_DISTANCE is hardcoded, not calculated.
+      Level 3 CLOSEST_ALLOWED is hardcoded, not calculated.
+      Level 3 COMPASS_HISTORY_SIZE is hardcoded, not calculated.
+      Level 3 Z-Azis not included in calculations.
+
+  - Latest OS updates caused the LED lights to fail on init.  Corrected by 
+      recompiling and reinstalling the existing mods, as outlined here:
+        https://github.com/jgarff/rpi_ws281x/wiki/Raspberry-Pi-5-support
+        https://github.com/jgarff/rpi_ws281x/issues/528#issuecomment-2784422523
+
 2.265_250702
   - For Testing
   - Replaced the Compass Level 2 with Level 3 coded.  
