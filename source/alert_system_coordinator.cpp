@@ -39,7 +39,7 @@ void ALERT_SYSTEM_COORDINATOR::check_for_alerts(system_data &sdSysData, AUTOMOBI
 
     // S-Temp alert
     if (sdSysData.ALL_ALERTS.res_alert_condition_greater_than(AUTO_RESERVE_ALERT_TEMP_S_TEMP, 
-      s_temp, 65.0f, 50.0f))
+      s_temp, 70.0f, 55.0f))
     {
       sdSysData.ALL_ALERTS.res_update_alert_text_line(AUTO_RESERVE_ALERT_TEMP_S_TEMP, "S-Temp Value is " + to_string((int)s_temp));
       sdSysData.ALL_ALERTS.res_update_additional_line_with_conditions(AUTO_RESERVE_ALERT_TEMP_S_TEMP);
@@ -98,7 +98,7 @@ void ALERT_SYSTEM_COORDINATOR::check_for_alerts(system_data &sdSysData, AUTOMOBI
     // Temperature Screen
     if ((sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c() > sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 25.0f) ||
           (sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c() > 110.0f) ||
-          (s_temp > 65.0f))
+          (s_temp > 70.0f))
     {
       sdSysData.PANEL_CONTROL.AUTO_TEMPERATURE.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000, "TMP ");
     }

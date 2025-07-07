@@ -1,3 +1,7 @@
+2.267_250707
+  - Rerestored the previous S-temp warning.  Increased the panel warning to to 70 from 65.
+  - Made changes to Compass.  Previous results were typically 40 degree error.
+
 2.266_250704
   - Improved compass based on test.
       The primary change was adding a simple noise filter.

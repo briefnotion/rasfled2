@@ -272,6 +272,9 @@ class CAL_LEVEL_3
   FLOAT_XYZ fake_compass_input(unsigned long tmeFrame_Time);
   // Generates a fake compass input for testing purposes.
 
+  bool xyz_equal(FLOAT_XYZ &A, FLOAT_XYZ &B);
+  // Checks if two FLOAT_XYZ points are equal.
+
   float dist_xyz(FLOAT_XYZ &A, FLOAT_XYZ &B);
   // Calculates the distance between two points in 3D space.
 

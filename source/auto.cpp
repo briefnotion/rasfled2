@@ -1644,7 +1644,7 @@ void AUTOMOBILE_CALCULATED::compute_low(DNFWTS_ &Dnfwts, AUTOMOBILE_TRANSLATED_D
   }
 
   // S-Temp
-  S_TEMP = (((2.0f * Status.TEMPS.AMBIANT_AIR_46.val_c() + 
+  S_TEMP = (((1.0f * Status.TEMPS.AMBIANT_AIR_46.val_c() + 
               2.0f * Status.TEMPS.AIR_INTAKE_0f.val_c() + 
               2.0f * Status.TEMPS.COOLANT_05.val_c() + 
               2.0f * (Status.TEMPS.CATALYST_3C.val_c() / 20.0f))

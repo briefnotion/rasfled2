@@ -1154,12 +1154,12 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
           color = RAS_CYAN;
         }
 
-        //if (color != RAS_BLUE)
-        //{
+        //if (color != RAS_GREY)
+        {
           c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].POINT.X / 4.0f), 
                         center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].POINT.Y / 4.0f));
           draw_marker_filled(Draw_List, sdSysData, c1, color);
-        //}
+        }
       }
     }
 

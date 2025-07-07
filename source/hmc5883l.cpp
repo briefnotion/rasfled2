@@ -369,14 +369,14 @@ FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
 {
   FLOAT_XYZ ret_point;
 
-  int speed = 5;  // 1 fastest
+  int speed = 10;  // 1 fastest
 
   //simulations
   bool noise = false;
-  float noise_factor = 1.0f;
+  float noise_factor = 0.5f;
 
   bool sparatic_random = true;
-  float sparatic_random_factor = 2.0f;
+  float sparatic_random_factor = 1.0f;
   int sparatic_random_chance_percent = 5; // 5% chance of sparatic random jump
 
   bool time_based_drift = false;
@@ -391,12 +391,9 @@ FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
   // parameters
   float radius = 250.0f;
   FLOAT_XYZ offset;
-  //offset.X = 0.0f;
-  //offset.Y = 0.0f;
-  //offset.Z = 0.0f;
   offset.X = 500.0f;
-  offset.Y = 33.3f;
-  offset.Z = 0.0f;
+  offset.Y = 500.3f;
+  //offset.Z = 0.0f;
 
   // gen
   float angle = (float)((tmeFrame_Time/speed) % 360);
@@ -461,6 +458,11 @@ FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
   return ret_point;
 }
 
+bool CAL_LEVEL_3::xyz_equal(FLOAT_XYZ &A, FLOAT_XYZ &B)
+{
+  return (A.X == B.X) && (A.Y == B.Y) && (A.Z == B.Z);
+}
+
 float CAL_LEVEL_3::dist_xyz(FLOAT_XYZ &A, FLOAT_XYZ &B)
 {
   return sqrtf(powf(A.X - B.X, 2) + powf(A.Y - B.Y, 2) + powf(A.Z - B.Z, 2));
@@ -470,6 +472,8 @@ void CAL_LEVEL_3::clear_all_flags()
 {
   for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
   {
+    COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = false;
+
     if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
     {
       COMPASS_HISTORY[pos].X_LOWER = false;
@@ -491,33 +495,37 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ &Raw_XYZ)
   bool ret_pass_filter = false;
 
   // Simple noise filter
-  if (dist_xyz(Raw_XYZ, LAST_READ_VALUE) < NOISE_FILTER_DISTANCE)
+  if (!xyz_equal(Raw_XYZ, LAST_READ_VALUE) &&
+      dist_xyz(Raw_XYZ, LAST_READ_VALUE) < NOISE_FILTER_DISTANCE)
   {
     // If the new point is too far from the last read value, do not store it.
     ret_pass_filter = true;
-  }
-
-  if (ret_pass_filter)
-  {
-    float dist_newpoint_anyother = 0.0f;
-
-    for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+    
+    if (ret_pass_filter)
     {
-      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+      float dist_newpoint_anyother = 0.0f;
+
+      for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
       {
-        dist_newpoint_anyother = dist_xyz(Raw_XYZ, COMPASS_HISTORY[pos].POINT);
-        
-        if (dist_newpoint_anyother < CLOSEST_ALLOWED)
+        if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
         {
-          COMPASS_HISTORY.erase_p(pos);
+          dist_newpoint_anyother = dist_xyz(Raw_XYZ, COMPASS_HISTORY[pos].POINT);
+          
+          if (dist_newpoint_anyother < CLOSEST_ALLOWED)
+          {
+            COMPASS_HISTORY.erase_p(pos);
+          }
         }
       }
-    }
 
-    COMPASS_POINT tmp_compass_point;
-    tmp_compass_point.POINT = Raw_XYZ;
-    COMPASS_HISTORY.push_back(tmp_compass_point);
+      COMPASS_POINT tmp_compass_point;
+      tmp_compass_point.POINT = Raw_XYZ;
+      COMPASS_HISTORY.push_back(tmp_compass_point);
+    }
   }
+  
+  LAST_READ_VALUE = Raw_XYZ;
+
 
   return ret_pass_filter;
 }
@@ -650,7 +658,9 @@ void CAL_LEVEL_3::group_means()
     {
       if (COMPASS_HISTORY[pos].X_LOWER)
       {
-        if (COMPASS_HISTORY[pos].POINT.X < X_LOWER_MEAN)
+        if (is_within(COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X, 
+                      (X_LOWER_MEAN - COMPASS_CENTER.X) * 2.0f, 
+                      (X_LOWER_MEAN - COMPASS_CENTER.X) * 0.8f))    
         {
           COMPASS_HISTORY[pos].X_LOWER_M = true;
         }
@@ -658,7 +668,9 @@ void CAL_LEVEL_3::group_means()
       
       if (COMPASS_HISTORY[pos].X_UPPER)
       {
-        if (COMPASS_HISTORY[pos].POINT.X > X_UPPER_MEAN)
+        if (is_within(COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X, 
+                      (X_UPPER_MEAN - COMPASS_CENTER.X) * 2.0f, 
+                      (X_UPPER_MEAN - COMPASS_CENTER.X) * 0.8f)) 
         {
           COMPASS_HISTORY[pos].X_UPPER_M = true;
         }
@@ -666,7 +678,9 @@ void CAL_LEVEL_3::group_means()
 
       if (COMPASS_HISTORY[pos].Y_LOWER)
       {
-        if (COMPASS_HISTORY[pos].POINT.Y < Y_LOWER_MEAN)
+        if (is_within(COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y, 
+                      (Y_LOWER_MEAN - COMPASS_CENTER.Y) * 2.0f, 
+                      (Y_LOWER_MEAN - COMPASS_CENTER.Y) * 0.8f))  
         {
           COMPASS_HISTORY[pos].Y_LOWER_M = true;
         }
@@ -674,10 +688,24 @@ void CAL_LEVEL_3::group_means()
 
       if (COMPASS_HISTORY[pos].Y_UPPER)
       {
-        if (COMPASS_HISTORY[pos].POINT.Y > Y_UPPER_MEAN)
+        if (is_within(COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y, 
+                      (Y_UPPER_MEAN - COMPASS_CENTER.Y) * 2.0f, 
+                      (Y_UPPER_MEAN - COMPASS_CENTER.Y) * 0.8f))
         {
           COMPASS_HISTORY[pos].Y_UPPER_M = true;
         }
+      }
+
+      if (COMPASS_HISTORY[pos].X_LOWER_M + 
+          COMPASS_HISTORY[pos].X_UPPER_M + 
+          COMPASS_HISTORY[pos].Y_LOWER_M + 
+          COMPASS_HISTORY[pos].Y_UPPER_M > 1)
+      {
+        // if a point is in more than one mean group, it is suspect, remove all flags
+        COMPASS_HISTORY[pos].X_LOWER_M = false;
+        COMPASS_HISTORY[pos].X_UPPER_M = false;
+        COMPASS_HISTORY[pos].Y_LOWER_M = false;
+        COMPASS_HISTORY[pos].Y_UPPER_M = false;
       }
     }
   }
@@ -772,45 +800,19 @@ void CAL_LEVEL_3::reinforce_means()
 
 void CAL_LEVEL_3::delete_unnecessary_points()
 {
-  int max_size = COMPASS_HISTORY_SIZE / 5;
+  //int max_size = COMPASS_HISTORY_SIZE / 5;
 
   for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
   {
     if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
     {
-      if (COMPASS_HISTORY[pos].X_LOWER_M == false && 
-          COMPASS_HISTORY[pos].X_UPPER_M == false &&
-          COMPASS_HISTORY[pos].Y_LOWER_M == false && 
-          COMPASS_HISTORY[pos].Y_UPPER_M == false)
-      {
-        bool del = false;
-
-        if (COMPASS_HISTORY[pos].X_LOWER && X_LOWER_COUNT > max_size)
+        if (COMPASS_HISTORY[pos].X_LOWER_M ||  
+            COMPASS_HISTORY[pos].X_UPPER_M ||  
+            COMPASS_HISTORY[pos].Y_LOWER_M ||  
+            COMPASS_HISTORY[pos].Y_UPPER_M)
         {
-          X_LOWER_COUNT--;
-          del = true;
+          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
         }
-        if (COMPASS_HISTORY[pos].X_UPPER && X_UPPER_COUNT > max_size)
-        {
-          X_UPPER_COUNT--;
-          del = true;
-        }
-        if (COMPASS_HISTORY[pos].Y_LOWER && Y_LOWER_COUNT > max_size)
-        {
-          Y_LOWER_COUNT--;
-          del = true;
-        }
-        if (COMPASS_HISTORY[pos].Y_UPPER && Y_UPPER_COUNT > max_size)
-        {
-          Y_UPPER_COUNT--;
-          del = true;
-        } 
-
-        if (del)
-        {
-          COMPASS_HISTORY.erase_p(pos);
-        }
-      }
     }
   }
 }
@@ -850,7 +852,6 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
   // Includes a simple noise filter.
   // Retain the last read value for future reference.
   bool successful_add = add_point(Raw_XYZ);
-  LAST_READ_VALUE = Raw_XYZ;
 
   // Analyze the points in the history. Only performed during iterations.
   // Analysis Determines Compass Center and Circle. 
@@ -877,7 +878,7 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
     }
 
     group_means();
-    reinforce_means();
+    //reinforce_means();
     delete_unnecessary_points();
   }
   
