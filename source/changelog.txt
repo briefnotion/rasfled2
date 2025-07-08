@@ -1,3 +1,7 @@
+2.268_250708
+  - Made changes to Compass.  Previous results were typically 60 degree error.  About 5 
+      degrees with good data.
+
 2.267_250707
   - Rerestored the previous S-temp warning.  Increased the panel warning to to 70 from 65.
   - Made changes to Compass.  Previous results were typically 40 degree error.

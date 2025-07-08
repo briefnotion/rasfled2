@@ -1294,6 +1294,32 @@ bool is_within(float Value, float Number_1, float Number_2)
   }
 }
 
+bool is_within(double Value, double Number_1, double Number_2)
+{
+  if (Number_1 <= Number_2)
+  {
+    if (Number_1 <= Value && Value <= Number_2)
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  else
+  {
+    if (Number_2 <= Value && Value <= Number_1)
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+}
+
 bool set_bool_with_change_notify(bool Set_Value, bool &Bool_Variable)
 {
   if (Bool_Variable == Set_Value)

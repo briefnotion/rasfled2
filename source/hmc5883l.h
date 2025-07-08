@@ -25,6 +25,11 @@
 #include <linux/i2c-dev.h>  // LINUX i2c device libraries.
 #include <cmath>
 
+// Third Party Header Files
+//#include <Eigen/Dense>
+//#include <Eigen/Eigenvalues>
+//#include <Eigen/GeneralizedEigenSolver>
+
 // RASFled related header files
 #include "definitions.h"
 #include "fled_time.h"
@@ -269,6 +274,7 @@ class COMPASS_POINT
 class CAL_LEVEL_3
 {
   private:
+
   FLOAT_XYZ fake_compass_input(unsigned long tmeFrame_Time);
   // Generates a fake compass input for testing purposes.
 
@@ -285,7 +291,6 @@ class CAL_LEVEL_3
   void group_upper_lower();
   void calculate_upper_lower_means();
   void group_means();
-  void reinforce_means();
   void delete_unnecessary_points();
 
   void set_heading_degrees_report(FLOAT_XYZ &Raw_XYZ);
@@ -330,7 +335,9 @@ class CAL_LEVEL_3
   //  to determine when to perform calculations.
   //  This is used to reduce the number of calculations performed.
   int ITERATION_COUNTER = 0;
-  int ITERATION_TRIGGER = 66;
+  int ITERATION_COUNTER2 = 0;
+  int ITERATION_TRIGGER = 2;
+
 
   float HEADING_DEGREES_REPORT = 0.0f;
   // The heading degrees report, calculated based on the compass center and points.
