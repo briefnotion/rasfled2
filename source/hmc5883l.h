@@ -24,6 +24,7 @@
 #include <fcntl.h>
 #include <linux/i2c-dev.h>  // LINUX i2c device libraries.
 #include <cmath>
+#include <iomanip>   // For std::fixed, std::setprecision
 
 // Third Party Header Files
 //#include <Eigen/Dense>
@@ -280,15 +281,15 @@ class COMPASS_POINT
 /**
  * @brief Stores the calculated calibration parameters.
  * Hard iron offset corrects for magnetic biases.
- * Soft iron scaling corrects for axis distortions (makes ellipse more circular).
+ * Soft iron matrix corrects for axis distortions (makes ellipse/ellipsoid spherical).
  */
 struct CalibrationParameters {
-    FLOAT_XYZ hard_iron_offset; // Bias to remove from each axis
-    FLOAT_XYZ soft_iron_scale;  // Scaling factor for each axis (X, Y, Z) to normalize ranges
+    FLOAT_XYZ hard_iron_offset; // Bias to remove from each axis (center of ellipsoid)
+    Matrix3x3 soft_iron_matrix; // 3x3 transformation matrix for soft iron correction
 
     CalibrationParameters() :
         hard_iron_offset(0.0f, 0.0f, 0.0f),
-        soft_iron_scale(1.0f, 1.0f, 1.0f) {} // Default to no scaling
+        soft_iron_matrix() {} // Default to identity matrix
 };
 
 class CAL_LEVEL_3
@@ -313,9 +314,6 @@ class CAL_LEVEL_3
   void group_means();
   void delete_unnecessary_points();
 
-  void set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ) ;
-  // Sets the heading degrees report based on the current raw XYZ values.
-
   int COMPASS_HISTORY_SIZE = 800;
   // Size of the compass history, hardcoded for now.
 
@@ -337,9 +335,15 @@ class CAL_LEVEL_3
   // Store calibration parameters globally or as a class member
   CalibrationParameters current_calibration_params;
 
+
+  bool fit_ellipsoid_and_get_calibration_matrix(
+      const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
+      FLOAT_XYZ& hard_iron_offset,
+      Matrix3x3& soft_iron_matrix);
   CalibrationParameters perform_hard_soft_iron_calibration(const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history);
   float calculate_calibrated_heading(const FLOAT_XYZ& raw_point, const CalibrationParameters& params);
-  //void set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ);
+  void set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ);
+
 
   // Testing
   float FAKE_INPUT = 0.0f;
