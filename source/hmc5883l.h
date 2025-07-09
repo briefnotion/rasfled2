@@ -256,20 +256,40 @@ class CALIBRATION_DATA
 class COMPASS_POINT
 {
   public:
-  FLOAT_XYZ POINT;
+    FLOAT_XYZ POINT; // The actual XYZ coordinates of the compass reading
 
-  bool X_LOWER = false;
-  bool X_UPPER = false;
-  bool Y_LOWER = false;
-  bool Y_UPPER = false;
+    bool X_LOWER = false; // Flag if this point is in the lower X region
+    bool X_UPPER = false; // Flag if this point is in the upper X region
+    bool Y_LOWER = false; // Flag if this point is in the lower Y region
+    bool Y_UPPER = false; // Flag if this point is in the upper Y region
 
-  bool X_LOWER_M = false;
-  bool X_UPPER_M = false;
-  bool Y_LOWER_M = false;
-  bool Y_UPPER_M = false;
+    bool X_LOWER_M = false; // Another set of flags, possibly for means or modified regions
+    bool X_UPPER_M = false;
+    bool Y_LOWER_M = false;
+    bool Y_UPPER_M = false; // Corrected: Added 'bool' keyword
+
+    // Default constructor to initialize POINT
+    COMPASS_POINT() : POINT() {}
+    // Constructor to initialize POINT with XYZ values
+    COMPASS_POINT(float x, float y, float z) : POINT(x, y, z) {}
 };
  
 // -------------------------------------------------------------------------------------
+
+
+/**
+ * @brief Stores the calculated calibration parameters.
+ * Hard iron offset corrects for magnetic biases.
+ * Soft iron scaling corrects for axis distortions (makes ellipse more circular).
+ */
+struct CalibrationParameters {
+    FLOAT_XYZ hard_iron_offset; // Bias to remove from each axis
+    FLOAT_XYZ soft_iron_scale;  // Scaling factor for each axis (X, Y, Z) to normalize ranges
+
+    CalibrationParameters() :
+        hard_iron_offset(0.0f, 0.0f, 0.0f),
+        soft_iron_scale(1.0f, 1.0f, 1.0f) {} // Default to no scaling
+};
 
 class CAL_LEVEL_3
 {
@@ -293,7 +313,7 @@ class CAL_LEVEL_3
   void group_means();
   void delete_unnecessary_points();
 
-  void set_heading_degrees_report(FLOAT_XYZ &Raw_XYZ);
+  void set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ) ;
   // Sets the heading degrees report based on the current raw XYZ values.
 
   int COMPASS_HISTORY_SIZE = 800;
@@ -312,6 +332,17 @@ class CAL_LEVEL_3
   int Y_LOWER_COUNT = 0;
   float Y_UPPER_SUM = 0.0f;
   int Y_UPPER_COUNT = 0;
+
+
+  // Store calibration parameters globally or as a class member
+  CalibrationParameters current_calibration_params;
+
+  CalibrationParameters perform_hard_soft_iron_calibration(const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history);
+  float calculate_calibrated_heading(const FLOAT_XYZ& raw_point, const CalibrationParameters& params);
+  //void set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ);
+
+  // Testing
+  float FAKE_INPUT = 0.0f;
 
   public:
   string OFFSET_HISTORY_FILENAME = "";

@@ -1,3 +1,7 @@
+2.269_250709
+  - Made massive changes to Compass based on AI.  Saving this as a Checkpoint.  Not fit for 
+      live runs.
+
 2.268_250708
   - Made changes to Compass.  Previous results were typically 60 degree error.  About 5 
       degrees with good data.

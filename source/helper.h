@@ -48,6 +48,37 @@ class FLOAT_XYZ
   float X = 0;
   float Y = 0;
   float Z = 0;
+
+  // Default constructor
+  FLOAT_XYZ() : X(0.0f), Y(0.0f), Z(0.0f) {}
+
+  // Parameterized constructor
+  FLOAT_XYZ(float x, float y, float z) : X(x), Y(y), Z(z) {}
+
+  // Overload for addition
+  FLOAT_XYZ operator+(const FLOAT_XYZ& other) const {
+      return FLOAT_XYZ(X + other.X, Y + other.Y, Z + other.Z);
+  }
+
+  // Overload for subtraction
+  FLOAT_XYZ operator-(const FLOAT_XYZ& other) const {
+      // FIX: Corrected Z component subtraction from other.Y to other.Z
+      return FLOAT_XYZ(X - other.X, Y - other.Y, Z - other.Z);
+  }
+
+  // Overload for scalar multiplication
+  FLOAT_XYZ operator*(float scalar) const {
+      return FLOAT_XYZ(X * scalar, Y * scalar, Z * scalar);
+  }
+
+  // Overload for scalar division
+  FLOAT_XYZ operator/(float scalar) const {
+      if (scalar != 0.0f) {
+          return FLOAT_XYZ(X / scalar, Y / scalar, Z / scalar);
+      }
+      return *this; // Avoid division by zero, return current state
+  }
+
 };
 
 class DOUBLE_XYZ
@@ -791,152 +822,200 @@ public:
 
 // ---------------------------------------------------------------------------------------
 // VECTOR DEQUE NON SEQUENTIAL
-
-class VECTOR_DEQUE_NON_SEQUENTIAL_FLAGS
-{
-  public:
-  bool HAS_DATA = false;
-  bool DO_NOT_OVERWRITE = false;
+/**
+ * @brief Flags for the VECTOR_DEQUE_NON_SEQUENTIAL to manage data presence and overwrite protection.
+ */
+struct VECTOR_DEQUE_NON_SEQUENTIAL_FLAGS {
+    bool HAS_DATA = false;
+    bool DO_NOT_OVERWRITE = false;
 };
 
 template <typename T>
 class VECTOR_DEQUE_NON_SEQUENTIAL
 {
-  vector<T>     DATA;
-  int BACK = 0;
-  int COUNT = 0;
-  int FULL_SIZE = 10;
+private:
+  std::vector<T> DATA;
+  int BACK = 0; // Index of the next available slot for push_back (circular)
+  int COUNT = 0; // Number of active (HAS_DATA = true) elements
+  int FULL_SIZE = 0; // Total capacity of the deque
 
-  public:
-  vector<VECTOR_DEQUE_NON_SEQUENTIAL_FLAGS>  FLAGS;
+public:
+  std::vector<VECTOR_DEQUE_NON_SEQUENTIAL_FLAGS> FLAGS;
 
+  // Default constructor
+  VECTOR_DEQUE_NON_SEQUENTIAL() 
+  {
+    set_size(10); // Default initial size
+  }
+
+  /**
+   * @brief Sets the capacity of the deque. Resets the deque.
+   * @param New_Capacity The new total capacity.
+   */
   void set_size(int New_Capacity)
   {
-    vector<T>     new_data(New_Capacity);
-    vector<VECTOR_DEQUE_NON_SEQUENTIAL_FLAGS>  new_flags(New_Capacity);
+    if (New_Capacity <= 0) 
+    {
+      std::cerr << "Warning: New_Capacity must be positive. Setting to 10." << std::endl;
+      New_Capacity = 10;
+    }
+
+    DATA.assign(New_Capacity, T()); // Resize and default-construct elements
+    FLAGS.assign(New_Capacity, VECTOR_DEQUE_NON_SEQUENTIAL_FLAGS()); // Resize and default-construct flags
 
     FULL_SIZE = New_Capacity;
     BACK = 0;
     COUNT = 0;
-    
-    DATA  = move(new_data);
-    FLAGS = move(new_flags);
+  }
 
-    /*
-    int new_count = 0;
-
-    for (int pos = 0; pos < New_Capacity; pos++)
-    {
-      if (pos < (int)DATA.size())
-      {
-        new_data[pos] = DATA[pos];
-        new_flags[pos] = FLAGS[pos];
-        if (FLAGS[pos].HAS_DATA)
-        {
-          new_count++;
-        }
-      }
-      else
-      {
-        new_flags[pos].HAS_DATA = false;
-        new_flags[pos].DO_NOT_OVERWRITE = false;
-      }
-    }
-
-    DATA  = move(new_data);
-    FLAGS = move(new_flags);
-
-    FULL_SIZE = New_Capacity;
-    BACK = 0;
-    COUNT = new_count;
-    */
-  } 
-
-  int count()
+  /**
+   * @brief Returns the number of active (HAS_DATA) elements in the deque.
+   * @return The count of active elements.
+   */
+  int count() const // Mark as const
   {
     return COUNT;
   }
 
-  size_t size()
+  /**
+   * @brief Returns the total capacity of the deque.
+   * @return The total capacity.
+   */
+  size_t size() const // Mark as const
   {
     return DATA.size();
   }
 
+  /**
+   * @brief Checks if the deque is empty (contains no active data).
+   * @return True if empty, false otherwise.
+   */
+  bool empty() const 
+  {
+    return COUNT == 0;
+  }
+
+  /**
+   * @brief Adds a new value to the deque. Handles circular buffer logic and overwrite rules.
+   * @param Value The value to add.
+   */
   void push_back(const T& Value)
   {
-    if (COUNT == FULL_SIZE)  // Full, overwrite oldest
+    if (FULL_SIZE == 0) {
+      std::cerr << "Error: VECTOR_DEQUE_NON_SEQUENTIAL size not set or is zero. Cannot push_back." << std::endl;
+      return;
+    }
+
+    if (COUNT == FULL_SIZE) // Full, overwrite oldest if not protected
     {
-      int position_found = false;
+      int position_found = -1; // Use -1 to indicate not found
 
-      for (size_t loc = 0; loc < DATA.size() && position_found == false; loc++)
+      // Search for the oldest non-protected slot starting from BACK
+      for (int loc = 0; loc < FULL_SIZE; ++loc) // Iterate up to FULL_SIZE
       {
-        if (FLAGS[(BACK + loc) %FULL_SIZE].DO_NOT_OVERWRITE == false)
+        int current_pos = (BACK + loc) % FULL_SIZE;
+        if (FLAGS[current_pos].DO_NOT_OVERWRITE == false)
         {
-          position_found = true;
-
-          BACK = (BACK + loc) %FULL_SIZE;
-
-          DATA[BACK] = Value;
-          FLAGS[BACK].HAS_DATA = true;
-          FLAGS[BACK].DO_NOT_OVERWRITE = false;
+          position_found = current_pos;
+          break; // Found a writable position
         }
       }
 
-      if (position_found == false)
+      if (position_found != -1) // A writable position was found
       {
+        // If the slot we are about to overwrite HAS_DATA, then COUNT doesn't change
+        // If it didn't have data (e.g., was explicitly erased, but not protected),
+        // then COUNT would increment. But in a full scenario, it must have had data.
+        // So COUNT remains the same.
+        BACK = position_found;
         DATA[BACK] = Value;
         FLAGS[BACK].HAS_DATA = true;
-        FLAGS[BACK].DO_NOT_OVERWRITE = false;
+        FLAGS[BACK].DO_NOT_OVERWRITE = false; // Ensure it's not protected after overwrite
       }
-      
-      BACK = (BACK + 1) % FULL_SIZE;
-
-    }
-    else
-    {
-      // Find first Deleted
-      bool replaced = false;
-      for (size_t pos = 0; (pos < DATA.size()) && (replaced == false); pos++)
+      else // All positions are protected (DO_NOT_OVERWRITE == true)
       {
-        if (FLAGS[pos].HAS_DATA == false)
+        // This case means the deque is full and all elements are protected.
+        // We cannot add new data without overwriting a protected element,
+        // which the logic explicitly tries to avoid.
+        std::cerr << "Warning: VECTOR_DEQUE_NON_SEQUENTIAL is full and all elements are protected. Cannot push_back." << std::endl;
+        return; // Cannot add
+      }
+
+      BACK = (BACK + 1) % FULL_SIZE; // Move BACK to the next potential slot
+    }
+    else // Not full, find first empty slot
+    {
+      for (int pos = 0; pos < FULL_SIZE; ++pos) // Iterate through all possible positions
+      {
+        if (FLAGS[pos].HAS_DATA == false) // Found an empty slot
         {
-          replaced = true;
           DATA[pos] = Value;
           FLAGS[pos].HAS_DATA = true;
-          FLAGS[pos].DO_NOT_OVERWRITE = false;
+          FLAGS[pos].DO_NOT_OVERWRITE = false; // Ensure it's not protected
           COUNT++;
+          break; // Slot found and filled
         }
       }
+      // If replaced is false here, it means COUNT < FULL_SIZE but no HAS_DATA == false slot was found.
+      // This scenario implies a logical inconsistency if COUNT is truly the number of HAS_DATA elements.
+      // It should not happen if COUNT accurately reflects HAS_DATA flags.
     }
   }
 
+  /**
+   * @brief Erases a point at a specific position by marking it as not having data.
+   * Decrements the active count.
+   * @param pos The index of the element to erase.
+   */
   void erase_p(int pos)
-  {  
-    /*
-    if (pos < 0 || pos >= (int)FLAGS.size())
+  {
+    if (pos < 0 || pos >= FULL_SIZE) // Check against FULL_SIZE (actual vector size)
     {
-      cout << "Index out of range in erase_p" << endl;
-      throw out_of_range("Index out of range in erase_p");
+      std::cerr << "Error: Index out of range in erase_p: " << pos << std::endl;
+      // Optionally throw out_of_range("Index out of range in erase_p");
+      return;
     }
-    */
-    
+
     if (FLAGS[pos].HAS_DATA)
     {
       FLAGS[pos].HAS_DATA = false;
-      FLAGS[pos].DO_NOT_OVERWRITE = false;
+      FLAGS[pos].DO_NOT_OVERWRITE = false; // Also clear overwrite protection
       COUNT--;
     }
   }
 
-  T& operator[](int pos) 
+  /**
+   * @brief Accesses the element at a specific position.
+   * @param pos The index of the element.
+   * @return A reference to the element.
+   */
+  T& operator[](int pos)
   {
-    /*
-    if (pos < 0 || pos >= COUNT)
+    // This operator should ideally check if pos is within bounds [0, FULL_SIZE-1]
+    // and potentially if FLAGS[pos].HAS_DATA is true, depending on desired behavior.
+    // For now, mirroring your original comment's logic, but note that `COUNT`
+    // is the number of active elements, not necessarily the highest index.
+    if (pos < 0 || pos >= FULL_SIZE) // Check against actual allocated size
     {
-      cout << "Index out of range in VECTOR_DEQUE_NON_SEQUENTIAL" << endl;
-      throw out_of_range("Index out of range in VECTOR_DEQUE_NON_SEQUENTIAL");
+      std::cerr << "Error: Index out of range in VECTOR_DEQUE_NON_SEQUENTIAL operator[]: " << pos << std::endl;
+      // Throwing an exception is generally better for unrecoverable errors.
+      throw std::out_of_range("Index out of range in VECTOR_DEQUE_NON_SEQUENTIAL");
     }
-    */
+    return DATA[pos];
+  }
+
+  /**
+   * @brief Const access to the element at a specific position.
+   * @param pos The index of the element.
+   * @return A const reference to the element.
+   */
+  const T& operator[](int pos) const
+  {
+    if (pos < 0 || pos >= FULL_SIZE)
+    {
+      std::cerr << "Error: Index out of range in VECTOR_DEQUE_NON_SEQUENTIAL const operator[]: " << pos << std::endl;
+      throw std::out_of_range("Index out of range in VECTOR_DEQUE_NON_SEQUENTIAL (const)");
+    }
     return DATA[pos];
   }
 };

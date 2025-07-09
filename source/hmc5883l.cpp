@@ -18,99 +18,105 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
+/**
+ * @brief Generates fake compass input for testing with various simulations.
+ * @param tmeFrame_Time Current frame time.
+ * @return A fake FLOAT_XYZ point.
+ */
 FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
 {
-  FLOAT_XYZ ret_point;
+    FLOAT_XYZ ret_point;
 
-  int speed = 10;  // 1 fastest
+    int speed = 10; // 1 fastest
 
-  //simulations
-  bool noise = false;
-  float noise_factor = 0.5f;
+    //simulations
+    bool noise = false;
+    float noise_factor = 0.5f;
 
-  bool sparatic_random = true;
-  float sparatic_random_factor = 1.0f;
-  int sparatic_random_chance_percent = 5; // 5% chance of sparatic random jump
+    bool sparatic_random = false;
+    float sparatic_random_factor = 1.0f;
+    int sparatic_random_chance_percent = 5; // 5% chance of sparatic random jump
 
-  bool time_based_drift = false;
-  float time_based_drift_factor = 100.0f;
+    bool time_based_drift = false;
+    float time_based_drift_factor = 100.0f;
 
-  bool interference_zone = true;
+    bool interference_zone = false;
 
-  bool skew = true;
-  //float skew_factor = 1.00f; // 100% skew
-  float skew_factor = 0.50f; // 50% skew
-  //float skew_factor = 0.10f; // 10% skew
+    bool skew = true;
+    float skew_factor = 0.10f; // 10% skew - As per your latest routine
 
-  bool figure_eight = false; // if true, will do a figure eight pattern
+    bool figure_eight = false; // if true, will do a figure eight pattern
 
-  // parameters
-  float radius = 250.0f;
-  FLOAT_XYZ offset;
-  offset.X = 50.0f;
-  offset.Y = 100.3f;
-  //offset.Z = 0.0f;
+    // parameters
+    float radius = 250.0f;
+    FLOAT_XYZ offset;
+    offset.X = 50.0f;
+    offset.Y = 100.3f;
+    offset.Z = 0.0f; // Ensure Z is initialized
 
-  // gen
-  float angle = (float)((tmeFrame_Time/speed) % 360);
+    // gen
+    float angle_degrees = (float)((tmeFrame_Time/speed) % 360);
+    FAKE_INPUT = angle_degrees; // Store angle in degrees as requested
 
-  angle = angle * (3.14159265f / 180.0f);
+    float angle_radians = angle_degrees * (M_PI / 180.0f); // Convert to radians for sin/cos
 
-  if (figure_eight == false)
-  {
-    ret_point.X = radius * cos(angle) + offset.X;
-    ret_point.Y = radius * sin(angle) + offset.Y;
-    ret_point.Z = 0.0f + offset.Z;
-  }
-  else
-  {
-    ret_point.X = radius * sin(angle);
-    ret_point.Y = radius * sin(angle) * cos(angle);
-    ret_point.Z = 0.0f + offset.Z;
-  }
-
-
-  // simulations
-  if (noise)
-  {
-    float noise_X = ((rand() % 100) - 50) * noise_factor; // -0.5 to +0.5
-    float noise_Y = ((rand() % 100) - 50) * noise_factor; // -0.5 to +0.5
-    ret_point.X += noise_X;
-    ret_point.Y += noise_Y;
-  }
-
-  if (sparatic_random)
-  {
-    if (sparatic_random && (rand() % 100) < sparatic_random_chance_percent) // ~5% chance
+    if (figure_eight == false)
     {
-      ret_point.X += ((rand() % ((int)radius * 2)) - (int)radius) * sparatic_random_factor; // large jump
-      ret_point.Y += ((rand() % ((int)radius * 2)) - (int)radius) * sparatic_random_factor;
+        ret_point.X = radius * cos(angle_radians) + offset.X;
+        ret_point.Y = radius * sin(angle_radians) + offset.Y;
+        ret_point.Z = 0.0f + offset.Z;
     }
-  }
-
-  if (time_based_drift)
-  {
-    offset.X += time_based_drift_factor * sin(tmeFrame_Time * 0.01f);
-    offset.Y += time_based_drift_factor * cos(tmeFrame_Time * 0.01f);
-  }
-
-  if (skew)
-  {
-    ret_point.X += skew_factor * ret_point.Y;
-    ret_point.Y += skew_factor * ret_point.X;
-  }
-  
-  if (interference_zone)
-  {
-    bool in_interference_zone = (tmeFrame_Time % 10000) < 2000; // 20% of the time
-    if (in_interference_zone) 
+    else
     {
-        ret_point.X += 50.0f * sin(tmeFrame_Time * 0.05f);
-        ret_point.Y += 50.0f * cos(tmeFrame_Time * 0.05f);
+        ret_point.X = radius * sin(angle_radians);
+        ret_point.Y = radius * sin(angle_radians) * cos(angle_radians);
+        ret_point.Z = 0.0f + offset.Z;
     }
-  }
 
-  return ret_point;
+
+    // simulations
+    if (noise)
+    {
+        float noise_X = ((rand() % 100) - 50) * noise_factor; // -0.5 to +0.5
+        float noise_Y = ((rand() % 100) - 50) * noise_factor; // -0.5 to +0.5
+        ret_point.X += noise_X;
+        ret_point.Y += noise_Y;
+    }
+
+    if (sparatic_random)
+    {
+        if ((rand() % 100) < sparatic_random_chance_percent) // ~5% chance
+        {
+            ret_point.X += ((rand() % ((int)radius * 2)) - (int)radius) * sparatic_random_factor; // large jump
+            ret_point.Y += ((rand() % ((int)radius * 2)) - (int)radius) * sparatic_random_factor;
+        }
+    }
+
+    if (time_based_drift)
+    {
+        offset.X += time_based_drift_factor * sin(tmeFrame_Time * 0.01f);
+        offset.Y += time_based_drift_factor * cos(tmeFrame_Time * 0.01f);
+    }
+
+    if (skew)
+    {
+        // Corrected skew logic to use original X for Y's skew calculation
+        float original_X = ret_point.X; // Store original X before modifying it
+        ret_point.X += skew_factor * ret_point.Y;
+        ret_point.Y += skew_factor * original_X; // Use original X for Y's skew
+    }
+    
+    if (interference_zone)
+    {
+        bool in_interference_zone = (tmeFrame_Time % 10000) < 2000; // 20% of the time
+        if (in_interference_zone)
+        {
+            ret_point.X += 50.0f * sin(tmeFrame_Time * 0.05f);
+            ret_point.Y += 50.0f * cos(tmeFrame_Time * 0.05f);
+        }
+    }
+
+    return ret_point;
 }
 
 bool CAL_LEVEL_3::xyz_equal(FLOAT_XYZ &A, FLOAT_XYZ &B)
@@ -462,6 +468,7 @@ void CAL_LEVEL_3::delete_unnecessary_points()
   }
 }
 
+/*
 void CAL_LEVEL_3::set_heading_degrees_report(FLOAT_XYZ &Raw_XYZ)
 {
   FLOAT_XYZ cent;
@@ -479,6 +486,176 @@ void CAL_LEVEL_3::set_heading_degrees_report(FLOAT_XYZ &Raw_XYZ)
 
   HEADING_DEGREES_REPORT = heading_deg;
 }
+*/
+
+
+// --- 6. Original `set_heading_degrees_report` (Modified to use new calibrated heading) ---
+
+/**
+ * @brief Reports the compass heading in degrees.
+ * Now uses the globally stored calibration parameters.
+ * @param Raw_XYZ The current raw compass reading.
+ */
+void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ) 
+{
+    HEADING_DEGREES_REPORT = calculate_calibrated_heading(Raw_XYZ, current_calibration_params);
+    std::cout << "Reported Heading (Calibrated): " << HEADING_DEGREES_REPORT << " degrees";
+    std::cout << "\tRaw Angle (from FAKE_INPUT): " << FAKE_INPUT << " degrees";
+    // Calculate and display the difference for easier analysis
+    float diff = HEADING_DEGREES_REPORT - FAKE_INPUT;
+    // Normalize difference to be within -180 to 180 for easier interpretation
+    if (diff > 180.0f) diff -= 360.0f;
+    if (diff < -180.0f) diff += 360.0f;
+    std::cout << "\tDiff: " << diff << std::endl;
+
+    // Also print raw and corrected XYZ values for detailed debugging
+    std::cout << "\tRaw XYZ: (" << Raw_XYZ.X << ", " << Raw_XYZ.Y << ", " << Raw_XYZ.Z << ")";
+    
+    // Apply hard iron correction to raw_XYZ to get intermediate point
+    FLOAT_XYZ intermediate_point = Raw_XYZ - current_calibration_params.hard_iron_offset;
+    // Apply soft iron correction to intermediate point to get final corrected point
+    FLOAT_XYZ final_corrected_point = intermediate_point;
+    final_corrected_point.X *= current_calibration_params.soft_iron_scale.X;
+    final_corrected_point.Y *= current_calibration_params.soft_iron_scale.Y;
+    final_corrected_point.Z *= current_calibration_params.soft_iron_scale.Z;
+
+    std::cout << "\tCorrected XYZ: (" << final_corrected_point.X << ", " << final_corrected_point.Y << ", " << final_corrected_point.Z << ")" << std::endl;
+    // In a real application, you would store this heading, update a display, etc.
+}
+
+// --- 4. Hard/Soft Iron Calibration Function (New) ---
+
+/**
+ * @brief Performs hard and soft iron calibration based on historical compass data.
+ * Hard iron correction: Calculates the center offset.
+ * Soft iron correction: Calculates scaling factors to make the ellipse more circular.
+ * Now iterates through the custom deque.
+ * @param history The custom deque of historical compass data points.
+ * @return CalibrationParameters containing the calculated offset and scale.
+ */
+    CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history) {
+    CalibrationParameters params;
+
+    if (history.empty()) {
+        std::cerr << "Warning: Compass history is empty, cannot perform calibration." << std::endl;
+        return params; // Return default parameters
+    }
+
+    // Find min/max values for each axis
+    float min_x = std::numeric_limits<float>::max();
+    float max_x = std::numeric_limits<float>::min();
+    float min_y = std::numeric_limits<float>::max();
+    float max_y = std::numeric_limits<float>::min();
+    float min_z = std::numeric_limits<float>::max();
+    float max_z = std::numeric_limits<float>::min();
+
+    bool first_data_point = true;
+
+    for (size_t i = 0; i < history.size(); ++i) { // Iterate over allocated size
+        if (history.FLAGS[i].HAS_DATA) { // Only process if it has data
+            const auto& p = history[i].POINT; // Access POINT.X, .Y, .Z
+
+            if (first_data_point) {
+                min_x = p.X;
+                max_x = p.X;
+                min_y = p.Y;
+                max_y = p.Y;
+                min_z = p.Z;
+                max_z = p.Z;
+                first_data_point = false;
+            } else {
+                min_x = std::min(min_x, p.X);
+                max_x = std::max(max_x, p.X);
+                min_y = std::min(min_y, p.Y);
+                max_y = std::max(max_y, p.Y);
+                min_z = std::min(min_z, p.Z);
+                max_z = std::max(max_z, p.Z);
+            }
+        }
+    }
+
+    // If no data points were found (e.g., all were erased), return default params
+    if (first_data_point) {
+        std::cerr << "Warning: No active data points in history for calibration." << std::endl;
+        return params;
+    }
+
+    // --- Hard Iron Correction ---
+    // The hard iron offset is simply the center of the min/max range for each axis.
+    // This removes constant magnetic biases from the sensor's environment.
+    params.hard_iron_offset.X = (max_x + min_x) * 0.5f;
+    params.hard_iron_offset.Y = (max_y + min_y) * 0.5f;
+    params.hard_iron_offset.Z = (max_z + min_z) * 0.5f;
+
+    // --- Soft Iron Correction (Simplified) ---
+    // Soft iron distortion causes the compass readings to form an ellipse instead of a circle.
+    // A simplified approach is to scale the axes to normalize their ranges.
+    // This attempts to transform the ellipse into a circle.
+    float range_x = max_x - min_x;
+    float range_y = max_y - min_y;
+    float range_z = max_z - min_z; // Though Z is less critical for 2D heading
+
+    // Avoid division by zero
+    if (range_x == 0.0f || range_y == 0.0f) {
+        std::cerr << "Warning: Insufficient range for soft iron calibration on X or Y axis." << std::endl;
+        // Keep default scales (1.0)
+    } else {
+        // Find the average range of X and Y (or the largest, or a target radius)
+        // Using the average of X and Y ranges for normalization
+        float average_xy_range = (range_x + range_y) * 0.5f;
+
+        // Calculate scaling factors: target_range / actual_range
+        // If we want to normalize to a perfect circle, we'd make both X and Y ranges equal
+        // to the average_xy_range.
+        params.soft_iron_scale.X = average_xy_range / range_x;
+        params.soft_iron_scale.Y = average_xy_range / range_y;
+        // For Z, we can normalize it to its own average or to the XY average if 3D heading is needed.
+        // For 2D heading, Z scaling is less critical but included for completeness.
+        params.soft_iron_scale.Z = (range_z != 0.0f) ? (average_xy_range / range_z) : 1.0f;
+    }
+
+    return params;
+}
+
+// --- 5. Calibrated Heading Calculation Function (New) ---
+
+/**
+ * @brief Calculates the compass heading in degrees after applying hard and soft iron corrections.
+ * @param raw_point The raw compass reading (FLOAT_XYZ).
+ * @param params The calibration parameters (offset and scale).
+ * @return The heading in degrees (0-360), where 0 is North.
+ */
+float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ& raw_point, const CalibrationParameters& params) {
+    // 1. Apply Hard Iron Correction: Remove the constant offset.
+    FLOAT_XYZ corrected_point = raw_point - params.hard_iron_offset;
+
+    // 2. Apply Soft Iron Correction: Scale the axes to make the ellipse circular.
+    corrected_point.X *= params.soft_iron_scale.X;
+    corrected_point.Y *= params.soft_iron_scale.Y;
+    corrected_point.Z *= params.soft_iron_scale.Z; // Apply Z scaling for completeness
+
+    // 3. Calculate Heading using atan2
+    // atan2(y, x) gives the angle in radians from the positive X-axis to the point (x, y).
+    // For compass, positive Y is North, positive X is East.
+    // Standard atan2 returns -PI to PI.
+    float heading_rad = std::atan2(corrected_point.Y, corrected_point.X);
+
+    // Convert radians to degrees
+    float heading_deg = heading_rad * 180.0f / M_PI;
+
+    // Normalize to 0-360 degrees
+    if (heading_deg < 0) {
+        heading_deg += 360.0f;
+    }
+
+    return heading_deg;
+}
+
+
+
+
+
+
 
 void CAL_LEVEL_3::clear()
 {
@@ -488,7 +665,7 @@ void CAL_LEVEL_3::clear()
 void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Raw_XYZ)
 {
   // Set to true to use fake compass input for testing
-  if (false)
+  if (true)
   {
     Raw_XYZ = fake_compass_input(tmeFrame_Time);
   }
@@ -522,8 +699,31 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
       COMPASS_CENTER.Y = (Y_UPPER_MEAN + Y_LOWER_MEAN) * 0.5f;
     }
 
-    group_means();
-    delete_unnecessary_points();
+        // --- NEW: Perform Hard/Soft Iron Calibration here ---
+        // This function will calculate the hard_iron_offset and soft_iron_scale
+        // based on the COMPASS_HISTORY.
+        current_calibration_params = perform_hard_soft_iron_calibration(COMPASS_HISTORY);
+        // We can optionally update COMPASS_CENTER with the hard_iron_offset from calibration
+        // if we want to ensure consistency. For now, let's keep them separate but conceptually linked.
+        // COMPASS_CENTER = current_calibration_params.hard_iron_offset;
+
+        group_means();
+        delete_unnecessary_points();
+
+        std::cout << "\n--- Calibration Performed ---" << std::endl;
+        std::cout << "Hard Iron Offset: X=" << current_calibration_params.hard_iron_offset.X
+                  << ", Y=" << current_calibration_params.hard_iron_offset.Y
+                  << ", Z=" << current_calibration_params.hard_iron_offset.Z << std::endl;
+        std::cout << "Soft Iron Scale: X=" << current_calibration_params.soft_iron_scale.X
+                  << ", Y=" << current_calibration_params.soft_iron_scale.Y
+                  << ", Z=" << current_calibration_params.soft_iron_scale.Z << std::endl;
+        std::cout << "-----------------------------\n" << std::endl;
+
+
+
+
+
+
   }
   
   // Calculate heading
