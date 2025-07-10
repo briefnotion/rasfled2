@@ -461,6 +461,7 @@ void CAL_LEVEL_3::group_means()
   }
 }
 
+/*
 void CAL_LEVEL_3::delete_unnecessary_points()
 {
   int max_size = COMPASS_HISTORY_SIZE / 5;
@@ -556,6 +557,109 @@ void CAL_LEVEL_3::delete_unnecessary_points()
     }
   }
 }
+*/
+
+void CAL_LEVEL_3::preservation_of_data()
+// This function identifies and marks a limited number of points within the compass history
+// to be preserved, aiming for an even angular distribution around the data's center.
+// The goal is to ensure a representative set of points are not overwritten.
+{
+  // Calculate the maximum number of points to keep for the even distribution.
+  // This ensures that we don't mark too many points as 'DO_NOT_OVERWRITE'.
+  int max_size = (COMPASS_HISTORY_SIZE * 4) / 5;
+
+  /*
+  // Step 2: Calculate the approximate center of the data.
+  // This is done by finding the mean X and Y coordinates of all valid points.
+  float sum_x = 0.0f;
+  float sum_y = 0.0f;
+  int valid_points_count = 0;
+
+  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); ++pos)
+  {
+    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    {
+      sum_x += COMPASS_HISTORY[pos].POINT.X;
+      sum_y += COMPASS_HISTORY[pos].POINT.Y;
+      valid_points_count++;
+    }
+  }
+
+  float center_x = 0.0f;
+  float center_y = 0.0f;
+  if (valid_points_count > 0)
+  {
+    center_x = sum_x / valid_points_count;
+    center_y = sum_y / valid_points_count;
+  }
+  else
+  {
+    // If no valid data, there's nothing to mark.
+    return;
+  }
+  */
+
+  float center_x = COMPASS_CENTER.X;
+  float center_y = COMPASS_CENTER.Y;
+
+  // Step 3: Collect valid points and calculate their angles relative to the center.
+  std::vector<PointAngle> angled_points;
+  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); ++pos)
+  {
+    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    {
+      float dx = COMPASS_HISTORY[pos].POINT.X - center_x;
+      float dy = COMPASS_HISTORY[pos].POINT.Y - center_y;
+
+      // Calculate angle using atan2, which handles all quadrants.
+      // The angle is in radians, typically from -PI to PI.
+      float angle = std::atan2(dy, dx);
+      angled_points.push_back({angle, pos});
+    }
+  }
+
+  // If there are no points or too few points, mark all of them if they fit max_size.
+  if (angled_points.empty()) 
+  {
+    return;
+  }
+
+  if (angled_points.size() <= static_cast<size_t>(max_size)) 
+  {
+    for (const auto& pa : angled_points) 
+    {
+      COMPASS_HISTORY.FLAGS[pa.original_index].DO_NOT_OVERWRITE = true;
+    }
+    return;
+  }
+
+  // Step 4: Sort points by their angle.
+  std::sort(angled_points.begin(), angled_points.end(), [](const PointAngle& a, const PointAngle& b) 
+            {
+              return a.angle < b.angle;
+            });
+
+  // Step 5: Select evenly distributed points and mark them.
+  // Calculate the step size to pick points evenly across the sorted angular range.
+  float step_size = static_cast<float>(angled_points.size()) / max_size;
+
+  for (int i = 0; i < max_size; ++i) 
+  {
+    // Calculate the index in the sorted `angled_points` vector.
+    // This ensures an even distribution.
+    size_t index_in_sorted_list = static_cast<size_t>(i * step_size);
+
+    // Ensure the index is within bounds, especially for the last element
+    if (index_in_sorted_list >= angled_points.size()) 
+    {
+      index_in_sorted_list = angled_points.size() - 1;
+    }
+
+    // Mark the original point's DO_NOT_OVERWRITE flag.
+    size_t original_pos = angled_points[index_in_sorted_list].original_index;
+    COMPASS_HISTORY.FLAGS[original_pos].DO_NOT_OVERWRITE = true;
+  }
+}
 
 
 // --- 4. Ellipsoid Fitting and Calibration Matrix Derivation (New Core Logic) ---
@@ -590,8 +694,8 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     }
 
     if (active_points.size() < MIN_POINTS) {
-        std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
-                  << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
+        //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
+        //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
         hard_iron_offset = FLOAT_XYZ(0,0,0);
         soft_iron_matrix = Matrix3x3(); // Identity
         return false;
@@ -745,7 +849,7 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     float range_z = max_z - min_z;
 
     if (range_x == 0.0f || range_y == 0.0f || range_z == 0.0f) {
-        std::cerr << "Warning: Insufficient range for soft iron calibration on one or more axes." << std::endl;
+        //std::cerr << "Warning: Insufficient range for soft iron calibration on one or more axes." << std::endl;
         soft_iron_matrix = Matrix3x3(); // Identity matrix
         return false;
     }
@@ -780,7 +884,7 @@ CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECT
 
     // Call the new fitting function
     if (!fit_ellipsoid_and_get_calibration_matrix(history, params.hard_iron_offset, params.soft_iron_matrix)) {
-        std::cerr << "Calibration failed or insufficient data. Using default parameters." << std::endl;
+        //std::cerr << "Calibration failed or insufficient data. Using default parameters." << std::endl;
         // params already initialized to defaults (0 offset, identity matrix)
     }
     return params;
@@ -830,6 +934,8 @@ float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ& raw_point, cons
  */
 void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ) {
     HEADING_DEGREES_REPORT = calculate_calibrated_heading(Raw_XYZ, current_calibration_params);
+    HEADING_DEGREES_REPORT -= 180.0f; // Adjust to match original code's convention
+
     /*
     std::cout << std::fixed << std::setprecision(3); // Set precision for output
 
@@ -882,6 +988,7 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
 
     clear_all_flags();
 
+    /*
     group_upper_lower();
     calculate_upper_lower_means();
 
@@ -896,6 +1003,9 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
       COMPASS_CENTER.X = (X_UPPER_MEAN + X_LOWER_MEAN) * 0.5f;
       COMPASS_CENTER.Y = (Y_UPPER_MEAN + Y_LOWER_MEAN) * 0.5f;
     }
+    */
+
+    COMPASS_CENTER = get_center_based_on_extremes();
 
     // --- NEW: Perform Hard/Soft Iron Calibration using the ellipsoid fitting approach ---
     // This function will calculate the hard_iron_offset and soft_iron_matrix
@@ -918,7 +1028,7 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
     */
 
     group_means();
-    delete_unnecessary_points();
+    preservation_of_data();
 
   }
   

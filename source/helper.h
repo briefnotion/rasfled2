@@ -1005,6 +1005,7 @@ public:
     return COUNT == 0;
   }
 
+
   /**
    * @brief Adds a new value to the deque. Handles circular buffer logic and overwrite rules.
    * @param Value The value to add.
@@ -1016,9 +1017,9 @@ public:
       return;
     }
 
-    if (COUNT == FULL_SIZE) // Full, overwrite oldest if not protected
+    if (COUNT == FULL_SIZE) // Full
     {
-      int position_found = -1; // Use -1 to indicate not found
+      int position_to_overwrite = -1; // Use -1 to indicate not found initially
 
       // Search for the oldest non-protected slot starting from BACK
       for (int loc = 0; loc < FULL_SIZE; ++loc) // Iterate up to FULL_SIZE
@@ -1026,32 +1027,32 @@ public:
         int current_pos = (BACK + loc) % FULL_SIZE;
         if (FLAGS[current_pos].DO_NOT_OVERWRITE == false)
         {
-          position_found = current_pos;
+          position_to_overwrite = current_pos;
           break; // Found a writable position
         }
       }
 
-      if (position_found != -1) // A writable position was found
+      if (position_to_overwrite != -1) // A writable (non-protected) position was found
       {
-        // If the slot we are about to overwrite HAS_DATA, then COUNT doesn't change
-        // If it didn't have data (e.g., was explicitly erased, but not protected),
-        // then COUNT would increment. But in a full scenario, it must have had data.
-        // So COUNT remains the same.
-        BACK = position_found;
+        BACK = position_to_overwrite;
+        // The item being overwritten had HAS_DATA=true. COUNT remains the same.
         DATA[BACK] = Value;
         FLAGS[BACK].HAS_DATA = true;
         FLAGS[BACK].DO_NOT_OVERWRITE = false; // Ensure it's not protected after overwrite
       }
       else // All positions are protected (DO_NOT_OVERWRITE == true)
       {
-        // This case means the deque is full and all elements are protected.
-        // We cannot add new data without overwriting a protected element,
-        // which the logic explicitly tries to avoid.
-        std::cerr << "Warning: VECTOR_DEQUE_NON_SEQUENTIAL is full and all elements are protected. Cannot push_back." << std::endl;
-        return; // Cannot add
+        // Overwrite the element at the current BACK position
+        // regardless of DO_NOT_OVERWRITE flag if no other slot is available.
+  
+        // Overwrite the element at the current BACK position
+        DATA[BACK] = Value;
+        FLAGS[BACK].HAS_DATA = true;
+        FLAGS[BACK].DO_NOT_OVERWRITE = false; // Ensure it's not protected after overwrite
+        // COUNT remains FULL_SIZE, as we're overwriting an existing element.
       }
 
-      BACK = (BACK + 1) % FULL_SIZE; // Move BACK to the next potential slot
+      BACK = (BACK + 1) % FULL_SIZE; // Move BACK to the next potential slot for the *next* push_back
     }
     else // Not full, find first empty slot
     {
@@ -1066,9 +1067,9 @@ public:
           break; // Slot found and filled
         }
       }
-      // If replaced is false here, it means COUNT < FULL_SIZE but no HAS_DATA == false slot was found.
-      // This scenario implies a logical inconsistency if COUNT is truly the number of HAS_DATA elements.
-      // It should not happen if COUNT accurately reflects HAS_DATA flags.
+      // If the loop finishes and no slot was found, it implies a logical inconsistency
+      // where COUNT < FULL_SIZE but all HAS_DATA flags are true. This case
+      // should ideally not be reached if COUNT is correctly maintained.
     }
   }
 

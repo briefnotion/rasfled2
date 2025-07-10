@@ -278,18 +278,26 @@ class COMPASS_POINT
 // -------------------------------------------------------------------------------------
 
 
+// Structure to hold point index and its angle for sorting.
+struct PointAngle 
+{
+  float angle;
+  size_t original_index;
+};
+
 /**
  * @brief Stores the calculated calibration parameters.
  * Hard iron offset corrects for magnetic biases.
  * Soft iron matrix corrects for axis distortions (makes ellipse/ellipsoid spherical).
  */
-struct CalibrationParameters {
-    FLOAT_XYZ hard_iron_offset; // Bias to remove from each axis (center of ellipsoid)
-    Matrix3x3 soft_iron_matrix; // 3x3 transformation matrix for soft iron correction
+struct CalibrationParameters 
+{
+  FLOAT_XYZ hard_iron_offset; // Bias to remove from each axis (center of ellipsoid)
+  Matrix3x3 soft_iron_matrix; // 3x3 transformation matrix for soft iron correction
 
-    CalibrationParameters() :
-        hard_iron_offset(0.0f, 0.0f, 0.0f),
-        soft_iron_matrix() {} // Default to identity matrix
+  CalibrationParameters() :
+      hard_iron_offset(0.0f, 0.0f, 0.0f),
+      soft_iron_matrix() {} // Default to identity matrix
 };
 
 class CAL_LEVEL_3
@@ -312,7 +320,7 @@ class CAL_LEVEL_3
   void group_upper_lower();
   void calculate_upper_lower_means();
   void group_means();
-  void delete_unnecessary_points();
+  void preservation_of_data();
 
   int COMPASS_HISTORY_SIZE = 800;
   // Size of the compass history, hardcoded for now.
