@@ -1137,30 +1137,14 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
       if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
       {
         int color = RAS_GREY;
-        if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].X_LOWER_M)
+
+        if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
         {
-          color = RAS_GREEN;
-        }
-        else if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].X_UPPER_M)
-        {
-          color = RAS_YELLOW;
-        }
-        if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].Y_LOWER_M)
-        {
-          color = RAS_RED;
-        }
-        else if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].Y_UPPER_M)
-        {
-          color = RAS_CYAN;
+          color = RAS_WHITE;
         }
 
         //if (color != RAS_GREY)
         {
-          if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
-          {
-            color = RAS_WHITE;
-          }
-
           c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].POINT.X / 4.0f), 
                         center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].POINT.Y / 4.0f));
           draw_marker_filled(Draw_List, sdSysData, c1, color);
@@ -1174,6 +1158,7 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
                   center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.Y / 4.0f));
     draw_marker_filled(Draw_List, sdSysData, c1, RAS_WHITE);
 
+    /*
     // Draw Upper and Lower Means
     p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.X_LOWER_MEAN/ 4.0f), 
                   center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.Y / 4.0f));
@@ -1197,6 +1182,7 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
               center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.LAST_READ_VALUE.Y / 4.0f));
 
     draw_line(Draw_List, sdSysData, c1, p1, RAS_WHITE, 2.0f);
+    */
   }
 }
 
@@ -1226,7 +1212,7 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
       ImGui::Text("GPS POSITION");
       ImGui::Text("   SPEED: %.1f", sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph());
       ImGui::Text("ALTITUDE: %.1f", sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val());
-      ImGui::Text(" HEADING: %.1f", sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+      ImGui::Text(" HEADING: %.1f°", sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
       ImGui::Text("P:%2.1f H:%2.1f V:%2.1f", sdSysData.GPS_SYSTEM.pdop(), sdSysData.GPS_SYSTEM.hdop(), sdSysData.GPS_SYSTEM.vdop());
     }
 
@@ -1237,8 +1223,18 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
 
       ImGui::Text("COMPASS");
 
-      ImGui::Text("BEARING: %4.1f ", sdSysData.COMMS_COMPASS.bearing());
-      ImGui::Text("        (%4.1f)", sdSysData.COMMS_COMPASS.bearing_known_offset());
+      ImGui::Text("BEARING: %4.1f° ", sdSysData.COMMS_COMPASS.bearing());
+      ImGui::Text("        (%4.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset());
+      
+      /*
+      // Fake Compass Review
+      // Normalize the difference to the range [-180, 180]
+      float error = sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.LEVEL_3.FAKE_INPUT_REPORTED;
+      if (error > 180.0f)        error -= 360.0f;
+      else if (error < -180.0f)  error += 360.0f;
+
+      ImGui::Text("fake error: %+4.1f°", error);
+      */
     }
   }
   ImGui::PopStyleColor();

@@ -214,6 +214,15 @@ bool PANEL::requested(unsigned long Time)
     }
   }
 }
+
+or a similer iteration
+
+  if (CALIBRATION_TIMER.is_ready(tmeFrame_Time))
+  {
+    CALIBRATION_TIMER.set(tmeFrame_Time, CALIBRATION_DELAY);
+    ...
+  }
+
 */
 
 {

@@ -259,16 +259,6 @@ class COMPASS_POINT
   public:
     FLOAT_XYZ POINT; // The actual XYZ coordinates of the compass reading
 
-    bool X_LOWER = false; // Flag if this point is in the lower X region
-    bool X_UPPER = false; // Flag if this point is in the upper X region
-    bool Y_LOWER = false; // Flag if this point is in the lower Y region
-    bool Y_UPPER = false; // Flag if this point is in the upper Y region
-
-    bool X_LOWER_M = false; // Another set of flags, possibly for means or modified regions
-    bool X_UPPER_M = false;
-    bool Y_LOWER_M = false;
-    bool Y_UPPER_M = false; // Corrected: Added 'bool' keyword
-
     // Default constructor to initialize POINT
     COMPASS_POINT() : POINT() {}
     // Constructor to initialize POINT with XYZ values
@@ -317,9 +307,8 @@ class CAL_LEVEL_3
   void clear_all_flags();
   bool add_point(FLOAT_XYZ &Raw_XYZ);
   FLOAT_XYZ get_center_based_on_extremes();
-  void group_upper_lower();
-  void calculate_upper_lower_means();
-  void group_means();
+
+  bool preserved_angle[360];
   void preservation_of_data();
 
   int COMPASS_HISTORY_SIZE = 800;
@@ -329,20 +318,8 @@ class CAL_LEVEL_3
   float CLOSEST_ALLOWED = 3.0f;
   float NOISE_FILTER_DISTANCE = 20.0f;
 
-  // Variables to hold the lower and upper sums and counts for X and Y axes
-  float X_LOWER_SUM = 0.0f;
-  int X_LOWER_COUNT = 0;
-  float X_UPPER_SUM = 0.0f;
-  int X_UPPER_COUNT = 0;
-  float Y_LOWER_SUM = 0.0f;
-  int Y_LOWER_COUNT = 0;
-  float Y_UPPER_SUM = 0.0f;
-  int Y_UPPER_COUNT = 0;
-
-
   // Store calibration parameters globally or as a class member
   CalibrationParameters current_calibration_params;
-
 
   bool fit_ellipsoid_and_get_calibration_matrix(
       const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
@@ -352,11 +329,11 @@ class CAL_LEVEL_3
   float calculate_calibrated_heading(const FLOAT_XYZ& raw_point, const CalibrationParameters& params);
   void set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ);
 
-
+  public:
   // Testing
   float FAKE_INPUT = 0.0f;
+  float FAKE_INPUT_REPORTED = 0.0f;
 
-  public:
   string OFFSET_HISTORY_FILENAME = "";
   // not coded
 
@@ -365,12 +342,6 @@ class CAL_LEVEL_3
   VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
   // Stores the history of compass points, using a non-sequential vector deque.
 
-  // Variables to hold the lower and upper means for X and Y axes
-  float X_LOWER_MEAN = 0.0f;
-  float X_UPPER_MEAN = 0.0f;
-  float Y_LOWER_MEAN = 0.0f;
-  float Y_UPPER_MEAN = 0.0f;
-
   FLOAT_XYZ COMPASS_CENTER;
   // The center of the compass, calculated
 
@@ -378,30 +349,16 @@ class CAL_LEVEL_3
   //  to determine when to perform calculations.
   //  This is used to reduce the number of calculations performed.
   int ITERATION_COUNTER = 0;
-  int ITERATION_COUNTER2 = 0;
   int ITERATION_TRIGGER = 2;
 
+  TIMED_IS_READY  CALIBRATION_TIMER;
+  int             CALIBRATION_DELAY = 1000;
 
   float HEADING_DEGREES_REPORT = 0.0f;
   // The heading degrees report, calculated based on the compass center and points.
   FLOAT_XYZ LAST_READ_VALUE;
   // The last read value from the compass, used for noise filtering.
 
-
-  //void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
-  //                          FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
-  //                          FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
-  //                          FLOAT_XYZ Cal_Pt_4, float Cal_Var_4);
-
-  //void calibration_preload_set();
-
-  //MIN_MAX_SIMPLE x_min_max();
-  //MIN_MAX_SIMPLE y_min_max();
-  //MIN_MAX_SIMPLE z_min_max();
-
-  //FLOAT_XYZ offset();
-  //FLOAT_XYZ skew();
-  
   void clear();
 
   //float variance();

@@ -1,3 +1,11 @@
+2.272_250712
+- Refactored preservation_of_data() to be less cycle-hungry ;no more nested loops or sorting 
+    overhead. It’s leaner and does a better job preserving data too.  Testing live will 
+    show if it will want to hold onto points forever.  Hopefully, if the center keeps shifting, 
+    so will its values.
+- Removed unwanted things.
+- Put in a timer for the compass calibration methods.  Calibration only occures once per second.
+
 2.271_250711
   - Testing a new "preservation_of_data" method, making the grouping method unnecessary.
   - Rotated results of  HEADING_DEGREES_REPORT, because coded compass is -+XY orientation.  But, 

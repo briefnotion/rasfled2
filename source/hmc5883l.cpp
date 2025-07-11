@@ -33,10 +33,10 @@ FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
     // and Corrected XYZ values to repeat in the output for those frames.
 
     //simulations
-    bool noise = false;
+    bool noise = true;
     float noise_factor = 0.5f;
 
-    bool sparatic_random = false;
+    bool sparatic_random = true;
     float sparatic_random_factor = 1.0f;
     int sparatic_random_chance_percent = 5; // 5% chance of sparatic random jump
 
@@ -220,22 +220,12 @@ float CAL_LEVEL_3::dist_xyz(FLOAT_XYZ &A, FLOAT_XYZ &B)
 
 void CAL_LEVEL_3::clear_all_flags()
 {
+
+  fill(begin(preserved_angle), end(preserved_angle), false);
+
   for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
   {
     COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = false;
-
-    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-    {
-      COMPASS_HISTORY[pos].X_LOWER = false;
-      COMPASS_HISTORY[pos].X_UPPER = false;
-      COMPASS_HISTORY[pos].Y_LOWER = false;
-      COMPASS_HISTORY[pos].Y_UPPER = false;
-
-      COMPASS_HISTORY[pos].X_LOWER_M = false;
-      COMPASS_HISTORY[pos].X_UPPER_M = false;
-      COMPASS_HISTORY[pos].Y_LOWER_M = false;
-      COMPASS_HISTORY[pos].Y_UPPER_M = false;
-    }
   }
 }
 
@@ -324,340 +314,30 @@ FLOAT_XYZ CAL_LEVEL_3::get_center_based_on_extremes()
   return ret_center;
 }
 
-void CAL_LEVEL_3::group_upper_lower()
-{
-  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-  {
-    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-    {
-      if (COMPASS_HISTORY[pos].POINT.X <= COMPASS_CENTER.X)
-      {
-        COMPASS_HISTORY[pos].X_LOWER = true;
-      }
-
-      if (COMPASS_HISTORY[pos].POINT.X >= COMPASS_CENTER.X)
-      {
-        COMPASS_HISTORY[pos].X_UPPER = true;
-      }
-      
-      if (COMPASS_HISTORY[pos].POINT.Y <= COMPASS_CENTER.Y)
-      {
-        COMPASS_HISTORY[pos].Y_LOWER = true;
-      }
-
-      if (COMPASS_HISTORY[pos].POINT.Y >= COMPASS_CENTER.Y)
-      {
-        COMPASS_HISTORY[pos].Y_UPPER = true;
-      }
-    }
-  }
-}
-
-void CAL_LEVEL_3::calculate_upper_lower_means()
-{
-  X_LOWER_SUM = 0.0f;
-  X_LOWER_COUNT = 0;
-
-  X_UPPER_SUM = 0.0f;
-  X_UPPER_COUNT = 0;
-
-  Y_LOWER_SUM = 0.0f;
-  Y_LOWER_COUNT = 0;
-
-  Y_UPPER_SUM = 0.0f;
-  Y_UPPER_COUNT = 0;
-
-  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-  {
-    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-    {
-      if (COMPASS_HISTORY[pos].X_LOWER)
-      {
-        X_LOWER_COUNT++;
-        X_LOWER_SUM += COMPASS_HISTORY[pos].POINT.X;
-      }
-      if (COMPASS_HISTORY[pos].X_UPPER)
-      {
-        X_UPPER_COUNT++;
-        X_UPPER_SUM += COMPASS_HISTORY[pos].POINT.X;
-      }
-      if (COMPASS_HISTORY[pos].Y_LOWER)
-      {
-        Y_LOWER_COUNT++;
-        Y_LOWER_SUM += COMPASS_HISTORY[pos].POINT.Y;
-      }
-      if (COMPASS_HISTORY[pos].Y_UPPER)
-      {
-        Y_UPPER_COUNT++;
-        Y_UPPER_SUM += COMPASS_HISTORY[pos].POINT.Y;
-      }
-    }
-  }
-
-  X_LOWER_MEAN = X_LOWER_SUM / (float)X_LOWER_COUNT;
-  X_UPPER_MEAN = X_UPPER_SUM / (float)X_UPPER_COUNT;
-  Y_LOWER_MEAN = Y_LOWER_SUM / (float)Y_LOWER_COUNT;
-  Y_UPPER_MEAN = Y_UPPER_SUM / (float)Y_UPPER_COUNT;
-}
-
-void CAL_LEVEL_3::group_means()
-{
-  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-  {
-    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-    {
-      if (COMPASS_HISTORY[pos].X_LOWER)
-      {
-        if (is_within(COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X, 
-                      (X_LOWER_MEAN - COMPASS_CENTER.X) * 2.0f, 
-                      (X_LOWER_MEAN - COMPASS_CENTER.X) * 0.8f))    
-        {
-          COMPASS_HISTORY[pos].X_LOWER_M = true;
-        }
-      }
-      
-      if (COMPASS_HISTORY[pos].X_UPPER)
-      {
-        if (is_within(COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X, 
-                      (X_UPPER_MEAN - COMPASS_CENTER.X) * 2.0f, 
-                      (X_UPPER_MEAN - COMPASS_CENTER.X) * 0.8f)) 
-        {
-          COMPASS_HISTORY[pos].X_UPPER_M = true;
-        }
-      }
-
-      if (COMPASS_HISTORY[pos].Y_LOWER)
-      {
-        if (is_within(COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y, 
-                      (Y_LOWER_MEAN - COMPASS_CENTER.Y) * 2.0f, 
-                      (Y_LOWER_MEAN - COMPASS_CENTER.Y) * 0.8f))  
-        {
-          COMPASS_HISTORY[pos].Y_LOWER_M = true;
-        }
-      }
-
-      if (COMPASS_HISTORY[pos].Y_UPPER)
-      {
-        if (is_within(COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y, 
-                      (Y_UPPER_MEAN - COMPASS_CENTER.Y) * 2.0f, 
-                      (Y_UPPER_MEAN - COMPASS_CENTER.Y) * 0.8f))
-        {
-          COMPASS_HISTORY[pos].Y_UPPER_M = true;
-        }
-      }
-
-      if (COMPASS_HISTORY[pos].X_LOWER_M + 
-          COMPASS_HISTORY[pos].X_UPPER_M + 
-          COMPASS_HISTORY[pos].Y_LOWER_M + 
-          COMPASS_HISTORY[pos].Y_UPPER_M > 1)
-      {
-        // if a point is in more than one mean group, it is suspect, remove all flags
-        COMPASS_HISTORY[pos].X_LOWER_M = false;
-        COMPASS_HISTORY[pos].X_UPPER_M = false;
-        COMPASS_HISTORY[pos].Y_LOWER_M = false;
-        COMPASS_HISTORY[pos].Y_UPPER_M = false;
-      }
-    }
-  }
-}
-
-/*
-void CAL_LEVEL_3::delete_unnecessary_points()
-{
-  int max_size = COMPASS_HISTORY_SIZE / 5;
-
-  int x_up = 0;
-  int x_lo = 0;
-  int y_up = 0;
-  int y_lo = 0;
-
-  // Pass 1: Keep max_size of Main Mean points.
-  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-  {
-    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-    {
-      if (COMPASS_HISTORY[pos].X_LOWER_M)
-      {
-        if (x_lo < max_size)
-        {
-          x_lo++;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
-      }
-
-      if (COMPASS_HISTORY[pos].X_UPPER_M)
-      {
-        if (x_up < max_size)
-        {
-          x_up++;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
-      }
-
-      if (COMPASS_HISTORY[pos].Y_LOWER_M)
-      {
-        if (y_lo < max_size)
-        {
-          y_lo++;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
-      }
-
-      if (COMPASS_HISTORY[pos].Y_UPPER_M)
-      {
-        if (y_up < max_size)
-        {
-          y_up++;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
-      }
-    }
-  }
-
-  // Pass 2: Keep max_size of upper and lower points with leftover reserves.
-  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-  {
-    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-    {
-      if (COMPASS_HISTORY[pos].X_LOWER)
-      {
-        if (x_lo < max_size)
-        {
-          x_lo++;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
-      }
-
-      if (COMPASS_HISTORY[pos].X_UPPER)
-      {
-        if (x_up < max_size)
-        {
-          x_up++;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
-      }
-
-      if (COMPASS_HISTORY[pos].Y_LOWER)
-      {
-        if (y_lo < max_size)
-        {
-          y_lo++;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
-      }
-
-      if (COMPASS_HISTORY[pos].Y_UPPER)
-      {
-        if (y_up < max_size)
-        {
-          y_up++;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
-      }
-    }
-  }
-}
-*/
-
 void CAL_LEVEL_3::preservation_of_data()
-// This function identifies and marks a limited number of points within the compass history
+// This function identifies and marks points within the compass history
 // to be preserved, aiming for an even angular distribution around the data's center.
 // The goal is to ensure a representative set of points are not overwritten.
 {
-  // Calculate the maximum number of points to keep for the even distribution.
-  // This ensures that we don't mark too many points as 'DO_NOT_OVERWRITE'.
-  int max_size = (COMPASS_HISTORY_SIZE * 4) / 5;
-
-  /*
-  // Step 2: Calculate the approximate center of the data.
-  // This is done by finding the mean X and Y coordinates of all valid points.
-  float sum_x = 0.0f;
-  float sum_y = 0.0f;
-  int valid_points_count = 0;
-
-  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); ++pos)
-  {
-    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-    {
-      sum_x += COMPASS_HISTORY[pos].POINT.X;
-      sum_y += COMPASS_HISTORY[pos].POINT.Y;
-      valid_points_count++;
-    }
-  }
-
-  float center_x = 0.0f;
-  float center_y = 0.0f;
-  if (valid_points_count > 0)
-  {
-    center_x = sum_x / valid_points_count;
-    center_y = sum_y / valid_points_count;
-  }
-  else
-  {
-    // If no valid data, there's nothing to mark.
-    return;
-  }
-  */
-
-  float center_x = COMPASS_CENTER.X;
-  float center_y = COMPASS_CENTER.Y;
-
-  // Step 3: Collect valid points and calculate their angles relative to the center.
   std::vector<PointAngle> angled_points;
   for (size_t pos = 0; pos < COMPASS_HISTORY.size(); ++pos)
   {
     if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
     {
-      float dx = COMPASS_HISTORY[pos].POINT.X - center_x;
-      float dy = COMPASS_HISTORY[pos].POINT.Y - center_y;
+      float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
+      float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
 
       // Calculate angle using atan2, which handles all quadrants.
       // The angle is in radians, typically from -PI to PI.
-      float angle = std::atan2(dy, dx);
-      angled_points.push_back({angle, pos});
+      int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
+      angle_slot = (angle_slot + 360) % 360;
+
+      if (preserved_angle[angle_slot] == false)
+      {
+        preserved_angle[angle_slot] = true;
+        COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
+      }
     }
-  }
-
-  // If there are no points or too few points, mark all of them if they fit max_size.
-  if (angled_points.empty()) 
-  {
-    return;
-  }
-
-  if (angled_points.size() <= static_cast<size_t>(max_size)) 
-  {
-    for (const auto& pa : angled_points) 
-    {
-      COMPASS_HISTORY.FLAGS[pa.original_index].DO_NOT_OVERWRITE = true;
-    }
-    return;
-  }
-
-  // Step 4: Sort points by their angle.
-  std::sort(angled_points.begin(), angled_points.end(), [](const PointAngle& a, const PointAngle& b) 
-            {
-              return a.angle < b.angle;
-            });
-
-  // Step 5: Select evenly distributed points and mark them.
-  // Calculate the step size to pick points evenly across the sorted angular range.
-  float step_size = static_cast<float>(angled_points.size()) / max_size;
-
-  for (int i = 0; i < max_size; ++i) 
-  {
-    // Calculate the index in the sorted `angled_points` vector.
-    // This ensures an even distribution.
-    size_t index_in_sorted_list = static_cast<size_t>(i * step_size);
-
-    // Ensure the index is within bounds, especially for the last element
-    if (index_in_sorted_list >= angled_points.size()) 
-    {
-      index_in_sorted_list = angled_points.size() - 1;
-    }
-
-    // Mark the original point's DO_NOT_OVERWRITE flag.
-    size_t original_pos = angled_points[index_in_sorted_list].original_index;
-    COMPASS_HISTORY.FLAGS[original_pos].DO_NOT_OVERWRITE = true;
   }
 }
 
@@ -932,33 +612,34 @@ float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ& raw_point, cons
  * Now uses the globally stored calibration parameters.
  * @param Raw_XYZ The current raw compass reading.
  */
-void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ) {
-    HEADING_DEGREES_REPORT = calculate_calibrated_heading(Raw_XYZ, current_calibration_params);
-    HEADING_DEGREES_REPORT -= 180.0f; // Adjust to match original code's convention
+void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ)
+{
+  HEADING_DEGREES_REPORT = calculate_calibrated_heading(Raw_XYZ, current_calibration_params);
+  HEADING_DEGREES_REPORT -= 180.0f; // Adjust to match original code's convention
 
-    /*
-    std::cout << std::fixed << std::setprecision(3); // Set precision for output
+  /*
+  std::cout << std::fixed << std::setprecision(3); // Set precision for output
 
-    std::cout << "Reported Heading (Calibrated): " << HEADING_DEGREES_REPORT << " degrees";
-    std::cout << "\tRaw Angle (from FAKE_INPUT): " << FAKE_INPUT << " degrees";
-    // Calculate and display the difference for easier analysis
-    float diff = HEADING_DEGREES_REPORT - FAKE_INPUT;
-    // Normalize difference to be within -180 to 180 for easier interpretation
-    if (diff > 180.0f) diff -= 360.0f;
-    if (diff < -180.0f) diff += 360.0f;
-    std::cout << "\tDiff: " << diff << std::endl;
+  std::cout << "Reported Heading (Calibrated): " << HEADING_DEGREES_REPORT << " degrees";
+  std::cout << "\tRaw Angle (from FAKE_INPUT): " << FAKE_INPUT << " degrees";
+  // Calculate and display the difference for easier analysis
+  float diff = HEADING_DEGREES_REPORT - FAKE_INPUT;
+  // Normalize difference to be within -180 to 180 for easier interpretation
+  if (diff > 180.0f) diff -= 360.0f;
+  if (diff < -180.0f) diff += 360.0f;
+  std::cout << "\tDiff: " << diff << std::endl;
 
-    // Also print raw and corrected XYZ values for detailed debugging
-    std::cout << "\tRaw XYZ: (" << Raw_XYZ.X << ", " << Raw_XYZ.Y << ", " << Raw_XYZ.Z << ")";
-    
-    // Apply hard iron correction to raw_XYZ to get intermediate point
-    FLOAT_XYZ intermediate_point = Raw_XYZ - current_calibration_params.hard_iron_offset;
-    // Apply soft iron correction to intermediate point to get final corrected point
-    FLOAT_XYZ final_corrected_point = current_calibration_params.soft_iron_matrix * intermediate_point;
+  // Also print raw and corrected XYZ values for detailed debugging
+  std::cout << "\tRaw XYZ: (" << Raw_XYZ.X << ", " << Raw_XYZ.Y << ", " << Raw_XYZ.Z << ")";
+  
+  // Apply hard iron correction to raw_XYZ to get intermediate point
+  FLOAT_XYZ intermediate_point = Raw_XYZ - current_calibration_params.hard_iron_offset;
+  // Apply soft iron correction to intermediate point to get final corrected point
+  FLOAT_XYZ final_corrected_point = current_calibration_params.soft_iron_matrix * intermediate_point;
 
-    std::cout << "\tCorrected XYZ: (" << final_corrected_point.X << ", " << final_corrected_point.Y << ", " << final_corrected_point.Z << ")" << std::endl;
-    // In a real application, you would store this heading, update a display, etc.
-    */
+  std::cout << "\tCorrected XYZ: (" << final_corrected_point.X << ", " << final_corrected_point.Y << ", " << final_corrected_point.Z << ")" << std::endl;
+  // In a real application, you would store this heading, update a display, etc.
+  */
 }
 
 void CAL_LEVEL_3::clear()
@@ -972,6 +653,7 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
   if (false)
   {
     Raw_XYZ = fake_compass_input(tmeFrame_Time);
+    FAKE_INPUT_REPORTED = FAKE_INPUT - 180.0f;
   }
 
   // Add point to history.  
@@ -981,29 +663,14 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
 
   // Analyze the points in the history. Only performed during iterations.
   // Analysis Determines Compass Center and Circle. 
-  ITERATION_COUNTER++;
-  if (successful_add && ITERATION_COUNTER > ITERATION_TRIGGER)
+  //ITERATION_COUNTER++;
+  //if (successful_add && ITERATION_COUNTER > ITERATION_TRIGGER)
+
+  if (successful_add && CALIBRATION_TIMER.is_ready(tmeFrame_Time))
   {
-    ITERATION_COUNTER = 0;
+    CALIBRATION_TIMER.set(tmeFrame_Time, CALIBRATION_DELAY);
 
     clear_all_flags();
-
-    /*
-    group_upper_lower();
-    calculate_upper_lower_means();
-
-    if (X_LOWER_COUNT == 0 || X_UPPER_COUNT == 0 || Y_LOWER_COUNT == 0 || Y_UPPER_COUNT == 0)
-    {
-      COMPASS_CENTER = get_center_based_on_extremes();
-      group_upper_lower();            // based on extremes
-      calculate_upper_lower_means();  // based on extremes
-    }
-    else
-    {
-      COMPASS_CENTER.X = (X_UPPER_MEAN + X_LOWER_MEAN) * 0.5f;
-      COMPASS_CENTER.Y = (Y_UPPER_MEAN + Y_LOWER_MEAN) * 0.5f;
-    }
-    */
 
     COMPASS_CENTER = get_center_based_on_extremes();
 
@@ -1027,13 +694,11 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
     std::cout << "-----------------------------\n" << std::endl;
     */
 
-    group_means();
     preservation_of_data();
 
   }
   
   // Calculate heading
-  // (simple)
   set_heading_degrees_report(Raw_XYZ);
 
   //ITERATION_COUNTER2++;
