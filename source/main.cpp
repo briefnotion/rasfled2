@@ -1129,7 +1129,8 @@ int loop_2(bool TTY_Only)
       sdSystem.dblCOMMS_COMPASS_DATA_READ_TIME.start_timer(sdSystem.PROGRAM_TIME.now());
 
       // Compass Serial Communications
-      if (sdSystem.COMMS_COMPASS.cycle(sdSystem.GPS_SYSTEM, sdSystem.PROGRAM_TIME.current_frame_time()))
+      //if (sdSystem.COMMS_COMPASS.cycle(sdSystem.GPS_SYSTEM, sdSystem.PROGRAM_TIME.current_frame_time()))
+      if (sdSystem.COMMS_COMPASS.cycle(sdSystem.PROGRAM_TIME.current_frame_time()))
       {
         if (sdSystem.COMMS_COMPASS.cycle_change() == 99)
         {

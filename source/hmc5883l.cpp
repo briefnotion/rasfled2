@@ -33,10 +33,10 @@ FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
     // and Corrected XYZ values to repeat in the output for those frames.
 
     //simulations
-    bool noise = true;
+    bool noise = false;
     float noise_factor = 0.5f;
 
-    bool sparatic_random = true;
+    bool sparatic_random = false;
     float sparatic_random_factor = 1.0f;
     int sparatic_random_chance_percent = 5; // 5% chance of sparatic random jump
 
@@ -65,8 +65,8 @@ FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
     // parameters
     float radius = 250.0f;
     FLOAT_XYZ offset;
-    offset.X = 50.0f;
-    offset.Y = 100.3f;
+    offset.X = 250.0f;
+    offset.Y = 300.3f;
     // Modified: Introduce Z variation for calibration
     offset.Z = 10.0f * std::sin(tmeFrame_Time * 0.01f); // Vary Z slightly
 
@@ -791,7 +791,8 @@ void HMC5883L::stop()
   CONNECTED = false;
 }
 
-void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
+//void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
+void HMC5883L::process(unsigned long tmeFrame_Time)
 {
   //FLOAT_XYZ calibrated_bearing_xyz = calculate_calibrated_xyz(RAW_XYZ, LEVEL_2.offset(), LEVEL_2.skew());
   //RAW_BEARING = (atan2(calibrated_bearing_xyz.Y, calibrated_bearing_xyz.X) * 180 / M_PI);
@@ -878,6 +879,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
     }
   }
 
+  /*
   // Passive GPS Bearing adjustment
   if (GPS_System.active(tmeFrame_Time)) // Enable
   {
@@ -928,6 +930,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
       }
     }
   }
+  */
 }
 
 void HMC5883L::calibrateion_reset()
@@ -949,91 +952,13 @@ bool HMC5883L::calibrate_on()
   return CALIBRATE;
 }
 
-/*
-void HMC5883L::calibrate_lock_toggle()
-{
-  CALIBRATE_LOCK = !CALIBRATE_LOCK;
-}
-
-bool HMC5883L::calibrate_lock_on()
-{
-  return CALIBRATE_LOCK;
-}
-*/
-
-/*
-MIN_MAX_SIMPLE HMC5883L::calibration_min_max_x()
-{
-  return LEVEL_2.x_min_max();
-}
-MIN_MAX_SIMPLE HMC5883L::calibration_min_max_y()
-{
-  return LEVEL_2.y_min_max();
-}
-MIN_MAX_SIMPLE HMC5883L::calibration_min_max_z()
-{
-  return LEVEL_2.z_min_max();
-}
-
-FLOAT_XYZ HMC5883L::calibration_offset()
-{
-  return LEVEL_2.offset();
-}
-
-CAL_LEVEL_2_QUAD_RECORD HMC5883L::calibration_points_active_quad_data()
-{
-  return LEVEL_2.CALIBRATION_QUADS[0].QUAD_DATA;
-}
-bool HMC5883L::calibration_points_active_quad_overflow()
-{
-  return LEVEL_2.CALIBRATION_QUADS[0].QUAD_DATA.OVERFLOW;
-}
-
-float HMC5883L::calibration_variance()
-{
-  return LEVEL_2.variance();
-}
-bool HMC5883L::calibration_simple()
-{
-  return LEVEL_2.simple_calibration();
-}
-*/
-
-/*
-void HMC5883L::calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
-                                    FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
-                                    FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
-                                    FLOAT_XYZ Cal_Pt_4, float Cal_Var_4, 
-                                    float Cal_Offset)
-{
-  PRELOAD_DATA_LOADED = true;
-  KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD = Cal_Offset;
-  LEVEL_2.calibration_preload(Cal_Pt_1, Cal_Var_1, Cal_Pt_2, Cal_Var_2, 
-                              Cal_Pt_3, Cal_Var_3, Cal_Pt_4, Cal_Var_4);
-}
-
-void HMC5883L::calibration_preload_set()
-{
-  if (PRELOAD_DATA_LOADED)
-  {
-    KNOWN_DEVICE_DEGREE_OFFSET = KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD;
-    
-    LEVEL_2.calibration_preload_set();
-    
-    if (LEVEL_2.BEARING_OFFSET_LOAD != -1)
-    {
-      KNOWN_DEVICE_DEGREE_OFFSET = LEVEL_2.BEARING_OFFSET_LOAD;
-    }
-  }
-}
-*/
-
 bool HMC5883L::connected()
 {
   return CONNECTED;
 }
 
-bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
+//bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
+bool HMC5883L::cycle(unsigned long tmeFrame_Time)
 {
   //bool data_received = true;
   bool ret_cycle_changed = false;
@@ -1177,7 +1102,8 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
 
         // Process
-        process(GPS_System, tmeFrame_Time);
+        //process(GPS_System, tmeFrame_Time);
+        process(tmeFrame_Time);
       }
     }
   }

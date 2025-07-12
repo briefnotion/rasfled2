@@ -1223,8 +1223,14 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
 
       ImGui::Text("COMPASS");
 
-      ImGui::Text("BEARING: %4.1f° ", sdSysData.COMMS_COMPASS.bearing());
-      ImGui::Text("        (%4.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset());
+      ImGui::Text("BEARING:  %5.1f° ", sdSysData.COMMS_COMPASS.bearing());
+
+      if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time())) // Enable
+      {
+        ImGui::Text("(%5.1f°) (%5.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset(),
+                                  no_roll_difference(sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.back().TRUE_HEADING,
+                                  sdSysData.COMMS_COMPASS.bearing(), 360.0f));
+      }
       
       /*
       // Fake Compass Review
