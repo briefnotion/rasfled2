@@ -18,14 +18,36 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
+void CAL_LEVEL_3::save_history_and_settings(HMC5883L_PROPERTIES &Props)
+{
+  cout << "***   Props.OFFSET_HISTORY_FILE_NAME: " << Props.OFFSET_HISTORY_FILE_NAME << endl;
+
+  /*
+  string file_to_string(string Dir_Filename, bool &Success);
+  // Opens and loads a file to return as a string.
+  // Reurns Success true false value.
+
+  string file_to_string(string Dir_Filename);
+  // Opens and loads a file to return as a string.
+
+  bool deque_string_to_file(string Dir_Filename, deque<string> &qFile, bool Append);
+  // Opens and saves a dequed string into a file with append option
+  // Reurns false if failed.
+
+  bool file_to_deque_string(string Dir_Filename, deque<string> &qFile);
+  // Opens and saves a dequed string into a file with append option
+  // Reurns false if failed.
+  */
+}
+
 /**
  * @brief Generates fake compass input for testing with various simulations.
  * @param tmeFrame_Time Current frame time.
  * @return A fake FLOAT_XYZ point.
  */
-FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
+FLOAT_XYZ_MATRIX CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
 {
-    FLOAT_XYZ ret_point;
+    FLOAT_XYZ_MATRIX ret_point;
 
     int speed = 10; // 1 fastest
     // Note: Due to integer division (tmeFrame_Time / speed), the angle will
@@ -64,7 +86,7 @@ FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
 
     // parameters
     float radius = 250.0f;
-    FLOAT_XYZ offset;
+    FLOAT_XYZ_MATRIX offset;
     offset.X = 250.0f;
     offset.Y = 300.3f;
     // Modified: Introduce Z variation for calibration
@@ -208,12 +230,12 @@ FLOAT_XYZ CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
     return ret_point;
 }
 
-bool CAL_LEVEL_3::xyz_equal(FLOAT_XYZ &A, FLOAT_XYZ &B)
+bool CAL_LEVEL_3::xyz_equal(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B)
 {
   return (A.X == B.X) && (A.Y == B.Y) && (A.Z == B.Z);
 }
 
-float CAL_LEVEL_3::dist_xyz(FLOAT_XYZ &A, FLOAT_XYZ &B)
+float CAL_LEVEL_3::dist_xyz(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B)
 {
   return sqrtf(powf(A.X - B.X, 2) + powf(A.Y - B.Y, 2) + powf(A.Z - B.Z, 2));
 }
@@ -229,7 +251,7 @@ void CAL_LEVEL_3::clear_all_flags()
   }
 }
 
-bool CAL_LEVEL_3::add_point(FLOAT_XYZ &Raw_XYZ)
+bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
 {
 
   bool ret_pass_filter = false;
@@ -270,9 +292,9 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ &Raw_XYZ)
   return ret_pass_filter;
 }
 
-FLOAT_XYZ CAL_LEVEL_3::get_center_based_on_extremes()
+FLOAT_XYZ_MATRIX CAL_LEVEL_3::get_center_based_on_extremes()
 {
-  FLOAT_XYZ ret_center;
+  FLOAT_XYZ_MATRIX ret_center;
 
   int x_min = 0;
   int x_max = 0;
@@ -359,14 +381,14 @@ void CAL_LEVEL_3::preservation_of_data()
  */
 bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
-    FLOAT_XYZ& hard_iron_offset,
+    FLOAT_XYZ_MATRIX& hard_iron_offset,
     Matrix3x3& soft_iron_matrix)
 {
     // Minimum number of points required to fit an ellipsoid (at least 9, ideally many more)
     // For a robust solution, typically 100+ points covering all orientations are needed.
     const int MIN_POINTS = 10; // Increased from 9 for better stability
 
-    std::vector<FLOAT_XYZ> active_points;
+    std::vector<FLOAT_XYZ_MATRIX> active_points;
     for (size_t i = 0; i < history.size(); ++i) {
         if (history.FLAGS[i].HAS_DATA) {
             active_points.push_back(history[i].POINT);
@@ -376,7 +398,7 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     if (active_points.size() < MIN_POINTS) {
         //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
         //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
-        hard_iron_offset = FLOAT_XYZ(0,0,0);
+        hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0);
         soft_iron_matrix = Matrix3x3(); // Identity
         return false;
     }
@@ -580,9 +602,9 @@ CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECT
  * @param params The calibration parameters (offset and matrix).
  * @return The heading in degrees (0-360), where 0 is North.
  */
-float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ& raw_point, const CalibrationParameters& params) {
+float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params) {
     // 1. Apply Hard Iron Correction: Remove the constant offset.
-    FLOAT_XYZ corrected_point = raw_point - params.hard_iron_offset;
+    FLOAT_XYZ_MATRIX corrected_point = raw_point - params.hard_iron_offset;
 
     // 2. Apply Soft Iron Correction: Transform the point using the soft iron matrix.
     // This matrix will scale and potentially rotate/shear the point to make the field spherical.
@@ -612,10 +634,10 @@ float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ& raw_point, cons
  * Now uses the globally stored calibration parameters.
  * @param Raw_XYZ The current raw compass reading.
  */
-void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ)
+void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ, HMC5883L_PROPERTIES &Props)
 {
   HEADING_DEGREES_REPORT = calculate_calibrated_heading(Raw_XYZ, current_calibration_params);
-  HEADING_DEGREES_REPORT -= 180.0f; // Adjust to match original code's convention
+  HEADING_DEGREES_REPORT += Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLENATION; // Adjust to match original code's convention
 
   /*
   std::cout << std::fixed << std::setprecision(3); // Set precision for output
@@ -647,13 +669,13 @@ void CAL_LEVEL_3::clear()
   COMPASS_HISTORY.set_size(COMPASS_HISTORY_SIZE);
 }
 
-void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Raw_XYZ)
+void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, HMC5883L_PROPERTIES &Props)
 {
   // Set to true to use fake compass input for testing
   if (false)
   {
     Raw_XYZ = fake_compass_input(tmeFrame_Time);
-    FAKE_INPUT_REPORTED = FAKE_INPUT - 180.0f;
+    FAKE_INPUT_REPORTED = FAKE_INPUT + Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLENATION;
   }
 
   // Add point to history.  
@@ -661,11 +683,7 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
   // Retain the last read value for future reference.
   bool successful_add = add_point(Raw_XYZ);
 
-  // Analyze the points in the history. Only performed during iterations.
-  // Analysis Determines Compass Center and Circle. 
-  //ITERATION_COUNTER++;
-  //if (successful_add && ITERATION_COUNTER > ITERATION_TRIGGER)
-
+  // Analyze the points in the history. Only performed during timed interval.
   if (successful_add && CALIBRATION_TIMER.is_ready(tmeFrame_Time))
   {
     CALIBRATION_TIMER.set(tmeFrame_Time, CALIBRATION_DELAY);
@@ -699,11 +717,14 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Ra
   }
   
   // Calculate heading
-  set_heading_degrees_report(Raw_XYZ);
+  set_heading_degrees_report(Raw_XYZ, Props);
 
-  //ITERATION_COUNTER2++;
-  //if (ITERATION_COUNTER2 > 400)
-  //exit(0);
+  // Save compass history and settings on timed inteval
+  if (CALIBRATION_DATA_SAVE.is_ready(tmeFrame_Time))
+  {
+    CALIBRATION_DATA_SAVE.set(tmeFrame_Time, CALIBRATION_DATA_SAVE_DELAY);
+    //save_history_and_settings(Props);
+  }
 }
 
 // -------------------------------------------------------------------------------------
@@ -791,8 +812,7 @@ void HMC5883L::stop()
   CONNECTED = false;
 }
 
-//void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
-void HMC5883L::process(unsigned long tmeFrame_Time)
+void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 {
   //FLOAT_XYZ calibrated_bearing_xyz = calculate_calibrated_xyz(RAW_XYZ, LEVEL_2.offset(), LEVEL_2.skew());
   //RAW_BEARING = (atan2(calibrated_bearing_xyz.Y, calibrated_bearing_xyz.X) * 180 / M_PI);
@@ -821,7 +841,7 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
   // Level 2 - Calibration (Always Active.)
   if (CALIBRATE_LOCK == false)
   {
-    LEVEL_3.calibration_level_3(tmeFrame_Time, RAW_XYZ);
+    LEVEL_3.calibration_level_3(tmeFrame_Time, RAW_XYZ, PROPS);
   }
 
   // Determine Jitter
@@ -879,58 +899,59 @@ void HMC5883L::process(unsigned long tmeFrame_Time)
     }
   }
 
-  /*
-  // Passive GPS Bearing adjustment
-  if (GPS_System.active(tmeFrame_Time)) // Enable
+  if (PROPS.GPS_ASSIST_HEADING)
   {
-    // Avoid constant recalibration from the GPS heading (gps only updated once per sec)
-    //  If calibration sucessful, wait 1 min. if not, try again 
-    //  in 10 sec.
+    // Passive GPS Bearing adjustment
+    if (GPS_System.active(tmeFrame_Time)) // Enable
+    {
+      // Avoid constant recalibration from the GPS heading (gps only updated once per sec)
+      //  If calibration sucessful, wait 1 min. if not, try again 
+      //  in 10 sec.
 
-    if (GPS_HEADING_CALIBRATION_TIMER.ping_down(tmeFrame_Time) == false)
-    { 
-      bool calibrated = false;
+      if (GPS_HEADING_CALIBRATION_TIMER.ping_down(tmeFrame_Time) == false)
+      { 
+        bool calibrated = false;
 
-      if (GPS_System.current_position().SPEED.val_mph() > 30.0f)  // if speed over X mps
-      {
-
-        if (GPS_System.TRACK.TRACK_POINTS_DETAILED.size() > 3)
+        if (GPS_System.current_position().SPEED.val_mph() > 30.0f)  // if speed over X mps
         {
-          // check track difference over past 3 seconds to be less than 1 degree. (not turning)
-          if (no_roll_difference(GPS_System.TRACK.TRACK_POINTS_DETAILED.back().TRUE_HEADING,
-                                  GPS_System.TRACK.TRACK_POINTS_DETAILED[GPS_System.TRACK.TRACK_POINTS_DETAILED.size() - 3].TRUE_HEADING, 
-                                  360.0f)
-                                  < 1.0f)
-          {
-            // Needs no roll system.  
-            float difference = no_roll_difference(BEARING_JITTER_MIN, BEARING_JITTER_MAX, 360.0f);
-            
-            // continue if jitter difference is small
-            if (difference < 3.0f) // if jitter less than X degrees
-            {
-              bearing_known_offset_calibration(GPS_System.current_position().TRUE_HEADING);
 
-              // cal good, wait 60 seconds
-              calibrated = true;
+          if (GPS_System.TRACK.TRACK_POINTS_DETAILED.size() > 3)
+          {
+            // check track difference over past 3 seconds to be less than 1 degree. (not turning)
+            if (no_roll_difference(GPS_System.TRACK.TRACK_POINTS_DETAILED.back().TRUE_HEADING,
+                                    GPS_System.TRACK.TRACK_POINTS_DETAILED[GPS_System.TRACK.TRACK_POINTS_DETAILED.size() - 3].TRUE_HEADING, 
+                                    360.0f)
+                                    < 1.0f)
+            {
+              // Needs no roll system.  
+              float difference = no_roll_difference(BEARING_JITTER_MIN, BEARING_JITTER_MAX, 360.0f);
+              
+              // continue if jitter difference is small
+              if (difference < 3.0f) // if jitter less than X degrees
+              {
+                bearing_known_offset_calibration(GPS_System.current_position().TRUE_HEADING);
+
+                // cal good, wait 60 seconds
+                calibrated = true;
+              }
             }
           }
         }
-      }
 
-      if (calibrated)
-      {
-        GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 60000);
-      }
-      else
-      {
-        // turning over 1 degree in 3 seconds.
-        // jitter too large, wait 10 sec
-        // not over 30 mph, wait 10 seconds
-        GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 10000);
+        if (calibrated)
+        {
+          GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 60000);
+        }
+        else
+        {
+          // turning over 1 degree in 3 seconds.
+          // jitter too large, wait 10 sec
+          // not over 30 mph, wait 10 seconds
+          GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 10000);
+        }
       }
     }
   }
-  */
 }
 
 void HMC5883L::calibrateion_reset()
@@ -938,8 +959,10 @@ void HMC5883L::calibrateion_reset()
   CALIBRATED_BEARINGS.clear();
 
   CALIBRATE_LOCK = false;
+  KNOWN_DEVICE_DEGREE_OFFSET = 0.0f;
 
   LEVEL_3.clear();
+
 }
 
 void HMC5883L::calibrate_toggle()
@@ -957,8 +980,7 @@ bool HMC5883L::connected()
   return CONNECTED;
 }
 
-//bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
-bool HMC5883L::cycle(unsigned long tmeFrame_Time)
+bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
 {
   //bool data_received = true;
   bool ret_cycle_changed = false;
@@ -1102,8 +1124,7 @@ bool HMC5883L::cycle(unsigned long tmeFrame_Time)
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
 
         // Process
-        //process(GPS_System, tmeFrame_Time);
-        process(tmeFrame_Time);
+        process(GPS_System, tmeFrame_Time);
       }
     }
   }

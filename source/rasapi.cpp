@@ -317,9 +317,9 @@ bool check_create_working_dir(string Directory, bool Create)
   bool ret_exist = false;
   namespace fs = boost::filesystem;
 
-  fs::path path(Directory);
+  boost::filesystem::path path(Directory);
 
-  if (fs::exists(Directory))
+  if (boost::filesystem::exists(Directory))
   {
     ret_exist = true;
     //printf("Exist: %s\n", Directory.c_str());
@@ -328,7 +328,7 @@ bool check_create_working_dir(string Directory, bool Create)
   {
     if (Create)
     {
-      ret_exist = fs::create_directory(path);
+      ret_exist = boost::filesystem::create_directory(path);
       //printf("Create: %s\n", Directory.c_str());
     }
     else
@@ -348,15 +348,13 @@ bool get_files_list(string Directory, vector<string> &List, string Only_Type)
 
   // Using Boost
   {
-    namespace fs = boost::filesystem;
+    boost::filesystem::path path (Directory);
 
-    fs::path path (Directory);
-
-    if (fs::exists(path))
+    if (boost::filesystem::exists(path))
     {
-      if (fs::is_directory(path))
+      if (boost::filesystem::is_directory(path))
       {
-        for (fs::directory_entry& x : fs::directory_iterator(path))
+        for (boost::filesystem::directory_entry& x : boost::filesystem::directory_iterator(path))
         {
           if (Only_Type == "")
           {

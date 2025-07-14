@@ -1027,6 +1027,17 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
       {
         sdSysData.COMMS_COMPASS.calibrateion_reset();
       }
+
+
+
+      ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 6.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
+                                        WORKING_AREA.y));
+      if (BTC_GPS_ASSIST.button_toggle_color(sdSysData, "GPS-A\n(On)", "GPS-A\n(Off)", sdSysData.COMMS_COMPASS.PROPS.GPS_ASSIST_HEADING, 
+                                        RAS_GREEN, RAS_BLUE, 
+                                        sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+      {
+        sdSysData.COMMS_COMPASS.PROPS.GPS_ASSIST_HEADING = !sdSysData.COMMS_COMPASS.PROPS.GPS_ASSIST_HEADING;
+      }
     }
   }
 }

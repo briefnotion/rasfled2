@@ -1,3 +1,9 @@
+2.274_250714
+  - Made some changes to keep all of the HMC5883L code together.
+  - Several other changes to the way things are handled in the compass.
+  - version 2.273_250713 - compass resulted in +-4 degree errors.  Added Declination to the 
+      properties to see if it makes any difference.
+
 2.273_250713
   - Disabled the compassas auto calibrate with GPS.  Manual gps calibration is still available.
   - Attempted a matrix 3 by 3 calibration method but it didn't work out well.  Reverted changes.

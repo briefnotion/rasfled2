@@ -26,16 +26,11 @@
 #include <cmath>
 #include <iomanip>   // For std::fixed, std::setprecision
 
-// Third Party Header Files
-//#include <Eigen/Dense>
-//#include <Eigen/Eigenvalues>
-//#include <Eigen/GeneralizedEigenSolver>
-
 // RASFled related header files
 #include "definitions.h"
 #include "fled_time.h"
 #include "helper.h"
-#include "json_interface.h"
+#include "rasapi.h"
 #include "nmea.h"
 
 
@@ -142,122 +137,162 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
-//float dist(float X, float Y);
-
-//void calc_offset_and_skew(bool Simple, FLOAT_XYZ Top, FLOAT_XYZ Right, FLOAT_XYZ Bot, FLOAT_XYZ Left, 
-//                          FLOAT_XYZ &Ret_Offset, FLOAT_XYZ &Ret_Skew);
-
-//FLOAT_XYZ calculate_calibrated_xyz(FLOAT_XYZ &Raw_XYZ, FLOAT_XYZ Offset, FLOAT_XYZ Skew);
-
-// -------------------------------------------------------------------------------------
-
-/*
-class COMPASS_XY
+class FLOAT_XYZ_MATRIX
 {
-  public:
+public:
+    float X = 0;
+    float Y = 0;
+    float Z = 0;
 
-  float X = 0;
-  float Y = 0;
+    // Default constructor
+    FLOAT_XYZ_MATRIX() : X(0.0f), Y(0.0f), Z(0.0f) {}
+
+    // Parameterized constructor
+    FLOAT_XYZ_MATRIX(float x, float y, float z) : X(x), Y(y), Z(z) {}
+
+    // Overload for addition
+    FLOAT_XYZ_MATRIX operator+(const FLOAT_XYZ_MATRIX& other) const {
+        return FLOAT_XYZ_MATRIX(X + other.X, Y + other.Y, Z + other.Z);
+    }
+
+    // Overload for subtraction
+    FLOAT_XYZ_MATRIX operator-(const FLOAT_XYZ_MATRIX& other) const {
+        return FLOAT_XYZ_MATRIX(X - other.X, Y - other.Y, Z - other.Z);
+    }
+
+    // Overload for scalar multiplication
+    FLOAT_XYZ_MATRIX operator*(float scalar) const {
+        return FLOAT_XYZ_MATRIX(X * scalar, Y * scalar, Z * scalar);
+    }
+
+    // Overload for scalar division
+    FLOAT_XYZ_MATRIX operator/(float scalar) const {
+        if (scalar != 0.0f) {
+            return FLOAT_XYZ_MATRIX(X / scalar, Y / scalar, Z / scalar);
+        }
+        return *this; // Avoid division by zero, return current state
+    }
+
+    // Dot product
+    float dot(const FLOAT_XYZ_MATRIX& other) const {
+        return X * other.X + Y * other.Y + Z * other.Z;
+    }
+
+    // Magnitude squared
+    float magSq() const {
+        return X*X + Y*Y + Z*Z;
+    }
+
+    // Magnitude
+    float mag() const {
+        return std::sqrt(magSq());
+    }
 };
-*/
 
 // -------------------------------------------------------------------------------------
 
-// -------------------------------------------------------------------------------------
+/**
+ * @brief Represents a 3x3 matrix for linear transformations.
+ * Used for soft iron correction.
+ */
+class Matrix3x3 {
+public:
+    float m[3][3];
 
-//bool four_point_check(FLOAT_XYZ Top, FLOAT_XYZ Bottom, 
-//                      FLOAT_XYZ Left, FLOAT_XYZ Right);
+    // Default constructor (identity matrix)
+    Matrix3x3() {
+        m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f;
+        m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f;
+        m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f;
+    }
 
-// -------------------------------------------------------------------------------------
+    // Constructor from values
+    Matrix3x3(float m00, float m01, float m02,
+              float m10, float m11, float m12,
+              float m20, float m21, float m22) {
+        m[0][0] = m00; m[0][1] = m01; m[0][2] = m02;
+        m[1][0] = m10; m[1][1] = m11; m[1][2] = m12;
+        m[2][0] = m20; m[2][1] = m21; m[2][2] = m22;
+    }
 
-/*
-class CAL_LEVEL_2_QUAD_RECORD
-{
-  private:
+    // Matrix-Vector multiplication (M * V)
+    FLOAT_XYZ_MATRIX operator*(const FLOAT_XYZ_MATRIX& v) const {
+        return FLOAT_XYZ_MATRIX(
+            m[0][0] * v.X + m[0][1] * v.Y + m[0][2] * v.Z,
+            m[1][0] * v.X + m[1][1] * v.Y + m[1][2] * v.Z,
+            m[2][0] * v.X + m[2][1] * v.Y + m[2][2] * v.Z
+        );
+    }
 
-  int VARIANCE_COLLECTION_SIZE_SIMPLE = 60 * COMMS_COMPASS_POLLING_RATE_MS;
-  int VARIANCE_COLLECTION_SIZE_COMPLEX = 30 * COMMS_COMPASS_POLLING_RATE_MS;
-  // To assist with first round calibration times, the larger 
-  //  VARIANCE_COLLECTION_SIZE_SIMPLE will be the collection size, 
-  //  and the system will return to VARIANCE_COLLECTION_SIZE_COMPLEX 
-  //  collection size, for a greater refined, accuracy after simple 
-  //  calibration isn't active.
+    // Matrix-Matrix multiplication (M1 * M2)
+    Matrix3x3 operator*(const Matrix3x3& other) const {
+        Matrix3x3 result;
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                result.m[i][j] = 0.0f;
+                for (int k = 0; k < 3; ++k) {
+                    result.m[i][j] += m[i][k] * other.m[k][j];
+                }
+            }
+        }
+        return result;
+    }
 
-  int VARIANCE_COLLECTION_SIZE = 0.0f;
-  // Restriting calibration to occur only if 180 degree turned happened
-  //  within the numeber multiplied of seconds, as default.
-  // Whatever this value is, will be replaced with either 
-  // 
+    // Transpose of the matrix
+    Matrix3x3 transpose() const {
+        return Matrix3x3(
+            m[0][0], m[1][0], m[2][0],
+            m[0][1], m[1][1], m[2][1],
+            m[0][2], m[1][2], m[2][2]
+        );
+    }
 
-  public:
+    // Determinant of the matrix
+    float determinant() const {
+        return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
+               m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
+               m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+    }
 
-  bool OVERFLOW = false;
+    // Inverse of the matrix (using adjugate method for 3x3)
+    Matrix3x3 inverse() const {
+        float det = determinant();
+        if (std::abs(det) < std::numeric_limits<float>::epsilon()) {
+            std::cerr << "Warning: Matrix is singular, cannot invert. Returning identity." << std::endl;
+            return Matrix3x3(); // Return identity or handle error appropriately
+        }
 
-  vector<FLOAT_XYZ> DATA_POINTS;
-  vector<FLOAT_XYZ> DATA_POINTS_CALIBRATED;
+        Matrix3x3 inv;
+        inv.m[0][0] = (m[1][1] * m[2][2] - m[1][2] * m[2][1]) / det;
+        inv.m[0][1] = (m[0][2] * m[2][1] - m[0][1] * m[2][2]) / det;
+        inv.m[0][2] = (m[0][1] * m[1][2] - m[0][2] * m[1][1]) / det;
+        inv.m[1][0] = (m[1][2] * m[2][0] - m[1][0] * m[2][2]) / det;
+        inv.m[1][1] = (m[0][0] * m[2][2] - m[0][2] * m[2][0]) / det;
+        inv.m[1][2] = (m[0][2] * m[1][0] - m[0][0] * m[1][2]) / det;
+        inv.m[2][0] = (m[1][0] * m[2][1] - m[1][1] * m[2][0]) / det;
+        inv.m[2][1] = (m[0][1] * m[2][0] - m[0][0] * m[2][1]) / det;
+        inv.m[2][2] = (m[0][0] * m[1][1] - m[0][1] * m[1][0]) / det;
+        return inv;
+    }
 
-  void add_point(FLOAT_XYZ &Raw_XYZ);
-
-  void clear(bool Simple_Calibration);
+    // Scalar multiplication
+    Matrix3x3 operator*(float scalar) const {
+        Matrix3x3 result;
+        for (int i = 0; i < 3; ++i) {
+            for (int j = 0; j < 3; ++j) {
+                result.m[i][j] = m[i][j] * scalar;
+            }
+        }
+        return result;
+    }
 };
-*/
-
-/*
-class CALIBRATION_DATA
-{
-  private:
-
-  int OFFSET_POINT_VECTOR_SIZE = 45;
-
-  public:
-
-  CAL_LEVEL_2_QUAD_RECORD QUAD_DATA;
-  
-  //FLOAT_XYZ COORD;
-
-  FLOAT_XYZ OFFSET_POINT;               // Stores Offset point value after ER 
-                                        //  cycle. Refer to OFFSET_POINT when 
-                                        //  building skew and boundaries. 
-
-  FLOAT_XYZ LAST_KNOWN_OFFSET_POINT;    // Stores the Offset point while it is being
-                                        //  considered to be added to the list. 
-
-  vector<FLOAT_XYZ> OFFSET_POINT_LIST;  // Stores a list of previous Offset point
-
-  float VARIANCE = 1000;            // The Good Variance value. Copied from 
-                                    //  LAST_KNOWN_VARIANCE when copy made.
-  float LAST_KNOWN_VARIANCE = 1000; // Stores Variance from the previous 
-                                    //  variance_from_offset() pass
-  bool HAS_DATA = false;
-
-  void add_point_to_offset_point_list(FLOAT_XYZ Point);
-  // Adds new offset point to list and resizes if necessary.
-
-  void calculate_offset_point();
-  // Calculates the best offset point from the OFFSET_POINT_LIST and 
-  //  saves it in OFFSET_POINT;
-
-  void add_last_known_offset_point();
-  // Takes the LAST_KNOWN_OFFSET_POINT and puts it in the OFFSET_POINT_LIST, then 
-  //  calculates the best offset point and saves it in OFFSET_POINT;
-
-  float variance_from_offset(FLOAT_XYZ Offset, FLOAT_XYZ Skew, bool &Good_Data_Count);
-  // If Quadrant = -1 then no stick the landing is performed.
-
-  bool stick_the_landing(FLOAT_XYZ Current_Offset, int Quadrant);
-  // Reviews all the points in QUAD_DATA, and finds the best point to represent the 
-  //  offset point and saves it in LAST_KNOWN_OFFSET_POINT
-
-  void clear(bool Simple_Calibration);
-};
-*/
 
 // -------------------------------------------------------------------------------------
 
 class COMPASS_POINT
 {
   public:
-    FLOAT_XYZ POINT; // The actual XYZ coordinates of the compass reading
+    FLOAT_XYZ_MATRIX POINT; // The actual XYZ coordinates of the compass reading
 
     // Default constructor to initialize POINT
     COMPASS_POINT() : POINT() {}
@@ -266,7 +301,6 @@ class COMPASS_POINT
 };
  
 // -------------------------------------------------------------------------------------
-
 
 // Structure to hold point index and its angle for sorting.
 struct PointAngle 
@@ -282,7 +316,7 @@ struct PointAngle
  */
 struct CalibrationParameters 
 {
-  FLOAT_XYZ hard_iron_offset; // Bias to remove from each axis (center of ellipsoid)
+  FLOAT_XYZ_MATRIX hard_iron_offset; // Bias to remove from each axis (center of ellipsoid)
   Matrix3x3 soft_iron_matrix; // 3x3 transformation matrix for soft iron correction
 
   CalibrationParameters() :
@@ -290,192 +324,6 @@ struct CalibrationParameters
       soft_iron_matrix() {} // Default to identity matrix
 };
 
-class CAL_LEVEL_3
-{
-  private:
-
-  FLOAT_XYZ fake_compass_input(unsigned long tmeFrame_Time);
-  // Generates a fake compass input for testing purposes.
-
-  bool xyz_equal(FLOAT_XYZ &A, FLOAT_XYZ &B);
-  // Checks if two FLOAT_XYZ points are equal.
-
-  float dist_xyz(FLOAT_XYZ &A, FLOAT_XYZ &B);
-  // Calculates the distance between two points in 3D space.
-
-  // Functions to analyze the points in the history.
-  void clear_all_flags();
-  bool add_point(FLOAT_XYZ &Raw_XYZ);
-  FLOAT_XYZ get_center_based_on_extremes();
-
-  bool preserved_angle[360];
-  void preservation_of_data();
-
-  int COMPASS_HISTORY_SIZE = 800;
-  // Size of the compass history, hardcoded for now.
-
-  // Constants for noise filtering
-  float CLOSEST_ALLOWED = 3.0f;
-  float NOISE_FILTER_DISTANCE = 20.0f;
-
-  // Store calibration parameters globally or as a class member
-  CalibrationParameters current_calibration_params;
-
-  bool fit_ellipsoid_and_get_calibration_matrix(
-      const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
-      FLOAT_XYZ& hard_iron_offset,
-      Matrix3x3& soft_iron_matrix);
-  CalibrationParameters perform_hard_soft_iron_calibration(const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history);
-  float calculate_calibrated_heading(const FLOAT_XYZ& raw_point, const CalibrationParameters& params);
-  void set_heading_degrees_report(const FLOAT_XYZ& Raw_XYZ);
-
-  public:
-  // Testing
-  float FAKE_INPUT = 0.0f;
-  float FAKE_INPUT_REPORTED = 0.0f;
-
-  string OFFSET_HISTORY_FILENAME = "";
-  // not coded
-
-  //int BEARING_OFFSET_LOAD = -1;
- 
-  VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
-  // Stores the history of compass points, using a non-sequential vector deque.
-
-  FLOAT_XYZ COMPASS_CENTER;
-  // The center of the compass, calculated
-
-  // Contains iteration information
-  //  to determine when to perform calculations.
-  //  This is used to reduce the number of calculations performed.
-  int ITERATION_COUNTER = 0;
-  int ITERATION_TRIGGER = 2;
-
-  TIMED_IS_READY  CALIBRATION_TIMER;
-  int             CALIBRATION_DELAY = 1000;
-
-  float HEADING_DEGREES_REPORT = 0.0f;
-  // The heading degrees report, calculated based on the compass center and points.
-  FLOAT_XYZ LAST_READ_VALUE;
-  // The last read value from the compass, used for noise filtering.
-
-  void clear();
-
-  //float variance();
-  //bool simple_calibration();
-
-  void calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ &Raw_XYZ);
-  // Run Level 2 cal routines.
-};
-
-
-// -------------------------------------------------------------------------------------
-
-/*
-class CAL_LEVEL_2
-{
-  private:
-
-  // Simple calibration
-  bool MIN_MAX_HAS_DATA = false;
-
-  bool SIMPLE_CALIBRATION = true;
-  
-  MIN_MAX_SIMPLE X_MIN_MAX;
-  MIN_MAX_SIMPLE Y_MIN_MAX;
-  MIN_MAX_SIMPLE Z_MIN_MAX;
-
-  FLOAT_XYZ OFFSET;
-  FLOAT_XYZ SKEW;
-  
-  //           |skew y
-  //           |
-  //     ------|------ skew x
-  //           |
-  //           |
-
-  int QUAD      = -1;
-  int QUAD_PREV = -1;
-
-  bool COMPLETE_QUAD_DATA_SET = false;
-  float DISTANCE_VARIANCE_FULL = -1.0f;
-
-  FLOAT_XYZ Cal_Pt_PRELOAD_1;
-  FLOAT_XYZ Cal_Pt_PRELOAD_2;
-  FLOAT_XYZ Cal_Pt_PRELOAD_3;
-  FLOAT_XYZ Cal_Pt_PRELOAD_4;
-  float Cal_Var_PRELOAD_1 = 0.0f;
-  float Cal_Var_PRELOAD_2 = 0.0f;
-  float Cal_Var_PRELOAD_3 = 0.0f;
-  float Cal_Var_PRELOAD_4 = 0.0f;
-
-  // Offset Point History
-  bool OFFSET_HISTORY_CHANGED = false;
-  TIMED_PING OFFSET_HISTORY_TIMER;
-
-  public:
-
-  string OFFSET_HISTORY_FILENAME = "";
-
-  vector<CALIBRATION_DATA> CALIBRATION_QUADS;
-
-  //       1                |skew y
-  //    --   --             |
-  //  4         2     ------|------ skew x
-  //    --   --             |
-  //       3    0 - Active  |
-
-  // CALIBRATION_DATA A;
-  // CALIBRATION_DATA C;
-  // CALIBRATION_DATA D;
-  // CALIBRATION_DATA B;
-  // CALIBRATION_DATA ACTIVE_QUAD_DATA;
-  
-  int BEARING_OFFSET_LOAD = -1;
-
-  private:
-
-  int get_quad(FLOAT_XYZ &Raw_XYZ, float Distance);
-
-  bool XYZ_MIN_MAX(FLOAT_XYZ &Raw_XYZ, bool &Has_Data, MIN_MAX_SIMPLE &Xmm, MIN_MAX_SIMPLE &Ymm, MIN_MAX_SIMPLE &Zmm);
-
-  float calc_all_quad_variance(int Swap_0_Quad_With, bool &Ret_Good_Data_Count_Pass);
-
-  void build_calibration_display_data();
-
-  void build_non_simple_offsets();
-
-  bool offset_history_read();
-  void offset_history_write();
- 
-  public:
-
-  void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
-                            FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
-                            FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
-                            FLOAT_XYZ Cal_Pt_4, float Cal_Var_4);
-
-  void calibration_preload_set();
-
-  MIN_MAX_SIMPLE x_min_max();
-  MIN_MAX_SIMPLE y_min_max();
-  MIN_MAX_SIMPLE z_min_max();
-
-  FLOAT_XYZ offset();
-  FLOAT_XYZ skew();
-  
-  void clear();
-
-  float variance();
-  bool simple_calibration();
-
-  void calibration_level_2(unsigned long tmeFrame_Time, FLOAT_XYZ &Raw_XYZ);
-  // Run Level 2 cal routines.
-
-};
-*/
-
-// -------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------
 
 class HMC5883L_PROPERTIES
@@ -498,7 +346,101 @@ class HMC5883L_PROPERTIES
   //  No checks for hardware disconnects.
 
   string OFFSET_HISTORY_FILE_NAME = "";
+
+  float CALIBRATION_MOUNT_OFFSET = -180.0f;
+  float CALIBRATION_LOCATION_DECLENATION = 4.0f;
+  bool GPS_ASSIST_HEADING = false;
 };
+
+// -------------------------------------------------------------------------------------
+
+class CAL_LEVEL_3
+{
+  private:
+  void save_history_and_settings(HMC5883L_PROPERTIES &Props);
+  // Save history and settings
+
+  FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time);
+  // Generates a fake compass input for testing purposes.
+
+  bool xyz_equal(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B);
+  // Checks if two FLOAT_XYZ points are equal.
+
+  float dist_xyz(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B);
+  // Calculates the distance between two points in 3D space.
+
+  // Functions to analyze the points in the history.
+  void clear_all_flags();
+  bool add_point(FLOAT_XYZ_MATRIX &Raw_XYZ);
+  FLOAT_XYZ_MATRIX get_center_based_on_extremes();
+
+  bool preserved_angle[360];
+  void preservation_of_data();
+
+  int COMPASS_HISTORY_SIZE = 800;
+  // Size of the compass history, hardcoded for now.
+
+  // Constants for noise filtering
+  float CLOSEST_ALLOWED = 3.0f;
+  float NOISE_FILTER_DISTANCE = 20.0f;
+
+  // Store calibration parameters globally or as a class member
+  CalibrationParameters current_calibration_params;
+
+  bool fit_ellipsoid_and_get_calibration_matrix(
+      const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
+      FLOAT_XYZ_MATRIX& hard_iron_offset,
+      Matrix3x3& soft_iron_matrix);
+  CalibrationParameters perform_hard_soft_iron_calibration(const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history);
+  float calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params);
+  void set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ, HMC5883L_PROPERTIES &Props);
+
+  // Testing
+  float FAKE_INPUT = 0.0f;
+  
+  public:
+  float FAKE_INPUT_REPORTED = 0.0f;
+
+  string OFFSET_HISTORY_FILENAME = "";
+  // not coded
+
+  //int BEARING_OFFSET_LOAD = -1;
+ 
+  VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
+  // Stores the history of compass points, using a non-sequential vector deque.
+
+  FLOAT_XYZ_MATRIX COMPASS_CENTER;
+  // The center of the compass, calculated
+
+  // Contains iteration information
+  //  to determine when to perform calculations.
+  //  This is used to reduce the number of calculations performed.
+  int ITERATION_COUNTER = 0;
+  int ITERATION_TRIGGER = 2;
+
+  // Amount of time that is waited before the compass runs the calibration routines.
+  TIMED_IS_READY  CALIBRATION_TIMER;
+  int             CALIBRATION_DELAY = 1000;
+
+  // Amount of time that is waited before the system stores its calibration history
+  // to file.
+  TIMED_IS_READY  CALIBRATION_DATA_SAVE;
+  int             CALIBRATION_DATA_SAVE_DELAY = 60000;
+
+  float HEADING_DEGREES_REPORT = 0.0f;
+  // The heading degrees report, calculated based on the compass center and points.
+  FLOAT_XYZ_MATRIX LAST_READ_VALUE;
+  // The last read value from the compass, used for noise filtering.
+
+  void clear();
+  //float variance();
+  //bool simple_calibration();
+
+  void calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, HMC5883L_PROPERTIES &Props);
+  // Run Level 2 cal routines.
+};
+
+// -------------------------------------------------------------------------------------
 
 class HMC5883L
 {
@@ -510,12 +452,10 @@ class HMC5883L
 
   // Data
 
-  FLOAT_XYZ RAW_XYZ;            // Temporary storage of XYZ before process;
+  FLOAT_XYZ_MATRIX RAW_XYZ;            // Temporary storage of XYZ before process;
 
   int CALIBRATED_BEARINGS_SIZE = 31;  // Calculated by: COMMS_COMPASS_HISTORY_TIME_SPAN_MS / 
                                       //                COMMS_COMPASS_POLLING_RATE_MS
-  // CALIBRATED_BEARINGS_SIZE stores a history of calculated bearing, to 
-  //  be average to return the indicated bearing.
 
   vector<float> CALIBRATED_BEARINGS;  // History of calculated bearings
 
@@ -525,7 +465,7 @@ class HMC5883L
   float BEARING_JITTER_MAX = 0;
 
   // Calibration
-  void add_point(FLOAT_XYZ Point);
+  void add_point(FLOAT_XYZ_MATRIX Point);
   bool CALIBRATE = false;
   bool CALIBRATE_LOCK = false;
   int CURRENT_CALIBRATION_LEVEL = 0;
@@ -563,8 +503,7 @@ class HMC5883L
                       //  Not yet fully implemented.
 
   // Process
-  //void process(NMEA &GPS_System, unsigned long tmeFrame_Time);
-  void process(unsigned long tmeFrame_Time);
+  void process(NMEA &GPS_System, unsigned long tmeFrame_Time);
   // Internal: Processes most recent received data. 
   // Performs Calibration Routines
 
@@ -575,19 +514,6 @@ class HMC5883L
   //CAL_LEVEL_2 LEVEL_2;
   CAL_LEVEL_3 LEVEL_3;
 
-  //void calibration_preload(FLOAT_XYZ Cal_Pt_1, float Cal_Var_1, 
-  //                          FLOAT_XYZ Cal_Pt_2, float Cal_Var_2, 
-  //                          FLOAT_XYZ Cal_Pt_3, float Cal_Var_3, 
-  //                          FLOAT_XYZ Cal_Pt_4, float Cal_Var_4, 
-  //                          float Cal_Offset);
-
-  //void calibration_preload_set();
-
-  //int current_calibration_level();
-  // Not yet implemented
-  //  0 - No calibration Done
-  //  1 - Calibration of MIN MAX in progress.
-
   void calibrateion_reset();
   // Removes all calibration data
 
@@ -597,36 +523,11 @@ class HMC5883L
   bool calibrate_on();
   // Returns true if calibration is displayed.
 
-  //void calibrate_lock_toggle();
-  // Start / Stop Calibration
-
-  //bool calibrate_lock_on();
-  // Returns true if calibration in progress.
-
-  // calibration
-
-  //MIN_MAX_SIMPLE calibration_min_max_x();
-  //MIN_MAX_SIMPLE calibration_min_max_y();
-  //MIN_MAX_SIMPLE calibration_min_max_z();
-  //FLOAT_XYZ calibration_offset();
-
-  //CAL_LEVEL_2_QUAD_RECORD calibration_points_active_quad_data();
-  //bool calibration_points_active_quad_overflow();
-
-  //float calibration_variance();
-  //bool calibration_simple();
-
-  //void calibration_preload(FLOAT_XYZ A_Cal_Pt, float A_Cal_Var, 
-  //                          FLOAT_XYZ B_Cal_Pt, float B_Cal_Var, 
-  //                          FLOAT_XYZ C_Cal_Pt, float C_Cal_Var, 
-  //                          FLOAT_XYZ D_Cal_Pt, float D_Cal_Var);
-
   bool connected();
   // Returns true if hmc5883l is successfully connected.
   //  Will assume data is being received.
 
-  //bool cycle(NMEA &GPS_System, unsigned long tmeFrame_Time);
-  bool cycle(unsigned long tmeFrame_Time);
+  bool cycle(NMEA &GPS_System, unsigned long tmeFrame_Time);
   // This is the main update loop.
 
   // Writes and Reads data to comm port to send and
