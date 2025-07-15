@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.274_250714"
+#define Revision "2.275_250715"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -132,7 +132,7 @@
 #define DEF_COMPASS_DEV_NAME              "/dev/i2c-1"                                    // System File
 //#define DEF_COMPASS_DEV_NAME              "/dev/i2c-2"                                    // System File
 
-#define DEF_COMPASS_OFFSET_HISTORY        "compass_offset_history.json"
+#define DEF_COMPASS_OFFSET_HISTORY        "compass_settings.json"
 
 
 // -------------------------------------------------------------------------------------

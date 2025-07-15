@@ -20,24 +20,51 @@ using namespace std;
 
 void CAL_LEVEL_3::save_history_and_settings(HMC5883L_PROPERTIES &Props)
 {
-  cout << "***   Props.OFFSET_HISTORY_FILE_NAME: " << Props.OFFSET_HISTORY_FILE_NAME << endl;
+  bool ret_success = false;
+  
+  JSON_INTERFACE configuration_json;
+
+  // Create base settings hin JSON
+  JSON_ENTRY settings;
+  settings.create_label_value(quotify("mount offset"), quotify("-180.0"));
+  settings.create_label_value(quotify("declination"), quotify("4.0"));
+  configuration_json.ROOT.put_json_in_set(quotify("settings"), settings);
+
+  // Create Point history in JSON
+  if (COMPASS_HISTORY.count() > 10)
+  {
+    JSON_ENTRY compass_points;
+    for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+    {
+      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA && COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
+      {
+        JSON_ENTRY single_point;
+        single_point.create_label_value(quotify("X"), quotify(to_string(COMPASS_HISTORY[pos].POINT.X)));
+        single_point.create_label_value(quotify("Y"), quotify(to_string(COMPASS_HISTORY[pos].POINT.Y)));
+        single_point.create_label_value(quotify("Z"), quotify(to_string(COMPASS_HISTORY[pos].POINT.Z)));
+        compass_points.put_json_in_list(single_point);
+      }
+    }
+    configuration_json.ROOT.put_json_in_set(quotify("calibration points"), compass_points);
+  }
+
+  // Save JSON
+  deque<string> json_deque;
+  configuration_json.json_print_build_to_string_deque(json_deque);
+  ret_success = deque_string_to_file(Props.OFFSET_HISTORY_FILE_NAME, json_deque, false);
+
+  (void) ret_success;
 
   /*
-  string file_to_string(string Dir_Filename, bool &Success);
-  // Opens and loads a file to return as a string.
-  // Reurns Success true false value.
-
-  string file_to_string(string Dir_Filename);
-  // Opens and loads a file to return as a string.
-
-  bool deque_string_to_file(string Dir_Filename, deque<string> &qFile, bool Append);
-  // Opens and saves a dequed string into a file with append option
-  // Reurns false if failed.
-
-  bool file_to_deque_string(string Dir_Filename, deque<string> &qFile);
-  // Opens and saves a dequed string into a file with append option
-  // Reurns false if failed.
+  cout << endl;
+  for(size_t pos = 0; pos < json_deque.size(); pos++)
+  {
+    cout << json_deque[pos] << endl;
+  }
+  cout << endl;
   */
+
+  //exit(0);
 }
 
 /**
@@ -637,7 +664,7 @@ float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_poin
 void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ, HMC5883L_PROPERTIES &Props)
 {
   HEADING_DEGREES_REPORT = calculate_calibrated_heading(Raw_XYZ, current_calibration_params);
-  HEADING_DEGREES_REPORT += Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLENATION; // Adjust to match original code's convention
+  HEADING_DEGREES_REPORT += Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLINATION; // Adjust to match original code's convention
 
   /*
   std::cout << std::fixed << std::setprecision(3); // Set precision for output
@@ -675,7 +702,7 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
   if (false)
   {
     Raw_XYZ = fake_compass_input(tmeFrame_Time);
-    FAKE_INPUT_REPORTED = FAKE_INPUT + Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLENATION;
+    FAKE_INPUT_REPORTED = FAKE_INPUT + Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLINATION;
   }
 
   // Add point to history.  
@@ -723,7 +750,7 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
   if (CALIBRATION_DATA_SAVE.is_ready(tmeFrame_Time))
   {
     CALIBRATION_DATA_SAVE.set(tmeFrame_Time, CALIBRATION_DATA_SAVE_DELAY);
-    //save_history_and_settings(Props);
+    save_history_and_settings(Props);
   }
 }
 

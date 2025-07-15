@@ -1,3 +1,9 @@
+2.275_250715
+  - Created a routine to save settings and an arbitrary set of compass points for calibration on 
+      system load.  Save occures every minute. 
+  - Load settings have not been written yet.
+  - Added some usage documentation in the json_interface.h for future reference.
+
 2.274_250714
   - Made some changes to keep all of the HMC5883L code together.
   - Several other changes to the way things are handled in the compass.

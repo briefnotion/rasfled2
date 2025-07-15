@@ -32,6 +32,7 @@
 #include "helper.h"
 #include "rasapi.h"
 #include "nmea.h"
+#include "json_interface.h"
 
 
 // -------------------------------------------------------------------------------------
@@ -348,7 +349,7 @@ class HMC5883L_PROPERTIES
   string OFFSET_HISTORY_FILE_NAME = "";
 
   float CALIBRATION_MOUNT_OFFSET = -180.0f;
-  float CALIBRATION_LOCATION_DECLENATION = 4.0f;
+  float CALIBRATION_LOCATION_DECLINATION = 4.0f;
   bool GPS_ASSIST_HEADING = false;
 };
 

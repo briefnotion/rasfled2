@@ -144,16 +144,91 @@ class JSON_ENTRY
 
   void create_label_value(string Label, string Value);
   // Creates a simple Label Value JSON Entry.
+  //    mount_offset.create_label_value("mount offset", "-180");
+  //      [mount offset]  [-180]
 
   void put_json_in_list(JSON_ENTRY Entry);
   // Moves a JSON Entry into JSON Entry list.
 
   void put_json_in_set(string Set_Name, JSON_ENTRY Entry);
   // Moves a JSON Entry into JSON Entry set with Set Name.
+  //    configuration_json.ROOT.put_json_in_set("configuration", entry);
+  //      [configuration]
 };
 
 class JSON_INTERFACE
 {
+  /*
+  USAGE
+
+  --------
+  To create and save:
+
+  JSON_INTERFACE state_json;
+  deque<string> state_dq_string;
+
+  bool ret_success = false;
+
+  CRGB color = sdSysData.get_running_color();
+
+  state_json.ROOT.create_label_value(quotify("red"), quotify(to_string((int)(color.r))));
+  state_json.ROOT.create_label_value(quotify("green"), quotify(to_string((int)(color.g))));
+  state_json.ROOT.create_label_value(quotify("blue"), quotify(to_string((int)(color.b))));
+  state_json.ROOT.create_label_value(quotify("description"), quotify(sdSysData.get_running_color_str()));
+
+  state_json.json_print_build_to_string_deque(state_dq_string);
+  ret_success = deque_string_to_file(strFilename, state_dq_string, false);
+
+  Results:
+    {
+      "red" : "0" ,
+      "green" : "0" ,
+      "blue" : "63" ,
+      "description" : "Blue"
+    }
+
+  
+  --------
+
+  To create a more complex list
+
+    JSON_ENTRY compass_points;
+    for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+    {
+      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA && COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
+      {
+        JSON_ENTRY single_point;
+        single_point.create_label_value(quotify("X"), quotify(to_string(COMPASS_HISTORY[pos].POINT.X)));
+        single_point.create_label_value(quotify("Y"), quotify(to_string(COMPASS_HISTORY[pos].POINT.Y)));
+        single_point.create_label_value(quotify("Z"), quotify(to_string(COMPASS_HISTORY[pos].POINT.Z)));
+        compass_points.put_json_in_list(single_point);
+      }
+    }
+    configuration_json.ROOT.put_json_in_set(quotify("calibration points"), compass_points);
+
+  Results:
+
+    "calibration points" :
+    [
+      {
+        "X" : "450.000000" ,
+        "Y" : "232.000000" ,
+        "Z" : "1595.000000"
+      } ,
+      {
+        "X" : "449.000000" ,
+        "Y" : "240.000000" ,
+        "Z" : "1607.000000"
+      } ,
+      {
+        "X" : "458.000000" ,
+        "Y" : "229.000000" ,
+        "Z" : "1610.000000"
+      }
+    ]
+
+  */
+
   private:
   
   void json_debug_to_string_deque(deque<string> &JSON_Print_Build, JSON_ENTRY Json_entry, int Level, int Count);
