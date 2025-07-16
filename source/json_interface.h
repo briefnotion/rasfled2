@@ -107,6 +107,11 @@ class JSON_ENTRY
   // Returns true  if label within a json does match and changes.
   //  Value to JSON value.
 
+  bool get_if_is(string Label, float &Value);
+  // Returns false if label within a json does not match.
+  // Returns true  if label within a json does match and changes.
+  //  Value to JSON value.
+
   bool get_if_is(string Label, char &Value);
   // Returns false if label within a json does not match.
   // Returns true  if label within a json does match and changes.
@@ -226,6 +231,109 @@ class JSON_INTERFACE
         "Z" : "1610.000000"
       }
     ]
+
+
+  --------
+  
+  To Load:
+
+    void CAL_LEVEL_3::load_history_and_settings(HMC5883L_PROPERTIES &Props)
+    {
+      bool ret_success = false;
+
+      JSON_INTERFACE configuration_json;
+
+      string json_state_file = file_to_string(Props.OFFSET_HISTORY_FILE_NAME, ret_success);
+
+      if (ret_success == true)
+      {
+        ret_success = configuration_json.load_json_from_string(json_state_file);
+
+        if (ret_success == true)
+        {
+          for(int root = 0; root < (int)configuration_json.ROOT.DATA.size(); root++)
+          {
+            // load settings
+            if (configuration_json.ROOT.DATA[root].label() == "settings")
+            {
+              float mount_offset =  0.0f;
+              bool mount_offset_loaded = false;
+
+              float declination =   0.0f;
+              bool declination_loaded = false;
+
+              for (int settings = 0; 
+                  settings < (int)configuration_json.ROOT.DATA[root].DATA.size(); settings++)
+              {
+                mount_offset_loaded = configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("mount offset", mount_offset);
+                declination_loaded =  configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("declination", declination);
+              }
+
+              // store as props but only if found
+              if (mount_offset_loaded)
+              {
+                Props.CALIBRATION_MOUNT_OFFSET = mount_offset;
+              }
+              if (declination_loaded)
+              {
+                Props.CALIBRATION_LOCATION_DECLINATION = declination;
+              }
+            }
+
+            // load configuration points
+            if (configuration_json.ROOT.DATA[root].label() == "calibration points")
+            {
+              for (int points = 0; 
+                  points < (int)configuration_json.ROOT.DATA[root].DATA.size(); points++)
+              {
+                float x = 0;
+                float y = 0;
+                float z = 0;
+
+                for (int values = 0; 
+                    values < (int)configuration_json.ROOT.DATA[root].DATA[points].DATA.size(); values++)
+                {
+
+                  configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("X", x);
+                  configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Y", y);
+                  configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Z", z);
+                }
+
+                ...
+
+              }
+
+              ...
+
+            }
+          }
+        }
+      }
+    }
+
+    Loads:
+
+    {
+      "settings" :
+      [
+        "mount offset" : "-180.0" ,
+        "declination" : "4.0"
+      ] ,
+      "calibration points" :
+      [
+        {
+          "X" : "560.000000" ,
+          "Y" : "232.000000" ,
+          "Z" : "1545.000000"
+        } ,
+        {
+          "X" : "560.000000" ,
+          "Y" : "224.000000" ,
+          "Z" : "1554.000000"
+        }
+      ]
+    }
+
 
   */
 

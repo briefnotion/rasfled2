@@ -987,7 +987,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
     ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 1.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                       WORKING_AREA.y));
 
-    if (BTC_CALI.button_toggle_color(sdSysData, "CALI\n(On)", "CALI\n(Off)", sdSysData.COMMS_COMPASS.calibrate_on(),
+    if (BTC_CALI.button_toggle_color(sdSysData, "<--", "...", sdSysData.COMMS_COMPASS.calibrate_on(),
                                     RAS_GREEN, RAS_BLUE, 
                                     sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
@@ -996,16 +996,14 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
 
     if (sdSysData.COMMS_COMPASS.calibrate_on())
     {
-      /*
       ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                         WORKING_AREA.y));
-      if (BTC_LOCK.button_toggle_color(sdSysData, "LOCK\n(On)", "LOCK\n(Off)", sdSysData.COMMS_COMPASS.calibrate_lock_on(),
+      if (BTC_LOCK.button_toggle_color(sdSysData, "CALI\n(On)", "CALI\n(Off)", sdSysData.COMMS_COMPASS.PROPS.CALIBRATION_ENABLED,
                                     RAS_GREEN, RAS_BLUE, 
                                     sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
-        sdSysData.COMMS_COMPASS.calibrate_lock_toggle();
+        sdSysData.COMMS_COMPASS.PROPS.CALIBRATION_ENABLED = !sdSysData.COMMS_COMPASS.PROPS.CALIBRATION_ENABLED;
       }
-      */
 
       ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                         WORKING_AREA.y));

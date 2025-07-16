@@ -373,6 +373,19 @@ bool JSON_ENTRY::get_if_is(string Label, int &Value)
   }
 }
 
+bool JSON_ENTRY::get_if_is(string Label, float &Value)
+{
+  if (LABEL == Label)
+  {
+    Value = string_to_float(VALUE);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 bool JSON_ENTRY::get_if_is(string Label, char &Value)
 {
   if (LABEL == Label)

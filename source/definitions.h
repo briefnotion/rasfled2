@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.275_250715"
+#define Revision "2.276_250716"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -178,9 +178,6 @@
 
 #define COMMS_COMPASS_POLLING_RATE_MS         15
 #define COMMS_COMPASS_HISTORY_TIME_SPAN_MS    500
-
-#define COMMS_COMPASS_CAL_LOCK_AT_START       false
-#define COMMS_COMPASS_CAL_LOAD_AT_START       false
 
 #define COMMS_COMPASS_CAL_PT_1_X              385.0f
 #define COMMS_COMPASS_CAL_PT_1_Y              94.0f

@@ -333,7 +333,7 @@ class HMC5883L_PROPERTIES
 
   bool AUTOSTART =  false;
 
-  bool CALIBRATION_LOCK_AT_START = false;
+  bool CALIBRATION_ENABLED = true;
 
   // Comm port settings
   string PORT = "";
@@ -357,6 +357,10 @@ class HMC5883L_PROPERTIES
 
 class CAL_LEVEL_3
 {
+  public:
+  void load_history_and_settings(HMC5883L_PROPERTIES &Props);
+  // Load history and settings
+
   private:
   void save_history_and_settings(HMC5883L_PROPERTIES &Props);
   // Save history and settings
@@ -468,7 +472,6 @@ class HMC5883L
   // Calibration
   void add_point(FLOAT_XYZ_MATRIX Point);
   bool CALIBRATE = false;
-  bool CALIBRATE_LOCK = false;
   int CURRENT_CALIBRATION_LEVEL = 0;
 
   TIMED_PING DATA_RECIEVED_TIMER;

@@ -18,6 +18,91 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
+void CAL_LEVEL_3::load_history_and_settings(HMC5883L_PROPERTIES &Props)
+{
+  bool ret_success = false;
+
+  JSON_INTERFACE configuration_json;
+
+  string json_state_file = file_to_string(Props.OFFSET_HISTORY_FILE_NAME, ret_success);
+
+  if (ret_success == true)
+  {
+    ret_success = configuration_json.load_json_from_string(json_state_file);
+
+    if (ret_success == true)
+    {
+      for(int root = 0; root < (int)configuration_json.ROOT.DATA.size(); root++)
+      {
+        // load settings
+        if (configuration_json.ROOT.DATA[root].label() == "settings")
+        {
+          float mount_offset =  0.0f;
+          bool mount_offset_loaded = false;
+
+          float declination =   0.0f;
+          bool declination_loaded = false;
+
+          for (int settings = 0; 
+              settings < (int)configuration_json.ROOT.DATA[root].DATA.size(); settings++)
+          {
+            mount_offset_loaded = configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("mount offset", mount_offset);
+            declination_loaded =  configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("declination", declination);
+          }
+
+          // store as props but only if found
+          if (mount_offset_loaded)
+          {
+            Props.CALIBRATION_MOUNT_OFFSET = mount_offset;
+          }
+          if (declination_loaded)
+          {
+            Props.CALIBRATION_LOCATION_DECLINATION = declination;
+          }
+        }
+
+        // load configuration points
+        if (configuration_json.ROOT.DATA[root].label() == "calibration points")
+        {
+          for (int points = 0; 
+              points < (int)configuration_json.ROOT.DATA[root].DATA.size(); points++)
+          {
+            float x = 0;
+            float y = 0;
+            float z = 0;
+
+            for (int values = 0; 
+                values < (int)configuration_json.ROOT.DATA[root].DATA[points].DATA.size(); values++)
+            {
+
+              configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("X", x);
+              configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Y", y);
+              configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Z", z);
+            }
+
+            COMPASS_POINT tmp_point;
+
+            tmp_point.POINT.X = x;
+            tmp_point.POINT.Y = y;
+            tmp_point.POINT.Z = z;
+
+            COMPASS_HISTORY.push_back(tmp_point);
+          }
+
+          // Set all points as do_not_overwrite so they look alive.
+          for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+          {
+            if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+            {
+              COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 void CAL_LEVEL_3::save_history_and_settings(HMC5883L_PROPERTIES &Props)
 {
   bool ret_success = false;
@@ -54,17 +139,6 @@ void CAL_LEVEL_3::save_history_and_settings(HMC5883L_PROPERTIES &Props)
   ret_success = deque_string_to_file(Props.OFFSET_HISTORY_FILE_NAME, json_deque, false);
 
   (void) ret_success;
-
-  /*
-  cout << endl;
-  for(size_t pos = 0; pos < json_deque.size(); pos++)
-  {
-    cout << json_deque[pos] << endl;
-  }
-  cout << endl;
-  */
-
-  //exit(0);
 }
 
 /**
@@ -711,7 +785,9 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
   bool successful_add = add_point(Raw_XYZ);
 
   // Analyze the points in the history. Only performed during timed interval.
-  if (successful_add && CALIBRATION_TIMER.is_ready(tmeFrame_Time))
+  if (Props.CALIBRATION_ENABLED &&
+      successful_add && 
+      CALIBRATION_TIMER.is_ready(tmeFrame_Time))
   {
     CALIBRATION_TIMER.set(tmeFrame_Time, CALIBRATION_DELAY);
 
@@ -783,10 +859,9 @@ bool HMC5883L::create(string Offset_History_Filename)
   
   LEVEL_3.OFFSET_HISTORY_FILENAME = Offset_History_Filename;
   LEVEL_3.clear();
+  LEVEL_3.load_history_and_settings(PROPS);
 
   CONNECTED = false;
-
-  CALIBRATE_LOCK = PROPS.CALIBRATION_LOCK_AT_START;
 
   if (PROPS.AUTOSTART == false)
   {
@@ -865,11 +940,8 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
     CALIBRATED_BEARINGS.erase(CALIBRATED_BEARINGS.begin());
   }
 
-  // Level 2 - Calibration (Always Active.)
-  if (CALIBRATE_LOCK == false)
-  {
-    LEVEL_3.calibration_level_3(tmeFrame_Time, RAW_XYZ, PROPS);
-  }
+  // Level 3 - Calibration and set bearing
+  LEVEL_3.calibration_level_3(tmeFrame_Time, RAW_XYZ, PROPS);
 
   // Determine Jitter
   if (CALIBRATED_BEARINGS.size() > 0)
@@ -984,12 +1056,8 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 void HMC5883L::calibrateion_reset()
 {
   CALIBRATED_BEARINGS.clear();
-
-  CALIBRATE_LOCK = false;
   KNOWN_DEVICE_DEGREE_OFFSET = 0.0f;
-
   LEVEL_3.clear();
-
 }
 
 void HMC5883L::calibrate_toggle()

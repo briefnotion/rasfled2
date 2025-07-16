@@ -371,43 +371,11 @@ int loop_2(bool TTY_Only)
   // Compass Comm Port Setup
   sdSystem.COMMS_COMPASS.PROPS.PORT = sdSystem.FILE_NAMES.COMPASS_DEVICE_FILE;
   sdSystem.COMMS_COMPASS.PROPS.I2C_ID = COMMS_ID_COMPASS;
-  //sdSystem.COMMS_COMPASS.PROPS.BAUD_RATE = COMMS_BAUD_GPS;
 
   sdSystem.COMMS_COMPASS.PROPS.AUTOSTART = COMMS_AUTOSTART_COMPASS;
   sdSystem.COMMS_COMPASS.PROPS.CONTINUOUS_DATA = CONTINUOUS_DATA_GPS;
 
-  sdSystem.COMMS_COMPASS.PROPS.CALIBRATION_LOCK_AT_START = COMMS_COMPASS_CAL_LOCK_AT_START;
-  sdSystem.COMMS_COMPASS.PROPS.OFFSET_HISTORY_FILE_NAME = sdSystem.FILE_NAMES.COMPASS_OFFSET_HISTROY_FILE;
-
-  /*
-  {
-    // Preload Calibration Data
-    FLOAT_XYZ Cal_Pt_1;
-    FLOAT_XYZ Cal_Pt_2;
-    FLOAT_XYZ Cal_Pt_3;
-    FLOAT_XYZ Cal_Pt_4;
-
-    Cal_Pt_1.X = COMMS_COMPASS_CAL_PT_1_X;
-    Cal_Pt_1.Y = COMMS_COMPASS_CAL_PT_1_Y;
-    float Cal_Var_1 = COMMS_COMPASS_CAL_PT_1_VAR;
-
-    Cal_Pt_2.X = COMMS_COMPASS_CAL_PT_2_X;
-    Cal_Pt_2.Y = COMMS_COMPASS_CAL_PT_2_Y;
-    float Cal_Var_2 = COMMS_COMPASS_CAL_PT_2_VAR;
-
-    Cal_Pt_3.X = COMMS_COMPASS_CAL_PT_3_X;
-    Cal_Pt_3.Y = COMMS_COMPASS_CAL_PT_3_Y;
-    float Cal_Var_3 = COMMS_COMPASS_CAL_PT_3_VAR;
-
-    Cal_Pt_4.X = COMMS_COMPASS_CAL_PT_4_X;
-    Cal_Pt_4.Y = COMMS_COMPASS_CAL_PT_4_Y;
-    float Cal_Var_4 = COMMS_COMPASS_CAL_PT_4_VAR;
-
-    float Cal_Offset = COMMS_COMPASS_CAL_OFFSET;
-
-    sdSystem.COMMS_COMPASS.calibration_preload(Cal_Pt_1, Cal_Var_1, Cal_Pt_2, Cal_Var_2, Cal_Pt_3, Cal_Var_3, Cal_Pt_4, Cal_Var_4, Cal_Offset);
-  }
-  */
+  sdSystem.COMMS_COMPASS.PROPS.OFFSET_HISTORY_FILE_NAME = sdSystem.FILE_NAMES.COMPASS_OFFSET_HISTORY_FILE;
 
   // ---------------------------------------------------------------------------------------
   // The Advertisements

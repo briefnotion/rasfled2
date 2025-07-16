@@ -99,7 +99,7 @@ class FILES
 
   // Compass
   string COMPASS_DEVICE_FILE = "";
-  string COMPASS_OFFSET_HISTROY_FILE = "";
+  string COMPASS_OFFSET_HISTORY_FILE = "";
 
   bool assign(CONSOLE_COMMUNICATION &cons);
 };
