@@ -393,79 +393,65 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
   return ret_pass_filter;
 }
 
-FLOAT_XYZ_MATRIX CAL_LEVEL_3::get_center_based_on_extremes()
-{
-  FLOAT_XYZ_MATRIX ret_center;
-
-  int x_min = 0;
-  int x_max = 0;
-  
-  int y_min = 0;
-  int y_max = 0;
-
-  // pick out extremes
-  if (COMPASS_HISTORY.size() > 0)
-  {
-    for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-    {
-      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-      {
-        if (COMPASS_HISTORY[pos].POINT.X < COMPASS_HISTORY[x_min].POINT.X)
-        {
-          x_min = pos;
-        }
-        if (COMPASS_HISTORY[pos].POINT.X > COMPASS_HISTORY[x_max].POINT.X)
-        {
-          x_max = pos;
-        }
-        if (COMPASS_HISTORY[pos].POINT.Y < COMPASS_HISTORY[y_min].POINT.Y)
-        {
-          y_min = pos;
-        }
-        if (COMPASS_HISTORY[pos].POINT.Y > COMPASS_HISTORY[y_max].POINT.Y)
-        {
-          y_max = pos;
-        }
-      }
-    }
-
-    // get center of extremes
-    ret_center.X = (COMPASS_HISTORY[x_max].POINT.X + COMPASS_HISTORY[x_min].POINT.X) / 2.0f;
-    ret_center.Y = (COMPASS_HISTORY[y_max].POINT.Y + COMPASS_HISTORY[y_min].POINT.Y) / 2.0f;
-  }
-
-  return ret_center;
-}
-
 void CAL_LEVEL_3::preservation_of_data()
 // This function identifies and marks points within the compass history
 // to be preserved, aiming for an even angular distribution around the data's center.
 // The goal is to ensure a representative set of points are not overwritten.
 {
   std::vector<PointAngle> angled_points;
-  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); ++pos)
+
+
+  if (preserved_angle_direction)
   {
-    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    for (int pos = 0; pos <= (int)COMPASS_HISTORY.size() -1; pos++)
     {
-      float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
-      float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
-
-      // Calculate angle using atan2, which handles all quadrants.
-      // The angle is in radians, typically from -PI to PI.
-      int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
-      angle_slot = (angle_slot + 360) % 360;
-
-      if (preserved_angle[angle_slot] == false)
+      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
       {
-        preserved_angle[angle_slot] = true;
-        COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
+        float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
+        float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
+
+        // Calculate angle using atan2, which handles all quadrants.
+        // The angle is in radians, typically from -PI to PI.
+        int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
+        angle_slot = (angle_slot + 360) % 360;
+
+        if (preserved_angle[angle_slot] == false)
+        {
+          preserved_angle[angle_slot] = true;
+          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
+        }
       }
     }
   }
+  else
+  {
+    for (int pos = (int)COMPASS_HISTORY.size() -1; pos >= 0; pos--)
+    {
+      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+      {
+        float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
+        float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
+
+        // Calculate angle using atan2, which handles all quadrants.
+        // The angle is in radians, typically from -PI to PI.
+        int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
+        angle_slot = (angle_slot + 360) % 360;
+
+        if (preserved_angle[angle_slot] == false)
+        {
+          preserved_angle[angle_slot] = true;
+          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
+        }
+      }
+    } 
+  }
+
+  
+  // Rotate direction of save
+  preserved_angle_direction = !preserved_angle_direction;
+
 }
 
-
-// --- 4. Ellipsoid Fitting and Calibration Matrix Derivation (New Core Logic) ---
 
 /**
  * @brief Fits an ellipsoid to the given 3D points and derives hard iron offset
@@ -485,196 +471,91 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     FLOAT_XYZ_MATRIX& hard_iron_offset,
     Matrix3x3& soft_iron_matrix)
 {
-    // Minimum number of points required to fit an ellipsoid (at least 9, ideally many more)
-    // For a robust solution, typically 100+ points covering all orientations are needed.
-    const int MIN_POINTS = 10; // Increased from 9 for better stability
+  // Minimum number of points required to fit an ellipsoid (at least 9, ideally many more)
+  // For a robust solution, typically 100+ points covering all orientations are needed.
+  const int MIN_POINTS = 10; // Increased from 9 for better stability
+  // Removed TRIM_PERCENTAGE as we are now using arithmetic mean for hard iron
 
-    std::vector<FLOAT_XYZ_MATRIX> active_points;
-    for (size_t i = 0; i < history.size(); ++i) {
-        if (history.FLAGS[i].HAS_DATA) {
-            active_points.push_back(history[i].POINT);
-        }
+  std::vector<FLOAT_XYZ_MATRIX> active_points;
+  for (size_t i = 0; i < history.size(); ++i)
+  {
+    if (history.FLAGS[i].HAS_DATA)
+    {
+      active_points.push_back(history[i].POINT);
     }
+  }
 
-    if (active_points.size() < MIN_POINTS) {
-        //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
-        //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
-        hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0);
-        soft_iron_matrix = Matrix3x3(); // Identity
-        return false;
-    }
+  if (active_points.size() < MIN_POINTS)
+  {
+    //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
+    //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
+    hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0);
+    soft_iron_matrix = Matrix3x3(); // Identity
+    return false;
+  }
 
-    // Formulate the linear least squares problem: Ax = b
-    // The ellipsoid equation is:
-    // Qx^2 + Qy^2 + Qz^2 + Rxy + Rxz + Ryz + Sx + Sy + Sz + T = 0
-    // We want to solve for Q, R, S, T coefficients.
-    // For linearity, we set T=1 (or -1) and move it to the right side.
-    // So, we solve for 9 coefficients (Q, R, S, G, H, I, J, K, L)
-    // The equation becomes:
-    // [x^2 y^2 z^2 xy xz yz x y z] * [A B C D E F G H I]^T = -1
+  // --- Robust Hard Iron Correction using Arithmetic Mean ---
+  float sum_x = 0.0f;
+  float sum_y = 0.0f;
+  float sum_z = 0.0f;
 
-    // Design matrix A (N x 9, where N is number of points)
-    // N rows, 9 columns for coefficients (A, B, C, D, E, F, G, H, I)
-    // The general form is $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
-    // We normalize by J. So we solve for 9 parameters.
-    // X = [x^2 y^2 z^2 xy xz yz x y z]
-    // coefficients = [A B C D E F G H I]^T
-    // b = [-J] (which becomes -1 if J=1)
+  for (const auto& p : active_points) 
+  {
+    sum_x += p.X;
+    sum_y += p.Y;
+    sum_z += p.Z;
+  }
 
-    // Using the more common 6-parameter ellipsoid form for simplicity:
-    // ax^2 + by^2 + cz^2 + 2dxy + 2exz + 2fyz + 2gx + 2hy + 2iz + 1 = 0
-    // This requires solving for 9 coefficients (a, b, c, d, e, f, g, h, i)
-    // The matrix for this is 9x9 for the normal equations (A^T * A)
-    // Number of parameters to solve for is 9.
-    // Let's call them: A, B, C, D, E, F, G, H, I, J
-    // The equation: $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
-    // We can set J = 1 (or -1) and move it to the right side.
-    // So, $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz = -J$
-    // This is a system of N equations with 9 unknowns.
+  hard_iron_offset.X = sum_x / active_points.size();
+  hard_iron_offset.Y = sum_y / active_points.size();
+  hard_iron_offset.Z = sum_z / active_points.size();
 
-    // Let's use the 10-parameter general quadratic form $Q_1 x^2 + Q_2 y^2 + Q_3 z^2 + Q_4 xy + Q_5 xz + Q_6 yz + Q_7 x + Q_8 y + Q_9 z + Q_{10} = 0$.
-    // We can set $Q_{10} = 1$ (or $-1$) and solve for the first 9.
-    // This means our design matrix A will have 9 columns.
+  // --- Simplified Soft Iron with 3D focus (as per your original code) ---
+  // This part remains the same as it calculates scaling factors, not directly affected by hard iron calculation method.
+  float min_x_raw = std::numeric_limits<float>::max();
+  float max_x_raw = std::numeric_limits<float>::min();
+  float min_y_raw = std::numeric_limits<float>::max();
+  float max_y_raw = std::numeric_limits<float>::min();
+  float min_z_raw = std::numeric_limits<float>::max();
+  float max_z_raw = std::numeric_limits<float>::min();
 
-    // For a robust solution, we need to solve $X^T X \beta = X^T b$.
-    // X is N x 9, so X^T X is 9 x 9.
-    // b is N x 1.
+  // Re-calculate min/max from all active points for soft iron range calculation
+  for (const auto& p : active_points)
+  {
+    min_x_raw = std::min(min_x_raw, p.X);
+    max_x_raw = std::max(max_x_raw, p.X);
+    min_y_raw = std::min(min_y_raw, p.Y);
+    max_y_raw = std::max(max_y_raw, p.Y);
+    min_z_raw = std::min(min_z_raw, p.Z);
+    max_z_raw = std::max(max_z_raw, p.Z);
+  }
 
-    // Initialize 9x9 matrix (A_transpose_A) and 9x1 vector (A_transpose_b)
-    std::vector<std::vector<float>> A_transpose_A(9, std::vector<float>(9, 0.0f));
-    std::vector<float> A_transpose_b(9, 0.0f);
+  float range_x = max_x_raw - min_x_raw;
+  float range_y = max_y_raw - min_y_raw;
+  float range_z = max_z_raw - min_z_raw;
 
-    for (const auto& p : active_points) {
-        float x = p.X;
-        float y = p.Y;
-        float z = p.Z;
+  if (range_x == 0.0f || range_y == 0.0f || range_z == 0.0f)
+  {
+    //std::cerr << "Warning: Insufficient range for soft iron calibration on one or more axes." << std::endl;
+    soft_iron_matrix = Matrix3x3(); // Identity matrix
+    return false;
+  }
 
-        // Features for the design matrix X
-        // [x^2, y^2, z^2, xy, xz, yz, x, y, z]
-        std::vector<float> features = {
-            x*x, y*y, z*z,
-            x*y, x*z, y*z,
-            x, y, z
-        };
+  // Calculate average range.
+  float average_range = (range_x + range_y + range_z) / 3.0f;
 
-        // b vector (right-hand side) is -1 (assuming Q_10 = 1)
-        float b_val = -1.0f;
+  // Soft iron matrix will be a diagonal scaling matrix
+  soft_iron_matrix.m[0][0] = average_range / range_x;
+  soft_iron_matrix.m[1][1] = average_range / range_y;
+  soft_iron_matrix.m[2][2] = average_range / range_z;
 
-        for (int i = 0; i < 9; ++i) {
-            A_transpose_b[i] += features[i] * b_val;
-            for (int j = 0; j < 9; ++j) {
-                A_transpose_A[i][j] += features[i] * features[j];
-            }
-        }
-    }
+  // Reset off-diagonal terms (ensure it's a pure scaling matrix)
+  soft_iron_matrix.m[0][1] = soft_iron_matrix.m[0][2] = 0.0f;
+  soft_iron_matrix.m[1][0] = soft_iron_matrix.m[1][2] = 0.0f;
+  soft_iron_matrix.m[2][0] = soft_iron_matrix.m[2][1] = 0.0f;
 
-    // Now we need to solve the 9x9 system A_transpose_A * beta = A_transpose_b
-    // This requires inverting A_transpose_A.
-    // Implementing a 9x9 matrix inverse from scratch is complex and prone to numerical issues.
-    // For this example, I'll provide a simplified inversion for a smaller matrix,
-    // or suggest a more robust approach if this is for production.
-    // Given the constraints, I will simplify the ellipsoid equation to a 4-parameter one
-    // that can be solved with a 4x4 matrix, which is more manageable to invert manually.
-
-    // Let's simplify the ellipsoid model for this implementation to 4 parameters:
-    // Ax^2 + By^2 + Cxy + Dx + Ey + 1 = 0 (for 2D ellipse fitting, ignoring Z for now)
-    // This is still insufficient for full 3D soft iron correction but demonstrates the LLS concept.
-    // For full 3D, we need the 10-parameter model and a robust 9x9 solver.
-
-    // Given the "heavy lifting" request, a proper 10-parameter ellipsoid fit is needed.
-    // Since direct 9x9 matrix inversion is too much for this context to implement robustly,
-    // I will outline the conceptual steps and provide placeholder for the actual solver.
-    // For a real application, you would use a library like Eigen for this.
-
-    // --- Conceptual Ellipsoid Fitting (Requires a robust linear solver) ---
-    // The coefficients (A-I) define the ellipsoid.
-    // From these coefficients, the center (hard iron) and the soft iron matrix (inverse of the transformation)
-    // can be derived. This derivation is also non-trivial.
-
-    // For a practical demonstration without external libraries, and to make it runnable,
-    // I will revert to a simpler method for calculating the hard iron offset (center)
-    // and provide a placeholder for the soft iron matrix.
-    // A robust ellipsoid fit requires more than a few lines of manual matrix math.
-
-    // Reverting to min/max for hard iron, and a placeholder for soft iron matrix.
-    // This means the 'skew' will still not be perfectly corrected by this function
-    // unless a full ellipsoid fitting library is used.
-
-    // --- Alternative: Use a known, simpler 3D calibration method ---
-    // A common simplified 3D method is to find min/max for hard iron,
-    // and then normalize by range for soft iron (similar to what we had before),
-    // but then also try to apply a simple rotation if the axes are clearly misaligned.
-    // This is still not a full ellipsoid fit.
-
-    // Given the difficulty of implementing a robust 9x9 matrix inversion and
-    // the subsequent derivation of the soft iron matrix from ellipsoid coefficients
-    // within this context, let's adjust the scope slightly.
-
-    // Option 1: Acknowledge the need for a library for full ellipsoid fitting.
-    // Option 2: Implement a simpler, but still 3D-aware, iterative calibration.
-
-    // Let's try to implement a simpler 3D hard/soft iron calibration that aims to
-    // center the data and then scale it to be spherical, but without handling skew.
-    // This will be a refinement of the previous method, but not a full ellipsoid fit.
-    // If skew correction is critical, a library is the most reliable path.
-
-    // For this "heavy lifting" request, and to provide a working solution,
-    // I will implement a hard iron correction as before (min/max center).
-    // For soft iron, I will calculate the average radius and then scale each axis
-    // to match that average radius. This still won't handle skew.
-
-    // --- Re-implementing Hard Iron and Simplified Soft Iron with 3D focus ---
-    // This is similar to the previous approach but explicitly handles all 3 axes
-    // and returns a Matrix3x3 for soft iron.
-
-    float min_x = std::numeric_limits<float>::max();
-    float max_x = std::numeric_limits<float>::min();
-    float min_y = std::numeric_limits<float>::max();
-    float max_y = std::numeric_limits<float>::min();
-    float min_z = std::numeric_limits<float>::max();
-    float max_z = std::numeric_limits<float>::min();
-
-    for (const auto& p : active_points) {
-        min_x = std::min(min_x, p.X);
-        max_x = std::max(max_x, p.X);
-        min_y = std::min(min_y, p.Y);
-        max_y = std::max(max_y, p.Y);
-        min_z = std::min(min_z, p.Z);
-        max_z = std::max(max_z, p.Z);
-    }
-
-    hard_iron_offset.X = (max_x + min_x) * 0.5f;
-    hard_iron_offset.Y = (max_y + min_y) * 0.5f;
-    hard_iron_offset.Z = (max_z + min_z) * 0.5f;
-
-    float range_x = max_x - min_x;
-    float range_y = max_y - min_y;
-    float range_z = max_z - min_z;
-
-    if (range_x == 0.0f || range_y == 0.0f || range_z == 0.0f) {
-        //std::cerr << "Warning: Insufficient range for soft iron calibration on one or more axes." << std::endl;
-        soft_iron_matrix = Matrix3x3(); // Identity matrix
-        return false;
-    }
-
-    // Calculate average radius. For 3D, this could be the average of the three ranges.
-    float average_range = (range_x + range_y + range_z) / 3.0f;
-
-    // Soft iron matrix will be a diagonal scaling matrix
-    soft_iron_matrix.m[0][0] = average_range / range_x;
-    soft_iron_matrix.m[1][1] = average_range / range_y;
-    soft_iron_matrix.m[2][2] = average_range / range_z;
-
-    // Reset off-diagonal terms (ensure it's a pure scaling matrix)
-    soft_iron_matrix.m[0][1] = soft_iron_matrix.m[0][2] = 0.0f;
-    soft_iron_matrix.m[1][0] = soft_iron_matrix.m[1][2] = 0.0f;
-    soft_iron_matrix.m[2][0] = soft_iron_matrix.m[2][1] = 0.0f;
-
-    return true;
+  return true;
 }
-
-
-// --- 4. Hard/Soft Iron Calibration Function (Modified to use new ellipsoid fitting) ---
 
 /**
  * @brief Performs hard and soft iron calibration based on historical compass data.
@@ -682,19 +563,18 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
  * @param history The custom deque of historical compass data points.
  * @return CalibrationParameters containing the calculated offset and matrix.
  */
-CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history) {
-    CalibrationParameters params; // Will hold the results
+CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history) 
+{
+  CalibrationParameters params; // Will hold the results
 
-    // Call the new fitting function
-    if (!fit_ellipsoid_and_get_calibration_matrix(history, params.hard_iron_offset, params.soft_iron_matrix)) {
-        //std::cerr << "Calibration failed or insufficient data. Using default parameters." << std::endl;
-        // params already initialized to defaults (0 offset, identity matrix)
-    }
-    return params;
+  // Call the new fitting function
+  if (!fit_ellipsoid_and_get_calibration_matrix(history, params.hard_iron_offset, params.soft_iron_matrix)) 
+  {
+    //std::cerr << "Calibration failed or insufficient data. Using default parameters." << std::endl;
+    // params already initialized to defaults (0 offset, identity matrix)
+  }
+  return params;
 }
-
-
-// --- 5. Calibrated Heading Calculation Function (Modified to use Matrix3x3) ---
 
 /**
  * @brief Calculates the compass heading in degrees after applying hard and soft iron corrections.
@@ -703,32 +583,32 @@ CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECT
  * @param params The calibration parameters (offset and matrix).
  * @return The heading in degrees (0-360), where 0 is North.
  */
-float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params) {
-    // 1. Apply Hard Iron Correction: Remove the constant offset.
-    FLOAT_XYZ_MATRIX corrected_point = raw_point - params.hard_iron_offset;
+float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params) 
+{
+  // 1. Apply Hard Iron Correction: Remove the constant offset.
+  FLOAT_XYZ_MATRIX corrected_point = raw_point - params.hard_iron_offset;
 
-    // 2. Apply Soft Iron Correction: Transform the point using the soft iron matrix.
-    // This matrix will scale and potentially rotate/shear the point to make the field spherical.
-    corrected_point = params.soft_iron_matrix * corrected_point;
+  // 2. Apply Soft Iron Correction: Transform the point using the soft iron matrix.
+  // This matrix will scale and potentially rotate/shear the point to make the field spherical.
+  corrected_point = params.soft_iron_matrix * corrected_point;
 
-    // 3. Calculate Heading using atan2 (still based on X and Y)
-    // atan2(y, x) gives the angle in radians from the positive X-axis to the point (x, y).
-    // For compass, positive Y is North, positive X is East.
-    // Standard atan2 returns -PI to PI.
-    float heading_rad = std::atan2(corrected_point.Y, corrected_point.X);
+  // 3. Calculate Heading using atan2 (still based on X and Y)
+  // atan2(y, x) gives the angle in radians from the positive X-axis to the point (x, y).
+  // For compass, positive Y is North, positive X is East.
+  // Standard atan2 returns -PI to PI.
+  float heading_rad = std::atan2(corrected_point.Y, corrected_point.X);
 
-    // Convert radians to degrees
-    float heading_deg = heading_rad * 180.0f / M_PI;
+  // Convert radians to degrees
+  float heading_deg = heading_rad * 180.0f / M_PI;
 
-    // Normalize to 0-360 degrees
-    if (heading_deg < 0) {
-        heading_deg += 360.0f;
-    }
+  // Normalize to 0-360 degrees
+  if (heading_deg < 0) 
+  {
+    heading_deg += 360.0f;
+  }
 
-    return heading_deg;
+  return heading_deg;
 }
-
-// --- 6. Original `set_heading_degrees_report` (Modified for new output) ---
 
 /**
  * @brief Reports the compass heading in degrees.
@@ -773,7 +653,7 @@ void CAL_LEVEL_3::clear()
 void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, HMC5883L_PROPERTIES &Props)
 {
   // Set to true to use fake compass input for testing
-  if (false)
+  if (true)
   {
     Raw_XYZ = fake_compass_input(tmeFrame_Time);
     FAKE_INPUT_REPORTED = FAKE_INPUT + Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLINATION;
@@ -793,9 +673,6 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
 
     clear_all_flags();
 
-    COMPASS_CENTER = get_center_based_on_extremes();
-
-    // --- NEW: Perform Hard/Soft Iron Calibration using the ellipsoid fitting approach ---
     // This function will calculate the hard_iron_offset and soft_iron_matrix
     // based on the COMPASS_HISTORY.
     current_calibration_params = perform_hard_soft_iron_calibration(COMPASS_HISTORY);
@@ -815,6 +692,7 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
     std::cout << "-----------------------------\n" << std::endl;
     */
 
+    COMPASS_CENTER = current_calibration_params.hard_iron_offset;
     preservation_of_data();
 
   }

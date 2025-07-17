@@ -1,3 +1,6 @@
+2.277_250717
+  - Made some changes to the way the compass saves its history.
+
 2.276_250716
   - Created a routine to load settings and arbitrary compass points for calibration on 
       system load.

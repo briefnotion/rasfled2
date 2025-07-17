@@ -377,9 +377,9 @@ class CAL_LEVEL_3
   // Functions to analyze the points in the history.
   void clear_all_flags();
   bool add_point(FLOAT_XYZ_MATRIX &Raw_XYZ);
-  FLOAT_XYZ_MATRIX get_center_based_on_extremes();
 
   bool preserved_angle[360];
+  bool preserved_angle_direction = false;
   void preservation_of_data();
 
   int COMPASS_HISTORY_SIZE = 800;
