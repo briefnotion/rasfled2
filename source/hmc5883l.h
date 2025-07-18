@@ -315,14 +315,22 @@ struct PointAngle
  * Hard iron offset corrects for magnetic biases.
  * Soft iron matrix corrects for axis distortions (makes ellipse/ellipsoid spherical).
  */
+//struct CalibrationParameters 
+//{
+//  FLOAT_XYZ_MATRIX hard_iron_offset; // Bias to remove from each axis (center of ellipsoid)
+//  Matrix3x3 soft_iron_matrix; // 3x3 transformation matrix for soft iron correction
+//
+//  CalibrationParameters() :
+//      hard_iron_offset(0.0f, 0.0f, 0.0f),
+//      soft_iron_matrix() {} // Default to identity matrix
+//};
+
 struct CalibrationParameters 
 {
-  FLOAT_XYZ_MATRIX hard_iron_offset; // Bias to remove from each axis (center of ellipsoid)
-  Matrix3x3 soft_iron_matrix; // 3x3 transformation matrix for soft iron correction
-
-  CalibrationParameters() :
-      hard_iron_offset(0.0f, 0.0f, 0.0f),
-      soft_iron_matrix() {} // Default to identity matrix
+  FLOAT_XYZ_MATRIX hard_iron_offset;
+  Matrix3x3 soft_iron_matrix;
+  float average_field_magnitude; // Added back for dynamic range
+  CalibrationParameters() : hard_iron_offset(0,0,0), soft_iron_matrix(), average_field_magnitude(0.0f) {} // Initialize new member
 };
 
 // -------------------------------------------------------------------------------------
@@ -392,10 +400,13 @@ class CAL_LEVEL_3
   // Store calibration parameters globally or as a class member
   CalibrationParameters current_calibration_params;
 
+  //bool fit_ellipsoid_and_get_calibration_matrix(
+  //    const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
+  //    FLOAT_XYZ_MATRIX& hard_iron_offset,
+  //    Matrix3x3& soft_iron_matrix);
   bool fit_ellipsoid_and_get_calibration_matrix(
-      const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
-      FLOAT_XYZ_MATRIX& hard_iron_offset,
-      Matrix3x3& soft_iron_matrix);
+    const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
+    CalibrationParameters& params); // Changed signature
   CalibrationParameters perform_hard_soft_iron_calibration(const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history);
   float calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params);
   void set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ, HMC5883L_PROPERTIES &Props);

@@ -156,7 +156,7 @@ FLOAT_XYZ_MATRIX CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
     // and Corrected XYZ values to repeat in the output for those frames.
 
     //simulations
-    bool noise = false;
+    bool noise = true;
     float noise_factor = 0.5f;
 
     bool sparatic_random = false;
@@ -393,6 +393,7 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
   return ret_pass_filter;
 }
 
+/*
 void CAL_LEVEL_3::preservation_of_data()
 // This function identifies and marks points within the compass history
 // to be preserved, aiming for an even angular distribution around the data's center.
@@ -446,10 +447,76 @@ void CAL_LEVEL_3::preservation_of_data()
     } 
   }
 
-  
   // Rotate direction of save
   preserved_angle_direction = !preserved_angle_direction;
 
+}
+*/
+
+void CAL_LEVEL_3::preservation_of_data()
+// This function identifies and marks points within the compass history
+// to be preserved, aiming for an even angular distribution around the data's center.
+// The goal is to ensure a representative set of points are not overwritten.
+{
+  // PointAngle struct is not defined and not used in the provided logic, so it's removed.
+  // std::vector<PointAngle> angled_points;
+
+  // The clear_all_flags() function (called before preservation_of_data)
+  // should already reset all DO_NOT_OVERWRITE flags and the preserved_angle array.
+  // If it doesn't, uncomment the following loop:
+  /*
+  for (int i = 0; i < 360; ++i) {
+      preserved_angle[i] = false;
+  }
+  */
+
+  if (preserved_angle_direction)
+  {
+    for (int pos = 0; pos <= (int)COMPASS_HISTORY.size() -1; pos++)
+    {
+      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+      {
+        float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
+        float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
+
+        // Calculate angle using atan2, which handles all quadrants.
+        // The angle is in radians, typically from -PI to PI.
+        int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
+        angle_slot = (angle_slot + 360) % 360;
+
+        if (preserved_angle[angle_slot] == false)
+        {
+          preserved_angle[angle_slot] = true;
+          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
+        }
+      }
+    }
+  }
+  else
+  {
+    for (int pos = (int)COMPASS_HISTORY.size() -1; pos >= 0; pos--)
+    {
+      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+      {
+        float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
+        float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
+
+        // Calculate angle using atan2, which handles all quadrants.
+        // The angle is in radians, typically from -PI to PI.
+        int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
+        angle_slot = (angle_slot + 360) % 360;
+
+        if (preserved_angle[angle_slot] == false)
+        {
+          preserved_angle[angle_slot] = true;
+          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
+        }
+      }
+    }
+  }
+
+  // Rotate direction of save
+  preserved_angle_direction = !preserved_angle_direction;
 }
 
 
@@ -466,6 +533,8 @@ void CAL_LEVEL_3::preservation_of_data()
  * @param soft_iron_matrix Output parameter for the calculated soft iron transformation matrix.
  * @return True if calibration was successful, false otherwise.
  */
+
+/*
 bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
     FLOAT_XYZ_MATRIX& hard_iron_offset,
@@ -474,18 +543,17 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
   // Minimum number of points required to fit an ellipsoid (at least 9, ideally many more)
   // For a robust solution, typically 100+ points covering all orientations are needed.
   const int MIN_POINTS = 10; // Increased from 9 for better stability
-  // Removed TRIM_PERCENTAGE as we are now using arithmetic mean for hard iron
 
   std::vector<FLOAT_XYZ_MATRIX> active_points;
-  for (size_t i = 0; i < history.size(); ++i)
+  for (size_t i = 0; i < history.size(); ++i) 
   {
-    if (history.FLAGS[i].HAS_DATA)
+    if (history.FLAGS[i].HAS_DATA) 
     {
       active_points.push_back(history[i].POINT);
     }
   }
 
-  if (active_points.size() < MIN_POINTS)
+  if (active_points.size() < MIN_POINTS) 
   {
     //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
     //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
@@ -494,45 +562,101 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     return false;
   }
 
-  // --- Robust Hard Iron Correction using Arithmetic Mean ---
-  float sum_x = 0.0f;
-  float sum_y = 0.0f;
-  float sum_z = 0.0f;
+  // Formulate the linear least squares problem: Ax = b
+  // The ellipsoid equation is:
+  // Qx^2 + Qy^2 + Qz^2 + Rxy + Rxz + Ryz + Sx + Sy + Sz + T = 0
+  // We want to solve for Q, R, S, T coefficients.
+  // For linearity, we set T=1 (or -1) and move it to the right side.
+  // So, we solve for 9 coefficients (Q, R, S, G, H, I, J, K, L)
+  // The equation becomes:
+  // [x^2 y^2 z^2 xy xz yz x y z] * [A B C D E F G H I]^T = -1
+
+  // Design matrix A (N x 9, where N is number of points)
+  // N rows, 9 columns for coefficients (A, B, C, D, E, F, G, H, I)
+  // The general form is $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
+  // We normalize by J. So we solve for 9 parameters.
+  // X = [x^2 y^2 z^2 xy xz yz x y z]
+  // coefficients = [A B C D E F G H I]^T
+  // b = [-J] (which becomes -1 if J=1)
+
+  // Using the more common 6-parameter ellipsoid form for simplicity:
+  // ax^2 + by^2 + cz^2 + 2dxy + 2exz + 2fyz + 2gx + 2hy + 2iz + 1 = 0
+  // This requires solving for 9 coefficients (a, b, c, d, e, f, g, h, i)
+  // The matrix for this is 9x9 for the normal equations (A^T * A)
+  // Number of parameters to solve for is 9.
+  // Let's call them: A, B, C, D, E, F, G, H, I, J
+  // The equation: $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
+  // We can set J = 1 (or -1) and move it to the right side.
+  // So, $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz = -J$
+  // This is a system of N equations with 9 unknowns.
+
+  // Let's use the 10-parameter general quadratic form $Q_1 x^2 + Q_2 y^2 + Q_3 z^2 + Q_4 xy + Q_5 xz + Q_6 yz + Q_7 x + Q_8 y + Q_9 z + Q_{10} = 0$.
+  // We can set $Q_{10} = 1$ (or $-1$) and solve for the first 9.
+  // This means our design matrix A will have 9 columns.
+
+  // For a robust solution, we need to solve $X^T X \beta = X^T b$.
+  // X is N x 9, so X^T X is 9 x 9.
+  // b is N x 1.
+
+  // Initialize 9x9 matrix (A_transpose_A) and 9x1 vector (A_transpose_b)
+  std::vector<std::vector<float>> A_transpose_A(9, std::vector<float>(9, 0.0f));
+  std::vector<float> A_transpose_b(9, 0.0f);
 
   for (const auto& p : active_points) 
   {
-    sum_x += p.X;
-    sum_y += p.Y;
-    sum_z += p.Z;
+    float x = p.X;
+    float y = p.Y;
+    float z = p.Z;
+
+    // Features for the design matrix X
+    // [x^2, y^2, z^2, xy, xz, yz, x, y, z]
+    std::vector<float> features = 
+    {
+      x*x, y*y, z*z,
+      x*y, x*z, y*z,
+      x, y, z
+    };
+
+    // b vector (right-hand side) is -1 (assuming Q_10 = 1)
+    float b_val = -1.0f;
+
+    for (int i = 0; i < 9; ++i) 
+    {
+      A_transpose_b[i] += features[i] * b_val;
+      for (int j = 0; j < 9; ++j) 
+      {
+        A_transpose_A[i][j] += features[i] * features[j];
+      }
+    }
   }
 
-  hard_iron_offset.X = sum_x / active_points.size();
-  hard_iron_offset.Y = sum_y / active_points.size();
-  hard_iron_offset.Z = sum_z / active_points.size();
+  // --- Original Hard Iron Correction using Min/Max ---
+  float min_x = std::numeric_limits<float>::max();
+  float max_x = std::numeric_limits<float>::min();
+  float min_y = std::numeric_limits<float>::max();
+  float max_y = std::numeric_limits<float>::min();
+  float min_z = std::numeric_limits<float>::max();
+  float max_z = std::numeric_limits<float>::min();
 
-  // --- Simplified Soft Iron with 3D focus (as per your original code) ---
-  // This part remains the same as it calculates scaling factors, not directly affected by hard iron calculation method.
-  float min_x_raw = std::numeric_limits<float>::max();
-  float max_x_raw = std::numeric_limits<float>::min();
-  float min_y_raw = std::numeric_limits<float>::max();
-  float max_y_raw = std::numeric_limits<float>::min();
-  float min_z_raw = std::numeric_limits<float>::max();
-  float max_z_raw = std::numeric_limits<float>::min();
-
-  // Re-calculate min/max from all active points for soft iron range calculation
   for (const auto& p : active_points)
   {
-    min_x_raw = std::min(min_x_raw, p.X);
-    max_x_raw = std::max(max_x_raw, p.X);
-    min_y_raw = std::min(min_y_raw, p.Y);
-    max_y_raw = std::max(max_y_raw, p.Y);
-    min_z_raw = std::min(min_z_raw, p.Z);
-    max_z_raw = std::max(max_z_raw, p.Z);
+    min_x = std::min(min_x, p.X);
+    max_x = std::max(max_x, p.X);
+    min_y = std::min(min_y, p.Y);
+    max_y = std::max(max_y, p.Y);
+    min_z = std::min(min_z, p.Z);
+    max_z = std::max(max_z, p.Z);
   }
 
-  float range_x = max_x_raw - min_x_raw;
-  float range_y = max_y_raw - min_y_raw;
-  float range_z = max_z_raw - min_z_raw;
+  hard_iron_offset.X = (max_x + min_x) * 0.5f;
+  hard_iron_offset.Y = (max_y + min_y) * 0.5f;
+  hard_iron_offset.Z = (max_z + min_z) * 0.5f;
+
+  // --- Simplified Soft Iron with 3D focus ---
+  // This part remains the same as it calculates scaling factors.
+  float range_x = max_x - min_x;
+  float range_y = max_y - min_y;
+  float range_z = max_z - min_z;
 
   if (range_x == 0.0f || range_y == 0.0f || range_z == 0.0f)
   {
@@ -556,6 +680,172 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
 
   return true;
 }
+*/
+
+
+/**
+ * @brief Fits an ellipsoid to the given 3D points and derives hard iron offset
+ * and soft iron transformation matrix.
+ * This implementation uses a linear least squares approach for ellipsoid fitting.
+ * The general ellipsoid equation is:
+ * Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0
+ * We normalize by J=1 (or another coefficient) to make it linear.
+ *
+ * @param history The custom deque of historical compass data points.
+ * @param params Output parameter for the calculated hard iron offset, soft iron matrix, and average field magnitude.
+ * @return True if calibration was successful, false otherwise.
+ */
+bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
+    const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
+    CalibrationParameters& params) // Changed signature
+{
+    // Minimum number of points required to fit an ellipsoid (at least 9, ideally many more)
+    // For a robust solution, typically 100+ points covering all orientations are needed.
+    const int MIN_POINTS = 10; // Increased from 9 for better stability
+
+    std::vector<FLOAT_XYZ_MATRIX> active_points;
+    for (size_t i = 0; i < history.size(); ++i)
+    {
+        if (history.FLAGS[i].HAS_DATA)
+        {
+            active_points.push_back(history[i].POINT);
+        }
+    }
+
+    if (active_points.size() < MIN_POINTS)
+    {
+        //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
+        //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
+        params.hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0); // Use params
+        params.soft_iron_matrix = Matrix3x3(); // Use params
+        params.average_field_magnitude = 0.0f; // Initialize
+        return false;
+    }
+
+    // Formulate the linear least squares problem: Ax = b
+    // The ellipsoid equation is:
+    // Qx^2 + Qy^2 + Qz^2 + Rxy + Rxz + Ryz + Sx + Sy + Sz + T = 0
+    // We want to solve for Q, R, S, T coefficients.
+    // For linearity, we set T=1 (or -1) and move it to the right side.
+    // So, we solve for 9 coefficients (Q, R, S, G, H, I, J, K, L)
+    // The equation becomes:
+    // [x^2 y^2 z^2 xy xz yz x y z] * [A B C D E F G H I]^T = -1
+
+    // Design matrix A (N x 9, where N is number of points)
+    // N rows, 9 columns for coefficients (A, B, C, D, E, F, G, H, I)
+    // The general form is $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
+    // We normalize by J. So we solve for 9 parameters.
+    // X = [x^2 y^2 z^2 xy xz yz x y z]
+    // coefficients = [A B C D E F G H I]^T
+    // b = [-J] (which becomes -1 if J=1)
+
+    // Using the more common 6-parameter ellipsoid form for simplicity:
+    // ax^2 + by^2 + cz^2 + 2dxy + 2exz + 2fyz + 2gx + 2hy + 2iz + 1 = 0
+    // This requires solving for 9 coefficients (a, b, c, d, e, f, g, h, i)
+    // The matrix for this is 9x9 for the normal equations (A^T * A)
+    // Number of parameters to solve for is 9.
+    // Let's call them: A, B, C, D, E, F, G, H, I, J
+    // The equation: $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
+    // We can set J = 1 (or -1) and move it to the right side.
+    // So, $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz = -J$
+    // This is a system of N equations with 9 unknowns.
+
+    // Let's use the 10-parameter general quadratic form $Q_1 x^2 + Q_2 y^2 + Q_3 z^2 + Q_4 xy + Q_5 xz + Q_6 yz + Q_7 x + Q_8 y + Q_9 z + Q_{10} = 0$.
+    // We can set $Q_{10} = 1$ (or $-1$) and solve for the first 9.
+    // This means our design matrix A will have 9 columns.
+
+    // For a robust solution, we need to solve $X^T X \beta = X^T b$.
+    // X is N x 9, so X^T X is 9 x 9.
+    // b is N x 1.
+
+    // Initialize 9x9 matrix (A_transpose_A) and 9x1 vector (A_transpose_b)
+    std::vector<std::vector<float>> A_transpose_A(9, std::vector<float>(9, 0.0f));
+    std::vector<float> A_transpose_b(9, 0.0f);
+
+    for (const auto& p : active_points)
+    {
+        float x = p.X;
+        float y = p.Y;
+        float z = p.Z;
+
+        // Features for the design matrix X
+        // [x^2, y^2, z^2, xy, xz, yz, x, y, z]
+        std::vector<float> features =
+        {
+            x*x, y*y, z*z,
+            x*y, x*z, y*z,
+            x, y, z
+        };
+
+        // b vector (right-hand side) is -1 (assuming Q_10 = 1)
+        float b_val = -1.0f;
+
+        for (int i = 0; i < 9; ++i)
+        {
+            A_transpose_b[i] += features[i] * b_val;
+            for (int j = 0; j < 9; ++j)
+            {
+                A_transpose_A[i][j] += features[i] * features[j];
+            }
+        }
+    }
+
+    // --- Original Hard Iron Correction using Min/Max ---
+    float min_x = std::numeric_limits<float>::max();
+    float max_x = std::numeric_limits<float>::min();
+    float min_y = std::numeric_limits<float>::max();
+    float max_y = std::numeric_limits<float>::min();
+    float min_z = std::numeric_limits<float>::max();
+    float max_z = std::numeric_limits<float>::min();
+
+    for (const auto& p : active_points)
+    {
+        min_x = std::min(min_x, p.X);
+        max_x = std::max(max_x, p.X);
+        min_y = std::min(min_y, p.Y);
+        max_y = std::max(max_y, p.Y);
+        min_z = std::min(min_z, p.Z);
+        max_z = std::max(max_z, p.Z);
+    }
+
+    params.hard_iron_offset.X = (max_x + min_x) * 0.5f; // Use params
+    params.hard_iron_offset.Y = (max_y + min_y) * 0.5f; // Use params
+    params.hard_iron_offset.Z = (max_z + min_z) * 0.5f; // Use params
+
+    // --- Simplified Soft Iron with 3D focus ---
+    // This part remains the same as it calculates scaling factors.
+    float range_x = max_x - min_x;
+    float range_y = max_y - min_y;
+    float range_z = max_z - min_z;
+
+    if (range_x == 0.0f || range_y == 0.0f || range_z == 0.0f)
+    {
+        //std::cerr << "Warning: Insufficient range for soft iron calibration on one or more axes." << std::endl;
+        params.soft_iron_matrix = Matrix3x3(); // Use params
+        params.average_field_magnitude = 0.0f; // Initialize
+        return false;
+    }
+
+    // Calculate average range.
+    float average_range = (range_x + range_y + range_z) / 3.0f;
+
+    // Store the average range in CalibrationParameters for use in preservation_of_data
+    params.average_field_magnitude = average_range; // Storing average range
+
+    // Soft iron matrix will be a diagonal scaling matrix
+    params.soft_iron_matrix.m[0][0] = average_range / range_x; // Use params
+    params.soft_iron_matrix.m[1][1] = average_range / range_y; // Use params
+    params.soft_iron_matrix.m[2][2] = average_range / range_z; // Use params
+
+    // Reset off-diagonal terms (ensure it's a pure scaling matrix)
+    params.soft_iron_matrix.m[0][1] = params.soft_iron_matrix.m[0][2] = 0.0f; // Use params
+    params.soft_iron_matrix.m[1][0] = params.soft_iron_matrix.m[1][2] = 0.0f; // Use params
+    params.soft_iron_matrix.m[2][0] = params.soft_iron_matrix.m[2][1] = 0.0f; // Use params
+
+    return true;
+}
+
+
 
 /**
  * @brief Performs hard and soft iron calibration based on historical compass data.
@@ -567,9 +857,8 @@ CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECT
 {
   CalibrationParameters params; // Will hold the results
 
-  // Call the new fitting function
-  if (!fit_ellipsoid_and_get_calibration_matrix(history, params.hard_iron_offset, params.soft_iron_matrix)) 
-  {
+  if (!fit_ellipsoid_and_get_calibration_matrix(history, params)) 
+  { // Changed call
     //std::cerr << "Calibration failed or insufficient data. Using default parameters." << std::endl;
     // params already initialized to defaults (0 offset, identity matrix)
   }
@@ -653,7 +942,7 @@ void CAL_LEVEL_3::clear()
 void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, HMC5883L_PROPERTIES &Props)
 {
   // Set to true to use fake compass input for testing
-  if (true)
+  if (false)
   {
     Raw_XYZ = fake_compass_input(tmeFrame_Time);
     FAKE_INPUT_REPORTED = FAKE_INPUT + Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLINATION;

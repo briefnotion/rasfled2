@@ -1,3 +1,8 @@
+2.278_250718
+  - Reverted the fit_ellipsoid_and_get_calibration_matrix function back to the original
+      method, Then made other changes.
+  - Kept the changes made in the preservation_of_data method.
+
 2.277_250717
   - Made some changes to the way the compass saves its history.
 
