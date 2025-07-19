@@ -386,7 +386,7 @@ class CAL_LEVEL_3
   void clear_all_flags();
   bool add_point(FLOAT_XYZ_MATRIX &Raw_XYZ);
 
-  bool preserved_angle[360];
+  int preserved_angle[360];
   bool preserved_angle_direction = false;
   void preservation_of_data();
 
@@ -395,7 +395,7 @@ class CAL_LEVEL_3
 
   // Constants for noise filtering
   float CLOSEST_ALLOWED = 3.0f;
-  float NOISE_FILTER_DISTANCE = 20.0f;
+  float NOISE_FILTER_DISTANCE = 50.0f;
 
   // Store calibration parameters globally or as a class member
   CalibrationParameters current_calibration_params;

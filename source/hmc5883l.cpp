@@ -159,14 +159,14 @@ FLOAT_XYZ_MATRIX CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
     bool noise = true;
     float noise_factor = 0.5f;
 
-    bool sparatic_random = false;
+    bool sparatic_random = true;
     float sparatic_random_factor = 1.0f;
     int sparatic_random_chance_percent = 5; // 5% chance of sparatic random jump
 
-    bool time_based_drift = false;
+    bool time_based_drift = true;
     float time_based_drift_factor = 100.0f;
 
-    bool interference_zone = false;
+    bool interference_zone = true;
 
     bool skew = true; // Retaining your original setting for demonstration
     float skew_factor = 0.10f; // 10% skew
@@ -344,7 +344,7 @@ float CAL_LEVEL_3::dist_xyz(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B)
 void CAL_LEVEL_3::clear_all_flags()
 {
 
-  fill(begin(preserved_angle), end(preserved_angle), false);
+  fill(begin(preserved_angle), end(preserved_angle), 0);
 
   for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
   {
@@ -358,8 +358,7 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
   bool ret_pass_filter = false;
 
   // Simple noise filter
-  if (!xyz_equal(Raw_XYZ, LAST_READ_VALUE) &&
-      dist_xyz(Raw_XYZ, LAST_READ_VALUE) < NOISE_FILTER_DISTANCE)
+  if (!xyz_equal(Raw_XYZ, LAST_READ_VALUE))
   {
     // If the new point is too far from the last read value, do not store it.
     ret_pass_filter = true;
@@ -367,6 +366,7 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
     if (ret_pass_filter)
     {
       float dist_newpoint_anyother = 0.0f;
+      float dist_newpoint_anyother_farthest = 9999.9f;
 
       for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
       {
@@ -378,12 +378,21 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
           {
             COMPASS_HISTORY.erase_p(pos);
           }
+
+          if (dist_newpoint_anyother < dist_newpoint_anyother_farthest)
+          {
+            dist_newpoint_anyother_farthest = dist_newpoint_anyother;
+          }
         }
       }
 
-      COMPASS_POINT tmp_compass_point;
-      tmp_compass_point.POINT = Raw_XYZ;
-      COMPASS_HISTORY.push_back(tmp_compass_point);
+      if (dist_newpoint_anyother_farthest < NOISE_FILTER_DISTANCE || 
+                COMPASS_HISTORY.count() == 0)
+      {
+        COMPASS_POINT tmp_compass_point;
+        tmp_compass_point.POINT = Raw_XYZ;
+        COMPASS_HISTORY.push_back(tmp_compass_point);
+      }
     }
   }
   
@@ -464,53 +473,29 @@ void CAL_LEVEL_3::preservation_of_data()
   // The clear_all_flags() function (called before preservation_of_data)
   // should already reset all DO_NOT_OVERWRITE flags and the preserved_angle array.
   // If it doesn't, uncomment the following loop:
-  /*
-  for (int i = 0; i < 360; ++i) {
-      preserved_angle[i] = false;
-  }
-  */
 
-  if (preserved_angle_direction)
+  for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
   {
-    for (int pos = 0; pos <= (int)COMPASS_HISTORY.size() -1; pos++)
+    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
     {
-      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+      int pos_new = pos;
+      if (preserved_angle_direction)
       {
-        float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
-        float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
-
-        // Calculate angle using atan2, which handles all quadrants.
-        // The angle is in radians, typically from -PI to PI.
-        int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
-        angle_slot = (angle_slot + 360) % 360;
-
-        if (preserved_angle[angle_slot] == false)
-        {
-          preserved_angle[angle_slot] = true;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
+        pos_new = (int)COMPASS_HISTORY.size() -1 - pos;
       }
-    }
-  }
-  else
-  {
-    for (int pos = (int)COMPASS_HISTORY.size() -1; pos >= 0; pos--)
-    {
-      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+
+      float dx = COMPASS_HISTORY[pos_new].POINT.X - COMPASS_CENTER.X;
+      float dy = COMPASS_HISTORY[pos_new].POINT.Y - COMPASS_CENTER.Y;
+
+      // Calculate angle using atan2, which handles all quadrants.
+      // The angle is in radians, typically from -PI to PI.
+      int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
+      angle_slot = (angle_slot + 360) % 360;
+
+      if (preserved_angle[angle_slot] < 2)
       {
-        float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
-        float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
-
-        // Calculate angle using atan2, which handles all quadrants.
-        // The angle is in radians, typically from -PI to PI.
-        int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
-        angle_slot = (angle_slot + 360) % 360;
-
-        if (preserved_angle[angle_slot] == false)
-        {
-          preserved_angle[angle_slot] = true;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
+        preserved_angle[angle_slot]++;
+        COMPASS_HISTORY.FLAGS[pos_new].DO_NOT_OVERWRITE = true;
       }
     }
   }
