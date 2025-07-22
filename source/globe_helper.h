@@ -13,14 +13,10 @@
 #define GLOBE_HELPER_H
 
 // Standard Header Files
-//#include <stdio.h>
-//#include <string>
 #include <vector>
+#include <cmath>
 
 // RASFled related header files
-//#include "system.h"
-//#include "commands.h"
-
 #include "stringthings.h"
 #include "screen4_helper.h"
 #include "comport.h"
@@ -36,6 +32,10 @@ float calculate_angle(float Distance, float Height);
 
 ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees);
 // Returns latitude and longitude coordinates at Distance_Miles on Bearing.
+
+float signed_angular_error(float Compass_Bearing, float GPS_Bearing);
+// Clockwise offset is positive and counterclockwise is 
+//  negative—perfect for compass error tracking or smooth directional logic.
 
 // -------------------------------------------------------------------------------------
 

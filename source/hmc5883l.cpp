@@ -1072,17 +1072,9 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   //RAW_BEARING = (atan2(calibrated_bearing_xyz.Y, calibrated_bearing_xyz.X) * 180 / M_PI);
   RAW_BEARING = LEVEL_3.HEADING_DEGREES_REPORT;
   
-  float bearing = RAW_BEARING + KNOWN_DEVICE_DEGREE_OFFSET;
+  float bearing = RAW_BEARING - KNOWN_DEVICE_DEGREE_OFFSET;
 
-  while (bearing <= 0.0f)
-  {
-    bearing = bearing + 360.0f;
-  }
-
-  while (bearing > 360.0f)
-  {
-    bearing = bearing - 360.0f;
-  }
+  bearing = fmod(bearing + 360.0f, 360.0f);
 
   CALIBRATED_BEARINGS.push_back(bearing);
 
@@ -1150,10 +1142,13 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
     }
   }
 
-  if (PROPS.GPS_ASSIST_HEADING)
+  // GPS readings
+  if (GPS_System.active(tmeFrame_Time)) // Enable
   {
-    // Passive GPS Bearing adjustment
-    if (GPS_System.active(tmeFrame_Time)) // Enable
+    float error_current = signed_angular_error(RAW_BEARING, GPS_System.current_position().TRUE_HEADING);
+    GPS_ERROR_MEAN.store_value(error_current);
+    
+    if (PROPS.GPS_ASSIST_HEADING)
     {
       // Avoid constant recalibration from the GPS heading (gps only updated once per sec)
       //  If calibration sucessful, wait 1 min. if not, try again 
@@ -1161,6 +1156,10 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 
       if (GPS_HEADING_CALIBRATION_TIMER.ping_down(tmeFrame_Time) == false)
       { 
+        GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 60000);
+        bearing_known_offset_calibration_to_gps();
+
+        /*
         bool calibrated = false;
 
         if (GPS_System.current_position().SPEED.val_mph() > 30.0f)  // if speed over X mps
@@ -1200,6 +1199,8 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
           // not over 30 mph, wait 10 seconds
           GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 10000);
         }
+
+        */
       }
     }
   }
@@ -1209,6 +1210,7 @@ void HMC5883L::calibrateion_reset()
 {
   CALIBRATED_BEARINGS.clear();
   KNOWN_DEVICE_DEGREE_OFFSET = 0.0f;
+  GPS_ERROR_MEAN.clear(0);
   LEVEL_3.clear();
 }
 
@@ -1400,30 +1402,25 @@ void HMC5883L::close_port()
 //  return DATA_RECIEVED_TIMER.ping_down(tmeFrame_Time);
 //}
 
-void HMC5883L::bearing_known_offset_calibration(float Known_Bearing)
+void HMC5883L::bearing_known_offset_calibration_to_gps()
 {
-  KNOWN_DEVICE_DEGREE_OFFSET = Known_Bearing - RAW_BEARING;
+  KNOWN_DEVICE_DEGREE_OFFSET = GPS_ERROR_MEAN.mean();
+}
 
-  if (KNOWN_DEVICE_DEGREE_OFFSET < 0.0f)
-  {
-    KNOWN_DEVICE_DEGREE_OFFSET = KNOWN_DEVICE_DEGREE_OFFSET + 360.0f;
-  }
-
-  //LEVEL_3.BEARING_OFFSET_LOAD = KNOWN_DEVICE_DEGREE_OFFSET;
+void HMC5883L::bearing_known_offset_clear()
+{
+  KNOWN_DEVICE_DEGREE_OFFSET = 0.0f;
+  GPS_ERROR_MEAN.clear(0);
 }
 
 float HMC5883L::bearing_known_offset()
 {
-  if (KNOWN_DEVICE_DEGREE_OFFSET > 180.0f)
-  {
-    // If offset is greater than 180, then it is negative.
-    return KNOWN_DEVICE_DEGREE_OFFSET -= 360.0f;
-  }
-  else
-  {
-    // If offset is less than 180, then it is positive.
-    return KNOWN_DEVICE_DEGREE_OFFSET;
-  }
+  return KNOWN_DEVICE_DEGREE_OFFSET;
+}
+
+float HMC5883L::accumulated_gps_to_compass_bearing_error()
+{
+  return GPS_ERROR_MEAN.mean();
 }
 
 float HMC5883L::bearing()

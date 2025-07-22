@@ -64,6 +64,12 @@ ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Dis
   return ret_coords;
 }
 
+float signed_angular_error(float Compass_Bearing, float GPS_Bearing)
+{
+  float diff = fmod(Compass_Bearing - GPS_Bearing + 540.0f, 360.0f) - 180.0f;
+  return diff;
+}
+
 // -------------------------------------------------------------------------------------
 
 void DISTANCE::store_meters(float Meters)

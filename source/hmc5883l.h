@@ -33,6 +33,7 @@
 #include "rasapi.h"
 #include "nmea.h"
 #include "json_interface.h"
+#include "globe_helper.h"
 
 
 // -------------------------------------------------------------------------------------
@@ -390,7 +391,7 @@ class CAL_LEVEL_3
   bool preserved_angle_direction = false;
   void preservation_of_data();
 
-  int COMPASS_HISTORY_SIZE = 800;
+  int COMPASS_HISTORY_SIZE = 360 * 3;
   // Size of the compass history, hardcoded for now.
 
   // Constants for noise filtering
@@ -508,6 +509,8 @@ class HMC5883L
 
   bool CONNECTED = false;                     // Set to true if connected.
 
+  MIN_MAX_TIME_SLICE GPS_ERROR_MEAN;
+
   // Comms Routines
   bool register_write(char Register, char Value);
     // Internal: Change chip settings.
@@ -572,8 +575,11 @@ class HMC5883L
   // Not needed at this point. Instead, access 
   // connected.
 
-  void bearing_known_offset_calibration(float Known_Bearing);
+  void bearing_known_offset_calibration_to_gps();
+  void bearing_known_offset_clear();
   float bearing_known_offset();
+
+  float accumulated_gps_to_compass_bearing_error();
 
   float bearing();
   // Direction Facing.

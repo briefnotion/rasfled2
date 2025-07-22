@@ -284,6 +284,8 @@ class MIN_MAX_TIME_SLICE
 
   //void merge(MIN_MAX_TIME_SLICE &Other_Time_Slice);
   // Merges another MIN_MAX_TIME_SLICE into this one.
+  // Not implemented, but if necessary dup code from
+  //  MIN_MAX_TIME_SLICE_DOUBLE
 
   float total();
   // Total Value of all samples
@@ -871,15 +873,16 @@ public:
 
       BACK = (BACK + 1) % FULL_SIZE; // Move BACK to the next potential slot for the *next* push_back
     }
-    else // Not full, find first empty slot
+    else // Not full, find first empty slot from BACK
     {
       for (int pos = 0; pos < FULL_SIZE; ++pos) // Iterate through all possible positions
       {
-        if (FLAGS[pos].HAS_DATA == false) // Found an empty slot
+        int current_pos = (BACK + pos) % FULL_SIZE;
+        if (FLAGS[current_pos].HAS_DATA == false) // Found an empty slot
         {
-          DATA[pos] = Value;
-          FLAGS[pos].HAS_DATA = true;
-          FLAGS[pos].DO_NOT_OVERWRITE = false; // Ensure it's not protected
+          DATA[current_pos] = Value;
+          FLAGS[current_pos].HAS_DATA = true;
+          FLAGS[current_pos].DO_NOT_OVERWRITE = false; // Ensure it's not protected
           COUNT++;
           break; // Slot found and filled
         }

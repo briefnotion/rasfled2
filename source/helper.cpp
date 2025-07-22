@@ -389,14 +389,6 @@ void MIN_MAX_TIME_SLICE::store_value(float Value)
   store_value(Value, 0);
 }
 
-/*
-void MIN_MAX_TIME_SLICE::merge(MIN_MAX_TIME_SLICE &Other_Time_Slice)
-{
-  int del = Other_Time_Slice.samples();
-  (void) del;
-}
-*/
-
 float MIN_MAX_TIME_SLICE::total()
 {
   return VALUE;

@@ -1007,16 +1007,9 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
 
       ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                         WORKING_AREA.y));
-      if (BC_BEAR_RESET.button_color(sdSysData, "BEAR\nRESET", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+      if (BC_BEAR_RESET.button_color(sdSysData, "BEAR\nCLEAR", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
-        if (ACTIVE_GPS)
-        {
-          sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
-        }
-        else
-        {
-          sdSysData.COMMS_COMPASS.bearing_known_offset_calibration(0.0f);
-        }
+        sdSysData.COMMS_COMPASS.bearing_known_offset_clear();
       }
 
       ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 4.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
@@ -1186,12 +1179,12 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     draw_line(Draw_List, sdSysData, c1, p2, RAS_YELLOW, 2.0f);
     draw_line(Draw_List, sdSysData, c1, p3, RAS_YELLOW, 2.0f);
     draw_line(Draw_List, sdSysData, c1, p4, RAS_YELLOW, 2.0f);
+    */
 
     p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.LAST_READ_VALUE.X/ 4.0f), 
               center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.LAST_READ_VALUE.Y / 4.0f));
 
-    draw_line(Draw_List, sdSysData, c1, p1, RAS_WHITE, 2.0f);
-    */
+    draw_line(Draw_List, sdSysData, c1, p1, RAS_WHITE, 4.0f);
   }
 }
 
@@ -1236,9 +1229,10 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
 
       if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time())) // Enable
       {
-        ImGui::Text("(%5.1f°) (%5.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset(),
-                                  no_roll_difference(sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.back().TRUE_HEADING,
-                                  sdSysData.COMMS_COMPASS.bearing(), 360.0f));
+        ImGui::Text("(%5.1f°) (%5.1f°)", sdSysData.COMMS_COMPASS.accumulated_gps_to_compass_bearing_error(),
+                                  signed_angular_error(sdSysData.COMMS_COMPASS.bearing(),
+                                                        sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.back().TRUE_HEADING));
+        ImGui::Text("         (%5.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset());
       }
       
       /*
