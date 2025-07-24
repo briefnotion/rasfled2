@@ -263,17 +263,24 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
       // translate
       if (INPUT_LINE.size() > 1)
       {
-        ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
-
         if (INPUT_LINE[0] == "$GPVTG" || INPUT_LINE[0] == "$GNVTG")
         {
           // Track made good and ground speed
           translate_gnvtg(INPUT_LINE, tmeFrame_Time);
 
           // Update Details
-          CURRENT_POSITION.TRUE_HEADING = TRUE_TRACK;
           CURRENT_POSITION.SPEED = SPEED_KMPH;
           CURRENT_POSITION.VALID_TRACK = VALID_TRACK_INFO;
+
+          CURRENT_POSITION.TRUE_HEADING.VALUE = TRUE_TRACK;
+          if (SPEED_KMPH.val_mph() > 10.0f)
+          {
+            CURRENT_POSITION.TRUE_HEADING.VALID = true;
+          }
+          else
+          {
+            CURRENT_POSITION.TRUE_HEADING.VALID = false;
+          }
 
           ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
           CURRENT_POSITION.CHANGED = true;

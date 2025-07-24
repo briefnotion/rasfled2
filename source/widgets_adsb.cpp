@@ -620,8 +620,8 @@ void ADSB_RANGE::create()
 {
   PROPS.COLOR = RAS_ORANGE;
   set_range(25.0f);
-  RANGE_IMP.set_size(45);
-  RANGE_IMP.set_alive_time(1500);
+  RANGE_IMP.set_size(180);
+  RANGE_IMP.set_alive_time(6000);
 }
 
 /// Updates the current range block size based on the latest range impact value.
@@ -1214,7 +1214,7 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
       ImGui::Text("GPS POSITION");
       ImGui::Text("   SPEED: %.1f", sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph());
       ImGui::Text("ALTITUDE: %.1f", sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val());
-      ImGui::Text(" HEADING: %.1f°", sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+      ImGui::Text(" HEADING: %.1f°", sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE);
       ImGui::Text("P:%2.1f H:%2.1f V:%2.1f", sdSysData.GPS_SYSTEM.pdop(), sdSysData.GPS_SYSTEM.hdop(), sdSysData.GPS_SYSTEM.vdop());
     }
 
@@ -1271,7 +1271,7 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
     {
       // draw compass at center location
       CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 2, gps_pos, WORKING_AREA.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                          sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
+                          sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE, 
                           ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing(), true, 
                           true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), MAP_HEADING_DEGREES_LATEST);
     }
@@ -2280,9 +2280,9 @@ void ADSB_MAP::draw(system_data &sdSysData)
       // Map direction for GPS
       if (ACTIVE_COMPASS && ACTIVE_GPS)
       {
-        if (sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph() > 15.0f)
+        if (sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALID)
         {
-          MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+          MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE);
         }
         else
         {
@@ -2295,7 +2295,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
       }
       else if (ACTIVE_GPS)
       {
-        MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING);
+        MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE);
       }
       else
       {

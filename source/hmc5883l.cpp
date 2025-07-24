@@ -150,26 +150,26 @@ FLOAT_XYZ_MATRIX CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
 {
     FLOAT_XYZ_MATRIX ret_point;
 
-    int speed = 10; // 1 fastest
+    int speed = 50; // 1 fastest
     // Note: Due to integer division (tmeFrame_Time / speed), the angle will
     // remain constant for 'speed' number of frames. This causes the Raw XYZ
     // and Corrected XYZ values to repeat in the output for those frames.
 
     //simulations
     bool noise = true;
-    float noise_factor = 0.5f;
+    float noise_factor = 0.2f;
 
-    bool sparatic_random = true;
+    bool sparatic_random = false;
     float sparatic_random_factor = 1.0f;
     int sparatic_random_chance_percent = 5; // 5% chance of sparatic random jump
 
     bool time_based_drift = true;
     float time_based_drift_factor = 100.0f;
 
-    bool interference_zone = true;
+    bool interference_zone = false;
 
     bool skew = true; // Retaining your original setting for demonstration
-    float skew_factor = 0.10f; // 10% skew
+    float skew_factor = 0.20f; // 10% skew
 
     bool figure_eight = false; // if true, will do a figure eight pattern
 
@@ -492,7 +492,7 @@ void CAL_LEVEL_3::preservation_of_data()
       int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
       angle_slot = (angle_slot + 360) % 360;
 
-      if (preserved_angle[angle_slot] < 2)
+      if (preserved_angle[angle_slot] < 1)
       {
         preserved_angle[angle_slot]++;
         COMPASS_HISTORY.FLAGS[pos_new].DO_NOT_OVERWRITE = true;
@@ -504,7 +504,6 @@ void CAL_LEVEL_3::preservation_of_data()
   preserved_angle_direction = !preserved_angle_direction;
 }
 
-
 /**
  * @brief Fits an ellipsoid to the given 3D points and derives hard iron offset
  * and soft iron transformation matrix.
@@ -514,36 +513,35 @@ void CAL_LEVEL_3::preservation_of_data()
  * We normalize by J=1 (or another coefficient) to make it linear.
  *
  * @param history The custom deque of historical compass data points.
- * @param hard_iron_offset Output parameter for the calculated hard iron offset (center of ellipsoid).
- * @param soft_iron_matrix Output parameter for the calculated soft iron transformation matrix.
+ * @param params Output parameter for the calculated hard iron offset, soft iron matrix, and average field magnitude.
  * @return True if calibration was successful, false otherwise.
  */
-
-/*
 bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
-    FLOAT_XYZ_MATRIX& hard_iron_offset,
-    Matrix3x3& soft_iron_matrix)
+    CalibrationParameters& params) // Changed signature
 {
   // Minimum number of points required to fit an ellipsoid (at least 9, ideally many more)
   // For a robust solution, typically 100+ points covering all orientations are needed.
   const int MIN_POINTS = 10; // Increased from 9 for better stability
 
-  std::vector<FLOAT_XYZ_MATRIX> active_points;
-  for (size_t i = 0; i < history.size(); ++i) 
+  static std::vector<FLOAT_XYZ_MATRIX> active_points;
+  active_points.reserve(history.size());
+  active_points.clear();
+  for (size_t i = 0; i < history.size(); ++i)
   {
-    if (history.FLAGS[i].HAS_DATA) 
+    if (history.FLAGS[i].HAS_DATA)
     {
       active_points.push_back(history[i].POINT);
     }
   }
 
-  if (active_points.size() < MIN_POINTS) 
+  if (active_points.size() < MIN_POINTS)
   {
     //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
     //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
-    hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0);
-    soft_iron_matrix = Matrix3x3(); // Identity
+    params.hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0); // Use params
+    params.soft_iron_matrix = Matrix3x3(); // Use params
+    params.average_field_magnitude = 0.0f; // Initialize
     return false;
   }
 
@@ -587,7 +585,7 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
   std::vector<std::vector<float>> A_transpose_A(9, std::vector<float>(9, 0.0f));
   std::vector<float> A_transpose_b(9, 0.0f);
 
-  for (const auto& p : active_points) 
+  for (const auto& p : active_points)
   {
     float x = p.X;
     float y = p.Y;
@@ -595,7 +593,7 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
 
     // Features for the design matrix X
     // [x^2, y^2, z^2, xy, xz, yz, x, y, z]
-    std::vector<float> features = 
+    std::vector<float> features =
     {
       x*x, y*y, z*z,
       x*y, x*z, y*z,
@@ -605,10 +603,10 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     // b vector (right-hand side) is -1 (assuming Q_10 = 1)
     float b_val = -1.0f;
 
-    for (int i = 0; i < 9; ++i) 
+    for (int i = 0; i < 9; ++i)
     {
       A_transpose_b[i] += features[i] * b_val;
-      for (int j = 0; j < 9; ++j) 
+      for (int j = 0; j < 9; ++j)
       {
         A_transpose_A[i][j] += features[i] * features[j];
       }
@@ -633,9 +631,9 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     max_z = std::max(max_z, p.Z);
   }
 
-  hard_iron_offset.X = (max_x + min_x) * 0.5f;
-  hard_iron_offset.Y = (max_y + min_y) * 0.5f;
-  hard_iron_offset.Z = (max_z + min_z) * 0.5f;
+  params.hard_iron_offset.X = (max_x + min_x) * 0.5f; // Use params
+  params.hard_iron_offset.Y = (max_y + min_y) * 0.5f; // Use params
+  params.hard_iron_offset.Z = (max_z + min_z) * 0.5f; // Use params
 
   // --- Simplified Soft Iron with 3D focus ---
   // This part remains the same as it calculates scaling factors.
@@ -646,188 +644,28 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
   if (range_x == 0.0f || range_y == 0.0f || range_z == 0.0f)
   {
     //std::cerr << "Warning: Insufficient range for soft iron calibration on one or more axes." << std::endl;
-    soft_iron_matrix = Matrix3x3(); // Identity matrix
+    params.soft_iron_matrix = Matrix3x3(); // Use params
+    params.average_field_magnitude = 0.0f; // Initialize
     return false;
   }
 
   // Calculate average range.
   float average_range = (range_x + range_y + range_z) / 3.0f;
 
+  // Store the average range in CalibrationParameters for use in preservation_of_data
+  params.average_field_magnitude = average_range; // Storing average range
+
   // Soft iron matrix will be a diagonal scaling matrix
-  soft_iron_matrix.m[0][0] = average_range / range_x;
-  soft_iron_matrix.m[1][1] = average_range / range_y;
-  soft_iron_matrix.m[2][2] = average_range / range_z;
+  params.soft_iron_matrix.m[0][0] = average_range / range_x; // Use params
+  params.soft_iron_matrix.m[1][1] = average_range / range_y; // Use params
+  params.soft_iron_matrix.m[2][2] = average_range / range_z; // Use params
 
   // Reset off-diagonal terms (ensure it's a pure scaling matrix)
-  soft_iron_matrix.m[0][1] = soft_iron_matrix.m[0][2] = 0.0f;
-  soft_iron_matrix.m[1][0] = soft_iron_matrix.m[1][2] = 0.0f;
-  soft_iron_matrix.m[2][0] = soft_iron_matrix.m[2][1] = 0.0f;
+  params.soft_iron_matrix.m[0][1] = params.soft_iron_matrix.m[0][2] = 0.0f; // Use params
+  params.soft_iron_matrix.m[1][0] = params.soft_iron_matrix.m[1][2] = 0.0f; // Use params
+  params.soft_iron_matrix.m[2][0] = params.soft_iron_matrix.m[2][1] = 0.0f; // Use params
 
   return true;
-}
-*/
-
-
-/**
- * @brief Fits an ellipsoid to the given 3D points and derives hard iron offset
- * and soft iron transformation matrix.
- * This implementation uses a linear least squares approach for ellipsoid fitting.
- * The general ellipsoid equation is:
- * Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0
- * We normalize by J=1 (or another coefficient) to make it linear.
- *
- * @param history The custom deque of historical compass data points.
- * @param params Output parameter for the calculated hard iron offset, soft iron matrix, and average field magnitude.
- * @return True if calibration was successful, false otherwise.
- */
-bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
-    const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
-    CalibrationParameters& params) // Changed signature
-{
-    // Minimum number of points required to fit an ellipsoid (at least 9, ideally many more)
-    // For a robust solution, typically 100+ points covering all orientations are needed.
-    const int MIN_POINTS = 10; // Increased from 9 for better stability
-
-    std::vector<FLOAT_XYZ_MATRIX> active_points;
-    for (size_t i = 0; i < history.size(); ++i)
-    {
-        if (history.FLAGS[i].HAS_DATA)
-        {
-            active_points.push_back(history[i].POINT);
-        }
-    }
-
-    if (active_points.size() < MIN_POINTS)
-    {
-        //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
-        //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
-        params.hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0); // Use params
-        params.soft_iron_matrix = Matrix3x3(); // Use params
-        params.average_field_magnitude = 0.0f; // Initialize
-        return false;
-    }
-
-    // Formulate the linear least squares problem: Ax = b
-    // The ellipsoid equation is:
-    // Qx^2 + Qy^2 + Qz^2 + Rxy + Rxz + Ryz + Sx + Sy + Sz + T = 0
-    // We want to solve for Q, R, S, T coefficients.
-    // For linearity, we set T=1 (or -1) and move it to the right side.
-    // So, we solve for 9 coefficients (Q, R, S, G, H, I, J, K, L)
-    // The equation becomes:
-    // [x^2 y^2 z^2 xy xz yz x y z] * [A B C D E F G H I]^T = -1
-
-    // Design matrix A (N x 9, where N is number of points)
-    // N rows, 9 columns for coefficients (A, B, C, D, E, F, G, H, I)
-    // The general form is $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
-    // We normalize by J. So we solve for 9 parameters.
-    // X = [x^2 y^2 z^2 xy xz yz x y z]
-    // coefficients = [A B C D E F G H I]^T
-    // b = [-J] (which becomes -1 if J=1)
-
-    // Using the more common 6-parameter ellipsoid form for simplicity:
-    // ax^2 + by^2 + cz^2 + 2dxy + 2exz + 2fyz + 2gx + 2hy + 2iz + 1 = 0
-    // This requires solving for 9 coefficients (a, b, c, d, e, f, g, h, i)
-    // The matrix for this is 9x9 for the normal equations (A^T * A)
-    // Number of parameters to solve for is 9.
-    // Let's call them: A, B, C, D, E, F, G, H, I, J
-    // The equation: $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
-    // We can set J = 1 (or -1) and move it to the right side.
-    // So, $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz = -J$
-    // This is a system of N equations with 9 unknowns.
-
-    // Let's use the 10-parameter general quadratic form $Q_1 x^2 + Q_2 y^2 + Q_3 z^2 + Q_4 xy + Q_5 xz + Q_6 yz + Q_7 x + Q_8 y + Q_9 z + Q_{10} = 0$.
-    // We can set $Q_{10} = 1$ (or $-1$) and solve for the first 9.
-    // This means our design matrix A will have 9 columns.
-
-    // For a robust solution, we need to solve $X^T X \beta = X^T b$.
-    // X is N x 9, so X^T X is 9 x 9.
-    // b is N x 1.
-
-    // Initialize 9x9 matrix (A_transpose_A) and 9x1 vector (A_transpose_b)
-    std::vector<std::vector<float>> A_transpose_A(9, std::vector<float>(9, 0.0f));
-    std::vector<float> A_transpose_b(9, 0.0f);
-
-    for (const auto& p : active_points)
-    {
-        float x = p.X;
-        float y = p.Y;
-        float z = p.Z;
-
-        // Features for the design matrix X
-        // [x^2, y^2, z^2, xy, xz, yz, x, y, z]
-        std::vector<float> features =
-        {
-            x*x, y*y, z*z,
-            x*y, x*z, y*z,
-            x, y, z
-        };
-
-        // b vector (right-hand side) is -1 (assuming Q_10 = 1)
-        float b_val = -1.0f;
-
-        for (int i = 0; i < 9; ++i)
-        {
-            A_transpose_b[i] += features[i] * b_val;
-            for (int j = 0; j < 9; ++j)
-            {
-                A_transpose_A[i][j] += features[i] * features[j];
-            }
-        }
-    }
-
-    // --- Original Hard Iron Correction using Min/Max ---
-    float min_x = std::numeric_limits<float>::max();
-    float max_x = std::numeric_limits<float>::min();
-    float min_y = std::numeric_limits<float>::max();
-    float max_y = std::numeric_limits<float>::min();
-    float min_z = std::numeric_limits<float>::max();
-    float max_z = std::numeric_limits<float>::min();
-
-    for (const auto& p : active_points)
-    {
-        min_x = std::min(min_x, p.X);
-        max_x = std::max(max_x, p.X);
-        min_y = std::min(min_y, p.Y);
-        max_y = std::max(max_y, p.Y);
-        min_z = std::min(min_z, p.Z);
-        max_z = std::max(max_z, p.Z);
-    }
-
-    params.hard_iron_offset.X = (max_x + min_x) * 0.5f; // Use params
-    params.hard_iron_offset.Y = (max_y + min_y) * 0.5f; // Use params
-    params.hard_iron_offset.Z = (max_z + min_z) * 0.5f; // Use params
-
-    // --- Simplified Soft Iron with 3D focus ---
-    // This part remains the same as it calculates scaling factors.
-    float range_x = max_x - min_x;
-    float range_y = max_y - min_y;
-    float range_z = max_z - min_z;
-
-    if (range_x == 0.0f || range_y == 0.0f || range_z == 0.0f)
-    {
-        //std::cerr << "Warning: Insufficient range for soft iron calibration on one or more axes." << std::endl;
-        params.soft_iron_matrix = Matrix3x3(); // Use params
-        params.average_field_magnitude = 0.0f; // Initialize
-        return false;
-    }
-
-    // Calculate average range.
-    float average_range = (range_x + range_y + range_z) / 3.0f;
-
-    // Store the average range in CalibrationParameters for use in preservation_of_data
-    params.average_field_magnitude = average_range; // Storing average range
-
-    // Soft iron matrix will be a diagonal scaling matrix
-    params.soft_iron_matrix.m[0][0] = average_range / range_x; // Use params
-    params.soft_iron_matrix.m[1][1] = average_range / range_y; // Use params
-    params.soft_iron_matrix.m[2][2] = average_range / range_z; // Use params
-
-    // Reset off-diagonal terms (ensure it's a pure scaling matrix)
-    params.soft_iron_matrix.m[0][1] = params.soft_iron_matrix.m[0][2] = 0.0f; // Use params
-    params.soft_iron_matrix.m[1][0] = params.soft_iron_matrix.m[1][2] = 0.0f; // Use params
-    params.soft_iron_matrix.m[2][0] = params.soft_iron_matrix.m[2][1] = 0.0f; // Use params
-
-    return true;
 }
 
 
@@ -1143,9 +981,9 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   }
 
   // GPS readings
-  if (GPS_System.active(tmeFrame_Time)) // Enable
+  if (GPS_System.active(tmeFrame_Time && GPS_System.current_position().TRUE_HEADING.VALID)) // Enable
   {
-    float error_current = signed_angular_error(RAW_BEARING, GPS_System.current_position().TRUE_HEADING);
+    float error_current = signed_angular_error(RAW_BEARING, GPS_System.current_position().TRUE_HEADING.VALUE);
     GPS_ERROR_MEAN.store_value(error_current);
     
     if (PROPS.GPS_ASSIST_HEADING)

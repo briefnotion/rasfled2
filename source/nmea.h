@@ -13,14 +13,9 @@
 #define NMEA_H
 
 // Standard Header Files
-//#include <stdio.h>
-//#include <string>
 #include <vector>
 
 // RASFled related header files
-//#include "system.h"
-//#include "commands.h"
-
 #include "globe_helper.h"
 #include "stringthings.h"
 #include "screen4_helper.h"
@@ -39,10 +34,10 @@ class NMEA
   // -------------------------------------------------------------------------------------
   // Track made good and ground speed
 
-  float TRUE_TRACK = 0;
+  float TRUE_TRACK = 0.0f;
   bool TRUE_TRACK_INDICATOR = false;
 
-  float MAGENTIC_TRACK = 0;
+  float MAGENTIC_TRACK = 0.0f;
   bool MAGENTIC_TRACK_INDICATOR = false;
 
   VELOCITY SPEED_KNOTS;

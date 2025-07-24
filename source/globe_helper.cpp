@@ -233,5 +233,21 @@ void DETAILED_TRACK::store(DETAILED_TRACK_POINT New_Track_Point)
   TRACK_POINTS_DETAILED.push_back(New_Track_Point);
 }
 
+/*
+void ComputeArcRadians(float min_deg, float max_deg, float reference_deg,
+                      float& out_start_rad, float& out_end_rad)
+{
+    if (min_deg < max_deg)
+    {
+        out_start_rad = (min_deg - 90.0f - reference_deg) * float_PI / 180.0f;
+        out_end_rad   = (max_deg - 90.0f - reference_deg) * float_PI / 180.0f;
+    }
+    else
+    {
+        out_end_rad   = (min_deg - 90.0f - reference_deg) * float_PI / 180.0f;
+        out_start_rad = (max_deg + 360.0f - 90.0f - reference_deg) * float_PI / 180.0f;
+    }
+}
+*/
 
 #endif

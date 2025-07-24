@@ -396,15 +396,11 @@ class CAL_LEVEL_3
 
   // Constants for noise filtering
   float CLOSEST_ALLOWED = 3.0f;
-  float NOISE_FILTER_DISTANCE = 50.0f;
+  float NOISE_FILTER_DISTANCE = 20.0f;
 
   // Store calibration parameters globally or as a class member
   CalibrationParameters current_calibration_params;
 
-  //bool fit_ellipsoid_and_get_calibration_matrix(
-  //    const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
-  //    FLOAT_XYZ_MATRIX& hard_iron_offset,
-  //    Matrix3x3& soft_iron_matrix);
   bool fit_ellipsoid_and_get_calibration_matrix(
     const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
     CalibrationParameters& params); // Changed signature

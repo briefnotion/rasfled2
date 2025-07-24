@@ -17,6 +17,7 @@
 #include <cmath>
 
 // RASFled related header files
+#include "helper.h"
 #include "stringthings.h"
 #include "screen4_helper.h"
 #include "comport.h"
@@ -104,7 +105,7 @@ class GLOBAL_POSITION_DETAILED
   DISTANCE ALTITUDE;     // M
   DISTANCE GEOID_HEIGHT; // M (mean sea level above WGS84 ellipsoid)
   
-  float TRUE_HEADING = 0;
+  FLOAT_VALID TRUE_HEADING;
   VELOCITY SPEED;
 
   float DILUTION_OF_POSITION = 0;

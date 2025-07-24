@@ -1,3 +1,8 @@
+2.281_250723
+  - Searching and trying different values for the compass settings.
+  - Corrected an error in the compass gps methods.
+  - Made some changes to the way the compass looks.
+
 2.280_250722
   - Searching and trying different values for the compass settings.
   - Made some changes to the way calibrate compass to gps heading works. (untested)
