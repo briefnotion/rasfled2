@@ -398,82 +398,14 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
   
   LAST_READ_VALUE = Raw_XYZ;
 
-
   return ret_pass_filter;
 }
 
-/*
 void CAL_LEVEL_3::preservation_of_data()
 // This function identifies and marks points within the compass history
 // to be preserved, aiming for an even angular distribution around the data's center.
 // The goal is to ensure a representative set of points are not overwritten.
 {
-  std::vector<PointAngle> angled_points;
-
-
-  if (preserved_angle_direction)
-  {
-    for (int pos = 0; pos <= (int)COMPASS_HISTORY.size() -1; pos++)
-    {
-      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-      {
-        float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
-        float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
-
-        // Calculate angle using atan2, which handles all quadrants.
-        // The angle is in radians, typically from -PI to PI.
-        int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
-        angle_slot = (angle_slot + 360) % 360;
-
-        if (preserved_angle[angle_slot] == false)
-        {
-          preserved_angle[angle_slot] = true;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
-      }
-    }
-  }
-  else
-  {
-    for (int pos = (int)COMPASS_HISTORY.size() -1; pos >= 0; pos--)
-    {
-      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-      {
-        float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
-        float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
-
-        // Calculate angle using atan2, which handles all quadrants.
-        // The angle is in radians, typically from -PI to PI.
-        int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
-        angle_slot = (angle_slot + 360) % 360;
-
-        if (preserved_angle[angle_slot] == false)
-        {
-          preserved_angle[angle_slot] = true;
-          COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-        }
-      }
-    } 
-  }
-
-  // Rotate direction of save
-  preserved_angle_direction = !preserved_angle_direction;
-
-}
-*/
-
-void CAL_LEVEL_3::preservation_of_data()
-// This function identifies and marks points within the compass history
-// to be preserved, aiming for an even angular distribution around the data's center.
-// The goal is to ensure a representative set of points are not overwritten.
-{
-  // PointAngle struct is not defined and not used in the provided logic, so it's removed.
-  // std::vector<PointAngle> angled_points;
-
-  // The clear_all_flags() function (called before preservation_of_data)
-  // should already reset all DO_NOT_OVERWRITE flags and the preserved_angle array.
-  // If it doesn't, uncomment the following loop:
-
   for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
   {
     if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
@@ -504,46 +436,6 @@ void CAL_LEVEL_3::preservation_of_data()
   preserved_angle_direction = !preserved_angle_direction;
 }
 
-/**
- * @brief Fits an ellipsoid to the given 3D points and derives hard iron offset
- * and soft iron transformation matrix.
- * This implementation uses a linear least squares approach for ellipsoid fitting.
- * The general ellipsoid equation is:
- * Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0
- * We normalize by J=1 (or another coefficient) to make it linear.
- *
- * @param history The custom deque of historical compass data points.
- * @param params Output parameter for the calculated hard iron offset, soft iron matrix, and average field magnitude.
- * @return True if calibration was successful, false otherwise.
- */
-bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
-    const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
-    CalibrationParameters& params) // Changed signature
-{
-  // Minimum number of points required to fit an ellipsoid (at least 9, ideally many more)
-  // For a robust solution, typically 100+ points covering all orientations are needed.
-  const int MIN_POINTS = 10; // Increased from 9 for better stability
-
-  static std::vector<FLOAT_XYZ_MATRIX> active_points;
-  active_points.reserve(history.size());
-  active_points.clear();
-  for (size_t i = 0; i < history.size(); ++i)
-  {
-    if (history.FLAGS[i].HAS_DATA)
-    {
-      active_points.push_back(history[i].POINT);
-    }
-  }
-
-  if (active_points.size() < MIN_POINTS)
-  {
-    //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
-    //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
-    params.hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0); // Use params
-    params.soft_iron_matrix = Matrix3x3(); // Use params
-    params.average_field_magnitude = 0.0f; // Initialize
-    return false;
-  }
 
   // Formulate the linear least squares problem: Ax = b
   // The ellipsoid equation is:
@@ -581,9 +473,56 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
   // X is N x 9, so X^T X is 9 x 9.
   // b is N x 1.
 
-  // Initialize 9x9 matrix (A_transpose_A) and 9x1 vector (A_transpose_b)
-  std::vector<std::vector<float>> A_transpose_A(9, std::vector<float>(9, 0.0f));
-  std::vector<float> A_transpose_b(9, 0.0f);
+/**
+ * @brief Fits an ellipsoid to the given 3D points and derives hard iron offset
+ * and soft iron transformation matrix.
+ * This implementation uses a linear least squares approach for ellipsoid fitting.
+ * The general ellipsoid equation is:
+ * Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0
+ * We normalize by J=1 (or another coefficient) to make it linear.
+ *
+ * @param history The custom deque of historical compass data points.
+ * @param params Output parameter for the calculated hard iron offset, soft iron matrix, and average field magnitude.
+ * @return True if calibration was successful, false otherwise.
+ */
+bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
+    const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
+    CalibrationParameters& params) // Changed signature
+{
+  // Minimum number of points required to fit an ellipsoid (at least 9, ideally many more)
+  // For a robust solution, typically 100+ points covering all orientations are needed.
+  const int MIN_POINTS = 10; // Increased from 9 for better stability
+
+  active_points.clear();
+  for (size_t i = 0; i < history.size(); ++i)
+  {
+    if (history.FLAGS[i].HAS_DATA)
+    {
+      active_points.push_back(history[i].POINT);
+    }
+  }
+
+  if (active_points.size() < MIN_POINTS)
+  {
+    //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
+    //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
+    params.hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0); // Use params
+    params.soft_iron_matrix = Matrix3x3(); // Use params
+    params.average_field_magnitude = 0.0f; // Initialize
+    return false;
+  }
+
+  // --- Reset for each calculation ---
+  // Instead of just clear(), we need to resize to ensure correct dimensions
+  // and re-initialize all elements to 0.0f.
+  // clear() + resize() is efficient here because capacity is likely retained.
+
+  for (int i = 0; i < 9; ++i) {
+      // Clear and resize each inner vector to 9 columns, initializing to 0.0f
+      // This effectively resets the entire A_transpose_A matrix to zeros.
+      A_transpose_A[i].assign(9, 0.0f); // More concise way to clear and resize/fill
+  }
+  A_transpose_b.assign(9, 0.0f); // Reset A_transpose_b to all zeros
 
   for (const auto& p : active_points)
   {
@@ -593,22 +532,26 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
 
     // Features for the design matrix X
     // [x^2, y^2, z^2, xy, xz, yz, x, y, z]
-    std::vector<float> features =
-    {
-      x*x, y*y, z*z,
-      x*y, x*z, y*z,
-      x, y, z
-    };
+    features_buffer.clear(); // Clear the buffer for the current point's features
+    features_buffer.push_back(x*x);
+    features_buffer.push_back(y*y);
+    features_buffer.push_back(z*z);
+    features_buffer.push_back(x*y);
+    features_buffer.push_back(x*z);
+    features_buffer.push_back(y*z);
+    features_buffer.push_back(x);
+    features_buffer.push_back(y);
+    features_buffer.push_back(z);
 
     // b vector (right-hand side) is -1 (assuming Q_10 = 1)
     float b_val = -1.0f;
 
     for (int i = 0; i < 9; ++i)
     {
-      A_transpose_b[i] += features[i] * b_val;
+      A_transpose_b[i] += features_buffer[i] * b_val; // Use features_buffer
       for (int j = 0; j < 9; ++j)
       {
-        A_transpose_A[i][j] += features[i] * features[j];
+        A_transpose_A[i][j] += features_buffer[i] * features_buffer[j]; // Use features_buffer
       }
     }
   }
@@ -667,8 +610,6 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
 
   return true;
 }
-
-
 
 /**
  * @brief Performs hard and soft iron calibration based on historical compass data.
@@ -760,12 +701,25 @@ void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ, HM
 void CAL_LEVEL_3::clear()
 {
   COMPASS_HISTORY.set_size(COMPASS_HISTORY_SIZE);
+  active_points.reserve(COMPASS_HISTORY_SIZE);
+
+  // Initial sizing and zeroing. This happens once per object creation.
+  A_transpose_A.resize(9);
+  for (int i = 0; i < 9; ++i) 
+  {
+    A_transpose_A[i].resize(9, 0.0f);
+  }
+  A_transpose_b.resize(9, 0.0f);
+
+  // Reserve capacity for features_buffer.
+  // It will always hold 9 elements, so reserving 9 prevents reallocations.
+  features_buffer.reserve(9);
 }
 
 void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, HMC5883L_PROPERTIES &Props)
 {
   // Set to true to use fake compass input for testing
-  if (false)
+  if (true)
   {
     Raw_XYZ = fake_compass_input(tmeFrame_Time);
     FAKE_INPUT_REPORTED = FAKE_INPUT + Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLINATION;
@@ -981,7 +935,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   }
 
   // GPS readings
-  if (GPS_System.active(tmeFrame_Time && GPS_System.current_position().TRUE_HEADING.VALID)) // Enable
+  if (GPS_System.active(tmeFrame_Time) && GPS_System.current_position().TRUE_HEADING.VALID) // Enable
   {
     float error_current = signed_angular_error(RAW_BEARING, GPS_System.current_position().TRUE_HEADING.VALUE);
     GPS_ERROR_MEAN.store_value(error_current);
@@ -989,56 +943,11 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
     if (PROPS.GPS_ASSIST_HEADING)
     {
       // Avoid constant recalibration from the GPS heading (gps only updated once per sec)
-      //  If calibration sucessful, wait 1 min. if not, try again 
-      //  in 10 sec.
 
       if (GPS_HEADING_CALIBRATION_TIMER.ping_down(tmeFrame_Time) == false)
       { 
         GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 60000);
         bearing_known_offset_calibration_to_gps();
-
-        /*
-        bool calibrated = false;
-
-        if (GPS_System.current_position().SPEED.val_mph() > 30.0f)  // if speed over X mps
-        {
-
-          if (GPS_System.TRACK.TRACK_POINTS_DETAILED.size() > 3)
-          {
-            // check track difference over past 3 seconds to be less than 1 degree. (not turning)
-            if (no_roll_difference(GPS_System.TRACK.TRACK_POINTS_DETAILED.back().TRUE_HEADING,
-                                    GPS_System.TRACK.TRACK_POINTS_DETAILED[GPS_System.TRACK.TRACK_POINTS_DETAILED.size() - 3].TRUE_HEADING, 
-                                    360.0f)
-                                    < 1.0f)
-            {
-              // Needs no roll system.  
-              float difference = no_roll_difference(BEARING_JITTER_MIN, BEARING_JITTER_MAX, 360.0f);
-              
-              // continue if jitter difference is small
-              if (difference < 3.0f) // if jitter less than X degrees
-              {
-                bearing_known_offset_calibration(GPS_System.current_position().TRUE_HEADING);
-
-                // cal good, wait 60 seconds
-                calibrated = true;
-              }
-            }
-          }
-        }
-
-        if (calibrated)
-        {
-          GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 60000);
-        }
-        else
-        {
-          // turning over 1 degree in 3 seconds.
-          // jitter too large, wait 10 sec
-          // not over 30 mph, wait 10 seconds
-          GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 10000);
-        }
-
-        */
       }
     }
   }

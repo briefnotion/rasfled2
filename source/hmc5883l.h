@@ -401,6 +401,12 @@ class CAL_LEVEL_3
   // Store calibration parameters globally or as a class member
   CalibrationParameters current_calibration_params;
 
+  // Declare as member variables
+  std::vector<FLOAT_XYZ_MATRIX> active_points;
+  std::vector<std::vector<float>> A_transpose_A;
+  std::vector<float> A_transpose_b;
+  std::vector<float> features_buffer; 
+
   bool fit_ellipsoid_and_get_calibration_matrix(
     const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
     CalibrationParameters& params); // Changed signature

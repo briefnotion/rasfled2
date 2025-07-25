@@ -1234,7 +1234,9 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
                                                         sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.back().TRUE_HEADING));
         ImGui::Text("         (%5.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset());
       }
-      
+
+      ImGui::Text("HIST SZ:  %3d",  sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY.count());
+    
       /*
       // Fake Compass Review
       // Normalize the difference to the range [-180, 180]
