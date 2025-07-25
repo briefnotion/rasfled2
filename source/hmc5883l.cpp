@@ -719,7 +719,7 @@ void CAL_LEVEL_3::clear()
 void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, HMC5883L_PROPERTIES &Props)
 {
   // Set to true to use fake compass input for testing
-  if (true)
+  if (false)
   {
     Raw_XYZ = fake_compass_input(tmeFrame_Time);
     FAKE_INPUT_REPORTED = FAKE_INPUT + Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLINATION;
