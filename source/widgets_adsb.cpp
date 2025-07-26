@@ -1235,9 +1235,9 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
         ImGui::Text("         (%5.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset());
       }
 
+      /*
       ImGui::Text("HIST SZ:  %3d",  sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY.count());
     
-      /*
       // Fake Compass Review
       // Normalize the difference to the range [-180, 180]
       float error = sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.LEVEL_3.FAKE_INPUT_REPORTED;

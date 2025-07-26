@@ -103,34 +103,33 @@ Address   Name
 #define   HMC_GN_230        0x07  // 230 Gauss
 
 // Keep clear for correct operation
-// CRB4-CRB0
+//  CRB4-CRB0
 
 
 // Mode Register (MR)
 
 // High Speed I2C, 3400kHz
-// MR7-MR2
+//  MR7-MR2
 //  HS
 
 // Mode Select
-// MR1-MR0
+//  MR1-MR0
 //  MD1-MD0
 #define   HMC_MD_CONT_MEAS  0x00  // Continuous Measurement Mode
 #define   HMC_MD_SING_MEAS  0x01  // Single Measurement Mode
-#define   HMC_MD_IDLE_1     0x02  // Devgice is placed in idle mode
-#define   HMC_MD_IDLE_2     0x03  // Devgice is placed in idle mode
+#define   HMC_MD_IDLE_1     0x02  // Device is placed in idle mode
+#define   HMC_MD_IDLE_2     0x03  // Device is placed in idle mode
 
 
 // Status Register
-// SR1-SR0
+//  SR1-SR0
 
-// SR1 - Lock
-// SR0 - Ready
-
+//  SR1 - Lock
+//  SR0 - Ready
 
 // Identfication Register
-// IRA, IRB, IRC
-// ASCII Chip MANUF ID
+//  IRA, IRB, IRC
+//  ASCII Chip MANUF ID
 
 
 // -------------------------------------------------------------------------------------
@@ -141,54 +140,62 @@ using namespace std;
 
 class FLOAT_XYZ_MATRIX
 {
-public:
-    float X = 0;
-    float Y = 0;
-    float Z = 0;
+  public:
+  float X = 0;
+  float Y = 0;
+  float Z = 0;
 
-    // Default constructor
-    FLOAT_XYZ_MATRIX() : X(0.0f), Y(0.0f), Z(0.0f) {}
+  // Default constructor
+  FLOAT_XYZ_MATRIX() : X(0.0f), Y(0.0f), Z(0.0f) {}
 
-    // Parameterized constructor
-    FLOAT_XYZ_MATRIX(float x, float y, float z) : X(x), Y(y), Z(z) {}
+  // Parameterized constructor
+  FLOAT_XYZ_MATRIX(float x, float y, float z) : X(x), Y(y), Z(z) {}
 
-    // Overload for addition
-    FLOAT_XYZ_MATRIX operator+(const FLOAT_XYZ_MATRIX& other) const {
-        return FLOAT_XYZ_MATRIX(X + other.X, Y + other.Y, Z + other.Z);
+  // Overload for addition
+  FLOAT_XYZ_MATRIX operator+(const FLOAT_XYZ_MATRIX& other) const 
+  {
+    return FLOAT_XYZ_MATRIX(X + other.X, Y + other.Y, Z + other.Z);
+  }
+
+  // Overload for subtraction
+  FLOAT_XYZ_MATRIX operator-(const FLOAT_XYZ_MATRIX& other) const 
+  {
+    return FLOAT_XYZ_MATRIX(X - other.X, Y - other.Y, Z - other.Z);
+  }
+
+  // Overload for scalar multiplication
+  FLOAT_XYZ_MATRIX operator*(float scalar) const 
+  {
+    return FLOAT_XYZ_MATRIX(X * scalar, Y * scalar, Z * scalar);
+  }
+
+  // Overload for scalar division
+  FLOAT_XYZ_MATRIX operator/(float scalar) const 
+  {
+    if (scalar != 0.0f) 
+    {
+      return FLOAT_XYZ_MATRIX(X / scalar, Y / scalar, Z / scalar);
     }
+    return *this; // Avoid division by zero, return current state
+  }
 
-    // Overload for subtraction
-    FLOAT_XYZ_MATRIX operator-(const FLOAT_XYZ_MATRIX& other) const {
-        return FLOAT_XYZ_MATRIX(X - other.X, Y - other.Y, Z - other.Z);
-    }
+  // Dot product
+  float dot(const FLOAT_XYZ_MATRIX& other) const 
+  {
+    return X * other.X + Y * other.Y + Z * other.Z;
+  }
 
-    // Overload for scalar multiplication
-    FLOAT_XYZ_MATRIX operator*(float scalar) const {
-        return FLOAT_XYZ_MATRIX(X * scalar, Y * scalar, Z * scalar);
-    }
+  // Magnitude squared
+  float magSq() const 
+  {
+    return X*X + Y*Y + Z*Z;
+  }
 
-    // Overload for scalar division
-    FLOAT_XYZ_MATRIX operator/(float scalar) const {
-        if (scalar != 0.0f) {
-            return FLOAT_XYZ_MATRIX(X / scalar, Y / scalar, Z / scalar);
-        }
-        return *this; // Avoid division by zero, return current state
-    }
-
-    // Dot product
-    float dot(const FLOAT_XYZ_MATRIX& other) const {
-        return X * other.X + Y * other.Y + Z * other.Z;
-    }
-
-    // Magnitude squared
-    float magSq() const {
-        return X*X + Y*Y + Z*Z;
-    }
-
-    // Magnitude
-    float mag() const {
-        return std::sqrt(magSq());
-    }
+  // Magnitude
+  float mag() const 
+  {
+    return std::sqrt(magSq());
+  }
 };
 
 // -------------------------------------------------------------------------------------
@@ -197,96 +204,111 @@ public:
  * @brief Represents a 3x3 matrix for linear transformations.
  * Used for soft iron correction.
  */
-class Matrix3x3 {
-public:
-    float m[3][3];
+class Matrix3x3 
+{
+  public:
+  float m[3][3];
 
-    // Default constructor (identity matrix)
-    Matrix3x3() {
-        m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f;
-        m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f;
-        m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f;
-    }
+  // Default constructor (identity matrix)
+  Matrix3x3() 
+  {
+    m[0][0] = 1.0f; m[0][1] = 0.0f; m[0][2] = 0.0f;
+    m[1][0] = 0.0f; m[1][1] = 1.0f; m[1][2] = 0.0f;
+    m[2][0] = 0.0f; m[2][1] = 0.0f; m[2][2] = 1.0f;
+  }
 
-    // Constructor from values
-    Matrix3x3(float m00, float m01, float m02,
-              float m10, float m11, float m12,
-              float m20, float m21, float m22) {
-        m[0][0] = m00; m[0][1] = m01; m[0][2] = m02;
-        m[1][0] = m10; m[1][1] = m11; m[1][2] = m12;
-        m[2][0] = m20; m[2][1] = m21; m[2][2] = m22;
-    }
+  // Constructor from values
+  Matrix3x3(float m00, float m01, float m02,
+            float m10, float m11, float m12,
+            float m20, float m21, float m22) 
+  {
+    m[0][0] = m00; m[0][1] = m01; m[0][2] = m02;
+    m[1][0] = m10; m[1][1] = m11; m[1][2] = m12;
+    m[2][0] = m20; m[2][1] = m21; m[2][2] = m22;
+  }
 
-    // Matrix-Vector multiplication (M * V)
-    FLOAT_XYZ_MATRIX operator*(const FLOAT_XYZ_MATRIX& v) const {
-        return FLOAT_XYZ_MATRIX(
-            m[0][0] * v.X + m[0][1] * v.Y + m[0][2] * v.Z,
-            m[1][0] * v.X + m[1][1] * v.Y + m[1][2] * v.Z,
-            m[2][0] * v.X + m[2][1] * v.Y + m[2][2] * v.Z
-        );
-    }
+  // Matrix-Vector multiplication (M * V)
+  FLOAT_XYZ_MATRIX operator*(const FLOAT_XYZ_MATRIX& v) const 
+  {
+    return FLOAT_XYZ_MATRIX(
+      m[0][0] * v.X + m[0][1] * v.Y + m[0][2] * v.Z,
+      m[1][0] * v.X + m[1][1] * v.Y + m[1][2] * v.Z,
+      m[2][0] * v.X + m[2][1] * v.Y + m[2][2] * v.Z
+    );
+  }
 
-    // Matrix-Matrix multiplication (M1 * M2)
-    Matrix3x3 operator*(const Matrix3x3& other) const {
-        Matrix3x3 result;
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                result.m[i][j] = 0.0f;
-                for (int k = 0; k < 3; ++k) {
-                    result.m[i][j] += m[i][k] * other.m[k][j];
-                }
-            }
+  // Matrix-Matrix multiplication (M1 * M2)
+  Matrix3x3 operator*(const Matrix3x3& other) const 
+  {
+    Matrix3x3 result;
+    for (int i = 0; i < 3; ++i) 
+    {
+      for (int j = 0; j < 3; ++j) 
+      {
+        result.m[i][j] = 0.0f;
+        for (int k = 0; k < 3; ++k) 
+        {
+          result.m[i][j] += m[i][k] * other.m[k][j];
         }
-        return result;
+      }
+    }
+    return result;
+  }
+
+  // Transpose of the matrix
+  Matrix3x3 transpose() const 
+  {
+    return Matrix3x3(
+      m[0][0], m[1][0], m[2][0],
+      m[0][1], m[1][1], m[2][1],
+      m[0][2], m[1][2], m[2][2]
+    );
+  }
+
+  // Determinant of the matrix
+  float determinant() const 
+  {
+    return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
+            m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
+            m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+  }
+
+  // Inverse of the matrix (using adjugate method for 3x3)
+  Matrix3x3 inverse() const 
+  {
+    float det = determinant();
+    if (std::abs(det) < std::numeric_limits<float>::epsilon()) 
+    {
+      std::cerr << "Warning: Matrix is singular, cannot invert. Returning identity." << std::endl;
+      return Matrix3x3(); // Return identity or handle error appropriately
     }
 
-    // Transpose of the matrix
-    Matrix3x3 transpose() const {
-        return Matrix3x3(
-            m[0][0], m[1][0], m[2][0],
-            m[0][1], m[1][1], m[2][1],
-            m[0][2], m[1][2], m[2][2]
-        );
-    }
+    Matrix3x3 inv;
+    inv.m[0][0] = (m[1][1] * m[2][2] - m[1][2] * m[2][1]) / det;
+    inv.m[0][1] = (m[0][2] * m[2][1] - m[0][1] * m[2][2]) / det;
+    inv.m[0][2] = (m[0][1] * m[1][2] - m[0][2] * m[1][1]) / det;
+    inv.m[1][0] = (m[1][2] * m[2][0] - m[1][0] * m[2][2]) / det;
+    inv.m[1][1] = (m[0][0] * m[2][2] - m[0][2] * m[2][0]) / det;
+    inv.m[1][2] = (m[0][2] * m[1][0] - m[0][0] * m[1][2]) / det;
+    inv.m[2][0] = (m[1][0] * m[2][1] - m[1][1] * m[2][0]) / det;
+    inv.m[2][1] = (m[0][1] * m[2][0] - m[0][0] * m[2][1]) / det;
+    inv.m[2][2] = (m[0][0] * m[1][1] - m[0][1] * m[1][0]) / det;
+    return inv;
+  }
 
-    // Determinant of the matrix
-    float determinant() const {
-        return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
-               m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
-               m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+  // Scalar multiplication
+  Matrix3x3 operator*(float scalar) const 
+  {
+    Matrix3x3 result;
+    for (int i = 0; i < 3; ++i) 
+    {
+      for (int j = 0; j < 3; ++j) 
+      {
+        result.m[i][j] = m[i][j] * scalar;
+      }
     }
-
-    // Inverse of the matrix (using adjugate method for 3x3)
-    Matrix3x3 inverse() const {
-        float det = determinant();
-        if (std::abs(det) < std::numeric_limits<float>::epsilon()) {
-            std::cerr << "Warning: Matrix is singular, cannot invert. Returning identity." << std::endl;
-            return Matrix3x3(); // Return identity or handle error appropriately
-        }
-
-        Matrix3x3 inv;
-        inv.m[0][0] = (m[1][1] * m[2][2] - m[1][2] * m[2][1]) / det;
-        inv.m[0][1] = (m[0][2] * m[2][1] - m[0][1] * m[2][2]) / det;
-        inv.m[0][2] = (m[0][1] * m[1][2] - m[0][2] * m[1][1]) / det;
-        inv.m[1][0] = (m[1][2] * m[2][0] - m[1][0] * m[2][2]) / det;
-        inv.m[1][1] = (m[0][0] * m[2][2] - m[0][2] * m[2][0]) / det;
-        inv.m[1][2] = (m[0][2] * m[1][0] - m[0][0] * m[1][2]) / det;
-        inv.m[2][0] = (m[1][0] * m[2][1] - m[1][1] * m[2][0]) / det;
-        inv.m[2][1] = (m[0][1] * m[2][0] - m[0][0] * m[2][1]) / det;
-        inv.m[2][2] = (m[0][0] * m[1][1] - m[0][1] * m[1][0]) / det;
-        return inv;
-    }
-
-    // Scalar multiplication
-    Matrix3x3 operator*(float scalar) const {
-        Matrix3x3 result;
-        for (int i = 0; i < 3; ++i) {
-            for (int j = 0; j < 3; ++j) {
-                result.m[i][j] = m[i][j] * scalar;
-            }
-        }
-        return result;
-    }
+    return result;
+  }
 };
 
 // -------------------------------------------------------------------------------------
@@ -294,12 +316,12 @@ public:
 class COMPASS_POINT
 {
   public:
-    FLOAT_XYZ_MATRIX POINT; // The actual XYZ coordinates of the compass reading
+  FLOAT_XYZ_MATRIX POINT; // The actual XYZ coordinates of the compass reading
 
-    // Default constructor to initialize POINT
-    COMPASS_POINT() : POINT() {}
-    // Constructor to initialize POINT with XYZ values
-    COMPASS_POINT(float x, float y, float z) : POINT(x, y, z) {}
+  // Default constructor to initialize POINT
+  COMPASS_POINT() : POINT() {}
+  // Constructor to initialize POINT with XYZ values
+  COMPASS_POINT(float x, float y, float z) : POINT(x, y, z) {}
 };
  
 // -------------------------------------------------------------------------------------
@@ -310,22 +332,14 @@ struct PointAngle
   float angle;
   size_t original_index;
 };
+ 
+// -------------------------------------------------------------------------------------
 
 /**
  * @brief Stores the calculated calibration parameters.
  * Hard iron offset corrects for magnetic biases.
  * Soft iron matrix corrects for axis distortions (makes ellipse/ellipsoid spherical).
  */
-//struct CalibrationParameters 
-//{
-//  FLOAT_XYZ_MATRIX hard_iron_offset; // Bias to remove from each axis (center of ellipsoid)
-//  Matrix3x3 soft_iron_matrix; // 3x3 transformation matrix for soft iron correction
-//
-//  CalibrationParameters() :
-//      hard_iron_offset(0.0f, 0.0f, 0.0f),
-//      soft_iron_matrix() {} // Default to identity matrix
-//};
-
 struct CalibrationParameters 
 {
   FLOAT_XYZ_MATRIX hard_iron_offset;
@@ -398,21 +412,48 @@ class CAL_LEVEL_3
   float CLOSEST_ALLOWED = 3.0f;
   float NOISE_FILTER_DISTANCE = 20.0f;
 
-  // Store calibration parameters globally or as a class member
+  // ---
+  // Complex Calibration functions.
+  // Core logic and data structures for magnetometer calibration.
+
+  // Stores the currently active hard and soft iron calibration parameters.
   CalibrationParameters current_calibration_params;
 
-  // Declare as member variables
+  // --- Internal Buffers for Optimized Calibration Calculations ---
+  // These are pre-allocated class members to minimize dynamic memory operations.
+
+  // Buffer for filtered magnetic points used in ellipsoid fitting.
   std::vector<FLOAT_XYZ_MATRIX> active_points;
+
+  // Left-hand side matrix (A^T * A) for the least-squares ellipsoid fit.
   std::vector<std::vector<float>> A_transpose_A;
+
+  // Right-hand side vector (A^T * b) for the least-squares ellipsoid fit.
   std::vector<float> A_transpose_b;
+
+  // Temporary buffer for a single point's features during ellipsoid fitting.
   std::vector<float> features_buffer; 
 
+  // --- Calibration Core Functions ---
+
+  // Performs a 3-parameter (diagonal) ellipsoid fit to calculate hard and soft iron parameters.
+  // Returns true on success.
   bool fit_ellipsoid_and_get_calibration_matrix(
     const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
-    CalibrationParameters& params); // Changed signature
+    CalibrationParameters& params);
+
+  // Orchestrates the hard and soft iron calibration process.
   CalibrationParameters perform_hard_soft_iron_calibration(const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history);
+
+  // --- Heading Calculation and Reporting Functions ---
+
+  // Calculates calibrated heading from raw magnetic data using current parameters (no tilt compensation).
   float calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params);
+
+  // Prepares and formats the calibrated heading for external reporting or display.
   void set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ, HMC5883L_PROPERTIES &Props);
+
+  // ---
 
   // Testing
   float FAKE_INPUT = 0.0f;
@@ -430,12 +471,6 @@ class CAL_LEVEL_3
 
   FLOAT_XYZ_MATRIX COMPASS_CENTER;
   // The center of the compass, calculated
-
-  // Contains iteration information
-  //  to determine when to perform calculations.
-  //  This is used to reduce the number of calculations performed.
-  int ITERATION_COUNTER = 0;
-  int ITERATION_TRIGGER = 2;
 
   // Amount of time that is waited before the compass runs the calibration routines.
   TIMED_IS_READY  CALIBRATION_TIMER;

@@ -405,6 +405,10 @@ void CAL_LEVEL_3::preservation_of_data()
 // This function identifies and marks points within the compass history
 // to be preserved, aiming for an even angular distribution around the data's center.
 // The goal is to ensure a representative set of points are not overwritten.
+//
+// Future consideration:
+//  Averaging multiple points on the same angle
+
 {
   for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
   {
@@ -437,41 +441,43 @@ void CAL_LEVEL_3::preservation_of_data()
 }
 
 
-  // Formulate the linear least squares problem: Ax = b
-  // The ellipsoid equation is:
-  // Qx^2 + Qy^2 + Qz^2 + Rxy + Rxz + Ryz + Sx + Sy + Sz + T = 0
-  // We want to solve for Q, R, S, T coefficients.
-  // For linearity, we set T=1 (or -1) and move it to the right side.
-  // So, we solve for 9 coefficients (Q, R, S, G, H, I, J, K, L)
-  // The equation becomes:
-  // [x^2 y^2 z^2 xy xz yz x y z] * [A B C D E F G H I]^T = -1
+// --- Calibration Core Functions --
 
-  // Design matrix A (N x 9, where N is number of points)
-  // N rows, 9 columns for coefficients (A, B, C, D, E, F, G, H, I)
-  // The general form is $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
-  // We normalize by J. So we solve for 9 parameters.
-  // X = [x^2 y^2 z^2 xy xz yz x y z]
-  // coefficients = [A B C D E F G H I]^T
-  // b = [-J] (which becomes -1 if J=1)
+// Formulate the linear least squares problem: Ax = b
+// The ellipsoid equation is:
+// Qx^2 + Qy^2 + Qz^2 + Rxy + Rxz + Ryz + Sx + Sy + Sz + T = 0
+// We want to solve for Q, R, S, T coefficients.
+// For linearity, we set T=1 (or -1) and move it to the right side.
+// So, we solve for 9 coefficients (Q, R, S, G, H, I, J, K, L)
+// The equation becomes:
+// [x^2 y^2 z^2 xy xz yz x y z] * [A B C D E F G H I]^T = -1
 
-  // Using the more common 6-parameter ellipsoid form for simplicity:
-  // ax^2 + by^2 + cz^2 + 2dxy + 2exz + 2fyz + 2gx + 2hy + 2iz + 1 = 0
-  // This requires solving for 9 coefficients (a, b, c, d, e, f, g, h, i)
-  // The matrix for this is 9x9 for the normal equations (A^T * A)
-  // Number of parameters to solve for is 9.
-  // Let's call them: A, B, C, D, E, F, G, H, I, J
-  // The equation: $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
-  // We can set J = 1 (or -1) and move it to the right side.
-  // So, $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz = -J$
-  // This is a system of N equations with 9 unknowns.
+// Design matrix A (N x 9, where N is number of points)
+// N rows, 9 columns for coefficients (A, B, C, D, E, F, G, H, I)
+// The general form is $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
+// We normalize by J. So we solve for 9 parameters.
+// X = [x^2 y^2 z^2 xy xz yz x y z]
+// coefficients = [A B C D E F G H I]^T
+// b = [-J] (which becomes -1 if J=1)
 
-  // Let's use the 10-parameter general quadratic form $Q_1 x^2 + Q_2 y^2 + Q_3 z^2 + Q_4 xy + Q_5 xz + Q_6 yz + Q_7 x + Q_8 y + Q_9 z + Q_{10} = 0$.
-  // We can set $Q_{10} = 1$ (or $-1$) and solve for the first 9.
-  // This means our design matrix A will have 9 columns.
+// Using the more common 6-parameter ellipsoid form for simplicity:
+// ax^2 + by^2 + cz^2 + 2dxy + 2exz + 2fyz + 2gx + 2hy + 2iz + 1 = 0
+// This requires solving for 9 coefficients (a, b, c, d, e, f, g, h, i)
+// The matrix for this is 9x9 for the normal equations (A^T * A)
+// Number of parameters to solve for is 9.
+// Let's call them: A, B, C, D, E, F, G, H, I, J
+// The equation: $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz + J = 0$
+// We can set J = 1 (or -1) and move it to the right side.
+// So, $Ax^2 + By^2 + Cz^2 + Dxy + Exz + Fyz + Gx + Hy + Iz = -J$
+// This is a system of N equations with 9 unknowns.
 
-  // For a robust solution, we need to solve $X^T X \beta = X^T b$.
-  // X is N x 9, so X^T X is 9 x 9.
-  // b is N x 1.
+// Let's use the 10-parameter general quadratic form $Q_1 x^2 + Q_2 y^2 + Q_3 z^2 + Q_4 xy + Q_5 xz + Q_6 yz + Q_7 x + Q_8 y + Q_9 z + Q_{10} = 0$.
+// We can set $Q_{10} = 1$ (or $-1$) and solve for the first 9.
+// This means our design matrix A will have 9 columns.
+
+// For a robust solution, we need to solve $X^T X \beta = X^T b$.
+// X is N x 9, so X^T X is 9 x 9.
+// b is N x 1.
 
 /**
  * @brief Fits an ellipsoid to the given 3D points and derives hard iron offset
@@ -839,8 +845,6 @@ bool HMC5883L::create(string Offset_History_Filename)
       
       ret_success = true;
       CONNECTED = true;
-
-      //calibration_preload_set();
     }
   }
   else
@@ -860,14 +864,13 @@ void HMC5883L::stop()
 
 void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 {
-  //FLOAT_XYZ calibrated_bearing_xyz = calculate_calibrated_xyz(RAW_XYZ, LEVEL_2.offset(), LEVEL_2.skew());
-  //RAW_BEARING = (atan2(calibrated_bearing_xyz.Y, calibrated_bearing_xyz.X) * 180 / M_PI);
+  // Level 3 - Calibration and set bearing
+  LEVEL_3.calibration_level_3(tmeFrame_Time, RAW_XYZ, PROPS);
   RAW_BEARING = LEVEL_3.HEADING_DEGREES_REPORT;
   
+  // Prepare for Jitter and normalize.
   float bearing = RAW_BEARING - KNOWN_DEVICE_DEGREE_OFFSET;
-
   bearing = fmod(bearing + 360.0f, 360.0f);
-
   CALIBRATED_BEARINGS.push_back(bearing);
 
   // Maintain point history size
@@ -875,9 +878,6 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   {
     CALIBRATED_BEARINGS.erase(CALIBRATED_BEARINGS.begin());
   }
-
-  // Level 3 - Calibration and set bearing
-  LEVEL_3.calibration_level_3(tmeFrame_Time, RAW_XYZ, PROPS);
 
   // Determine Jitter
   if (CALIBRATED_BEARINGS.size() > 0)
@@ -934,16 +934,17 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
     }
   }
 
-  // GPS readings
+  // Calibration compass heading with GPS heading
   if (GPS_System.active(tmeFrame_Time) && GPS_System.current_position().TRUE_HEADING.VALID) // Enable
   {
+    // save error to error mean variable
     float error_current = signed_angular_error(RAW_BEARING, GPS_System.current_position().TRUE_HEADING.VALUE);
     GPS_ERROR_MEAN.store_value(error_current);
     
+    // if gps assist calibration enabled, set bearing offset,
     if (PROPS.GPS_ASSIST_HEADING)
     {
-      // Avoid constant recalibration from the GPS heading (gps only updated once per sec)
-
+      // Avoid constant recalibration from the GPS heading (gps only updated once per minute (60000ms))
       if (GPS_HEADING_CALIBRATION_TIMER.ping_down(tmeFrame_Time) == false)
       { 
         GPS_HEADING_CALIBRATION_TIMER.ping_up(tmeFrame_Time, 60000);

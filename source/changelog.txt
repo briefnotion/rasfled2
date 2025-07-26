@@ -1,3 +1,7 @@
+2.283_250726
+  - Added some descriptive comments for the "Core logic and data structures for 
+      magnetometer calibration."
+
 2.282_250725
   - Changed the way fit_ellipsoid_and_get_calibration_matrix's vectors are stored in 
       memory.
