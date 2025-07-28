@@ -350,6 +350,12 @@ void CAL_LEVEL_3::clear_all_flags()
   {
     COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = false;
   }
+
+  for (int pos = 0; pos < PRESERVATION_ANGLE_AVERAGE_ARR_COUNT; pos++)
+  {
+    PRESERVATION_ANGLE_AVERAGE[pos].POSITION.clear();
+  }
+  PRESERVATION_ANGLE_AVERAGE_ARR_COUNT = 0;
 }
 
 bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
@@ -405,9 +411,14 @@ void CAL_LEVEL_3::preservation_of_data()
 // This function identifies and marks points within the compass history
 // to be preserved, aiming for an even angular distribution around the data's center.
 // The goal is to ensure a representative set of points are not overwritten.
-//
-// Future consideration:
-//  Averaging multiple points on the same angle
+
+// preservation_of_data is the last of the functions called in the calibration routine.
+// Data in COMPASS_HISTORY will be rewritten at next calibration call.
+// The position of the new averaged point is insignificant.  It is important 
+//  to remove the points used in the average and the new point is store with 
+//  do not overwrite.
+// PRESERVATION_ANGLE_AVERAGE_ARR_COUNT is set to 0 and
+//  all data in PRESERVATION_ANGLE_AVERAGE is cleared at the beginning of every calibration routine.
 
 {
   for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
@@ -428,16 +439,78 @@ void CAL_LEVEL_3::preservation_of_data()
       int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
       angle_slot = (angle_slot + 360) % 360;
 
-      if (preserved_angle[angle_slot] < 1)
+      preserved_angle[angle_slot]++;
+
+      if (preserved_angle[angle_slot] == 1)
       {
-        preserved_angle[angle_slot]++;
         COMPASS_HISTORY.FLAGS[pos_new].DO_NOT_OVERWRITE = true;
       }
+
+      /*
+      if (preserved_angle[angle_slot] > 1)
+      {
+        // add to list for averageing angle.
+        // from PRESERVE_ANGLE PRESERVATION_ANGLE_AVERAGE[10];
+        if (PRESERVATION_ANGLE_AVERAGE_ARR_COUNT < 10)
+        {
+          // Search angle slots
+          bool found = false;
+          for (int array_pos = 0; array_pos < PRESERVATION_ANGLE_AVERAGE_ARR_COUNT; array_pos++)
+          {
+            if (angle_slot == PRESERVATION_ANGLE_AVERAGE[array_pos].ANGLE)
+            {
+              // add current compass history position to list.
+              PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION.push_back(pos_new);
+              found = true;
+              break;
+            }
+          }
+
+          // create a new pres angle of not found.
+          if (found == false)
+          {
+            cout << " n:" << PRESERVATION_ANGLE_AVERAGE_ARR_COUNT << endl;
+            PRESERVATION_ANGLE_AVERAGE[PRESERVATION_ANGLE_AVERAGE_ARR_COUNT].ANGLE = angle_slot;
+            PRESERVATION_ANGLE_AVERAGE[PRESERVATION_ANGLE_AVERAGE_ARR_COUNT].POSITION.push_back(pos_new);
+            PRESERVATION_ANGLE_AVERAGE_ARR_COUNT++;
+          }
+        }
+      }
+          */
     }
   }
 
   // Rotate direction of save
   preserved_angle_direction = !preserved_angle_direction;
+
+  /*
+  // Average out similar angles.
+  cout << " c:" << PRESERVATION_ANGLE_AVERAGE_ARR_COUNT << endl;
+  for (int array_pos = 0; array_pos < PRESERVATION_ANGLE_AVERAGE_ARR_COUNT; array_pos++)
+  {
+    // get average of new point
+    COMPASS_POINT tmp_point;
+    for(size_t item = 0; item < PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION.size(); item++)
+    {
+      tmp_point.POINT = tmp_point.POINT + COMPASS_HISTORY[PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION[item]].POINT;
+    }
+    // PRESERVATION_ANGLE_AVERAGE[pos].POSITION.size() should never be zero, but checking anyway
+    if (PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION.size() > 0)
+    {
+      tmp_point.POINT = tmp_point.POINT / PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION.size();
+    }
+
+    // delete points used in calculation.
+    for(size_t item = 0; item < PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION.size(); item++)
+    {
+      cout << " d:" << PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION[item] << flush;
+      COMPASS_HISTORY.erase_p(PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION[item]);
+    }
+
+    // Add new point
+    COMPASS_HISTORY.push_back(tmp_point, true);
+  }
+  */
 }
 
 

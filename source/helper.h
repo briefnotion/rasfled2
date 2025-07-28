@@ -17,6 +17,7 @@
 #include <vector>
 #include <string>
 #include <chrono>
+#include <functional>
 
 #include <cmath>
 
@@ -38,6 +39,7 @@ using namespace std;
 // ***************************************************************************************
 // STRUCTURES AND CLASSES
 // ***************************************************************************************
+
 
 // -------------------------------------------------------------------------------------
 // VALIDITY VARIABLES
@@ -840,7 +842,7 @@ public:
    * @brief Adds a new value to the deque. Handles circular buffer logic and overwrite rules.
    * @param Value The value to add.
    */
-  void push_back(const T& Value)
+  void push_back(const T& Value, bool Do_Not_Overwrite)
   {
     if (FULL_SIZE == 0) {
       std::cerr << "Error: VECTOR_DEQUE_NON_SEQUENTIAL size not set or is zero. Cannot push_back." << std::endl;
@@ -868,7 +870,7 @@ public:
         // The item being overwritten had HAS_DATA=true. COUNT remains the same.
         DATA[BACK] = Value;
         FLAGS[BACK].HAS_DATA = true;
-        FLAGS[BACK].DO_NOT_OVERWRITE = false; // Ensure it's not protected after overwrite
+        FLAGS[BACK].DO_NOT_OVERWRITE = Do_Not_Overwrite; // Ensure it's protection
       }
       else // All positions are protected (DO_NOT_OVERWRITE == true)
       {
@@ -878,7 +880,7 @@ public:
         // Overwrite the element at the current BACK position
         DATA[BACK] = Value;
         FLAGS[BACK].HAS_DATA = true;
-        FLAGS[BACK].DO_NOT_OVERWRITE = false; // Ensure it's not protected after overwrite
+        FLAGS[BACK].DO_NOT_OVERWRITE = Do_Not_Overwrite; // Ensure it's protection
         // COUNT remains FULL_SIZE, as we're overwriting an existing element.
       }
 
@@ -893,7 +895,7 @@ public:
         {
           DATA[current_pos] = Value;
           FLAGS[current_pos].HAS_DATA = true;
-          FLAGS[current_pos].DO_NOT_OVERWRITE = false; // Ensure it's not protected
+          FLAGS[current_pos].DO_NOT_OVERWRITE = Do_Not_Overwrite; // Ensure it's protection
           COUNT++;
           break; // Slot found and filled
         }
@@ -902,6 +904,11 @@ public:
       // where COUNT < FULL_SIZE but all HAS_DATA flags are true. This case
       // should ideally not be reached if COUNT is correctly maintained.
     }
+  }
+
+  void push_back(const T& Value)
+  {
+    push_back(Value, false);
   }
 
   /**

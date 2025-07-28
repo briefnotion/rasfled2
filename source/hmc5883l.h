@@ -376,6 +376,13 @@ class HMC5883L_PROPERTIES
   bool GPS_ASSIST_HEADING = false;
 };
 
+class PRESERVE_ANGLE
+{
+  public:
+  int ANGLE = 0;
+  vector<int> POSITION;
+};
+
 // -------------------------------------------------------------------------------------
 
 class CAL_LEVEL_3
@@ -405,12 +412,17 @@ class CAL_LEVEL_3
   bool preserved_angle_direction = false;
   void preservation_of_data();
 
+  int PRESERVATION_ANGLE_AVERAGE_ARR_COUNT = 0;
+  PRESERVE_ANGLE PRESERVATION_ANGLE_AVERAGE[10];
+  // 360 degrees. 1 set of 10 every second. 36 seconds.
+
+
   int COMPASS_HISTORY_SIZE = 360 * 3;
   // Size of the compass history, hardcoded for now.
 
   // Constants for noise filtering
   float CLOSEST_ALLOWED = 3.0f;
-  float NOISE_FILTER_DISTANCE = 20.0f;
+  float NOISE_FILTER_DISTANCE = 30.0f;
 
   // ---
   // Complex Calibration functions.

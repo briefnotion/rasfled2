@@ -159,8 +159,8 @@ void store_event_counts(system_data &sdSysData, ANIMATION_HANDLER Animations)
 
 
 // ***************************************************************************************
-// The Following chunk of code is what handles the imported library's ability to put the 
-// lights on and off or whatever.  Will not pretend to understand it.  Instead, will 
+// The Following chunk of code is what handles the imported library's ability to put the
+// lights on and off or whatever.  Will not pretend to understand it.  Instead, will
 // squish it down as much as possible so that I can pretend its not there.
 // ***************************************************************************************
 void matrix_render(int led_count)
@@ -169,12 +169,12 @@ void matrix_render(int led_count)
 
     for (x = 0; x < led_count; x++)
     {
-		ledstring.channel[0].leds[x] = matrix[x];
+    ledstring.channel[0].leds[x] = matrix[x];
     }
 }
 static void ctrl_c_handler(int signum)
 {
-	(void)(signum);
+  (void)(signum);
     running = 0;
 }
 static void setup_handlers(void)
@@ -187,7 +187,7 @@ static void setup_handlers(void)
 }
 void ledprep(ws2811_t *ws2811, int led_count)
 {
-	ws2811->channel[0].count = led_count;
+  ws2811->channel[0].count = led_count;
 }
 
 // ***************************************************************************************
@@ -209,26 +209,20 @@ void shutdown()
 // ---------------------------------------------------------------------------------------
 void setup()
 {
-  // Keeping this for now to remind me of what I haven't implementd, from the preport, 
+  // Keeping this for now to remind me of what I haven't implementd, from the preport,
   //  yet.
 }
 
 // ---------------------------------------------------------------------------------------
 // Global function for Main Loop Threads
-// By passing the global variable, difficult to work with, ledstring to the, just as 
-//  difficult to work with, ws2811_render routine, all led and values will be transmitted 
+// By passing the global variable, difficult to work with, ledstring to the, just as
+//  difficult to work with, ws2811_render routine, all led and values will be transmitted
 //  to the lights on a seperate thread.
 void proc_render_thread()
 {
   //int ret = 0;  // contains fail or pass status of the render routine.
   //ret = ws2811_render(&ledstring);  // Send values of ledstring to hardware.
-
-
-
   ws2811_render(&ledstring);  // Send values of ledstring to hardware.
-
-
-
 }
 
 // ---------------------------------------------------------------------------------------
@@ -237,9 +231,9 @@ int loop_2(bool TTY_Only)
 //  Main Loop:
 //    Events and Light Path animations should only be called when their time is up.
 
-// This was once the main() program.  Ever since we abandoned global variable, the setup 
-//  portion of this program has become convoluted.  It could use a good reorganize and 
-//  maybe a way to get some of this stuff out, subroutine, much of these routines. 
+// This was once the main() program.  Ever since we abandoned global variable, the setup
+//  portion of this program has become convoluted.  It could use a good reorganize and
+//  maybe a way to get some of this stuff out, subroutine, much of these routines.
 {
   using namespace std;
 
@@ -252,7 +246,7 @@ int loop_2(bool TTY_Only)
                                           //  serial comms.
   TIMED_IS_READY  comms_gps_timer;        // Delay for communicating with Automobile and GPS
                                           //  serial comms.
-  TIMED_IS_READY  compass_timer;          // Delay for communicating with compass 
+  TIMED_IS_READY  compass_timer;          // Delay for communicating with compass
                                           // serial comms.
 
   // Define System Data and Console
@@ -260,7 +254,7 @@ int loop_2(bool TTY_Only)
   system_data sdSystem;
   sdSystem.TTY_ONLY = TTY_Only;
 
-  // Control for threads. 
+  // Control for threads.
   //THREAD_COMMAND.create();
   sdSystem.THREAD_RENDER.create(get_frame_interval(sdSystem.CONFIG.iFRAMES_PER_SECOND));
 
@@ -281,7 +275,7 @@ int loop_2(bool TTY_Only)
 
   // Switch Lights On
   sdSystem.Lights_On.set(true);
-  
+
   // Initialize wiring pi
   //int intRet = wiringPiSetup();
   wiringPiSetup();
@@ -307,12 +301,12 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   comms_auto_timer.set(20);
-  
+
   // Can Bus Comm Port Setup
   sdSystem.COMMS_AUTO.PROPS.PORT = sdSystem.FILE_NAMES.CAN_BUS_DEVICE_FILE;
-  
+
   sdSystem.COMMS_AUTO.PROPS.AUTOSTART = COMMS_AUTOSTART;
-  
+
   sdSystem.COMMS_AUTO.PROPS.BAUD_RATE = COMMS_BAUD;
   sdSystem.COMMS_AUTO.PROPS.BIT_COUNT = COMMS_BIT_PARITY;
   sdSystem.COMMS_AUTO.PROPS.PARITY = COMMS_BIT_PARITY;
@@ -323,7 +317,7 @@ int loop_2(bool TTY_Only)
 
   sdSystem.COMMS_AUTO.PROPS.SAVE_LOG_FILENAME = sdSystem.FILE_NAMES.CAN_BUS_LOG_FILE;
   // will be appeded with date and time.
-  
+
   sdSystem.COMMS_AUTO.PROPS.RECEIVE_TEST_DATA = TEST_DATA_CAN_BUS;
   sdSystem.COMMS_AUTO.PROPS.TEST_DATA_FILENAME = sdSystem.FILE_NAMES.CAN_BUS_TEST_FILE;
 
@@ -360,7 +354,7 @@ int loop_2(bool TTY_Only)
   sdSystem.COMMS_GPS.PROPS.CONTINUOUS_DATA = CONTINUOUS_DATA_GPS;
 
   sdSystem.COMMS_GPS.PROPS.SAVE_LOG_FILENAME = sdSystem.FILE_NAMES.GPS_LOG_FILE;
-  
+
   sdSystem.COMMS_GPS.PROPS.RECEIVE_TEST_DATA = TEST_DATA_GPS;
   sdSystem.COMMS_GPS.PROPS.TEST_DATA_FILENAME = sdSystem.FILE_NAMES.GPS_TEST_FILE;
 
@@ -386,7 +380,7 @@ int loop_2(bool TTY_Only)
   cons_2.create(sdSystem);    // Prepare console.
 
   sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR.resize(4);
-  
+
   // Print Start Info
   sdSystem.SCREEN_COMMS.printw("Console Initialized ...  OK");
   sdSystem.SCREEN_COMMS.printw("");
@@ -399,7 +393,10 @@ int loop_2(bool TTY_Only)
   // System Init
 
   // ---------------------------------------------------------------------------------------
+  // Init Error Capture
+  //  Not coded. Rediecting cerr is problematic.
 
+  // ---------------------------------------------------------------------------------------
   // Initialize Alert System
   sdSystem.SCREEN_COMMS.printw("Initializing Alert System ...");
 
@@ -415,7 +412,7 @@ int loop_2(bool TTY_Only)
 
   // Sleeping Loop Variables
   sdSystem.PROGRAM_TIME.create();    //  Get current time.  This will be our timeframe to work in.
-  
+
   if (sdSystem.PROGRAM_TIME.setframetime() == true)
   {
     sdSystem.SCREEN_COMMS.printw("");
@@ -423,13 +420,13 @@ int loop_2(bool TTY_Only)
     sdSystem.SCREEN_COMMS.printw("");
 
     sdSystem.ALL_ALERTS.add_generic_alert("PROGRAM CLOCK\nAdjusting Program Clock", "");
-    
+
     sdSystem.PROGRAM_TIME.clear_error();
   }
-  
+
   // ---------------------------------------------------------------------------------------
   // Load system configuration and set data
-  
+
   sdSystem.SCREEN_COMMS.printw("Loading Configuration ...");
 
   // Set Running Color to white.
@@ -582,7 +579,7 @@ int loop_2(bool TTY_Only)
   ANIMATION_HANDLER animations;
 
   animations.create_events(sdSystem);
-  
+
   if (animations.load_collections(sdSystem.FILE_NAMES.ANIMATIONS_FILE) == true)
   {
     sdSystem.SCREEN_COMMS.printw("  Animations file loaded.");
@@ -627,9 +624,9 @@ int loop_2(bool TTY_Only)
 
       sdSystem.WS2811_ENABLED = false;
     }
-  
     else
     {
+      sdSystem.SCREEN_COMMS.printw("  WS2811 INIT SUCCESS");
       sdSystem.SCREEN_COMMS.printw("  LED count: " + to_string(led_count));
     }
   }
@@ -696,13 +693,13 @@ int loop_2(bool TTY_Only)
 
   // Start Power On Animation
   process_power_animation(sdSystem, sdSystem.PROGRAM_TIME.now(), animations, CRGB(0, 0, 25));
-  
+
   // ---------------------------------------------------------------------------------------
   //  Repeating Sleeping Loop until eXit is triggered.
   // ---------------------------------------------------------------------------------------
 
   sdSystem.SCREEN_COMMS.printw("Starting System ...");
-  
+
   // **************************************************************************************
   // **************************************************************************************
   // **************************************************************************************
@@ -714,7 +711,7 @@ int loop_2(bool TTY_Only)
     // Thread Management
 
     // Close all completed and active threads after sleep cycle is complete.
-    sdSystem.THREAD_RENDER.check_for_completition();    
+    sdSystem.THREAD_RENDER.check_for_completition();
 
     // ---------------------------------------------------------------------------------------
     // --- Prpare the Loop ---
@@ -727,7 +724,7 @@ int loop_2(bool TTY_Only)
       sdSystem.SCREEN_COMMS.printw("           DIFFERANCE: "  + to_string(sdSystem.PROGRAM_TIME.error()));
       sdSystem.SCREEN_COMMS.printw("");
 
-      sdSystem.ALL_ALERTS.add_generic_alert("ALERT", "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " + 
+      sdSystem.ALL_ALERTS.add_generic_alert("ALERT", "ALERT: PROGRAM TIME\nSTREAM INTURPTED OR CORRUPT\nDIFFERANCE: " +
                                           to_string(sdSystem.PROGRAM_TIME.error()));
 
       sdSystem.PROGRAM_TIME.clear_error();
@@ -740,7 +737,7 @@ int loop_2(bool TTY_Only)
 
     // ---------------------------------------------------------------------------------------
 
-    // Signal to RasCAM to get data on next read comm cycle.  
+    // Signal to RasCAM to get data on next read comm cycle.
     //  Screen draw cycle may be to much of a delay to handle?
     //  A half milsec delay after the send in the req is an alt.
     //  Never comment this out or the system will never sleep
@@ -750,14 +747,14 @@ int loop_2(bool TTY_Only)
     }
 
     // ---------------------------------------------------------------------------------------
-    // --- Read Switchs --- 
+    // --- Read Switchs ---
 
     // Are switches ready -----------------
     //  Never comment this out or the system will never sleep
     if (input_from_switches.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
-    {    
+    {
       // Read values of switches
-      // Read information from car system. If not available, then get door info 
+      // Read information from car system. If not available, then get door info
       //  from original system as redundancy.
 
       if (sdSystem.CAR_INFO.active() == true && sdSystem.CAR_INFO.STATUS.DOORS.available() == true)
@@ -767,7 +764,7 @@ int loop_2(bool TTY_Only)
         sdSystem.CONFIG.vSWITCH_PIN_MAP[1].value = sdSystem.CAR_INFO.STATUS.DOORS.lf_door_open();
         sdSystem.CONFIG.vSWITCH_PIN_MAP[2].value = sdSystem.CAR_INFO.STATUS.DOORS.rb_door_open();
         sdSystem.CONFIG.vSWITCH_PIN_MAP[3].value = sdSystem.CAR_INFO.STATUS.DOORS.rf_door_open();
-        
+
         if (sdSystem.CONFIG.vSWITCH_PIN_MAP.size() >= 4 && sdSystem.CONFIG.vSWITCH_PIN_MAP.size() <= 6)
         {
           sdSystem.CONFIG.vSWITCH_PIN_MAP[4].value = sdSystem.CAR_INFO.STATUS.DOORS.hatchback_door_open();
@@ -799,8 +796,8 @@ int loop_2(bool TTY_Only)
         sdSystem.CONFIG.vSWITCH_PIN_MAP.at(0).value = sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
         sdSystem.CONFIG.vSWITCH_PIN_MAP.at(1).value = sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
         sdSystem.CONFIG.vSWITCH_PIN_MAP.at(2).value = sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR[2];
-        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(3).value = sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR[3];        
-        
+        sdSystem.CONFIG.vSWITCH_PIN_MAP.at(3).value = sdSystem.SCREEN_COMMS.DEBUG_STATUS.DOOR[3];
+
         TRUTH_CATCH ret_changed;
         for(int x=0; x<sdSystem.CONFIG.iNUM_SWITCHES; x++)
         {
@@ -819,7 +816,7 @@ int loop_2(bool TTY_Only)
     }
 
     // Read light switchs and set day on or day off modes.
-    sdSystem.Day_On_With_Override.set(sdSystem.CAR_INFO.active() == true && 
+    sdSystem.Day_On_With_Override.set(sdSystem.CAR_INFO.active() == true &&
                                 sdSystem.CAR_INFO.STATUS.INDICATORS.available() == true,
                                 sdSystem.CAR_INFO.STATUS.INDICATORS.val_light_switch() == false, sdSystem.Day_On);
 
@@ -827,7 +824,7 @@ int loop_2(bool TTY_Only)
     // --- Check and Execute Timed Events That Are Ready ---
 
     // Is Events and Render ready -----------------
-    //  Never comment this out or the system will never sleep   
+    //  Never comment this out or the system will never sleep
     if(sdSystem.THREAD_RENDER.check_to_run_routine_on_thread(sdSystem.PROGRAM_TIME.current_frame_time()))
     {
       // MOVE RENAME ELIMINATE ??? !!!
@@ -842,28 +839,24 @@ int loop_2(bool TTY_Only)
         {
           int channel = sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].intCHANNEL;
 
-          sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].booARRAY_UPDATED 
-            = animations.EVENTS[channel].execute2(sdSystem, sRND, 
-                sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].crgbARRAY, 
+          sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].booARRAY_UPDATED
+            = animations.EVENTS[channel].execute2(sdSystem, sRND,
+                sdSystem.CONFIG.LED_MAIN[0].vLED_GROUPS[group].vLED_STRIPS[strip].crgbARRAY,
                 sdSystem.PROGRAM_TIME.current_frame_time());
         }
       }
-      
-
-
-
 
       // ---------------------------------------------------------------------------------------
       // Render all the LEDs if changes have been made.
 
       // --- Execute LED Hardware Changes If Anything Was Updated ---
       //  For now we are working with just one big LED strip.  So, just check to see if anything
-      //    changed.  Then, Redraw the entire strip. 
+      //    changed.  Then, Redraw the entire strip.
 
       // Calculate LED values and update if enabled.
       if (sdSystem.Lights_On.value() == true)
       {
-        // Update?    
+        // Update?
         for(int group=0; group < sdSystem.CONFIG.LED_MAIN.at(0).g_size(); group++)
         {
           for(int strip=0; strip < sdSystem.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
@@ -888,8 +881,8 @@ int loop_2(bool TTY_Only)
             {
               for(int strip=0; strip < sdSystem.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
               {
-                MatxixBlank(sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY, 
-                sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(), 
+                MatxixBlank(sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY,
+                sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(),
                 CRGB(0,0,0));
               }
             }
@@ -910,44 +903,44 @@ int loop_2(bool TTY_Only)
             for(int strip=0; strip < sdSystem.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
             {
               MatrixPrepare(
-                    sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY, 
-                    sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(), 
+                    sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY,
+                    sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(),
                     matrix, mcount);
             }
           }
         }
 
-        //  Are the lights enable to display.       
-        //    Lights off will not turn the lights off and clear their values.  
+        //  Are the lights enable to display.
+        //    Lights off will not turn the lights off and clear their values.
         //      Instead, transmitting those color are to the lights disabled.
-        
+
         if (sdSystem.WS2811_ENABLED)
         {
           // LED Library Renderer -- Recommend: DON'T TOUCH
           matrix_render(led_count);
 
           // Create a seperate thread only to render the LEDs with the hardware.  This process
-          //  is very intensive for the system and is only one way.  The render thread only needs 
-          //  to rejoin with the main program, at the end of the main loop, to signify its 
-          //  completion, so that the loop can restart and begin computing its values and colors 
-          //  again. 
+          //  is very intensive for the system and is only one way.  The render thread only needs
+          //  to rejoin with the main program, at the end of the main loop, to signify its
+          //  completion, so that the loop can restart and begin computing its values and colors
+          //  again.
           // A render thread should not be created if no changes have been made to the led values.
 
           // Get timer for render thread.
           sdSystem.dblCOMMS_LED_RENDER_TIME.start_timer(sdSystem.PROGRAM_TIME.current_frame_time());
 
           // Be careful with this because it looks like black magic to me.
-          sdSystem.THREAD_RENDER.start_render_thread([&]() 
+          sdSystem.THREAD_RENDER.start_render_thread([&]()
                         {  proc_render_thread();  });
-          
+
           sdSystem.dblCOMMS_LED_RENDER_TIME.end_timer(sdSystem.PROGRAM_TIME.current_frame_time());
         }
       }
     } // Is Events and Render ready -----------------
-     
+
     // ---------------------------------------------------------------------------------------
-    // Now that we have done all the hard work, read hardware, computed, generated, displayed 
-    // all the lights, we will take the latter clock cycles to get keybord input and update 
+    // Now that we have done all the hard work, read hardware, computed, generated, displayed
+    // all the lights, we will take the latter clock cycles to get keybord input and update
     // console with status and so on.
 
     // Is Keyboard or Mouse read ready -----------------
@@ -967,15 +960,15 @@ int loop_2(bool TTY_Only)
       // Read ADS-B Aircraft JSON
       if (watcher_aircraft_json.changed() == true)
       {
-        sdSystem.AIRCRAFT_COORD.process(sdSystem.PROGRAM_TIME.current_frame_time(), file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE), 
-                                                          sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM, 
-                                                          sdSystem.GPS_SYSTEM.active(sdSystem.PROGRAM_TIME.current_frame_time()), 
+        sdSystem.AIRCRAFT_COORD.process(sdSystem.PROGRAM_TIME.current_frame_time(), file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE),
+                                                          sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM,
+                                                          sdSystem.GPS_SYSTEM.active(sdSystem.PROGRAM_TIME.current_frame_time()),
                                                           sdSystem.GPS_SYSTEM.current_position().LATITUDE, sdSystem.GPS_SYSTEM.current_position().LONGITUDE);
       }
 
       processcommandlineinput(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
       extraanimationdoorcheck2(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
-      
+
       // Also delayed, File maintenance.
       if (sdSystem.booRunning_State_File_Dirty == true)
       {
@@ -1034,14 +1027,14 @@ int loop_2(bool TTY_Only)
 
       // Process Automobile Lights
       automobile_handler.update_events(sdSystem, animations, sdSystem.PROGRAM_TIME.current_frame_time());
-      
+
       sdSystem.dblCOMMS_AUTO_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
     }
 
     // ---------------------------------------------------------------------------------------
     // Comm Port Read
     // GPS Data Process.
-    
+
     if (comms_gps_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
       sdSystem.dblCOMMS_GPS_TRANSFER_TIME.start_timer(sdSystem.PROGRAM_TIME.now());
@@ -1080,17 +1073,17 @@ int loop_2(bool TTY_Only)
 
       // ---------------------------------------------------------------------------------------
       // GPS Process
-      
+
       sdSystem.GPS_SYSTEM.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
       //cons_2.update_GPS_gadgets(sdSystem);
-      
+
       sdSystem.dblCOMMS_GPS_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
     }
 
     // ---------------------------------------------------------------------------------------
     // Comm Port Read
     // Compass Data Process.
-    
+
     //  Never comment this out or the system will never sleep
     if (compass_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
@@ -1140,8 +1133,8 @@ int loop_2(bool TTY_Only)
     {
       // if condition no longer needed.
       {
-        // Refresh console data storeage from main program. This will be a pass through buffer. 
-        // so the console will not have to access any real data. 
+        // Refresh console data storeage from main program. This will be a pass through buffer.
+        // so the console will not have to access any real data.
         sdSystem.store_door_switch_states();
 
         store_event_counts(sdSystem, animations);
@@ -1164,7 +1157,7 @@ int loop_2(bool TTY_Only)
             sdSystem.SOUND_SYSTEM.set_mute(false);
           }
         }
-       
+
         // Redraw the console screen with what the screen determines needs to be displayed.
         //cons.display(fsPlayer, sdSystem, sdSystem.PROGRAM_TIME.current_frame_time());
         sdSystem.dblSCREEN_RENDER_TIME.start_timer(sdSystem.PROGRAM_TIME.now());
@@ -1172,23 +1165,27 @@ int loop_2(bool TTY_Only)
         sdSystem.dblSCREEN_RENDER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
 
       }
-  
+
       // Alert system checks
       sdSystem.ALL_ALERTS.alert_list_clean(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM);
-      
+
     } // Is display to console ready -----------------
 
     // Run external commands, if pending
     {
       sdSystem.COMMAND_THREADS.execute();
     }
-    
+
     // ---------------------------------------------------------------------------------------
-    // Now that the complete cycle is over, we need figure out how much time is remaining in 
-    // the cycle and go to sleep for the appropriate amount of time. 
+    // PRINT C_ERRORS to console
+    //  Not Coded.
+
+    // ---------------------------------------------------------------------------------------
+    // Now that the complete cycle is over, we need figure out how much time is remaining in
+    // the cycle and go to sleep for the appropriate amount of time.
     // Calculate times and sleep till next frame is ready.
 
-    // Determine how long to sleep and then sleep by 
+    // Determine how long to sleep and then sleep by
     //  finding the earliest sleep wake time.
     // Make sure non of these are commented out, or the system will never sleep.
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_switches.get_ready_time());
@@ -1205,10 +1202,10 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   // If we are here, then we are closing the program.
-  
+
   // Wait for threads to end before continuing to shutdown.
   sdSystem.THREAD_RENDER.wait_for_thread_to_finish();
-  
+
   // Shutdown RPI.
   if (sdSystem.WS2811_ENABLED)
   {
@@ -1296,13 +1293,86 @@ int main(int argc, char *argv[])
         ret = loop_2(true);  // To be phased out?
         cout << "Do Not Load Graphics Window" << endl;
       }
-    } 
-    catch (std::exception const& e)
+    }
+
+    // --- Catch Specific Standard Exceptions First ---
+    // Catches std::out_of_range exceptions (e.g., from vector/array bounds checks)
+    catch (const std::out_of_range& e)
     {
-      // Handle unexpected exceptions during the main loop
-      cout << "An Error has occured in the main loop." << endl;
-      cout << "Error Code: " << ret << endl;
+      // Print a critical error message to std::cerr for immediate visibility
+      std::cerr << "!!! CRITICAL ERROR (Out of Range) !!!" << std::endl;
+      std::cerr << "Details: " << e.what() << std::endl; // e.what() provides the exception message
+      std::cerr << "Program Status Code (before exception): " << ret << std::endl;
+      ret = 0; // Set return code to indicate a failure exit
+
+      // Pause the program to allow viewing the error message
+      std::cerr << "Press Enter to exit..." << std::endl;
+      std::cin.clear();
+      std::string dummy;
+      std::getline(std::cin, dummy);
+    }
+    // Catches std::invalid_argument exceptions (e.g., from bad function arguments)
+    catch (const std::invalid_argument& e)
+    {
+      std::cerr << "!!! CRITICAL ERROR (Invalid Argument) !!!" << std::endl;
+      std::cerr << "Details: " << e.what() << std::endl;
+      std::cerr << "Program Status Code (before exception): " << ret << std::endl;
       ret = 0;
+
+      // Pause the program to allow viewing the error message
+      std::cerr << "Press Enter to exit..." << std::endl;
+      std::cin.clear();
+      std::string dummy;
+      std::getline(std::cin, dummy);
+    }
+    // Catches std::bad_alloc exceptions (e.g., when memory allocation fails)
+    catch (const std::bad_alloc& e)
+    {
+      std::cerr << "!!! FATAL ERROR (Memory Allocation Failed) !!!" << std::endl;
+      std::cerr << "Details: " << e.what() << std::endl;
+      std::cerr << "Consider increasing available memory or reducing usage." << std::endl;
+      std::cerr << "Program Status Code (before exception): " << ret << std::endl;
+      ret = 0;
+
+      // Pause the program to allow viewing the error message
+      std::cerr << "Press Enter to exit..." << std::endl;
+      std::cin.clear();
+      std::string dummy;
+      std::getline(std::cin, dummy);
+    }
+    // --- Catch General Standard Exceptions ---
+    // This catches any other exception derived from std::exception
+    // (e.g., std::runtime_error, std::logic_error, if not caught by a more specific handler above)
+    catch (const std::exception& e)
+    {
+      std::cerr << "!!! UNEXPECTED ERROR IN MAIN LOOP !!!" << std::endl;
+      std::cerr << "Details: " << e.what() << std::endl;
+      std::cerr << "Program Status Code (before exception): " << ret << std::endl;
+      ret = 0;
+
+      // Pause the program to allow viewing the error message
+      std::cerr << "Press Enter to exit..." << std::endl;
+      std::cin.clear();
+      std::string dummy;
+      std::getline(std::cin, dummy);
+    }
+    // --- Catch All Other Unforeseen Exceptions ---
+    // This is the catch-all for any non-std::exception derived throws
+    // (e.g., throw "string", throw 123) or if a custom exception class
+    // does not inherit from std::exception.
+    // It provides a last-resort safety net.
+    catch (...)
+    {
+      std::cerr << "!!! UNKNOWN CRITICAL ERROR IN MAIN LOOP !!!" << std::endl;
+      std::cerr << "An exception of an unknown type occurred. This indicates a serious issue." << std::endl;
+      std::cerr << "Program Status Code (before exception): " << ret << std::endl;
+      ret = 0;
+
+      // Pause the program to allow viewing the error message
+      std::cerr << "Press Enter to exit..." << std::endl;
+      std::cin.clear();
+      std::string dummy;
+      std::getline(std::cin, dummy);
     }
 
     // Check for a reboot condition and restart the main loop if necessary
