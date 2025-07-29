@@ -316,7 +316,8 @@ class Matrix3x3
 class COMPASS_POINT
 {
   public:
-  FLOAT_XYZ_MATRIX POINT; // The actual XYZ coordinates of the compass reading
+  FLOAT_XYZ_MATRIX  POINT;          // The actual XYZ coordinates of the compass reading
+  int               SUDO_ANGLE = 0; // An angle from center approximation
 
   // Default constructor to initialize POINT
   COMPASS_POINT() : POINT() {}
@@ -412,17 +413,12 @@ class CAL_LEVEL_3
   bool preserved_angle_direction = false;
   void preservation_of_data();
 
-  int PRESERVATION_ANGLE_AVERAGE_ARR_COUNT = 0;
-  PRESERVE_ANGLE PRESERVATION_ANGLE_AVERAGE[10];
-  // 360 degrees. 1 set of 10 every second. 36 seconds.
-
-
   int COMPASS_HISTORY_SIZE = 360 * 3;
   // Size of the compass history, hardcoded for now.
 
   // Constants for noise filtering
   float CLOSEST_ALLOWED = 3.0f;
-  float NOISE_FILTER_DISTANCE = 30.0f;
+  float NOISE_FILTER_DISTANCE = 40.0f;
 
   // ---
   // Complex Calibration functions.
@@ -495,6 +491,7 @@ class CAL_LEVEL_3
 
   float HEADING_DEGREES_REPORT = 0.0f;
   // The heading degrees report, calculated based on the compass center and points.
+  
   FLOAT_XYZ_MATRIX LAST_READ_VALUE;
   // The last read value from the compass, used for noise filtering.
 
@@ -519,6 +516,7 @@ class HMC5883L
   // Data
 
   FLOAT_XYZ_MATRIX RAW_XYZ;            // Temporary storage of XYZ before process;
+  FLOAT_XYZ_MATRIX RAW_XYZ_PREVIOUS_VALUE;
 
   int CALIBRATED_BEARINGS_SIZE = 31;  // Calculated by: COMMS_COMPASS_HISTORY_TIME_SPAN_MS / 
                                       //                COMMS_COMPASS_POLLING_RATE_MS

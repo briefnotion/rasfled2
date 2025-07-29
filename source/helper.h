@@ -542,6 +542,8 @@ class IMPACT_RESISTANCE_FLOAT
 
 // ---------------------------------------------------------------------------------------
 
+void press_enter_to_continue();
+
 // Debug Walker
 float walker_float(unsigned long Time, float One_Second_Value, float Max_value);
 // Time based value walker for debugging. 

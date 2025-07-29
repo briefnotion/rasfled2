@@ -350,12 +350,6 @@ void CAL_LEVEL_3::clear_all_flags()
   {
     COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = false;
   }
-
-  for (int pos = 0; pos < PRESERVATION_ANGLE_AVERAGE_ARR_COUNT; pos++)
-  {
-    PRESERVATION_ANGLE_AVERAGE[pos].POSITION.clear();
-  }
-  PRESERVATION_ANGLE_AVERAGE_ARR_COUNT = 0;
 }
 
 bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
@@ -364,41 +358,38 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
   bool ret_pass_filter = false;
 
   // Simple noise filter
-  if (!xyz_equal(Raw_XYZ, LAST_READ_VALUE))
+  // If the new point is too far from the last read value, do not store it.
+  ret_pass_filter = true;
+  
+  if (ret_pass_filter)
   {
-    // If the new point is too far from the last read value, do not store it.
-    ret_pass_filter = true;
-    
-    if (ret_pass_filter)
+    float dist_newpoint_anyother = 0.0f;
+    float dist_newpoint_anyother_farthest = 9999.9f;
+
+    for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
     {
-      float dist_newpoint_anyother = 0.0f;
-      float dist_newpoint_anyother_farthest = 9999.9f;
-
-      for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
       {
-        if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+        dist_newpoint_anyother = dist_xyz(Raw_XYZ, COMPASS_HISTORY[pos].POINT);
+        
+        if (dist_newpoint_anyother < CLOSEST_ALLOWED)
         {
-          dist_newpoint_anyother = dist_xyz(Raw_XYZ, COMPASS_HISTORY[pos].POINT);
-          
-          if (dist_newpoint_anyother < CLOSEST_ALLOWED)
-          {
-            COMPASS_HISTORY.erase_p(pos);
-          }
+          COMPASS_HISTORY.erase_p(pos);
+        }
 
-          if (dist_newpoint_anyother < dist_newpoint_anyother_farthest)
-          {
-            dist_newpoint_anyother_farthest = dist_newpoint_anyother;
-          }
+        if (dist_newpoint_anyother < dist_newpoint_anyother_farthest)
+        {
+          dist_newpoint_anyother_farthest = dist_newpoint_anyother;
         }
       }
+    }
 
-      if (dist_newpoint_anyother_farthest < NOISE_FILTER_DISTANCE || 
-                COMPASS_HISTORY.count() == 0)
-      {
-        COMPASS_POINT tmp_compass_point;
-        tmp_compass_point.POINT = Raw_XYZ;
-        COMPASS_HISTORY.push_back(tmp_compass_point);
-      }
+    if (dist_newpoint_anyother_farthest < NOISE_FILTER_DISTANCE || 
+              COMPASS_HISTORY.count() == 0)
+    {
+      COMPASS_POINT tmp_compass_point;
+      tmp_compass_point.POINT = Raw_XYZ;
+      COMPASS_HISTORY.push_back(tmp_compass_point);
     }
   }
   
@@ -421,16 +412,16 @@ void CAL_LEVEL_3::preservation_of_data()
 //  all data in PRESERVATION_ANGLE_AVERAGE is cleared at the beginning of every calibration routine.
 
 {
-  for (int pos = 0; pos < (int)COMPASS_HISTORY.size(); pos++)
+  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
   {
-    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    int pos_new = pos;
+    if (preserved_angle_direction)
     {
-      int pos_new = pos;
-      if (preserved_angle_direction)
-      {
-        pos_new = (int)COMPASS_HISTORY.size() -1 - pos;
-      }
+      pos_new = (int)COMPASS_HISTORY.size() -1 - pos;
+    }
 
+    if (COMPASS_HISTORY.FLAGS[pos_new].HAS_DATA)
+    {
       float dx = COMPASS_HISTORY[pos_new].POINT.X - COMPASS_CENTER.X;
       float dy = COMPASS_HISTORY[pos_new].POINT.Y - COMPASS_CENTER.Y;
 
@@ -440,77 +431,40 @@ void CAL_LEVEL_3::preservation_of_data()
       angle_slot = (angle_slot + 360) % 360;
 
       preserved_angle[angle_slot]++;
+      COMPASS_HISTORY[pos_new].SUDO_ANGLE = angle_slot;
 
-      if (preserved_angle[angle_slot] == 1)
+      if (preserved_angle[angle_slot] <= 1)
       {
         COMPASS_HISTORY.FLAGS[pos_new].DO_NOT_OVERWRITE = true;
       }
-
-      /*
-      if (preserved_angle[angle_slot] > 1)
-      {
-        // add to list for averageing angle.
-        // from PRESERVE_ANGLE PRESERVATION_ANGLE_AVERAGE[10];
-        if (PRESERVATION_ANGLE_AVERAGE_ARR_COUNT < 10)
-        {
-          // Search angle slots
-          bool found = false;
-          for (int array_pos = 0; array_pos < PRESERVATION_ANGLE_AVERAGE_ARR_COUNT; array_pos++)
-          {
-            if (angle_slot == PRESERVATION_ANGLE_AVERAGE[array_pos].ANGLE)
-            {
-              // add current compass history position to list.
-              PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION.push_back(pos_new);
-              found = true;
-              break;
-            }
-          }
-
-          // create a new pres angle of not found.
-          if (found == false)
-          {
-            cout << " n:" << PRESERVATION_ANGLE_AVERAGE_ARR_COUNT << endl;
-            PRESERVATION_ANGLE_AVERAGE[PRESERVATION_ANGLE_AVERAGE_ARR_COUNT].ANGLE = angle_slot;
-            PRESERVATION_ANGLE_AVERAGE[PRESERVATION_ANGLE_AVERAGE_ARR_COUNT].POSITION.push_back(pos_new);
-            PRESERVATION_ANGLE_AVERAGE_ARR_COUNT++;
-          }
-        }
-      }
-          */
     }
   }
 
   // Rotate direction of save
   preserved_angle_direction = !preserved_angle_direction;
 
-  /*
   // Average out similar angles.
-  cout << " c:" << PRESERVATION_ANGLE_AVERAGE_ARR_COUNT << endl;
-  for (int array_pos = 0; array_pos < PRESERVATION_ANGLE_AVERAGE_ARR_COUNT; array_pos++)
+  for (int angle = 0; angle < 360; angle++)
   {
-    // get average of new point
-    COMPASS_POINT tmp_point;
-    for(size_t item = 0; item < PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION.size(); item++)
+    // If angles has more than 1 item in it, combine them.
+    if (preserved_angle[angle] > 1)
     {
-      tmp_point.POINT = tmp_point.POINT + COMPASS_HISTORY[PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION[item]].POINT;
-    }
-    // PRESERVATION_ANGLE_AVERAGE[pos].POSITION.size() should never be zero, but checking anyway
-    if (PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION.size() > 0)
-    {
-      tmp_point.POINT = tmp_point.POINT / PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION.size();
-    }
+      COMPASS_POINT tmp_compass_point;
 
-    // delete points used in calculation.
-    for(size_t item = 0; item < PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION.size(); item++)
-    {
-      cout << " d:" << PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION[item] << flush;
-      COMPASS_HISTORY.erase_p(PRESERVATION_ANGLE_AVERAGE[array_pos].POSITION[item]);
-    }
+      for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+      {
+        if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA && COMPASS_HISTORY[pos].SUDO_ANGLE == angle)
+        {
+          tmp_compass_point.POINT = tmp_compass_point.POINT + COMPASS_HISTORY[pos].POINT;
+          COMPASS_HISTORY.erase_p(pos);
+        }
+      }
 
-    // Add new point
-    COMPASS_HISTORY.push_back(tmp_point, true);
+
+      tmp_compass_point.POINT = tmp_compass_point.POINT / preserved_angle[angle];
+      COMPASS_HISTORY.push_back(tmp_compass_point, true);
+    }
   }
-  */
 }
 
 
@@ -1194,7 +1148,13 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
 
         // Process
-        process(GPS_System, tmeFrame_Time);
+        if (RAW_XYZ.X != RAW_XYZ_PREVIOUS_VALUE.X ||
+            RAW_XYZ.Y != RAW_XYZ_PREVIOUS_VALUE.Y ||
+            RAW_XYZ.Z != RAW_XYZ_PREVIOUS_VALUE.Z)
+        {
+          RAW_XYZ_PREVIOUS_VALUE = RAW_XYZ;
+          process(GPS_System, tmeFrame_Time);
+        }
       }
     }
   }

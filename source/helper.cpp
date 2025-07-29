@@ -988,6 +988,15 @@ float IMPACT_RESISTANCE_FLOAT::impact(unsigned long Time)
 
 // ---------------------------------------------------------------------------------------
 
+void press_enter_to_continue()
+{
+  // Pause the program to allow viewing the error message
+  std::cerr << "Press Enter to exit..." << std::endl;
+  std::cin.clear();
+  std::string dummy;
+  std::getline(std::cin, dummy);
+}
+
 // Debug Walker
 float walker_float(unsigned long Time, float One_Second_Value, float Max_value)
 {

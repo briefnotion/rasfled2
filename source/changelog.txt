@@ -1,3 +1,6 @@
+2.285_250729
+  - Changed the way the compass remembers its radial points in the compass history.
+
 2.284_250728
    - Added some more catch error routines to print errors on program crash.
 

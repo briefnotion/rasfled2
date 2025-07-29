@@ -1306,10 +1306,7 @@ int main(int argc, char *argv[])
       ret = 0; // Set return code to indicate a failure exit
 
       // Pause the program to allow viewing the error message
-      std::cerr << "Press Enter to exit..." << std::endl;
-      std::cin.clear();
-      std::string dummy;
-      std::getline(std::cin, dummy);
+      press_enter_to_continue();
     }
     // Catches std::invalid_argument exceptions (e.g., from bad function arguments)
     catch (const std::invalid_argument& e)
@@ -1320,10 +1317,7 @@ int main(int argc, char *argv[])
       ret = 0;
 
       // Pause the program to allow viewing the error message
-      std::cerr << "Press Enter to exit..." << std::endl;
-      std::cin.clear();
-      std::string dummy;
-      std::getline(std::cin, dummy);
+      press_enter_to_continue();
     }
     // Catches std::bad_alloc exceptions (e.g., when memory allocation fails)
     catch (const std::bad_alloc& e)
@@ -1335,10 +1329,7 @@ int main(int argc, char *argv[])
       ret = 0;
 
       // Pause the program to allow viewing the error message
-      std::cerr << "Press Enter to exit..." << std::endl;
-      std::cin.clear();
-      std::string dummy;
-      std::getline(std::cin, dummy);
+      press_enter_to_continue();
     }
     // --- Catch General Standard Exceptions ---
     // This catches any other exception derived from std::exception
@@ -1351,10 +1342,7 @@ int main(int argc, char *argv[])
       ret = 0;
 
       // Pause the program to allow viewing the error message
-      std::cerr << "Press Enter to exit..." << std::endl;
-      std::cin.clear();
-      std::string dummy;
-      std::getline(std::cin, dummy);
+      press_enter_to_continue();
     }
     // --- Catch All Other Unforeseen Exceptions ---
     // This is the catch-all for any non-std::exception derived throws
@@ -1369,10 +1357,7 @@ int main(int argc, char *argv[])
       ret = 0;
 
       // Pause the program to allow viewing the error message
-      std::cerr << "Press Enter to exit..." << std::endl;
-      std::cin.clear();
-      std::string dummy;
-      std::getline(std::cin, dummy);
+      press_enter_to_continue();
     }
 
     // Check for a reboot condition and restart the main loop if necessary
