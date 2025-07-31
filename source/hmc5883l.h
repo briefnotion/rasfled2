@@ -141,9 +141,9 @@ using namespace std;
 class FLOAT_XYZ_MATRIX
 {
   public:
-  float X = 0;
-  float Y = 0;
-  float Z = 0;
+  float X = 0.0f;
+  float Y = 0.0f;
+  float Z = 0.0f;
 
   // Default constructor
   FLOAT_XYZ_MATRIX() : X(0.0f), Y(0.0f), Z(0.0f) {}
@@ -351,6 +351,11 @@ struct CalibrationParameters
 
 // -------------------------------------------------------------------------------------
 
+FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fake_Bearing);
+// Generates a fake compass input for testing purposes.
+
+// -------------------------------------------------------------------------------------
+
 class HMC5883L_PROPERTIES
 {
   public:
@@ -373,8 +378,10 @@ class HMC5883L_PROPERTIES
   string OFFSET_HISTORY_FILE_NAME = "";
 
   float CALIBRATION_MOUNT_OFFSET = -180.0f;
-  float CALIBRATION_LOCATION_DECLINATION = 4.0f;
+  float CALIBRATION_LOCATION_DECLINATION = 0.0f;
   bool GPS_ASSIST_HEADING = false;
+
+  bool ENABLE_FAKE_COMPASS = false;
 };
 
 class PRESERVE_ANGLE
@@ -388,16 +395,9 @@ class PRESERVE_ANGLE
 
 class CAL_LEVEL_3
 {
-  public:
-  void load_history_and_settings(HMC5883L_PROPERTIES &Props);
-  // Load history and settings
-
   private:
   void save_history_and_settings(HMC5883L_PROPERTIES &Props);
   // Save history and settings
-
-  FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time);
-  // Generates a fake compass input for testing purposes.
 
   bool xyz_equal(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B);
   // Checks if two FLOAT_XYZ points are equal.
@@ -419,6 +419,10 @@ class CAL_LEVEL_3
   // Constants for noise filtering
   float CLOSEST_ALLOWED = 3.0f;
   float NOISE_FILTER_DISTANCE = 40.0f;
+
+  // Amount of time that is waited before the compass runs the calibration routines.
+  TIMED_IS_READY  CALIBRATION_TIMER;
+  int             CALIBRATION_DELAY = 1000;
 
   // ---
   // Complex Calibration functions.
@@ -459,47 +463,25 @@ class CAL_LEVEL_3
   float calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params);
 
   // Prepares and formats the calibrated heading for external reporting or display.
-  void set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ, HMC5883L_PROPERTIES &Props);
+  void set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ);
 
   // ---
-
-  // Testing
-  float FAKE_INPUT = 0.0f;
   
   public:
-  float FAKE_INPUT_REPORTED = 0.0f;
-
-  string OFFSET_HISTORY_FILENAME = "";
-  // not coded
-
-  //int BEARING_OFFSET_LOAD = -1;
- 
   VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
   // Stores the history of compass points, using a non-sequential vector deque.
 
   FLOAT_XYZ_MATRIX COMPASS_CENTER;
   // The center of the compass, calculated
 
-  // Amount of time that is waited before the compass runs the calibration routines.
-  TIMED_IS_READY  CALIBRATION_TIMER;
-  int             CALIBRATION_DELAY = 1000;
-
-  // Amount of time that is waited before the system stores its calibration history
-  // to file.
-  TIMED_IS_READY  CALIBRATION_DATA_SAVE;
-  int             CALIBRATION_DATA_SAVE_DELAY = 60000;
-
   float HEADING_DEGREES_REPORT = 0.0f;
   // The heading degrees report, calculated based on the compass center and points.
   
-  FLOAT_XYZ_MATRIX LAST_READ_VALUE;
-  // The last read value from the compass, used for noise filtering.
-
   void clear();
   //float variance();
   //bool simple_calibration();
 
-  void calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, HMC5883L_PROPERTIES &Props);
+  void calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, bool Enable_Calibration_Routines);
   // Run Level 2 cal routines.
 };
 
@@ -512,11 +494,6 @@ class HMC5883L
   int DEVICE = 0;                 // For file IO.
 
   unsigned char BUFFER[16];
-
-  // Data
-
-  FLOAT_XYZ_MATRIX RAW_XYZ;            // Temporary storage of XYZ before process;
-  FLOAT_XYZ_MATRIX RAW_XYZ_PREVIOUS_VALUE;
 
   int CALIBRATED_BEARINGS_SIZE = 31;  // Calculated by: COMMS_COMPASS_HISTORY_TIME_SPAN_MS / 
                                       //                COMMS_COMPASS_POLLING_RATE_MS
@@ -551,6 +528,11 @@ class HMC5883L
   // GPS Automatic Heading Calibration Timer
   TIMED_PING GPS_HEADING_CALIBRATION_TIMER;
 
+  // Amount of time that is waited before the system stores its calibration history
+  // to file.
+  TIMED_IS_READY  CALIBRATION_DATA_SAVE;
+  int             CALIBRATION_DATA_SAVE_DELAY = 60000;
+
   // Preload Calibration Data
   bool PRELOAD_DATA_LOADED = false;
 
@@ -558,11 +540,18 @@ class HMC5883L
 
   MIN_MAX_TIME_SLICE GPS_ERROR_MEAN;
 
+  public:
+
+  // Load history and settings
+  // Creates JSON file with saved settings.
+  void load_history_and_settings();
+  void save_history_and_settings();
+
   // Comms Routines
   bool register_write(char Register, char Value);
     // Internal: Change chip settings.
 
-  bool create(string Offset_History_Filename);      // Internal: Opens port for access.
+  bool create();      // Internal: Opens port for access.
 
   void stop();        // Internal: Closes port for access.
                       //  Not yet fully implemented.
@@ -572,11 +561,18 @@ class HMC5883L
   // Internal: Processes most recent received data. 
   // Performs Calibration Routines
 
+  FLOAT_XYZ_MATRIX RAW_XYZ_PREVIOUS_VALUE;
   public:
+
+  FLOAT_XYZ_MATRIX RAW_XYZ;
+  // Most Recent XYZ coords from compass.  
+  // Useful for drawing on 2d plane.
+
+  float TRUE_FAKE_BEARING;
+  // When using fake compass, holds the unmodified bearing.
 
   HMC5883L_PROPERTIES PROPS;
 
-  //CAL_LEVEL_2 LEVEL_2;
   CAL_LEVEL_3 LEVEL_3;
 
   void calibrateion_reset();

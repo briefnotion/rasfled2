@@ -16,320 +16,78 @@
 
 using namespace std;
 
-// -------------------------------------------------------------------------------------
-
-void CAL_LEVEL_3::load_history_and_settings(HMC5883L_PROPERTIES &Props)
-{
-  bool ret_success = false;
-
-  JSON_INTERFACE configuration_json;
-
-  string json_state_file = file_to_string(Props.OFFSET_HISTORY_FILE_NAME, ret_success);
-
-  if (ret_success == true)
-  {
-    ret_success = configuration_json.load_json_from_string(json_state_file);
-
-    if (ret_success == true)
-    {
-      for(int root = 0; root < (int)configuration_json.ROOT.DATA.size(); root++)
-      {
-        // load settings
-        if (configuration_json.ROOT.DATA[root].label() == "settings")
-        {
-          float mount_offset =  0.0f;
-          bool mount_offset_loaded = false;
-
-          float declination =   0.0f;
-          bool declination_loaded = false;
-
-          for (int settings = 0; 
-              settings < (int)configuration_json.ROOT.DATA[root].DATA.size(); settings++)
-          {
-            mount_offset_loaded = configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("mount offset", mount_offset);
-            declination_loaded =  configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("declination", declination);
-          }
-
-          // store as props but only if found
-          if (mount_offset_loaded)
-          {
-            Props.CALIBRATION_MOUNT_OFFSET = mount_offset;
-          }
-          if (declination_loaded)
-          {
-            Props.CALIBRATION_LOCATION_DECLINATION = declination;
-          }
-        }
-
-        // load configuration points
-        if (configuration_json.ROOT.DATA[root].label() == "calibration points")
-        {
-          for (int points = 0; 
-              points < (int)configuration_json.ROOT.DATA[root].DATA.size(); points++)
-          {
-            float x = 0;
-            float y = 0;
-            float z = 0;
-
-            for (int values = 0; 
-                values < (int)configuration_json.ROOT.DATA[root].DATA[points].DATA.size(); values++)
-            {
-
-              configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("X", x);
-              configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Y", y);
-              configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Z", z);
-            }
-
-            COMPASS_POINT tmp_point;
-
-            tmp_point.POINT.X = x;
-            tmp_point.POINT.Y = y;
-            tmp_point.POINT.Z = z;
-
-            COMPASS_HISTORY.push_back(tmp_point);
-          }
-
-          // Set all points as do_not_overwrite so they look alive.
-          for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-          {
-            if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-            {
-              COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-void CAL_LEVEL_3::save_history_and_settings(HMC5883L_PROPERTIES &Props)
-{
-  bool ret_success = false;
-  
-  JSON_INTERFACE configuration_json;
-
-  // Create base settings hin JSON
-  JSON_ENTRY settings;
-  settings.create_label_value(quotify("mount offset"), quotify("-180.0"));
-  settings.create_label_value(quotify("declination"), quotify("4.0"));
-  configuration_json.ROOT.put_json_in_set(quotify("settings"), settings);
-
-  // Create Point history in JSON
-  if (COMPASS_HISTORY.count() > 10)
-  {
-    JSON_ENTRY compass_points;
-    for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-    {
-      if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA && COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
-      {
-        JSON_ENTRY single_point;
-        single_point.create_label_value(quotify("X"), quotify(to_string(COMPASS_HISTORY[pos].POINT.X)));
-        single_point.create_label_value(quotify("Y"), quotify(to_string(COMPASS_HISTORY[pos].POINT.Y)));
-        single_point.create_label_value(quotify("Z"), quotify(to_string(COMPASS_HISTORY[pos].POINT.Z)));
-        compass_points.put_json_in_list(single_point);
-      }
-    }
-    configuration_json.ROOT.put_json_in_set(quotify("calibration points"), compass_points);
-  }
-
-  // Save JSON
-  deque<string> json_deque;
-  configuration_json.json_print_build_to_string_deque(json_deque);
-  ret_success = deque_string_to_file(Props.OFFSET_HISTORY_FILE_NAME, json_deque, false);
-
-  (void) ret_success;
-}
-
 /**
- * @brief Generates fake compass input for testing with various simulations.
- * @param tmeFrame_Time Current frame time.
- * @return A fake FLOAT_XYZ point.
+ * @brief Simulates a fake compass input based on time, and calculates a true fake bearing.
+ *
+ * This function generates X, Y, and Z values for a FLOAT_XYZ_MATRIX,
+ * simulating sensor readings. The values are based on a 'true' bearing
+ * that changes over time. This 'true' bearing is also calculated and
+ * returned via the TRUE_FAKE_BEARING reference parameter.
+ *
+ * @param tmeFrame_Time An unsigned long representing the current frame time or elapsed time.
+ * This is used to make the simulated bearing dynamic.
+ * @param True_Fake_Bearing A reference to a float where the calculated
+ * 'true' fake bearing (in degrees) will be stored.
+ * This value can be used for comparison after calibration.
+ * @return FLOAT_XYZ_MATRIX A matrix containing simulated X, Y, and Z sensor readings.
  */
-FLOAT_XYZ_MATRIX CAL_LEVEL_3::fake_compass_input(unsigned long tmeFrame_Time)
+FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fake_Bearing)
 {
     FLOAT_XYZ_MATRIX ret_point;
 
-    int speed = 50; // 1 fastest
-    // Note: Due to integer division (tmeFrame_Time / speed), the angle will
-    // remain constant for 'speed' number of frames. This causes the Raw XYZ
-    // and Corrected XYZ values to repeat in the output for those frames.
+    bool skew = true;
+    float skew_factor = .10f; // Added 'f' suffix for float literal
 
-    //simulations
-    bool noise = true;
-    float noise_factor = 0.2f;
+    // --- 1. Calculate the TRUE_FAKE_BEARING ahead of time ---
+    // This simulates a continuous rotation.
+    // We'll use a speed factor to control how fast the bearing changes with time.
+    // The result is modulo 360.0f to keep it within a full circle (0 to 360 degrees).
+    const float rotation_speed_deg_per_ms = 0.0573f; // Adjusted for degrees (approx 0.0010 rad/ms * 180/PI)
+    True_Fake_Bearing = fmod(tmeFrame_Time * rotation_speed_deg_per_ms, 360.0f);
 
-    bool sparatic_random = false;
-    float sparatic_random_factor = 1.0f;
-    int sparatic_random_chance_percent = 5; // 5% chance of sparatic random jump
-
-    bool time_based_drift = true;
-    float time_based_drift_factor = 100.0f;
-
-    bool interference_zone = false;
-
-    bool skew = true; // Retaining your original setting for demonstration
-    float skew_factor = 0.20f; // 10% skew
-
-    bool figure_eight = false; // if true, will do a figure eight pattern
-
-    // NEW SCENARIO: Rotate 120 degrees, then random points, then repeat
-    bool rotate_and_random_scenario = false; // Disable previous scenario
-    bool triangle_pattern_scenario = false;   // Enable new scenario
-
-    // Parameters for triangle_pattern_scenario
-    int segment_1_frames = 30; // Points for 0 degrees cluster
-    int segment_2_frames = 40; // Points for 120 degrees cluster
-    int segment_3_frames = 30; // Points for 240 degrees cluster
-    int total_frames_per_cycle_triangle = segment_1_frames + segment_2_frames + segment_3_frames; // Total 100 frames
-
-    float cluster_variation_magnitude = 10.0f; // Max deviation from the ideal point for a cluster
-
-    // parameters
-    float radius = 250.0f;
-    FLOAT_XYZ_MATRIX offset;
-    offset.X = 250.0f;
-    offset.Y = 300.3f;
-    // Modified: Introduce Z variation for calibration
-    offset.Z = 10.0f * std::sin(tmeFrame_Time * 0.01f); // Vary Z slightly
-
-    if (triangle_pattern_scenario)
-    {
-        unsigned long current_cycle_frame = tmeFrame_Time % total_frames_per_cycle_triangle;
-        float base_angle_degrees = 0.0f;
-
-        if (current_cycle_frame < (unsigned int)segment_1_frames)
-        {
-            base_angle_degrees = 0.0f; // First cluster around 0 degrees
-        }
-        else if (current_cycle_frame < (unsigned int)(segment_1_frames + segment_2_frames))
-        {
-            base_angle_degrees = 120.0f; // Second cluster around 120 degrees
-        }
-        else
-        {
-            base_angle_degrees = 240.0f; // Third cluster around 240 degrees
-        }
-
-        FAKE_INPUT = base_angle_degrees; // Store the target angle for the cluster
-
-        float base_angle_radians = base_angle_degrees * (M_PI / 180.0f);
-
-        // Calculate base point for the cluster
-        float base_X = radius * cos(base_angle_radians) + offset.X;
-        float base_Y = radius * sin(base_angle_radians) + offset.Y;
-        float base_Z = 0.0f + offset.Z; // Z still varies with time for calibration
-
-        // Add small random variation around the base point
-        float rand_x_offset = ((rand() % 201) - 100) / 100.0f * cluster_variation_magnitude; // -1 to 1 * magnitude
-        float rand_y_offset = ((rand() % 201) - 100) / 100.0f * cluster_variation_magnitude;
-        float rand_z_offset = ((rand() % 201) - 100) / 100.0f * cluster_variation_magnitude;
-
-        ret_point.X = base_X + rand_x_offset;
-        ret_point.Y = base_Y + rand_y_offset;
-        ret_point.Z = base_Z + rand_z_offset;
-    }
-    else if (rotate_and_random_scenario) // Original rotate_and_random_scenario
-    {
-        int rotation_degrees_per_segment = 120;
-        int frames_per_rotation_segment = rotation_degrees_per_segment * speed; // e.g., 120 * 10 = 1200 frames
-        int frames_per_random_segment = 100; // 100 frames of random data
-        int total_frames_per_cycle = frames_per_rotation_segment + frames_per_random_segment;
-
-        unsigned long current_cycle_frame = tmeFrame_Time % total_frames_per_cycle;
-
-        if (current_cycle_frame < (unsigned int)frames_per_rotation_segment)
-        {
-            // Rotation phase (0 to 120 degrees)
-            float angle_degrees_in_segment = (float)(current_cycle_frame / speed);
-            FAKE_INPUT = angle_degrees_in_segment; // Store angle in degrees
-
-            float angle_radians = angle_degrees_in_segment * (M_PI / 180.0f);
-            ret_point.X = radius * cos(angle_radians) + offset.X;
-            ret_point.Y = radius * sin(angle_radians) + offset.Y;
-            ret_point.Z = 0.0f + offset.Z; // Z still varies with time for calibration
-        }
-        else
-        {
-            // Random points phase
-            // Generate points within a reasonable range around the offset
-            float random_range = radius * 0.5f; // Random points within half the radius
-            ret_point.X = offset.X + ((rand() % 201) - 100) * (random_range / 100.0f); // -random_range to +random_range
-            ret_point.Y = offset.Y + ((rand() % 201) - 100) * (random_range / 100.0f);
-            ret_point.Z = offset.Z + ((rand() % 201) - 100) * (random_range / 100.0f);
-            
-            FAKE_INPUT = -1.0f; // Indicate random phase with a negative value
-        }
-    }
-    else // Original full circle scenario if no new scenarios are active
-    {
-        // gen
-        float angle_degrees = (float)((tmeFrame_Time/speed) % 360);
-        FAKE_INPUT = angle_degrees; // Store angle in degrees as requested
-
-        float angle_radians = angle_degrees * (M_PI / 180.0f); // Convert to radians for sin/cos
-
-        if (figure_eight == false)
-        {
-            ret_point.X = radius * cos(angle_radians) + offset.X;
-            ret_point.Y = radius * sin(angle_radians) + offset.Y;
-            ret_point.Z = 0.0f + offset.Z;
-        }
-        else
-        {
-            ret_point.X = radius * sin(angle_radians);
-            ret_point.Y = radius * sin(angle_radians) * cos(angle_radians);
-            ret_point.Z = 0.0f + offset.Z;
-        }
+    // Ensure the bearing is always positive (fmod can return negative for negative inputs)
+    if (True_Fake_Bearing < 0) {
+        True_Fake_Bearing += 360.0f;
     }
 
+    // --- 2. Calculate X, Y, and Z offsets based on the TRUE_FAKE_BEARING ---
+    // These values simulate the raw sensor output that would correspond to the bearing.
+    // Based on your provided raw data mapping (RAW_XYZ.X = y; RAW_XYZ.Y = x;),
+    // we swap the sine and cosine components to match the expected rotation.
 
-    // simulations (applied to whatever ret_point was generated above)
-    if (noise)
-    {
-        float noise_X = ((rand() % 100) - 50) * noise_factor; // -0.5 to +0.5
-        float noise_Y = ((rand() % 100) - 50) * noise_factor; // -0.5 to +0.5
-        ret_point.X += noise_X;
-        ret_point.Y += noise_Y;
-    }
+    const float magnitude_xy = 250.0f; // Scale factor for X and Y components
+    const float x_bias_offset = 600.0f;   // Fixed offset for X
+    const float y_bias_offset = 400.0f;  // Fixed offset for Y
+    const float z_constant_offset = 10.0f; // Fixed offset for Z (e.g., vertical component)
 
-    if (sparatic_random)
-    {
-        if ((rand() % 100) < sparatic_random_chance_percent) // ~5% chance
-        {
-            ret_point.X += ((rand() % ((int)radius * 2)) - (int)radius) * sparatic_random_factor; // large jump
-            ret_point.Y += ((rand() % ((int)radius * 2)) - (int)radius) * sparatic_random_factor;
-        }
-    }
+    // Convert True_Fake_Bearing from degrees to radians for std::sin and std::cos
+    float True_Fake_Bearing_Rad = True_Fake_Bearing * (M_PI / 180.0f);
 
-    if (time_based_drift)
-    {
-        offset.X += time_based_drift_factor * sin(tmeFrame_Time * 0.01f);
-        offset.Y += time_based_drift_factor * cos(tmeFrame_Time * 0.01f);
-    }
+    // Swapped sin and cos for X and Y to match the RAW_XYZ.X = y, RAW_XYZ.Y = x mapping
+    ret_point.X = (magnitude_xy * std::cos(True_Fake_Bearing_Rad)) + x_bias_offset; // X corresponds to original 'y'
+    ret_point.Y = (magnitude_xy * std::sin(True_Fake_Bearing_Rad)) + y_bias_offset; // Y corresponds to original 'x'
+    ret_point.Z = z_constant_offset; // Z can be a constant or vary independently
 
+    // Is skew on?
     if (skew)
     {
-        // Note: Skew applied this way can significantly distort the shape,
-        // potentially making simple min/max soft iron correction less effective.
-        // A more complex matrix-based soft iron correction would handle this better.
-        float original_X = ret_point.X; // Store original X before modifying it
-        ret_point.X += skew_factor * ret_point.Y;
-        ret_point.Y += skew_factor * original_X; // Use original X for Y's skew
-    }
-    
-    if (interference_zone)
-    {
-        bool in_interference_zone = (tmeFrame_Time % 10000) < 2000; // 20% of the time
-        if (in_interference_zone)
-        {
-            ret_point.X += 50.0f * sin(tmeFrame_Time * 0.05f);
-            ret_point.Y += 50.0f * cos(tmeFrame_Time * 0.05f);
-        }
+        // Store original values before skewing to avoid compounding effects
+        float original_X = ret_point.X;
+        float original_Y = ret_point.Y;
+
+        // Skew the x and y components.
+        // This simulates cross-axis interference or non-orthogonality.
+        // For example, the X reading is influenced by the true Y value, and vice-versa.
+        ret_point.X = original_X + original_Y * skew_factor;
+        ret_point.Y = original_Y + original_X * skew_factor;
+        // You can adjust the skew_factor or apply different skewing logic
+        // to simulate various sensor imperfections.
     }
 
     return ret_point;
 }
+
+// -------------------------------------------------------------------------------------
 
 bool CAL_LEVEL_3::xyz_equal(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B)
 {
@@ -392,8 +150,6 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
       COMPASS_HISTORY.push_back(tmp_compass_point);
     }
   }
-  
-  LAST_READ_VALUE = Raw_XYZ;
 
   return ret_pass_filter;
 }
@@ -701,10 +457,9 @@ float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_poin
  * Now uses the globally stored calibration parameters.
  * @param Raw_XYZ The current raw compass reading.
  */
-void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ, HMC5883L_PROPERTIES &Props)
+void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ)
 {
   HEADING_DEGREES_REPORT = calculate_calibrated_heading(Raw_XYZ, current_calibration_params);
-  HEADING_DEGREES_REPORT += Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLINATION; // Adjust to match original code's convention
 
   /*
   std::cout << std::fixed << std::setprecision(3); // Set precision for output
@@ -749,22 +504,15 @@ void CAL_LEVEL_3::clear()
   features_buffer.reserve(9);
 }
 
-void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, HMC5883L_PROPERTIES &Props)
+void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, bool Enable_Calibration_Routines)
 {
-  // Set to true to use fake compass input for testing
-  if (false)
-  {
-    Raw_XYZ = fake_compass_input(tmeFrame_Time);
-    FAKE_INPUT_REPORTED = FAKE_INPUT + Props.CALIBRATION_MOUNT_OFFSET + Props.CALIBRATION_LOCATION_DECLINATION;
-  }
-
   // Add point to history.  
   // Includes a simple noise filter.
   // Retain the last read value for future reference.
   bool successful_add = add_point(Raw_XYZ);
 
   // Analyze the points in the history. Only performed during timed interval.
-  if (Props.CALIBRATION_ENABLED &&
+  if (Enable_Calibration_Routines && 
       successful_add && 
       CALIBRATION_TIMER.is_ready(tmeFrame_Time))
   {
@@ -797,17 +545,133 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
   }
   
   // Calculate heading
-  set_heading_degrees_report(Raw_XYZ, Props);
-
-  // Save compass history and settings on timed inteval
-  if (CALIBRATION_DATA_SAVE.is_ready(tmeFrame_Time))
-  {
-    CALIBRATION_DATA_SAVE.set(tmeFrame_Time, CALIBRATION_DATA_SAVE_DELAY);
-    save_history_and_settings(Props);
-  }
+  set_heading_degrees_report(Raw_XYZ);
 }
 
 // -------------------------------------------------------------------------------------
+
+void HMC5883L::load_history_and_settings()
+{
+  bool ret_success = false;
+
+  JSON_INTERFACE configuration_json;
+
+  string json_state_file = file_to_string(PROPS.OFFSET_HISTORY_FILE_NAME, ret_success);
+
+  if (ret_success == true)
+  {
+    ret_success = configuration_json.load_json_from_string(json_state_file);
+
+    if (ret_success == true)
+    {
+      for(int root = 0; root < (int)configuration_json.ROOT.DATA.size(); root++)
+      {
+        // load settings
+        if (configuration_json.ROOT.DATA[root].label() == "settings")
+        {
+          float mount_offset =  0.0f;
+          bool mount_offset_loaded = false;
+
+          float declination =   0.0f;
+          bool declination_loaded = false;
+
+          for (int settings = 0; 
+              settings < (int)configuration_json.ROOT.DATA[root].DATA.size(); settings++)
+          {
+            mount_offset_loaded = configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("mount offset", mount_offset);
+            declination_loaded =  configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("declination", declination);
+          }
+
+          // store as props but only if found
+          if (mount_offset_loaded)
+          {
+            PROPS.CALIBRATION_MOUNT_OFFSET = mount_offset;
+          }
+          if (declination_loaded)
+          {
+            PROPS.CALIBRATION_LOCATION_DECLINATION = declination;
+          }
+        }
+
+        // load configuration points
+        if (configuration_json.ROOT.DATA[root].label() == "calibration points")
+        {
+          for (int points = 0; 
+              points < (int)configuration_json.ROOT.DATA[root].DATA.size(); points++)
+          {
+            float x = 0;
+            float y = 0;
+            float z = 0;
+
+            for (int values = 0; 
+                values < (int)configuration_json.ROOT.DATA[root].DATA[points].DATA.size(); values++)
+            {
+
+              configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("X", x);
+              configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Y", y);
+              configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Z", z);
+            }
+
+            COMPASS_POINT tmp_point;
+
+            tmp_point.POINT.X = x;
+            tmp_point.POINT.Y = y;
+            tmp_point.POINT.Z = z;
+
+            LEVEL_3.COMPASS_HISTORY.push_back(tmp_point);
+          }
+
+          // Set all points as do_not_overwrite so they look alive.
+          for (size_t pos = 0; pos < LEVEL_3.COMPASS_HISTORY.size(); pos++)
+          {
+            if (LEVEL_3.COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+            {
+              LEVEL_3.COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+void HMC5883L::save_history_and_settings()
+{
+  bool ret_success = false;
+  
+  JSON_INTERFACE configuration_json;
+
+  // Create base settings in JSON
+  JSON_ENTRY settings;
+  settings.create_label_value(quotify("mount offset"), quotify("-180.0"));
+  settings.create_label_value(quotify("declination"), quotify("0.0"));
+  configuration_json.ROOT.put_json_in_set(quotify("settings"), settings);
+
+  // Create Point history in JSON
+  if (LEVEL_3.COMPASS_HISTORY.count() > 10)
+  {
+    JSON_ENTRY compass_points;
+    for (size_t pos = 0; pos < LEVEL_3.COMPASS_HISTORY.size(); pos++)
+    {
+      if (LEVEL_3.COMPASS_HISTORY.FLAGS[pos].HAS_DATA && LEVEL_3.COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
+      {
+        JSON_ENTRY single_point;
+        single_point.create_label_value(quotify("X"), quotify(to_string(LEVEL_3.COMPASS_HISTORY[pos].POINT.X)));
+        single_point.create_label_value(quotify("Y"), quotify(to_string(LEVEL_3.COMPASS_HISTORY[pos].POINT.Y)));
+        single_point.create_label_value(quotify("Z"), quotify(to_string(LEVEL_3.COMPASS_HISTORY[pos].POINT.Z)));
+        compass_points.put_json_in_list(single_point);
+      }
+    }
+    configuration_json.ROOT.put_json_in_set(quotify("calibration points"), compass_points);
+  }
+
+  // Save JSON
+  deque<string> json_deque;
+  configuration_json.json_print_build_to_string_deque(json_deque);
+  ret_success = deque_string_to_file(PROPS.OFFSET_HISTORY_FILE_NAME, json_deque, false);
+
+  (void) ret_success;
+}
 
 bool HMC5883L::register_write(char Register, char Value)
 {
@@ -825,7 +689,7 @@ bool HMC5883L::register_write(char Register, char Value)
   return ret_write_success;
 }
 
-bool HMC5883L::create(string Offset_History_Filename)
+bool HMC5883L::create()
 {
   bool ret_success = false;
 
@@ -834,9 +698,8 @@ bool HMC5883L::create(string Offset_History_Filename)
   CALIBRATED_BEARINGS.clear();
   CALIBRATED_BEARINGS.reserve(CALIBRATED_BEARINGS_SIZE + 1);
   
-  LEVEL_3.OFFSET_HISTORY_FILENAME = Offset_History_Filename;
   LEVEL_3.clear();
-  LEVEL_3.load_history_and_settings(PROPS);
+  load_history_and_settings();
 
   CONNECTED = false;
 
@@ -892,11 +755,16 @@ void HMC5883L::stop()
 void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 {
   // Level 3 - Calibration and set bearing
-  LEVEL_3.calibration_level_3(tmeFrame_Time, RAW_XYZ, PROPS);
+  LEVEL_3.calibration_level_3(tmeFrame_Time, RAW_XYZ, PROPS.CALIBRATION_ENABLED);
   RAW_BEARING = LEVEL_3.HEADING_DEGREES_REPORT;
-  
+
+  // Adjust bearing for offsets and declination
   // Prepare for Jitter and normalize.
-  float bearing = RAW_BEARING - KNOWN_DEVICE_DEGREE_OFFSET;
+  float bearing = RAW_BEARING + 
+                  PROPS.CALIBRATION_MOUNT_OFFSET + 
+                  PROPS.CALIBRATION_LOCATION_DECLINATION - 
+                  KNOWN_DEVICE_DEGREE_OFFSET; // Adjust to match original code's convention
+
   bearing = fmod(bearing + 360.0f, 360.0f);
   CALIBRATED_BEARINGS.push_back(bearing);
 
@@ -965,7 +833,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   if (GPS_System.active(tmeFrame_Time) && GPS_System.current_position().TRUE_HEADING.VALID) // Enable
   {
     // save error to error mean variable
-    float error_current = signed_angular_error(RAW_BEARING, GPS_System.current_position().TRUE_HEADING.VALUE);
+    float error_current = signed_angular_error(bearing, GPS_System.current_position().TRUE_HEADING.VALUE);
     GPS_ERROR_MEAN.store_value(error_current);
     
     // if gps assist calibration enabled, set bearing offset,
@@ -978,6 +846,13 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
         bearing_known_offset_calibration_to_gps();
       }
     }
+  }
+
+  // Save compass history and settings on timed inteval
+  if (CALIBRATION_DATA_SAVE.is_ready(tmeFrame_Time))
+  {
+    CALIBRATION_DATA_SAVE.set(tmeFrame_Time, CALIBRATION_DATA_SAVE_DELAY);
+    save_history_and_settings();
   }
 }
 
@@ -1078,12 +953,12 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 2000);   // Refresh the data recieve timer.
 
         CYCLE = 0; // Go into normal cycle.
-        create(PROPS.OFFSET_HISTORY_FILE_NAME);
+        create();
       }
       else
       {
         CYCLE = -1;
-        create(PROPS.OFFSET_HISTORY_FILE_NAME);
+        create();
       }
     }
   }
@@ -1146,6 +1021,17 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
         RAW_XYZ.Z = z;
 
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
+
+        // Set to true to use fake compass input for testing
+        //  by overwriting the read valules.
+        if (PROPS.ENABLE_FAKE_COMPASS)
+        {
+          RAW_XYZ = fake_compass_input(tmeFrame_Time, TRUE_FAKE_BEARING);
+
+          TRUE_FAKE_BEARING -= (PROPS.CALIBRATION_MOUNT_OFFSET + 
+                                PROPS.CALIBRATION_LOCATION_DECLINATION - 
+                                KNOWN_DEVICE_DEGREE_OFFSET); // Adjust to match original code's convention
+        }
 
         // Process
         if (RAW_XYZ.X != RAW_XYZ_PREVIOUS_VALUE.X ||

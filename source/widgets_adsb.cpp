@@ -1181,8 +1181,8 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     draw_line(Draw_List, sdSysData, c1, p4, RAS_YELLOW, 2.0f);
     */
 
-    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.LAST_READ_VALUE.X/ 4.0f), 
-              center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.LAST_READ_VALUE.Y / 4.0f));
+    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.RAW_XYZ.X/ 4.0f), 
+              center.y + (sdSysData.COMMS_COMPASS.RAW_XYZ.Y / 4.0f));
 
     draw_line(Draw_List, sdSysData, c1, p1, RAS_WHITE, 4.0f);
   }
@@ -1235,17 +1235,22 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
         ImGui::Text("         (%5.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset());
       }
 
-      /*
       ImGui::Text("HIST SZ:  %3d",  sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY.count());
     
+      
       // Fake Compass Review
-      // Normalize the difference to the range [-180, 180]
-      float error = sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.LEVEL_3.FAKE_INPUT_REPORTED;
-      if (error > 180.0f)        error -= 360.0f;
-      else if (error < -180.0f)  error += 360.0f;
+      if (sdSysData.COMMS_COMPASS.PROPS.ENABLE_FAKE_COMPASS)
+      {
+        // Normalize the difference to the range [-180, 180]
+        float error = sdSysData.COMMS_COMPASS.bearing() - sdSysData.COMMS_COMPASS.TRUE_FAKE_BEARING;
+        if (error > 180.0f)        error -= 360.0f;
+        else if (error < -180.0f)  error += 360.0f;
 
-      ImGui::Text("fake error: %+4.1f°", error);
-      */
+        
+        ImGui::Text("fake bearing: %+4.1f°  %+4.1f°", sdSysData.COMMS_COMPASS.bearing(), sdSysData.COMMS_COMPASS.TRUE_FAKE_BEARING);
+        ImGui::Text("  fake error: %+4.1f°", error);
+      }
+      
     }
   }
   ImGui::PopStyleColor();

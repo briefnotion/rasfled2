@@ -1,3 +1,7 @@
+2.286_250730
+  - Searching and trying different values for the compass settings.
+  - Moved the offset calculations to be more post calibration adjustments.
+
 2.285_250729
   - Changed the way the compass remembers its radial points in the compass history.
 
