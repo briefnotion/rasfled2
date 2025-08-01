@@ -37,6 +37,14 @@ ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Dis
 float signed_angular_error(float Compass_Bearing, float GPS_Bearing);
 // Clockwise offset is positive and counterclockwise is 
 //  negative—perfect for compass error tracking or smooth directional logic.
+// For calculating the signed angular difference between two 
+//  bearings—ensuring the result is in the range of –180° to +180°.
+
+float wrap_degrees(float angle);
+// Ensures that any input angle is converted into the standard compass range of 
+//  0° to less than 360°, regardless of whether it's positive, 
+//  negative, or beyond a full rotation.
+
 
 // -------------------------------------------------------------------------------------
 

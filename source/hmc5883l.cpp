@@ -36,7 +36,7 @@ FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fak
     FLOAT_XYZ_MATRIX ret_point;
 
     bool skew = true;
-    float skew_factor = .10f; // Added 'f' suffix for float literal
+    float skew_factor = 0.05f; // Added 'f' suffix for float literal
 
     // --- 1. Calculate the TRUE_FAKE_BEARING ahead of time ---
     // This simulates a continuous rotation.
@@ -101,6 +101,7 @@ float CAL_LEVEL_3::dist_xyz(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B)
 
 void CAL_LEVEL_3::clear_all_flags()
 {
+  INFORMATION_CALIBRATION = "";
 
   fill(begin(preserved_angle), end(preserved_angle), 0);
 
@@ -293,8 +294,8 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
 
   if (active_points.size() < MIN_POINTS)
   {
-    //std::cerr << "Error: Not enough data points for ellipsoid fitting. Need at least "
-    //          << MIN_POINTS << ", got " << active_points.size() << "." << std::endl;
+    INFORMATION_CALIBRATION += "Error: Not enough data points for ellipsoid \n\tfitting. Need at least " +
+                    to_string(MIN_POINTS) + ", got " + to_string(active_points.size()) + ".\n";
     params.hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0); // Use params
     params.soft_iron_matrix = Matrix3x3(); // Use params
     params.average_field_magnitude = 0.0f; // Initialize
@@ -375,7 +376,7 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
 
   if (range_x == 0.0f || range_y == 0.0f || range_z == 0.0f)
   {
-    //std::cerr << "Warning: Insufficient range for soft iron calibration on one or more axes." << std::endl;
+    INFORMATION_CALIBRATION += "Warning: Insufficient range for soft iron \n\tcalibration on one or more axes.\n";
     params.soft_iron_matrix = Matrix3x3(); // Use params
     params.average_field_magnitude = 0.0f; // Initialize
     return false;
@@ -412,7 +413,7 @@ CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECT
 
   if (!fit_ellipsoid_and_get_calibration_matrix(history, params)) 
   { // Changed call
-    //std::cerr << "Calibration failed or insufficient data. Using default parameters." << std::endl;
+    INFORMATION_CALIBRATION += "Calibration failed or insufficient data. \n\tUsing default parameters.\n";
     // params already initialized to defaults (0 offset, identity matrix)
   }
   return params;
@@ -425,31 +426,49 @@ CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECT
  * @param params The calibration parameters (offset and matrix).
  * @return The heading in degrees (0-360), where 0 is North.
  */
-float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params) 
+void CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params) 
 {
-  // 1. Apply Hard Iron Correction: Remove the constant offset.
-  FLOAT_XYZ_MATRIX corrected_point = raw_point - params.hard_iron_offset;
-
-  // 2. Apply Soft Iron Correction: Transform the point using the soft iron matrix.
-  // This matrix will scale and potentially rotate/shear the point to make the field spherical.
-  corrected_point = params.soft_iron_matrix * corrected_point;
-
-  // 3. Calculate Heading using atan2 (still based on X and Y)
-  // atan2(y, x) gives the angle in radians from the positive X-axis to the point (x, y).
-  // For compass, positive Y is North, positive X is East.
-  // Standard atan2 returns -PI to PI.
-  float heading_rad = std::atan2(corrected_point.Y, corrected_point.X);
-
-  // Convert radians to degrees
-  float heading_deg = heading_rad * 180.0f / M_PI;
-
-  // Normalize to 0-360 degrees
-  if (heading_deg < 0) 
+  // Calculated Calibrated Heading
   {
-    heading_deg += 360.0f;
+    // 1. Apply Hard Iron Correction: Remove the constant offset.
+    FLOAT_XYZ_MATRIX corrected_point = raw_point - params.hard_iron_offset;
+
+    // 2. Apply Soft Iron Correction: Transform the point using the soft iron matrix.
+    // This matrix will scale and potentially rotate/shear the point to make the field spherical.
+    corrected_point = params.soft_iron_matrix * corrected_point;
+
+    // 3. Calculate Heading using atan2 (still based on X and Y)
+    // atan2(y, x) gives the angle in radians from the positive X-axis to the point (x, y).
+    // For compass, positive Y is North, positive X is East.
+    // Standard atan2 returns -PI to PI.
+    float heading_rad = std::atan2(corrected_point.Y, corrected_point.X);
+
+    // Convert radians to degrees
+    float heading_deg = heading_rad * 180.0f / M_PI;
+
+    // Normalize to 0-360 degrees
+    if (heading_deg < 0) 
+    {
+      heading_deg += 360.0f;
+    }
+
+    HEADING_DEGREES_REPORT = heading_deg;
   }
 
-  return heading_deg;
+  // --- Heading Without Soft Iron Compensation (Hard Iron Only) ---
+  if (true)
+  {
+    FLOAT_XYZ_MATRIX partially_corrected_point = raw_point - params.hard_iron_offset;
+
+    float heading_rad_raw = std::atan2(partially_corrected_point.Y, partially_corrected_point.X);
+    float heading_deg_raw = (heading_rad_raw * 180.0f / M_PI);
+    if (heading_deg_raw < 0) 
+    {
+      heading_deg_raw += 360.0f;
+    }
+
+    HEADING_DEGREES_REPORT_NON_CALIBRATED = heading_deg_raw;
+  }
 }
 
 /**
@@ -459,30 +478,37 @@ float CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_poin
  */
 void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ)
 {
-  HEADING_DEGREES_REPORT = calculate_calibrated_heading(Raw_XYZ, current_calibration_params);
+  calculate_calibrated_heading(Raw_XYZ, current_calibration_params);
 
   /*
-  std::cout << std::fixed << std::setprecision(3); // Set precision for output
+  if (false)
+  {
+    //INFORMATION_CALIBRATION += std::fixed << std::setprecision(3); // Set precision for output
 
-  std::cout << "Reported Heading (Calibrated): " << HEADING_DEGREES_REPORT << " degrees";
-  std::cout << "\tRaw Angle (from FAKE_INPUT): " << FAKE_INPUT << " degrees";
-  // Calculate and display the difference for easier analysis
-  float diff = HEADING_DEGREES_REPORT - FAKE_INPUT;
-  // Normalize difference to be within -180 to 180 for easier interpretation
-  if (diff > 180.0f) diff -= 360.0f;
-  if (diff < -180.0f) diff += 360.0f;
-  std::cout << "\tDiff: " << diff << std::endl;
+    INFORMATION_CALIBRATION += "Reported Heading (Calibrated): " + to_string(HEADING_DEGREES_REPORT) + " degrees";
+    
+    if (true)
+    {  
+      INFORMATION_CALIBRATION += "\tRaw Angle (from FAKE_INPUT): " + to_string(TRUE_FAKE_BEARING) + " degrees";
+      // Calculate and display the difference for easier analysis
+      float diff = HEADING_DEGREES_REPORT - FAKE_INPUT;
+      // Normalize difference to be within -180 to 180 for easier interpretation
+      if (diff > 180.0f) diff -= 360.0f;
+      if (diff < -180.0f) diff += 360.0f;
+      INFORMATION_CALIBRATION += "\tDiff: " << diff << std::endl;
+    }
 
-  // Also print raw and corrected XYZ values for detailed debugging
-  std::cout << "\tRaw XYZ: (" << Raw_XYZ.X << ", " << Raw_XYZ.Y << ", " << Raw_XYZ.Z << ")";
-  
-  // Apply hard iron correction to raw_XYZ to get intermediate point
-  FLOAT_XYZ intermediate_point = Raw_XYZ - current_calibration_params.hard_iron_offset;
-  // Apply soft iron correction to intermediate point to get final corrected point
-  FLOAT_XYZ final_corrected_point = current_calibration_params.soft_iron_matrix * intermediate_point;
+    // Also print raw and corrected XYZ values for detailed debugging
+    INFORMATION_CALIBRATION += "\tRaw XYZ: (" + to_string(Raw_XYZ.X) + ", " + to_string(Raw_XYZ.Y) + ", " + to_string(Raw_XYZ.Z) + ")";
+    
+    // Apply hard iron correction to raw_XYZ to get intermediate point
+    FLOAT_XYZ_MATRIX intermediate_point = Raw_XYZ - current_calibration_params.hard_iron_offset;
+    // Apply soft iron correction to intermediate point to get final corrected point
+    FLOAT_XYZ_MATRIX final_corrected_point = current_calibration_params.soft_iron_matrix * intermediate_point;
 
-  std::cout << "\tCorrected XYZ: (" << final_corrected_point.X << ", " << final_corrected_point.Y << ", " << final_corrected_point.Z << ")" << std::endl;
-  // In a real application, you would store this heading, update a display, etc.
+    INFORMATION_CALIBRATION += "\tCorrected XYZ: (" + to_string(final_corrected_point.X) + ", " + to_string(final_corrected_point.Y) + ", " + to_string(final_corrected_point.Z) + ")\n";
+    // In a real application, you would store this heading, update a display, etc.
+  }
   */
 }
 
@@ -520,28 +546,31 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
 
     clear_all_flags();
 
-    // This function will calculate the hard_iron_offset and soft_iron_matrix
-    // based on the COMPASS_HISTORY.
-    current_calibration_params = perform_hard_soft_iron_calibration(COMPASS_HISTORY);
-    // COMPASS_CENTER is now conceptually replaced by current_calibration_params.hard_iron_offset
+    if (true)
+    {
+      // This function will calculate the hard_iron_offset and soft_iron_matrix
+      // based on the COMPASS_HISTORY.
+      current_calibration_params = perform_hard_soft_iron_calibration(COMPASS_HISTORY);
+      // COMPASS_CENTER is now conceptually replaced by current_calibration_params.hard_iron_offset
 
-    /*
-    std::cout << "\n--- Calibration Performed ---" << std::endl;
-    std::cout << "Hard Iron Offset: X=" << current_calibration_params.hard_iron_offset.X
-              << ", Y=" << current_calibration_params.hard_iron_offset.Y
-              << ", Z=" << current_calibration_params.hard_iron_offset.Z << std::endl;
-    std::cout << "Soft Iron Matrix:" << std::endl;
-    for (int i = 0; i < 3; ++i) {
-        std::cout << "\t[" << current_calibration_params.soft_iron_matrix.m[i][0] << ", "
-                  << current_calibration_params.soft_iron_matrix.m[i][1] << ", "
-                  << current_calibration_params.soft_iron_matrix.m[i][2] << "]" << std::endl;
+      INFORMATION_CALIBRATION += "Hard Iron Offset: X=" + to_string(current_calibration_params.hard_iron_offset.X) + 
+                      ", Y=" + to_string(current_calibration_params.hard_iron_offset.Y) +
+                      ", Z=" + to_string(current_calibration_params.hard_iron_offset.Z) +
+                      "\n";
+                      
+      INFORMATION_CALIBRATION += "Soft Iron Matrix:\n";
+      for (int i = 0; i < 3; ++i) 
+      {
+        INFORMATION_CALIBRATION += "\t[" + to_string(current_calibration_params.soft_iron_matrix.m[i][0]) + ", " +
+                      to_string(current_calibration_params.soft_iron_matrix.m[i][1]) + ", " +
+                      to_string(current_calibration_params.soft_iron_matrix.m[i][2]) + "]" + 
+                      "\n";
+      }
+      INFORMATION_CALIBRATION += "-----------------------------\n";
     }
-    std::cout << "-----------------------------\n" << std::endl;
-    */
 
     COMPASS_CENTER = current_calibration_params.hard_iron_offset;
     preservation_of_data();
-
   }
   
   // Calculate heading
@@ -765,6 +794,12 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
                   PROPS.CALIBRATION_LOCATION_DECLINATION - 
                   KNOWN_DEVICE_DEGREE_OFFSET; // Adjust to match original code's convention
 
+  // Store uncalibrated bearing (Simple)
+  BEARING_NON_CALIBRATED = LEVEL_3.HEADING_DEGREES_REPORT_NON_CALIBRATED + 
+                PROPS.CALIBRATION_MOUNT_OFFSET + 
+                PROPS.CALIBRATION_LOCATION_DECLINATION - 
+                KNOWN_DEVICE_DEGREE_OFFSET; // Adjust to match original code's convention
+
   bearing = fmod(bearing + 360.0f, 360.0f);
   CALIBRATED_BEARINGS.push_back(bearing);
 
@@ -853,6 +888,29 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   {
     CALIBRATION_DATA_SAVE.set(tmeFrame_Time, CALIBRATION_DATA_SAVE_DELAY);
     save_history_and_settings();
+  }
+
+  if (CALIBRATE)
+  {
+    float calibration_correction = signed_angular_error(bearing_calibrated(), bearing_non_calibrated());
+
+    INFORMATION = "";
+
+    if (PROPS.ENABLE_FAKE_COMPASS == false)
+    {
+      INFORMATION += "  BEARING CALIBRATED: " + to_string(bearing_calibrated()) + "\n";
+      INFORMATION += "      NON_CALIBRATED: " + to_string(bearing_non_calibrated()) + "\n";
+      INFORMATION += "          ADJUSTMENT: " + to_string(calibration_correction) + "\n";
+    }
+    else
+    {
+      INFORMATION += "        BEARING FAKE: " + to_string(bearing_non_true_fake()) + "\n";
+      INFORMATION += "      NON_CALIBRATED: " + to_string(bearing_non_calibrated()) + "\n";
+      INFORMATION += "  BEARING CALIBRATED: " + to_string(bearing_calibrated()) + "\n";
+      INFORMATION += "          ADJUSTMENT: " + to_string(calibration_correction) + "\n";
+    }
+
+    INFORMATION += "COMPASS HISTORY SIZE: " + to_string(LEVEL_3.COMPASS_HISTORY.count()) + "\n";
   }
 }
 
@@ -1090,40 +1148,29 @@ float HMC5883L::accumulated_gps_to_compass_bearing_error()
   return GPS_ERROR_MEAN.mean();
 }
 
-float HMC5883L::bearing()
+float HMC5883L::bearing_calibrated()
 {
-  if (BEARING < -0.0f)
-  {
-    return 360.0f + BEARING;
-  }
-  else
-  {
-    return BEARING;
-  }
+  return wrap_degrees(BEARING);
+}
+
+float HMC5883L::bearing_non_calibrated()
+{
+  return wrap_degrees(BEARING_NON_CALIBRATED);
+}
+
+float HMC5883L::bearing_non_true_fake()
+{
+  return wrap_degrees(TRUE_FAKE_BEARING);
 }
         
 float HMC5883L::bearing_jitter_min()
 {
-  if (BEARING_JITTER_MIN < -0.0f)
-  {
-    return 360.0f + BEARING_JITTER_MIN;
-  }
-  else
-  {
-    return BEARING_JITTER_MIN;
-  }
+  return wrap_degrees(BEARING_JITTER_MIN);
 }
 
 float HMC5883L::bearing_jitter_max()
 {
-  if (BEARING_JITTER_MAX < -0.0f)
-  {
-    return 360.0f + BEARING_JITTER_MAX;
-  }
-  else
-  {
-    return BEARING_JITTER_MAX;
-  }
+  return wrap_degrees(BEARING_JITTER_MAX);
 }
 
 

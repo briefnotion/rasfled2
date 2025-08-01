@@ -413,7 +413,7 @@ class CAL_LEVEL_3
   bool preserved_angle_direction = false;
   void preservation_of_data();
 
-  int COMPASS_HISTORY_SIZE = 360 * 3;
+  int COMPASS_HISTORY_SIZE = 540; //360 * 1.5;
   // Size of the compass history, hardcoded for now.
 
   // Constants for noise filtering
@@ -460,7 +460,7 @@ class CAL_LEVEL_3
   // --- Heading Calculation and Reporting Functions ---
 
   // Calculates calibrated heading from raw magnetic data using current parameters (no tilt compensation).
-  float calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params);
+  void calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params);
 
   // Prepares and formats the calibrated heading for external reporting or display.
   void set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ);
@@ -468,13 +468,16 @@ class CAL_LEVEL_3
   // ---
   
   public:
+  string INFORMATION_CALIBRATION = "";
+
   VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
   // Stores the history of compass points, using a non-sequential vector deque.
 
   FLOAT_XYZ_MATRIX COMPASS_CENTER;
   // The center of the compass, calculated
 
-  float HEADING_DEGREES_REPORT = 0.0f;
+  float HEADING_DEGREES_REPORT                = 0.0f;
+  float HEADING_DEGREES_REPORT_NON_CALIBRATED = 0.0f;
   // The heading degrees report, calculated based on the compass center and points.
   
   void clear();
@@ -500,10 +503,11 @@ class HMC5883L
 
   vector<float> CALIBRATED_BEARINGS;  // History of calculated bearings
 
-  float RAW_BEARING = 0;              // Recent Bearing
-  float BEARING = 0;
-  float BEARING_JITTER_MIN = 0;
-  float BEARING_JITTER_MAX = 0;
+  float RAW_BEARING             = 0;  // Recent Bearing
+  float BEARING                 = 0;
+  float BEARING_NON_CALIBRATED  = 0;
+  float BEARING_JITTER_MIN      = 0;
+  float BEARING_JITTER_MAX      = 0;
 
   // Calibration
   void add_point(FLOAT_XYZ_MATRIX Point);
@@ -562,18 +566,22 @@ class HMC5883L
   // Performs Calibration Routines
 
   FLOAT_XYZ_MATRIX RAW_XYZ_PREVIOUS_VALUE;
+  
+  float TRUE_FAKE_BEARING;
+
   public:
 
   FLOAT_XYZ_MATRIX RAW_XYZ;
   // Most Recent XYZ coords from compass.  
   // Useful for drawing on 2d plane.
 
-  float TRUE_FAKE_BEARING;
   // When using fake compass, holds the unmodified bearing.
 
   HMC5883L_PROPERTIES PROPS;
 
   CAL_LEVEL_3 LEVEL_3;
+
+  string INFORMATION = "";
 
   void calibrateion_reset();
   // Removes all calibration data
@@ -624,7 +632,9 @@ class HMC5883L
 
   float accumulated_gps_to_compass_bearing_error();
 
-  float bearing();
+  float bearing_calibrated();
+  float bearing_non_calibrated();
+  float bearing_non_true_fake();
   // Direction Facing.
 
   float bearing_jitter_min();

@@ -905,7 +905,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 draw_compass(draw_list_status_compass, sdSysData, 1, ImVec2((working_area.x + working_area.z / 2.0f),(working_area.y + working_area.w / 2.0f)), 
                               (working_area.z / 6.0f), false, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                               sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, (sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE), 
-                              sdSysData.COMMS_COMPASS.connected(), (sdSysData.COMMS_COMPASS.bearing()), false, 0.0f);
+                              sdSysData.COMMS_COMPASS.connected(), (sdSysData.COMMS_COMPASS.bearing_calibrated()), false, 0.0f);
 
                 // Change Screens
                 if (button_area(working_area))
@@ -1786,7 +1786,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                         working_area.y + (working_area.w / 2.0f)), 
                         working_area.z / 2.0f * 0.6f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
                         sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE, 
-                        sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing(), false, 
+                        sdSysData.COMMS_COMPASS.connected(), sdSysData.COMMS_COMPASS.bearing_calibrated(), false, 
                         true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), 0.0f);
 
             if (button_area(working_area))

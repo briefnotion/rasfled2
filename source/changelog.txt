@@ -1,3 +1,7 @@
+2.287_250801
+  - If compass calibration is on, calibration data will be displayed on the 
+      ADSB-Map screen.
+
 2.286_250730
   - Searching and trying different values for the compass settings.
   - Moved the offset calculations to be more post calibration adjustments.

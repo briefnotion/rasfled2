@@ -70,6 +70,16 @@ float signed_angular_error(float Compass_Bearing, float GPS_Bearing)
   return diff;
 }
 
+float wrap_degrees(float angle)
+{
+  float result = fmod(angle, 360.0f);
+  if (result < 0.0f)
+  {
+    result += 360.0f;
+  }
+  return result;
+}
+
 // -------------------------------------------------------------------------------------
 
 void DISTANCE::store_meters(float Meters)
