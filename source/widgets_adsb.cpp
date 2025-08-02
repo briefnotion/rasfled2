@@ -1238,8 +1238,9 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
       // Print calibration data if calibration is on
       if (sdSysData.COMMS_COMPASS.calibrate_on())
       {
-        ImGui::Text("%s", sdSysData.COMMS_COMPASS.INFORMATION.c_str());
-        ImGui::Text("%s", sdSysData.COMMS_COMPASS.LEVEL_3.INFORMATION_CALIBRATION.c_str());
+        ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + (WORKING_AREA.z * 0.25f), WORKING_AREA.y + (WORKING_AREA.w * 0.6f)));
+        string info = sdSysData.COMMS_COMPASS.INFORMATION + "\n" + sdSysData.COMMS_COMPASS.LEVEL_3.INFORMATION_CALIBRATION;
+        ImGui::Text("%s", info.c_str());
       }
     }
   }

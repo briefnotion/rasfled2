@@ -1,3 +1,43 @@
+2.288_250802
+  - Adjusted the position of the displayed compass information.
+  - I'm done with modifying the compass routines for now.  
+      At its worste its off by 5 degrees.  
+      The soft iron matrix calibration usually maxes out at 5 degrees, but 
+        it does have its moments when its off a few degrees.
+      The soft iron circle is well defined and works very well at filtering 
+        out noise. The circle resets quickly at a turn. The circle is 
+        susceptible by magnetic interference during a turn. A solution would be 
+        keeping more data and generating a second cicle by averaging the positions 
+        on the first, then soft iron calibrating with the second.  When bad data 
+        is read the compass heading will stay errored until rotated again to 
+        overwrite the bad data.  Depending on the direction traveled, it could 
+        stay that way.
+      Over the course of 8 hours and hundreds of rotations, the average angular 
+        error was .2 degrees, consistantly, from the gps heading reading. Likely, 
+        a mounted error of margin by not placing the device perfectly aligned to 
+        the direction of the car.  
+      GPS assist will work if the orientation is incorrect in the properties, 
+        or the compass is misaligned.
+      The compass is very susceptible environmental interference. Buildings, 
+        bridges, powerlines, canopys, underground pipes and cables, road railings, 
+        dranage systems, other cars and trucks, litteraly anything can throw 
+        off the reading of Earth's magnetic breeze.  This can be easly observed 
+        when traveling down the interstate and seeing the jitter indicator 
+        constantly at 10 degrees at 5 degrees off the gps heading reading.
+      All settings is designed from what I observed works best in my car. 
+        The compass cannot handle pitch and roll at all.  On embankments the 
+        heading will be off by some magnitude of the angle the compass is at to 
+        the ground. 
+      The compass is designed to work mounted level.  The soft iron and hard iron 
+        calibration will try to compenaste for errors. 
+      Greater accuracy may be obtained by better positioning. I hadn't tested this.
+      The compass is designed to constantly self calibrate and adjust and find 
+        North and the forward of whatever automible its mounted in on its own, 
+        but only if gps is available. Otherwise, it will need to be set in the 
+        properties. The json file in the compass directoy can be changed to 
+        adjust the properties, but i haven't fully checked to see if it works.
+      All in all, it's ok.
+
 2.287_250801
   - If compass calibration is on, calibration data will be displayed on the 
       ADSB-Map screen.

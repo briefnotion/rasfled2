@@ -566,7 +566,6 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
                       to_string(current_calibration_params.soft_iron_matrix.m[i][2]) + "]" + 
                       "\n";
       }
-      INFORMATION_CALIBRATION += "-----------------------------\n";
     }
 
     COMPASS_CENTER = current_calibration_params.hard_iron_offset;
@@ -847,17 +846,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 
     if (CALIBRATED_BEARINGS.size() > 0)
     {
-      BEARING = CALIBRATED_BEARINGS.back();
-
-      if (BEARING <= 0.0f)
-      {
-        BEARING = BEARING + 360.0f;
-      }
-      else if (BEARING > 360.0f)
-      {
-        BEARING = BEARING - 360.0f;
-      }
-      else
+      BEARING = wrap_degrees(CALIBRATED_BEARINGS.back());
 
       BEARING_JITTER_MIN = bearing_min;
       BEARING_JITTER_MAX = bearing_max;
