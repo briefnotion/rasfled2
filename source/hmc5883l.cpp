@@ -402,6 +402,129 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
 }
 
 /**
+ * @brief Performs a 2D ellipse fit to the X and Y coordinates of the data points.
+ * Derives the hard-iron offset and a 2D soft-iron transformation matrix.
+ *
+ * @param history The custom deque of historical compass data points.
+ * @param params Output parameter for the calculated hard iron offset and soft iron matrix.
+ * @return True if calibration was successful, false otherwise.
+ */
+bool CAL_LEVEL_3::fit_ellipse_and_get_calibration_matrix_2D(
+    const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
+    CalibrationParameters& params)
+{
+  const int MIN_POINTS = 50; // Fewer points needed for a 2D fit, but still good to have many.
+
+  active_points.clear();
+  for (size_t i = 0; i < history.size(); ++i)
+  {
+    if (history.FLAGS[i].HAS_DATA)
+    {
+      active_points.push_back(history[i].POINT);
+    }
+  }
+
+  if (active_points.size() < MIN_POINTS)
+  {
+    INFORMATION_CALIBRATION += "Error: Not enough data points for 2D ellipse \n\tfitting. Need at least " +
+                                to_string(MIN_POINTS) + ", got " + to_string(active_points.size()) + ".\n";
+    params.hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0);
+    params.soft_iron_matrix = Matrix3x3();
+    params.average_field_magnitude = 0.0f;
+    return false;
+  }
+
+  // --- Reset for each calculation ---
+  A_transpose_A_2D.assign(5, std::vector<float>(5, 0.0f));
+  A_transpose_b_2D.assign(5, 0.0f);
+  features_buffer_2D.assign(5, 0.0f);
+
+  for (const auto& p : active_points)
+  {
+    float x = p.X;
+    float y = p.Y;
+
+    // Features for the design matrix A
+    // [x^2, xy, y^2, x, y]
+    features_buffer_2D[0] = x*x;
+    features_buffer_2D[1] = x*y;
+    features_buffer_2D[2] = y*y;
+    features_buffer_2D[3] = x;
+    features_buffer_2D[4] = y;
+
+    // Right-hand side vector for the least-squares problem is -1
+    float b_val = -1.0f;
+
+    // Populate A_transpose_A and A_transpose_b
+    for (int i = 0; i < 5; ++i)
+    {
+      A_transpose_b_2D[i] += features_buffer_2D[i] * b_val;
+      for (int j = 0; j < 5; ++j)
+      {
+        A_transpose_A_2D[i][j] += features_buffer_2D[i] * features_buffer_2D[j];
+      }
+    }
+  }
+
+  // --- Solve the linear system ---
+  std::vector<std::vector<float>> A_transpose_A_inv = invert5x5(A_transpose_A_2D);
+
+  // Q_coeffs = (A^T * A)^-1 * (A^T * b)
+  std::vector<float> Q_coeffs(5, 0.0f);
+  for (int i = 0; i < 5; ++i)
+  {
+    for (int j = 0; j < 5; ++j)
+    {
+      Q_coeffs[i] += A_transpose_A_inv[i][j] * A_transpose_b_2D[j];
+    }
+  }
+
+  // --- Extract calibration parameters from the ellipse coefficients ---
+  // General equation: Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0
+  float A = Q_coeffs[0];
+  float B = Q_coeffs[1];
+  float C = Q_coeffs[2];
+  float D = Q_coeffs[3];
+  float E = Q_coeffs[4];
+
+  // --- Calculate Hard Iron Offset (Center of Ellipse) ---
+  float h_x = (B*E - 2.0f*C*D) / (4.0f*A*C - B*B);
+  float h_y = (B*D - 2.0f*A*E) / (4.0f*A*C - B*B);
+  params.hard_iron_offset = FLOAT_XYZ_MATRIX(h_x, h_y, 0.0f);
+
+  // --- Calculate Soft Iron Matrix (2D) ---
+  // The soft iron matrix M corrects the shape of the ellipse.
+  // The inverse of M*M^T is proportional to the quadratic part of the ellipse matrix.
+  // We can use the Cholesky decomposition of the quadratic part of the ellipse matrix to get the correction matrix.
+  
+  // We'll calculate a 2x2 matrix for the quadratic part
+  float det_Q = (4.0f * A * C - B * B) / 4.0f;
+  float scale_factor = std::sqrt(std::abs(1.0f / det_Q));
+  
+  // This is a simplified approach, but should be a good starting point.
+  // The correct soft iron matrix involves a Cholesky decomposition of the quadratic part
+  // of the ellipsoid equation. For simplicity, we can construct the matrix directly.
+  params.soft_iron_matrix.m[0][0] = A;
+  params.soft_iron_matrix.m[0][1] = B / 2.0f;
+  params.soft_iron_matrix.m[1][0] = B / 2.0f;
+  params.soft_iron_matrix.m[1][1] = C;
+  params.soft_iron_matrix.m[2][2] = 1.0f; // Keep Z-axis as identity.
+  params.soft_iron_matrix = params.soft_iron_matrix * scale_factor;
+
+  // We can also calculate the average field magnitude in the XY plane.
+  float avg_mag = 0.0f;
+  for (const auto& p : active_points)
+  {
+    FLOAT_XYZ_MATRIX corrected_p = p - params.hard_iron_offset;
+    corrected_p = params.soft_iron_matrix * corrected_p;
+    avg_mag += std::sqrt(corrected_p.X*corrected_p.X + corrected_p.Y*corrected_p.Y);
+  }
+  params.average_field_magnitude = avg_mag / active_points.size();
+
+  return true;
+}
+
+/**
  * @brief Performs hard and soft iron calibration based on historical compass data.
  * Now uses the more advanced (though still simplified) 3D approach.
  * @param history The custom deque of historical compass data points.
@@ -411,11 +534,20 @@ CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECT
 {
   CalibrationParameters params; // Will hold the results
 
+  /*
   if (!fit_ellipsoid_and_get_calibration_matrix(history, params)) 
   { // Changed call
     INFORMATION_CALIBRATION += "Calibration failed or insufficient data. \n\tUsing default parameters.\n";
     // params already initialized to defaults (0 offset, identity matrix)
   }
+  */
+
+  if (!fit_ellipse_and_get_calibration_matrix_2D(history, params)) 
+  {
+      INFORMATION_CALIBRATION += "2D Calibration failed or insufficient data. \n\tUsing default parameters.\n";
+      // params already initialized to defaults (0 offset, identity matrix)
+  }
+    
   return params;
 }
 
@@ -661,6 +793,74 @@ void HMC5883L::load_history_and_settings()
       }
     }
   }
+}
+
+/**
+ * @brief Helper function to perform a 5x5 matrix inversion.
+ * A standard Gaussian elimination with partial pivoting is used.
+ * @param matrix The 5x5 matrix to invert.
+ * @return The inverted 5x5 matrix.
+ */
+std::vector<std::vector<float>> invert5x5(const std::vector<std::vector<float>>& matrix) {
+    if (matrix.size() != 5 || matrix[0].size() != 5) {
+        std::cerr << "Error: Invalid matrix dimensions for 5x5 inversion." << std::endl;
+        std::vector<std::vector<float>> identity(5, std::vector<float>(5, 0.0f));
+        for (int i = 0; i < 5; ++i) identity[i][i] = 1.0f;
+        return identity;
+    }
+
+    std::vector<std::vector<float>> A = matrix;
+    std::vector<std::vector<float>> invA(5, std::vector<float>(5, 0.0f));
+
+    // Initialize inverse matrix as an identity matrix
+    for (int i = 0; i < 5; ++i) {
+        invA[i][i] = 1.0f;
+    }
+
+    // Gaussian elimination
+    for (int i = 0; i < 5; ++i) {
+        // Find pivot for the current column
+        float pivot_val = A[i][i];
+        int pivot_row = i;
+        for (int k = i + 1; k < 5; ++k) {
+            if (std::abs(A[k][i]) > std::abs(pivot_val)) {
+                pivot_val = A[k][i];
+                pivot_row = k;
+            }
+        }
+
+        // Swap rows if a better pivot is found
+        if (pivot_row != i) {
+            std::swap(A[i], A[pivot_row]);
+            std::swap(invA[i], invA[pivot_row]);
+        }
+        
+        // Normalize the pivot row
+        float div = A[i][i];
+        if (std::abs(div) < std::numeric_limits<float>::epsilon()) {
+            std::cerr << "Error: Matrix is singular. Cannot invert." << std::endl;
+            std::vector<std::vector<float>> identity(5, std::vector<float>(5, 0.0f));
+            for (int j = 0; j < 5; ++j) identity[j][j] = 1.0f;
+            return identity;
+        }
+
+        for (int j = 0; j < 5; ++j) {
+            A[i][j] /= div;
+            invA[i][j] /= div;
+        }
+
+        // Eliminate other rows
+        for (int k = 0; k < 5; ++k) {
+            if (k != i) {
+                float factor = A[k][i];
+                for (int j = 0; j < 5; ++j) {
+                    A[k][j] -= factor * A[i][j];
+                    invA[k][j] -= factor * invA[i][j];
+                }
+            }
+        }
+    }
+    return invA;
 }
 
 void HMC5883L::save_history_and_settings()

@@ -1,3 +1,7 @@
+2.289_250804
+  - Previous test was showing error of 10 degrees or more consistantlty.  
+      Trying another approach.  Simplified it to 2d.
+
 2.288_250802
   - Adjusted the position of the displayed compass information.
   - I'm done with modifying the compass routines for now.  

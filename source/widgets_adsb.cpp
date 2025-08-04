@@ -1142,7 +1142,7 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
 
         if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
         {
-          color = RAS_YELLOW;
+          color = RAS_BLUE;
         }
 
         //if (color != RAS_GREY)
@@ -1238,7 +1238,7 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
       // Print calibration data if calibration is on
       if (sdSysData.COMMS_COMPASS.calibrate_on())
       {
-        ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + (WORKING_AREA.z * 0.25f), WORKING_AREA.y + (WORKING_AREA.w * 0.6f)));
+        ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + (WORKING_AREA.z * 0.25f), WORKING_AREA.y + (WORKING_AREA.w * 0.55f)));
         string info = sdSysData.COMMS_COMPASS.INFORMATION + "\n" + sdSysData.COMMS_COMPASS.LEVEL_3.INFORMATION_CALIBRATION;
         ImGui::Text("%s", info.c_str());
       }

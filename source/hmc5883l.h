@@ -393,6 +393,17 @@ class PRESERVE_ANGLE
 
 // -------------------------------------------------------------------------------------
 
+/**
+ * @brief Helper function to perform a 5x5 matrix inversion.
+ * A standard Gaussian elimination with partial pivoting is used.
+ * @param matrix The 5x5 matrix to invert.
+ * @return The inverted 5x5 matrix.
+ */
+std::vector<std::vector<float>> invert5x5(const std::vector<std::vector<float>>& matrix);
+
+// -------------------------------------------------------------------------------------
+
+
 class CAL_LEVEL_3
 {
   private:
@@ -451,6 +462,15 @@ class CAL_LEVEL_3
   // Performs a 3-parameter (diagonal) ellipsoid fit to calculate hard and soft iron parameters.
   // Returns true on success.
   bool fit_ellipsoid_and_get_calibration_matrix(
+    const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
+    CalibrationParameters& params);
+
+  std::vector<std::vector<float>> A_transpose_A_2D;
+  std::vector<float> A_transpose_b_2D;
+  std::vector<float> features_buffer_2D;
+  // other private members from original code
+    
+  bool fit_ellipse_and_get_calibration_matrix_2D(
     const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
     CalibrationParameters& params);
 
