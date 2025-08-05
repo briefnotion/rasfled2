@@ -1154,6 +1154,27 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
       }
     }
 
+    
+    for (size_t pos = 0; pos < sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY.size(); pos++)
+    {
+      if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY.FLAGS[pos].HAS_DATA)
+      {
+        int color = RAS_GREEN;
+
+        if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
+        {
+          color = RAS_RED;
+        }
+
+        //if (color != RAS_GREY)
+        {
+          c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY[pos].POINT.X / 4.0f), 
+                        center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY[pos].POINT.Y / 4.0f));
+          draw_marker_filled(Draw_List, sdSysData, c1, color);
+        }
+      }
+    }
+
 
     // Draw Center
     c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.X / 4.0f), 

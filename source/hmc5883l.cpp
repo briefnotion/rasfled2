@@ -103,12 +103,13 @@ void CAL_LEVEL_3::clear_all_flags()
 {
   INFORMATION_CALIBRATION = "";
 
-  fill(begin(preserved_angle), end(preserved_angle), 0);
-
+  // no longer significant
+  /*
   for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
   {
     COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = false;
   }
+  */
 }
 
 bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
@@ -169,6 +170,7 @@ void CAL_LEVEL_3::preservation_of_data()
 //  all data in PRESERVATION_ANGLE_AVERAGE is cleared at the beginning of every calibration routine.
 
 {
+  /*
   for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
   {
     int pos_new = pos;
@@ -217,9 +219,58 @@ void CAL_LEVEL_3::preservation_of_data()
         }
       }
 
-
       tmp_compass_point.POINT = tmp_compass_point.POINT / preserved_angle[angle];
       COMPASS_HISTORY.push_back(tmp_compass_point, true);
+    }
+  }
+  */
+
+  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
+  {
+    if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
+    {
+      float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
+      float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
+
+      // Calculate angle using atan2, which handles all quadrants.
+      // The angle is in radians, typically from -PI to PI.
+      int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
+      angle_slot = (angle_slot + 360) % 360;
+
+      preserved_angle_buffer[angle_slot].add(COMPASS_HISTORY[pos].POINT);
+      COMPASS_HISTORY.erase_p(pos);
+    }
+  }
+
+  // Average out similar angles.
+  for (int angle = 0; angle < 360; angle++)
+  {
+    // If angles has more than 1 item in it, combine them.
+    if (COMPASS_CALIBRATION_HISTORY.FLAGS[angle].HAS_DATA == false && 
+        preserved_angle_buffer[angle].count() > 0)
+    {
+      FLOAT_XYZ_MATRIX tmp_new_value = preserved_angle_buffer[angle].average();
+      COMPASS_POINT tmp_new_point;
+
+      tmp_new_point.POINT.X =  tmp_new_value.X;
+      tmp_new_point.POINT.Y =  tmp_new_value.Y;
+      tmp_new_point.POINT.Z =  tmp_new_value.Z;
+
+      COMPASS_CALIBRATION_HISTORY.put_in_position(angle, tmp_new_point);
+      preserved_angle_buffer[angle].clear();
+    }
+    else if (COMPASS_CALIBRATION_HISTORY.FLAGS[angle].HAS_DATA && 
+              preserved_angle_buffer[angle].count() > preservation_of_data_buffer_size)
+    {
+      FLOAT_XYZ_MATRIX tmp_new_value = (COMPASS_CALIBRATION_HISTORY[angle].POINT + preserved_angle_buffer[angle].average()) / 2;
+      COMPASS_POINT tmp_new_point;
+
+      tmp_new_point.POINT.X =  tmp_new_value.X;
+      tmp_new_point.POINT.Y =  tmp_new_value.Y;
+      tmp_new_point.POINT.Z =  tmp_new_value.Z;
+
+      COMPASS_CALIBRATION_HISTORY.put_in_position(angle, tmp_new_point);
+      preserved_angle_buffer[angle].clear();
     }
   }
 }
@@ -647,7 +698,8 @@ void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ)
 void CAL_LEVEL_3::clear()
 {
   COMPASS_HISTORY.set_size(COMPASS_HISTORY_SIZE);
-  active_points.reserve(COMPASS_HISTORY_SIZE);
+  active_points.reserve(COMPASS_CALIBRATION_HISTORY_SIZE);
+  COMPASS_CALIBRATION_HISTORY.set_size(COMPASS_CALIBRATION_HISTORY_SIZE);
 
   // Initial sizing and zeroing. This happens once per object creation.
   A_transpose_A.resize(9);
@@ -681,8 +733,8 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
     if (true)
     {
       // This function will calculate the hard_iron_offset and soft_iron_matrix
-      // based on the COMPASS_HISTORY.
-      current_calibration_params = perform_hard_soft_iron_calibration(COMPASS_HISTORY);
+      // based on the COMPASS_CALIBRATION_HISTORY.
+      current_calibration_params = perform_hard_soft_iron_calibration(COMPASS_CALIBRATION_HISTORY);
       // COMPASS_CENTER is now conceptually replaced by current_calibration_params.hard_iron_offset
 
       INFORMATION_CALIBRATION += "Hard Iron Offset: X=" + to_string(current_calibration_params.hard_iron_offset.X) + 
@@ -709,6 +761,110 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
 }
 
 // -------------------------------------------------------------------------------------
+
+int PRESERVE_ANGLE_CALC::count()
+{
+  return COUNT;
+}
+
+void PRESERVE_ANGLE_CALC::add(FLOAT_XYZ_MATRIX Add_Point)
+{
+  POINT_SUM = POINT_SUM + Add_Point;
+  COUNT++;
+}
+
+FLOAT_XYZ_MATRIX PRESERVE_ANGLE_CALC::average()
+{
+  return POINT_SUM / COUNT;
+}
+
+void PRESERVE_ANGLE_CALC::clear()
+{
+  COUNT = 0;
+  POINT_SUM.X = 0.0f;
+  POINT_SUM.Y = 0.0f;
+  POINT_SUM.Z = 0.0f;
+}
+
+/**
+ * @brief Helper function to perform a 5x5 matrix inversion.
+ * A standard Gaussian elimination with partial pivoting is used.
+ * @param matrix The 5x5 matrix to invert.
+ * @return The inverted 5x5 matrix.
+ */
+std::vector<std::vector<float>> invert5x5(const std::vector<std::vector<float>>& matrix) 
+{
+  if (matrix.size() != 5 || matrix[0].size() != 5) 
+  {
+    std::cerr << "Error: Invalid matrix dimensions for 5x5 inversion." << std::endl;
+    std::vector<std::vector<float>> identity(5, std::vector<float>(5, 0.0f));
+    for (int i = 0; i < 5; ++i) identity[i][i] = 1.0f;
+    return identity;
+  }
+
+  std::vector<std::vector<float>> A = matrix;
+  std::vector<std::vector<float>> invA(5, std::vector<float>(5, 0.0f));
+
+  // Initialize inverse matrix as an identity matrix
+  for (int i = 0; i < 5; ++i) 
+  {
+    invA[i][i] = 1.0f;
+  }
+
+  // Gaussian elimination
+  for (int i = 0; i < 5; ++i) 
+  {
+    // Find pivot for the current column
+    float pivot_val = A[i][i];
+    int pivot_row = i;
+    for (int k = i + 1; k < 5; ++k) 
+    {
+      if (std::abs(A[k][i]) > std::abs(pivot_val)) 
+      {
+          pivot_val = A[k][i];
+          pivot_row = k;
+      }
+    }
+
+    // Swap rows if a better pivot is found
+    if (pivot_row != i) 
+    {
+      std::swap(A[i], A[pivot_row]);
+      std::swap(invA[i], invA[pivot_row]);
+    }
+    
+    // Normalize the pivot row
+    float div = A[i][i];
+    if (std::abs(div) < std::numeric_limits<float>::epsilon()) 
+    {
+      std::cerr << "Error: Matrix is singular. Cannot invert." << std::endl;
+      std::vector<std::vector<float>> identity(5, std::vector<float>(5, 0.0f));
+      for (int j = 0; j < 5; ++j) identity[j][j] = 1.0f;
+      return identity;
+    }
+
+    for (int j = 0; j < 5; ++j) 
+    {
+      A[i][j] /= div;
+      invA[i][j] /= div;
+    }
+
+    // Eliminate other rows
+    for (int k = 0; k < 5; ++k) 
+    {
+      if (k != i) 
+      {
+        float factor = A[k][i];
+        for (int j = 0; j < 5; ++j) 
+        {
+          A[k][j] -= factor * A[i][j];
+          invA[k][j] -= factor * invA[i][j];
+        }
+      }
+    }
+  }
+  return invA;
+}
 
 void HMC5883L::load_history_and_settings()
 {
@@ -759,28 +915,33 @@ void HMC5883L::load_history_and_settings()
           for (int points = 0; 
               points < (int)configuration_json.ROOT.DATA[root].DATA.size(); points++)
           {
-            float x = 0;
-            float y = 0;
-            float z = 0;
+            int   angle = -1;
+            float x     = -1.0f;
+            float y     = -1.0f;
+            float z     = -1.0f;
 
             for (int values = 0; 
                 values < (int)configuration_json.ROOT.DATA[root].DATA[points].DATA.size(); values++)
             {
-
+              configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("angle", angle);
               configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("X", x);
               configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Y", y);
               configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Z", z);
             }
 
-            COMPASS_POINT tmp_point;
+            if (angle >= 0 && angle <= 360)
+            {
+              COMPASS_POINT tmp_point;
 
-            tmp_point.POINT.X = x;
-            tmp_point.POINT.Y = y;
-            tmp_point.POINT.Z = z;
+              tmp_point.POINT.X = x;
+              tmp_point.POINT.Y = y;
+              tmp_point.POINT.Z = z;
 
-            LEVEL_3.COMPASS_HISTORY.push_back(tmp_point);
+              LEVEL_3.COMPASS_CALIBRATION_HISTORY.put_in_position(angle, tmp_point);
+            }
           }
 
+          /*
           // Set all points as do_not_overwrite so they look alive.
           for (size_t pos = 0; pos < LEVEL_3.COMPASS_HISTORY.size(); pos++)
           {
@@ -789,78 +950,11 @@ void HMC5883L::load_history_and_settings()
               LEVEL_3.COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
             }
           }
+          */
         }
       }
     }
   }
-}
-
-/**
- * @brief Helper function to perform a 5x5 matrix inversion.
- * A standard Gaussian elimination with partial pivoting is used.
- * @param matrix The 5x5 matrix to invert.
- * @return The inverted 5x5 matrix.
- */
-std::vector<std::vector<float>> invert5x5(const std::vector<std::vector<float>>& matrix) {
-    if (matrix.size() != 5 || matrix[0].size() != 5) {
-        std::cerr << "Error: Invalid matrix dimensions for 5x5 inversion." << std::endl;
-        std::vector<std::vector<float>> identity(5, std::vector<float>(5, 0.0f));
-        for (int i = 0; i < 5; ++i) identity[i][i] = 1.0f;
-        return identity;
-    }
-
-    std::vector<std::vector<float>> A = matrix;
-    std::vector<std::vector<float>> invA(5, std::vector<float>(5, 0.0f));
-
-    // Initialize inverse matrix as an identity matrix
-    for (int i = 0; i < 5; ++i) {
-        invA[i][i] = 1.0f;
-    }
-
-    // Gaussian elimination
-    for (int i = 0; i < 5; ++i) {
-        // Find pivot for the current column
-        float pivot_val = A[i][i];
-        int pivot_row = i;
-        for (int k = i + 1; k < 5; ++k) {
-            if (std::abs(A[k][i]) > std::abs(pivot_val)) {
-                pivot_val = A[k][i];
-                pivot_row = k;
-            }
-        }
-
-        // Swap rows if a better pivot is found
-        if (pivot_row != i) {
-            std::swap(A[i], A[pivot_row]);
-            std::swap(invA[i], invA[pivot_row]);
-        }
-        
-        // Normalize the pivot row
-        float div = A[i][i];
-        if (std::abs(div) < std::numeric_limits<float>::epsilon()) {
-            std::cerr << "Error: Matrix is singular. Cannot invert." << std::endl;
-            std::vector<std::vector<float>> identity(5, std::vector<float>(5, 0.0f));
-            for (int j = 0; j < 5; ++j) identity[j][j] = 1.0f;
-            return identity;
-        }
-
-        for (int j = 0; j < 5; ++j) {
-            A[i][j] /= div;
-            invA[i][j] /= div;
-        }
-
-        // Eliminate other rows
-        for (int k = 0; k < 5; ++k) {
-            if (k != i) {
-                float factor = A[k][i];
-                for (int j = 0; j < 5; ++j) {
-                    A[k][j] -= factor * A[i][j];
-                    invA[k][j] -= factor * invA[i][j];
-                }
-            }
-        }
-    }
-    return invA;
 }
 
 void HMC5883L::save_history_and_settings()
@@ -876,17 +970,18 @@ void HMC5883L::save_history_and_settings()
   configuration_json.ROOT.put_json_in_set(quotify("settings"), settings);
 
   // Create Point history in JSON
-  if (LEVEL_3.COMPASS_HISTORY.count() > 10)
+  if (LEVEL_3.COMPASS_CALIBRATION_HISTORY.count() > 10)
   {
     JSON_ENTRY compass_points;
-    for (size_t pos = 0; pos < LEVEL_3.COMPASS_HISTORY.size(); pos++)
+    for (size_t pos = 0; pos < LEVEL_3.COMPASS_CALIBRATION_HISTORY.size(); pos++)
     {
-      if (LEVEL_3.COMPASS_HISTORY.FLAGS[pos].HAS_DATA && LEVEL_3.COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
+      if (LEVEL_3.COMPASS_CALIBRATION_HISTORY.FLAGS[pos].HAS_DATA)
       {
         JSON_ENTRY single_point;
-        single_point.create_label_value(quotify("X"), quotify(to_string(LEVEL_3.COMPASS_HISTORY[pos].POINT.X)));
-        single_point.create_label_value(quotify("Y"), quotify(to_string(LEVEL_3.COMPASS_HISTORY[pos].POINT.Y)));
-        single_point.create_label_value(quotify("Z"), quotify(to_string(LEVEL_3.COMPASS_HISTORY[pos].POINT.Z)));
+        single_point.create_label_value(quotify("angle"), quotify(to_string(pos)));
+        single_point.create_label_value(quotify("X"), quotify(to_string(LEVEL_3.COMPASS_CALIBRATION_HISTORY[pos].POINT.X)));
+        single_point.create_label_value(quotify("Y"), quotify(to_string(LEVEL_3.COMPASS_CALIBRATION_HISTORY[pos].POINT.Y)));
+        single_point.create_label_value(quotify("Z"), quotify(to_string(LEVEL_3.COMPASS_CALIBRATION_HISTORY[pos].POINT.Z)));
         compass_points.put_json_in_list(single_point);
       }
     }
@@ -1100,6 +1195,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
     }
 
     INFORMATION += "COMPASS HISTORY SIZE: " + to_string(LEVEL_3.COMPASS_HISTORY.count()) + "\n";
+    INFORMATION += "COMPASS CALIBRA SIZE: " + to_string(LEVEL_3.COMPASS_CALIBRATION_HISTORY.count()) + "\n";
   }
 }
 

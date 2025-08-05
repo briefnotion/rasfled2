@@ -913,6 +913,17 @@ public:
     push_back(Value, false);
   }
 
+  void put_in_position(const int Position, const T& Value)
+  {
+    if (FLAGS[Position].HAS_DATA == false)
+    {
+      FLAGS[Position].HAS_DATA = true;
+      COUNT++;
+    }
+    
+    DATA[Position] = Value;
+  }
+
   /**
    * @brief Erases a point at a specific position by marking it as not having data.
    * Decrements the active count.

@@ -1,3 +1,12 @@
+2.290_250805
+  - 2d soft iron calibration seems to be running much better than the previous 
+      routine.  I'm doubtful accuracy will improve. There is too much 
+      magnetic filth in a city for the compass calibration to ever be 
+      truely accurate. 
+  - Testing another method of preservation_of_data()
+      Less cycles, smaller memory footprint, averaging buffer.
+      Still has glitches though.
+
 2.289_250804
   - Previous test was showing error of 10 degrees or more consistantlty.  
       Trying another approach.  Simplified it to 2d.

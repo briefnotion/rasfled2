@@ -317,7 +317,6 @@ class COMPASS_POINT
 {
   public:
   FLOAT_XYZ_MATRIX  POINT;          // The actual XYZ coordinates of the compass reading
-  int               SUDO_ANGLE = 0; // An angle from center approximation
 
   // Default constructor to initialize POINT
   COMPASS_POINT() : POINT() {}
@@ -384,11 +383,17 @@ class HMC5883L_PROPERTIES
   bool ENABLE_FAKE_COMPASS = false;
 };
 
-class PRESERVE_ANGLE
+class PRESERVE_ANGLE_CALC
 {
+  private:
+  int               COUNT = 0;
+  FLOAT_XYZ_MATRIX  POINT_SUM;
+
   public:
-  int ANGLE = 0;
-  vector<int> POSITION;
+  int count();
+  void add(FLOAT_XYZ_MATRIX Add_Point);
+  FLOAT_XYZ_MATRIX average();
+  void clear();
 };
 
 // -------------------------------------------------------------------------------------
@@ -420,12 +425,12 @@ class CAL_LEVEL_3
   void clear_all_flags();
   bool add_point(FLOAT_XYZ_MATRIX &Raw_XYZ);
 
-  int preserved_angle[360];
-  bool preserved_angle_direction = false;
-  void preservation_of_data();
+  PRESERVE_ANGLE_CALC preserved_angle_buffer[360];
+  void                preservation_of_data();
+  int                 preservation_of_data_buffer_size = 3;
 
-  int COMPASS_HISTORY_SIZE = 540; //360 * 1.5;
-  // Size of the compass history, hardcoded for now.
+  int COMPASS_HISTORY_SIZE              = 60;
+  int COMPASS_CALIBRATION_HISTORY_SIZE  = 360;
 
   // Constants for noise filtering
   float CLOSEST_ALLOWED = 3.0f;
@@ -491,7 +496,10 @@ class CAL_LEVEL_3
   string INFORMATION_CALIBRATION = "";
 
   VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
-  // Stores the history of compass points, using a non-sequential vector deque.
+  // Stores a history of compass points, using a non-sequential vector deque.
+  
+  VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_CALIBRATION_HISTORY;
+  // Stores the Average of the points, by radial, from the COMPASS_HISTORY.
 
   FLOAT_XYZ_MATRIX COMPASS_CENTER;
   // The center of the compass, calculated
