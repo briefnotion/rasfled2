@@ -270,9 +270,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
           {
             sdSysData.SCREEN_COMMS.command_text_set(" startauto");
           }
-
           ImGui::SameLine();
-
           if (STOP_AUTO.button_color(sdSysData, "Stop\nAuto", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" stopauto");
@@ -284,9 +282,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
           {
             sdSysData.SCREEN_COMMS.command_text_set(" startadsb");
           }
-
           ImGui::SameLine();
-
           if (STOP_ADSB.button_color(sdSysData, "Stop\nADS-B", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" stopadsb");
@@ -298,9 +294,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
           {
             sdSysData.SCREEN_COMMS.command_text_set(" startgps");
           }
-
           ImGui::SameLine();
-
           if (STOP_GPS.button_color(sdSysData, "Stop\nGPS", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" stopgps");
@@ -312,9 +306,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
           {
             sdSysData.SCREEN_COMMS.command_text_set(" startcomp");
           }
-
           ImGui::SameLine();
-
           if (STOP_COMPASS.button_color(sdSysData, "Stop\nCompass", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
           {
             sdSysData.SCREEN_COMMS.command_text_set(" stopcomp");
@@ -360,9 +352,7 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
         {
           sdSysData.SCREEN_COMMS.command_text_set(" autop");
         }
-
         ImGui::SameLine();
-
         if (GPS_TO_CONSOLE.button_color(sdSysData, "GPS\nCONS", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
           sdSysData.SCREEN_COMMS.command_text_set(" gpsp");
@@ -379,9 +369,24 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
 
         // ---
 
+        ImGui::NewLine();
+        ImGui::Text("Screen Brightness:");
+
+        if (BRIGHTNESS_100.button_color(sdSysData, "BRT\n100", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt100");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_50.button_color(sdSysData, "BRT\n50", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt50");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_25.button_color(sdSysData, "BRT\n25", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt25");
+        }
         ImGui::EndChild();
-
-
       }
 
       // Debug area

@@ -1,3 +1,7 @@
+2.292_250807
+  - Added buttons on the "..." screen to change brightness.
+  - Modified the compass.  Will reveret back if it doesnt work any better. 
+
 2.291_250806
   - Testing ran short of getting full set of data, but the new routines work 
       fairly well. Will try again. Observed calibration taking much more time, 

@@ -498,9 +498,9 @@ void COLOR_COMBOS::set_frame_time(unsigned long Time)
 
 void COLOR_COMBOS::init(unsigned long Time, float Intensity)
 {
-  //if (ALREADY_INITIALIZED == false)
+  if (ALREADY_INITIALIZED == false)
   {
-    //ALREADY_INITIALIZED = true; //prevent another routine from running again
+    ALREADY_INITIALIZED = true; //prevent another routine from running again
 
     COLOR_COMBINATIONS.clear();
     COLOR_COMBINATIONS_V.clear();
@@ -550,36 +550,36 @@ void COLOR_COMBOS::init(unsigned long Time, float Intensity)
     COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Purple
     COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Pink
     COLOR_COMBINATIONS_NEO.push_back(tmp_neo_color_combo);  // Monochrome
-
-    // Assign Colors
-    COLOR_COMBINATIONS[0].set_rgb_black();  // Black
-    COLOR_COMBINATIONS[1].set_rgb(1.0f, 1.0f, 1.0f, 1.0f, Intensity);  // White
-    COLOR_COMBINATIONS[2].set_rgb(0.4f, 0.4f, 0.4f, 1.0f, Intensity);  // Grey
-    COLOR_COMBINATIONS[3].set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Red
-    COLOR_COMBINATIONS[4].set_rgb(1.0f, 0.75f, 0.0f, 1.0f, Intensity);  // Orange
-    COLOR_COMBINATIONS[5].set_rgb(1.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Yellow
-    COLOR_COMBINATIONS[6].set_rgb(0.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Green
-    COLOR_COMBINATIONS[7].set_rgb(0.0f, 1.0f, 1.0f, 1.0f, Intensity);  // Cyan
-    COLOR_COMBINATIONS[8].set_rgb(0.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Blue
-    COLOR_COMBINATIONS[9].set_rgb(1.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
-    COLOR_COMBINATIONS[10].set_rgb(1.0f, 0.5f, 1.0f, 1.0f, Intensity);  // Pink
-    COLOR_COMBINATIONS[11].set_rgb(0.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Monochrome
-
-    COLOR_COMBINATIONS_V[0].set_rgb_black();                                // Black
-    COLOR_COMBINATIONS_V[1].set_rgb_v(1.0f, 1.0f, 1.0f, 1.0f, Intensity);  // White
-    COLOR_COMBINATIONS_V[2].set_rgb_v(0.4f, 0.4f, 0.4f, 1.0f, Intensity);  // Grey
-    COLOR_COMBINATIONS_V[3].set_rgb_v(1.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Red
-    COLOR_COMBINATIONS_V[4].set_rgb_v(1.0f, 0.75f, 0.0f, 1.0f, Intensity);  // Orange
-    COLOR_COMBINATIONS_V[5].set_rgb_v(1.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Yellow
-    COLOR_COMBINATIONS_V[6].set_rgb_v(0.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Green
-    COLOR_COMBINATIONS_V[7].set_rgb_v(0.0f, 1.0f, 1.0f, 1.0f, Intensity);  // Cyan
-    COLOR_COMBINATIONS_V[8].set_rgb_v(0.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Blue
-    COLOR_COMBINATIONS_V[9].set_rgb_v(0.6f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
-    COLOR_COMBINATIONS_V[10].set_rgb_v(1.0f, 0.5f, 1.0f, 1.0f, Intensity);  // Pink
-    COLOR_COMBINATIONS_V[11].set_rgb_v(0.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Monochrome
-
-    set_neo_colors_with_color_change(Time);
   }
+
+  // Assign Colors
+  COLOR_COMBINATIONS[0].set_rgb_black();  // Black
+  COLOR_COMBINATIONS[1].set_rgb(1.0f, 1.0f, 1.0f, 1.0f, Intensity);  // White
+  COLOR_COMBINATIONS[2].set_rgb(0.4f, 0.4f, 0.4f, 1.0f, Intensity);  // Grey
+  COLOR_COMBINATIONS[3].set_rgb(1.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Red
+  COLOR_COMBINATIONS[4].set_rgb(1.0f, 0.75f, 0.0f, 1.0f, Intensity);  // Orange
+  COLOR_COMBINATIONS[5].set_rgb(1.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Yellow
+  COLOR_COMBINATIONS[6].set_rgb(0.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Green
+  COLOR_COMBINATIONS[7].set_rgb(0.0f, 1.0f, 1.0f, 1.0f, Intensity);  // Cyan
+  COLOR_COMBINATIONS[8].set_rgb(0.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Blue
+  COLOR_COMBINATIONS[9].set_rgb(1.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
+  COLOR_COMBINATIONS[10].set_rgb(1.0f, 0.5f, 1.0f, 1.0f, Intensity);  // Pink
+  COLOR_COMBINATIONS[11].set_rgb(0.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Monochrome
+
+  COLOR_COMBINATIONS_V[0].set_rgb_black();                                // Black
+  COLOR_COMBINATIONS_V[1].set_rgb_v(1.0f, 1.0f, 1.0f, 1.0f, Intensity);  // White
+  COLOR_COMBINATIONS_V[2].set_rgb_v(0.4f, 0.4f, 0.4f, 1.0f, Intensity);  // Grey
+  COLOR_COMBINATIONS_V[3].set_rgb_v(1.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Red
+  COLOR_COMBINATIONS_V[4].set_rgb_v(1.0f, 0.75f, 0.0f, 1.0f, Intensity);  // Orange
+  COLOR_COMBINATIONS_V[5].set_rgb_v(1.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Yellow
+  COLOR_COMBINATIONS_V[6].set_rgb_v(0.0f, 1.0f, 0.0f, 1.0f, Intensity);  // Green
+  COLOR_COMBINATIONS_V[7].set_rgb_v(0.0f, 1.0f, 1.0f, 1.0f, Intensity);  // Cyan
+  COLOR_COMBINATIONS_V[8].set_rgb_v(0.0f, 0.0f, 1.0f, 1.0f, Intensity);  // Blue
+  COLOR_COMBINATIONS_V[9].set_rgb_v(0.6f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
+  COLOR_COMBINATIONS_V[10].set_rgb_v(1.0f, 0.5f, 1.0f, 1.0f, Intensity);  // Pink
+  COLOR_COMBINATIONS_V[11].set_rgb_v(0.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Monochrome
+
+  set_neo_colors_with_color_change(Time);
 }
 
 COLOR_COMBO COLOR_COMBOS::pure_color(int Color)

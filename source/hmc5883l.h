@@ -496,6 +496,8 @@ class CAL_LEVEL_3
   public:
   string INFORMATION_CALIBRATION = "";
 
+  float TRUE_FAKE_BEARING_FROM_UPPER = 0.0f;
+
   VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
   // Stores a history of compass points, using a non-sequential vector deque.
   

@@ -35,10 +35,10 @@ FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fak
 {
     FLOAT_XYZ_MATRIX ret_point;
 
-    const float rotation_speed_deg_per_ms = 0.0573f * 0.8f; // Adjusted for degrees (approx 0.0010 rad/ms * 180/PI)
+    const float rotation_speed_deg_per_ms = 0.0573f * 1.0f; // Adjusted for degrees (approx 0.0010 rad/ms * 180/PI)
 
     bool skew = true;
-    float skew_factor = 0.05f; // Added 'f' suffix for float literal
+    float skew_factor = 0.10f; // Added 'f' suffix for float literal
 
     // --- 1. Calculate the TRUE_FAKE_BEARING ahead of time ---
     // This simulates a continuous rotation.
@@ -544,6 +544,7 @@ CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECT
  * @param params The calibration parameters (offset and matrix).
  * @return The heading in degrees (0-360), where 0 is North.
  */
+/*
 void CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params) 
 {
   // Calculated Calibrated Heading
@@ -587,6 +588,38 @@ void CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point
 
     HEADING_DEGREES_REPORT_NON_CALIBRATED = heading_deg_raw;
   }
+}
+*/
+
+// This function calculates the calibrated heading using a dampened soft-iron correction.
+void CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params) 
+{
+  // Apply hard-iron offset to the raw magnetic data.
+  // This removes the constant bias caused by the sensor's internal components.
+  FLOAT_XYZ_MATRIX hard_iron_corrected_point = raw_point - params.hard_iron_offset;
+
+  // --- Calculate the heading with full soft-iron correction ---
+  // This uses the soft-iron matrix to scale the magnetic field,
+  // making the data more spherical and accurate for heading calculation.
+  FLOAT_XYZ_MATRIX full_corrected_point = params.soft_iron_matrix * hard_iron_corrected_point;
+  float full_corrected_heading_rad = std::atan2(full_corrected_point.Y, full_corrected_point.X);
+  float full_corrected_heading_deg = wrap_degrees(full_corrected_heading_rad * 180.0f / M_PI);
+
+  // --- Calculate the heading with only hard-iron correction ---
+  // This is the baseline heading, which is less precise but more stable.
+  float hard_iron_heading_rad = std::atan2(hard_iron_corrected_point.Y, hard_iron_corrected_point.X);
+  float hard_iron_heading_deg = wrap_degrees(hard_iron_heading_rad * 180.0f / M_PI);
+
+  // --- Dampen the correction ---
+  // The difference between the two headings is the correction provided by the soft-iron matrix.
+  // We only apply a portion of this correction to the hard-iron heading to prevent
+  // "overcorrection" and maintain a smoother, more stable result.
+  float soft_iron_correction_deg = signed_angular_error(hard_iron_heading_deg, full_corrected_heading_deg);
+  float dampened_heading = wrap_degrees(hard_iron_heading_deg - (soft_iron_correction_deg / 2.0f));
+
+  // Store the results in the class's report variables.
+  HEADING_DEGREES_REPORT = dampened_heading;
+  HEADING_DEGREES_REPORT_NON_CALIBRATED = hard_iron_heading_deg;
 }
 
 /**
@@ -672,18 +705,19 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
       current_calibration_params = perform_hard_soft_iron_calibration(COMPASS_CALIBRATION_HISTORY);
       // COMPASS_CENTER is now conceptually replaced by current_calibration_params.hard_iron_offset
 
-      INFORMATION_CALIBRATION += "Hard Iron Offset: X=" + to_string(current_calibration_params.hard_iron_offset.X) + 
-                      ", Y=" + to_string(current_calibration_params.hard_iron_offset.Y) +
-                      ", Z=" + to_string(current_calibration_params.hard_iron_offset.Z) +
+      INFORMATION_CALIBRATION += 
+                      "Hard Iron Offset:\n\tX=" +  to_string_round_to_nth(current_calibration_params.hard_iron_offset.X, 1) + 
+                      "\n\tY=" +                  to_string_round_to_nth(current_calibration_params.hard_iron_offset.Y, 1) +
+                      "\n\tZ=" +                  to_string_round_to_nth(current_calibration_params.hard_iron_offset.Z, 1) +
                       "\n";
                       
       INFORMATION_CALIBRATION += "Soft Iron Matrix:\n";
       for (int i = 0; i < 3; ++i) 
       {
-        INFORMATION_CALIBRATION += "\t[" + to_string(current_calibration_params.soft_iron_matrix.m[i][0]) + ", " +
-                      to_string(current_calibration_params.soft_iron_matrix.m[i][1]) + ", " +
-                      to_string(current_calibration_params.soft_iron_matrix.m[i][2]) + "]" + 
-                      "\n";
+        INFORMATION_CALIBRATION += "\t[" +  to_string(current_calibration_params.soft_iron_matrix.m[i][0]) + ", " +
+                                            to_string(current_calibration_params.soft_iron_matrix.m[i][1]) + ", " +
+                                            to_string(current_calibration_params.soft_iron_matrix.m[i][2]) + "]" + 
+                                            "\n";
       }
     }
 
@@ -1106,16 +1140,20 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 
     if (PROPS.ENABLE_FAKE_COMPASS == false)
     {
-      INFORMATION += "  BEARING CALIBRATED: " + to_string(bearing_calibrated()) + "\n";
-      INFORMATION += "      NON_CALIBRATED: " + to_string(bearing_non_calibrated()) + "\n";
-      INFORMATION += "          ADJUSTMENT: " + to_string(calibration_correction) + "\n";
+      INFORMATION += "  BEARING CALIBRATED: " + to_string_round_to_nth(bearing_calibrated(), 1) + "\n";
+      INFORMATION += "      NON_CALIBRATED: " + to_string_round_to_nth(bearing_non_calibrated(), 1) + "\n";
+      INFORMATION += "          ADJUSTMENT: " + to_string_round_to_nth(calibration_correction, 1) + "\n";
     }
     else
     {
-      INFORMATION += "        BEARING FAKE: " + to_string(bearing_non_true_fake()) + "\n";
-      INFORMATION += "      NON_CALIBRATED: " + to_string(bearing_non_calibrated()) + "\n";
-      INFORMATION += "  BEARING CALIBRATED: " + to_string(bearing_calibrated()) + "\n";
-      INFORMATION += "          ADJUSTMENT: " + to_string(calibration_correction) + "\n";
+      float error_non_cali  = signed_angular_error(TRUE_FAKE_BEARING, bearing_non_calibrated());
+      float error_cali      = signed_angular_error(TRUE_FAKE_BEARING, bearing_calibrated());
+      INFORMATION += "        BEARING FAKE: " + to_string_round_to_nth(bearing_non_true_fake(), 1) + "\n";
+      INFORMATION += "      NON_CALIBRATED: " + to_string_round_to_nth(bearing_non_calibrated(), 1) + "\n";
+      INFORMATION += "  BEARING CALIBRATED: " + to_string_round_to_nth(bearing_calibrated(), 1) + "\n";
+      INFORMATION += "          ADJUSTMENT: " + to_string_round_to_nth(calibration_correction, 1) + "\n";
+      INFORMATION += "     TRUE FAKE ERROR: " + to_string_round_to_nth(error_non_cali, 1) + "\n";
+      INFORMATION += "     TRUE CALI ERROR: " + to_string_round_to_nth(error_cali, 1) + "\n";
     }
 
     INFORMATION += "COMPASS HISTORY SIZE: " + to_string(LEVEL_3.COMPASS_HISTORY.count()) + "\n";
@@ -1298,6 +1336,7 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
           TRUE_FAKE_BEARING -= (PROPS.CALIBRATION_MOUNT_OFFSET + 
                                 PROPS.CALIBRATION_LOCATION_DECLINATION - 
                                 KNOWN_DEVICE_DEGREE_OFFSET); // Adjust to match original code's convention
+          LEVEL_3.TRUE_FAKE_BEARING_FROM_UPPER = TRUE_FAKE_BEARING;
         }
 
         // Process

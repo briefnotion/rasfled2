@@ -1159,11 +1159,11 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     {
       if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY.FLAGS[pos].HAS_DATA)
       {
-        int color = RAS_GREEN;
+        int color = RAS_RED;
 
         if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
         {
-          color = RAS_RED;
+          color = RAS_GREEN;
         }
 
         //if (color != RAS_GREY)
@@ -1259,7 +1259,8 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
       // Print calibration data if calibration is on
       if (sdSysData.COMMS_COMPASS.calibrate_on())
       {
-        ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + (WORKING_AREA.z * 0.25f), WORKING_AREA.y + (WORKING_AREA.w * 0.55f)));
+        //ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + (WORKING_AREA.z * 0.25f), WORKING_AREA.y + (WORKING_AREA.w * 0.55f)));
+        ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + (WORKING_AREA.z * 0.52f), WORKING_AREA.y + sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y));
         string info = sdSysData.COMMS_COMPASS.INFORMATION + "\n" + sdSysData.COMMS_COMPASS.LEVEL_3.INFORMATION_CALIBRATION;
         ImGui::Text("%s", info.c_str());
       }
