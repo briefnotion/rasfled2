@@ -368,8 +368,8 @@ void NEO_COLOR_CRGB::set_color(unsigned long Time, CRGB Color)
 void COLOR_COMBO::set_rgb(float R, float G, float B, float A, float Intensity)
 {
   TEXT        = ImColor((R *0.8f + 0.5f) * Intensity, (G *0.8f + 0.5f) * Intensity, (B *0.8f + 0.5f) * Intensity, A);
-  BACKGROUND  = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.2f);
-  DIM         = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.5f);
+  BACKGROUND  = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.2f);
+  DIM         = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.5f);
   STANDARD    = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.7f);
   STANDARD_V  = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.7f);
   HOVERED     = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.8f);
@@ -380,8 +380,8 @@ void COLOR_COMBO::set_rgb(float R, float G, float B, float A, float Intensity)
 void COLOR_COMBO::set_rgb_v(float R, float G, float B, float A, float Intensity)
 {
   TEXT        = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
-  BACKGROUND  = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.2f);
-  DIM         = ImColor(R * Intensity, G * Intensity, B * Intensity, A * Intensity *0.5f);
+  BACKGROUND  = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.2f);
+  DIM         = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.5f);
   STANDARD    = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.7f);
   STANDARD_V  = ImColor((1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, (1.0f *0.8f + 0.5f) * Intensity, 1.0f);
   HOVERED     = ImColor(R * Intensity, G * Intensity, B * Intensity, A *0.8f);
@@ -498,9 +498,13 @@ void COLOR_COMBOS::set_frame_time(unsigned long Time)
 
 void COLOR_COMBOS::init(unsigned long Time, float Intensity)
 {
-  if (ALREADY_INITIALIZED == false)
+  //if (ALREADY_INITIALIZED == false)
   {
-    ALREADY_INITIALIZED = true; //prevent another routine from running again
+    //ALREADY_INITIALIZED = true; //prevent another routine from running again
+
+    COLOR_COMBINATIONS.clear();
+    COLOR_COMBINATIONS_V.clear();
+    COLOR_COMBINATIONS_NEO.clear();
 
     COLOR_COMBO tmp_color_combo; 
     NEO_COLOR_COMBO tmp_neo_color_combo;

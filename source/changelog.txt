@@ -1,3 +1,17 @@
+2.291_250806
+  - Testing ran short of getting full set of data, but the new routines work 
+      fairly well. Will try again. Observed calibration taking much more time, 
+      less filthy noise interference, and medium amount of cicle deviations. 
+  - Made a few changes to allow the circle to move in a more "creepy" manner. 
+      May have eliminated the glitching points by adjusting the size of 
+      the compass_history (first layer of cache) and staging it into the 
+      averaging buffer via TAG.
+  - Testing screen brightness controls.
+      On Command line:
+        " brt25"  - Brightness 25%
+        " brt50"  - Brightness 50%
+        " brt100" - Brightness 100%
+
 2.290_250805
   - 2d soft iron calibration seems to be running much better than the previous 
       routine.  I'm doubtful accuracy will improve. There is too much 

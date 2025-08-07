@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.290_250805"
+#define Revision "2.291_250806"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -31,6 +31,8 @@
 #define TEST_DATA_CAN_BUS   false   // "rascomms.txt" in the auto dir
 #define TEST_DATA_AIRCRAFT  false   //
 #define TEST_DATA_GPS       false   //
+
+#define ENABLE_TEST_COMPASS false    // Sets the fake compass in hmc5883.h properties
 
 // -------------------------------------------------------------------------------------
 // CONSOLE AND INTEFACE SETUP

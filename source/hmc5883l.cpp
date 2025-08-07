@@ -35,6 +35,8 @@ FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fak
 {
     FLOAT_XYZ_MATRIX ret_point;
 
+    const float rotation_speed_deg_per_ms = 0.0573f * 0.8f; // Adjusted for degrees (approx 0.0010 rad/ms * 180/PI)
+
     bool skew = true;
     float skew_factor = 0.05f; // Added 'f' suffix for float literal
 
@@ -42,7 +44,6 @@ FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fak
     // This simulates a continuous rotation.
     // We'll use a speed factor to control how fast the bearing changes with time.
     // The result is modulo 360.0f to keep it within a full circle (0 to 360 degrees).
-    const float rotation_speed_deg_per_ms = 0.0573f; // Adjusted for degrees (approx 0.0010 rad/ms * 180/PI)
     True_Fake_Bearing = fmod(tmeFrame_Time * rotation_speed_deg_per_ms, 360.0f);
 
     // Ensure the bearing is always positive (fmod can return negative for negative inputs)
@@ -102,14 +103,6 @@ float CAL_LEVEL_3::dist_xyz(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B)
 void CAL_LEVEL_3::clear_all_flags()
 {
   INFORMATION_CALIBRATION = "";
-
-  // no longer significant
-  /*
-  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-  {
-    COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = false;
-  }
-  */
 }
 
 bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
@@ -149,7 +142,7 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
     {
       COMPASS_POINT tmp_compass_point;
       tmp_compass_point.POINT = Raw_XYZ;
-      COMPASS_HISTORY.push_back(tmp_compass_point);
+      COMPASS_HISTORY.push_back(tmp_compass_point, true);
     }
   }
 
@@ -170,75 +163,27 @@ void CAL_LEVEL_3::preservation_of_data()
 //  all data in PRESERVATION_ANGLE_AVERAGE is cleared at the beginning of every calibration routine.
 
 {
-  /*
-  for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-  {
-    int pos_new = pos;
-    if (preserved_angle_direction)
-    {
-      pos_new = (int)COMPASS_HISTORY.size() -1 - pos;
-    }
-
-    if (COMPASS_HISTORY.FLAGS[pos_new].HAS_DATA)
-    {
-      float dx = COMPASS_HISTORY[pos_new].POINT.X - COMPASS_CENTER.X;
-      float dy = COMPASS_HISTORY[pos_new].POINT.Y - COMPASS_CENTER.Y;
-
-      // Calculate angle using atan2, which handles all quadrants.
-      // The angle is in radians, typically from -PI to PI.
-      int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
-      angle_slot = (angle_slot + 360) % 360;
-
-      preserved_angle[angle_slot]++;
-      COMPASS_HISTORY[pos_new].SUDO_ANGLE = angle_slot;
-
-      if (preserved_angle[angle_slot] <= 1)
-      {
-        COMPASS_HISTORY.FLAGS[pos_new].DO_NOT_OVERWRITE = true;
-      }
-    }
-  }
-
-  // Rotate direction of save
-  preserved_angle_direction = !preserved_angle_direction;
-
-  // Average out similar angles.
-  for (int angle = 0; angle < 360; angle++)
-  {
-    // If angles has more than 1 item in it, combine them.
-    if (preserved_angle[angle] > 1)
-    {
-      COMPASS_POINT tmp_compass_point;
-
-      for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
-      {
-        if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA && COMPASS_HISTORY[pos].SUDO_ANGLE == angle)
-        {
-          tmp_compass_point.POINT = tmp_compass_point.POINT + COMPASS_HISTORY[pos].POINT;
-          COMPASS_HISTORY.erase_p(pos);
-        }
-      }
-
-      tmp_compass_point.POINT = tmp_compass_point.POINT / preserved_angle[angle];
-      COMPASS_HISTORY.push_back(tmp_compass_point, true);
-    }
-  }
-  */
-
   for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
   {
     if (COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
     {
-      float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
-      float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
+      if (COMPASS_HISTORY[pos].TAG == false)
+      {
+        COMPASS_HISTORY[pos].TAG = true;
+      }
+      else
+      {
+        float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
+        float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
 
-      // Calculate angle using atan2, which handles all quadrants.
-      // The angle is in radians, typically from -PI to PI.
-      int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
-      angle_slot = (angle_slot + 360) % 360;
+        // Calculate angle using atan2, which handles all quadrants.
+        // The angle is in radians, typically from -PI to PI.
+        int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
+        angle_slot = (angle_slot + 360) % 360;
 
-      preserved_angle_buffer[angle_slot].add(COMPASS_HISTORY[pos].POINT);
-      COMPASS_HISTORY.erase_p(pos);
+        preserved_angle_buffer[angle_slot].add(COMPASS_HISTORY[pos].POINT);
+        COMPASS_HISTORY.erase_p(pos);
+      }
     }
   }
 
@@ -249,26 +194,16 @@ void CAL_LEVEL_3::preservation_of_data()
     if (COMPASS_CALIBRATION_HISTORY.FLAGS[angle].HAS_DATA == false && 
         preserved_angle_buffer[angle].count() > 0)
     {
-      FLOAT_XYZ_MATRIX tmp_new_value = preserved_angle_buffer[angle].average();
       COMPASS_POINT tmp_new_point;
-
-      tmp_new_point.POINT.X =  tmp_new_value.X;
-      tmp_new_point.POINT.Y =  tmp_new_value.Y;
-      tmp_new_point.POINT.Z =  tmp_new_value.Z;
-
+      tmp_new_point.POINT = preserved_angle_buffer[angle].average();
       COMPASS_CALIBRATION_HISTORY.put_in_position(angle, tmp_new_point);
       preserved_angle_buffer[angle].clear();
     }
     else if (COMPASS_CALIBRATION_HISTORY.FLAGS[angle].HAS_DATA && 
               preserved_angle_buffer[angle].count() > preservation_of_data_buffer_size)
     {
-      FLOAT_XYZ_MATRIX tmp_new_value = (COMPASS_CALIBRATION_HISTORY[angle].POINT + preserved_angle_buffer[angle].average()) / 2;
       COMPASS_POINT tmp_new_point;
-
-      tmp_new_point.POINT.X =  tmp_new_value.X;
-      tmp_new_point.POINT.Y =  tmp_new_value.Y;
-      tmp_new_point.POINT.Z =  tmp_new_value.Z;
-
+      tmp_new_point.POINT =  (COMPASS_CALIBRATION_HISTORY[angle].POINT + preserved_angle_buffer[angle].average()) / 2;
       COMPASS_CALIBRATION_HISTORY.put_in_position(angle, tmp_new_point);
       preserved_angle_buffer[angle].clear();
     }
@@ -940,17 +875,6 @@ void HMC5883L::load_history_and_settings()
               LEVEL_3.COMPASS_CALIBRATION_HISTORY.put_in_position(angle, tmp_point);
             }
           }
-
-          /*
-          // Set all points as do_not_overwrite so they look alive.
-          for (size_t pos = 0; pos < LEVEL_3.COMPASS_HISTORY.size(); pos++)
-          {
-            if (LEVEL_3.COMPASS_HISTORY.FLAGS[pos].HAS_DATA)
-            {
-              LEVEL_3.COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE = true;
-            }
-          }
-          */
         }
       }
     }

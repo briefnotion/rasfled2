@@ -1042,7 +1042,6 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                   ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
 
                   DAEMON_LOG.display(sdSysData, "System Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
-                  
                 }
                 ImGui::EndChild();
 

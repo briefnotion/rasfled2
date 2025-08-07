@@ -639,6 +639,27 @@ void processcommandlineinput(system_data &sdSysData,
       }
       
       // -------------------------------------------------------------------------------------
+      // BRIGHTNESS COMMANDS
+      
+      // Brightness 25%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt25", "Brightness 25%."))
+      {
+        sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 0.25f);
+      }
+      
+      // Brightness 50%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt50", "Brightness 50%."))
+      {
+        sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 0.50f);
+      }
+      
+      // Brightness 100%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt100", "Brightness 100%."))
+      {
+        sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 1.00f);
+      }
+      
+      // -------------------------------------------------------------------------------------
       // TERMINAL COMMANDS
   
       // Command Line (sudo shutdown now)

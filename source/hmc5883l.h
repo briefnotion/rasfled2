@@ -317,6 +317,7 @@ class COMPASS_POINT
 {
   public:
   FLOAT_XYZ_MATRIX  POINT;          // The actual XYZ coordinates of the compass reading
+  bool              TAG = false;
 
   // Default constructor to initialize POINT
   COMPASS_POINT() : POINT() {}
@@ -380,7 +381,7 @@ class HMC5883L_PROPERTIES
   float CALIBRATION_LOCATION_DECLINATION = 0.0f;
   bool GPS_ASSIST_HEADING = true;
 
-  bool ENABLE_FAKE_COMPASS = false;
+  bool ENABLE_FAKE_COMPASS = ENABLE_TEST_COMPASS;
 };
 
 class PRESERVE_ANGLE_CALC
@@ -429,7 +430,7 @@ class CAL_LEVEL_3
   void                preservation_of_data();
   int                 preservation_of_data_buffer_size = 3;
 
-  int COMPASS_HISTORY_SIZE              = 60;
+  int COMPASS_HISTORY_SIZE              = 145;  // 2 seconds of history. 15ms: 67 * 2 -> 134
   int COMPASS_CALIBRATION_HISTORY_SIZE  = 360;
 
   // Constants for noise filtering

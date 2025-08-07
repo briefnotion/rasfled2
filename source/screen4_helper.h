@@ -314,7 +314,7 @@ class COLOR_COMBOS
 
   COLOR_COMBO             CUSTOM_COLOR_COMBO;
 
-  bool ALREADY_INITIALIZED = false;
+  //bool ALREADY_INITIALIZED = false;
 
   int void_color_value = 3;
   int void_color_prev_value = 3;

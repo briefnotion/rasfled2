@@ -1140,7 +1140,7 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
       {
         int color = RAS_GREY;
 
-        if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY.FLAGS[pos].DO_NOT_OVERWRITE)
+        if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].TAG)
         {
           color = RAS_BLUE;
         }
@@ -2370,6 +2370,15 @@ void ADSB_MAP::draw(system_data &sdSysData)
     }
   }
 
+  // Draw Compass Calibration
+  if (ACTIVE_COMPASS)
+  {
+    if (sdSysData.COMMS_COMPASS.calibrate_on())
+    {
+      screen_draw_calibration(draw_list_map, sdSysData); 
+    }
+  }
+
   // All Text Below Here
   screen_text(sdSysData);
 
@@ -2382,15 +2391,6 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // All Text Above Here
   // -------------------------------------------------------------------------------------
   RANGE_INDICATOR.draw_scale(draw_list_map, sdSysData, WORKING_AREA);
-
-  // Draw Compass Calibration
-  if (ACTIVE_COMPASS)
-  {
-    if (sdSysData.COMMS_COMPASS.calibrate_on())
-    {
-      screen_draw_calibration(draw_list_map, sdSysData);
-    }
-  }
 
   // Draw Landmarks
   for (int landmark = 0; landmark < (int)LANDMARKS.size(); landmark++)
