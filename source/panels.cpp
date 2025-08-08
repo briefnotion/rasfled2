@@ -104,7 +104,21 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
   PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 2;
 }
 
-// --- 
+// ---
+
+void SCREEN4_PANEL_CONTROL::color_set_intensity(unsigned long Time, float Intensity)
+{
+  if (Intensity != INTENSITY)
+  {
+    INTENSITY = Intensity;
+    COLOR_SELECT.init_and_set_intensity(Time, Intensity);
+  }
+}
+
+float SCREEN4_PANEL_CONTROL::color_current_intensity()
+{
+  return INTENSITY;
+}
 
 int SCREEN4_PANEL_CONTROL::autonomous_state()
 {

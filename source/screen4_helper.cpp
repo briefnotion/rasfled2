@@ -496,7 +496,7 @@ void COLOR_COMBOS::set_frame_time(unsigned long Time)
   }
 }
 
-void COLOR_COMBOS::init(unsigned long Time, float Intensity)
+void COLOR_COMBOS::init_and_set_intensity(unsigned long Time, float Intensity)
 {
   if (ALREADY_INITIALIZED == false)
   {
@@ -578,6 +578,12 @@ void COLOR_COMBOS::init(unsigned long Time, float Intensity)
   COLOR_COMBINATIONS_V[9].set_rgb_v(0.6f, 0.0f, 1.0f, 1.0f, Intensity);  // Purple
   COLOR_COMBINATIONS_V[10].set_rgb_v(1.0f, 0.5f, 1.0f, 1.0f, Intensity);  // Pink
   COLOR_COMBINATIONS_V[11].set_rgb_v(0.0f, 0.0f, 0.0f, 1.0f, Intensity);  // Monochrome
+
+  CUSTOM_COLOR_COMBO.set_rgb_v(CUSTOM_COLOR_STORAGE.x, 
+                                CUSTOM_COLOR_STORAGE.y, 
+                                CUSTOM_COLOR_STORAGE.z, 
+                                CUSTOM_COLOR_STORAGE.w, 
+                                Intensity);
 
   set_neo_colors_with_color_change(Time);
 }
@@ -708,7 +714,17 @@ void COLOR_COMBOS::void_color_set(unsigned long Time, int Color)
 
 void COLOR_COMBOS::void_color_set(unsigned long Time, float R, float G, float B, float Intensity)
 {
-  CUSTOM_COLOR_COMBO.set_rgb_v(R, G, B, 1.0f, Intensity);
+  // Original color. Color in CUSTOM_COLOR_COMBO will change with intensity.
+  CUSTOM_COLOR_STORAGE.x = R;
+  CUSTOM_COLOR_STORAGE.y = G;
+  CUSTOM_COLOR_STORAGE.z = B;
+  CUSTOM_COLOR_STORAGE.w = 1.0f;  // Max alpha
+
+  CUSTOM_COLOR_COMBO.set_rgb_v(CUSTOM_COLOR_STORAGE.x, 
+                                CUSTOM_COLOR_STORAGE.y, 
+                                CUSTOM_COLOR_STORAGE.z, 
+                                CUSTOM_COLOR_STORAGE.w, 
+                                Intensity);
 
   // for now, avoid invalid value, monocrome and black
   if (void_color_value != -1 && void_color_value != 0 && void_color_value != 11)

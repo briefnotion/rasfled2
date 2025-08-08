@@ -1,3 +1,8 @@
+2.293_250808
+  - Screen brightness can now be set with:
+      sdSysData.PANEL_CONTROL.color_set_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.50f);
+  - Custom colors will now adjust to brightness also.
+
 2.292_250807
   - Added buttons on the "..." screen to change brightness.
   - Modified the compass.  Will reveret back if it doesnt work any better. 

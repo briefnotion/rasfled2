@@ -92,111 +92,111 @@ void AUTOMOBILE_HANDLER::running_temperature_color_set(system_data &sdSysData, f
   {
     running_temperature_color_rank = rank;
     
-    sdSysData.COLOR_SELECT.set_neo_duration(10000.0f);
+    sdSysData.PANEL_CONTROL.COLOR_SELECT.set_neo_duration(10000.0f);
     VELOCITY_COLOR.PROPS.DURATION = 10000.0f;
 
     switch (running_temperature_color_rank)
     {
       case 0:     // < 0
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_GREY);
-        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pure_color(RAS_GREY).SIMPLE_RGB);
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_GREY);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_GREY).SIMPLE_RGB);
         break;
       }
       case 1:     // 0 - 5
-      {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 1.0f, 1.0f);
+      { // Cyan
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 1.0f, sdSysData.PANEL_CONTROL.color_current_intensity());
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.0f, 1.0f, 1.0f, 1.0f)));
         break;
       }
       case 2:     // 5 - 10
-      {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 1.0f, 1.0f);
+      { // White
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 1.0f, sdSysData.PANEL_CONTROL.color_current_intensity());
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)));
         break;
       }
       case 3:     // 10 - 15
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 1.0f, 1.0f);
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 1.0f, sdSysData.PANEL_CONTROL.color_current_intensity());
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.66f, 1.0f, 1.0f, 1.0f)));
         break;
       }
       case 4:     // 15 - 20
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.33f, 1.0f, 1.0f, 1.0f); //
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.33f, 1.0f, 1.0f, sdSysData.PANEL_CONTROL.color_current_intensity()); //
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.33f, 1.0f, 1.0f, 1.0f))); //
         break;
       }
       case 5:     // 20 - 25
-      {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 1.0f, 1.0f); //
+      { // Cyan
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 1.0f, sdSysData.PANEL_CONTROL.color_current_intensity()); //
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.0f, 1.0f, 1.0f, 1.0f))); //
         break;
       }
       case 6:     // 25 - 30
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.66f, 1.0f); //
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.66f, sdSysData.PANEL_CONTROL.color_current_intensity()); //
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.0f, 1.0f, 0.66f, 1.0f))); //
         break;
       }
       case 7:     // 30 - 35
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.33f, 1.0f); // 
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.33f, sdSysData.PANEL_CONTROL.color_current_intensity()); // 
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.0f, 1.0f, 0.33f, 1.0f))); //
         break;
       }
       case 8:     // 35 - 40
-      {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.0f, 1.0f); // G
+      { // Green
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.0f, 1.0f, 0.0f, sdSysData.PANEL_CONTROL.color_current_intensity()); // G
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.0f, 1.0f, 0.0f, 1.0f))); // G
         break;
       }
       case 9:     // 40 - 45
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.33f, 1.0f, 0.0f, 1.0f); //
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.33f, 1.0f, 0.0f, sdSysData.PANEL_CONTROL.color_current_intensity()); //
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.33f, 1.0f, 0.0f, 1.0f))); //
         break;
       }
       case 10:     // 45 - 50
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 0.0f, 1.0f); //
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 0.66f, 1.0f, 0.0f, sdSysData.PANEL_CONTROL.color_current_intensity()); //
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(0.66f, 1.0f, 0.0f, 1.0f))); // 
         break;
       }
       case 11:     // 50 - 55
-      {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.0f, 1.0f);
+      {// Yellow
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.0f, sdSysData.PANEL_CONTROL.color_current_intensity());
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 1.0f, 0.0f, 1.0f)));
         break;
       }
       case 12:     // 55 - 60
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.33f, 1.0f);
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.33f, sdSysData.PANEL_CONTROL.color_current_intensity());
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 1.0f, 0.33f, 1.0f)));
         break;
       }
       case 13:     // 60 - 65
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.66f, 1.0f);
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 0.66f, sdSysData.PANEL_CONTROL.color_current_intensity());
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 1.0f, 0.66f, 1.0f)));
         break;
       }
       case 14:     // 65 - 70
-      {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 1.0f, 1.0f);
+      { // White
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 1.0f, 1.0f, sdSysData.PANEL_CONTROL.color_current_intensity());
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 1.0f, 1.0f, 1.0f)));
         break;
       }
       case 15:     // 70 +
       {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 0.0f, 1.0f, 0.5f);
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f, 0.0f, 1.0f, 1.0f);
         VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), convert_imvec4_to_crgb(ImVec4(1.0f, 0.0f, 1.0f, 0.5f)));
         break;
       }
       default:
-      {
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_MONOCHROME);
-        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pure_color(RAS_MONOCHROME).SIMPLE_RGB);
+      { // Purple
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_MONOCHROME);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_MONOCHROME).SIMPLE_RGB);
         break;
       }
     }
@@ -319,16 +319,16 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     }
     else
     {
-      sdSysData.COLOR_SELECT.set_neo_duration(2000.0f);
+      sdSysData.PANEL_CONTROL.COLOR_SELECT.set_neo_duration(2000.0f);
       VELOCITY_COLOR.PROPS.DURATION = 2000.0f;
 
       if (sdSysData.RUNNING_COLOR == RAS_RED || sdSysData.RUNNING_COLOR == RAS_BLUE)
       {
-        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pure_color(RAS_BLACK).SIMPLE_RGB);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_BLACK).SIMPLE_RGB);
       }
       else
       {
-        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.pure_color(sdSysData.RUNNING_COLOR).SIMPLE_RGB);
+        VELOCITY_COLOR.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(sdSysData.RUNNING_COLOR).SIMPLE_RGB);
       }
 
     }

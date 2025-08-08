@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.292_250807"
+#define Revision "2.293_250808"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -31,8 +31,6 @@
 #define TEST_DATA_CAN_BUS   false   // "rascomms.txt" in the auto dir
 #define TEST_DATA_AIRCRAFT  false   //
 #define TEST_DATA_GPS       false   //
-
-#define ENABLE_TEST_COMPASS false    // Sets the fake compass in hmc5883.h properties
 
 // -------------------------------------------------------------------------------------
 // CONSOLE AND INTEFACE SETUP
@@ -109,8 +107,8 @@
 #define DEF_REFERENCE_CARD                "refer_advert.png"
 
 // Rasfled logs and user files
-#define DEF_LOGS_DIR                       "rasfled/"    // Create Directory
-#define DEF_LOGS_DIR_TEST                  "rasfled-t/"  // Create Directory
+#define DEF_LOGS_DIR                       "rasfled/"             // Create Directory
+#define DEF_LOGS_DIR_TEST                  "rasfled-t/"           // Create Directory
 
 #define DEF_CAN_BUS_SUB_DIR               "auto/"                 // Create Directory
 #define DEF_AIRCRAFT_SUB_DIR              "adsb/"                 // Create Directory
@@ -131,8 +129,9 @@
 #define DEF_GPS_TEST_DATA_NAME            "gpscomms_test.txt"
 
 // Compass
-#define DEF_COMPASS_DEV_NAME              "/dev/i2c-1"                                    // System File
-//#define DEF_COMPASS_DEV_NAME              "/dev/i2c-2"                                    // System File
+#define ENABLE_TEST_COMPASS               false                   // Sets the fake compass in hmc5883.h properties
+#define DEF_COMPASS_DEV_NAME              "/dev/i2c-1"            // System File
+//#define DEF_COMPASS_DEV_NAME            "/dev/i2c-2"            // System File
 
 #define DEF_COMPASS_OFFSET_HISTORY        "compass_settings.json"
 

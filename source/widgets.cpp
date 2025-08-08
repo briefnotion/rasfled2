@@ -280,11 +280,11 @@ void W_TEXT::draw(system_data &sdSysData)
   {
     if (PROPS.STANDARD_COLOR)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.neo_color_ACTIVE(RAS_ORANGE), sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR))));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_ACTIVE(RAS_ORANGE), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR))));
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.COLOR_SELECT.neo_color_ACTIVE(RAS_ORANGE), sdSysData.COLOR_SELECT.neo_color_TEXT(PROPS.COLOR))));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(gradiant_color(sdSysData, UPDATE_TIMED.start_time(), 500, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_ACTIVE(RAS_ORANGE), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(PROPS.COLOR))));
     }
     
     ImGui::Text(TEXT.c_str());
@@ -294,11 +294,11 @@ void W_TEXT::draw(system_data &sdSysData)
   {
     if (PROPS.STANDARD_COLOR)
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR)));
     }
     else
     {
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(PROPS.COLOR)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(PROPS.COLOR)));
     }
     ImGui::Text(TEXT.c_str());
     ImGui::PopStyleColor();
@@ -375,7 +375,7 @@ void TEXT_CONSOLE::display(system_data &sdSysData, const char *name, bool *p_ope
 { 
   ImGui::Begin(name, p_open, flags);
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
 
     ImGui::TextUnformatted(CONSOLE_TEXT.c_str());
     if (CONSOLE_SCROLL_TO_BOTTOM == true && ImGui::GetScrollMaxY() > 0)
@@ -394,7 +394,7 @@ void TEXT_CONSOLE::display(system_data &sdSysData, const char *name, bool *p_ope
 { 
   ImGui::Begin(name, p_open, flags);
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
 
     // Enable text wrapping
     ImGui::PushTextWrapPos(ImGui::GetWindowContentRegionMax().x - 10); 
@@ -419,7 +419,7 @@ void text_simple_bool(system_data &sdSysData, string Text, bool Indication, int 
 {
   if (Indication == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(COLOR)));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(COLOR)));
     ImGui::Text(Text.c_str());
     ImGui::PopStyleColor();
   }
@@ -433,7 +433,7 @@ bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, Im
 {
   bool ret_value = false;
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
 
   if (Enabled == true)
   {
@@ -444,10 +444,10 @@ bool button_simple_enabled(system_data &sdSysData, string Text, bool Enabled, Im
   }
   else
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_BLUE))); 
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_BLUE)));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_BLUE)));
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLUE)));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_BACKGROUND(RAS_BLUE))); 
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_BACKGROUND(RAS_BLUE)));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_BACKGROUND(RAS_BLUE)));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLUE)));
     ImGui::Button(Text.c_str(), ImVec2_Size);
     ImGui::PopStyleColor(4);
   }
@@ -467,7 +467,7 @@ bool BUTTON_INVISIBLE::button_flash_color(ImDrawList *Draw_List, system_data &sd
   
   if (ImGui::InvisibleButton(Text.c_str(), Size))
   {
-    FLASH_COLOR.set_color_jump(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), IM_COL32(0, 0, 0, 0));
+    FLASH_COLOR.set_color_jump(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), IM_COL32(0, 0, 0, 0));
     
     ret_value = true;
   }
@@ -488,11 +488,11 @@ bool BUTTON_COLOR::button_color(system_data &sdSysData, string Text, int Color, 
 {
   bool ret_value = false;
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
 
-  ImGui::PushStyleColor(ImGuiCol_Button, ImU32(BUTTON_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(Color))));
-  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_HOVERED(Color))));
-  ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_ACTIVE(Color))));
+  ImGui::PushStyleColor(ImGuiCol_Button, ImU32(BUTTON_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color))));
+  ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_HOVERED(Color))));
+  ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_ACTIVE(Color))));
 
   //if (ImGui::Button(TEXT.value(Text).c_str(), ImVec2_Size))
   if (ImGui::Button(Text.c_str(), ImVec2_Size))
@@ -510,13 +510,13 @@ bool BUTTON_TOGGLE_COLOR::button_toggle_color(system_data &sdSysData, string Tru
   // Does not control toggle, just shows value.
   bool ret_value = false;
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
+  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
 
   if (Toggle == false)
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(BUTTON_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(False_Color))));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_HOVERED(False_Color))));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_ACTIVE(False_Color))));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(BUTTON_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(False_Color))));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_HOVERED(False_Color))));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_ACTIVE(False_Color))));
 
     //if (ImGui::Button(TEXT.value(False_Value_Text).c_str(), ImVec2_Size))
     if (ImGui::Button(False_Value_Text.c_str(), ImVec2_Size))
@@ -527,9 +527,9 @@ bool BUTTON_TOGGLE_COLOR::button_toggle_color(system_data &sdSysData, string Tru
   }
   else
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(BUTTON_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(True_Color))));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_HOVERED(True_Color))));
-    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_ACTIVE(True_Color))));
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(BUTTON_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(True_Color))));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_HOVERED(True_Color))));
+    ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_ACTIVE(True_Color))));
 
     //if (ImGui::Button(TEXT.value(True_Value_Text).c_str(), ImVec2_Size))
     if (ImGui::Button(True_Value_Text.c_str(), ImVec2_Size))
@@ -602,24 +602,24 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     if (Version == 1)
     {
       // Draw Location (Circle)
-      Draw_List->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f);
-      Draw_List->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 12.0f);
-      Draw_List->AddNgon(Screen_Position, Size + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f, size_outline);
-      Draw_List->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 12.0f, size_outline);
+      Draw_List->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f);
+      Draw_List->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), 12.0f);
+      Draw_List->AddNgon(Screen_Position, Size + 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f, size_outline);
+      Draw_List->AddNgon(Screen_Position, Size, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), 12.0f, size_outline);
 
       // Draw Double Location (Second Circle)
       if (Main)
       {
-        Draw_List->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 12.0f, 2.0f);
+        Draw_List->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), 12.0f, 2.0f);
       }
     }
     else
     {
       // Draw Center Location (Solid Circle)
-      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f + 4.0f);
-      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 12.0f);
-      Draw_List->AddNgon(Screen_Position, 15.0f + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f, size_outline);
-      Draw_List->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 12.0f, size_outline);
+      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f + 4.0f);
+      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), 12.0f);
+      Draw_List->AddNgon(Screen_Position, 15.0f + 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f, size_outline);
+      Draw_List->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), 12.0f, size_outline);
     }
   }
   else
@@ -627,24 +627,24 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     if (Version == 1)
     {
       // Draw Location (Circle)
-      Draw_List->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f);
-      Draw_List->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 12.0f);
-      Draw_List->AddNgon(Screen_Position, Size + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f, size_outline);
-      Draw_List->AddNgon(Screen_Position, Size, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 12.0f, size_outline);
+      Draw_List->AddNgonFilled(Screen_Position, (needle_size / 2.0f) + 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f);
+      Draw_List->AddNgonFilled(Screen_Position, needle_size / 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), 12.0f);
+      Draw_List->AddNgon(Screen_Position, Size + 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f, size_outline);
+      Draw_List->AddNgon(Screen_Position, Size, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), 12.0f, size_outline);
 
       // Draw Double Location (Second Circle)
       if (Main)
       {
-        Draw_List->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 12.0f, 2.0f);
+        Draw_List->AddNgon(Screen_Position, Size + 4.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), 12.0f, 2.0f);
       }
     }
     else
     {
       // Draw Center Location (Solid Circle)
-      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f + 4.0f);
-      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 12.0f);
-      Draw_List->AddNgon(Screen_Position, 15.0f + 2.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f, size_outline);
-      Draw_List->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 12.0f, size_outline);
+      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f + 4.0f);
+      Draw_List->AddNgonFilled(Screen_Position, 15.0f / 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), 12.0f);
+      Draw_List->AddNgon(Screen_Position, 15.0f + 2.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 12.0f, size_outline);
+      Draw_List->AddNgon(Screen_Position, 15.0f, (ImU32)sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), 12.0f, size_outline);
     }
   }
 
@@ -700,13 +700,13 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       // Draw the arrowhead lines.
       if (Valid_Position)
       {
-        Draw_List->AddLine(p2, arrowLeft, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 3.0f);
-        Draw_List->AddLine(p2, arrowRight, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), 3.0f);
+        Draw_List->AddLine(p2, arrowLeft, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), 3.0f);
+        Draw_List->AddLine(p2, arrowRight, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), 3.0f);
       }
       else
       {
-        Draw_List->AddLine(p2, arrowLeft, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 3.0f);
-        Draw_List->AddLine(p2, arrowRight, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), 3.0f);
+        Draw_List->AddLine(p2, arrowLeft, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), 3.0f);
+        Draw_List->AddLine(p2, arrowRight, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), 3.0f);
       }
     }
 
@@ -728,12 +728,12 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
         if (Valid_Position)
         {
           Draw_List->PathArcTo(Screen_Position, Size + (font_height * 1.25f), rad_1, rad_2, 32);
-          Draw_List->PathStroke(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), false, font_height / 2.0f);
+          Draw_List->PathStroke(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), false, font_height / 2.0f);
         }
         else
         {
           Draw_List->PathArcTo(Screen_Position, Size + (font_height * 1.25f), rad_1, rad_2, 32);
-          Draw_List->PathStroke(sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), false, font_height / 2.0f);
+          Draw_List->PathStroke(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), false, font_height / 2.0f);
         }
 
       }
@@ -757,13 +757,13 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       // Draw the line
       if (Valid_Position)
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), needle_size + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), needle_size);
+        Draw_List->AddLine(p1, p2, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), needle_size);
       }
       else
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), needle_size + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), needle_size);
+        Draw_List->AddLine(p1, p2, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), needle_size);
       }
     }
     else
@@ -774,12 +774,12 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       if (Valid_Position)
       {
         Draw_List->PathArcTo(Screen_Position, Size + (font_height / 2.0f), rad_1, rad_2, 32);
-        Draw_List->PathStroke(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), false, font_height);
+        Draw_List->PathStroke(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), false, font_height);
       }
       else
       {
         Draw_List->PathArcTo(Screen_Position, Size + (font_height / 2.0f), rad_1, rad_2, 32);
-        Draw_List->PathStroke(sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), false, font_height);
+        Draw_List->PathStroke(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), false, font_height);
       }
     }
 
@@ -789,7 +789,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       float rad2 = 0.0f;
       ImVec2 p3;
 
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_BLACK)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_BLACK)));
 
       if (Heading_2 - Map_Bearing < 90.0f || Heading_2 - Map_Bearing > 270.0f)
       {
@@ -843,13 +843,13 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       // Draw the line
       if (Valid_Position)
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), needle_size + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), needle_size);
+        Draw_List->AddLine(p1, p2, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), needle_size);
       }
       else
       {
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), needle_size + 4.0f);
-        Draw_List->AddLine(p1, p2, sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), needle_size);
+        Draw_List->AddLine(p1, p2, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), needle_size + 4.0f);
+        Draw_List->AddLine(p1, p2, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), needle_size);
       }
     }
     else // if (Version == 2)  // Inner Ring
@@ -860,19 +860,19 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
       if (Valid_Position)
       {
         Draw_List->PathArcTo(Screen_Position, Size - (font_height / 2.0f), rad_1, rad_2, 32);
-        Draw_List->PathStroke(sdSysData.COLOR_SELECT.neo_color_STANDARD_V(Color), false, font_height);
+        Draw_List->PathStroke(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color), false, font_height);
       }
       else
       {
         Draw_List->PathArcTo(Screen_Position, Size - (font_height / 2.0f), rad_1, rad_2, 32);
-        Draw_List->PathStroke(sdSysData.COLOR_SELECT.neo_color_STANDARD(Color), false, font_height);
+        Draw_List->PathStroke(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(Color), false, font_height);
       }
 
       // Nothing written yet to handle other sized version 2 compass rotated heading text.
       float rad2 = 0.0f;
       ImVec2 p3;
 
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_BLACK)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_BLACK)));
 
       if (Heading_1 - Map_Bearing < 90.0f || Heading_1 - Map_Bearing > 270.0f)
       {
@@ -1012,7 +1012,7 @@ void BAR_TECH::draw_min_max_val(system_data &sdSysData)
       ImGui::TableNextRow();
       ImGui::TableNextColumn();
       
-      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
       ImGui::Text(PROPS.LABEL.c_str());
       ImGui::PopStyleColor();
 
@@ -1088,26 +1088,26 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
   {
     if (is_within(VALUE, PROPS.MIN, PROPS.MAX))
     {
-      Draw_List->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_DIM(PROPS.COLOR_BACKGROUND)), 5.0f, ImDrawFlags_None);
-      Draw_List->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_BACKGROUND(PROPS.COLOR_BACKGROUND)), 5.0f, ImDrawFlags_None, 2.0f);
+      Draw_List->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(PROPS.COLOR_BACKGROUND)), 5.0f, ImDrawFlags_None);
+      Draw_List->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_BACKGROUND(PROPS.COLOR_BACKGROUND)), 5.0f, ImDrawFlags_None, 2.0f);
     }
     else
     {
-      Draw_List->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_RED)), 5.0f, ImDrawFlags_None);
-      Draw_List->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_RED)), 5.0f, ImDrawFlags_None, 2.0f);
+      Draw_List->AddRectFilled(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_RED)), 5.0f, ImDrawFlags_None);
+      Draw_List->AddRect(pos, ImVec2(pos.x + size.x , pos.y + PROPS.BAR_HEIGHT), NEO_BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_BACKGROUND(RAS_RED)), 5.0f, ImDrawFlags_None, 2.0f);
     }
   }
   else
   {
     if (is_within(VALUE, PROPS.MIN, PROPS.MAX))
     {
-      Draw_List->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_DIM(PROPS.COLOR_BACKGROUND)), 5.0f, ImDrawFlags_None);
-      Draw_List->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_BACKGROUND(PROPS.COLOR_BACKGROUND)), 5.0f, ImDrawFlags_None, 2.0f);
+      Draw_List->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(PROPS.COLOR_BACKGROUND)), 5.0f, ImDrawFlags_None);
+      Draw_List->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_BACKGROUND(PROPS.COLOR_BACKGROUND)), 5.0f, ImDrawFlags_None, 2.0f);
     }
     else
     {
-      Draw_List->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_RED)), 5.0f, ImDrawFlags_None);
-      Draw_List->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_RED)), 5.0f, ImDrawFlags_None, 2.0f);
+      Draw_List->AddRectFilled(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_RED)), 5.0f, ImDrawFlags_None);
+      Draw_List->AddRect(pos, ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y), NEO_BACKGROUND.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_BACKGROUND(RAS_RED)), 5.0f, ImDrawFlags_None, 2.0f);
     }
   }
 
@@ -1150,12 +1150,12 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
       Draw_List->AddRectFilled(ImVec2(pos.x + min_location, pos.y), 
                                 ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT), 
-                                NEO_MIN_MAX_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_DIM(PROPS.COLOR_MARKER)), 
+                                NEO_MIN_MAX_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(PROPS.COLOR_MARKER)), 
                                 5.0f, ImDrawFlags_None);
 
       Draw_List->AddRect(ImVec2(pos.x + min_location, pos.y + 2.0f), 
                                 ImVec2(pos.x + max_location, pos.y + PROPS.BAR_HEIGHT - 2.0f), 
-                                NEO_MIN_MAX.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
+                                NEO_MIN_MAX.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
                                 5.0f, 
                                 ImDrawFlags_None, 2.0f);
 
@@ -1203,12 +1203,12 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
       Draw_List->AddRectFilled(ImVec2(pos.x, pos.y + size.y - max_location), 
                                 ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - min_location), 
-                                NEO_MIN_MAX_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_DIM(PROPS.COLOR_MARKER)), 
+                                NEO_MIN_MAX_DIM.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(PROPS.COLOR_MARKER)), 
                                 5.0f, ImDrawFlags_None);
 
       Draw_List->AddRect(ImVec2(pos.x, pos.y + size.y - max_location - 2.0f), 
                                 ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - min_location + 2.0f), 
-                                NEO_MIN_MAX.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
+                                NEO_MIN_MAX.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
                                 5.0f, ImDrawFlags_None, 2.0f);
 
       if (PROPS.DRAW_RULER)
@@ -1248,12 +1248,12 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
       Draw_List->AddRectFilled(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
                                 ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
-                                NEO_VALUE.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
+                                NEO_VALUE.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
                                 5.0f, ImDrawFlags_None);    
       
       Draw_List->AddRect(ImVec2(pos.x + marker_location - PROPS.MARKER_SIZE / 2.0f, pos.y), 
                                 ImVec2(pos.x + marker_location + PROPS.MARKER_SIZE / 2.0f , pos.y + PROPS.BAR_HEIGHT), 
-                                sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
+                                sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
                                 5.0f, ImDrawFlags_None, 2.0f);
     }
     else
@@ -1272,12 +1272,12 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
       Draw_List->AddCircleFilled(ImVec2(pos.x + marker_location, pos.y + PROPS.BAR_HEIGHT / 2.0f), 
                                 PROPS.BAR_HEIGHT / 4.0f, 
-                                NEO_VALUE.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
+                                NEO_VALUE.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
                                 12.0f);    
       
       Draw_List->AddCircle(ImVec2(pos.x + marker_location, pos.y + PROPS.BAR_HEIGHT / 2.0f), 
                                 PROPS.BAR_HEIGHT / 4.0f, 
-                                sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
+                                sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
                                 12.0f, 2.0f);
     }
 
@@ -1313,12 +1313,12 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
       Draw_List->AddRectFilled(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
                                 ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
-                                NEO_VALUE.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
+                                NEO_VALUE.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
                                 5.0f, ImDrawFlags_None);
 
       Draw_List->AddRect(ImVec2(pos.x, pos.y + size.y - (marker_location + PROPS.MARKER_SIZE / 2.0f)), 
                                 ImVec2(pos.x + PROPS.BAR_HEIGHT, pos.y + size.y - (marker_location - PROPS.MARKER_SIZE / 2.0f)), 
-                                sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
+                                sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
                                 5.0f, ImDrawFlags_None, 2.0f);
     }
     else
@@ -1337,12 +1337,12 @@ void BAR_TECH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 
       Draw_List->AddCircleFilled(ImVec2(pos.x + PROPS.BAR_HEIGHT / 2.0f, pos.y + size.y + marker_location), 
                                 PROPS.BAR_HEIGHT / 4.0f, 
-                                NEO_VALUE.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
+                                NEO_VALUE.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR_MARKER)), 
                                 12.0f);
 
       Draw_List->AddCircle(ImVec2(pos.x + PROPS.BAR_HEIGHT / 2.0f, pos.y + size.y + marker_location), 
                                 PROPS.BAR_HEIGHT / 4.0f, 
-                                sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
+                                sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLACK), 
                                 12.0f, 2.0f);
     }
 

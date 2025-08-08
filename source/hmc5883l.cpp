@@ -33,59 +33,60 @@ using namespace std;
  */
 FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fake_Bearing)
 {
-    FLOAT_XYZ_MATRIX ret_point;
+  FLOAT_XYZ_MATRIX ret_point;
 
-    const float rotation_speed_deg_per_ms = 0.0573f * 1.0f; // Adjusted for degrees (approx 0.0010 rad/ms * 180/PI)
+  const float rotation_speed_deg_per_ms = 0.0573f * 1.0f; // Adjusted for degrees (approx 0.0010 rad/ms * 180/PI)
 
-    bool skew = true;
-    float skew_factor = 0.10f; // Added 'f' suffix for float literal
+  bool skew = true;
+  float skew_factor = 0.10f; // Added 'f' suffix for float literal
 
-    // --- 1. Calculate the TRUE_FAKE_BEARING ahead of time ---
-    // This simulates a continuous rotation.
-    // We'll use a speed factor to control how fast the bearing changes with time.
-    // The result is modulo 360.0f to keep it within a full circle (0 to 360 degrees).
-    True_Fake_Bearing = fmod(tmeFrame_Time * rotation_speed_deg_per_ms, 360.0f);
+  // --- 1. Calculate the TRUE_FAKE_BEARING ahead of time ---
+  // This simulates a continuous rotation.
+  // We'll use a speed factor to control how fast the bearing changes with time.
+  // The result is modulo 360.0f to keep it within a full circle (0 to 360 degrees).
+  True_Fake_Bearing = fmod(tmeFrame_Time * rotation_speed_deg_per_ms, 360.0f);
 
-    // Ensure the bearing is always positive (fmod can return negative for negative inputs)
-    if (True_Fake_Bearing < 0) {
-        True_Fake_Bearing += 360.0f;
-    }
+  // Ensure the bearing is always positive (fmod can return negative for negative inputs)
+  if (True_Fake_Bearing < 0) 
+  {
+    True_Fake_Bearing += 360.0f;
+  }
 
-    // --- 2. Calculate X, Y, and Z offsets based on the TRUE_FAKE_BEARING ---
-    // These values simulate the raw sensor output that would correspond to the bearing.
-    // Based on your provided raw data mapping (RAW_XYZ.X = y; RAW_XYZ.Y = x;),
-    // we swap the sine and cosine components to match the expected rotation.
+  // --- 2. Calculate X, Y, and Z offsets based on the TRUE_FAKE_BEARING ---
+  // These values simulate the raw sensor output that would correspond to the bearing.
+  // Based on your provided raw data mapping (RAW_XYZ.X = y; RAW_XYZ.Y = x;),
+  // we swap the sine and cosine components to match the expected rotation.
 
-    const float magnitude_xy = 250.0f; // Scale factor for X and Y components
-    const float x_bias_offset = 600.0f;   // Fixed offset for X
-    const float y_bias_offset = 400.0f;  // Fixed offset for Y
-    const float z_constant_offset = 10.0f; // Fixed offset for Z (e.g., vertical component)
+  const float magnitude_xy = 250.0f; // Scale factor for X and Y components
+  const float x_bias_offset = 600.0f;   // Fixed offset for X
+  const float y_bias_offset = 400.0f;  // Fixed offset for Y
+  const float z_constant_offset = 10.0f; // Fixed offset for Z (e.g., vertical component)
 
-    // Convert True_Fake_Bearing from degrees to radians for std::sin and std::cos
-    float True_Fake_Bearing_Rad = True_Fake_Bearing * (M_PI / 180.0f);
+  // Convert True_Fake_Bearing from degrees to radians for std::sin and std::cos
+  float True_Fake_Bearing_Rad = True_Fake_Bearing * (M_PI / 180.0f);
 
-    // Swapped sin and cos for X and Y to match the RAW_XYZ.X = y, RAW_XYZ.Y = x mapping
-    ret_point.X = (magnitude_xy * std::cos(True_Fake_Bearing_Rad)) + x_bias_offset; // X corresponds to original 'y'
-    ret_point.Y = (magnitude_xy * std::sin(True_Fake_Bearing_Rad)) + y_bias_offset; // Y corresponds to original 'x'
-    ret_point.Z = z_constant_offset; // Z can be a constant or vary independently
+  // Swapped sin and cos for X and Y to match the RAW_XYZ.X = y, RAW_XYZ.Y = x mapping
+  ret_point.X = (magnitude_xy * std::cos(True_Fake_Bearing_Rad)) + x_bias_offset; // X corresponds to original 'y'
+  ret_point.Y = (magnitude_xy * std::sin(True_Fake_Bearing_Rad)) + y_bias_offset; // Y corresponds to original 'x'
+  ret_point.Z = z_constant_offset; // Z can be a constant or vary independently
 
-    // Is skew on?
-    if (skew)
-    {
-        // Store original values before skewing to avoid compounding effects
-        float original_X = ret_point.X;
-        float original_Y = ret_point.Y;
+  // Is skew on?
+  if (skew)
+  {
+    // Store original values before skewing to avoid compounding effects
+    float original_X = ret_point.X;
+    float original_Y = ret_point.Y;
 
-        // Skew the x and y components.
-        // This simulates cross-axis interference or non-orthogonality.
-        // For example, the X reading is influenced by the true Y value, and vice-versa.
-        ret_point.X = original_X + original_Y * skew_factor;
-        ret_point.Y = original_Y + original_X * skew_factor;
-        // You can adjust the skew_factor or apply different skewing logic
-        // to simulate various sensor imperfections.
-    }
+    // Skew the x and y components.
+    // This simulates cross-axis interference or non-orthogonality.
+    // For example, the X reading is influenced by the true Y value, and vice-versa.
+    ret_point.X = original_X + original_Y * skew_factor;
+    ret_point.Y = original_Y + original_X * skew_factor;
+    // You can adjust the skew_factor or apply different skewing logic
+    // to simulate various sensor imperfections.
+  }
 
-    return ret_point;
+  return ret_point;
 }
 
 // -------------------------------------------------------------------------------------
@@ -212,6 +213,8 @@ void CAL_LEVEL_3::preservation_of_data()
 
 
 // --- Calibration Core Functions --
+
+// This is no longer relevant because the fit_ellipsoid_and_get_calibration_matrix is flawed. 
 
 // Formulate the linear least squares problem: Ax = b
 // The ellipsoid equation is:
@@ -530,66 +533,12 @@ CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECT
 
   if (!fit_ellipse_and_get_calibration_matrix_2D(history, params)) 
   {
-      INFORMATION_CALIBRATION += "2D Calibration failed or insufficient data. \n\tUsing default parameters.\n";
-      // params already initialized to defaults (0 offset, identity matrix)
+    INFORMATION_CALIBRATION += "2D Calibration failed or insufficient data. \n\tUsing default parameters.\n";
+    // params already initialized to defaults (0 offset, identity matrix)
   }
     
   return params;
 }
-
-/**
- * @brief Calculates the compass heading in degrees after applying hard and soft iron corrections.
- * Uses a full 3x3 matrix for soft iron correction.
- * @param raw_point The raw compass reading (FLOAT_XYZ).
- * @param params The calibration parameters (offset and matrix).
- * @return The heading in degrees (0-360), where 0 is North.
- */
-/*
-void CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params) 
-{
-  // Calculated Calibrated Heading
-  {
-    // 1. Apply Hard Iron Correction: Remove the constant offset.
-    FLOAT_XYZ_MATRIX corrected_point = raw_point - params.hard_iron_offset;
-
-    // 2. Apply Soft Iron Correction: Transform the point using the soft iron matrix.
-    // This matrix will scale and potentially rotate/shear the point to make the field spherical.
-    corrected_point = params.soft_iron_matrix * corrected_point;
-
-    // 3. Calculate Heading using atan2 (still based on X and Y)
-    // atan2(y, x) gives the angle in radians from the positive X-axis to the point (x, y).
-    // For compass, positive Y is North, positive X is East.
-    // Standard atan2 returns -PI to PI.
-    float heading_rad = std::atan2(corrected_point.Y, corrected_point.X);
-
-    // Convert radians to degrees
-    float heading_deg = heading_rad * 180.0f / M_PI;
-
-    // Normalize to 0-360 degrees
-    if (heading_deg < 0) 
-    {
-      heading_deg += 360.0f;
-    }
-
-    HEADING_DEGREES_REPORT = heading_deg;
-  }
-
-  // --- Heading Without Soft Iron Compensation (Hard Iron Only) ---
-  if (true)
-  {
-    FLOAT_XYZ_MATRIX partially_corrected_point = raw_point - params.hard_iron_offset;
-
-    float heading_rad_raw = std::atan2(partially_corrected_point.Y, partially_corrected_point.X);
-    float heading_deg_raw = (heading_rad_raw * 180.0f / M_PI);
-    if (heading_deg_raw < 0) 
-    {
-      heading_deg_raw += 360.0f;
-    }
-
-    HEADING_DEGREES_REPORT_NON_CALIBRATED = heading_deg_raw;
-  }
-}
-*/
 
 // This function calculates the calibrated heading using a dampened soft-iron correction.
 void CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params) 

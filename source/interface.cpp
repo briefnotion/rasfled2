@@ -644,19 +644,19 @@ void processcommandlineinput(system_data &sdSysData,
       // Brightness 25%
       if (check_command(sdSysData.SCREEN_COMMS, " brt25", "Brightness 25%."))
       {
-        sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 0.25f);
+        sdSysData.PANEL_CONTROL.color_set_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.25f);
       }
       
       // Brightness 50%
       if (check_command(sdSysData.SCREEN_COMMS, " brt50", "Brightness 50%."))
       {
-        sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 0.50f);
+        sdSysData.PANEL_CONTROL.color_set_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.50f);
       }
       
       // Brightness 100%
       if (check_command(sdSysData.SCREEN_COMMS, " brt100", "Brightness 100%."))
       {
-        sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 1.00f);
+        sdSysData.PANEL_CONTROL.color_set_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 1.00f);
       }
       
       // -------------------------------------------------------------------------------------
@@ -971,63 +971,63 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS,"oo", "Turn On Overhead Illumination Lights with Running Color") || 
           check_command(sdSysData.SCREEN_COMMS,"zz", "Turn On Overhead Illumination Lights with Running Color"))
       {
-        sdSysData.CUSTOM_COLOR = sdSysData.COLOR_SELECT.neo_color_SIMPLE_RGB(RAS_CUSTOM).brightness(0.25);
+        sdSysData.CUSTOM_COLOR = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_SIMPLE_RGB(RAS_CUSTOM).brightness(0.25);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead White
       if (check_command(sdSysData.SCREEN_COMMS, "ow", "Turn On White Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_WHITE).SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_WHITE).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Red
       if (check_command(sdSysData.SCREEN_COMMS, "or", "Turn On Red Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_RED).SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_RED).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Green
       if (check_command(sdSysData.SCREEN_COMMS, "og", "Turn On Green Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_GREEN).SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_GREEN).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Blue
       if (check_command(sdSysData.SCREEN_COMMS, "ob", "Turn On Blue Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_BLUE).SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_BLUE).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Purple
       if (check_command(sdSysData.SCREEN_COMMS, "ou", "Turn On Purple Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_PURPLE).SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_PURPLE).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Yellow
       if (check_command(sdSysData.SCREEN_COMMS, "oy", "Turn On Yellow Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_YELLOW).SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_YELLOW).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Cyan
       if (check_command(sdSysData.SCREEN_COMMS, "oc", "Turn On Cyan Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_CYAN).SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_CYAN).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
       // Overhead Orange
       if (check_command(sdSysData.SCREEN_COMMS, "on", "Turn On Orange Overhead Illumination Lights"))
       {
-        sdSysData.CUSTOM_COLOR = (sdSysData.COLOR_SELECT.pure_color(RAS_ORANGE).SIMPLE_RGB).brightness(0.25f);
+        sdSysData.CUSTOM_COLOR = (sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_ORANGE).SIMPLE_RGB).brightness(0.25f);
         processcommandoverheadillum(sdSysData, tmeCurrentTime, Animations);
       }
 
@@ -1036,96 +1036,96 @@ void processcommandlineinput(system_data &sdSysData,
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_WHITE;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_WHITE).SIMPLE_RGB.brightness(0.25f), "White");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_WHITE);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_WHITE).SIMPLE_RGB.brightness(0.25f), "White");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_WHITE);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rr", "Set Running Color to Red"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_RED;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_RED).SIMPLE_RGB.brightness(0.25f), "Red");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_RED);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_RED).SIMPLE_RGB.brightness(0.25f), "Red");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_RED);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rg", "Set Running Color to Green"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_GREEN;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_GREEN).SIMPLE_RGB.brightness(0.25f), "Green");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_GREEN);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_GREEN).SIMPLE_RGB.brightness(0.25f), "Green");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_GREEN);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rb", "Set Running Color to Blue"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_BLUE;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_BLUE).SIMPLE_RGB.brightness(0.25f), "Blue");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_BLUE);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_BLUE).SIMPLE_RGB.brightness(0.25f), "Blue");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_BLUE);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "ru", "Set Running Color to Purple"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_PURPLE;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_PURPLE).SIMPLE_RGB.brightness(0.25f), "Purple");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_PURPLE);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_PURPLE).SIMPLE_RGB.brightness(0.25f), "Purple");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_PURPLE);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "ry", "Set Running Color to Yellow"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_YELLOW;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_YELLOW).SIMPLE_RGB.brightness(0.25f), "Yellow");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_YELLOW);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_YELLOW).SIMPLE_RGB.brightness(0.25f), "Yellow");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_YELLOW);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rc", "Set Running Color to Cyan"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_CYAN;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_CYAN).SIMPLE_RGB.brightness(0.25f), "Cyan");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_CYAN);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_CYAN).SIMPLE_RGB.brightness(0.25f), "Cyan");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_CYAN);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rn", "Set Running Color to Orange"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_ORANGE;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_ORANGE).SIMPLE_RGB.brightness(0.25f), "Orange");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_ORANGE);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_ORANGE).SIMPLE_RGB.brightness(0.25f), "Orange");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_ORANGE);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rx", "Set Running Color to Monochrome"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_MONOCHROME;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_MONOCHROME).SIMPLE_RGB.brightness(0.25f), "Monochrome");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_MONOCHROME);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_MONOCHROME).SIMPLE_RGB.brightness(0.25f), "Monochrome");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_MONOCHROME);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "re", "Set Running Color to Grey"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_GREY;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_GREY).SIMPLE_RGB.brightness(0.25f), "Grey");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_GREY);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_GREY).SIMPLE_RGB.brightness(0.25f), "Grey");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_GREY);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rp", "Set Running Color to Pink"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = false;
         sdSysData.RUNNING_COLOR = RAS_PINK;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_PINK).SIMPLE_RGB.brightness(0.25f), "Pink");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_PINK);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_PINK).SIMPLE_RGB.brightness(0.25f), "Pink");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_PINK);
       }
 
       if (check_command(sdSysData.SCREEN_COMMS, "rt", "Set Running Color to Automobile Temperature"))
       {
         sdSysData.RUNNING_COLOR_TEMPERATURE = true;
         sdSysData.RUNNING_COLOR = RAS_CUSTOM;
-        sdSysData.set_running_color(sdSysData.COLOR_SELECT.pure_color(RAS_GREEN).SIMPLE_RGB.brightness(0.25f), "Temperature");
-        sdSysData.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_GREEN);
+        sdSysData.set_running_color(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_GREEN).SIMPLE_RGB.brightness(0.25f), "Temperature");
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_set(sdSysData.PROGRAM_TIME.current_frame_time(), RAS_GREEN);
       }
 
       // -------------------------------------------------------------------------------------

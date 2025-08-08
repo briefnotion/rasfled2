@@ -14,6 +14,7 @@
 
 #include "fled_time.h"
 #include "stringthings.h"
+#include "screen4_helper.h"
 
 // ---------------------------------------------------------------------------------------
 
@@ -94,6 +95,11 @@ class SCREEN4_PANEL_CONTROL
 {
   private:
 
+  // AKA: Screen Brightness
+  float INTENSITY = 1.0f; // Not sure if this is the best place for intensity.
+                          //  Maybe it should just reside with the COLOR_SELECT.
+                          //  Except, its a panel thing
+
   int ATONOMOUS = 1;
   // 0 - Off
   // 1 - On
@@ -112,9 +118,11 @@ class SCREEN4_PANEL_CONTROL
   void set_adsb_map_max_distance();
 
   public:
+  // Colors
+  COLOR_COMBOS    COLOR_SELECT;     // All Working Colors
 
   // Main working panel
-  SCREEN4_PANELS PANELS;
+  SCREEN4_PANELS  PANELS;
 
   // Panel Control variables from alert system coordinator
   PANEL AUTO_TEMPERATURE;
@@ -127,6 +135,10 @@ class SCREEN4_PANEL_CONTROL
 
   // Notation 
   string EXTRA;
+
+  // Color Intensity
+  void color_set_intensity(unsigned long Time, float Intensity);
+  float color_current_intensity();
 
   // Flags initiated from points other than alert system coordinator
   bool FLAG_AUTO_ACCELERATION_DECELERATION = false;

@@ -37,7 +37,7 @@ void SCREEN4::door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 
 {
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(0).value)
   {
-    DOOR_INDICATOR_RD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
+    DOOR_INDICATOR_RD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
   }
   else
   {
@@ -46,7 +46,7 @@ void SCREEN4::door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(1).value)
   {
-    DOOR_INDICATOR_FD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
+    DOOR_INDICATOR_FD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
   }
   else
   {
@@ -55,7 +55,7 @@ void SCREEN4::door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(2).value)
   {
-    DOOR_INDICATOR_RP.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
+    DOOR_INDICATOR_RP.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
   }
   else
   {
@@ -64,7 +64,7 @@ void SCREEN4::door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 
 
   if (sdSysData.CONFIG.vSWITCH_PIN_MAP.at(3).value)
   {
-    DOOR_INDICATOR_FP.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
+    DOOR_INDICATOR_FP.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE));
   }
   else
   {
@@ -120,17 +120,17 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
         {
           if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left())
           {
-            BLINKER_INDICATOR_LEFT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_ORANGE));
+            BLINKER_INDICATOR_LEFT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_ORANGE));
           }
 
           if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
           {
-            BLINKER_INDICATOR_RIGHT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_ORANGE));
+            BLINKER_INDICATOR_RIGHT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_ORANGE));
           }
 
           if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards() || sdSysData.booHazardRunning)
           {
-            BLINKER_INDICATOR_HAZARD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED));
+            BLINKER_INDICATOR_HAZARD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_RED));
           }
         }
         else
@@ -194,19 +194,19 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
 
 void SCREEN4::set_screen_default_colors(system_data &sdSysData)
 {
-  //sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f);
+  //sdSysData.PANEL_CONTROL.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f);
   
   ImGuiStyle& style = ImGui::GetStyle();
 
-  ImColor background = sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_BLUE);
-  ImColor dim = sdSysData.COLOR_SELECT.neo_color_DIM(RAS_BLUE);
-  ImColor standard = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_BLUE);
-  ImColor hovered = sdSysData.COLOR_SELECT.neo_color_HOVERED(RAS_BLUE);
-  ImColor active = sdSysData.COLOR_SELECT.neo_color_ACTIVE(RAS_BLUE);
+  ImColor background = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_BACKGROUND(RAS_BLUE);
+  ImColor dim = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(RAS_BLUE);
+  ImColor standard = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_BLUE);
+  ImColor hovered = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_HOVERED(RAS_BLUE);
+  ImColor active = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_ACTIVE(RAS_BLUE);
 
   //style.Colors[ImGuiCol_ChildBg] = ImVec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-  style.Colors[ImGuiCol_Text] = sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE);
+  style.Colors[ImGuiCol_Text] = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE);
 
   style.Colors[ImGuiCol_TitleBg] = standard;
   style.Colors[ImGuiCol_TitleBgActive] = active;
@@ -217,7 +217,7 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   style.Colors[ImGuiCol_FrameBgActive] = active;
 
   style.Colors[ImGuiCol_Border] = background;
-  style.Colors[ImGuiCol_BorderShadow] = sdSysData.COLOR_SELECT.neo_color_BACKGROUND(RAS_YELLOW);
+  style.Colors[ImGuiCol_BorderShadow] = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_BACKGROUND(RAS_YELLOW);
 
   style.Colors[ImGuiCol_CheckMark] = standard;
 
@@ -237,9 +237,9 @@ void SCREEN4::set_screen_default_colors(system_data &sdSysData)
   style.Colors[ImGuiCol_TableRowBg] = dim;
   style.Colors[ImGuiCol_TableRowBgAlt] = standard;
 
-  style.Colors[ImGuiCol_Separator] = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE);
-  style.Colors[ImGuiCol_SeparatorHovered] = sdSysData.COLOR_SELECT.neo_color_HOVERED(RAS_WHITE);
-  style.Colors[ImGuiCol_SeparatorActive] = sdSysData.COLOR_SELECT.neo_color_ACTIVE(RAS_WHITE);
+  style.Colors[ImGuiCol_Separator] = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE);
+  style.Colors[ImGuiCol_SeparatorHovered] = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_HOVERED(RAS_WHITE);
+  style.Colors[ImGuiCol_SeparatorActive] = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_ACTIVE(RAS_WHITE);
 
   style.Colors[ImGuiCol_ResizeGrip] = standard;
   style.Colors[ImGuiCol_ResizeGripHovered] = hovered;
@@ -272,13 +272,13 @@ int SCREEN4::create(system_data &sdSysData)
 
     // Set colors
 
-    //sdSysData.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f);
+    //sdSysData.PANEL_CONTROL.COLOR_SELECT.init(sdSysData.PROGRAM_TIME.current_frame_time(), 1.0f);
 
     // Init and prepare DISPLAY_SCREEN
     
     clear_color = ImVec4(0.00f, 0.55f, 0.00f, 0.00f);
 
-    BLACK_QPAQUE = sdSysData.COLOR_SELECT.pure_color(RAS_BLACK).STANDARD;
+    BLACK_QPAQUE = sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_BLACK).STANDARD;
     BLACK_QPAQUE.Value.w = 0.0f;
 
     glfwSetErrorCallback(glfw_error_callback);
@@ -533,10 +533,10 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
   if (sdSysData.TTY_ONLY == false)
   {
     // For all colors, set the current frame time
-    sdSysData.COLOR_SELECT.set_frame_time(sdSysData.PROGRAM_TIME.current_frame_time());
+    sdSysData.PANEL_CONTROL.COLOR_SELECT.set_frame_time(sdSysData.PROGRAM_TIME.current_frame_time());
 
     //Check for changes in style
-    if (sdSysData.COLOR_SELECT.neo_color_is_changing())
+    if (sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_is_changing())
     {
       set_screen_default_colors(sdSysData);
     }
@@ -686,11 +686,11 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           line_start_2 = ImVec2(working_area.x + working_area.z - 50.0f, working_area.y + 50.0f);
           line_end_2 = ImVec2(working_area.x + 50.0f, working_area.y + working_area.w - 50.0f);
 
-          draw_list->AddLine(line_start_1, line_end_1, sdSysData.COLOR_SELECT.pure_color(RAS_RED).STANDARD, 50.0f);
-          draw_list->AddLine(line_start_2, line_end_2, sdSysData.COLOR_SELECT.pure_color(RAS_RED).STANDARD, 50.0f);
+          draw_list->AddLine(line_start_1, line_end_1, sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_RED).STANDARD, 50.0f);
+          draw_list->AddLine(line_start_2, line_end_2, sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_RED).STANDARD, 50.0f);
 
           ImGui::PushFont(io.Fonts->Fonts.Data[2]);
-          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.pure_color(RAS_RED).STANDARD));
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_RED).STANDARD));
 
           ImGui::SetCursorScreenPos(ImVec2(working_area.x + 50.0f, working_area.y + 150.0f));
           ImGui::Text(sdSysData.DNFWTS.DNFWTS_TEXT_1.value().c_str());
@@ -747,7 +747,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 RESET_KEYBOARD_FOCUS = false;
               }
 
-              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
+              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
               ImGui::PushFont(io.Fonts->Fonts.Data[2]);
               ImGui::Text("CMD:");
 
@@ -883,7 +883,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                                                   ImVec2(working_area_status_right.x, working_area_status_right.y), 
                                                   ImVec2(working_area_status_right.z, working_area_status_right.w)))
               {
-                sdSysData.COLOR_SELECT.toggle_void_color(sdSysData.PROGRAM_TIME.current_frame_time());
+                sdSysData.PANEL_CONTROL.COLOR_SELECT.toggle_void_color(sdSysData.PROGRAM_TIME.current_frame_time());
               }
             }
             ImGui::EndChild();
@@ -1159,7 +1159,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             ImGui::SameLine();
             //ImGui::BeginChild("Info Bar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
             {        
-              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_TEXT(RAS_GREEN)));
+              ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREEN)));
               ImGui::PushFont(io.Fonts->Fonts.Data[2]);
 
               // Display the Autononomous State or Street Legal Mode

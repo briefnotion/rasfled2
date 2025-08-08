@@ -104,14 +104,14 @@ void Text_Rotate(std::string textToRotate, float angleToRotate, bbEnum rotationC
 void simple_wrap_text_box(string Text, ImDrawList *Draw_List, system_data &sdSysData)
 {
   ImGui::Text(Text.c_str());
-  Draw_List->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), sdSysData.COLOR_SELECT.neo_color_ACTIVE(RAS_YELLOW));
+  Draw_List->AddRect(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_ACTIVE(RAS_YELLOW));
 }
 
 //void simple_black_back_text_box(string Text, ImDrawList *Draw_List, system_data &sdSysData)
 //{
   // isnt going to work
 //  ImGui::Text(Text.c_str());
-//  Draw_List->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), sdSysData.COLOR_SELECT.neo_c_black().ACTIVE, 3.0f);
+//  Draw_List->AddRectFilled(ImGui::GetItemRectMin(), ImGui::GetItemRectMax(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_c_black().ACTIVE, 3.0f);
 //}
 
 // ---------------------------------------------------------------------------------------
@@ -159,7 +159,7 @@ void Graphical_Number(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Posi
   {
     ImVec2 pos_1 = ImVec2(Position.x + Width - ((float)((number * 2) + 0)  * 12.0f), Position.y - 3.0f);
     ImVec2 pos_2 = ImVec2(Position.x + Width - ((float)((number * 2) + 1)  * 12.0f), Position.y - 3.0f);
-    Draw_List->AddLine(pos_1, pos_2, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE), 3.0f);
+    Draw_List->AddLine(pos_1, pos_2, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE), 3.0f);
   }
 }
 
@@ -206,7 +206,7 @@ void MARKER_GADGET::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 S
     if (PROPS.HORIZONTAL)
     {
       Draw_List->AddRectFilled(ImVec2(Start_Pos.x, Start_Pos.y), 
-                    ImVec2(Start_Pos.x + Size.x, Start_Pos.y + PROPS.SIZE), sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR));
+                    ImVec2(Start_Pos.x + Size.x, Start_Pos.y + PROPS.SIZE), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR));
       // No left side, relabel for bottom is not necessary.
     }
     else
@@ -214,12 +214,12 @@ void MARKER_GADGET::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 S
       if (PROPS.LEFT_SIDE)
       {
         Draw_List->AddRectFilled(ImVec2(Start_Pos.x, Start_Pos.y), 
-                      ImVec2(Start_Pos.x + PROPS.SIZE, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR));
+                      ImVec2(Start_Pos.x + PROPS.SIZE, Start_Pos.y + Size.y), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR));
       }
       else
       {
         Draw_List->AddRectFilled(ImVec2(Start_Pos.x + Size.x - PROPS.SIZE , Start_Pos.y), 
-                      ImVec2(Start_Pos.x + Size.x, Start_Pos.y + Size.y), sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR));
+                      ImVec2(Start_Pos.x + Size.x, Start_Pos.y + Size.y), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR));
       }
     }
   }
@@ -322,7 +322,7 @@ void ONE_CHAR_LINE_GRAPH::update_value(float Value, float Max_Value)
 
 void ONE_CHAR_LINE_GRAPH::draw(ImDrawList *Draw_List, system_data &sdSysData)
 {
-  ImU32 col = sdSysData.COLOR_SELECT.neo_color_TEXT(PROPS.COLOR);
+  ImU32 col = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(PROPS.COLOR);
 
   ImVec2 position = ImGui::GetCursorScreenPos();
 
@@ -468,7 +468,7 @@ void DRAW_RULER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Star
     {
       Draw_List->AddLine(ImVec2(Start_Position.x + l1_size, Start_Position.y), 
                           ImVec2(Start_Position.x + l1_size, Start_Position.y + (y_size * 0.75f)), 
-                          sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
+                          sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
     }
 
     // 10 ticks
@@ -478,7 +478,7 @@ void DRAW_RULER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Star
       {
         Draw_List->AddLine(ImVec2(Start_Position.x + (tenths * l2_size), Start_Position.y), 
                       ImVec2(Start_Position.x + (tenths * l2_size), Start_Position.y + (y_size * 0.5f)), 
-                      sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
+                      sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
       }
     }
 
@@ -489,7 +489,7 @@ void DRAW_RULER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Star
       {
         Draw_List->AddLine(ImVec2(Start_Position.x + (twentyiths * l3_size), Start_Position.y), 
                       ImVec2(Start_Position.x + (twentyiths * l3_size), Start_Position.y + (y_size * 0.25f)), 
-                      sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
+                      sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
       }
     }
 
@@ -500,7 +500,7 @@ void DRAW_RULER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Star
       {
         Draw_List->AddLine(ImVec2(Start_Position.x + (hundreds * l4_size), Start_Position.y), 
                       ImVec2(Start_Position.x + (hundreds * l4_size), Start_Position.y + 1.0f), 
-                      sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
+                      sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
       }
     }
   }
@@ -511,7 +511,7 @@ void DRAW_RULER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Star
     {
       Draw_List->AddLine(ImVec2(Start_Position.x, Start_Position.y + l1_size), 
                           ImVec2(Start_Position.x + (x_size * 0.75f), Start_Position.y + l1_size), 
-                          sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
+                          sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
     }
 
     // 10 ticks
@@ -521,7 +521,7 @@ void DRAW_RULER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Star
       {
         Draw_List->AddLine(ImVec2(Start_Position.x, Start_Position.y + (tenths * l2_size)), 
                       ImVec2(Start_Position.x + (x_size * 0.5f), Start_Position.y + (tenths * l2_size)), 
-                      sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
+                      sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
       }
     }
 
@@ -532,7 +532,7 @@ void DRAW_RULER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Star
       {
         Draw_List->AddLine(ImVec2(Start_Position.x, Start_Position.y + (twentyiths * l3_size)), 
                       ImVec2(Start_Position.x + (x_size * 0.25f), Start_Position.y + (twentyiths * l3_size)), 
-                      sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
+                      sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
       }
     }
 
@@ -543,7 +543,7 @@ void DRAW_RULER::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Star
       {
         Draw_List->AddLine(ImVec2(Start_Position.x, Start_Position.y + (hundreds * l4_size)), 
                       ImVec2(Start_Position.x + 1.0f, Start_Position.y  + (hundreds * l4_size)), 
-                      sdSysData.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
+                      sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(PROPS.COLOR), PROPS.POINT_SIZE);
       }
     }
   }
@@ -568,7 +568,7 @@ void DRAW_GRID::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Start
   {
     Draw_List->AddLine(ImVec2(Start_Position.x + (vert_count * X_SIZE), Start_Position.y), 
                   ImVec2(Start_Position.x + (vert_count * X_SIZE), End_Position.y), 
-                  sdSysData.COLOR_SELECT.neo_color_DIM(PROPS.COLOR), PROPS.POINT_SIZE);
+                  sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(PROPS.COLOR), PROPS.POINT_SIZE);
   }
 
   // Horizontal Lines
@@ -576,7 +576,7 @@ void DRAW_GRID::draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Start
   {
     Draw_List->AddLine(ImVec2(Start_Position.x, Start_Position.y + (horz_count * Y_SIZE)), 
                   ImVec2((End_Position.x), Start_Position.y + (horz_count * Y_SIZE)), 
-                  sdSysData.COLOR_SELECT.neo_color_DIM(PROPS.COLOR), PROPS.POINT_SIZE);
+                  sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(PROPS.COLOR), PROPS.POINT_SIZE);
   }
 }
 
@@ -953,7 +953,7 @@ void DRAW_D2_PLOT::draw_graph(ImDrawList *Draw_List, system_data &sdSysData)
   for (int graph = 0; graph < (int)SUB_GRAPHS.size(); graph++)
   {
     ImGui::SetCursorScreenPos(ImVec2(SUB_GRAPHS[graph].START_POS.x + 2.0f, SUB_GRAPHS[graph].START_POS.y + 0.0f));
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE)));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE)));
     ImGui::Text("%s", SUB_GRAPHS[graph].LABEL.c_str());
     ImGui::PopStyleColor();
 
@@ -996,7 +996,7 @@ void DRAW_D2_PLOT::draw_graph(ImDrawList *Draw_List, system_data &sdSysData)
 
             if (single_value_out_of_bounds_x == false)
             {
-              Draw_List->AddLine(top, bottom, sdSysData.COLOR_SELECT.neo_color_STANDARD(SUB_GRAPHS[graph].LINE[line].LINE_COLOR), SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
+              Draw_List->AddLine(top, bottom, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(SUB_GRAPHS[graph].LINE[line].LINE_COLOR), SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
             }
           }
         }
@@ -1016,7 +1016,7 @@ void DRAW_D2_PLOT::draw_graph(ImDrawList *Draw_List, system_data &sdSysData)
 
           if (min_max_out_of_bounds_x == false)
           {
-            Draw_List->AddLine(min, max, sdSysData.COLOR_SELECT.neo_color_DIM(SUB_GRAPHS[graph].LINE[line].LINE_COLOR), SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
+            Draw_List->AddLine(min, max, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(SUB_GRAPHS[graph].LINE[line].LINE_COLOR), SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
           }
         }
         
@@ -1035,7 +1035,7 @@ void DRAW_D2_PLOT::draw_graph(ImDrawList *Draw_List, system_data &sdSysData)
 
           if (mean_out_of_bounds_x_start == false && mean_out_of_bounds_x_end == false)
           {
-            Draw_List->AddLine(mean_start, mean_end, sdSysData.COLOR_SELECT.neo_color_STANDARD_V(SUB_GRAPHS[graph].LINE[line].LINE_COLOR), SUB_GRAPHS[graph].LINE[line].POINT_SIZE);
+            Draw_List->AddLine(mean_start, mean_end, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(SUB_GRAPHS[graph].LINE[line].LINE_COLOR), SUB_GRAPHS[graph].LINE[line].POINT_SIZE);
           }
         }
       }
@@ -1052,7 +1052,7 @@ void DRAW_D2_PLOT::draw_graph(ImDrawList *Draw_List, system_data &sdSysData)
 
         if (min_max_out_of_bounds_x == false)
         {
-          Draw_List->AddLine(min, max, sdSysData.COLOR_SELECT.neo_color_DIM(SUB_GRAPHS[graph].LINE[line].LINE_COLOR), SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
+          Draw_List->AddLine(min, max, sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(SUB_GRAPHS[graph].LINE[line].LINE_COLOR), SUB_GRAPHS[graph].X_FACTOR * SUB_GRAPHS[graph].LINE[line].MIN_MAX_OVERLAP_FACTOR);
         }
       }
     }
@@ -1342,8 +1342,8 @@ float DRAW_D2_PLOT_DEGENERATE::value_to_y(float Value)
 void DRAW_D2_PLOT_DEGENERATE::draw_grid(ImDrawList *Draw_List, system_data &sdSysData)
 {
   // Assign Colors
-  ImColor color_border = sdSysData.COLOR_SELECT.neo_color_DIM(RAS_BLUE);
-  ImColor color_grid   = sdSysData.COLOR_SELECT.neo_color_DIM(RAS_WHITE);
+  ImColor color_border = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(RAS_BLUE);
+  ImColor color_grid   = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(RAS_WHITE);
 
   ImVec2 point_start;
   ImVec2 point_end;
@@ -1421,7 +1421,7 @@ void DRAW_D2_PLOT_DEGENERATE::draw_grid(ImDrawList *Draw_List, system_data &sdSy
         if (position_on_plot(point_end, screen_position_end))
         {
           ImGui::SetCursorScreenPos(screen_position_end);
-          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE)));
+          ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE)));
           ImGui::Text("%s", GRID_PROPERTIES[property].LABEL.c_str());
           ImGui::PopStyleColor();
         }
@@ -1455,7 +1455,7 @@ void DRAW_D2_PLOT_DEGENERATE::draw_grid(ImDrawList *Draw_List, system_data &sdSy
 
     vector<float> position;
 
-    ImColor color_line_dim = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(1);
+    ImColor color_line_dim = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(1);
 
     float tmp_position;
     for (int xpos = 0; xpos < DEGEN_POINT_SIZE; xpos++)
@@ -1569,8 +1569,8 @@ void DRAW_D2_PLOT_DEGENERATE::draw_lines(ImDrawList *Draw_List, system_data &sdS
 
         bool start_drawing = false;
 
-        ImColor color_line = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(LINE[line_number].LINE_COLOR);
-        ImColor color_line_dim = sdSysData.COLOR_SELECT.neo_color_DIM(LINE[line_number].LINE_COLOR);
+        ImColor color_line = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(LINE[line_number].LINE_COLOR);
+        ImColor color_line_dim = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(LINE[line_number].LINE_COLOR);
 
         // Draw line
         for (int point = 0; point < (int)LINE[line_number].DATA_POINT.size(); point++)
@@ -1814,15 +1814,15 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
   ImVec2 point_end;
 
   // Values
-  ImColor color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
-  ImColor color_line_decel = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
+  ImColor color_line_accel = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
+  ImColor color_line_decel = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
 
-  ImColor color_line_accel_history = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
-  ImColor color_line_decel_history = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_PINK);
+  ImColor color_line_accel_history = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
+  ImColor color_line_decel_history = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_PINK);
 
-  ImColor color_marker = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
-  ImColor color_marker_fill = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
-  ImColor color_marker_fill_decel = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
+  ImColor color_marker = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
+  ImColor color_marker_fill = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
+  ImColor color_marker_fill_decel = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
 
   // Draw DECELERATION
   if (SPEED_VECTORS_DECELERATION.size() > 0)
@@ -1853,31 +1853,31 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
     {
       if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 0)
       {
-        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_GREY);
+        color_line_accel = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_GREY);
       }
       else if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 1)
       {
-        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
+        color_line_accel = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_WHITE);
       }
       else if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 2)
       {
-        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_ORANGE);
+        color_line_accel = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_ORANGE);
       }
       else if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 3)
       {
-        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_BLUE);
+        color_line_accel = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_BLUE);
       }
       else if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 4)
       {
-        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_GREEN);
+        color_line_accel = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_GREEN);
       }
       else if (SPEED_VECTORS_ACCELERATION_GEAR[speed_point] == 5)
       {
-        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
+        color_line_accel = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
       }
       else
       {
-        color_line_accel = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_PURPLE);
+        color_line_accel = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_PURPLE);
       }
 
       speed = (float)speed_point / (float)PROPS.MPH_DIVISION;
@@ -1970,10 +1970,10 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_lines(ImDrawList *Draw_List, system_data &sd
 void DRAW_D2_PLOT_POWER_CURVE::draw_grid(ImDrawList *Draw_List, system_data &sdSysData)
 {
   // Assign Colors
-  ImColor color_border        = sdSysData.COLOR_SELECT.neo_color_DIM(RAS_BLUE);
-  ImColor color_grid_speed    = sdSysData.COLOR_SELECT.neo_color_DIM(RAS_WHITE);
-  ImColor color_grid_accel    = sdSysData.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
-  ImColor color_grid_decel    = sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
+  ImColor color_border        = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(RAS_BLUE);
+  ImColor color_grid_speed    = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_DIM(RAS_WHITE);
+  ImColor color_grid_accel    = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(RAS_YELLOW);
+  ImColor color_grid_decel    = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_RED);
 
   ImVec2 point_start;
   ImVec2 point_end;
@@ -2002,7 +2002,7 @@ void DRAW_D2_PLOT_POWER_CURVE::draw_grid(ImDrawList *Draw_List, system_data &sdS
                         color_grid_speed, 1.0f);
 
     ImGui::SetCursorScreenPos(screen_position_start);
-    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE)));
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_WHITE)));
     ImGui::Text("%d", (int)(speed_line * 10.0f));
     ImGui::PopStyleColor();
   }

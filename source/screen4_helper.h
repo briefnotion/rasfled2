@@ -312,6 +312,8 @@ class COLOR_COMBOS
   vector<COLOR_COMBO>     COLOR_COMBINATIONS_V;   // Color palates for corpo mode
   vector<NEO_COLOR_COMBO> COLOR_COMBINATIONS_NEO; // Color palates for corpo mode
 
+  ImVec4                  CUSTOM_COLOR_STORAGE; // Rembers the original custom color, to be 
+                                                      //  changed when intensity changes.
   COLOR_COMBO             CUSTOM_COLOR_COMBO;
 
   bool ALREADY_INITIALIZED = false;
@@ -324,7 +326,7 @@ class COLOR_COMBOS
 
   public:
 
-  void init(unsigned long Time, float Intensity);
+  void init_and_set_intensity(unsigned long Time, float Intensity);
 
   void set_neo_duration(float Duration);
 
