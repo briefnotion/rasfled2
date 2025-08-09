@@ -1,3 +1,6 @@
+2.294_250809_A
+  - Small change to start at brightness 100% if not connected to car.
+
 2.294_250809
   - Brightness will go to 50% when the headlights are switched on, and 100% when 
       the headlights are switched off.  (UNTESTED)
