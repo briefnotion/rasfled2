@@ -258,8 +258,12 @@ int loop_2(bool TTY_Only)
   //THREAD_COMMAND.create();
   sdSystem.THREAD_RENDER.create(get_frame_interval(sdSystem.CONFIG.iFRAMES_PER_SECOND));
 
+  // Load Color System
+  //sdSystem.PANEL_CONTROL.COLOR_SELECT.init_and_set_intensity(sdSystem.PROGRAM_TIME.current_frame_time(), 1.0f);
+  sdSystem.PANEL_CONTROL.color_set_initial_values(true, 1.00f, 0.50f);
+  sdSystem.PANEL_CONTROL.color_start(sdSystem.PROGRAM_TIME.current_frame_time());
+  
   // Load Windows or Console
-  sdSystem.PANEL_CONTROL.COLOR_SELECT.init_and_set_intensity(sdSystem.PROGRAM_TIME.current_frame_time(), 1.0f);
   SCREEN4 cons_2;
 
   // Check Directories

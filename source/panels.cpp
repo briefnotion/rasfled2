@@ -18,6 +18,94 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
+void FLOAT_ON_OFF_AUTOMATIC::set_initial_values(bool Automatic_On_or_Off, float Manual_Value, float Automatic_value)
+{
+  AUTOMATIC_ON = Automatic_On_or_Off;
+  VALUE_MANUAL = Manual_Value;
+  VALUE_AUTOMATIC = Automatic_value;
+}
+
+bool FLOAT_ON_OFF_AUTOMATIC::set_manual_value(float Value)
+{
+  if (AUTOMATIC_ON)
+  {
+    AUTOMATIC_ON = false;
+    if (VALUE_AUTOMATIC != Value)
+    {
+      VALUE_MANUAL = Value;
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  else
+  {
+    if (Value != VALUE_MANUAL)
+    {
+      VALUE_MANUAL = Value;
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+}
+
+bool FLOAT_ON_OFF_AUTOMATIC::set_automatic_value(float Value)
+{
+  if (VALUE_AUTOMATIC != Value)
+  {
+    VALUE_AUTOMATIC = Value;
+    if (AUTOMATIC_ON)
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool FLOAT_ON_OFF_AUTOMATIC::set_automatic(bool On_or_Off)
+{
+  if (AUTOMATIC_ON != On_or_Off)
+  {
+    AUTOMATIC_ON = On_or_Off;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+bool FLOAT_ON_OFF_AUTOMATIC::automatic_value()
+{
+  return AUTOMATIC_ON;
+}
+
+float FLOAT_ON_OFF_AUTOMATIC::value()
+{
+  if (AUTOMATIC_ON)
+  {
+    return VALUE_AUTOMATIC;
+  }
+  else
+  {
+    return VALUE_MANUAL;
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
 void PANEL::request(unsigned long Time, int Linger_Time, string Description)
 {
   REQUESTED = true;
@@ -105,19 +193,48 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
 }
 
 // ---
-
-void SCREEN4_PANEL_CONTROL::color_set_intensity(unsigned long Time, float Intensity)
+void SCREEN4_PANEL_CONTROL::color_start(unsigned long Time)
 {
-  if (Intensity != INTENSITY)
+  COLOR_SELECT.init_and_set_intensity(Time, INTENSITY.value());
+}
+
+void SCREEN4_PANEL_CONTROL::color_set_initial_values(bool Automatic_On_or_Off, float Manual_Value, float Automatic_value)
+{
+  INTENSITY.set_initial_values(Automatic_On_or_Off, Manual_Value, Automatic_value);
+}
+
+void SCREEN4_PANEL_CONTROL::color_set_manual_intensity(unsigned long Time, float Intensity)
+{
+  if (INTENSITY.set_manual_value(Intensity))
   {
-    INTENSITY = Intensity;
     COLOR_SELECT.init_and_set_intensity(Time, Intensity);
+  }
+}
+
+void SCREEN4_PANEL_CONTROL::color_set_automatic_intensity(unsigned long Time, float Intensity)
+{
+  if (INTENSITY.set_automatic_value(Intensity))
+  {
+    COLOR_SELECT.init_and_set_intensity(Time, Intensity);
+  }
+}
+
+void SCREEN4_PANEL_CONTROL::color_set_automatic(unsigned long Time, bool On_or_Off)
+{
+  if (INTENSITY.set_automatic(On_or_Off))
+  {
+    COLOR_SELECT.init_and_set_intensity(Time, INTENSITY.value());
   }
 }
 
 float SCREEN4_PANEL_CONTROL::color_current_intensity()
 {
-  return INTENSITY;
+  return INTENSITY.value();
+}
+
+bool SCREEN4_PANEL_CONTROL::color_automatic_value()
+{
+  return INTENSITY.automatic_value();
 }
 
 int SCREEN4_PANEL_CONTROL::autonomous_state()

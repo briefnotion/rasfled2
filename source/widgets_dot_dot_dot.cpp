@@ -372,19 +372,25 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
         ImGui::NewLine();
         ImGui::Text("Screen Brightness:");
 
-        if (BRIGHTNESS_100.button_color(sdSysData, "BRT\n100", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        if (BRIGHTNESS_100.button_toggle_color(sdSysData, "BRT\n100", "BRT\n100", 
+                                                sdSysData.PANEL_CONTROL.color_current_intensity() == 1.00f, 
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
           sdSysData.SCREEN_COMMS.command_text_set(" brt100");
         }
         ImGui::SameLine();
-        if (BRIGHTNESS_50.button_color(sdSysData, "BRT\n50", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        if (BRIGHTNESS_50.button_toggle_color(sdSysData, "BRT\n50", "BRT\n50", 
+                                                sdSysData.PANEL_CONTROL.color_current_intensity() == 0.50f, 
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
           sdSysData.SCREEN_COMMS.command_text_set(" brt50");
         }
         ImGui::SameLine();
-        if (BRIGHTNESS_25.button_color(sdSysData, "BRT\n25", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        if (BRIGHTNESS_AUTO.button_toggle_color(sdSysData, "BRT\nAUTO", "BRT\nAUTO", 
+                                                sdSysData.PANEL_CONTROL.color_automatic_value(), 
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
-          sdSysData.SCREEN_COMMS.command_text_set(" brt25");
+          sdSysData.SCREEN_COMMS.command_text_set(" brtauto");
         }
         ImGui::EndChild();
       }

@@ -337,7 +337,7 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 
 
 
-/*
+    /*
     // MIL alert
     if (sdSysData.ALL_ALERTS.res_alert_condition(AUTO_RESERVE_ALERT_MIL, 
                                       sdSysData.CAR_INFO.STATUS.SYSTEM.malfunction_indicator_light() == true , 
@@ -384,10 +384,21 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
       sdSysData.ALL_ALERTS.ALERTS_RESERVE[AUTO_RESERVE_ALERT_FUEL_LEVEL].set_show_value_bar(true);
     }
 
-*/
+    */
 
-
-
+    
+    // Headlights Changed On and Off
+    if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on(), LIGHTS_HEADLIGHTS) == true)
+    {
+      if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on())
+      {
+        sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 0.50f);
+      }
+      else
+      {
+        sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 1.00f);
+      }
+    }
 
     // Cruese Control On Off
     if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.cruise_control(), CUISE_CONTROL) == true)

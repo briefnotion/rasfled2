@@ -1,3 +1,15 @@
+2.294_250809
+  - Brightness will go to 50% when the headlights are switched on, and 100% when 
+      the headlights are switched off.  (UNTESTED)
+  - retained buttons in "...". Replaced the Brightness 25% button with an Automatic 
+      Brightness for the headlights.  
+  - retained the command lines for brightness, and added one.
+      On Command line:
+        " brtauto"- Toggle Automatic Brightness
+        " brt25"  - Brightness 25%
+        " brt50"  - Brightness 50%
+        " brt100" - Brightness 100%
+
 2.293_250808
   - Screen brightness can now be set with:
       sdSysData.PANEL_CONTROL.color_set_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.50f);

@@ -18,6 +18,24 @@
 
 // ---------------------------------------------------------------------------------------
 
+class FLOAT_ON_OFF_AUTOMATIC
+{
+  private:
+  float VALUE_MANUAL    = 0.0f;
+  float VALUE_AUTOMATIC = 0.0f;
+  bool  AUTOMATIC_ON    = false;
+
+  public:
+  void set_initial_values(bool Automatic_On_or_Off, float Manual_Value, float Automatic_value);
+  bool set_manual_value(float Value);
+  bool set_automatic_value(float Value);
+  bool set_automatic(bool On_or_Off);
+  bool automatic_value();
+  float value();
+};
+
+// ---------------------------------------------------------------------------------------
+
 class SCREEN4_PANELS
 {
   public:
@@ -96,9 +114,11 @@ class SCREEN4_PANEL_CONTROL
   private:
 
   // AKA: Screen Brightness
-  float INTENSITY = 1.0f; // Not sure if this is the best place for intensity.
+  //float INTENSITY = 1.0f; // Not sure if this is the best place for intensity.
                           //  Maybe it should just reside with the COLOR_SELECT.
                           //  Except, its a panel thing
+
+  FLOAT_ON_OFF_AUTOMATIC INTENSITY;
 
   int ATONOMOUS = 1;
   // 0 - Off
@@ -137,8 +157,15 @@ class SCREEN4_PANEL_CONTROL
   string EXTRA;
 
   // Color Intensity
-  void color_set_intensity(unsigned long Time, float Intensity);
+  void color_start(unsigned long Time);
+  void color_set_initial_values(bool Automatic_On_or_Off, float Manual_Value, float Automatic_value);
+  
+  void color_set_manual_intensity(unsigned long Time, float Intensity);
+  void color_set_automatic_intensity(unsigned long Time, float Intensity);
+  void color_set_automatic(unsigned long Time, bool On_or_Off);
+  
   float color_current_intensity();
+  bool color_automatic_value();
 
   // Flags initiated from points other than alert system coordinator
   bool FLAG_AUTO_ACCELERATION_DECELERATION = false;

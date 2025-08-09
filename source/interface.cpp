@@ -641,22 +641,30 @@ void processcommandlineinput(system_data &sdSysData,
       // -------------------------------------------------------------------------------------
       // BRIGHTNESS COMMANDS
       
+
+      // Brightness 25%
+      if (check_command(sdSysData.SCREEN_COMMS, " brtauto", "Toggle Auto Brightness."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_automatic(sdSysData.PROGRAM_TIME.current_frame_time(), 
+                                            !sdSysData.PANEL_CONTROL.color_automatic_value());
+      }
+
       // Brightness 25%
       if (check_command(sdSysData.SCREEN_COMMS, " brt25", "Brightness 25%."))
       {
-        sdSysData.PANEL_CONTROL.color_set_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.25f);
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.25f);
       }
       
       // Brightness 50%
       if (check_command(sdSysData.SCREEN_COMMS, " brt50", "Brightness 50%."))
       {
-        sdSysData.PANEL_CONTROL.color_set_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.50f);
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.50f);
       }
       
       // Brightness 100%
       if (check_command(sdSysData.SCREEN_COMMS, " brt100", "Brightness 100%."))
       {
-        sdSysData.PANEL_CONTROL.color_set_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 1.00f);
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 1.00f);
       }
       
       // -------------------------------------------------------------------------------------
