@@ -63,6 +63,8 @@ class AUTOMOBILE_HANDLER
   bool LIGHT_DOOR_HANDLE_ON = false;
 
   bool LIGHTS_HEADLIGHTS = false;
+  TIMED_IS_READY SCREEN_BRIGHTNESS_CHANGE;
+
   bool CUISE_CONTROL = false;
 
   TIMED_PING ALERT_TIMER;   // Restrict multiple sequential alerts

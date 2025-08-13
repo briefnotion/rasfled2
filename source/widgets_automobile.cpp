@@ -711,7 +711,7 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
 
   ImGui::SameLine();
   
-  if (BTC_NOVA_2_GPS_COMPASS.button_toggle_color(sdSysData, "GPS\nCOMP", "GPS\nCOMP", sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION == 4, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  if (BTC_NOVA_2_GPS_COMPASS.button_toggle_color(sdSysData, "GPS\nCOMP", "GPS\nCOMP", sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION == 5, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
   {
     sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION = 5;
   }
@@ -972,33 +972,34 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
   if (sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION == 5)  // GPS and COMPASS
   {
     ImGui::Text("          GPS");
-  
-    //NOVA_2_DOOR_LF.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.lf_door_open()));
-    //NOVA_2_DOOR_LF.draw(draw_list_nova, sdSysData);
-  
-    //ImGui::SameLine();
-  
-    //NOVA_2_DOOR_RF.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.rf_door_open()));
-    //NOVA_2_DOOR_RF.draw(draw_list_nova, sdSysData);
-    
-    //ImGui::SameLine();
-  
-    //NOVA_2_DOOR_HOOD.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.DOORS.hood_door_open()));
-    //NOVA_2_DOOR_HOOD.draw(draw_list_nova, sdSysData);
+    {
+      NOVA_2_GPS_ACTIVE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time())));
+      NOVA_2_GPS_ACTIVE.draw(draw_list_nova, sdSysData);
+      
+      NOVA_2_GPS_CURRENT_LOCATION_LATITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().LATITUDE));
+      NOVA_2_GPS_CURRENT_LOCATION_LATITUDE.draw(draw_list_nova, sdSysData);
 
+      NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().LONGITUDE));
+      NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.draw(draw_list_nova, sdSysData);
+    }
     // ---
   
     ImGui::NewLine();
     ImGui::Text("          Compass");
+    {
+
+    }
+
+    // ---
   
-    //NOVA_2_FUEL_CONSUMED.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.consumed());
-    //NOVA_2_FUEL_CONSUMED.draw(draw_list_nova, sdSysData);
-  
-    //NOVA_2_FUEL_PERCENTAGE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.percentage());
-    //NOVA_2_FUEL_PERCENTAGE.draw(draw_list_nova, sdSysData);
-  
-    //NOVA_2_FUEL_LEVEL_RAW.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.FUEL.level_raw());
-    //NOVA_2_FUEL_LEVEL_RAW.draw(draw_list_nova, sdSysData);
+    ImGui::NewLine();
+    ImGui::Text("          Other");
+    {
+      NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.update_value(sdSysData, to_string(
+              getCurrentDaylightFactor((float)sdSysData.GPS_SYSTEM.current_position().LATITUDE, 
+                                        (float)sdSysData.GPS_SYSTEM.current_position().LONGITUDE)));
+      NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.draw(draw_list_nova, sdSysData);
+    }
   }
 }
 
@@ -2127,6 +2128,22 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     NOVA_2_STEERING_LEFT_OF_CENTER.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "LEFTOC ");
     NOVA_2_STEERING_LEFT_OF_CENTER.create(sdSysData);
 
+    // GPS COMPASS OTHER
+    NOVA_2_GPS_ACTIVE.PROPS = tmp_defalt_props;
+    NOVA_2_GPS_ACTIVE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "GPS ACT ");
+    NOVA_2_GPS_ACTIVE.create(sdSysData);
+
+    NOVA_2_GPS_CURRENT_LOCATION_LATITUDE.PROPS = tmp_defalt_props;
+    NOVA_2_GPS_CURRENT_LOCATION_LATITUDE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "GPS LAT ");
+    NOVA_2_GPS_CURRENT_LOCATION_LATITUDE.create(sdSysData);
+
+    NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.PROPS = tmp_defalt_props;
+    NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "GPS LON ");
+    NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.create(sdSysData);
+
+    NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.PROPS = tmp_defalt_props;
+    NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "BRIGHT ");
+    NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.create(sdSysData);
   }
 }
 

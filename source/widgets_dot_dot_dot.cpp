@@ -370,27 +370,108 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
         // ---
 
         ImGui::NewLine();
-        ImGui::Text("Screen Brightness:");
+        ImGui::Text("Screen Brightness:  (%.3f)", sdSysData.PANEL_CONTROL.color_current_intensity());
 
-        if (BRIGHTNESS_100.button_toggle_color(sdSysData, "BRT\n100", "BRT\n100", 
-                                                sdSysData.PANEL_CONTROL.color_current_intensity() == 1.00f, 
-                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
-        {
-          sdSysData.SCREEN_COMMS.command_text_set(" brt100");
-        }
-        ImGui::SameLine();
-        if (BRIGHTNESS_50.button_toggle_color(sdSysData, "BRT\n50", "BRT\n50", 
-                                                sdSysData.PANEL_CONTROL.color_current_intensity() == 0.50f, 
-                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
-        {
-          sdSysData.SCREEN_COMMS.command_text_set(" brt50");
-        }
-        ImGui::SameLine();
         if (BRIGHTNESS_AUTO.button_toggle_color(sdSysData, "BRT\nAUTO", "BRT\nAUTO", 
                                                 sdSysData.PANEL_CONTROL.color_automatic_value(), 
                                               RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
         {
           sdSysData.SCREEN_COMMS.command_text_set(" brtauto");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_00.button_toggle_color(sdSysData, " 00", " 00", 
+                                                (sdSysData.PANEL_CONTROL.color_current_intensity() >= 0.00f &&
+                                                  sdSysData.PANEL_CONTROL.color_current_intensity() < 0.10f), 
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt00");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_10.button_toggle_color(sdSysData, " 10", " 10", 
+                                                (sdSysData.PANEL_CONTROL.color_current_intensity() >= 0.10f &&
+                                                  sdSysData.PANEL_CONTROL.color_current_intensity() < 0.20f), 
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt10");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_20.button_toggle_color(sdSysData, " 20", " 20", 
+                                                (sdSysData.PANEL_CONTROL.color_current_intensity() >= 0.20f &&
+                                                  sdSysData.PANEL_CONTROL.color_current_intensity() < 0.30f), 
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt20");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_30.button_toggle_color(sdSysData, " 30", " 30", 
+                                                (sdSysData.PANEL_CONTROL.color_current_intensity() >= 0.30f &&
+                                                  sdSysData.PANEL_CONTROL.color_current_intensity() < 0.40f),
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt30");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_40.button_toggle_color(sdSysData, " 40", " 40", 
+                                                (sdSysData.PANEL_CONTROL.color_current_intensity() >= 0.40f &&
+                                                  sdSysData.PANEL_CONTROL.color_current_intensity() < 0.50f),
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt40");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_50.button_toggle_color(sdSysData, " 50", " 50", 
+                                                (sdSysData.PANEL_CONTROL.color_current_intensity() >= 0.50f &&
+                                                  sdSysData.PANEL_CONTROL.color_current_intensity() < 0.60f),
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt50");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_60.button_toggle_color(sdSysData, " 60", " 60", 
+                                                (sdSysData.PANEL_CONTROL.color_current_intensity() >= 0.60f &&
+                                                  sdSysData.PANEL_CONTROL.color_current_intensity() < 0.70f),
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt60");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_70.button_toggle_color(sdSysData, " 70", " 70", 
+                                                (sdSysData.PANEL_CONTROL.color_current_intensity() >= 0.70f &&
+                                                  sdSysData.PANEL_CONTROL.color_current_intensity() < 0.80f),
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt70");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_80.button_toggle_color(sdSysData, " 80", " 80", 
+                                                (sdSysData.PANEL_CONTROL.color_current_intensity() >= 0.80f &&
+                                                  sdSysData.PANEL_CONTROL.color_current_intensity() < 0.90f),
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt80");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_90.button_toggle_color(sdSysData, " 90", " 90", 
+                                                (sdSysData.PANEL_CONTROL.color_current_intensity() >= 0.90f &&
+                                                  sdSysData.PANEL_CONTROL.color_current_intensity() < 1.00f),
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt90");
+        }
+        ImGui::SameLine();
+        if (BRIGHTNESS_100.button_toggle_color(sdSysData, " 100", " 100", 
+                                                sdSysData.PANEL_CONTROL.color_current_intensity() == 1.00f, 
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_THIN))
+        {
+          sdSysData.SCREEN_COMMS.command_text_set(" brt100");
+        }
+
+        // need to see if works.
+        if (TRACK_ASSIST.button_toggle_color(sdSysData, "TRACK\nASSIST", "TRACK\nASSIST", 
+                                                sdSysData.GPS_SYSTEM.PROPS.TRUE_TRACK_ASSIST, 
+                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+        {
+          sdSysData.GPS_SYSTEM.PROPS.TRUE_TRACK_ASSIST = !sdSysData.GPS_SYSTEM.PROPS.TRUE_TRACK_ASSIST;
         }
         ImGui::EndChild();
       }

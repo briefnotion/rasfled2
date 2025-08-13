@@ -15,6 +15,9 @@
 // Standard Header Files
 #include <vector>
 #include <cmath>
+#include <iostream>
+#include <chrono>
+#include <ctime>
 
 // RASFled related header files
 #include "helper.h"
@@ -24,6 +27,10 @@
 
 // ---------------------------------------------------------------------------------------
 // Map Tools
+
+double degToRad(double deg);
+double radToDeg(double rad);
+double julianDay(int year, int month, int day, double hourUTC);
 
 float calculate_distance(float lat1, float long1, float lat2, float long2);
 // Returns distance in miles from first and second lat lon coords.
@@ -45,6 +52,11 @@ float wrap_degrees(float angle);
 //  0° to less than 360°, regardless of whether it's positive, 
 //  negative, or beyond a full rotation.
 
+// -------------------------------------------------------------------------------------
+
+double getSunAltitude(double lat, double lon, int year, int month, int day, double hourUTC);
+float daylightFactor(double altitude);
+float getCurrentDaylightFactor(double lat, double lon);
 
 // -------------------------------------------------------------------------------------
 

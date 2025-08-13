@@ -19,6 +19,32 @@ using namespace std;
 // ---------------------------------------------------------------------------------------
 // Map Tools
 
+
+
+double degToRad(double deg)
+{ 
+  return deg * float_PI / 180.0;
+}
+
+double radToDeg(double rad)
+{
+  return rad * 180.0 / float_PI;
+}
+
+// Julian Day calculation
+double julianDay(int year, int month, int day, double hourUTC)
+{
+  if (month <= 2)
+  {
+    year--; month += 12;
+  }
+  int A = year / 100;
+  int B = 2 - A + A / 4;
+  return floor(365.25 * (year + 4716)) +
+          floor(30.6001 * (month + 1)) +
+          day + B - 1524.5 + hourUTC / 24.0;
+}
+
 float calculate_distance(float lat1, float lon1, float lat2, float lon2)
 {
   // Convert latitude and longitude from degrees to radians
@@ -79,6 +105,87 @@ float wrap_degrees(float angle)
   }
   return result;
 }
+
+// -------------------------------------------------------------------------------------
+
+// Sun altitude calculation
+double getSunAltitude(double lat, double lon, int year, int month, int day, double hourUTC) 
+{
+  double JD = julianDay(year, month, day, hourUTC);
+  double T = (JD - 2451545.0) / 36525.0;
+
+  // Sun's position
+  double L0 = fmod(280.46646 + 36000.76983 * T, 360.0);
+  double M  = 357.52911 + 35999.05029 * T;
+  double e  = 0.016708634 - T * (0.000042037 + 0.0000001267 * T);
+
+  double C = (1.914602 - T * (0.004817 + 0.000014 * T)) * sin(degToRad(M))
+            + (0.019993 - 0.000101 * T) * sin(degToRad(2*M))
+            + 0.000289 * sin(degToRad(3*M));
+  double trueLong = L0 + C;
+  double omega = 125.04 - 1934.136 * T;
+  double lambda = trueLong - 0.00569 - 0.00478 * sin(degToRad(omega));
+
+  double epsilon0 = 23.4392966666667 - T * (0.0130041666667 + 0.0000001638889 * T - 0.0000005036111 * T * T);
+  double epsilon  = epsilon0 + 0.00256 * cos(degToRad(omega));
+
+  // Sun declination
+  double delta = radToDeg(asin(sin(degToRad(epsilon)) * sin(degToRad(lambda))));
+
+  // Equation of time
+  double y = tan(degToRad(epsilon/2)) * tan(degToRad(epsilon/2));
+  double eqTime = 4 * radToDeg(y * sin(2*degToRad(L0))
+                - 2*e*sin(degToRad(M))
+                + 4*e*y*sin(degToRad(M))*cos(2*degToRad(L0))
+                - 0.5*y*y*sin(4*degToRad(L0))
+                - 1.25*e*e*sin(2*degToRad(M)));
+
+  // True solar time
+  double timeOffset = eqTime + 4 * lon; // in minutes
+  double trueSolarTime = fmod(hourUTC * 60 + timeOffset + 1440, 1440);
+
+  // Hour angle
+  double hourAngle = (trueSolarTime / 4 < 0) ? trueSolarTime/4 + 180 : trueSolarTime/4 - 180;
+
+  // Sun altitude
+  double altitude = radToDeg(asin(sin(degToRad(lat)) * sin(degToRad(delta))
+      + cos(degToRad(lat)) * cos(degToRad(delta)) * cos(degToRad(hourAngle))));
+  return altitude;
+}
+
+// Map sun altitude to brightness factor 0.0–1.0
+float daylightFactor(double altitude) 
+{
+  double minAlt = -6.0; // end of civil twilight
+  double maxAlt = 6.0;  // fully bright
+  
+  if (altitude <= minAlt) return 0.0f;
+  if (altitude >= maxAlt) return 1.0f;
+  return static_cast<float>((altitude - minAlt) / (maxAlt - minAlt));
+}
+
+float getCurrentDaylightFactor(double lat, double lon) 
+{
+  // Get current time in UTC
+  auto now = std::chrono::system_clock::now();
+  std::time_t tt = std::chrono::system_clock::to_time_t(now);
+  std::tm utc_tm = *std::gmtime(&tt);
+
+  double hourUTC = utc_tm.tm_hour + utc_tm.tm_min / 60.0 + utc_tm.tm_sec / 3600.0;
+  double alt = getSunAltitude(lat, lon, utc_tm.tm_year + 1900, utc_tm.tm_mon + 1, utc_tm.tm_mday, hourUTC);
+  return daylightFactor(alt);
+}
+
+/*
+// USAGE:
+int main() {
+    double lat = 34.0522;   // Example: Los Angeles
+    double lon = -118.2437; // Negative for west
+
+    float brightness = getCurrentDaylightFactor(lat, lon);
+    std::cout << "Brightness factor: " << brightness << std::endl;
+}
+*/
 
 // -------------------------------------------------------------------------------------
 

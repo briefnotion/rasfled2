@@ -23,6 +23,12 @@
 
 // -------------------------------------------------------------------------------------
 
+class NMEA_PROPERTIES
+{
+  public:
+  bool TRUE_TRACK_ASSIST = false;
+};
+
 class NMEA
 {
   private:
@@ -34,7 +40,10 @@ class NMEA
   // -------------------------------------------------------------------------------------
   // Track made good and ground speed
 
+  float TRUE_TRACK_PREV = 0.0f;
   float TRUE_TRACK = 0.0f;
+  float TRUE_TRACK_ASSIST = 0.0f;
+  
   bool TRUE_TRACK_INDICATOR = false;
 
   float MAGENTIC_TRACK = 0.0f;
@@ -126,6 +135,8 @@ class NMEA
   TIMED_PING ADD_TRACK_POINT_TIMER;
   
   public:
+
+  NMEA_PROPERTIES PROPS;
 
   DETAILED_TRACK TRACK;
 

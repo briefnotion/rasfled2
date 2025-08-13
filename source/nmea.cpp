@@ -272,7 +272,29 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
           CURRENT_POSITION.SPEED = SPEED_KMPH;
           CURRENT_POSITION.VALID_TRACK = VALID_TRACK_INFO;
 
-          CURRENT_POSITION.TRUE_HEADING.VALUE = TRUE_TRACK;
+          // Store track as track assist or track
+          if (PROPS.TRUE_TRACK_ASSIST)
+          {
+            // Determine TRUE_TRACK_ASSIST
+            float TRACK_DIFFERENCE = signed_angular_error(TRUE_TRACK, TRUE_TRACK_PREV);
+            if (TRACK_DIFFERENCE > -180.0f && TRACK_DIFFERENCE < 180.0f)
+            {
+              TRUE_TRACK_ASSIST = TRUE_TRACK - TRACK_DIFFERENCE;
+            }
+            else
+            {
+              TRUE_TRACK_ASSIST = TRUE_TRACK;
+            }
+
+            TRUE_TRACK_PREV = TRUE_TRACK;   // Store prev track heading
+            CURRENT_POSITION.TRUE_HEADING.VALUE = TRUE_TRACK_ASSIST;
+          }
+          else
+          {
+            CURRENT_POSITION.TRUE_HEADING.VALUE = TRUE_TRACK;
+          }
+
+          // Set Track Valid if speed > min
           if (SPEED_KMPH.val_mph() > 10.0f)
           {
             CURRENT_POSITION.TRUE_HEADING.VALID = true;

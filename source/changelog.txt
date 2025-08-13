@@ -1,3 +1,12 @@
+2.295_250812
+  - Testing GPS Track Heading Assist.  Simple routine of radial velocity over previous read to 
+      determine current heading.  Trying to match gps heading with compass heading.  
+      Anglular acceleration is not considered because gps read only once per second.
+      Default off.  Enabled on "..." screen.
+  - Testing screen brightness of 100% to 50% fade related to sunset and sunrise of gps 
+      position and system time.  Triggered by headlights on. Falls back to only headlights 
+      on brightness at 50%, if gps not available.
+
 2.294_250809_A
   - Small change to start at brightness 100% if not connected to car.
 

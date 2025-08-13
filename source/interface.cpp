@@ -642,11 +642,29 @@ void processcommandlineinput(system_data &sdSysData,
       // BRIGHTNESS COMMANDS
       
 
-      // Brightness 25%
+      // Brightness AUTOMATIC
       if (check_command(sdSysData.SCREEN_COMMS, " brtauto", "Toggle Auto Brightness."))
       {
         sdSysData.PANEL_CONTROL.color_set_automatic(sdSysData.PROGRAM_TIME.current_frame_time(), 
                                             !sdSysData.PANEL_CONTROL.color_automatic_value());
+      }
+
+      // Brightness 0%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt00", "Brightness 0%."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.00f);
+      }
+
+      // Brightness 10%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt10", "Brightness 10%."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.10f);
+      }
+
+      // Brightness 20%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt20", "Brightness 20%."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.20f);
       }
 
       // Brightness 25%
@@ -654,11 +672,53 @@ void processcommandlineinput(system_data &sdSysData,
       {
         sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.25f);
       }
+
+      // Brightness 30%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt30", "Brightness 30%."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.30f);
+      }
+
+      // Brightness 40%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt40", "Brightness 40%."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.40f);
+      }
       
       // Brightness 50%
       if (check_command(sdSysData.SCREEN_COMMS, " brt50", "Brightness 50%."))
       {
         sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.50f);
+      }
+
+      // Brightness 60%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt60", "Brightness 60%."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.60f);
+      }
+
+      // Brightness 70%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt70", "Brightness 70%."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.70f);
+      }
+
+      // Brightness 75%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt75", "Brightness 75%."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.75f);
+      }
+
+      // Brightness 80%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt80", "Brightness 80%."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.80f);
+      }
+
+      // Brightness 90%
+      if (check_command(sdSysData.SCREEN_COMMS, " brt90", "Brightness 90%."))
+      {
+        sdSysData.PANEL_CONTROL.color_set_manual_intensity(sdSysData.PROGRAM_TIME.current_frame_time(), 0.90f);
       }
       
       // Brightness 100%
