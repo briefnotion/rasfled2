@@ -1,3 +1,8 @@
+2.296_250813
+  - Corrected a signage issue with the GPS Compass TRUE_TRACK_ASSIST.  
+      Property TRUE_TRACK_ASSIST is now set to default on.
+  - Changed the way the Screen Brightness is connected to the status of the Headlights.
+
 2.295_250812
   - Testing GPS Track Heading Assist.  Simple routine of radial velocity over previous read to 
       determine current heading.  Trying to match gps heading with compass heading.  

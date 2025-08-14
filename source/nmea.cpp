@@ -279,7 +279,7 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
             float TRACK_DIFFERENCE = signed_angular_error(TRUE_TRACK, TRUE_TRACK_PREV);
             if (TRACK_DIFFERENCE > -180.0f && TRACK_DIFFERENCE < 180.0f)
             {
-              TRUE_TRACK_ASSIST = TRUE_TRACK - TRACK_DIFFERENCE;
+              TRUE_TRACK_ASSIST = TRUE_TRACK + TRACK_DIFFERENCE;
             }
             else
             {

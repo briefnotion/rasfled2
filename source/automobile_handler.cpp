@@ -386,39 +386,44 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
 
     */
 
-    
-    // Headlights Changed On and Off
-    if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on(), LIGHTS_HEADLIGHTS) == true)
+    // Sets screen brightness when headlights are truned on or off.
     {
-      // If lights are on, set screen brightness
-      if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on())
+      // This portion is for when the headlights are turned off
+      // The screen brightness will be set to 100% immediately.
+      if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on(), LIGHTS_HEADLIGHTS) == true)
       {
-
-        if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
+        // If lights are truned off, set screen brightness to 100%
+        if (LIGHTS_HEADLIGHTS == false)
         {
-          // Only change the brightness once per minute
-          if (SCREEN_BRIGHTNESS_CHANGE.is_ready(tmeCurrentTime))
-          {
-            SCREEN_BRIGHTNESS_CHANGE.set(tmeCurrentTime, 60000);
-
-            // Set Screen brightness (automaticlly) to level indicated by sun position and gps location.
-            //    50% + (50% * brightnes) --> 100% to 50%
-            sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 0.50f + (0.50f * 
-                                                    getCurrentDaylightFactor((float)sdSysData.GPS_SYSTEM.current_position().LATITUDE, 
-                                                                              (float)sdSysData.GPS_SYSTEM.current_position().LONGITUDE))
-                                                                );
-          }
-        }
-        else
-        {
-          // if gps not available, set to 50% if lights are on.
-          sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 0.50f);
+          // Set Screen brightness (automaticlly) to 100%.  Does not affect manual settings
+          sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 1.00f);
         }
       }
-      else
+
+      // This portion is for when the lights are on.
+      // These changes can take a minute to adjust because the code is only ran 
+      //  once per 60 seconds.
+      if (SCREEN_BRIGHTNESS_CHANGE.is_ready(tmeCurrentTime))
       {
-        // Set Screen brightness (automaticlly) to 100%.
-        sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 1.00f);
+        SCREEN_BRIGHTNESS_CHANGE.set(tmeCurrentTime, 60000);
+        if (LIGHTS_HEADLIGHTS == true)
+        {
+          if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time()))
+          {
+            // Set Screen brightness (automaticlly) to level indicated by sun position and gps location.
+            //    50% + (50% * brightnes) --> 100% to 50%
+            sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 0.50f + 
+                                                    (0.50f * 
+                                                    getCurrentDaylightFactor((float)sdSysData.GPS_SYSTEM.current_position().LATITUDE, 
+                                                                              (float)sdSysData.GPS_SYSTEM.current_position().LONGITUDE)
+                                                    ));
+          }
+          else
+          {
+            // if gps not available, set brightness to 50% if lights are on.
+            sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 0.50f);
+          }
+        }
       }
     }
 

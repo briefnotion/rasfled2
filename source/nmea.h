@@ -26,7 +26,7 @@
 class NMEA_PROPERTIES
 {
   public:
-  bool TRUE_TRACK_ASSIST = false;
+  bool TRUE_TRACK_ASSIST = true;
 };
 
 class NMEA
