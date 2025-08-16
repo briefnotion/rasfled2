@@ -182,8 +182,11 @@ void CAL_LEVEL_3::preservation_of_data()
         int angle_slot = static_cast<int>(std::round(std::atan2(dy, dx) * 180.0 / M_PI));
         angle_slot = (angle_slot + 360) % 360;
 
-        preserved_angle_buffer[angle_slot].add(COMPASS_HISTORY[pos].POINT);
-        COMPASS_HISTORY.erase_p(pos);
+        if (angle_slot >= 0 && angle_slot < 360)
+        {
+          preserved_angle_buffer[angle_slot].add(COMPASS_HISTORY[pos].POINT);
+          COMPASS_HISTORY.erase_p(pos);
+        }
       }
     }
   }
@@ -847,7 +850,7 @@ void HMC5883L::load_history_and_settings()
               configuration_json.ROOT.DATA[root].DATA[points].DATA[values].get_if_is("Z", z);
             }
 
-            if (angle >= 0 && angle <= 360)
+            if (angle >= 0 && angle < 360)
             {
               COMPASS_POINT tmp_point;
 
@@ -1326,7 +1329,11 @@ void HMC5883L::close_port()
 
 void HMC5883L::bearing_known_offset_calibration_to_gps()
 {
-  KNOWN_DEVICE_DEGREE_OFFSET = GPS_ERROR_MEAN.mean();
+  // Only set the from GPS mean if half a minute of data is accumulated
+  if (GPS_ERROR_MEAN.samples() > 500)
+  {
+    KNOWN_DEVICE_DEGREE_OFFSET = GPS_ERROR_MEAN.mean();
+  }
 }
 
 void HMC5883L::bearing_known_offset_clear()

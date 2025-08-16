@@ -647,6 +647,10 @@ class DRAW_D2_PLOT_POWER_CURVE_PROPERTIES
   int HISTORY_SIZE = 100;
 
   float INDICATOR_SIZE = 8.0f; // Size of the indicator marker on the graph.
+
+  // For triggering Alerts
+  float TRIGGER_LOWER_LIMIT_SPEED = 10.0f;      // Only trigger if speed over 10
+  float TRIGGER_LOWER_LIMIT_PROXIMITY = 0.97f;  // Only trigger if 97% of max
 };
 
 class DRAW_D2_PLOT_POWER_CURVE

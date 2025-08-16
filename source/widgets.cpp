@@ -714,6 +714,7 @@ void draw_compass(ImDrawList *Draw_List, system_data &sdSysData, int Version, Im
     {
       if (Version == 2)
       {
+        // possibly needs correction with signed_angular_error and wrap_degrees
         if (Jitter_Heading_Min < Jitter_Heading_Max)
         {
           rad_1 = ((Jitter_Heading_Min) - 90.0f - Map_Bearing) * float_PI / 180.0f;

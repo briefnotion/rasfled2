@@ -2073,7 +2073,7 @@ void DRAW_D2_PLOT_POWER_CURVE::create()
 
 bool DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Acceleration, int Gear)
 {
-  bool ret_85percent_flag = false;
+  bool ret_trigger_flag = false;
 
   LAST_SPEED_ACCELERATION_READ.x = Speed;
   LAST_SPEED_ACCELERATION_READ.y = Acceleration;
@@ -2099,10 +2099,10 @@ bool DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Accelerati
       }
 
       // Check for 15% flag
-      if (Acceleration > SPEED_VECTORS_ACCELERATION[(int)storage_point].max() * 0.85f &&
-          Speed > 10.0f)
+      if (Acceleration > SPEED_VECTORS_ACCELERATION[(int)storage_point].max() * PROPS.TRIGGER_LOWER_LIMIT_PROXIMITY &&
+          Speed > PROPS.TRIGGER_LOWER_LIMIT_SPEED)
       {
-        ret_85percent_flag = true;
+        ret_trigger_flag = true;
       }
 
     }
@@ -2119,9 +2119,9 @@ bool DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Accelerati
       }
 
       // Check for 15% flag
-      if (abs(Acceleration) > SPEED_VECTORS_DECELERATION[(int)storage_point].max() * 0.85f)
+      if (abs(Acceleration) > SPEED_VECTORS_DECELERATION[(int)storage_point].max() * PROPS.TRIGGER_LOWER_LIMIT_PROXIMITY)
       {
-        ret_85percent_flag = true;
+        ret_trigger_flag = true;
       }
 
     }
@@ -2140,7 +2140,7 @@ bool DRAW_D2_PLOT_POWER_CURVE::update(double Time, float Speed, float Accelerati
     }
   }
 
-  return ret_85percent_flag;
+  return ret_trigger_flag;
 }
 
 bool DRAW_D2_PLOT_POWER_CURVE::draw(system_data &sdSysData, ImVec2 Start_Position, ImVec2 End_Position)

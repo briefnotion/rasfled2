@@ -1,3 +1,8 @@
+2.297_250816
+  - Changed the power curve to show at 97% instead of 85%.
+  - Compass to GPS beading automatic heading adjustment will only occur if 30 seconds 
+      of data is accumulated.
+
 2.296_250813
   - Corrected a signage issue with the GPS Compass TRUE_TRACK_ASSIST.  
       Property TRUE_TRACK_ASSIST is now set to default on.
