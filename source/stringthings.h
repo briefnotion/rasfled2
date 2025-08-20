@@ -142,6 +142,15 @@ float string_to_float(string String_Value);
 //  Returns true if value sucessful.
 // ! No Error Checking
 
+bool string_to_double(string String_Value, double &Double_Value);
+// Convert in String_Value number to out Double_Value.
+//  Returns true if value sucessful.
+
+double string_to_double(string String_Value);
+// Convert in String_Value number to out Double_Value.
+//  Returns true if value sucessful.
+// ! No Error Checking
+
 string to_string_round_to_nth(float Value, int nth);
 // Returns string of float rounded to nth decimal.
 //  like: float_to_string
@@ -223,6 +232,31 @@ class STRING_FLOAT
   string get_str_value();
 
   float get_float_value();
+
+  int get_int_value();
+
+  bool conversion_success();
+};
+
+class STRING_DOUBLE
+// Variable stores original string number and converted value.
+// Sets error if conversion unsucessful.
+// Retains value if conversion not sucessful.
+{
+  private:
+  string  STR_VALUE = "";
+  double   DOUBLE_VALUE = 0;
+  double   NEW_DOUBLE_VALUE = 0;
+  bool    CONVERSION_SUCCESS = false;
+
+  public:
+  void store(string str_value);
+
+  void store_val(double value);
+  
+  string get_str_value();
+
+  double get_double_value();
 
   int get_int_value();
 

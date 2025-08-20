@@ -1,3 +1,8 @@
+2.298_250820
+  - Converted NMEA to store latitude and longitude as double instead of float.  Still needs 
+      work because the system downcast it along the lines.  In testting.
+  - Moved working directory from /etc to home/
+
 2.297_250816
   - Changed the power curve to show at 97% instead of 85%.
   - Compass to GPS beading automatic heading adjustment will only occur if 30 seconds 

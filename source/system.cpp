@@ -37,39 +37,34 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
   // Check Directories
   if (!TEST_MODE)
   {
-    WORKING_DIR = (string)DEF_WORKING_DIR;
+    WORKING_DIR = homedir_str + (string)DEF_WORKING_DIR;
   }
   else
   {
-    WORKING_DIR = (string)DEF_WORKING_DIR_TEST;
+    WORKING_DIR = homedir_str + (string)DEF_WORKING_DIR_TEST;
   }
 
-  COMPASS_DIR = WORKING_DIR + (string)DEF_COMPASS_SUB_DIR;
-
-  if (!TEST_MODE)
-  {
-    LOGS_DIR = homedir_str + (string)DEF_LOGS_DIR;
-  }
-  else
-  {
-    LOGS_DIR = homedir_str + (string)DEF_LOGS_DIR_TEST;
-  }
-
-  LOGS_CAN_BUS_DIR = LOGS_DIR +  (string)DEF_CAN_BUS_SUB_DIR;
+  LOGS_CAN_BUS_DIR = WORKING_DIR +  (string)DEF_CAN_BUS_SUB_DIR;
   LOGS_CAN_BUS_HISTORY_SUB_DIR = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_HISTORY_LOG_SUB_DIR;
-  LOGS_AIRCRAFT_DIR = LOGS_DIR + (string)DEF_AIRCRAFT_SUB_DIR;
-  LOGS_GPS_DIR = LOGS_DIR + (string)DEF_GPS_SUB_DIR;
-  LOGS_ADVERTS_DIR = LOGS_DIR + (string)DEF_ADVERTS_SUB_DIR;
+  LOGS_AIRCRAFT_DIR = WORKING_DIR + (string)DEF_AIRCRAFT_SUB_DIR;
+  LOGS_GPS_DIR = WORKING_DIR + (string)DEF_GPS_SUB_DIR;
+  LOGS_ADVERTS_DIR = WORKING_DIR + (string)DEF_ADVERTS_SUB_DIR;
+  LOGS_AUDIO_DIR = WORKING_DIR + (string)DEF_AUDIO_DIR;
+  LOGS_IMAGES_DIR = WORKING_DIR + (string)DEF_IMAGES_DIR;
+  LOGS_SETTINGS_DIR = WORKING_DIR + (string)DEF_SETTINGS_DIR;
+  LOGS_COMPASS_DIR = WORKING_DIR + (string)DEF_COMPASS_SUB_DIR;
   
   // Crash occurs if directory to be created is within a directory that doesnt exist.
   ret_success.catch_false(check_create_working_dir(WORKING_DIR, true));
-  ret_success.catch_false(check_create_working_dir(COMPASS_DIR, true));
-  ret_success.catch_false(check_create_working_dir(LOGS_DIR, true));
   ret_success.catch_false(check_create_working_dir(LOGS_CAN_BUS_DIR, true));
   ret_success.catch_false(check_create_working_dir(LOGS_CAN_BUS_HISTORY_SUB_DIR, true));
   ret_success.catch_false(check_create_working_dir(LOGS_AIRCRAFT_DIR, true));
   ret_success.catch_false(check_create_working_dir(LOGS_GPS_DIR, true));
   ret_success.catch_false(check_create_working_dir(LOGS_ADVERTS_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_AUDIO_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_IMAGES_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_SETTINGS_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_COMPASS_DIR, true));
   
   if (!ret_success.has_false())
   {
@@ -92,19 +87,19 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
 
 
     // Main Control for working rasfled
-    ANIMATIONS_FILE = WORKING_DIR + (string)DEF_ANIMATIONS_FILE;
+    ANIMATIONS_FILE = LOGS_SETTINGS_DIR + (string)DEF_ANIMATIONS_FILE;
     cons.printw("  " + ANIMATIONS_FILE);
 
-    CONFIGURATION_FILE = WORKING_DIR + (string)DEF_CONFIGURATION;
+    CONFIGURATION_FILE = LOGS_SETTINGS_DIR + (string)DEF_CONFIGURATION;
     cons.printw("  " + CONFIGURATION_FILE);
 
-    RUNNING_STATE_FILE = WORKING_DIR + (string)DEF_RUNNING_STATE;
+    RUNNING_STATE_FILE = LOGS_SETTINGS_DIR + (string)DEF_RUNNING_STATE;
     cons.printw("  " + RUNNING_STATE_FILE);
 
-    QR_CODE_FILE = WORKING_DIR + (string)DEF_QR_CODE;
+    QR_CODE_FILE = LOGS_IMAGES_DIR + (string)DEF_QR_CODE;
     cons.printw("  " + QR_CODE_FILE);
 
-    REFERENCE_CARD_FILE = WORKING_DIR + (string)DEF_REFERENCE_CARD;
+    REFERENCE_CARD_FILE = LOGS_IMAGES_DIR + (string)DEF_REFERENCE_CARD;
     cons.printw("  " + REFERENCE_CARD_FILE);
 
 
@@ -140,7 +135,7 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
     COMPASS_DEVICE_FILE = (string)DEF_COMPASS_DEV_NAME;
     cons.printw("  " + COMPASS_DEVICE_FILE);
 
-    COMPASS_OFFSET_HISTORY_FILE = COMPASS_DIR + (string)DEF_COMPASS_OFFSET_HISTORY;
+    COMPASS_OFFSET_HISTORY_FILE = LOGS_COMPASS_DIR + (string)DEF_COMPASS_OFFSET_HISTORY;
     cons.printw("  " + COMPASS_OFFSET_HISTORY_FILE);
 
 

@@ -484,6 +484,19 @@ bool JSON_ENTRY::get_if_is(string Label, STRING_FLOAT &Value)
   }
 }
 
+bool JSON_ENTRY::get_if_is(string Label, STRING_DOUBLE &Value)
+{
+  if (LABEL == Label)
+  {
+    Value.store(VALUE);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 void JSON_ENTRY::create_label_value(string Label, string Value)
 {
   JSON_ENTRY new_entry;

@@ -196,8 +196,8 @@ AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Dra
   {
     bool draw = false;
     ImVec2 draw_position = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon,
-                                                  ImVec2( Aircraft.AIRCRAFT_ITEM.POSITION.LATITUDE.get_float_value(), 
-                                                          Aircraft.AIRCRAFT_ITEM.POSITION.LONGITUDE.get_float_value()), 
+                                                  ImVec2( Aircraft.AIRCRAFT_ITEM.POSITION.LATITUDE.get_double_value(), 
+                                                          Aircraft.AIRCRAFT_ITEM.POSITION.LONGITUDE.get_double_value()), 
                                                           Map_Bearing, draw);
 
     // Draw track first then overlay aircraft.
@@ -2284,8 +2284,8 @@ void ADSB_MAP::draw(system_data &sdSysData)
     if (ACTIVE_ADSB)
     {
       // Check and store AIRCRAFT Current Location
-      RANGE_INDICATOR.set_aircraft_pos_lat_lon(ImVec2(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.POSITION.LATITUDE.get_float_value(), 
-                                                  sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.POSITION.LONGITUDE.get_float_value()));
+      RANGE_INDICATOR.set_aircraft_pos_lat_lon(ImVec2(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.POSITION.LATITUDE.get_double_value(), 
+                                                  sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.POSITION.LONGITUDE.get_double_value()));
     }
   }
 

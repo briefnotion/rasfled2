@@ -693,6 +693,10 @@ int loop_2(bool TTY_Only)
     sdSystem.CONFIG.vhwDOORS.push_back(tmpSwitch);
   }
 
+  // Initialize Audio Filenames
+  sdSystem.SCREEN_COMMS.printw("Initializing Audio ...");
+  sdSystem.SOUND_SYSTEM.create(sdSystem.FILE_NAMES.LOGS_AUDIO_DIR);
+
   // -------------------------------------------------------------------------------------
 
   // Start Power On Animation

@@ -59,19 +59,11 @@ class FILES
   // Main Control for working rasfled
   string WORKING_DIR = "";
 
-  string COMPASS_DIR = "";
-
   string ANIMATIONS_FILE = "";
   string CONFIGURATION_FILE = "";
   string RUNNING_STATE_FILE = "";
   string QR_CODE_FILE = "";
   string REFERENCE_CARD_FILE = "";
-
-  // Sounds Directory
-  //string SOUNDS_DIR = "";
-
-  // Rasfled logs and user files
-  string LOGS_DIR = "";
 
   string LOGS_CAN_BUS_DIR = "";
   string LOGS_CAN_BUS_HISTORY_SUB_DIR = "";
@@ -79,6 +71,10 @@ class FILES
   string LOGS_AIRCRAFT_DIR = "";
   string LOGS_GPS_DIR = "";
   string LOGS_ADVERTS_DIR = "";
+  string LOGS_AUDIO_DIR = "";
+  string LOGS_IMAGES_DIR = "";
+  string LOGS_SETTINGS_DIR = "";
+  string LOGS_COMPASS_DIR = "";
 
   // CAN Bus
   string CAN_BUS_DEVICE_FILE = "";

@@ -18,6 +18,25 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
+void SOUNDS::create(string Audio_Directory)
+{
+  C6 = Audio_Directory + C6;
+  D6 = Audio_Directory + D6;
+  E6 = Audio_Directory + E6;
+  F6 = Audio_Directory + F6;
+  G6 = Audio_Directory + G6;
+  A6 = Audio_Directory + A6;
+  B6 = Audio_Directory + B6;
+  
+  C7 = Audio_Directory + C7;
+  D7 = Audio_Directory + D7;
+  E7 = Audio_Directory + E7;
+  F7 = Audio_Directory + F7;
+  G7 = Audio_Directory + G7;
+  A7 = Audio_Directory + A7;
+  B7 = Audio_Directory + B7;
+}
+
 void SOUNDS::set_mute(bool Mute)
 {
   MUTE = Mute;

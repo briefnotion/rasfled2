@@ -181,8 +181,8 @@ void AIRCRAFT_MAP_DETAILS::update_aircraft(AIRCRAFT Aircraft_o, unsigned long tm
     {
       {
         DETAILED_TRACK_POINT new_lat_lon;
-        new_lat_lon.LATITUDE = AIRCRAFT_ITEM.POSITION.LATITUDE.get_float_value();
-        new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_float_value();
+        new_lat_lon.LATITUDE = AIRCRAFT_ITEM.POSITION.LATITUDE.get_double_value();
+        new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_double_value();
         new_lat_lon.ALTITUDE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
         new_lat_lon.TIME = (float)tmeCurrentMillis;
 
@@ -198,12 +198,12 @@ void AIRCRAFT_MAP_DETAILS::update_aircraft(AIRCRAFT Aircraft_o, unsigned long tm
         TRACK.store(new_lat_lon);
       }
     }
-    else if (AIRCRAFT_ITEM.POSITION.LATITUDE.get_float_value() != TRACK.TRACK_POINTS_DETAILED[TRACK.TRACK_POINTS_DETAILED.size() -1].LATITUDE || 
-              AIRCRAFT_ITEM.POSITION.LONGITUDE.get_float_value() != TRACK.TRACK_POINTS_DETAILED[TRACK.TRACK_POINTS_DETAILED.size() -1].LONGITUDE)
+    else if (AIRCRAFT_ITEM.POSITION.LATITUDE.get_double_value() != TRACK.TRACK_POINTS_DETAILED[TRACK.TRACK_POINTS_DETAILED.size() -1].LATITUDE || 
+              AIRCRAFT_ITEM.POSITION.LONGITUDE.get_double_value() != TRACK.TRACK_POINTS_DETAILED[TRACK.TRACK_POINTS_DETAILED.size() -1].LONGITUDE)
     {
       DETAILED_TRACK_POINT new_lat_lon;
-      new_lat_lon.LATITUDE = AIRCRAFT_ITEM.POSITION.LATITUDE.get_float_value();
-      new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_float_value();
+      new_lat_lon.LATITUDE = AIRCRAFT_ITEM.POSITION.LATITUDE.get_double_value();
+      new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_double_value();
       new_lat_lon.ALTITUDE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
       new_lat_lon.TIME = (float)tmeCurrentMillis;
 
@@ -527,8 +527,8 @@ void AIRCRAFT_COORDINATOR::post_post_process()
         DATA.CURRENT_POS_AVAIL)
     {
       DATA.AIRCRAFTS[aircraft].DISTANCE_FROM_BASE = calculate_distance(
-                                  DATA.AIRCRAFTS[aircraft].POSITION.LATITUDE.get_float_value(), 
-                                  DATA.AIRCRAFTS[aircraft].POSITION.LONGITUDE.get_float_value(), 
+                                  DATA.AIRCRAFTS[aircraft].POSITION.LATITUDE.get_double_value(), 
+                                  DATA.AIRCRAFTS[aircraft].POSITION.LONGITUDE.get_double_value(), 
                                   DATA.CURRENT_LAT, 
                                   DATA.CURRENT_LON);
 

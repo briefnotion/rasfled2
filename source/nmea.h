@@ -100,8 +100,8 @@ class NMEA
   // -------------------------------------------------------------------------------------
   // Global Positioning System Fix Data
 
-  float LATITUDE = 0;
-  float LONGITUDE = 0;
+  double LATITUDE = 0;
+  double LONGITUDE = 0;
   DISTANCE ALTITUDE;     // M
   DISTANCE GEOID_HEIGHT; // M (mean sea level above WGS84 ellipsoid)
 

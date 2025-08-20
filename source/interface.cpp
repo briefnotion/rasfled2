@@ -582,10 +582,6 @@ void processcommandlineinput(system_data &sdSysData,
 
       if (check_command(sdSysData.SCREEN_COMMS, " animld", "Reload Animations"))
       {
-        //string Working_Directory = FILES_DIRECTORY;
-        //string Animations_Library_JSON = FILES_ANIMATIONS;
-        //string Running_State_Filename = Working_Directory + FILES_RUNNING_STATE_SAVE;
-
         if (Animations.load_collections(sdSysData.FILE_NAMES.ANIMATIONS_FILE) == true)
         {
           sdSysData.SCREEN_COMMS.printw("  Animations file loaded.");

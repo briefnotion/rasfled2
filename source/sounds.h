@@ -25,25 +25,27 @@ class SOUNDS
 {
   private:
 
-  string C6 = "/etc/rasfled/c6.wav";
-  string D6 = "/etc/rasfled/d6.wav";
-  string E6 = "/etc/rasfled/e6.wav";
-  string F6 = "/etc/rasfled/f6.wav";
-  string G6 = "/etc/rasfled/g6.wav";
-  string A6 = "/etc/rasfled/a6.wav";
-  string B6 = "/etc/rasfled/b6.wav";
+  string C6 = "c6.wav";
+  string D6 = "d6.wav";
+  string E6 = "e6.wav";
+  string F6 = "f6.wav";
+  string G6 = "g6.wav";
+  string A6 = "a6.wav";
+  string B6 = "b6.wav";
   
-  string C7 = "/etc/rasfled/c7.wav";
-  string D7 = "/etc/rasfled/d7.wav";
-  string E7 = "/etc/rasfled/e7.wav";
-  string F7 = "/etc/rasfled/f7.wav";
-  string G7 = "/etc/rasfled/g7.wav";
-  string A7 = "/etc/rasfled/a7.wav";
-  string B7 = "/etc/rasfled/b7.wav";
+  string C7 = "c7.wav";
+  string D7 = "d7.wav";
+  string E7 = "e7.wav";
+  string F7 = "f7.wav";
+  string G7 = "g7.wav";
+  string A7 = "a7.wav";
+  string B7 = "b7.wav";
 
   bool MUTE = false;
 
   public:
+
+  void create(string Audio_Directory);
 
   void set_mute(bool Mute);
 

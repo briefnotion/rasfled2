@@ -120,8 +120,8 @@ class GLOBAL_POSITION_DETAILED
 
   unsigned long SYSTEM_UPDATE_TIME = 0;
 
-  float LATITUDE = 0;
-  float LONGITUDE = 0;
+  double LATITUDE = 0;
+  double LONGITUDE = 0;
   DISTANCE ALTITUDE;     // M
   DISTANCE GEOID_HEIGHT; // M (mean sea level above WGS84 ellipsoid)
   
@@ -141,8 +141,8 @@ class GLOBAL_POSITION_DETAILED
 class GLOBAL_POSITION
 {
   public:
-  STRING_FLOAT LATITUDE;
-  STRING_FLOAT LONGITUDE;
+  STRING_DOUBLE LATITUDE;
+  STRING_DOUBLE LONGITUDE;
 
   bool GLOBAL_POSITION_FOUND = false;
 };
@@ -153,16 +153,16 @@ class SIMPLE_TRACK_POINT
 {
   public:
   
-  float LATITUDE = 0.0f;
-  float LONGITUDE = 0.0f;
+  double LATITUDE = 0.0f;
+  double LONGITUDE = 0.0f;
 };
 
 class DETAILED_TRACK_POINT
 {
   public:
   
-  float LATITUDE = 0.0f;
-  float LONGITUDE = 0.0f;
+  double LATITUDE = 0.0f;
+  double LONGITUDE = 0.0f;
 
   float TRUE_HEADING = 0;
 

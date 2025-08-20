@@ -147,6 +147,11 @@ class JSON_ENTRY
   // Returns true  if label within a json does match and changes.
   //  Value to JSON value.
 
+  bool get_if_is(string Label, STRING_DOUBLE &Value);
+  // Returns false if label within a json does not match.
+  // Returns true  if label within a json does match and changes.
+  //  Value to JSON value.
+
   void create_label_value(string Label, string Value);
   // Creates a simple Label Value JSON Entry.
   //    mount_offset.create_label_value("mount offset", "-180");

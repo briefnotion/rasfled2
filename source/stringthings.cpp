@@ -411,6 +411,27 @@ float string_to_float(string String_Value)
   return tmp_float;
 }
 
+bool string_to_double(string String_Value, double &Double_Value)
+{
+  try
+  {
+    Double_Value = stod(String_Value);
+    return true;
+  }
+  catch(const std::exception& e)
+  {
+    Double_Value = 0;
+    return false;
+  }
+}
+
+double string_to_double(string String_Value)
+{
+  double tmp_double = 0;
+  string_to_double(String_Value, tmp_double);
+  return tmp_double;
+}
+
 string to_string_round_to_nth(float Value, int nth)
 {
   string ret_string = to_string(Value);
@@ -644,7 +665,7 @@ float STRING_FLOAT::get_float_value()
 int STRING_FLOAT::get_int_value()
 // Return converted number string value.
 {
-  return FLOAT_VALUE;
+  return (int)FLOAT_VALUE;
 }
 
 bool STRING_FLOAT::conversion_success()
@@ -652,6 +673,54 @@ bool STRING_FLOAT::conversion_success()
 {
   return CONVERSION_SUCCESS;
 }
+
+
+void STRING_DOUBLE::store(string str_value)
+{
+  STR_VALUE = str_value;
+
+  if (string_to_double(str_value, NEW_DOUBLE_VALUE))
+  {
+    DOUBLE_VALUE = NEW_DOUBLE_VALUE;
+    CONVERSION_SUCCESS = true;
+  }
+  else
+  {
+    CONVERSION_SUCCESS = false;
+  }
+}
+
+void STRING_DOUBLE::store_val(double value)
+{
+  DOUBLE_VALUE = value;
+  STR_VALUE = to_string(value);
+  CONVERSION_SUCCESS = true;
+}
+
+string STRING_DOUBLE::get_str_value()
+// Return original number string value.
+{
+  return STR_VALUE;
+}
+
+double STRING_DOUBLE::get_double_value()
+// Return converted number string value.
+{
+  return DOUBLE_VALUE;
+}
+
+int STRING_DOUBLE::get_int_value()
+// Return converted number string value.
+{
+  return (int)DOUBLE_VALUE;
+}
+
+bool STRING_DOUBLE::conversion_success()
+// Returns true if conversion was unsucessful.
+{
+  return CONVERSION_SUCCESS;
+}
+
 
 bool isAlphaNumeric(char c)
 {
