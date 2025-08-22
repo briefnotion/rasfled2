@@ -42,7 +42,7 @@ bool load_json_configuration(system_data &sdSysData, string Filename)
       {
         //cons.printwait("switches parse");
         switch_map tmpsm;
-        tmpsm.pin = string_to_int(configuration_json.ROOT.DATA[switches_pos].DATA[pos].value());
+        tmpsm.pin = string_to_value<int>(configuration_json.ROOT.DATA[switches_pos].DATA[pos].value());
         sdSysData.CONFIG.vSWITCH_PIN_MAP.push_back(tmpsm);
       }
 
@@ -58,7 +58,7 @@ bool load_json_configuration(system_data &sdSysData, string Filename)
         // clear preloads
         sdSysData.CONFIG.LED_MAIN.clear();
 
-        tmainstripprofile.set(string_to_int(configuration_json.ROOT.DATA[leds_pos].value_from_list("SyStem_ID")), 
+        tmainstripprofile.set(string_to_value<int>(configuration_json.ROOT.DATA[leds_pos].value_from_list("SyStem_ID")), 
                               configuration_json.ROOT.DATA[leds_pos].value_from_list("SyStem_Name"));
         sdSysData.CONFIG.LED_MAIN.push_back(tmainstripprofile);
 
@@ -68,7 +68,7 @@ bool load_json_configuration(system_data &sdSysData, string Filename)
         for(int led_group=0; led_group < (int)configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA.size(); led_group++)
         {
           sdSysData.CONFIG.LED_MAIN.at(0).add_group(
-            string_to_int(configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].value_from_list("LED_Group_ID")), 
+            string_to_value<int>(configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].value_from_list("LED_Group_ID")), 
             configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].value_from_list("LED_Group_Name"));
 
           // Strip List
@@ -79,7 +79,7 @@ bool load_json_configuration(system_data &sdSysData, string Filename)
             int sid = led_strip_pos;
             string sname = configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].DATA[led_strip_group_pos].DATA[led_strip_pos].value_from_list("LED_Strip_Name");
             string sposition = configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].DATA[led_strip_group_pos].DATA[led_strip_pos].value_from_list("Position");
-            int sledcount = string_to_int(configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].DATA[led_strip_group_pos].DATA[led_strip_pos].value_from_list("LED_Count"));
+            int sledcount = string_to_value<int>(configuration_json.ROOT.DATA[leds_pos].DATA[led_group_pos].DATA[led_group].DATA[led_strip_group_pos].DATA[led_strip_pos].value_from_list("LED_Count"));
             
             bool sforward = false;
             bool sbot_at_start = false;

@@ -33,13 +33,97 @@ using namespace std;
 // ***************************************************************************************
 
 # define float_PI		3.14159265358979323846f   // pi
+# define double_PI		3.14159265358979323846  // pi
 # define float_EARTH_RADIUS		3963.191f       // Earth Radius
+# define double_EARTH_RADIUS	3963.191        // Earth Radius
 
 
 // ***************************************************************************************
 // STRUCTURES AND CLASSES
 // ***************************************************************************************
 
+
+// ---------------------------------------------------------------------------------------
+//Double precision ImVec2
+
+class DOUBLE_VEC2
+{
+  public:
+    double x;
+    double y;
+
+  /**
+   * @brief Default constructor. Initializes the vector to (0.0, 0.0).
+   */
+  DOUBLE_VEC2() : x(0.0), y(0.0) 
+  {}
+
+  /**
+   * @brief Parameterized constructor.
+   * @param x The x-component of the vector.
+   * @param y The y-component of the vector.
+   */
+  DOUBLE_VEC2(double x, double y) : x(x), y(y) 
+  {}
+
+  /**
+   * @brief Overloads the addition operator (+).
+   * @param other The vector to add to this one.
+   * @return A new Vec2 object representing the sum.
+   */
+  DOUBLE_VEC2 operator+(const DOUBLE_VEC2& other) const
+  {
+    return DOUBLE_VEC2(x + other.x, y + other.y);
+  }
+
+  /**
+   * @brief Overloads the subtraction operator (-).
+   * @param other The vector to subtract from this one.
+   * @return A new Vec2 object representing the difference.
+   */
+  DOUBLE_VEC2 operator-(const DOUBLE_VEC2& other) const
+  {
+    return DOUBLE_VEC2(x - other.x, y - other.y);
+  }
+
+  /**
+   * @brief Overloads the multiplication operator (*).
+   * @param scalar The scalar value to multiply the vector by.
+   * @return A new Vec2 object representing the scaled vector.
+   */
+  DOUBLE_VEC2 operator*(double scalar) const
+  {
+    return DOUBLE_VEC2(x * scalar, y * scalar);
+  }
+
+  /**
+   * @brief Overloads the division operator (/).
+   * @param scalar The scalar value to divide the vector by.
+   * @return A new Vec2 object representing the divided vector.
+   */
+  DOUBLE_VEC2 operator/(double scalar) const
+  {
+    if (scalar != 0.0) 
+    {
+      return DOUBLE_VEC2(x / scalar, y / scalar);
+    }
+    // In a real-world scenario, you might want to handle division by zero
+    // with an exception or a warning. For simplicity, we return a zero vector.
+    return DOUBLE_VEC2(0.0, 0.0);
+  }
+  
+  /**
+   * @brief Overloads the stream insertion operator (<<) for printing.
+   * @param os The output stream.
+   * @param vec The Vec2 object to print.
+   * @return The output stream.
+   */
+  friend std::ostream& operator<<(std::ostream& os, const DOUBLE_VEC2& vec) 
+  {
+    os << "(" << vec.x << ", " << vec.y << ")";
+    return os;
+  }
+};
 
 // -------------------------------------------------------------------------------------
 // VALIDITY VARIABLES

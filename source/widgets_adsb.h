@@ -55,7 +55,7 @@ ImVec2 point_position_center(ImVec4 Working_Area);
 // Returns Screen coordinates of center of working area.
 
 ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
-                                ImVec2 Lat_Lon_Center, ImVec2 Lat_Lon, 
+                                DOUBLE_VEC2 Lat_Lon_Center, DOUBLE_VEC2 Lat_Lon, 
                                 float Degrees, bool &Drawn);
 // Returns Screen coordinanates x and y pixel position of Latitude and Longitude.
 // Scale needs to be established.
@@ -82,10 +82,10 @@ void draw_point_marker(ImDrawList *Draw_List, ImVec2 Screen_Position, ImColor Co
 
 void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
                 float Strength_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
-                ImVec2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track);
+                DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track);
 
 AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
-                                  int Draw_Level_Of_Detail, ImVec2 Center_Lat_Lon, float Map_Bearing, NEW_COLOR_SCALE &Altitude_Color_Scale);
+                                  int Draw_Level_Of_Detail, DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, NEW_COLOR_SCALE &Altitude_Color_Scale);
 
 // ---------------------------------------------------------------------------------------
 
@@ -93,14 +93,14 @@ class MAP_MARKER
 {
   public:
 
-  ImVec2 LAT_LON;
+  DOUBLE_VEC2 LAT_LON;
   string DISPLAY_NAME = "";
   string LONG_NAME = "";
   int TYPE = 0;
 
   // Type 1
   vector<float> AIRPORT_LANDING_VECTORS;
-  vector<ImVec2> REGION_GPS_COORDS;
+  vector<DOUBLE_VEC2> REGION_GPS_COORDS;
 
   // Types:
   //  0 - Generic
@@ -111,7 +111,7 @@ class MAP_MARKER
   void clear();
 
   void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
-            ImVec2 Center_Lat_Lon, float Map_Bearing, float Range);
+            DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, float Range);
 };
 
 // ---------------------------------------------------------------------------------------
@@ -142,9 +142,9 @@ class ADSB_RANGE
   ImVec2 LAT_LON_TO_POINT_SCALE;          // Required for calculating map draw routines
                                           // in point_position_lat_lon
 
-  ImVec2 NO_POS_LAT_LON;
-  ImVec2 GPS_POS_LAT_LON;
-  ImVec2 AIRCRAFT_POS_LAT_LON;
+  DOUBLE_VEC2 NO_POS_LAT_LON;
+  DOUBLE_VEC2 GPS_POS_LAT_LON;
+  DOUBLE_VEC2 AIRCRAFT_POS_LAT_LON;
 
   ImVec2 CENTER_POS_LAT_LON;
 
@@ -176,12 +176,12 @@ class ADSB_RANGE
 
   bool gps_display_current_location();
 
-  void set_no_pos_lat_lon(ImVec2 Lat_Lon);
-  void set_gps_pos_lat_lon(ImVec2 Lat_Lon);
-  void set_aircraft_pos_lat_lon(ImVec2 Lat_Lon);
+  void set_no_pos_lat_lon(DOUBLE_VEC2 Lat_Lon);
+  void set_gps_pos_lat_lon(DOUBLE_VEC2 Lat_Lon);
+  void set_aircraft_pos_lat_lon(DOUBLE_VEC2 Lat_Lon);
 
-  ImVec2 get_center_lat_lon();
-  ImVec2 get_gps_lat_lon();
+  DOUBLE_VEC2 get_center_lat_lon();
+  DOUBLE_VEC2 get_gps_lat_lon();
 
   void create();
   // Prep the color, range size, and size of the impact variables
@@ -268,7 +268,7 @@ class ADSB_MAP
 
   COMPASS_WIDGET CURRENT_POSITION_COMPASS;
 
-  void add_landmark(ImVec2 Lat_Lon, string Display_Name, int Type);
+  void add_landmark(DOUBLE_VEC2 Lat_Lon, string Display_Name, int Type);
   // Adds landmark to vector list.
 
   void screen_buttons(system_data &sdSysData);

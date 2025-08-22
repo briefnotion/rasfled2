@@ -364,7 +364,7 @@ bool JSON_ENTRY::get_if_is(string Label, int &Value)
 {
   if (LABEL == Label)
   {
-    Value = string_to_int(VALUE);
+    Value = string_to_value<int>(VALUE);
     return true;
   }
   else
@@ -377,7 +377,7 @@ bool JSON_ENTRY::get_if_is(string Label, float &Value)
 {
   if (LABEL == Label)
   {
-    Value = string_to_float(VALUE);
+    Value = string_to_value<float>(VALUE);
     return true;
   }
   else

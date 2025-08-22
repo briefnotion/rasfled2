@@ -32,13 +32,13 @@ double degToRad(double deg);
 double radToDeg(double rad);
 double julianDay(int year, int month, int day, double hourUTC);
 
-float calculate_distance(float lat1, float long1, float lat2, float long2);
+double calculate_distance(double lat1, double long1, double lat2, double long2);
 // Returns distance in miles from first and second lat lon coords.
 
 float calculate_angle(float Distance, float Height);
 // Returns angle in degrees. Distance and Height need to be same unit type. 
 
-ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees);
+DOUBLE_VEC2 get_coords_x_miles_from_coords(double Latitude, double Longitude, double Distance_Miles, float Bearing_Degrees);
 // Returns latitude and longitude coordinates at Distance_Miles on Bearing.
 
 float signed_angular_error(float Compass_Bearing, float GPS_Bearing);

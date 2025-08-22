@@ -341,27 +341,27 @@ int ANIMATION_HANDLER::determine_led_pos(string LED_Position, v_profile_strip St
     {
       if (right_of_char(LED_Position, '|', right) == true)
       {
-        ret_pos = Strip_Info.fs(string_to_int(right));
+        ret_pos = Strip_Info.fs(string_to_value<int>(right));
       }
     }
     else if (left == "from_end")
     {
       if (right_of_char(LED_Position, '|', right) == true)
       {
-        ret_pos = Strip_Info.fe(string_to_int(right));
+        ret_pos = Strip_Info.fe(string_to_value<int>(right));
       }
     } else if (left == "from_top")
     {
       if (right_of_char(LED_Position, '|', right) == true)
       {
-        ret_pos = Strip_Info.ft(string_to_int(right));
+        ret_pos = Strip_Info.ft(string_to_value<int>(right));
       }
     }
     else if (left == "from_bot")
     {
       if (right_of_char(LED_Position, '|', right) == true)
       {
-        ret_pos = Strip_Info.fb(string_to_int(right));
+        ret_pos = Strip_Info.fb(string_to_value<int>(right));
       }
     }
     // strip value reverse and right value +- num overlap will occur.
@@ -369,41 +369,41 @@ int ANIMATION_HANDLER::determine_led_pos(string LED_Position, v_profile_strip St
     {
       if (right_of_char(LED_Position, '|', right) == true)
       {
-        ret_pos = (Strip_Info.fe(0) / 2) + string_to_int(right);
+        ret_pos = (Strip_Info.fe(0) / 2) + string_to_value<int>(right);
       }
     }
     else if (left == "from_1/3")
     {
       if (right_of_char(LED_Position, '|', right) == true)
       {
-        ret_pos = (Strip_Info.fe(0) / 3) + string_to_int(right);
+        ret_pos = (Strip_Info.fe(0) / 3) + string_to_value<int>(right);
       }
     }
     else if (left == "from_2/3")
     {
       if (right_of_char(LED_Position, '|', right) == true)
       {
-        ret_pos = ((Strip_Info.fe(0) * 2) / 3) + string_to_int(right);
+        ret_pos = ((Strip_Info.fe(0) * 2) / 3) + string_to_value<int>(right);
       }
     }
     else if (left == "from_1/4")
     {
       if (right_of_char(LED_Position, '|', right) == true)
       {
-        ret_pos = (Strip_Info.fe(0) / 4) + string_to_int(right);
+        ret_pos = (Strip_Info.fe(0) / 4) + string_to_value<int>(right);
       }
     }
     else if (left == "from_3/4")
     {
       if (right_of_char(LED_Position, '|', right) == true)
       {
-        ret_pos = ((Strip_Info.fe(0) * 3) / 4) + string_to_int(right);
+        ret_pos = ((Strip_Info.fe(0) * 3) / 4) + string_to_value<int>(right);
       }
     }
   }
   else
   {
-    ret_pos = string_to_int(LED_Position);
+    ret_pos = string_to_value<int>(LED_Position);
   }
 
   return ret_pos;

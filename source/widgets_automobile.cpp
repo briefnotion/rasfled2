@@ -975,19 +975,30 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
     {
       NOVA_2_GPS_ACTIVE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time())));
       NOVA_2_GPS_ACTIVE.draw(draw_list_nova, sdSysData);
-      
+      ImGui::SameLine();
       NOVA_2_GPS_CURRENT_LOCATION_LATITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().LATITUDE));
       NOVA_2_GPS_CURRENT_LOCATION_LATITUDE.draw(draw_list_nova, sdSysData);
-
+      ImGui::SameLine();
       NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().LONGITUDE));
       NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.draw(draw_list_nova, sdSysData);
-    }
-    // ---
-  
-    ImGui::NewLine();
-    ImGui::Text("          Compass");
-    {
 
+      NOVA_2_GPS_SPEED.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph()));
+      NOVA_2_GPS_SPEED.draw(draw_list_nova, sdSysData);
+      ImGui::SameLine();
+      NOVA_2_GPS_CURRENT_HEADING.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE));
+      NOVA_2_GPS_CURRENT_HEADING.draw(draw_list_nova, sdSysData);
+
+      NOVA_2_GPS_CURRENT_ALTITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val()));
+      NOVA_2_GPS_CURRENT_ALTITUDE.draw(draw_list_nova, sdSysData);
+
+      NOVA_2_GPS_SATILITES.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.satilite_count()));
+      NOVA_2_GPS_SATILITES.draw(draw_list_nova, sdSysData);
+      ImGui::SameLine();
+      string phv =  "P:" + to_string_round_to_nth(sdSysData.GPS_SYSTEM.pdop(), 2) + "  " + 
+                    "H:" + to_string_round_to_nth(sdSysData.GPS_SYSTEM.hdop(), 2) + "  " + 
+                    "V:" + to_string_round_to_nth(sdSysData.GPS_SYSTEM.vdop(), 2) ;
+      NOVA_2_GPS_PHV.update_value(sdSysData, phv);
+      NOVA_2_GPS_PHV.draw(draw_list_nova, sdSysData);
     }
 
     // ---
@@ -999,6 +1010,18 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
               getCurrentDaylightFactor((float)sdSysData.GPS_SYSTEM.current_position().LATITUDE, 
                                         (float)sdSysData.GPS_SYSTEM.current_position().LONGITUDE)));
       NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.draw(draw_list_nova, sdSysData);
+    }
+
+    // ---
+  
+    ImGui::NewLine();
+    ImGui::Text("          Compass");
+    {
+      NOVA_2_COMPASS_INFORMATION.update_value(sdSysData, sdSysData.COMMS_COMPASS.INFORMATION);
+      NOVA_2_COMPASS_INFORMATION.draw(draw_list_nova, sdSysData);
+
+      NOVA_2_COMPASS_INFORMATION_CALIBRATION.update_value(sdSysData, sdSysData.COMMS_COMPASS.LEVEL_3.INFORMATION_CALIBRATION);
+      NOVA_2_COMPASS_INFORMATION_CALIBRATION.draw(draw_list_nova, sdSysData);
     }
   }
 }
@@ -2140,6 +2163,34 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.PROPS = tmp_defalt_props;
     NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "GPS LON ");
     NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.create(sdSysData);
+
+    NOVA_2_GPS_CURRENT_ALTITUDE.PROPS = tmp_defalt_props;
+    NOVA_2_GPS_CURRENT_ALTITUDE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "ALTITUDE ");
+    NOVA_2_GPS_CURRENT_ALTITUDE.create(sdSysData);
+
+    NOVA_2_GPS_CURRENT_HEADING.PROPS = tmp_defalt_props;
+    NOVA_2_GPS_CURRENT_HEADING.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "HEADING ");
+    NOVA_2_GPS_CURRENT_HEADING.create(sdSysData);
+
+    NOVA_2_GPS_SPEED.PROPS = tmp_defalt_props;
+    NOVA_2_GPS_SPEED.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "SPEED ");
+    NOVA_2_GPS_SPEED.create(sdSysData);
+
+    NOVA_2_GPS_PHV.PROPS = tmp_defalt_props;
+    NOVA_2_GPS_PHV.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "");
+    NOVA_2_GPS_PHV.create(sdSysData);
+
+    NOVA_2_GPS_SATILITES.PROPS = tmp_defalt_props;
+    NOVA_2_GPS_SATILITES.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "SATILITES ");
+    NOVA_2_GPS_SATILITES.create(sdSysData);
+
+    NOVA_2_COMPASS_INFORMATION.PROPS = tmp_defalt_props;
+    NOVA_2_COMPASS_INFORMATION.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "INFO ");
+    NOVA_2_COMPASS_INFORMATION.create(sdSysData);
+
+    NOVA_2_COMPASS_INFORMATION_CALIBRATION.PROPS = tmp_defalt_props;
+    NOVA_2_COMPASS_INFORMATION_CALIBRATION.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "INFO CAL ");
+    NOVA_2_COMPASS_INFORMATION_CALIBRATION.create(sdSysData);
 
     NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.PROPS = tmp_defalt_props;
     NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "BRIGHT ");

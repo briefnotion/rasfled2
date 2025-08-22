@@ -305,27 +305,6 @@ string remove_first_and_last_characters(char Character, string Text)
   return Text;
 }
 
-bool string_to_int(string String_Value, int &Int_Value)
-{
-  try
-  {
-    Int_Value = stoi(String_Value);
-    return true;
-  }
-  catch(const std::exception& e)
-  {
-    Int_Value = 0;
-    return false;
-  }
-}
-
-int string_to_int(string String_Value)
-{
-  int tmp_int = 0;
-  string_to_int(String_Value, tmp_int);
-  return tmp_int;
-}
-
 bool string_hex_to_int(string Hex_String_Value, int &Int_Value)
 {
   try
@@ -345,91 +324,6 @@ int string_hex_to_int(string Hex_String_Value)
   int tmp_int = 0;
   string_hex_to_int(Hex_String_Value, tmp_int);
   return tmp_int;
-}
-
-bool string_to_ulong(string String_Value, unsigned long &Unsigned_Long_Value)
-{
-  try
-  {
-    //Long_Value = strtol(String_Value, NULL, 10);
-    Unsigned_Long_Value = stoul(String_Value);
-    return true;
-  }
-  catch(const std::exception& e)
-  {
-    Unsigned_Long_Value = 0;
-    return false;
-  }
-}
-
-unsigned long string_to_ulong(string String_Value)
-{
-  unsigned long tmp_ulong = 0;
-  string_to_ulong(String_Value, tmp_ulong);
-  return tmp_ulong;
-}
-
-bool string_to_ulonglong(string String_Value, unsigned long long &Unsigned_Long_Long_Value)
-{
-  try
-  {
-    Unsigned_Long_Long_Value = stoull(String_Value);
-    return true;
-  }
-  catch(const std::exception& e)
-  {
-    Unsigned_Long_Long_Value = 0;
-    return false;
-  }
-}
-
-unsigned long long string_to_ulonglong(string String_Value)
-{
-  unsigned long long tmp_ulonglong = 0;
-  string_to_ulonglong(String_Value, tmp_ulonglong);
-  return tmp_ulonglong;
-}
-
-bool string_to_float(string String_Value, float &Float_Value)
-{
-  try
-  {
-    Float_Value = stof(String_Value);
-    return true;
-  }
-  catch(const std::exception& e)
-  {
-    Float_Value = 0;
-    return false;
-  }
-}
-
-float string_to_float(string String_Value)
-{
-  float tmp_float = 0;
-  string_to_float(String_Value, tmp_float);
-  return tmp_float;
-}
-
-bool string_to_double(string String_Value, double &Double_Value)
-{
-  try
-  {
-    Double_Value = stod(String_Value);
-    return true;
-  }
-  catch(const std::exception& e)
-  {
-    Double_Value = 0;
-    return false;
-  }
-}
-
-double string_to_double(string String_Value)
-{
-  double tmp_double = 0;
-  string_to_double(String_Value, tmp_double);
-  return tmp_double;
 }
 
 string to_string_round_to_nth(float Value, int nth)
@@ -599,7 +493,7 @@ void STRING_INT::store(string str_value)
 {
   STR_VALUE = str_value;
 
-  if (string_to_int(str_value, NEW_INT_VALUE))
+  if (string_to_value(str_value, NEW_INT_VALUE))
   {
     INT_VALUE = NEW_INT_VALUE;
     CONVERSION_SUCCESS = true;
@@ -632,7 +526,7 @@ void STRING_FLOAT::store(string str_value)
 {
   STR_VALUE = str_value;
 
-  if (string_to_float(str_value, NEW_FLOAT_VALUE))
+  if (string_to_value(str_value, NEW_FLOAT_VALUE))
   {
     FLOAT_VALUE = NEW_FLOAT_VALUE;
     CONVERSION_SUCCESS = true;
@@ -679,7 +573,7 @@ void STRING_DOUBLE::store(string str_value)
 {
   STR_VALUE = str_value;
 
-  if (string_to_double(str_value, NEW_DOUBLE_VALUE))
+  if (string_to_value(str_value, NEW_DOUBLE_VALUE))
   {
     DOUBLE_VALUE = NEW_DOUBLE_VALUE;
     CONVERSION_SUCCESS = true;

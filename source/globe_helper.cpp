@@ -45,13 +45,13 @@ double julianDay(int year, int month, int day, double hourUTC)
           day + B - 1524.5 + hourUTC / 24.0;
 }
 
-float calculate_distance(float lat1, float lon1, float lat2, float lon2)
+double calculate_distance(double lat1, double lon1, double lat2, double lon2)
 {
   // Convert latitude and longitude from degrees to radians
-  lat1 = lat1 * float_PI / 180.0f;
-  lon1 = lon1 * float_PI / 180.0f;
-  lat2 = lat2 * float_PI / 180.0f;
-  lon2 = lon2 * float_PI / 180.0f;
+  lat1 = lat1 * double_PI / 180.0f;
+  lon1 = lon1 * double_PI / 180.0f;
+  lat2 = lat2 * double_PI / 180.0f;
+  lon2 = lon2 * double_PI / 180.0f;
 
   // Calculate the differences between the coordinates
   double dlat = lat2 - lat1;
@@ -64,7 +64,7 @@ float calculate_distance(float lat1, float lon1, float lat2, float lon2)
   double R = 3963.191;  // Radius of the Earth in miles
   double distance = R * c;
 
-  return (float)distance;
+  return distance;
 }
 
 float calculate_angle(float Distance, float Height) 
@@ -72,20 +72,20 @@ float calculate_angle(float Distance, float Height)
   return ((atan2(Height, Distance) * 180.0f) / float_PI);
 }
 
-ImVec2 get_coords_x_miles_from_coords(float Latitude, float Longitude, float Distance_Miles, float Bearing_Degrees) 
+DOUBLE_VEC2 get_coords_x_miles_from_coords(double Latitude, double Longitude, double Distance_Miles, float Bearing_Degrees) 
 {
-  ImVec2 ret_coords;
+  DOUBLE_VEC2 ret_coords;
 
-  float lat1Rad = Latitude * float_PI / 180.0f;
-  float lon1Rad = Longitude * float_PI / 180.0f;
-  float angularDistance = Distance_Miles / float_EARTH_RADIUS;
+  double lat1Rad = Latitude * double_PI / 180.0f;
+  double lon1Rad = Longitude * double_PI / 180.0f;
+  double angularDistance = Distance_Miles / double_EARTH_RADIUS;
 
-  float lat2Rad = asin(sin(lat1Rad) * cos(angularDistance) + cos(lat1Rad) * sin(angularDistance) * cos(Bearing_Degrees * float_PI / 180.0f));
-  float lon2Rad = lon1Rad + atan2(sin(Bearing_Degrees * float_PI / 180.0f) * sin(angularDistance) * cos(lat1Rad),
+  double lat2Rad = asin(sin(lat1Rad) * cos(angularDistance) + cos(lat1Rad) * sin(angularDistance) * cos((double)Bearing_Degrees * double_PI / 180.0f));
+  double lon2Rad = lon1Rad + atan2(sin((double)Bearing_Degrees * double_PI / 180.0f) * sin(angularDistance) * cos(lat1Rad),
                                     cos(angularDistance) - sin(lat1Rad) * sin(lat2Rad));
 
-  ret_coords.x = (lat2Rad * 180.0f / float_PI);
-  ret_coords.y = (lon2Rad * 180.0f / float_PI);
+  ret_coords.x = (lat2Rad * 180.0f / double_PI);
+  ret_coords.y = (lon2Rad * 180.0f / double_PI);
 
   return ret_coords;
 }

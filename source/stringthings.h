@@ -100,14 +100,6 @@ string remove_first_and_last_characters(char Character, string Text);
 // For removing things like start and ending quotes.
 // Value will be trimmed.
 
-bool string_to_int(string String_Value, int &Int_Value);
-// Convert in String_Value number to out Int_Value.
-//  Returns true if value sucessful.
-
-int string_to_int(string String_Value);
-// Convert in String_Value number to out int.
-//  Returns Integer Value
-
 bool string_hex_to_int(string String_Value, int &Int_Value);
 // Convert in String_Value number to out Int_Value.
 //  Returns true if value sucessful.
@@ -116,62 +108,176 @@ int string_hex_to_int(string String_Value);
 // Convert in String_Value number to out int.
 //  Returns Integer Value
 
-bool string_to_ulong(string String_Value, unsigned long &Unsigned_Long_Value);
-// Convert in String_Value number to out Int_Value.
-//  Returns true if value sucessful.
-
-unsigned long string_to_ulong(string String_Value);
-// Convert in String_Value number to out ulong.
-//  Returns Unsigned Long Value
-
-bool string_to_ulonglong(string String_Value, unsigned long long &Unsigned_Long_Long_Value);
-// Convert in String_Value number to out Unsigned_Long_Long_Value.
-//  Returns true if value sucessful.
-
-unsigned long long string_to_ulonglong(string String_Value);
-// Convert in String_Value number to out Unsigned_Long_Long_Value.
-//  Returns true if value sucessful.
-// ! No Error Checking
-
-bool string_to_float(string String_Value, float &Float_Value);
-// Convert in String_Value number to out Float_Value.
-//  Returns true if value sucessful.
-
-float string_to_float(string String_Value);
-// Convert in String_Value number to out Float_Value.
-//  Returns true if value sucessful.
-// ! No Error Checking
-
-bool string_to_double(string String_Value, double &Double_Value);
-// Convert in String_Value number to out Double_Value.
-//  Returns true if value sucessful.
-
-double string_to_double(string String_Value);
-// Convert in String_Value number to out Double_Value.
-//  Returns true if value sucessful.
-// ! No Error Checking
-
 string to_string_round_to_nth(float Value, int nth);
 // Returns string of float rounded to nth decimal.
 //  like: float_to_string
 
-int color_range(float Value, int Magenta, int Red, int Yellow, int Green, int Blue);
+//int color_range(float Value, int Magenta, int Red, int Yellow, int Green, int Blue);
 // Returns color in ranges of 1st to 5th of values
 // eg (12, 5, 10, 15, 20, 25) returns color yellow
 // Non zero or mid level green.
 
-int color_range_reverse(float Value, int Blue, int Green, int Yellow, int Red, int Magenta);
+//int color_range_reverse(float Value, int Blue, int Green, int Yellow, int Red, int Magenta);
 // Returns color in ranges of 1st to 5th of values
 // eg (12, 5, 10, 15, 20, 25) returns color yellow
 // Non zero or mid level green.
 
-int color_scale(float Value, int Green, int Yellow, int Red, int Magenta, int Blue);
+//int color_scale(float Value, int Green, int Yellow, int Red, int Magenta, int Blue);
 // Returns color in ranges of 1st to 5th of values
 // eg (12, 5, 10, 15, 20, 25) returns color red
 // zero level green.
 
 short xor_checksum(string Line, char Start_Char, char End_Char);
 // Short CHECKSUM
+
+/**
+ * @brief Checks if a type is one of the supported numeric types.
+ *
+ * This helper template is used by the static_asserts to validate the types.
+ * @tparam T The type to check.
+ */
+
+template <typename T>
+constexpr bool is_supported_type_v =
+    std::is_same_v<T, int> ||
+    std::is_same_v<T, unsigned int> ||
+    std::is_same_v<T, long> ||
+    std::is_same_v<T, unsigned long> ||
+    std::is_same_v<T, long long> ||
+    std::is_same_v<T, unsigned long long> ||
+    std::is_same_v<T, float> ||
+    std::is_same_v<T, double>;
+
+/**
+ * @brief Converts a string to a specified numeric type, returning the value directly.
+ *
+ * @tparam T The target numeric type.
+ * @param String_Value The string to convert.
+ * @return The converted numeric value of type T.
+ */
+template <typename T>
+T string_to_value(const std::string& String_Value)
+/*
+  MUST BE ASSIGNE AS:
+    string_to_value<int>(string)
+    string_to_value<float>(string)
+    string_to_value<ulong>(string)
+    string_to_value<double>(string)
+*/
+{
+  static_assert(is_supported_type_v<T>,
+                "The string_to_value function can only be used with specific integer or floating-point types.");
+
+  static_assert(
+      !std::is_unsigned<T>::value || std::is_integral<T>::value,
+      "Unsigned floating-point types (e.g., unsigned float, unsigned double) are not standard C++ types."
+  );
+
+  try
+  {
+    if constexpr (std::is_same_v<T, int>)
+    {
+      return std::stoi(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, unsigned int>)
+    {
+      return std::stoul(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, long>)
+    {
+      return std::stol(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, unsigned long>)
+    {
+      return std::stoul(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, long long>)
+    {
+      return std::stoll(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, unsigned long long>)
+    {
+      return std::stoull(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, float>)
+    {
+      return std::stof(String_Value);
+    }
+    else // This must be T = double.
+    {
+      return std::stod(String_Value);
+    }
+  }
+  catch (const std::exception& e)
+  {
+    std::cerr << "Conversion error: " << e.what() << " String: " << String_Value << std::endl;
+    return T{};
+  }
+}
+
+/**
+ * @brief Converts a string to a specified numeric type, returning a boolean for success.
+ *
+ * @tparam T The target numeric type.
+ * @param String_Value The string to convert.
+ * @param Result_Value A reference to the variable to store the result.
+ * @return true if the conversion was successful, false otherwise.
+ */
+template <typename T>
+bool string_to_value(const std::string& String_Value, T& Result_Value)
+{
+  static_assert(is_supported_type_v<T>,
+    "The string_to_value function can only be used with specific integer or floating-point types.");
+
+  static_assert(
+    !std::is_unsigned<T>::value || std::is_integral<T>::value,
+    "Unsigned floating-point types (e.g., unsigned float, unsigned double) are not standard C++ types."
+  );
+
+  try
+  {
+    if constexpr (std::is_same_v<T, int>)
+    {
+      Result_Value = std::stoi(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, unsigned int>)
+    {
+      Result_Value = std::stoul(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, long>)
+    {
+      Result_Value = std::stol(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, unsigned long>)
+    {
+      Result_Value = std::stoul(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, long long>)
+    {
+      Result_Value = std::stoll(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, unsigned long long>)
+    {
+      Result_Value = std::stoull(String_Value);
+    }
+    else if constexpr (std::is_same_v<T, float>)
+    {
+      Result_Value = std::stof(String_Value);
+    }
+    else // This must be T = double.
+    {
+      Result_Value = std::stod(String_Value);
+    }
+    return true;
+  }
+  catch (const std::exception& e)
+  {
+    // error reported off because true returns false on error
+    //std::cerr << "Conversion error: " << e.what() << " String: " << String_Value << std::endl;
+    Result_Value = T{}; // Ensure the value is reset on failure
+    return false;
+  }
+}
 
 class STRING_STRING
 // Variable stores original string number and converted value.

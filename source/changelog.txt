@@ -1,3 +1,6 @@
+2.299_250821
+  - Continued converting the NMEA latitude and longitude to double precision.
+
 2.298_250820
   - Converted NMEA to store latitude and longitude as double instead of float.  Still needs 
       work because the system downcast it along the lines.  In testting.

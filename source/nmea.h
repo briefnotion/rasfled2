@@ -147,6 +147,7 @@ class NMEA
   float pdop();
   float hdop();
   float vdop();
+  int satilite_count();
 
   // Routines:
   string device_change_baud_rate_string(int Baud_Rate);

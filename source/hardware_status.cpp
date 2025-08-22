@@ -35,7 +35,7 @@ void HARDWARE_STATUS::read_temperature()
 
       fread(data, buf_size, 1, fshardware);
 
-      TEMPERTURE = string_to_int(data);
+      TEMPERTURE = string_to_value<double>(data);
       TEMPERTURE /= 1000;
 
       fclose(fshardware);
@@ -68,7 +68,7 @@ void HARDWARE_STATUS::read_low_voltage()
 
       fread(data, buf_size, 1, fshardware);
 
-      LOW_VOLTAGE = string_to_int(data);
+      LOW_VOLTAGE = string_to_value<double>(data);
 
       fclose(fshardware);
     }      

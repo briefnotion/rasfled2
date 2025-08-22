@@ -36,29 +36,38 @@ satellite systems.
 
 void NMEA::translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time)
 {
+  // tmp vars
+  float tmp_float = 0.0f;
+
   // Track made good and ground speed
   //  The NMEA-0183 message $GNVTG is used for course over ground and ground speed.
 
   if (Input.size() == 10)
   {
-    SPEED_KNOTS.store_knots(string_to_float(Input[5]), tmeFrame_Time, 0);
-    if (Input[6] == "N")
+    if (string_to_value(Input[5], tmp_float))
     {
-      SPEED_KNOTS_INDICATOR = true;
-    }
-    else
-    {
-      SPEED_KNOTS_INDICATOR = false;
+      SPEED_KNOTS.store_knots(tmp_float, tmeFrame_Time, 0);
+      if (Input[6] == "N")
+      {
+        SPEED_KNOTS_INDICATOR = true;
+      }
+      else
+      {
+        SPEED_KNOTS_INDICATOR = false;
+      }
     }
 
-    SPEED_KMPH.store_kmph(string_to_float(Input[7]), tmeFrame_Time, 0);
-    if (Input[8] == "K")
+    if(string_to_value(Input[7], tmp_float))
     {
-      SPEED_KMPH_INDICATOR = true;
-    }
-    else
-    {
-      SPEED_KMPH_INDICATOR = false;
+      SPEED_KMPH.store_kmph(tmp_float, tmeFrame_Time, 0);
+      if (Input[8] == "K")
+      {
+        SPEED_KMPH_INDICATOR = true;
+      }
+      else
+      {
+        SPEED_KMPH_INDICATOR = false;
+      }
     }
 
     VELOCITY_TRACK_MODE = Input[9];
@@ -72,24 +81,30 @@ void NMEA::translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time)
       VALID_TRACK_INFO = true;
     }
 
-    TRUE_TRACK = string_to_float(Input[1]);
-    if (Input[2] == "T")
+    if(string_to_value(Input[1], tmp_float))
     {
-      TRUE_TRACK_INDICATOR = true;
-    }
-    else
-    {
-      TRUE_TRACK_INDICATOR = false;
+      TRUE_TRACK = tmp_float;
+      if (Input[2] == "T")
+      {
+        TRUE_TRACK_INDICATOR = true;
+      }
+      else
+      {
+        TRUE_TRACK_INDICATOR = false;
+      }
     }
 
-    MAGENTIC_TRACK = string_to_float(Input[3]);
-    if (Input[4] == "M")
+    if(string_to_value(Input[3], tmp_float))
     {
-      MAGENTIC_TRACK_INDICATOR = true;
-    }
-    else
-    {
-      MAGENTIC_TRACK_INDICATOR = false;
+      MAGENTIC_TRACK = tmp_float;
+      if (Input[4] == "M")
+      {
+        MAGENTIC_TRACK_INDICATOR = true;
+      }
+      else
+      {
+        MAGENTIC_TRACK_INDICATOR = false;
+      }
     }
 
     // Valid track only if v > 1kmph
@@ -108,80 +123,172 @@ void NMEA::translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time)
 
 void NMEA::translate_gngsa(vector<string> &Input)
 {
+  // tmp vars
+  int tmp_int = 0;
+  float tmp_float = 0.0f;
+
   // GPS DOP and active satellites
   
   if (Input.size() == 18)
   {
     MANUAL_AUTOMATIC = Input[1];
-    GSA_MODE = string_to_int(Input[2]);
+    if(string_to_value(Input[2], tmp_int))
+    {
+      GSA_MODE = tmp_int;
+    }
 
-    PRNNUMBER_01 = string_to_int(Input[3]);
-    PRNNUMBER_02 = string_to_int(Input[4]);
-    PRNNUMBER_03 = string_to_int(Input[5]);
-    PRNNUMBER_04 = string_to_int(Input[6]);
-    PRNNUMBER_05 = string_to_int(Input[7]);
-    PRNNUMBER_06 = string_to_int(Input[8]);
-    PRNNUMBER_07 = string_to_int(Input[9]);
-    PRNNUMBER_08 = string_to_int(Input[10]);
-    PRNNUMBER_09 = string_to_int(Input[11]);
-    PRNNUMBER_10 = string_to_int(Input[12]);
-    PRNNUMBER_11 = string_to_int(Input[13]);
-    PRNNUMBER_12 = string_to_int(Input[14]);
+    if(string_to_value(Input[3], tmp_int))
+    {
+      PRNNUMBER_01 = tmp_int;
+    }
+    if(string_to_value(Input[4], tmp_int))
+    {
+      PRNNUMBER_02 = tmp_int;
+    }
+    if(string_to_value(Input[5], tmp_int))
+    {
+      PRNNUMBER_03 = tmp_int;
+    }
+    if(string_to_value(Input[6], tmp_int))
+    {
+      PRNNUMBER_04 = tmp_int;
+    }
+    if(string_to_value(Input[7], tmp_int))
+    {
+      PRNNUMBER_05 = tmp_int;
+    }
+    if(string_to_value(Input[8], tmp_int))
+    {
+      PRNNUMBER_06 = tmp_int;
+    }
+    if(string_to_value(Input[9], tmp_int))
+    {
+      PRNNUMBER_07 = tmp_int;
+    }
+    if(string_to_value(Input[10], tmp_int))
+    {
+      PRNNUMBER_08 = tmp_int;
+    }
+    if(string_to_value(Input[11], tmp_int))
+    {
+      PRNNUMBER_09 = tmp_int;
+    }
+    if(string_to_value(Input[12], tmp_int))
+    {
+      PRNNUMBER_10 = tmp_int;
+    }
+    if(string_to_value(Input[13], tmp_int))
+    {
+      PRNNUMBER_11 = tmp_int;
+    }
+    if(string_to_value(Input[14], tmp_int))
+    {
+      PRNNUMBER_12 = tmp_int;
+    }
 
-    PDOP = string_to_float(Input[15]);
-    HDOP = string_to_float(Input[16]);
-    VDOP = string_to_float(Input[17]);
+    if(string_to_value(Input[15], tmp_float))
+    {
+      PDOP = tmp_float;
+    }
+    if(string_to_value(Input[16], tmp_float))
+    {
+      HDOP = tmp_float;
+    }
+    if(string_to_value(Input[17], tmp_float))
+    {
+      VDOP = tmp_float;
+    }
   }
 }
 
 void NMEA::translate_gngga(vector<string> &Input)
 {
+  // tmp vars
+  int tmp_int = 0;
+  float tmp_float = 0.0f;
+  double tmp_double = 0.0;
+
   if (Input.size() == 15)
   {
-    GGA_TIME = string_to_float(Input[1]);
-    
     // primarily for file access reloading file (bug, not a feature)
-    if (GGA_TIME_PREV > GGA_TIME)
+    if(string_to_value(Input[1], tmp_float))
     {
-      GGA_TIME_PREV = GGA_TIME;
+      GGA_TIME = tmp_float;
+      if (GGA_TIME_PREV > GGA_TIME)
+      {
+        GGA_TIME_PREV = GGA_TIME;
+      }
     }
-    
-    LATITUDE = string_to_float(Input[2]);
+   
     // Convert long degrees minutes to degrees decimal
-    LATITUDE = (int)(LATITUDE / 100.0f) + ( ((LATITUDE / 100.0f) - (int)(LATITUDE / 100.0f)) *100 / 60 );
-    if (Input[3] == "S")
+    if(string_to_value(Input[2], tmp_double))
     {
-      LATITUDE = LATITUDE * -1;
+      LATITUDE = tmp_double;
+      LATITUDE = (int)(LATITUDE / 100.0f) + ( ((LATITUDE / 100.0f) - (int)(LATITUDE / 100.0f)) *100 / 60 );
+      if (Input[3] == "S")
+      {
+        LATITUDE = LATITUDE * -1;
+      }
     }
 
-    LONGITUDE = string_to_float(Input[4]);
     // Convert long degrees minutes to degrees decimal
-    LONGITUDE = (int)(LONGITUDE / 100.0f) + ( ((LONGITUDE / 100.0f) - (int)(LONGITUDE / 100.0f)) *100 / 60 );
-    if (Input[5] == "W")
+    if(string_to_value(Input[4], tmp_double))
     {
-      LONGITUDE = LONGITUDE * -1;
+      LONGITUDE = tmp_double;
+      LONGITUDE = (int)(LONGITUDE / 100.0f) + ( ((LONGITUDE / 100.0f) - (int)(LONGITUDE / 100.0f)) *100 / 60 );
+      if (Input[5] == "W")
+      {
+        LONGITUDE = LONGITUDE * -1;
+      }
     }
 
-    QUALITY = string_to_int(Input[6]);
-    NUMBER_OF_SATILITES = string_to_int(Input[7]);
-    DILUTION_OF_POSITION = string_to_float(Input[8]);
+    if(string_to_value(Input[6], tmp_int))
+    {
+      QUALITY = tmp_int;
+    }
+
+    if(string_to_value(Input[7], tmp_int))
+    {
+      NUMBER_OF_SATILITES = tmp_int;
+    }
+
+    if(string_to_value(Input[8], tmp_float))
+    {
+      DILUTION_OF_POSITION = tmp_float;
+    }
 
     if (Input[10] == "M")
     {
-      ALTITUDE.store_meters(string_to_float(Input[9]));
+      if(string_to_value(Input[9], tmp_float))
+      {
+        ALTITUDE.store_meters(tmp_float);
+      }
     }
 
     if (Input[12] == "M")
     {
-      GEOID_HEIGHT.store_meters(string_to_float(Input[11]));
+      if(string_to_value(Input[11], tmp_float))
+      {
+        GEOID_HEIGHT.store_meters(tmp_float);
+      }
     }
 
-    TIME_SINCE_LAST_DGPS_UPDATE = string_to_float(Input[13]);
+    if(string_to_value(Input[13], tmp_float))
+    {
+      TIME_SINCE_LAST_DGPS_UPDATE = tmp_float;
+    }
     
     string tmp_string = "";
 
     left_of_char(Input[14], '*', tmp_string);
-    DGPS_STATION_ID = string_to_int(tmp_string);
+    if(string_to_value(tmp_string, tmp_int))
+    {
+      DGPS_STATION_ID = tmp_int;
+    }
+    else
+    {
+      DGPS_STATION_ID = 0;
+    }
 
     right_of_char(Input[14], '*', tmp_string);
 
@@ -208,6 +315,11 @@ float NMEA::hdop()
 float NMEA::vdop()
 {
   return VDOP;
+}
+
+int NMEA::satilite_count()
+{
+  return NUMBER_OF_SATILITES;
 }
 
 // Routines:

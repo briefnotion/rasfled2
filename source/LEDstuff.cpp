@@ -64,9 +64,9 @@ CRGB CRGB::StringtoCRGB(string strCRGB)
 
     if (c2 != (int)string::npos)
     {
-      r = string_to_int(strCRGB.substr(0,c1)); 
-      g = string_to_int(strCRGB.substr(c1+1,c2-c1-1));
-      b = string_to_int(strCRGB.substr(c2+1,strCRGB.length()-1));
+      r = string_to_value<int>(strCRGB.substr(0,c1)); 
+      g = string_to_value<int>(strCRGB.substr(c1+1,c2-c1-1));
+      b = string_to_value<int>(strCRGB.substr(c2+1,strCRGB.length()-1));
     }
   }
   return CRGB(r,g,b);

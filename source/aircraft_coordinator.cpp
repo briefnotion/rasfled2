@@ -514,8 +514,8 @@ void AIRCRAFT_COORDINATOR::post_post_process()
     int dec_pos = DATA.NOW.get_str_value().find('.');
     if (dec_pos != (int)string::npos)
     {
-      DATA.CONVERTED_TIME.put_seconds(string_to_ulong(DATA.NOW.get_str_value().erase(dec_pos)));
-      DATA.CONVERTED_TIME.put_deciseconds(string_to_int(DATA.NOW.get_str_value().erase(0, dec_pos +1)));
+      DATA.CONVERTED_TIME.put_seconds(string_to_value<ulong>(DATA.NOW.get_str_value().erase(dec_pos)));
+      DATA.CONVERTED_TIME.put_deciseconds(string_to_value<ulong>(DATA.NOW.get_str_value().erase(0, dec_pos +1)));
     }
   }
   
