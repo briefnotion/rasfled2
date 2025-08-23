@@ -34,6 +34,7 @@
 #include "hmc5883l.h"
 #include "rasapi.h"
 #include "panels.h"
+#include "map.h"
 
 #include "screen4_helper.h"
 
@@ -75,6 +76,7 @@ class FILES
   string LOGS_IMAGES_DIR = "";
   string LOGS_SETTINGS_DIR = "";
   string LOGS_COMPASS_DIR = "";
+  string LOGS_MAPS_DIR = "";
 
   // CAN Bus
   string CAN_BUS_DEVICE_FILE = "";
@@ -96,6 +98,9 @@ class FILES
   // Compass
   string COMPASS_DEVICE_FILE = "";
   string COMPASS_OFFSET_HISTORY_FILE = "";
+
+  // Map
+  string MAP_GLOBE_JSON = "";
 
   bool assign(CONSOLE_COMMUNICATION &cons);
 };
@@ -211,6 +216,9 @@ class system_data
   // Communications Port
   COMPORT         COMMS_AUTO;
   AUTOMOBILE      CAR_INFO;
+
+  // Map
+  MAP             MAP_SYSTEM;
 
   // GPS
   COMPORT         COMMS_GPS;

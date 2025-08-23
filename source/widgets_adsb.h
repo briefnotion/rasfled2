@@ -34,6 +34,7 @@
 #include "widgets.h"
 #include "widgets_drawing.h"
 #include "globe_helper.h"
+#include "map.h"
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
@@ -80,39 +81,13 @@ void draw_airport_marker(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 S
 
 void draw_point_marker(ImDrawList *Draw_List, ImVec2 Screen_Position, ImColor Color, float Size);
 
-void draw_track(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
+void draw_track(ImDrawList *Draw_List, system_data &sdSysData, 
+                ImVec4 &Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
                 float Strength_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
                 DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track);
 
 AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
                                   int Draw_Level_Of_Detail, DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, NEW_COLOR_SCALE &Altitude_Color_Scale);
-
-// ---------------------------------------------------------------------------------------
-
-class MAP_MARKER
-{
-  public:
-
-  DOUBLE_VEC2 LAT_LON;
-  string DISPLAY_NAME = "";
-  string LONG_NAME = "";
-  int TYPE = 0;
-
-  // Type 1
-  vector<float> AIRPORT_LANDING_VECTORS;
-  vector<DOUBLE_VEC2> REGION_GPS_COORDS;
-
-  // Types:
-  //  0 - Generic
-  //  1 - Airport
-  //  2 - Region
-  //  3 - Interstate
-
-  void clear();
-
-  void draw(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
-            DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, float Range);
-};
 
 // ---------------------------------------------------------------------------------------
 
@@ -243,7 +218,6 @@ class ADSB_MAP
   BUTTON_TOGGLE_COLOR BTC_GPS_ASSIST;
 
   ADSB_RANGE RANGE_INDICATOR;
-  deque<MAP_MARKER> LANDMARKS;
 
   NEW_COLOR_SCALE GPS_ALTITUDE_COLOR_SCALE;
   NEW_COLOR_SCALE ALTITUDE_COLOR_SCALE;
@@ -268,8 +242,10 @@ class ADSB_MAP
 
   COMPASS_WIDGET CURRENT_POSITION_COMPASS;
 
-  void add_landmark(DOUBLE_VEC2 Lat_Lon, string Display_Name, int Type);
   // Adds landmark to vector list.
+  void draw_landmark( ImDrawList *Draw_List, system_data &sdSysData, MAP_INFO &Landmark, 
+                      ImVec4 &Working_Area, ImVec2 Scale, 
+                      DOUBLE_VEC2 Center_Lat_Lon, float &Map_Bearing, float Range);
 
   void screen_buttons(system_data &sdSysData);
   // Draws buttons onto the screen

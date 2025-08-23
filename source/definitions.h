@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.299_250821"
+#define Revision "2.300_250822"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -94,26 +94,28 @@
 #define DEF_AIRCRAFT_1090_DIR             "/run/dump1090-fa/"     // Not Created
 #define DEF_AIRCRAFT_FA_JSON_FILE         "aircraft.json"         // Not Created
 
-// Main Control for working rasfled
+// Main Control directories for working rasfled
 #define DEF_WORKING_DIR                   "rasfled/"         // Create Directory
 #define DEF_WORKING_DIR_TEST              "rasfled-t/"       // Create Directory
-
-#define DEF_COMPASS_SUB_DIR               "compass/"              // Create Directory
-
-#define DEF_ANIMATIONS_FILE               "animations.json"
-#define DEF_CONFIGURATION                 "configuration.json"
-#define DEF_RUNNING_STATE                 "runningstate.json"
-#define DEF_QR_CODE                       "qr_rasfled2_rev.png"
-#define DEF_REFERENCE_CARD                "refer_advert.png"
 
 // Rasfled directories
 #define DEF_CAN_BUS_SUB_DIR               "auto/"                 // Create Directory
 #define DEF_AIRCRAFT_SUB_DIR              "adsb/"                 // Create Directory
 #define DEF_GPS_SUB_DIR                   "gps_log/"              // Create Directory
 #define DEF_ADVERTS_SUB_DIR               "adverts/"              // Create Directory
-#define DEF_AUDIO_DIR                     "audio/"              // Create Directory
-#define DEF_IMAGES_DIR                    "images/"              // Create Directory
-#define DEF_SETTINGS_DIR                  "settings/"              // Create Directory
+#define DEF_AUDIO_DIR                     "audio/"                // Create Directory
+#define DEF_IMAGES_DIR                    "images/"               // Create Directory
+#define DEF_SETTINGS_DIR                  "settings/"             // Create Directory
+#define DEF_COMPASS_SUB_DIR               "compass/"              // Create Directory
+#define DEF_MAP_DIR                       "maps/"             // Create Directory
+
+// Files
+#define DEF_ANIMATIONS_FILE               "animations.json"
+#define DEF_CONFIGURATION                 "configuration.json"
+#define DEF_RUNNING_STATE                 "runningstate.json"
+#define DEF_QR_CODE                       "qr_rasfled2_rev.png"
+#define DEF_REFERENCE_CARD                "refer_advert.png"
+#define DEF_MAP_GLOBE_JSON                "map_globe.json"
 
 
 // CAN Bus

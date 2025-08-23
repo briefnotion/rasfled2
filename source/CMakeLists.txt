@@ -69,6 +69,7 @@ target_sources(rasfled PRIVATE
   animations_handler.cpp
   automobile_handler.cpp
   interface.cpp
+  map.cpp
   aircraft_coordinator.cpp
   widgets_advertisement.cpp
   widgets.cpp

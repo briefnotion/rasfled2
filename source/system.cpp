@@ -53,6 +53,7 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
   LOGS_IMAGES_DIR = WORKING_DIR + (string)DEF_IMAGES_DIR;
   LOGS_SETTINGS_DIR = WORKING_DIR + (string)DEF_SETTINGS_DIR;
   LOGS_COMPASS_DIR = WORKING_DIR + (string)DEF_COMPASS_SUB_DIR;
+  LOGS_MAPS_DIR = WORKING_DIR + (string)DEF_MAP_DIR;
   
   // Crash occurs if directory to be created is within a directory that doesnt exist.
   ret_success.catch_false(check_create_working_dir(WORKING_DIR, true));
@@ -65,26 +66,11 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
   ret_success.catch_false(check_create_working_dir(LOGS_IMAGES_DIR, true));
   ret_success.catch_false(check_create_working_dir(LOGS_SETTINGS_DIR, true));
   ret_success.catch_false(check_create_working_dir(LOGS_COMPASS_DIR, true));
+  ret_success.catch_false(check_create_working_dir(LOGS_MAPS_DIR, true));
   
   if (!ret_success.has_false())
   {
     cons.printw("File Assignments:");
-
-    // Specific Directories and Files
-    DEAMON_LOG = DEF_DEAMON_LOG;
-    cons.printw("  " + DEAMON_LOG);
-
-    if (!TEST_DATA_AIRCRAFT)
-    {
-      AIRCRAFT_FA_FILE = AIRCRAFT_1090_DIR + (string)DEF_AIRCRAFT_FA_JSON_FILE;
-    }
-    else
-    {
-      AIRCRAFT_FA_FILE = LOGS_AIRCRAFT_DIR + (string)DEF_AIRCRAFT_FA_JSON_FILE;
-    }
-    
-    cons.printw("  " + AIRCRAFT_FA_FILE);
-
 
     // Main Control for working rasfled
     ANIMATIONS_FILE = LOGS_SETTINGS_DIR + (string)DEF_ANIMATIONS_FILE;
@@ -102,11 +88,7 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
     REFERENCE_CARD_FILE = LOGS_IMAGES_DIR + (string)DEF_REFERENCE_CARD;
     cons.printw("  " + REFERENCE_CARD_FILE);
 
-
     // // CAN Bus
-    CAN_BUS_DEVICE_FILE = (string)DEF_CAN_BUS_DEV_NAME;
-    cons.printw("  " + CAN_BUS_DEVICE_FILE);
-
     CAN_BUS_HISTORY_FILE = LOGS_CAN_BUS_HISTORY_SUB_DIR + (string)DEF_CAN_BUS_SAVE_LOG_NAME;
     cons.printw("  " + CAN_BUS_HISTORY_FILE);
 
@@ -119,25 +101,47 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
     CAN_BUS_ERROR_LOG_FILE = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_ERROR_LOG;
     cons.printw("  " + CAN_BUS_ERROR_LOG_FILE);
 
-
     // GPS
-    GPS_DEVICE_FILE = (string)DEF_GPS_DEV_NAME;
-    cons.printw("  " + GPS_DEVICE_FILE);
-
     GPS_LOG_FILE = LOGS_GPS_DIR + (string)DEF_GPS_SAVE_LOG_NAME;
     cons.printw("  " + GPS_LOG_FILE);
 
     GPS_TEST_FILE = LOGS_GPS_DIR + (string)DEF_GPS_TEST_DATA_NAME;
     cons.printw("  " + GPS_TEST_FILE);
 
-
     // Compass
-    COMPASS_DEVICE_FILE = (string)DEF_COMPASS_DEV_NAME;
-    cons.printw("  " + COMPASS_DEVICE_FILE);
-
     COMPASS_OFFSET_HISTORY_FILE = LOGS_COMPASS_DIR + (string)DEF_COMPASS_OFFSET_HISTORY;
     cons.printw("  " + COMPASS_OFFSET_HISTORY_FILE);
 
+    MAP_GLOBE_JSON = LOGS_MAPS_DIR + (string)DEF_MAP_GLOBE_JSON;
+    cons.printw("  " + MAP_GLOBE_JSON);
+
+    // Specific Hardware Directories and Files
+    cons.printw("");
+    cons.printw("Hardware and External Sources:");
+
+    DEAMON_LOG = DEF_DEAMON_LOG;
+    cons.printw("  " + DEAMON_LOG);
+
+    {
+      if (!TEST_DATA_AIRCRAFT)
+      {
+        AIRCRAFT_FA_FILE = AIRCRAFT_1090_DIR + (string)DEF_AIRCRAFT_FA_JSON_FILE;
+      }
+      else
+      {
+        AIRCRAFT_FA_FILE = LOGS_AIRCRAFT_DIR + (string)DEF_AIRCRAFT_FA_JSON_FILE;
+      }
+      cons.printw("  " + AIRCRAFT_FA_FILE);
+    }
+
+    CAN_BUS_DEVICE_FILE = (string)DEF_CAN_BUS_DEV_NAME;
+    cons.printw("  " + CAN_BUS_DEVICE_FILE);
+
+    GPS_DEVICE_FILE = (string)DEF_GPS_DEV_NAME;
+    cons.printw("  " + GPS_DEVICE_FILE);
+
+    COMPASS_DEVICE_FILE = (string)DEF_COMPASS_DEV_NAME;
+    cons.printw("  " + COMPASS_DEVICE_FILE);
 
     cons.printw("");
   }

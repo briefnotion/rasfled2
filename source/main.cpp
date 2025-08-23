@@ -693,6 +693,16 @@ int loop_2(bool TTY_Only)
     sdSystem.CONFIG.vhwDOORS.push_back(tmpSwitch);
   }
 
+  // -------------------------------------------------------------------------------------
+  // Map load and initialize
+  sdSystem.SCREEN_COMMS.printw("Initializing Map ...");
+  sdSystem.MAP_SYSTEM.PROPS.FILENAME_WORLD_MAP = sdSystem.FILE_NAMES.MAP_GLOBE_JSON;
+  if (!sdSystem.MAP_SYSTEM.create())
+  {
+    sdSystem.SCREEN_COMMS.printw("  " + sdSystem.MAP_SYSTEM.INFORMATION);
+  }
+
+  // -------------------------------------------------------------------------------------
   // Initialize Audio Filenames
   sdSystem.SCREEN_COMMS.printw("Initializing Audio ...");
   sdSystem.SOUND_SYSTEM.create(sdSystem.FILE_NAMES.LOGS_AUDIO_DIR);

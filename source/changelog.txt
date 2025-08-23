@@ -1,3 +1,7 @@
+2.300_250822
+  - Started making changes to the map.
+  - Testing tracks to draw in colors instead of gray.
+
 2.299_250821
   - Continued converting the NMEA latitude and longitude to double precision.
 
