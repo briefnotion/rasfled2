@@ -100,7 +100,10 @@ class FILES
   string COMPASS_OFFSET_HISTORY_FILE = "";
 
   // Map
-  string MAP_GLOBE_JSON = "";
+  string LOGS_MAPS_GENERICS_JSON = "";
+  string LOGS_MAPS_AIRPORTS_JSON = "";
+  string LOGS_MAPS_REGIONS_JSON = "";
+  string LOGS_MAPS_ROADS_JSON = "";
 
   bool assign(CONSOLE_COMMUNICATION &cons);
 };

@@ -26,6 +26,10 @@
 #include <string>
 #include <time.h>
 #include <deque>
+#include <fstream>
+#include <sstream>
+#include <algorithm> // Required for std::remove_if
+#include <cctype>    // Required for std::isalnum and std::isspace
 
 // Boost libraries
 #include <boost/filesystem.hpp>
@@ -108,9 +112,18 @@ bool check_create_working_dir(string Directory, bool Create);
 bool get_files_list(string Directory, vector<string> &List, string Only_Type);
 // returns false if no files found.
 
-string file_to_string(string Dir_Filename, bool &Success);
-// Opens and loads a file to return as a string.
-// Reurns Success true false value.
+//std::string file_to_string(const std::string& Dir_Filename, bool& Success, bool strip_special_chars = false)
+std::string file_to_string(const std::string& Dir_Filename, bool& Success);
+// This function reads the entire content of a file into a single string.
+// It is more efficient and robust than the original version.
+//
+// Dir_Filename: The path and name of the file to read.
+// Success: A reference to a boolean variable that will be set to true if the
+//          file was read successfully, and false otherwise.
+// strip_special_chars: A boolean parameter that, if true, will remove any
+//                      character that is not a letter, number, or space from
+//                      the returned string.
+// Returns: A string containing the entire content of the file.
 
 string file_to_string(string Dir_Filename);
 // Opens and loads a file to return as a string.

@@ -1,3 +1,7 @@
+2.301_250823
+  - Started adding load and save routines for the maps.
+  - Modified tracks to draw wider instead of more opaque with the signal streangth.
+
 2.300_250822
   - Started making changes to the map.
   - Testing tracks to draw in colors instead of gray.

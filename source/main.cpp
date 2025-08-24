@@ -696,7 +696,10 @@ int loop_2(bool TTY_Only)
   // -------------------------------------------------------------------------------------
   // Map load and initialize
   sdSystem.SCREEN_COMMS.printw("Initializing Map ...");
-  sdSystem.MAP_SYSTEM.PROPS.FILENAME_WORLD_MAP = sdSystem.FILE_NAMES.MAP_GLOBE_JSON;
+  sdSystem.MAP_SYSTEM.PROPS.FILENAME_GENERICS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_GENERICS_JSON;
+  sdSystem.MAP_SYSTEM.PROPS.FILENAME_AIRPORTS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_AIRPORTS_JSON;
+  sdSystem.MAP_SYSTEM.PROPS.FILENAME_REGIONS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_REGIONS_JSON;
+  sdSystem.MAP_SYSTEM.PROPS.FILENAME_ROADS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_ROADS_JSON;
   if (!sdSystem.MAP_SYSTEM.create())
   {
     sdSystem.SCREEN_COMMS.printw("  " + sdSystem.MAP_SYSTEM.INFORMATION);

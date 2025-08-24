@@ -796,25 +796,74 @@ bool MAP::map_hardcoded_load()
   return ret_suc;
 }
 
+
+bool MAP::map_save()
+{
+  bool ret_success = false;
+
+  JSON_INTERFACE map;
+
+  JSON_ENTRY all_generics;
+  JSON_ENTRY all_airports;
+  JSON_ENTRY all_regions;
+  JSON_ENTRY all_roads;
+
+
+  for (size_t pos = 0; pos < LANDMARKS.size(); pos++)
+  {
+
+    if (LANDMARKS[pos].TYPE == 3)
+    {
+      JSON_ENTRY road;
+
+      road.create_label_value(quotify("display name"), quotify(LANDMARKS[pos].DISPLAY_NAME));
+      road.create_label_value(quotify("long name"), quotify(LANDMARKS[pos].LONG_NAME));
+      road.create_label_value(quotify("type"), quotify("road"));
+
+      JSON_ENTRY points;
+      for (size_t coord = 0; coord < LANDMARKS[pos].REGION_GPS_COORDS.size(); coord++)
+      {
+        JSON_ENTRY latitude_logitude;
+        latitude_logitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].x)));
+        latitude_logitude.create_label_value(quotify("logitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].y)));
+        points.put_json_in_list(latitude_logitude);
+      }
+      road.put_json_in_set("points", points);
+      
+      all_roads.put_json_in_list(road);
+    }
+
+
+
+  }
+
+  map.ROOT.put_json_in_set(quotify("roads"), all_roads);
+
+  // Save JSON
+  deque<string> json_deque;
+  map.json_print_build_to_string_deque(json_deque);
+  ret_success = deque_string_to_file(PROPS.FILENAME_ROADS_MAP, json_deque, false);
+
+  return ret_success;
+}
+
 bool MAP::map_load()
 {
   bool ret_success = false;
   bool tmp_success = false;
+  string json_map_file = "";
 
-  // Load map from JSON map file.
-  JSON_INTERFACE map_json;
-  string json_state_file = file_to_string(PROPS.FILENAME_WORLD_MAP, tmp_success);
+  // Load Road Map
+  JSON_INTERFACE map_road_json;
+  json_map_file = file_to_string(PROPS.FILENAME_ROADS_MAP, tmp_success);
   if (tmp_success)
   {
-    INFORMATION += "File \"" + PROPS.FILENAME_WORLD_MAP + "\" loaded sucessfully.\n";
+    INFORMATION += "File \"" + PROPS.FILENAME_ROADS_MAP + "\" loaded sucessfully.\n";
 
-    if (map_json.load_json_from_string(json_state_file))
+    if (map_road_json.load_json_from_string(json_map_file))
     {
+      // parse json
       INFORMATION += "JSON parsed sucessfully.\n";
-
-
-
-
     }
     else
     {
@@ -823,7 +872,7 @@ bool MAP::map_load()
   }
   else
   {
-    INFORMATION += "File \"" + PROPS.FILENAME_WORLD_MAP + "\" not found.\n";
+    INFORMATION += "File \"" + PROPS.FILENAME_ROADS_MAP + "\" not found.\n";
   }
 
   // If map was never loaded, atttempt to load via hardcode.
@@ -832,6 +881,15 @@ bool MAP::map_load()
     if (map_hardcoded_load())
     {
       INFORMATION += "Map created from hardcode.\n";
+
+      if (map_save())
+      {
+        INFORMATION += "Map file created from hardcode and saved for next load.\n";
+      }
+      else
+      {
+        INFORMATION += "Failed to create a map file from hardcoded information.\n";
+      }
     }
     else
     {
@@ -855,6 +913,7 @@ bool MAP::create()
   }
   else
   {
+    INFORMATION += "Map load and save not fully implemented.\n";
   }
 
   return ret_suc;

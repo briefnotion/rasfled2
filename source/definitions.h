@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.300_250822"
+#define Revision "2.301_250823"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -115,8 +115,11 @@
 #define DEF_RUNNING_STATE                 "runningstate.json"
 #define DEF_QR_CODE                       "qr_rasfled2_rev.png"
 #define DEF_REFERENCE_CARD                "refer_advert.png"
-#define DEF_MAP_GLOBE_JSON                "map_globe.json"
 
+#define DEF_MAP_GENERICS_JSON             "map_generics.json"
+#define DEF_MAP_AIRPORTS_JSON             "map_airports.json"
+#define DEF_MAP_REGIONS_JSON              "map_regions.json"
+#define DEF_MAP_ROADS_JSON                "map_roads.json"
 
 // CAN Bus
 #define DEF_CAN_BUS_DEV_NAME              "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"         // System File

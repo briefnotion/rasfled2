@@ -112,8 +112,18 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
     COMPASS_OFFSET_HISTORY_FILE = LOGS_COMPASS_DIR + (string)DEF_COMPASS_OFFSET_HISTORY;
     cons.printw("  " + COMPASS_OFFSET_HISTORY_FILE);
 
-    MAP_GLOBE_JSON = LOGS_MAPS_DIR + (string)DEF_MAP_GLOBE_JSON;
-    cons.printw("  " + MAP_GLOBE_JSON);
+    // Maps
+    LOGS_MAPS_GENERICS_JSON = LOGS_MAPS_DIR + (string)DEF_MAP_GENERICS_JSON;
+    cons.printw("  " + LOGS_MAPS_GENERICS_JSON);
+
+    LOGS_MAPS_AIRPORTS_JSON = LOGS_MAPS_DIR + (string)DEF_MAP_AIRPORTS_JSON;
+    cons.printw("  " + LOGS_MAPS_AIRPORTS_JSON);
+
+    LOGS_MAPS_REGIONS_JSON = LOGS_MAPS_DIR + (string)DEF_MAP_REGIONS_JSON;
+    cons.printw("  " + LOGS_MAPS_REGIONS_JSON);
+
+    LOGS_MAPS_ROADS_JSON = LOGS_MAPS_DIR + (string)DEF_MAP_ROADS_JSON;
+    cons.printw("  " + LOGS_MAPS_ROADS_JSON);
 
     // Specific Hardware Directories and Files
     cons.printw("");

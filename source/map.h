@@ -52,7 +52,10 @@ class MAP_PROPERTIES
 {
   public:
 
-  string FILENAME_WORLD_MAP = "";
+  string FILENAME_GENERICS_MAP = "";
+  string FILENAME_AIRPORTS_MAP = "";
+  string FILENAME_REGIONS_MAP = "";
+  string FILENAME_ROADS_MAP = "";
 
 };
 
@@ -65,6 +68,7 @@ class MAP
 
   bool map_hardcoded_load();
 
+  bool map_save();
   bool map_load();
 
   public:

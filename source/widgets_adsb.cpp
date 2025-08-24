@@ -125,7 +125,7 @@ void draw_point_marker(ImDrawList *Draw_List, ImVec2 Screen_Position, ImColor Co
 
 void draw_track(ImDrawList *Draw_List, system_data &sdSysData, 
                 ImVec4 &Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
-                float Strength_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
+                float Initial_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
                 DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track)
 {
   bool draw_0 = false;
@@ -175,17 +175,10 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
 
     if (draw_0 || draw_1)
     {
-      ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position].ALTITUDE));
+      ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position].ALTITUDE));
 
-      point_color.Value.w = Track.TRACK_POINTS_DETAILED[position].RSSI_INTENSITY;
-
-      //draw_point_marker(Draw_List, track_position_0, point_color, Strength_Point_Size);
-
-      Draw_List->AddLine(track_position_0, track_position_1, 
-                          point_color, Strength_Point_Size);
-
-      //Draw_List->AddLine(track_position_0, track_position_1, 
-      //                    sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 2.0f);
+      Draw_List->AddLine(track_position_0, track_position_1, point_color, 
+                          (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].RSSI_INTENSITY));
     }
   }
 }
@@ -207,7 +200,7 @@ AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Dra
     // Draw track first then overlay aircraft.
     if (Aircraft.TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 3.0f, Altitude_Color_Scale, Center_Lat_Lon, Map_Bearing, Aircraft.TRACK);
+      draw_track(Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 4.0f, Altitude_Color_Scale, Center_Lat_Lon, Map_Bearing, Aircraft.TRACK);
     }
 
     // Text Describing Aircraft
@@ -1259,7 +1252,7 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
   // Draw track of GPS Position.
   if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
   {
-    draw_track(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 2.5f, 
+    draw_track(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 4.0f, 
                 GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.GPS_SYSTEM.TRACK);
   }
 

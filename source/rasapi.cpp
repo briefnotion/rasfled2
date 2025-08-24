@@ -388,46 +388,69 @@ bool get_files_list(string Directory, vector<string> &List, string Only_Type)
   return ret_sucess;
 }
 
-string file_to_string(string Dir_Filename, bool &Success)
+
+// This function reads the entire content of a file into a single string.
+// It is more efficient and robust than the original version.
+//
+// Dir_Filename: The path and name of the file to read.
+// Success: A reference to a boolean variable that will be set to true if the
+//          file was read successfully, and false otherwise.
+// strip_special_chars: A boolean parameter that, if true, will remove any
+//                      character that is not a letter, number, or space from
+//                      the returned string.
+// Returns: A string containing the entire content of the file.
+//std::string file_to_string(const std::string& Dir_Filename, bool& Success, bool strip_special_chars = false)
+std::string file_to_string(const std::string& Dir_Filename, bool& Success)
 {
-  fstream fsFile;
+  // Start with the assumption of failure.
+  Success = false;
 
-  string File_String = "";
+  bool strip_special_chars = true;
 
-  bool booSuccess = false;
-  bool booActive = false;
+  // Use std::ifstream for reading from a file.
+  // std::fstream is for both reading and writing.
+  std::ifstream inputFile(Dir_Filename);
 
-  fsFile.open(Dir_Filename, ios::in);
-
-  if (!fsFile)
+  // Check if the file was successfully opened. This is a crucial first step.
+  if (inputFile.is_open()) 
   {
-    booActive = false;
-  }
-  else 
-  {
-    booActive = true;
-  }
+    // Use a stringstream to efficiently build the string from the file's content.
+    // This is much faster than repeated string concatenation.
+    std::stringstream buffer;
+    
+    // Read the entire content of the file into the stringstream buffer.
+    // The rdbuf() function returns a pointer to the stream's streambuf object,
+    // which can be used to copy the entire file content at once.
+    buffer << inputFile.rdbuf();
 
-  if (booActive == true)
-  {
-    string strRead = "";
+    // Close the file stream. It's good practice to close streams explicitly.
+    inputFile.close();
 
-    while(booActive == true)
+    // Get the string from the stringstream.
+    std::string file_content = buffer.str();
+
+    // Check if we need to strip special characters.
+    if (strip_special_chars) 
     {
-      getline(fsFile,strRead);
-
-      File_String = File_String + strRead;
-
-      if(fsFile.eof())
-      {
-        booActive = false;
-        booSuccess = true;
-      }
+      // Use the erase-remove idiom to efficiently filter out unwanted characters.
+      // This lambda function specifically targets and removes carriage returns,
+      // newlines, and tabs, which are common culprits for parsing issues.
+      file_content.erase(std::remove_if(file_content.begin(), file_content.end(),
+                                        [](unsigned char c) 
+                                        {
+                                          return c == '\r' || c == '\n' || c == '\t'; 
+                                        }),
+                          file_content.end());
     }
+
+    // If we reach this point, the operation was successful.
+    Success = true;
+    
+    return file_content;
   }
 
-  Success = booSuccess;
-  return File_String;
+  // If the file could not be opened, return an empty string and keep Success as false.
+  return "";
 }
 
 string file_to_string(string Dir_Filename)
