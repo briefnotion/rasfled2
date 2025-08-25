@@ -796,22 +796,124 @@ bool MAP::map_hardcoded_load()
   return ret_suc;
 }
 
+bool MAP::map_load_json(string Filename)
+{
+  bool ret_success = false;
+  bool tmp_success = false;
+  string json_map_file = "";
+
+  // Load Map
+  JSON_INTERFACE map_json;
+  json_map_file = file_to_string(Filename, tmp_success);
+  if (tmp_success)
+  {
+    INFORMATION += "  Map \"" + Filename + "\" loaded successfully.\n";
+
+    // parse file
+  }
+  else
+  {
+    INFORMATION += "  Failed to load \"" + Filename + "\"\n";
+
+  }
+  
+  return ret_success;
+}
+
 
 bool MAP::map_save()
 {
-  bool ret_success = false;
-
-  JSON_INTERFACE map;
-
+  // Generics
+  JSON_INTERFACE generic_map;
   JSON_ENTRY all_generics;
-  JSON_ENTRY all_airports;
-  JSON_ENTRY all_regions;
-  JSON_ENTRY all_roads;
+  deque<string> generic_json_deque;
 
+  // Airports  
+  JSON_INTERFACE airport_map;
+  JSON_ENTRY all_airports;
+  deque<string> airport_json_deque;
+
+  // Regions
+  JSON_INTERFACE region_map;
+  JSON_ENTRY all_regions;
+  deque<string> region_json_deque;
+
+  // Roads
+  JSON_INTERFACE road_map;
+  JSON_ENTRY all_roads;
+  deque<string> road_json_deque;
 
   for (size_t pos = 0; pos < LANDMARKS.size(); pos++)
   {
+    // Generics
+    if (LANDMARKS[pos].TYPE == 0)
+    {
+      JSON_ENTRY generic;
 
+      generic.create_label_value(quotify("display name"), quotify(LANDMARKS[pos].DISPLAY_NAME));
+      generic.create_label_value(quotify("long name"), quotify(LANDMARKS[pos].LONG_NAME));
+      generic.create_label_value(quotify("type"), quotify("generic"));
+
+      JSON_ENTRY latitude_logitude;
+      latitude_logitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.x)));
+      latitude_logitude.create_label_value(quotify("logitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.y)));
+      generic.put_json_in_set(quotify("location"), latitude_logitude);
+
+      all_generics.put_json_in_list(generic);
+    }
+
+    // Airports
+    if (LANDMARKS[pos].TYPE == 1)
+    {
+      JSON_ENTRY airport;
+
+      airport.create_label_value(quotify("display name"), quotify(LANDMARKS[pos].DISPLAY_NAME));
+      airport.create_label_value(quotify("long name"), quotify(LANDMARKS[pos].LONG_NAME));
+      airport.create_label_value(quotify("type"), quotify("airport"));
+
+      JSON_ENTRY latitude_logitude;
+      latitude_logitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.x)));
+      latitude_logitude.create_label_value(quotify("logitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.y)));
+      airport.put_json_in_set(quotify("location"), latitude_logitude);
+
+      JSON_ENTRY runway_vecors;
+      for (size_t vectors = 0; vectors < LANDMARKS[pos].AIRPORT_LANDING_VECTORS.size(); vectors++)
+      {
+        runway_vecors.create_label_value(quotify("vector"), to_string(LANDMARKS[pos].AIRPORT_LANDING_VECTORS[vectors]));
+      }
+      airport.put_json_in_set(quotify("runway vectors"),  runway_vecors);
+
+      all_airports.put_json_in_list(airport);
+    }
+
+    // Regions
+    if (LANDMARKS[pos].TYPE == 2)
+    {
+      JSON_ENTRY region;
+
+      region.create_label_value(quotify("display name"), quotify(LANDMARKS[pos].DISPLAY_NAME));
+      region.create_label_value(quotify("long name"), quotify(LANDMARKS[pos].LONG_NAME));
+      region.create_label_value(quotify("type"), quotify("region"));
+
+      JSON_ENTRY latitude_logitude;
+      latitude_logitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.x)));
+      latitude_logitude.create_label_value(quotify("logitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.y)));
+      region.put_json_in_set(quotify("location"), latitude_logitude);
+
+
+      JSON_ENTRY points;
+      for (size_t coord = 0; coord < LANDMARKS[pos].REGION_GPS_COORDS.size(); coord++)
+      {
+        JSON_ENTRY latitude_logitude;
+        latitude_logitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].x)));
+        latitude_logitude.create_label_value(quotify("logitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].y)));
+        points.put_json_in_list(latitude_logitude);
+      }
+      region.put_json_in_set("points", points);
+      all_regions.put_json_in_list(region);
+    }
+
+    // Roads
     if (LANDMARKS[pos].TYPE == 3)
     {
       JSON_ENTRY road;
@@ -832,72 +934,106 @@ bool MAP::map_save()
       
       all_roads.put_json_in_list(road);
     }
-
-
-
   }
 
-  map.ROOT.put_json_in_set(quotify("roads"), all_roads);
+  // Put Maps together and Save
 
-  // Save JSON
-  deque<string> json_deque;
-  map.json_print_build_to_string_deque(json_deque);
-  ret_success = deque_string_to_file(PROPS.FILENAME_ROADS_MAP, json_deque, false);
+  FALSE_CATCH json_saved;
 
-  return ret_success;
+  // Generics
+  generic_map.ROOT.put_json_in_set(quotify("generic"), all_generics);
+  generic_map.json_print_build_to_string_deque(generic_json_deque);
+  if(deque_string_to_file(PROPS.FILENAME_GENERICS_MAP, generic_json_deque, false))
+  {
+    INFORMATION += "  Successfully saved \"" + PROPS.FILENAME_GENERICS_MAP + "\"\n";
+    json_saved.catch_false(true);
+  }
+  else
+  {
+    INFORMATION += "  Failed to save \"" + PROPS.FILENAME_GENERICS_MAP + "\"\n";
+    json_saved.catch_false(false);
+  }
+
+  // Airports
+  airport_map.ROOT.put_json_in_set(quotify("roads"), all_airports);
+  airport_map.json_print_build_to_string_deque(airport_json_deque);
+  if(deque_string_to_file(PROPS.FILENAME_AIRPORTS_MAP, airport_json_deque, false))
+  {
+    INFORMATION += "  Successfully saved \"" + PROPS.FILENAME_AIRPORTS_MAP + "\"\n";
+    json_saved.catch_false(true);
+  }
+  else
+  {
+    INFORMATION += "  Failed to save \"" + PROPS.FILENAME_AIRPORTS_MAP + "\"\n";
+    json_saved.catch_false(false);
+  }
+
+  // Regions
+  region_map.ROOT.put_json_in_set(quotify("region"), all_regions);
+  region_map.json_print_build_to_string_deque(region_json_deque);
+  if(deque_string_to_file(PROPS.FILENAME_REGIONS_MAP, region_json_deque, false))
+  {
+    INFORMATION += "  Successfully saved \"" + PROPS.FILENAME_REGIONS_MAP + "\"\n";
+    json_saved.catch_false(true);
+  }
+  else
+  {
+    INFORMATION += "  Failed to save \"" + PROPS.FILENAME_REGIONS_MAP + "\"\n";
+    json_saved.catch_false(false);
+  }
+
+  // Roads
+  road_map.ROOT.put_json_in_set(quotify("roads"), all_roads);
+  road_map.json_print_build_to_string_deque(road_json_deque);
+  if(deque_string_to_file(PROPS.FILENAME_ROADS_MAP, road_json_deque, false))
+  {
+    INFORMATION += "  Successfully saved \"" + PROPS.FILENAME_ROADS_MAP + "\"\n";
+    json_saved.catch_false(true);
+  }
+  else
+  {
+    INFORMATION += "  Failed to save \"" + PROPS.FILENAME_ROADS_MAP + "\"\n";
+    json_saved.catch_false(false);
+  }
+
+  return !(json_saved.has_false());
 }
 
 bool MAP::map_load()
 {
-  bool ret_success = false;
-  bool tmp_success = false;
-  string json_map_file = "";
+  FALSE_CATCH ret_failure;
 
-  // Load Road Map
-  JSON_INTERFACE map_road_json;
-  json_map_file = file_to_string(PROPS.FILENAME_ROADS_MAP, tmp_success);
-  if (tmp_success)
-  {
-    INFORMATION += "File \"" + PROPS.FILENAME_ROADS_MAP + "\" loaded sucessfully.\n";
-
-    if (map_road_json.load_json_from_string(json_map_file))
-    {
-      // parse json
-      INFORMATION += "JSON parsed sucessfully.\n";
-    }
-    else
-    {
-      INFORMATION += "JSON failed to parse.\n";
-    }
-  }
-  else
-  {
-    INFORMATION += "File \"" + PROPS.FILENAME_ROADS_MAP + "\" not found.\n";
-  }
+  ret_failure.catch_false(map_load_json(PROPS.FILENAME_GENERICS_MAP));
+  ret_failure.catch_false(map_load_json(PROPS.FILENAME_AIRPORTS_MAP));
+  ret_failure.catch_false(map_load_json(PROPS.FILENAME_REGIONS_MAP));
+  ret_failure.catch_false(map_load_json(PROPS.FILENAME_ROADS_MAP));
 
   // If map was never loaded, atttempt to load via hardcode.
-  if (ret_success == false)
+  if (ret_failure.has_false())
   {
+    INFORMATION += "  Maps failed to load.\n";
     if (map_hardcoded_load())
     {
-      INFORMATION += "Map created from hardcode.\n";
+      INFORMATION += "  Map created from hardcode.\n";
 
       if (map_save())
       {
-        INFORMATION += "Map file created from hardcode and saved for next load.\n";
+        INFORMATION += "  Map file created from hardcode and saved for next load.\n";
       }
       else
       {
-        INFORMATION += "Failed to create a map file from hardcoded information.\n";
+        ret_failure.catch_false(false);
+        INFORMATION += "  Failed to create a map file from hardcoded information.\n";
       }
     }
     else
     {
-      INFORMATION += "Failed creating map from hardcode.\n";
+      ret_failure.catch_false(false);
+      INFORMATION += "  Failed creating map from hardcode.\n";
     }
   }
 
-  return ret_success;
+  return !(ret_failure.has_false());
 }
 
 bool MAP::create()
@@ -908,12 +1044,12 @@ bool MAP::create()
   // Load world map
   if(map_load())
   {
-    INFORMATION += "Map loaded sucessfully.";
+    INFORMATION += "  Map loaded successfully.";
     ret_suc = true;
   }
   else
   {
-    INFORMATION += "Map load and save not fully implemented.\n";
+    INFORMATION += "  Map load and save not fully implemented.\n";
   }
 
   return ret_suc;

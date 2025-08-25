@@ -700,10 +700,8 @@ int loop_2(bool TTY_Only)
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_AIRPORTS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_AIRPORTS_JSON;
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_REGIONS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_REGIONS_JSON;
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_ROADS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_ROADS_JSON;
-  if (!sdSystem.MAP_SYSTEM.create())
-  {
-    sdSystem.SCREEN_COMMS.printw("  " + sdSystem.MAP_SYSTEM.INFORMATION);
-  }
+  sdSystem.MAP_SYSTEM.create();
+  sdSystem.SCREEN_COMMS.printw(sdSystem.MAP_SYSTEM.INFORMATION);
 
   // -------------------------------------------------------------------------------------
   // Initialize Audio Filenames

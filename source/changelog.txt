@@ -1,3 +1,7 @@
+2.302_250824
+  - Created a routine to create and save all hardcoded maps as json files 
+      if the map files do not exist.
+
 2.301_250823a
   - Adjustment to the modified tracks display.
 

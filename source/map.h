@@ -68,6 +68,8 @@ class MAP
 
   bool map_hardcoded_load();
 
+  bool map_load_json(string Filename);
+
   bool map_save();
   bool map_load();
 
