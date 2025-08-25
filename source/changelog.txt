@@ -1,3 +1,6 @@
+2.301_250823a
+  - Adjustment to the modified tracks display.
+
 2.301_250823
   - Started adding load and save routines for the maps.
   - Modified tracks to draw wider instead of more opaque with the signal streangth.

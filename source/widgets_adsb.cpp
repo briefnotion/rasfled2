@@ -178,7 +178,10 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
       ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position].ALTITUDE));
 
       Draw_List->AddLine(track_position_0, track_position_1, point_color, 
-                          (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].RSSI_INTENSITY));
+                          (1.0f + (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].RSSI_INTENSITY)));
+
+      Draw_List->AddLine( track_position_0, track_position_1, 
+                          sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
     }
   }
 }
