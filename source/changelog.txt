@@ -1,3 +1,11 @@
+2.303_250825
+  - Map JSON files will load and be active.
+      Previously generated maps will need to be erased because the generated json files 
+        contained errors.  rm *.json in the maps directory so they can regen on load, 
+        and be active on subsequenntial loads.
+      If map json files have errors, it is likely they will be overwritten on load. No 
+        automatic backup routine of maps have been written. 
+
 2.302_250824
   - Created a routine to create and save all hardcoded maps as json files 
       if the map files do not exist.

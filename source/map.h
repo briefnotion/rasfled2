@@ -23,6 +23,11 @@
 
 using namespace std;
 
+#define MAP_POINT_TYPE_GENERIC  0
+#define MAP_POINT_TYPE_AIRPORT  1
+#define MAP_POINT_TYPE_REGION   2
+#define MAP_POINT_TYPE_ROAD     3
+
 // -------------------------------------------------------------------------------------
 
 class MAP_INFO

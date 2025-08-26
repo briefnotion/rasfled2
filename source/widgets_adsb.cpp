@@ -138,12 +138,16 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
   if ((int)Track.TRACK_POINTS_SIMPLE.size() > 0)
   {
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                      DOUBLE_VEC2(Track.TRACK_POINTS_SIMPLE[0].LATITUDE, Track.TRACK_POINTS_SIMPLE[0].LONGITUDE), Map_Bearing, draw_1);
+                                                      DOUBLE_VEC2(Track.TRACK_POINTS_SIMPLE[0].LATITUDE, 
+                                                                  Track.TRACK_POINTS_SIMPLE[0].LONGITUDE), 
+                                                      Map_Bearing, draw_1);
   }
   else
   {
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                      DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[0].LATITUDE, Track.TRACK_POINTS_DETAILED[0].LONGITUDE), Map_Bearing, draw_1);
+                                                      DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[0].LATITUDE, 
+                                                                  Track.TRACK_POINTS_DETAILED[0].LONGITUDE), 
+                                                      Map_Bearing, draw_1);
   }
 
   // Draw Simple Track
@@ -158,7 +162,9 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
     draw_0 = draw_1;
 
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                    DOUBLE_VEC2(Track.TRACK_POINTS_SIMPLE[position].LATITUDE, Track.TRACK_POINTS_SIMPLE[position].LONGITUDE), Map_Bearing, draw_1);
+                                                    DOUBLE_VEC2(Track.TRACK_POINTS_SIMPLE[position].LATITUDE, 
+                                                                Track.TRACK_POINTS_SIMPLE[position].LONGITUDE), 
+                                                    Map_Bearing, draw_1);
 
     Draw_List->AddLine(track_position_0, track_position_1, 
                         sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
@@ -171,7 +177,9 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
     draw_0 = draw_1;
 
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                    DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, Track.TRACK_POINTS_DETAILED[position].LONGITUDE), Map_Bearing, draw_1);
+                                                    DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, 
+                                                                Track.TRACK_POINTS_DETAILED[position].LONGITUDE), 
+                                                    Map_Bearing, draw_1);
 
     if (draw_0 || draw_1)
     {
@@ -203,7 +211,8 @@ AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Dra
     // Draw track first then overlay aircraft.
     if (Aircraft.TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track(Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 4.0f, Altitude_Color_Scale, Center_Lat_Lon, Map_Bearing, Aircraft.TRACK);
+      draw_track( Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 8.0f, 
+                  Altitude_Color_Scale, Center_Lat_Lon, Map_Bearing, Aircraft.TRACK);
     }
 
     // Text Describing Aircraft
@@ -1255,7 +1264,7 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
   // Draw track of GPS Position.
   if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
   {
-    draw_track(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 4.0f, 
+    draw_track(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 8.0f, 
                 GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.GPS_SYSTEM.TRACK);
   }
 

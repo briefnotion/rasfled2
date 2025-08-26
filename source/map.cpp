@@ -23,7 +23,7 @@ void MAP_INFO::clear()
   LAT_LON = DOUBLE_VEC2(0.0, 0.0);
   DISPLAY_NAME = "";
   LONG_NAME = "";
-  TYPE = 0;
+  TYPE = MAP_POINT_TYPE_GENERIC;
   AIRPORT_LANDING_VECTORS.clear();
   REGION_GPS_COORDS.clear();
 }
@@ -800,21 +800,150 @@ bool MAP::map_load_json(string Filename)
 {
   bool ret_success = false;
   bool tmp_success = false;
-  string json_map_file = "";
 
   // Load Map
   JSON_INTERFACE map_json;
-  json_map_file = file_to_string(Filename, tmp_success);
+  string json_map_file = file_to_string(Filename, tmp_success);
   if (tmp_success)
   {
     INFORMATION += "  Map \"" + Filename + "\" loaded successfully.\n";
 
     // parse file
+    ret_success = map_json.load_json_from_string(json_map_file);
+
+    if (ret_success == true)
+    {
+      for(size_t root = 0; root < map_json.ROOT.DATA.size(); root++)
+      {
+        if (map_json.ROOT.DATA[root].label() == "generic"   ||
+            map_json.ROOT.DATA[root].label() == "airports"  ||
+            map_json.ROOT.DATA[root].label() == "region"    ||
+            map_json.ROOT.DATA[root].label() == "roads")
+        {
+          for (size_t marker_list = 0; 
+                      marker_list < map_json.ROOT.DATA[root].DATA.size(); marker_list++)
+          {
+            MAP_INFO tmp_map_marker;
+
+            string display_name = "";
+            string long_name = "";
+            string type = "";
+            STRING_DOUBLE latitude;
+            STRING_DOUBLE longitude;
+
+            for (size_t marker_item = 0; 
+                        marker_item < map_json.ROOT.DATA[root].DATA[marker_list].DATA.size(); marker_item++)
+            {
+              // common marker values
+              map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].get_if_is("display name", display_name);
+              map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].get_if_is("long name", long_name);
+              map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].get_if_is("type", type);
+
+              // location
+              if (map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].label() == "location")
+              {
+                for (size_t location_entry = 0; 
+                      location_entry < map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].DATA.size(); location_entry++)
+                {
+                  map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].DATA[location_entry].get_if_is("latitude", latitude);
+                  map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].DATA[location_entry].get_if_is("longitude", longitude);
+                }
+                tmp_map_marker.LAT_LON.x = latitude.get_double_value();
+                tmp_map_marker.LAT_LON.y = longitude.get_double_value();
+              }
+
+              // points
+              if (map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].label() == "points")
+              {
+                for (size_t points_entry = 0; 
+                      points_entry < map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].DATA.size(); points_entry++)
+                {
+                  STRING_DOUBLE points_entry_location_latitude;
+                  STRING_DOUBLE points_entry_location_longitude;
+                  DOUBLE_VEC2 point;
+                  for (size_t points_entry_location = 0; 
+                        points_entry_location < map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].DATA[points_entry].DATA.size(); 
+                        points_entry_location++)
+                  {
+                    map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].DATA[points_entry].DATA[points_entry_location].get_if_is("latitude", points_entry_location_latitude);
+                    map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].DATA[points_entry].DATA[points_entry_location].get_if_is("longitude", points_entry_location_longitude);
+                  }
+                  point.x = points_entry_location_latitude.get_double_value();
+                  point.y = points_entry_location_longitude.get_double_value();
+                  tmp_map_marker.REGION_GPS_COORDS.push_back(point);
+                }
+              }
+
+              // runway vecotors
+              if (map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].label() == "runway vectors")
+              {
+                for (size_t vector_entry = 0; 
+                      vector_entry < map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].DATA.size(); vector_entry++)
+                {
+                  STRING_FLOAT vector;
+                  map_json.ROOT.DATA[root].DATA[marker_list].DATA[marker_item].DATA[vector_entry].get_if_is("vector", vector);
+                  tmp_map_marker.AIRPORT_LANDING_VECTORS.push_back(vector.get_float_value());
+                }
+              }
+            }
+            
+            // build entry (vectors and points already made)
+            tmp_map_marker.DISPLAY_NAME = display_name;
+            tmp_map_marker.LONG_NAME = long_name;
+
+            if (type == "generic")
+            {
+              tmp_map_marker.TYPE = MAP_POINT_TYPE_GENERIC;
+              tmp_map_marker.LAT_LON.x = latitude.get_double_value();
+              tmp_map_marker.LAT_LON.y = longitude.get_double_value();
+
+              // add entry to map list
+              LANDMARKS.push_back(tmp_map_marker);
+            }
+            else if (type == "airport")
+            {
+              tmp_map_marker.TYPE = MAP_POINT_TYPE_AIRPORT;
+              tmp_map_marker.LAT_LON.x = latitude.get_double_value();
+              tmp_map_marker.LAT_LON.y = longitude.get_double_value();
+              // runway vectors already created
+
+              // add entry to map list
+              LANDMARKS.push_back(tmp_map_marker);
+            }
+            else if (type == "region")
+            {
+              tmp_map_marker.TYPE = MAP_POINT_TYPE_REGION;
+              tmp_map_marker.LAT_LON.x = latitude.get_double_value();
+              tmp_map_marker.LAT_LON.y = longitude.get_double_value();
+              // points already created
+
+              // add entry to map list
+              LANDMARKS.push_back(tmp_map_marker);
+            }
+            else if (type == "road")
+            {
+              tmp_map_marker.TYPE = MAP_POINT_TYPE_ROAD;
+              // roads have no location info
+              // points already created
+
+              // add entry to map list
+              LANDMARKS.push_back(tmp_map_marker);
+            }
+          }
+        }
+      }
+
+      // all items successfully loaded.  return success.
+      ret_success = true;
+    }
+    else
+    {
+      INFORMATION += "  Failed to parse json \"" + Filename + "\"\n";
+    }
   }
   else
   {
     INFORMATION += "  Failed to load \"" + Filename + "\"\n";
-
   }
   
   return ret_success;
@@ -846,7 +975,7 @@ bool MAP::map_save()
   for (size_t pos = 0; pos < LANDMARKS.size(); pos++)
   {
     // Generics
-    if (LANDMARKS[pos].TYPE == 0)
+    if (LANDMARKS[pos].TYPE == MAP_POINT_TYPE_GENERIC)
     {
       JSON_ENTRY generic;
 
@@ -854,16 +983,16 @@ bool MAP::map_save()
       generic.create_label_value(quotify("long name"), quotify(LANDMARKS[pos].LONG_NAME));
       generic.create_label_value(quotify("type"), quotify("generic"));
 
-      JSON_ENTRY latitude_logitude;
-      latitude_logitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.x)));
-      latitude_logitude.create_label_value(quotify("logitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.y)));
-      generic.put_json_in_set(quotify("location"), latitude_logitude);
+      JSON_ENTRY latitude_longitude;
+      latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.x)));
+      latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.y)));
+      generic.put_json_in_set(quotify("location"), latitude_longitude);
 
       all_generics.put_json_in_list(generic);
     }
 
     // Airports
-    if (LANDMARKS[pos].TYPE == 1)
+    if (LANDMARKS[pos].TYPE == MAP_POINT_TYPE_AIRPORT)
     {
       JSON_ENTRY airport;
 
@@ -871,10 +1000,10 @@ bool MAP::map_save()
       airport.create_label_value(quotify("long name"), quotify(LANDMARKS[pos].LONG_NAME));
       airport.create_label_value(quotify("type"), quotify("airport"));
 
-      JSON_ENTRY latitude_logitude;
-      latitude_logitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.x)));
-      latitude_logitude.create_label_value(quotify("logitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.y)));
-      airport.put_json_in_set(quotify("location"), latitude_logitude);
+      JSON_ENTRY latitude_longitude;
+      latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.x)));
+      latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.y)));
+      airport.put_json_in_set(quotify("location"), latitude_longitude);
 
       JSON_ENTRY runway_vecors;
       for (size_t vectors = 0; vectors < LANDMARKS[pos].AIRPORT_LANDING_VECTORS.size(); vectors++)
@@ -887,7 +1016,7 @@ bool MAP::map_save()
     }
 
     // Regions
-    if (LANDMARKS[pos].TYPE == 2)
+    if (LANDMARKS[pos].TYPE == MAP_POINT_TYPE_REGION)
     {
       JSON_ENTRY region;
 
@@ -895,26 +1024,26 @@ bool MAP::map_save()
       region.create_label_value(quotify("long name"), quotify(LANDMARKS[pos].LONG_NAME));
       region.create_label_value(quotify("type"), quotify("region"));
 
-      JSON_ENTRY latitude_logitude;
-      latitude_logitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.x)));
-      latitude_logitude.create_label_value(quotify("logitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.y)));
-      region.put_json_in_set(quotify("location"), latitude_logitude);
+      JSON_ENTRY latitude_longitude;
+      latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.x)));
+      latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(LANDMARKS[pos].LAT_LON.y)));
+      region.put_json_in_set(quotify("location"), latitude_longitude);
 
 
       JSON_ENTRY points;
       for (size_t coord = 0; coord < LANDMARKS[pos].REGION_GPS_COORDS.size(); coord++)
       {
-        JSON_ENTRY latitude_logitude;
-        latitude_logitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].x)));
-        latitude_logitude.create_label_value(quotify("logitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].y)));
-        points.put_json_in_list(latitude_logitude);
+        JSON_ENTRY latitude_longitude;
+        latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].x)));
+        latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].y)));
+        points.put_json_in_list(latitude_longitude);
       }
-      region.put_json_in_set("points", points);
+      region.put_json_in_set(quotify("points"), points);
       all_regions.put_json_in_list(region);
     }
 
     // Roads
-    if (LANDMARKS[pos].TYPE == 3)
+    if (LANDMARKS[pos].TYPE == MAP_POINT_TYPE_ROAD)
     {
       JSON_ENTRY road;
 
@@ -925,12 +1054,12 @@ bool MAP::map_save()
       JSON_ENTRY points;
       for (size_t coord = 0; coord < LANDMARKS[pos].REGION_GPS_COORDS.size(); coord++)
       {
-        JSON_ENTRY latitude_logitude;
-        latitude_logitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].x)));
-        latitude_logitude.create_label_value(quotify("logitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].y)));
-        points.put_json_in_list(latitude_logitude);
+        JSON_ENTRY latitude_longitude;
+        latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].x)));
+        latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(LANDMARKS[pos].REGION_GPS_COORDS[coord].y)));
+        points.put_json_in_list(latitude_longitude);
       }
-      road.put_json_in_set("points", points);
+      road.put_json_in_set(quotify("points"), points);
       
       all_roads.put_json_in_list(road);
     }
@@ -955,7 +1084,7 @@ bool MAP::map_save()
   }
 
   // Airports
-  airport_map.ROOT.put_json_in_set(quotify("roads"), all_airports);
+  airport_map.ROOT.put_json_in_set(quotify("airports"), all_airports);
   airport_map.json_print_build_to_string_deque(airport_json_deque);
   if(deque_string_to_file(PROPS.FILENAME_AIRPORTS_MAP, airport_json_deque, false))
   {
