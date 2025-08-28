@@ -459,66 +459,50 @@ string file_to_string(string Dir_Filename)
   return file_to_string(Dir_Filename, success);
 }
 
-bool deque_string_to_file(string Dir_Filename, deque<string> &qFile, bool Append)
+/**
+ * @brief Writes the contents of a deque of strings to a file.
+ * @param Dir_Filename The path to the file.
+ * @param qFile A reference to the deque of strings to be written.
+ * @param Append If true, appends to the file. If false, overwrites the file.
+ * @return True on success, false on failure.
+ */
+bool deque_string_to_file(const std::string& Dir_Filename, std::deque<std::string>& qFile, bool Append)
 {
-  fstream fsFile;
-  bool booSuccess = false;
+  // Use an RAII approach to handle file streams. The fstream object will
+  // automatically close when it goes out of scope, even if an error occurs.
+  // This makes the code cleaner and less prone to resource leaks.
+  std::fstream fsFile;
 
-  bool booActive = false;
-
-  // Append or New File
-  if (Append == true)
+  // Determine the open mode based on the 'Append' flag.
+  std::ios_base::openmode openMode = std::ios::out;
+  if (Append) 
   {
-    fsFile.open(Dir_Filename, ios::app);
-  }
-  else
-  {
-    fsFile.open(Dir_Filename, ios::out);
+    openMode = std::ios::app;
   }
 
-  // Check file for error.
-  if (!fsFile)
+  // Open the file.
+  fsFile.open(Dir_Filename, openMode);
+
+  // Check if the file opened successfully.
+  if (!fsFile.is_open()) 
   {
-    booActive = false;
-    booSuccess = false;
-  }
-  else 
-  {
-    booActive = true;
+    std::cerr << "Error: Could not open file " << Dir_Filename << std::endl;
+    return false; // Return early on failure.
   }
 
-  // File did not error, continue with writte.
-  if (booActive == true)
+  // Iterate through the deque and write each string to the file.
+  // A range-based for loop is more modern and readable.
+  for (const auto& line : qFile) 
   {
-    if (Append == true)
-    {
-      for (int pos = 0; pos < (int)qFile.size(); pos++)
-      {
-        fsFile << qFile[pos];
-        if (pos +1 < (int)qFile.size())
-        {
-          fsFile << endl;
-        }
-      }
-      fsFile << endl;
-      fsFile.close();
-      booSuccess = true;
-    }
-    else
-    {
-      while(qFile.empty() == false)
-      {
-        fsFile << qFile.front();
-        fsFile << endl;   // Not sure if i should if this out, like the append block.
-        qFile.pop_front();
-      }
-      fsFile << endl;     // Not sure if i should comment this out
-      fsFile.close();
-      booSuccess = true;
-    }
+    fsFile << line << '\n'; // Write the line and a newline character.
   }
 
-  return booSuccess;
+  // The fstream destructor will automatically close the file.
+  // No need for an explicit fsFile.close(); call unless you need to
+  // close it for some reason before the function returns.
+
+  // If we reached this point, the write operation was a success.
+  return true;
 }
 
 bool file_to_deque_string(string Dir_Filename, deque<string> &qFile)

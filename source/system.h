@@ -77,6 +77,7 @@ class FILES
   string LOGS_SETTINGS_DIR = "";
   string LOGS_COMPASS_DIR = "";
   string LOGS_MAPS_DIR = "";
+  string TRACK_ARCHIVE_DIR = "";
 
   // CAN Bus
   string CAN_BUS_DEVICE_FILE = "";
@@ -104,6 +105,9 @@ class FILES
   string LOGS_MAPS_AIRPORTS_JSON = "";
   string LOGS_MAPS_REGIONS_JSON = "";
   string LOGS_MAPS_ROADS_JSON = "";
+
+  // Tracks
+  string TRACK_CURRENT_JSON = "";
 
   bool assign(CONSOLE_COMMUNICATION &cons);
 };

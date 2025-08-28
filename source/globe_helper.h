@@ -170,7 +170,9 @@ class DETAILED_TRACK_POINT
                                 //  Represeting either
                                 //  frame time of message received 
                                 //  or from nmea source gga time.
-  float RSSI_INTENSITY = 0.0f;
+
+  float ACCURACY = 0.0f;  // 0% to 100%, 0.0f to 1.0f
+  
   float ALTITUDE = 0.0f;
 };
 

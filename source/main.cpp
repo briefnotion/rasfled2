@@ -363,7 +363,7 @@ int loop_2(bool TTY_Only)
   sdSystem.COMMS_GPS.PROPS.TEST_DATA_FILENAME = sdSystem.FILE_NAMES.GPS_TEST_FILE;
 
   sdSystem.COMMS_GPS.device_baud_rate_change_to_target_string(
-  sdSystem.GPS_SYSTEM.device_change_baud_rate_string(COMMS_BAUD_TARGET_GPS));
+    sdSystem.GPS_SYSTEM.device_change_baud_rate_string(COMMS_BAUD_TARGET_GPS));
 
   // ---------------------------------------------------------------------------------------
   // Compass Comm Port Setup
@@ -696,12 +696,17 @@ int loop_2(bool TTY_Only)
   // -------------------------------------------------------------------------------------
   // Map load and initialize
   sdSystem.SCREEN_COMMS.printw("Initializing Map ...");
+
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_GENERICS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_GENERICS_JSON;
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_AIRPORTS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_AIRPORTS_JSON;
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_REGIONS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_REGIONS_JSON;
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_ROADS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_ROADS_JSON;
   sdSystem.MAP_SYSTEM.create();
   sdSystem.SCREEN_COMMS.printw(sdSystem.MAP_SYSTEM.INFORMATION);
+
+  // Load Track into GPS_System
+  sdSystem.GPS_SYSTEM.PROPS.CURRENT_TRACK_FILENAME = sdSystem.FILE_NAMES.TRACK_CURRENT_JSON;
+  sdSystem.GPS_SYSTEM.load_track(sdSystem.SCREEN_COMMS, sdSystem.MAP_SYSTEM);
 
   // -------------------------------------------------------------------------------------
   // Initialize Audio Filenames
@@ -1093,8 +1098,9 @@ int loop_2(bool TTY_Only)
       // ---------------------------------------------------------------------------------------
       // GPS Process
 
-      sdSystem.GPS_SYSTEM.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time());
-      //cons_2.update_GPS_gadgets(sdSystem);
+      sdSystem.GPS_SYSTEM.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_GPS, 
+                                  sdSystem.PROGRAM_TIME.current_frame_time(), 
+                                  sdSystem.MAP_SYSTEM);
 
       sdSystem.dblCOMMS_GPS_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
     }

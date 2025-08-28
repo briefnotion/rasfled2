@@ -128,68 +128,89 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
                 float Initial_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
                 DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track)
 {
+  // Seperate simple and detailed tracks from each other
+  //  There is no guarantee that they are connected.
+
   bool draw_0 = false;
   bool draw_1 = false;
 
   ImVec2 track_position_0;
   ImVec2 track_position_1;
 
-  // Set First Point
-  if ((int)Track.TRACK_POINTS_SIMPLE.size() > 0)
-  {
-    track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                      DOUBLE_VEC2(Track.TRACK_POINTS_SIMPLE[0].LATITUDE, 
-                                                                  Track.TRACK_POINTS_SIMPLE[0].LONGITUDE), 
-                                                      Map_Bearing, draw_1);
-  }
-  else
-  {
-    track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                      DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[0].LATITUDE, 
-                                                                  Track.TRACK_POINTS_DETAILED[0].LONGITUDE), 
-                                                      Map_Bearing, draw_1);
-  }
 
-  // Draw Simple Track
+  // LOD
   if (Draw_Level_Of_Detail < 1)
   {
     Draw_Level_Of_Detail = 1;
   }
 
-  for(int position = 1; position < (int)Track.TRACK_POINTS_SIMPLE.size(); position = position + Draw_Level_Of_Detail)
+  // Simple
+  // Set First Point
+  
+  if (Track.TRACK_POINTS_SIMPLE.size() > 1)
   {
-    track_position_0 = track_position_1;
-    draw_0 = draw_1;
-
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                    DOUBLE_VEC2(Track.TRACK_POINTS_SIMPLE[position].LATITUDE, 
-                                                                Track.TRACK_POINTS_SIMPLE[position].LONGITUDE), 
-                                                    Map_Bearing, draw_1);
+                                                      DOUBLE_VEC2(Track.TRACK_POINTS_SIMPLE[0].LATITUDE, 
+                                                                  Track.TRACK_POINTS_SIMPLE[0].LONGITUDE), 
+                                                      Map_Bearing, draw_1);
 
-    Draw_List->AddLine(track_position_0, track_position_1, 
-                        sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
+    // Siple step through
+    for(int position = 1; position < (int)Track.TRACK_POINTS_SIMPLE.size(); position = position + Draw_Level_Of_Detail)
+    {
+      track_position_0 = track_position_1;
+      draw_0 = draw_1;
+
+      track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                      DOUBLE_VEC2(Track.TRACK_POINTS_SIMPLE[position].LATITUDE, 
+                                                                  Track.TRACK_POINTS_SIMPLE[position].LONGITUDE), 
+                                                      Map_Bearing, draw_1);
+      track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                      DOUBLE_VEC2(Track.TRACK_POINTS_SIMPLE[position].LATITUDE, 
+                                                                  Track.TRACK_POINTS_SIMPLE[position].LONGITUDE), 
+                                                      Map_Bearing, draw_1);
+
+      Draw_List->AddLine(track_position_0, track_position_1, 
+                          sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
+
+      cout << position << endl;
+      cout << Track.TRACK_POINTS_SIMPLE[position].LATITUDE << " \t" << Track.TRACK_POINTS_SIMPLE[position].LONGITUDE << endl;
+      cout << track_position_1.x << " \t" << track_position_1.y << endl;
+
+      cout << endl;
+    }
   }
 
-  // Draw Detailed Track
-  for(int position = 1; position < (int)Track.TRACK_POINTS_DETAILED.size(); position++)
+
+  // Detailed
+  // Set First Point
+  if ((int)Track.TRACK_POINTS_DETAILED.size() > 1)
   {
-    track_position_0 = track_position_1;
-    draw_0 = draw_1;
-
     track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                    DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, 
-                                                                Track.TRACK_POINTS_DETAILED[position].LONGITUDE), 
-                                                    Map_Bearing, draw_1);
+                                                      DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[0].LATITUDE, 
+                                                                  Track.TRACK_POINTS_DETAILED[0].LONGITUDE), 
+                                                      Map_Bearing, draw_1);
 
-    if (draw_0 || draw_1)
+    // Detailed step through
+    for(int position = 1; position < (int)Track.TRACK_POINTS_DETAILED.size(); position++)
     {
-      ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position].ALTITUDE));
+      track_position_0 = track_position_1;
+      draw_0 = draw_1;
 
-      Draw_List->AddLine(track_position_0, track_position_1, point_color, 
-                          (1.0f + (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].RSSI_INTENSITY)));
+      track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                      DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, 
+                                                                  Track.TRACK_POINTS_DETAILED[position].LONGITUDE), 
+                                                      Map_Bearing, draw_1);
 
-      Draw_List->AddLine( track_position_0, track_position_1, 
-                          sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
+      if (draw_0 || draw_1)
+      {
+        ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position].ALTITUDE));
+
+        Draw_List->AddLine(track_position_0, track_position_1, point_color, 
+                            (1.0f + (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].ACCURACY)));
+
+        Draw_List->AddLine( track_position_0, track_position_1, 
+                            sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
+      }
     }
   }
 }
@@ -1224,7 +1245,10 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
       ImGui::Text("   SPEED: %.1f", sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph());
       ImGui::Text("ALTITUDE: %.1f", sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val());
       ImGui::Text(" HEADING: %.1f°", sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE);
-      ImGui::Text("P:%2.1f H:%2.1f V:%2.1f", sdSysData.GPS_SYSTEM.pdop(), sdSysData.GPS_SYSTEM.hdop(), sdSysData.GPS_SYSTEM.vdop());
+      ImGui::Text("%3.0f%%  P:%2.1f \nH:%2.1f V:%2.1f",  sdSysData.GPS_SYSTEM.accuracy_score() * 100.0f,
+                                                        sdSysData.GPS_SYSTEM.pdop(),  
+                                                        sdSysData.GPS_SYSTEM.hdop(), 
+                                                        sdSysData.GPS_SYSTEM.vdop());
     }
 
     // Compass Information

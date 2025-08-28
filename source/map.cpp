@@ -1165,6 +1165,105 @@ bool MAP::map_load()
   return !(ret_failure.has_false());
 }
 
+bool MAP::track_save(DETAILED_TRACK &Track, string Filename)
+{
+  // Track
+  JSON_INTERFACE track_map;
+  JSON_ENTRY all_track;
+  deque<string> track_json_deque;
+
+  JSON_ENTRY points;
+
+  // Simple
+  for (size_t pos = 0; pos < Track.TRACK_POINTS_SIMPLE.size(); pos++)
+  {
+    JSON_ENTRY latitude_longitude;
+    latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(Track.TRACK_POINTS_SIMPLE[pos].LATITUDE)));
+    latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(Track.TRACK_POINTS_SIMPLE[pos].LONGITUDE)));
+    points.put_json_in_list(latitude_longitude);
+  }
+
+  // Detailed
+  for (size_t pos = 0; pos < Track.TRACK_POINTS_DETAILED.size(); pos++)
+  {
+    JSON_ENTRY latitude_longitude;
+    latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LATITUDE)));
+    latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LONGITUDE)));
+    points.put_json_in_list(latitude_longitude);
+  }
+
+  all_track.put_json_in_set(quotify("points"), points);
+
+  // Save Track
+  FALSE_CATCH json_saved;
+
+  track_map.ROOT.put_json_in_set(quotify("track"), all_track);
+  track_map.json_print_build_to_string_deque(track_json_deque);
+
+  if(deque_string_to_file(Filename, track_json_deque, false))
+  {
+    json_saved.catch_false(true);
+  }
+  else
+  {
+    json_saved.catch_false(false);
+  }
+
+  return !(json_saved.has_false());
+}
+
+bool MAP::track_load(DETAILED_TRACK &Track, string Filename)
+{
+  bool ret_success = false;
+  bool tmp_success = false;
+  
+  // Load Map
+  JSON_INTERFACE track_json;
+  string json_track_file = file_to_string(Filename, tmp_success);
+  if (tmp_success)
+  {
+    // parse file
+    ret_success = track_json.load_json_from_string(json_track_file);
+
+    if (ret_success == true)
+    {
+      for(size_t root = 0; root < track_json.ROOT.DATA.size(); root++)
+      {
+        if (track_json.ROOT.DATA[root].label() == "track")
+        {
+          for (size_t marker_list = 0; 
+                      marker_list < track_json.ROOT.DATA[root].DATA.size(); marker_list++)
+          {
+            if (track_json.ROOT.DATA[root].DATA[marker_list].label() == "points")
+            {
+              for (size_t points_entry = 0; 
+                    points_entry < track_json.ROOT.DATA[root].DATA[marker_list].DATA.size(); points_entry++)
+              {
+                SIMPLE_TRACK_POINT location;
+                STRING_DOUBLE points_entry_location_latitude;
+                STRING_DOUBLE points_entry_location_longitude;
+                
+                for (size_t points_entry_location = 0; 
+                      points_entry_location < track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA.size(); 
+                      points_entry_location++)
+                {
+                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[points_entry_location].get_if_is("latitude", points_entry_location_latitude);
+                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[points_entry_location].get_if_is("longitude", points_entry_location_longitude);
+                }
+                location.LATITUDE = points_entry_location_latitude.get_double_value();
+                location.LONGITUDE = points_entry_location_longitude.get_double_value();
+                Track.TRACK_POINTS_SIMPLE.push_back(location);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return ret_success;
+}
+
 bool MAP::create()
 {
   bool ret_suc = false;
@@ -1182,6 +1281,16 @@ bool MAP::create()
   }
 
   return ret_suc;
+}
+
+bool MAP::save_track(DETAILED_TRACK &Track, string Filename)
+{
+  return track_save(Track, Filename);
+}
+
+bool MAP::load_track(DETAILED_TRACK &Track, string Filename)
+{
+  return track_load(Track, Filename);
 }
 
 // -------------------------------------------------------------------------------------

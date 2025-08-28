@@ -18,6 +18,49 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
+/**
+ * @brief Calculates a normalized accuracy score based on DOP values.
+ *
+ * This function takes a vector of DOP values (PDOP, HDOP, VDOP) and
+ * returns a float value between 0.0 and 1.0. The score is calculated as follows:
+ * - An average DOP less than 1.0 returns a perfect score of 1.0.
+ * - An average DOP between 1.0 and 10.0 is scaled linearly, where 1.0 returns
+ * 1.0 and 10.0 returns 0.0.
+ * - An average DOP of 10.0 or greater returns a score of 0.0.
+ *
+ * @param dop_values A vector of float values representing DOP metrics.
+ * @return A float representing the normalized accuracy score (0.0 to 1.0).
+ */
+float NMEA::calculate_accuracy_score()
+{
+  // Calculate the average of the DOP values.
+  float average_dop = PDOP + HDOP + VDOP / 3.0f;
+
+  // Normalize the score based on the average DOP.
+  if (average_dop == 0.0f) 
+  {
+    // Score 0 should be impossible, assume no values
+    return 0.0f;
+  }
+  else if (average_dop <= 1.0f) 
+  {
+    // Ideal case: score is 1.0.
+    return 1.0f;
+  } 
+  else if (average_dop > 1.0f && average_dop < 10.0f) 
+  {
+    // Linear scaling from 1.0 to 0.0.
+    // Formula: 1.0 - ((average_dop - 1.0) / (10.0 - 1.0))
+    return 1.0f - ((average_dop - 1.0f) / 9.0f);
+  } else 
+  {
+    // Average DOP is 10.0 or greater: score is 0.0.
+    return 0.0f;
+  }
+}
+
+// -------------------------------------------------------------------------------------
+
 /*
 In NMEA sentences, the first two letters after the $ denote the Talker ID, which 
 identifies the source of the information1.
@@ -198,6 +241,7 @@ void NMEA::translate_gngsa(vector<string> &Input)
     {
       VDOP = tmp_float;
     }
+    ACCURACY_SCORE = calculate_accuracy_score();
   }
 }
 
@@ -317,6 +361,11 @@ float NMEA::vdop()
   return VDOP;
 }
 
+float NMEA::accuracy_score()
+{
+  return ACCURACY_SCORE;
+}
+
 int NMEA::satilite_count()
 {
   return NUMBER_OF_SATILITES;
@@ -331,7 +380,19 @@ string NMEA::device_change_baud_rate_string(int Baud_Rate)
   return (send_string + to_string_hex(xor_checksum(send_string, '$', '*')).c_str());
 }
 
-void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time)
+void NMEA::load_track(CONSOLE_COMMUNICATION &cons, MAP &Current_map)
+{
+  if (Current_map.load_track(TRACK, PROPS.CURRENT_TRACK_FILENAME))
+  {
+    cons.printw("Successfully saved \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+  }
+  else
+  {
+    cons.printw("Failed to save \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+  }
+}
+
+void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time, MAP &Current_map)
 {
   // Read New Data
   if (Com_Port.recieve_size() > 0)
@@ -465,7 +526,7 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
               
               //DILUTION_OF_POSITION ranges 0 - 100.
               // 0.5 to 2.5 is good to bad.
-              tmp_track_point.RSSI_INTENSITY = (((PDOP + HDOP + VDOP) / 3.0f) - 0.5f) / 2.0f; // Sat sig str?
+              tmp_track_point.ACCURACY = ACCURACY_SCORE;
 
               TRACK.store(tmp_track_point);
             }
@@ -482,6 +543,20 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
 
       // clear working vector
       INPUT_LINE.clear();
+    }
+  }
+
+  // Save Track
+  if (SAVE_TRACK_TIMER.is_ready(tmeFrame_Time))
+  {
+    SAVE_TRACK_TIMER.set(tmeFrame_Time, PROPS.SAVE_TRACK_TIMER);
+    if (Current_map.save_track(TRACK, PROPS.CURRENT_TRACK_FILENAME))
+    {
+      cons.printw("Successfully saved \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+    }
+    else
+    {
+      cons.printw("Failed to save \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
     }
   }
 }

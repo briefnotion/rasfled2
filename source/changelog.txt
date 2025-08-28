@@ -1,3 +1,19 @@
+2.304_250827
+  - There exist 2 bugs of onknown orgnin.
+      System will crash on system time change.  Was corrected months ago, but it 
+        resurfaced. 
+      When loading the program and active gps, switching to the ADSB tab will cause 
+        system to lock.
+  - Tracks are now saved every 9 minutes as simple track.  Simple track will load 
+      on program start.  No method coded yet for managing old tracks, so they will 
+      grow indefinitly.
+  - Tracks no longer contain the RSSI_INTENSITY entry. Instead, it was replaced with 
+      the ACCURACY entry. Its value represents a percentile 0% to 100% as 0.0f to 1.0f.
+      1.0f strong signal streangth or accurate signal to 0.0f representing no or weak 
+      signal. The value assigned is bespoke to the hardware assigning it. For ADSB 
+      it is RSSI_INTENSITY, or Radio signal streangth 0 to 10 to 30, and for NMEA, it is 
+      a combination of PDOP, HDOP, and VDOP being 0 - 1 - 5.
+
 2.303_250825
   - Map JSON files will load and be active.
       Previously generated maps will need to be erased because the generated json files 

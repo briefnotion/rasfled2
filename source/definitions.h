@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.303_250825"
+#define Revision "2.304_250827"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -107,7 +107,8 @@
 #define DEF_IMAGES_DIR                    "images/"               // Create Directory
 #define DEF_SETTINGS_DIR                  "settings/"             // Create Directory
 #define DEF_COMPASS_SUB_DIR               "compass/"              // Create Directory
-#define DEF_MAP_DIR                       "maps/"             // Create Directory
+#define DEF_MAP_DIR                       "maps/"                 // Create Directory
+#define DEF_TRACK_ARCHIVE_DIR             "tracks/"               // Create Directory
 
 // Files
 #define DEF_ANIMATIONS_FILE               "animations.json"
@@ -120,6 +121,9 @@
 #define DEF_MAP_AIRPORTS_JSON             "map_airports.json"
 #define DEF_MAP_REGIONS_JSON              "map_regions.json"
 #define DEF_MAP_ROADS_JSON                "map_roads.json"
+
+// Track
+#define DEF_CURRENT_TRACK_JSON            "current_track.json"
 
 // CAN Bus
 #define DEF_CAN_BUS_DEV_NAME              "/dev/serial/by-id/usb-Arduino_LLC_Arduino_Leonardo-if00"         // System File

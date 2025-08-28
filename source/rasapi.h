@@ -128,9 +128,13 @@ std::string file_to_string(const std::string& Dir_Filename, bool& Success);
 string file_to_string(string Dir_Filename);
 // Opens and loads a file to return as a string.
 
-bool deque_string_to_file(string Dir_Filename, deque<string> &qFile, bool Append);
-// Opens and saves a dequed string into a file with append option
-// Reurns false if failed.
+bool deque_string_to_file(const std::string& Dir_Filename, std::deque<std::string>& qFile, bool Append);
+/**
+ * @param Dir_Filename The path to the file.
+ * @param qFile A reference to the deque of strings to be written.
+ * @param Append If true, appends to the file. If false, overwrites the file.
+ * @return True on success, false on failure.
+ */
 
 bool file_to_deque_string(string Dir_Filename, deque<string> &qFile);
 // Opens and saves a dequed string into a file with append option

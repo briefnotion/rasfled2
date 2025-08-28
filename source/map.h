@@ -78,6 +78,9 @@ class MAP
   bool map_save();
   bool map_load();
 
+  bool track_save(DETAILED_TRACK &Track, string Filename);
+  bool track_load(DETAILED_TRACK &Track, string Filename);
+
   public:
   MAP_PROPERTIES PROPS;
   
@@ -87,6 +90,8 @@ class MAP
 
   bool create();
 
+  bool save_track(DETAILED_TRACK &Track, string Filename);
+  bool load_track(DETAILED_TRACK &Track, string Filename);
 };
 
 // -------------------------------------------------------------------------------------

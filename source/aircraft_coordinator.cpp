@@ -139,6 +139,44 @@ bool AIRCRAFT::alert()
 
 // -------------------------------------------------------------------------------------
 
+/**
+ * @brief Calculates a normalized accuracy score based on RSSI values.
+ *
+ * This function takes a single RSSI (Received Signal Strength Indicator) value
+ * and returns a float score between 0.0 and 1.0. The score is calculated as follows:
+ * - An RSSI of 0.0 returns a score of 0.0 (assumes no signal).
+ * - An RSSI less than or equal to 10.0 returns a perfect score of 1.0.
+ * - An RSSI between 10.0 and 30.0 is scaled linearly, where 10.0 returns
+ * 1.0 and 30.0 returns 0.0.
+ * - An RSSI of 30.0 or greater returns a score of 0.0.
+ *
+ * @param RSSI A float representing the RSSI metric.
+ * @return A float representing the normalized accuracy score (0.0 to 1.0).
+ */
+float AIRCRAFT_MAP_DETAILS::calculate_accuracy_score(float RSSI)
+{
+  // Normalize the score based on the average DOP.
+  if (RSSI == 0.0f) 
+  {
+    // Score 0 should be impossible, assume no values
+    return 0.0f;
+  }
+  else if (RSSI <= 10.0f) 
+  {
+    // Ideal case: score is 1.0.
+    return 1.0f;
+  } 
+  else if (RSSI > 10.0f && RSSI < 30.0f) 
+  {
+    // Linear scaling from 1.0 to 0.0.
+    return 1.0f - ((RSSI - 10.0f) / 20.0f);
+  } else 
+  {
+    // Average DOP is 10.0 or greater: score is 0.0.
+    return 0.0f;
+  }
+}
+
 void AIRCRAFT_MAP_DETAILS::clear()
 // Clear values
 {
@@ -186,14 +224,7 @@ void AIRCRAFT_MAP_DETAILS::update_aircraft(AIRCRAFT Aircraft_o, unsigned long tm
         new_lat_lon.ALTITUDE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
         new_lat_lon.TIME = (float)tmeCurrentMillis;
 
-        float intensity = (32.0f + AIRCRAFT_ITEM.RSSI.get_float_value()) / 32.0f;
-
-        if (intensity < 0.2f)
-        {
-          intensity = 0.2f;
-        }
-        
-        new_lat_lon.RSSI_INTENSITY = intensity;
+        new_lat_lon.ACCURACY = calculate_accuracy_score(AIRCRAFT_ITEM.RSSI.get_float_value());
 
         TRACK.store(new_lat_lon);
       }
@@ -206,15 +237,8 @@ void AIRCRAFT_MAP_DETAILS::update_aircraft(AIRCRAFT Aircraft_o, unsigned long tm
       new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_double_value();
       new_lat_lon.ALTITUDE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
       new_lat_lon.TIME = (float)tmeCurrentMillis;
-
-      float intensity = (32.0f + AIRCRAFT_ITEM.RSSI.get_float_value()) / 32.0f;
-
-      if (intensity < 0.2f)
-      {
-        intensity = 0.2f;
-      }
-      
-      new_lat_lon.RSSI_INTENSITY = intensity;
+        
+      new_lat_lon.ACCURACY = calculate_accuracy_score(AIRCRAFT_ITEM.RSSI.get_float_value());
 
       TRACK.store(new_lat_lon);
     }

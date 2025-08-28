@@ -45,7 +45,6 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
   }
 
   LOGS_CAN_BUS_DIR = WORKING_DIR +  (string)DEF_CAN_BUS_SUB_DIR;
-  LOGS_CAN_BUS_HISTORY_SUB_DIR = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_HISTORY_LOG_SUB_DIR;
   LOGS_AIRCRAFT_DIR = WORKING_DIR + (string)DEF_AIRCRAFT_SUB_DIR;
   LOGS_GPS_DIR = WORKING_DIR + (string)DEF_GPS_SUB_DIR;
   LOGS_ADVERTS_DIR = WORKING_DIR + (string)DEF_ADVERTS_SUB_DIR;
@@ -54,6 +53,9 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
   LOGS_SETTINGS_DIR = WORKING_DIR + (string)DEF_SETTINGS_DIR;
   LOGS_COMPASS_DIR = WORKING_DIR + (string)DEF_COMPASS_SUB_DIR;
   LOGS_MAPS_DIR = WORKING_DIR + (string)DEF_MAP_DIR;
+
+  LOGS_CAN_BUS_HISTORY_SUB_DIR = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_HISTORY_LOG_SUB_DIR;
+  TRACK_ARCHIVE_DIR = LOGS_MAPS_DIR + (string)DEF_TRACK_ARCHIVE_DIR;
   
   // Crash occurs if directory to be created is within a directory that doesnt exist.
   ret_success.catch_false(check_create_working_dir(WORKING_DIR, true));
@@ -67,6 +69,7 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
   ret_success.catch_false(check_create_working_dir(LOGS_SETTINGS_DIR, true));
   ret_success.catch_false(check_create_working_dir(LOGS_COMPASS_DIR, true));
   ret_success.catch_false(check_create_working_dir(LOGS_MAPS_DIR, true));
+  ret_success.catch_false(check_create_working_dir(TRACK_ARCHIVE_DIR, true));
   
   if (!ret_success.has_false())
   {
@@ -124,6 +127,9 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
 
     LOGS_MAPS_ROADS_JSON = LOGS_MAPS_DIR + (string)DEF_MAP_ROADS_JSON;
     cons.printw("  " + LOGS_MAPS_ROADS_JSON);
+
+    TRACK_CURRENT_JSON = LOGS_MAPS_DIR + (string)DEF_CURRENT_TRACK_JSON;
+    cons.printw("  " + TRACK_CURRENT_JSON);
 
     // Specific Hardware Directories and Files
     cons.printw("");

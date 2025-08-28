@@ -20,6 +20,7 @@
 #include "stringthings.h"
 #include "screen4_helper.h"
 #include "comport.h"
+#include "map.h"
 
 // -------------------------------------------------------------------------------------
 
@@ -27,6 +28,10 @@ class NMEA_PROPERTIES
 {
   public:
   bool TRUE_TRACK_ASSIST = true;
+
+  string CURRENT_TRACK_FILENAME = "";
+  unsigned long SAVE_TRACK_TIMER =  9 * 60 * 1000;
+  //unsigned long SAVE_TRACK_TIMER =  10 * 1000;
 };
 
 class NMEA
@@ -89,9 +94,24 @@ class NMEA
   int PRNNUMBER_11 = 0;
   int PRNNUMBER_12 = 0;
 
+  /*
+  < 1: This is considered the ideal, but is rarely achieved in practice.
+
+  1-2: Excellent. This is the highest level of precision you can typically expect.
+
+  2-5: Good. These values are very common and provide a reliable position for most applications.
+
+  5-10: Moderate to Fair. The position fix is usable, but accuracy may be compromised. 
+          It's often recommended to wait for better satellite geometry.
+
+  > 10: Poor. The position data is likely very inaccurate and should not be used for 
+          any critical navigation or surveying tasks
+  */
+
   float PDOP = 0.0f;  // .5 - 99.9
   float HDOP = 0.0f;  // .5 - 99.9
   float VDOP = 0.0f;  // .5 - 99.9
+  float ACCURACY_SCORE = 0.0f;  // Returns pecentile 0.0f to 1.0f, weak to strong.
 
   // if NMEA-0183 version 4.10, 7th and 8th fields:
   //int SYSTEM_ID = 0;
@@ -124,6 +144,8 @@ class NMEA
 
   GLOBAL_POSITION_DETAILED CURRENT_POSITION;
 
+  float calculate_accuracy_score();
+
   // Routines:
   void translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time);   //  Track made good and ground speed
   void translate_gngsa(vector<string> &Input);    //  GPS DOP and active satellites 
@@ -132,7 +154,8 @@ class NMEA
   //void translate_gngll(vector<string> &Input);  //  Geographic Position, Latitude/Longitude
   //void translate_gnrmc(vector<string> &Input);  //  Recommended minimum specific GPS/Transit data
 
-  TIMED_PING ADD_TRACK_POINT_TIMER;
+  TIMED_PING      ADD_TRACK_POINT_TIMER;
+  TIMED_IS_READY  SAVE_TRACK_TIMER;
   
   public:
 
@@ -147,12 +170,16 @@ class NMEA
   float pdop();
   float hdop();
   float vdop();
+  float accuracy_score();
+
   int satilite_count();
 
   // Routines:
   string device_change_baud_rate_string(int Baud_Rate);
+
+  void load_track(CONSOLE_COMMUNICATION &cons, MAP &Current_map);
   
-  void process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time);
+  void process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time, MAP &Current_map);
 
   GLOBAL_POSITION_DETAILED current_position();
   void current_position_change_acknowleged();
