@@ -863,7 +863,11 @@ void processcommandlineinput(system_data &sdSysData,
       {
         // Call command.
         //cons.printw("cp -r /run/dump1090-fa/ ~/flightaware/snapshot." + to_string(tmeCurrentTime));
-        sdSysData.COMMAND_THREADS.run_command("cp -r /run/dump1090-fa/ /home/delmane/flightaware/snapshot." + sdSysData.AIRCRAFT_COORD.DATA.NOW.get_str_value());
+        sdSysData.COMMAND_THREADS.run_command(  "cp -r " + sdSysData.FILE_NAMES.AIRCRAFT_FA_FILE + " " + 
+                                                sdSysData.FILE_NAMES.LOGS_AIRCRAFT_DIR + 
+                                                "/" + 
+                                                sdSysData.AIRCRAFT_COORD.DATA.NOW.get_str_value() + 
+                                                ".aircraft.json");
 
         // Start Power Down Animation
         process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(0, 30, 0));

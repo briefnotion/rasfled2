@@ -711,12 +711,19 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
 
   ImGui::SameLine();
   
-  if (BTC_NOVA_2_GPS_COMPASS.button_toggle_color(sdSysData, "GPS\nCOMP", "GPS\nCOMP", sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION == 5, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  if (BTC_NOVA_2_GPS.button_toggle_color(sdSysData, "GPS", "GPS", sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION == 5, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
   {
     sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION = 5;
   }
+
+  ImGui::SameLine();
   
-  if (sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION < 0 || sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION > 5)
+  if (BTC_NOVA_2_COMPASS.button_toggle_color(sdSysData, "COMP", "COMP", sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION == 6, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB_MEDIUM))
+  {
+    sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION = 6;
+  }
+  
+  if (sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION < 0 || sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION > 6)
   {
     sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION = 0;
   }
@@ -969,7 +976,7 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
   
   // ---
 
-  if (sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION == 5)  // GPS and COMPASS
+  if (sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION == 5)  // GPS
   {
     ImGui::Text("          GPS");
     {
@@ -999,6 +1006,15 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
                     "V:" + to_string_round_to_nth(sdSysData.GPS_SYSTEM.vdop(), 2) ;
       NOVA_2_GPS_PHV.update_value(sdSysData, phv);
       NOVA_2_GPS_PHV.draw(draw_list_nova, sdSysData);
+
+      NOVA_2_GPS_NMEA_TIMESTAMP.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.unix_epoch_nmea_time()));
+      NOVA_2_GPS_NMEA_TIMESTAMP.draw(draw_list_nova, sdSysData);
+
+      NOVA_2_GPS_SYSTEM_TIMESTAMP.update_value(sdSysData, to_string(getCurrentTimestampAsDouble()));
+      NOVA_2_GPS_SYSTEM_TIMESTAMP.draw(draw_list_nova, sdSysData);
+
+      NOVA_2_TIMESTAMP_DIFFERENCE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.unix_epoch_nmea_time() - getCurrentTimestampAsDouble()));
+      NOVA_2_TIMESTAMP_DIFFERENCE.draw(draw_list_nova, sdSysData);
     }
 
     // ---
@@ -1011,9 +1027,12 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
                                         (float)sdSysData.GPS_SYSTEM.current_position().LONGITUDE)));
       NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.draw(draw_list_nova, sdSysData);
     }
-
-    // ---
+  }
   
+  // ---
+
+  if (sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION == 6)  // Compass
+  {
     ImGui::NewLine();
     ImGui::Text("          Compass");
     {
@@ -2183,6 +2202,18 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     NOVA_2_GPS_SATILITES.PROPS = tmp_defalt_props;
     NOVA_2_GPS_SATILITES.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "SATILITES ");
     NOVA_2_GPS_SATILITES.create(sdSysData);
+
+    NOVA_2_GPS_NMEA_TIMESTAMP.PROPS = tmp_defalt_props;
+    NOVA_2_GPS_NMEA_TIMESTAMP.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "NMEA TIME ");
+    NOVA_2_GPS_NMEA_TIMESTAMP.create(sdSysData);
+
+    NOVA_2_GPS_SYSTEM_TIMESTAMP.PROPS = tmp_defalt_props;
+    NOVA_2_GPS_SYSTEM_TIMESTAMP.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "SYS TIME ");
+    NOVA_2_GPS_SYSTEM_TIMESTAMP.create(sdSysData);
+
+    NOVA_2_TIMESTAMP_DIFFERENCE.PROPS = tmp_defalt_props;
+    NOVA_2_TIMESTAMP_DIFFERENCE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "TIME DIFF ");
+    NOVA_2_TIMESTAMP_DIFFERENCE.create(sdSysData);
 
     NOVA_2_COMPASS_INFORMATION.PROPS = tmp_defalt_props;
     NOVA_2_COMPASS_INFORMATION.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "INFO ");

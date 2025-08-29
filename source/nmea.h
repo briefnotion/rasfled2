@@ -45,22 +45,26 @@ class NMEA
   // -------------------------------------------------------------------------------------
   // Track made good and ground speed
 
-  float TRUE_TRACK_PREV = 0.0f;
-  float TRUE_TRACK = 0.0f;
-  float TRUE_TRACK_ASSIST = 0.0f;
+  int       UTC_DATE = 0.0f;
+  float     UTC_TIME = 0.0f;
+  double    UNIX_EPOC_NMEA_TIME;
+
+  float     TRUE_TRACK_PREV = 0.0f;
+  float     TRUE_TRACK = 0.0f;
+  float     TRUE_TRACK_ASSIST = 0.0f;
   
-  bool TRUE_TRACK_INDICATOR = false;
+  bool      TRUE_TRACK_INDICATOR = false;
 
-  float MAGENTIC_TRACK = 0.0f;
-  bool MAGENTIC_TRACK_INDICATOR = false;
+  float     MAGENTIC_TRACK = 0.0f;
+  bool      MAGENTIC_TRACK_INDICATOR = false;
 
-  VELOCITY SPEED_KNOTS;
-  bool SPEED_KNOTS_INDICATOR = false;
+  VELOCITY  SPEED_KNOTS;
+  bool      SPEED_KNOTS_INDICATOR = false;
 
-  VELOCITY SPEED_KMPH;
-  bool SPEED_KMPH_INDICATOR = false;
+  VELOCITY  SPEED_KMPH;
+  bool      SPEED_KMPH_INDICATOR = false;
 
-  string VELOCITY_TRACK_MODE = "N";
+  string  VELOCITY_TRACK_MODE = "N";
   // Positioning system mode indicator. 
   // A = Autonomous, 
   // D = Differential, 
@@ -145,6 +149,7 @@ class NMEA
   GLOBAL_POSITION_DETAILED CURRENT_POSITION;
 
   float calculate_accuracy_score();
+  double unix_epoch_nmea_time(int utc_date, float utc_time);
 
   // Routines:
   void translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time);   //  Track made good and ground speed
@@ -152,7 +157,7 @@ class NMEA
   void translate_gngga(vector<string> &Input);    //  Global Positioning System Fix Data
   //void translate_gpgsv(vector<string> &Input);  //  GPS Satellites in view
   //void translate_gngll(vector<string> &Input);  //  Geographic Position, Latitude/Longitude
-  //void translate_gnrmc(vector<string> &Input);  //  Recommended minimum specific GPS/Transit data
+  void translate_gnrmc(vector<string> &Input);    //  Recommended minimum specific GPS/Transit data
 
   TIMED_PING      ADD_TRACK_POINT_TIMER;
   TIMED_IS_READY  SAVE_TRACK_TIMER;
@@ -185,6 +190,8 @@ class NMEA
   void current_position_change_acknowleged();
 
   bool active(unsigned long tmeFrame_Time);
+
+  double unix_epoch_nmea_time();
 };
 
 // -------------------------------------------------------------------------------------

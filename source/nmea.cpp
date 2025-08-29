@@ -59,6 +59,55 @@ float NMEA::calculate_accuracy_score()
   }
 }
 
+/**
+ * @brief Converts a UTC date and time from NMEA format into a Unix epoch timestamp.
+ *
+ * This function takes the date (DDMMYY) and time (HHMMSS.ss) as separate
+ * numeric values and returns a single double representing the Unix epoch
+ * timestamp with sub-second precision. It uses timegm to ensure the conversion
+ * is based on UTC, not the local system time.
+ *
+ * @param utc_date An integer representing the UTC date in DDMMYY format (e.g., 130625 for June 13, 2025).
+ * @param utc_time A float representing the UTC time in HHMMSS.ss format (e.g., 235354.00).
+ * @return The Unix epoch timestamp as a double.
+ */
+double NMEA::unix_epoch_nmea_time(int utc_date, float utc_time) {
+    // --- Step 1: Parse the UTC Date ---
+    // The date format is DDMMYY. We need to extract each component.
+    int day = utc_date / 10000;
+    int month = (utc_date / 100) % 100;
+    int year = utc_date % 100;
+
+    // --- Step 2: Parse the UTC Time ---
+    // The time format is HHMMSS.ss. We need to extract each component.
+    int hours = static_cast<int>(utc_time / 10000);
+    int minutes = static_cast<int>(utc_time / 100) % 100;
+    int seconds = static_cast<int>(utc_time) % 100;
+    double fractional_seconds = utc_time - static_cast<int>(utc_time);
+
+    // --- Step 3: Populate a struct tm ---
+    // This structure is used by C functions to handle date and time.
+    std::tm time_struct = {};
+    time_struct.tm_year = year + 100; // tm_year is years since 1900
+    time_struct.tm_mon = month - 1;   // tm_mon is 0-11
+    time_struct.tm_mday = day;        // tm_mday is 1-31
+    time_struct.tm_hour = hours;      // tm_hour is 0-23
+    time_struct.tm_min = minutes;     // tm_min is 0-59
+    time_struct.tm_sec = seconds;     // tm_sec is 0-60
+
+    // --- Step 4: Convert to UTC time_t using timegm ---
+    // timegm() converts the time structure to a Unix epoch timestamp,
+    // assuming the input time is UTC.
+    std::time_t time_t_value = timegm(&time_struct);
+
+    // --- Step 5: Add the fractional seconds for high precision ---
+    // The Unix epoch timestamp is the total number of seconds.
+    // We add the fractional part to the time_t value to get a double with precision.
+    double unix_timestamp = static_cast<double>(time_t_value) + fractional_seconds;
+
+    return unix_timestamp;
+}
+
 // -------------------------------------------------------------------------------------
 
 /*
@@ -345,6 +394,66 @@ void NMEA::translate_gngga(vector<string> &Input)
     QUALITY = 0;
   }
 }
+
+void NMEA::translate_gnrmc(vector<string> &Input)
+{
+  // tmp vars
+  int tmp_int = 0;
+  float tmp_float = 0.0f;
+
+  if (Input.size() == 13)
+  {
+    // $GNRMC,235356.00,A,3014.84041,N,09208.86217,W,57.991,90.37,130625,,,A*6D
+
+    // primarily for file access reloading file (bug, not a feature)
+    if(string_to_value(Input[1], tmp_float))
+    {
+      UTC_TIME = tmp_float;
+    }
+
+    // Status. "A" means the data is valid or "Active." A "V" would mean it's invalid.
+    //if(string_to_value(Input[2], tmp_float))
+
+    //  Latitude. The position is at 30 degrees, 14.84041 minutes North.
+    //if(string_to_value(Input[3], tmp_float))
+
+    // North.
+    //if(string_to_value(Input[4], tmp_float))
+
+    // Longitude. The position is at 92 degrees, 08.86217 minutes West.
+    //if(string_to_value(Input[5], tmp_float))
+
+    // West.
+    //if(string_to_value(Input[6], tmp_float))
+
+    // Speed over ground. The speed is 57.991 knots.
+    //if(string_to_value(Input[7], tmp_float))
+
+    // True course. The vessel is heading on a course of 90.37 degrees.
+    //if(string_to_value(Input[8], tmp_float))
+   
+    // UTC Date. This is the date of the fix: 13th day of the 06th month (June) of the year '25.
+    if(string_to_value(Input[9], tmp_int))
+    {
+      UTC_DATE = tmp_int;
+    }
+
+    // Magnetic Variation. This field is empty in your sentence, which is common.
+    //if(string_to_value(Input[10], tmp_float))
+
+    // Magnetic Variation Direction. This field is also empty.
+    //if(string_to_value(Input[11], tmp_float))
+
+    // Mode Indicator. "A" means the fix is from an "Autonomous" GNSS system. Other modes include D (Differential), E (Estimated), and N (No Fix).
+    //if(string_to_value(Input[12], tmp_float))
+
+    // The checksum for data integrity.
+    //if(string_to_value(Input[13], tmp_float))
+
+  }
+}
+
+
 // Data:
 float NMEA::pdop()
 {
@@ -404,6 +513,7 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
     {
       // parse
       string working_line = trim(Com_Port.recieve());
+      string l = working_line;
 
       //CHECKSUM
       //printf(" %s\n", working_line.c_str());
@@ -514,9 +624,10 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
 
               DETAILED_TRACK_POINT tmp_track_point;
 
+              tmp_track_point.TIMESTAMP = UNIX_EPOC_NMEA_TIME;
+
               tmp_track_point.LATITUDE = LATITUDE;
               tmp_track_point.LONGITUDE = LONGITUDE;
-              tmp_track_point.TIME = GGA_TIME * 1000.0f;
 
               tmp_track_point.TRUE_HEADING = TRUE_TRACK;
 
@@ -538,6 +649,14 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
 
           ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
           CURRENT_POSITION.CHANGED = true;
+        }
+
+        else if (INPUT_LINE[0] == "$GPRMC" || INPUT_LINE[0] == "$GNRMC")
+        {
+          // Global Positioning System Fix Data
+          translate_gnrmc(INPUT_LINE);
+
+          UNIX_EPOC_NMEA_TIME = unix_epoch_nmea_time(UTC_DATE, UTC_TIME);
         }
       }
 
@@ -574,6 +693,11 @@ void NMEA::current_position_change_acknowleged()
 bool NMEA::active(unsigned long tmeFrame_Time)
 {
   return ACTIVITY_TIMER.ping_down(tmeFrame_Time) && CURRENT_POSITION.VALID_COORDS;
+}
+
+double NMEA::unix_epoch_nmea_time()
+{
+  return UNIX_EPOC_NMEA_TIME;
 }
 
 // -------------------------------------------------------------------------------------

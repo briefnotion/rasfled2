@@ -1177,19 +1177,29 @@ bool MAP::track_save(DETAILED_TRACK &Track, string Filename)
   // Simple
   for (size_t pos = 0; pos < Track.TRACK_POINTS_SIMPLE.size(); pos++)
   {
+    JSON_ENTRY position_info;
+    position_info.create_label_value(quotify("unix_epoch_nmea_time"), quotify(to_string(Track.TRACK_POINTS_SIMPLE[pos].TIMESTAMP)));
+
     JSON_ENTRY latitude_longitude;
     latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(Track.TRACK_POINTS_SIMPLE[pos].LATITUDE)));
     latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(Track.TRACK_POINTS_SIMPLE[pos].LONGITUDE)));
-    points.put_json_in_list(latitude_longitude);
+
+    position_info.put_json_in_set(quotify("location"), latitude_longitude);
+    points.put_json_in_list(position_info);
   }
 
   // Detailed
   for (size_t pos = 0; pos < Track.TRACK_POINTS_DETAILED.size(); pos++)
   {
+    JSON_ENTRY position_info;
+    position_info.create_label_value(quotify("unix_epoch_nmea_time"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].TIMESTAMP)));
+
     JSON_ENTRY latitude_longitude;
     latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LATITUDE)));
     latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LONGITUDE)));
-    points.put_json_in_list(latitude_longitude);
+
+    position_info.put_json_in_set(quotify("location"), latitude_longitude);
+    points.put_json_in_list(position_info);
   }
 
   all_track.put_json_in_set(quotify("points"), points);
@@ -1227,31 +1237,43 @@ bool MAP::track_load(DETAILED_TRACK &Track, string Filename)
 
     if (ret_success == true)
     {
-      for(size_t root = 0; root < track_json.ROOT.DATA.size(); root++)
+      for(size_t root = 0; root < track_json.ROOT.DATA.size(); root++)        //root
       {
         if (track_json.ROOT.DATA[root].label() == "track")
         {
-          for (size_t marker_list = 0; 
+          for (size_t marker_list = 0;                                        //root/marker_list
                       marker_list < track_json.ROOT.DATA[root].DATA.size(); marker_list++)
           {
             if (track_json.ROOT.DATA[root].DATA[marker_list].label() == "points")
             {
-              for (size_t points_entry = 0; 
+              for (size_t points_entry = 0;                                         //root/marker_list/points_entry
                     points_entry < track_json.ROOT.DATA[root].DATA[marker_list].DATA.size(); points_entry++)
               {
                 SIMPLE_TRACK_POINT location;
-                STRING_DOUBLE points_entry_location_latitude;
-                STRING_DOUBLE points_entry_location_longitude;
-                
-                for (size_t points_entry_location = 0; 
-                      points_entry_location < track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA.size(); 
-                      points_entry_location++)
+                STRING_DOUBLE timestamp;
+                STRING_DOUBLE location_latitude;
+                STRING_DOUBLE location_longitude;
+
+                for (size_t entry = 0;                                         //root/marker_list/points_entry/entry
+                      entry < track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA.size(); entry++)
                 {
-                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[points_entry_location].get_if_is("latitude", points_entry_location_latitude);
-                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[points_entry_location].get_if_is("longitude", points_entry_location_longitude);
+                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("unix_epoch_nmea_time", timestamp);
+
+                  if (track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].label() == "location")
+                  {
+                    for (size_t location = 0; 
+                          location < track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].DATA.size(); 
+                          location++)
+                    {
+                      track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].DATA[location].get_if_is("latitude", location_latitude);
+                      track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].DATA[location].get_if_is("longitude", location_longitude);
+                    }
+                  }
                 }
-                location.LATITUDE = points_entry_location_latitude.get_double_value();
-                location.LONGITUDE = points_entry_location_longitude.get_double_value();
+
+                location.TIMESTAMP = timestamp.get_double_value();
+                location.LATITUDE = location_latitude.get_double_value();
+                location.LONGITUDE = location_longitude.get_double_value();
                 Track.TRACK_POINTS_SIMPLE.push_back(location);
               }
             }

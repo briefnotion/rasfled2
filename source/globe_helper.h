@@ -120,8 +120,8 @@ class GLOBAL_POSITION_DETAILED
 
   unsigned long SYSTEM_UPDATE_TIME = 0;
 
-  double LATITUDE = 0;
-  double LONGITUDE = 0;
+  double LATITUDE = 0.0;
+  double LONGITUDE = 0.0;
   DISTANCE ALTITUDE;     // M
   DISTANCE GEOID_HEIGHT; // M (mean sea level above WGS84 ellipsoid)
   
@@ -153,23 +153,20 @@ class SIMPLE_TRACK_POINT
 {
   public:
   
-  double LATITUDE = 0.0f;
-  double LONGITUDE = 0.0f;
+  double TIMESTAMP = 0.0;
+  double LATITUDE = 0.0;
+  double LONGITUDE = 0.0;
 };
 
 class DETAILED_TRACK_POINT
 {
   public:
   
+  double TIMESTAMP = 0.0;
   double LATITUDE = 0.0f;
   double LONGITUDE = 0.0f;
 
   float TRUE_HEADING = 0;
-
-  float TIME = 0.0f;            // Time im ms:
-                                //  Represeting either
-                                //  frame time of message received 
-                                //  or from nmea source gga time.
 
   float ACCURACY = 0.0f;  // 0% to 100%, 0.0f to 1.0f
   

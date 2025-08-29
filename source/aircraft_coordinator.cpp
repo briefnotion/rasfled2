@@ -155,21 +155,23 @@ bool AIRCRAFT::alert()
  */
 float AIRCRAFT_MAP_DETAILS::calculate_accuracy_score(float RSSI)
 {
+  float working_rssi = abs(RSSI);
+
   // Normalize the score based on the average DOP.
-  if (RSSI == 0.0f) 
+  if (working_rssi == 0.0f) 
   {
     // Score 0 should be impossible, assume no values
     return 0.0f;
   }
-  else if (RSSI <= 10.0f) 
+  else if (working_rssi <= 10.0f) 
   {
     // Ideal case: score is 1.0.
     return 1.0f;
   } 
-  else if (RSSI > 10.0f && RSSI < 30.0f) 
+  else if (working_rssi > 10.0f && working_rssi < 30.0f) 
   {
     // Linear scaling from 1.0 to 0.0.
-    return 1.0f - ((RSSI - 10.0f) / 20.0f);
+    return 1.0f - ((working_rssi - 10.0f) / 20.0f);
   } else 
   {
     // Average DOP is 10.0 or greater: score is 0.0.
@@ -222,8 +224,7 @@ void AIRCRAFT_MAP_DETAILS::update_aircraft(AIRCRAFT Aircraft_o, unsigned long tm
         new_lat_lon.LATITUDE = AIRCRAFT_ITEM.POSITION.LATITUDE.get_double_value();
         new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_double_value();
         new_lat_lon.ALTITUDE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
-        new_lat_lon.TIME = (float)tmeCurrentMillis;
-
+        new_lat_lon.TIMESTAMP = getCurrentTimestampAsDouble();
         new_lat_lon.ACCURACY = calculate_accuracy_score(AIRCRAFT_ITEM.RSSI.get_float_value());
 
         TRACK.store(new_lat_lon);
@@ -236,8 +237,7 @@ void AIRCRAFT_MAP_DETAILS::update_aircraft(AIRCRAFT Aircraft_o, unsigned long tm
       new_lat_lon.LATITUDE = AIRCRAFT_ITEM.POSITION.LATITUDE.get_double_value();
       new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_double_value();
       new_lat_lon.ALTITUDE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
-      new_lat_lon.TIME = (float)tmeCurrentMillis;
-        
+      new_lat_lon.TIMESTAMP = getCurrentTimestampAsDouble();
       new_lat_lon.ACCURACY = calculate_accuracy_score(AIRCRAFT_ITEM.RSSI.get_float_value());
 
       TRACK.store(new_lat_lon);

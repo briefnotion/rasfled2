@@ -1451,6 +1451,30 @@ string file_format_system_hour_minutes_seconds()
   return ret_date_time;
 }
 
+/**
+ * @brief Gets the current system time as a double-precision floating-point number.
+ *
+ * The value represents the number of seconds since the Unix epoch (January 1, 1970, 00:00:00 UTC),
+ * including a fractional part for sub-second precision.
+ *
+ * @return The current timestamp as a double.
+ */
+double getCurrentTimestampAsDouble() 
+{
+  // Get the current time point from the system clock.
+  const auto now = std::chrono::system_clock::now();
+
+  // Calculate the duration from the system clock's epoch to the current time point.
+  const auto duration_since_epoch = now.time_since_epoch();
+
+  // Cast the duration to a `std::chrono::duration` with a `double` representation for seconds.
+  // This handles both the whole seconds and the fractional part.
+  const auto seconds_double = std::chrono::duration<double>(duration_since_epoch);
+
+  // Return the total count of seconds as a double.
+  return seconds_double.count();
+}
+
 // ---------------------------------------------------------------------------------------
 
 void EMPERICAL::add_value(float Value)

@@ -1,3 +1,7 @@
+2.305_250829
+  - Corrected ADSB aircraft not showing sig strength on path.
+  - Modified the tracks.json to include a timestamp.
+
 2.304_250827
   - There exist 2 bugs of onknown orgnin.
       System will crash on system time change.  Was corrected months ago, but it 

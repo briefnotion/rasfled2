@@ -743,6 +743,11 @@ string file_format_system_date();
 string file_format_system_hour_minutes_seconds();
 // Return format "20230628_22.44.39"
 
+double getCurrentTimestampAsDouble();
+//The value represents the number of seconds since the Unix epoch (January 1, 1970, 00:00:00 UTC),
+// including a fractional part for sub-second precision.
+// @return The current timestamp as a double.
+
 // ---------------------------------------------------------------------------------------
 
 

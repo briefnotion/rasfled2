@@ -310,8 +310,9 @@ void DETAILED_TRACK::store(DETAILED_TRACK_POINT New_Track_Point)
         {
           // if point time and next point time diff is more than 15 seconds, move it to the 
           //  simple vector.
-          if (TRACK_POINTS_DETAILED[pos +1].TIME - TRACK_POINTS_DETAILED[pos].TIME > 15000.0f)
+          if (TRACK_POINTS_DETAILED[pos +1].TIMESTAMP - TRACK_POINTS_DETAILED[pos].TIMESTAMP > 15000.0f)
           {
+            temp_track_point_simple.TIMESTAMP = TRACK_POINTS_DETAILED[pos].TIMESTAMP;
             temp_track_point_simple.LATITUDE = TRACK_POINTS_DETAILED[pos].LATITUDE;
             temp_track_point_simple.LONGITUDE = TRACK_POINTS_DETAILED[pos].LONGITUDE;
 
