@@ -414,8 +414,8 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
             //    50% + (50% * brightnes) --> 100% to 50%
             sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 0.50f + 
                                                     (0.50f * 
-                                                    getCurrentDaylightFactor((float)sdSysData.GPS_SYSTEM.current_position().LATITUDE, 
-                                                                              (float)sdSysData.GPS_SYSTEM.current_position().LONGITUDE)
+                                                    getCurrentDaylightFactor((float)sdSysData.GPS_SYSTEM.CURRENT_POSITION.LATITUDE, 
+                                                                              (float)sdSysData.GPS_SYSTEM.CURRENT_POSITION.LONGITUDE)
                                                     ));
           }
           else

@@ -86,6 +86,11 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
                 float Initial_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
                 DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track);
 
+void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData, 
+                ImVec4 &Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
+                float Initial_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
+                DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track);
+
 AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
                                   int Draw_Level_Of_Detail, DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, NEW_COLOR_SCALE &Altitude_Color_Scale);
 

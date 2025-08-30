@@ -1286,6 +1286,114 @@ bool MAP::track_load(DETAILED_TRACK &Track, string Filename)
   return ret_success;
 }
 
+
+bool MAP::track_save_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename)
+{
+  // Track
+  JSON_INTERFACE track_map;
+  JSON_ENTRY all_track;
+  deque<string> track_json_deque;
+
+  JSON_ENTRY points;
+
+  // Detailed
+  for (size_t pos = 0; pos < Track.TRACK_POINTS_DETAILED.size(); pos++)
+  {
+    JSON_ENTRY position_info;
+    position_info.create_label_value(quotify("unix_epoch_nmea_time"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].TIMESTAMP)));
+
+    JSON_ENTRY latitude_longitude;
+    latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LATITUDE)));
+    latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LONGITUDE)));
+
+    position_info.put_json_in_set(quotify("location"), latitude_longitude);
+    points.put_json_in_list(position_info);
+  }
+
+  all_track.put_json_in_set(quotify("points"), points);
+
+  // Save Track
+  FALSE_CATCH json_saved;
+
+  track_map.ROOT.put_json_in_set(quotify("track"), all_track);
+  track_map.json_print_build_to_string_deque(track_json_deque);
+
+  if(deque_string_to_file(Filename, track_json_deque, false))
+  {
+    json_saved.catch_false(true);
+  }
+  else
+  {
+    json_saved.catch_false(false);
+  }
+
+  return !(json_saved.has_false());
+}
+
+bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename)
+{
+  bool ret_success = false;
+  bool tmp_success = false;
+  
+  // Load Map
+  JSON_INTERFACE track_json;
+  string json_track_file = file_to_string(Filename, tmp_success);
+  if (tmp_success)
+  {
+    // parse file
+    ret_success = track_json.load_json_from_string(json_track_file);
+
+    if (ret_success == true)
+    {
+      for(size_t root = 0; root < track_json.ROOT.DATA.size(); root++)        //root
+      {
+        if (track_json.ROOT.DATA[root].label() == "track")
+        {
+          for (size_t marker_list = 0;                                        //root/marker_list
+                      marker_list < track_json.ROOT.DATA[root].DATA.size(); marker_list++)
+          {
+            if (track_json.ROOT.DATA[root].DATA[marker_list].label() == "points")
+            {
+              for (size_t points_entry = 0;                                         //root/marker_list/points_entry
+                    points_entry < track_json.ROOT.DATA[root].DATA[marker_list].DATA.size(); points_entry++)
+              {
+                DETAILED_TRACK_POINT location;
+                STRING_DOUBLE timestamp;
+                STRING_DOUBLE location_latitude;
+                STRING_DOUBLE location_longitude;
+
+                for (size_t entry = 0;                                         //root/marker_list/points_entry/entry
+                      entry < track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA.size(); entry++)
+                {
+                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("unix_epoch_nmea_time", timestamp);
+
+                  if (track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].label() == "location")
+                  {
+                    for (size_t location = 0; 
+                          location < track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].DATA.size(); 
+                          location++)
+                    {
+                      track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].DATA[location].get_if_is("latitude", location_latitude);
+                      track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].DATA[location].get_if_is("longitude", location_longitude);
+                    }
+                  }
+                }
+
+                location.TIMESTAMP = timestamp.get_double_value();
+                location.LATITUDE = location_latitude.get_double_value();
+                location.LONGITUDE = location_longitude.get_double_value();
+                Track.TRACK_POINTS_DETAILED.push_back(location);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return ret_success;
+}
+
 bool MAP::create()
 {
   bool ret_suc = false;
@@ -1305,14 +1413,82 @@ bool MAP::create()
   return ret_suc;
 }
 
-bool MAP::save_track(DETAILED_TRACK &Track, string Filename)
+void MAP::load_track(CONSOLE_COMMUNICATION &cons)
 {
-  return track_save(Track, Filename);
+  if (track_load(TRACK, PROPS.CURRENT_TRACK_FILENAME))
+  {
+    cons.printw("Successfully loaded \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+  }
+  else
+  {
+    cons.printw("Failed to loaded \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+  }
+
+  if (track_load_detailed(TRACK_2, PROPS.CURRENT_TRACK_FILENAME + ".DEETS"))
+  {
+    cons.printw("Successfully loaded \"" + PROPS.CURRENT_TRACK_FILENAME + ".DEETS" + "\"\n");
+  }
+  else
+  {
+    cons.printw("Failed to loaded \"" + PROPS.CURRENT_TRACK_FILENAME + ".DEETS" + "\"\n");
+  }
 }
 
-bool MAP::load_track(DETAILED_TRACK &Track, string Filename)
+void MAP::update(CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, bool Test_Alternative)
 {
-  return track_load(Track, Filename);
+
+  TEST_ALTERNATIVE = Test_Alternative;
+
+  // Save new track point
+  if (GPS_System.CURRENT_POSITION.CHANGED_POSITION && 
+      GPS_System.CURRENT_POSITION.CHANGED_TIME)
+  {
+    GPS_System.CURRENT_POSITION.CHANGED_POSITION = false;
+    GPS_System.CURRENT_POSITION.CHANGED_TIME = false;
+
+    DETAILED_TRACK_POINT tmp_track_point;
+
+    tmp_track_point.TIMESTAMP = GPS_System.CURRENT_POSITION.UNIX_EPOC_NMEA_TIME;
+    tmp_track_point.LATITUDE = GPS_System.CURRENT_POSITION.LATITUDE;
+    tmp_track_point.LONGITUDE = GPS_System.CURRENT_POSITION.LONGITUDE;
+    tmp_track_point.TRUE_HEADING = GPS_System.CURRENT_POSITION.TRUE_HEADING.VALUE;
+    tmp_track_point.ALTITUDE = GPS_System.CURRENT_POSITION.SPEED.val_mph();
+    tmp_track_point.ACCURACY = GPS_System.CURRENT_POSITION.ACCURACY_SCORE;
+
+    TRACK.store(tmp_track_point);
+    if (TEST_ALTERNATIVE)
+    {
+      TRACK_2.store(tmp_track_point);
+    }
+  }
+
+  // Save Track
+  if (SAVE_TRACK_TIMER.is_ready(tmeFrame_Time))
+  {
+    SAVE_TRACK_TIMER.set(tmeFrame_Time, PROPS.SAVE_TRACK_TIMER);
+
+    if (track_save(TRACK, PROPS.CURRENT_TRACK_FILENAME))
+    {
+      cons.printw("Successfully saved \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+    }
+    else
+    {
+      cons.printw("Failed to save \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+    }
+
+    if (TEST_ALTERNATIVE)
+    {
+      if (track_save_detailed(TRACK_2, PROPS.CURRENT_TRACK_FILENAME + ".DEETS"))
+      {
+        cons.printw("Successfully saved \"" + PROPS.CURRENT_TRACK_FILENAME + ".DEETS" + "\"\n");
+      }
+      else
+      {
+        cons.printw("Failed to save \"" + PROPS.CURRENT_TRACK_FILENAME + ".DEETS" + "\"\n");
+      }
+    }
+  }
+
 }
 
 // -------------------------------------------------------------------------------------

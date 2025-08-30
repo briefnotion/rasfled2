@@ -217,6 +217,61 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
   }
 }
 
+void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData, 
+                ImVec4 &Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
+                float Initial_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
+                DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK_ALTERNATIVE &Track)
+{
+  // Seperate simple and detailed tracks from each other
+  //  There is no guarantee that they are connected.
+
+  bool draw_0 = false;
+  bool draw_1 = false;
+
+  ImVec2 track_position_0;
+  ImVec2 track_position_1;
+
+  // LOD
+  if (Draw_Level_Of_Detail < 1)
+  {
+    Draw_Level_Of_Detail = 1;
+  }
+
+  // Detailed
+  // Set First Point
+  if ((int)Track.TRACK_POINTS_DETAILED.size() > 1)
+  {
+    track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                      DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[0].LATITUDE, 
+                                                                  Track.TRACK_POINTS_DETAILED[0].LONGITUDE), 
+                                                      Map_Bearing, draw_1);
+
+    // Detailed step through
+    for(int position = 1; position < (int)Track.TRACK_POINTS_DETAILED.size(); position++)
+    {
+      track_position_0 = track_position_1;
+      draw_0 = draw_1;
+
+      track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                      DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, 
+                                                                  Track.TRACK_POINTS_DETAILED[position].LONGITUDE), 
+                                                      Map_Bearing, draw_1);
+
+      if (draw_0 || draw_1)
+      {
+        ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position - 1].ALTITUDE));
+
+        Draw_List->AddLine(track_position_0, track_position_1, point_color, 
+                            (1.0f + (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].ACCURACY)));
+
+        Draw_List->AddLine( track_position_0, track_position_1, 
+                            sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
+      }
+    }
+  }
+}
+
+
 // Draw all aircraft onto the maps.
 AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
                                             int Draw_Level_Of_Detail, DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, NEW_COLOR_SCALE &Altitude_Color_Scale)
@@ -1244,13 +1299,13 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
       ImGui::NewLine();
 
       ImGui::Text("GPS POSITION");
-      ImGui::Text("   SPEED: %.1f", sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph());
-      ImGui::Text("ALTITUDE: %.1f", sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val());
-      ImGui::Text(" HEADING: %.1f°", sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE);
-      ImGui::Text("%3.0f%%  P:%2.1f \nH:%2.1f V:%2.1f",  sdSysData.GPS_SYSTEM.accuracy_score() * 100.0f,
-                                                        sdSysData.GPS_SYSTEM.pdop(),  
-                                                        sdSysData.GPS_SYSTEM.hdop(), 
-                                                        sdSysData.GPS_SYSTEM.vdop());
+      ImGui::Text("   SPEED: %.1f", sdSysData.GPS_SYSTEM.CURRENT_POSITION.SPEED.val_mph());
+      ImGui::Text("ALTITUDE: %.1f", sdSysData.GPS_SYSTEM.CURRENT_POSITION.ALTITUDE.feet_val());
+      ImGui::Text(" HEADING: %.1f°", sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALUE);
+      ImGui::Text("%3.0f%%  P:%2.1f \nH:%2.1f V:%2.1f", sdSysData.GPS_SYSTEM.CURRENT_POSITION.ACCURACY_SCORE * 100.0f,
+                                                        sdSysData.GPS_SYSTEM.CURRENT_POSITION.PDOP,  
+                                                        sdSysData.GPS_SYSTEM.CURRENT_POSITION.HDOP, 
+                                                        sdSysData.GPS_SYSTEM.CURRENT_POSITION.VDOP);
     }
 
     // Compass Information
@@ -1266,7 +1321,7 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
       {
         ImGui::Text("(%5.1f°) (%5.1f°)", sdSysData.COMMS_COMPASS.accumulated_gps_to_compass_bearing_error(),
                                   signed_angular_error(sdSysData.COMMS_COMPASS.bearing_calibrated(),
-                                                        sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.back().TRUE_HEADING));
+                                                        sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALUE));
         ImGui::Text("         (%5.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset());
       }
 
@@ -1288,10 +1343,18 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
   // For Active GPS and Valid Coordinates
 
   // Draw track of GPS Position.
-  if (sdSysData.GPS_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
+  if (sdSysData.MAP_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
   {
-    draw_track(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 8.0f, 
-                GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.GPS_SYSTEM.TRACK);
+    if (sdSysData.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK)
+    {
+      draw_track_2(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 8.0f, 
+                  GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.TRACK_2);
+    }
+    else
+    {
+      draw_track(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 8.0f, 
+                  GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.TRACK);
+    }
   }
 
   bool draw = false;
@@ -1304,8 +1367,8 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
     //if (RANGE_INDICATOR.CENTER_ON_LOCATION == 1)
     {
       // draw compass at center location
-      CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 2, gps_pos, WORKING_AREA.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                          sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE, 
+      CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 2, gps_pos, WORKING_AREA.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_GPS_FIX, 
+                          sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_TRACK, sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALUE, 
                           ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing_calibrated(), true, 
                           true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), MAP_HEADING_DEGREES_LATEST);
     }
@@ -1313,8 +1376,8 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
     else
     {
       // draw compass at gps pos
-      CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                          sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
+      CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 1, gps_pos, 15.0f, true, sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_GPS_FIX, 
+                          sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_TRACK, sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING, 
                           ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing_calibrated(), !NORTH_UP, MAP_HEADING_DEGREES_LATEST);
     }
     */
@@ -1341,15 +1404,15 @@ void ADSB_MAP::screen_draw_compass_center(ImDrawList *Draw_List, system_data &sd
                       true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), 0.0f);
 
   /*
-  CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 2, screen_position, WORKING_AREA.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                      sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
+  CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 2, screen_position, WORKING_AREA.w / 2.0f * 0.66f, true, sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_GPS_FIX, 
+                      sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_TRACK, sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING, 
                       ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing_calibrated(), true, 
                       true, sdSysData.COMMS_COMPASS.bearing_jitter_min(), sdSysData.COMMS_COMPASS.bearing_jitter_max(), MAP_HEADING_DEGREES_LATEST);
   */
 
   /*
-  CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 1, screen_position, 15.0f, true, sdSysData.GPS_SYSTEM.current_position().VALID_GPS_FIX, 
-                      sdSysData.GPS_SYSTEM.current_position().VALID_TRACK, sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING, 
+  CURRENT_POSITION_COMPASS.draw(Draw_List, sdSysData, 1, screen_position, 15.0f, true, sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_GPS_FIX, 
+                      sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_TRACK, sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING, 
                       ACTIVE_COMPASS, sdSysData.COMMS_COMPASS.bearing_calibrated(), !NORTH_UP, MAP_HEADING_DEGREES_LATEST);  
                       */
 }
@@ -1525,14 +1588,14 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // Store some map info regarding positions
   // Store current gps location
   {
-    if (sdSysData.GPS_SYSTEM.current_position().VALID_COORDS && sdSysData.GPS_SYSTEM.current_position().CHANGED)
+    if (sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_COORDS && sdSysData.GPS_SYSTEM.CURRENT_POSITION.CHANGED_POSITION_FOR_DRAW)
     {
-      // Check and store GPS Current Location
-      RANGE_INDICATOR.set_gps_pos_lat_lon(DOUBLE_VEC2(sdSysData.GPS_SYSTEM.current_position().LATITUDE, 
-                                                  sdSysData.GPS_SYSTEM.current_position().LONGITUDE));
-
       // Mark Changes as seen.
-      sdSysData.GPS_SYSTEM.current_position_change_acknowleged();
+      sdSysData.GPS_SYSTEM.CURRENT_POSITION.CHANGED_POSITION_FOR_DRAW = false;
+
+      // Check and store GPS Current Location
+      RANGE_INDICATOR.set_gps_pos_lat_lon(DOUBLE_VEC2(sdSysData.GPS_SYSTEM.CURRENT_POSITION.LATITUDE, 
+                                                  sdSysData.GPS_SYSTEM.CURRENT_POSITION.LONGITUDE));
     }
   }
 
@@ -1557,9 +1620,9 @@ void ADSB_MAP::draw(system_data &sdSysData)
       // Map direction for GPS
       if (ACTIVE_COMPASS && ACTIVE_GPS)
       {
-        if (sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALID)
+        if (sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALID)
         {
-          MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE);
+          MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALUE);
         }
         else
         {
@@ -1572,7 +1635,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
       }
       else if (ACTIVE_GPS)
       {
-        MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE);
+        MAP_HEADING_DEGREES.set_value(sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALUE);
       }
       else
       {
@@ -1659,7 +1722,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
   }
 
   // Draw Current Position Marker
-  if (ACTIVE_GPS && sdSysData.GPS_SYSTEM.current_position().VALID_COORDS)
+  if (ACTIVE_GPS && sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_COORDS)
   {
     screen_draw_position_marker(draw_list_map, sdSysData);
   }

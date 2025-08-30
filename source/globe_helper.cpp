@@ -368,4 +368,21 @@ void ComputeArcRadians(float min_deg, float max_deg, float reference_deg,
 }
 */
 
+// ---------------------------------------------------------------------------------------
+
+void DETAILED_TRACK_ALTERNATIVE::clear()
+{
+  TRACK_POINTS_DETAILED.clear();
+}
+
+void DETAILED_TRACK_ALTERNATIVE::store(DETAILED_TRACK_POINT New_Track_Point)
+{
+  if (TRACK_POINTS_DETAILED.size() == 0)
+  {
+    TRACK_POINTS_DETAILED.reserve(MAX_SIZE_DETAILED);
+  }
+
+  TRACK_POINTS_DETAILED.push_back(New_Track_Point);
+}
+
 #endif

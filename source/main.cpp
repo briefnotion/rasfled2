@@ -705,8 +705,8 @@ int loop_2(bool TTY_Only)
   sdSystem.SCREEN_COMMS.printw(sdSystem.MAP_SYSTEM.INFORMATION);
 
   // Load Track into GPS_System
-  sdSystem.GPS_SYSTEM.PROPS.CURRENT_TRACK_FILENAME = sdSystem.FILE_NAMES.TRACK_CURRENT_JSON;
-  sdSystem.GPS_SYSTEM.load_track(sdSystem.SCREEN_COMMS, sdSystem.MAP_SYSTEM);
+  sdSystem.MAP_SYSTEM.PROPS.CURRENT_TRACK_FILENAME = sdSystem.FILE_NAMES.TRACK_CURRENT_JSON;
+  sdSystem.MAP_SYSTEM.load_track(sdSystem.SCREEN_COMMS);
 
   // -------------------------------------------------------------------------------------
   // Initialize Audio Filenames
@@ -987,7 +987,7 @@ int loop_2(bool TTY_Only)
         sdSystem.AIRCRAFT_COORD.process(sdSystem.PROGRAM_TIME.current_frame_time(), file_to_string(sdSystem.FILE_NAMES.AIRCRAFT_FA_FILE),
                                                           sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM,
                                                           sdSystem.GPS_SYSTEM.active(sdSystem.PROGRAM_TIME.current_frame_time()),
-                                                          sdSystem.GPS_SYSTEM.current_position().LATITUDE, sdSystem.GPS_SYSTEM.current_position().LONGITUDE);
+                                                          sdSystem.GPS_SYSTEM.CURRENT_POSITION.LATITUDE, sdSystem.GPS_SYSTEM.CURRENT_POSITION.LONGITUDE);
       }
 
       processcommandlineinput(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
@@ -1098,9 +1098,10 @@ int loop_2(bool TTY_Only)
       // ---------------------------------------------------------------------------------------
       // GPS Process
 
-      sdSystem.GPS_SYSTEM.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_GPS, 
-                                  sdSystem.PROGRAM_TIME.current_frame_time(), 
-                                  sdSystem.MAP_SYSTEM);
+      if (sdSystem.GPS_SYSTEM.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time()))
+      {
+        sdSystem.MAP_SYSTEM.update(sdSystem.SCREEN_COMMS, sdSystem.GPS_SYSTEM, sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK);
+      }
 
       sdSystem.dblCOMMS_GPS_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
     }

@@ -89,6 +89,8 @@ class SCREEN4_PANELS
   // 1  - MIN (On)
   // 2  - MAX (On)
   // 3  - DRV (On)
+
+  bool MAP_ALTERNATIVE_TRACK = false;
 };
 
 

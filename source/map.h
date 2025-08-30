@@ -20,6 +20,8 @@
 // Rasfled libraries
 #include "globe_helper.h"
 #include "json_interface.h"
+#include "screen4_helper.h"
+#include "nmea.h"
 
 using namespace std;
 
@@ -61,12 +63,17 @@ class MAP_PROPERTIES
   string FILENAME_AIRPORTS_MAP = "";
   string FILENAME_REGIONS_MAP = "";
   string FILENAME_ROADS_MAP = "";
+  string CURRENT_TRACK_FILENAME = "";
+
+  //unsigned long SAVE_TRACK_TIMER =  9 * 60 * 1000;
+  unsigned long SAVE_TRACK_TIMER =  10 * 1000;
 
 };
 
 class MAP
 {
   private:
+  TIMED_IS_READY  SAVE_TRACK_TIMER;
 
   void add_landmark(DOUBLE_VEC2 Lat_Lon, string Display_Name, int Type);
   // Adds landmark to vector list.
@@ -81,17 +88,25 @@ class MAP
   bool track_save(DETAILED_TRACK &Track, string Filename);
   bool track_load(DETAILED_TRACK &Track, string Filename);
 
+  bool track_save_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
+  bool track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
+
+  bool TEST_ALTERNATIVE = false;
+
   public:
   MAP_PROPERTIES PROPS;
   
   deque<MAP_INFO> LANDMARKS;
+  DETAILED_TRACK              TRACK;
+  DETAILED_TRACK_ALTERNATIVE  TRACK_2;
 
   string INFORMATION = "";
 
   bool create();
 
-  bool save_track(DETAILED_TRACK &Track, string Filename);
-  bool load_track(DETAILED_TRACK &Track, string Filename);
+  void load_track(CONSOLE_COMMUNICATION &cons);
+
+  void update(CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, bool Test_Alternative);
 };
 
 // -------------------------------------------------------------------------------------

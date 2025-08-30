@@ -20,7 +20,6 @@
 #include "stringthings.h"
 #include "screen4_helper.h"
 #include "comport.h"
-#include "map.h"
 
 // -------------------------------------------------------------------------------------
 
@@ -28,10 +27,6 @@ class NMEA_PROPERTIES
 {
   public:
   bool TRUE_TRACK_ASSIST = true;
-
-  string CURRENT_TRACK_FILENAME = "";
-  unsigned long SAVE_TRACK_TIMER =  9 * 60 * 1000;
-  //unsigned long SAVE_TRACK_TIMER =  10 * 1000;
 };
 
 class NMEA
@@ -40,6 +35,9 @@ class NMEA
 
   TIMED_PING ACTIVITY_TIMER;
 
+  // -------------------------------------------------------------------------------------
+  // Buffer Variables.  Do not access externally.
+  // All Items final store in CURRENT_POSITION
   // ALL CURRENT STATUSs
 
   // -------------------------------------------------------------------------------------
@@ -48,6 +46,7 @@ class NMEA
   int       UTC_DATE = 0.0f;
   float     UTC_TIME = 0.0f;
   double    UNIX_EPOC_NMEA_TIME;
+  double    NMEA_SYSTEM_TIME_DIFF = 0.0;
 
   float     TRUE_TRACK_PREV = 0.0f;
   float     TRUE_TRACK = 0.0f;
@@ -74,17 +73,7 @@ class NMEA
 
   bool VALID_TRACK_INFO = false;
 
-  // -------------------------------------------------------------------------------------
-  // GPS DOP and active satellites
-  // Dilution of Precision
-  // $GNGSA
-
-  string MANUAL_AUTOMATIC = "";
-  
-  int GSA_MODE = 0;
-    //  Fix type: 1 = not available, 2 = 2D, 3 = 3D
-
-    //  01 to 32 for GPS, 33 to 64 for SBAS, 64+ for GLONASS
+  //  01 to 32 for GPS, 33 to 64 for SBAS, 64+ for GLONASS
   int PRNNUMBER_01 = 0;
   int PRNNUMBER_02 = 0;
   int PRNNUMBER_03 = 0;
@@ -97,6 +86,17 @@ class NMEA
   int PRNNUMBER_10 = 0;
   int PRNNUMBER_11 = 0;
   int PRNNUMBER_12 = 0;
+
+
+  // -------------------------------------------------------------------------------------
+  // GPS DOP and active satellites
+  // Dilution of Precision
+  // $GNGSA
+
+  string MANUAL_AUTOMATIC = "";
+  
+  int GSA_MODE = 0;
+    //  Fix type: 1 = not available, 2 = 2D, 3 = 3D
 
   /*
   < 1: This is considered the ideal, but is rarely achieved in practice.
@@ -139,14 +139,11 @@ class NMEA
   float DILUTION_OF_POSITION = 0;
 
   int QUALITY = 0;  // 0 - 8;
+  // ---
 
   // -------------------------------------------------------------------------------------
   // NO CONSOLIDATION OCCURS
   // -------------------------------------------------------------------------------------
-
-  bool CHANGED = false;
-
-  GLOBAL_POSITION_DETAILED CURRENT_POSITION;
 
   float calculate_accuracy_score();
   double unix_epoch_nmea_time(int utc_date, float utc_time);
@@ -160,38 +157,19 @@ class NMEA
   void translate_gnrmc(vector<string> &Input);    //  Recommended minimum specific GPS/Transit data
 
   TIMED_PING      ADD_TRACK_POINT_TIMER;
-  TIMED_IS_READY  SAVE_TRACK_TIMER;
   
   public:
 
   NMEA_PROPERTIES PROPS;
 
-  DETAILED_TRACK TRACK;
-
-  // TEMPORARY _ ERASE AS SOON AS CONSOLE IS GONE.
-  vector<string> RECIEVE_HISTORY;
-
-  // Data:
-  float pdop();
-  float hdop();
-  float vdop();
-  float accuracy_score();
-
-  int satilite_count();
+  GLOBAL_POSITION_DETAILED CURRENT_POSITION;
 
   // Routines:
   string device_change_baud_rate_string(int Baud_Rate);
-
-  void load_track(CONSOLE_COMMUNICATION &cons, MAP &Current_map);
   
-  void process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time, MAP &Current_map);
-
-  GLOBAL_POSITION_DETAILED current_position();
-  void current_position_change_acknowleged();
+  bool process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time);
 
   bool active(unsigned long tmeFrame_Time);
-
-  double unix_epoch_nmea_time();
 };
 
 // -------------------------------------------------------------------------------------

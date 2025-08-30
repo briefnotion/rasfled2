@@ -1,3 +1,16 @@
+2.306_250830
+  - Moved the stored gps track out of nmea to maps.
+  - Removed massive memory leak:
+      // TEMPORARY _ ERASE AS SOON AS CONSOLE IS GONE.
+      //vector<string> RECIEVE_HISTORY;
+      //RECIEVE_HISTORY.push_back(working_line);
+  - Cleaned up nmea, somewhat.
+  - Added "ALTERNATIVE TRACK" toggle button to the ... screen.
+      Will start testing Alternative Track method. During first stages, it is 
+      guaranteed to fail, likely with artifacts, so it is defaulted off.
+  - Have not coded to old track save methods yet because changes to the JSON is 
+      in the works.
+
 2.305_250829
   - Corrected ADSB aircraft not showing sig strength on path.
   - Modified the tracks.json to include a timestamp.

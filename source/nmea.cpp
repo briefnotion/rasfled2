@@ -290,7 +290,6 @@ void NMEA::translate_gngsa(vector<string> &Input)
     {
       VDOP = tmp_float;
     }
-    ACCURACY_SCORE = calculate_accuracy_score();
   }
 }
 
@@ -449,35 +448,7 @@ void NMEA::translate_gnrmc(vector<string> &Input)
 
     // The checksum for data integrity.
     //if(string_to_value(Input[13], tmp_float))
-
   }
-}
-
-
-// Data:
-float NMEA::pdop()
-{
-  return PDOP;
-}
-
-float NMEA::hdop()
-{
-  return HDOP;
-}
-
-float NMEA::vdop()
-{
-  return VDOP;
-}
-
-float NMEA::accuracy_score()
-{
-  return ACCURACY_SCORE;
-}
-
-int NMEA::satilite_count()
-{
-  return NUMBER_OF_SATILITES;
 }
 
 // Routines:
@@ -489,20 +460,11 @@ string NMEA::device_change_baud_rate_string(int Baud_Rate)
   return (send_string + to_string_hex(xor_checksum(send_string, '$', '*')).c_str());
 }
 
-void NMEA::load_track(CONSOLE_COMMUNICATION &cons, MAP &Current_map)
-{
-  if (Current_map.load_track(TRACK, PROPS.CURRENT_TRACK_FILENAME))
-  {
-    cons.printw("Successfully saved \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
-  }
-  else
-  {
-    cons.printw("Failed to save \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
-  }
-}
 
-void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time, MAP &Current_map)
+bool NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time)
 {
+  bool ret_updated = false;
+
   // Read New Data
   if (Com_Port.recieve_size() > 0)
   {
@@ -524,8 +486,6 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
         cons.printw(working_line);
       }
 
-      RECIEVE_HISTORY.push_back(working_line);
-
       string left = "";
 
       bool exit_parse_while = false;
@@ -546,10 +506,15 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
       // translate
       if (INPUT_LINE.size() > 1)
       {
+          // Update Ground Speed and Bearing
         if (INPUT_LINE[0] == "$GPVTG" || INPUT_LINE[0] == "$GNVTG")
         {
           // Track made good and ground speed
           translate_gnvtg(INPUT_LINE, tmeFrame_Time);
+
+          // Return true for updated position
+          ret_updated = true;
+          CURRENT_POSITION.CHANGED_SPEED = true;
 
           // Update Details
           CURRENT_POSITION.SPEED = SPEED_KMPH;
@@ -588,19 +553,37 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
           }
 
           ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
-          CURRENT_POSITION.CHANGED = true;
         }
 
+        // Update Satilite Information
         else if (INPUT_LINE[0] == "$GPGSA" || INPUT_LINE[0] == "$GNGSA")
         {
           // GPS DOP and active satellites
           translate_gngsa(INPUT_LINE);
+
+          // Activity - even if no valid gps location
+          ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
+
+          // Return true for updated position
+          ret_updated = true;
+          CURRENT_POSITION.CHANGED_RECEPTION = true;
+
+          CURRENT_POSITION.PDOP = PDOP;
+          CURRENT_POSITION.HDOP = HDOP;
+          CURRENT_POSITION.VDOP = VDOP;
+          CURRENT_POSITION.ACCURACY_SCORE = calculate_accuracy_score();
         }
 
+        // Update Global Position
         else if (INPUT_LINE[0] == "$GPGGA" || INPUT_LINE[0] == "$GNGGA")
         {
           // Global Positioning System Fix Data
           translate_gngga(INPUT_LINE);
+
+          // Return true for updated position
+          ret_updated = true;
+          CURRENT_POSITION.CHANGED_POSITION = true;
+          CURRENT_POSITION.CHANGED_POSITION_FOR_DRAW = true;
 
           // Update Details
           if (QUALITY > 0)
@@ -621,25 +604,6 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
               GGA_TIME_PREV = GGA_TIME;
 
               ADD_TRACK_POINT_TIMER.ping_up(tmeFrame_Time, 60000);
-
-              DETAILED_TRACK_POINT tmp_track_point;
-
-              tmp_track_point.TIMESTAMP = UNIX_EPOC_NMEA_TIME;
-
-              tmp_track_point.LATITUDE = LATITUDE;
-              tmp_track_point.LONGITUDE = LONGITUDE;
-
-              tmp_track_point.TRUE_HEADING = TRUE_TRACK;
-
-              // Velocity color instead of altitude color
-              //tmp_track_point.ALTITUDE = ALTITUDE.feet_val();
-              tmp_track_point.ALTITUDE = SPEED_KMPH.val_mph();
-              
-              //DILUTION_OF_POSITION ranges 0 - 100.
-              // 0.5 to 2.5 is good to bad.
-              tmp_track_point.ACCURACY = ACCURACY_SCORE;
-
-              TRACK.store(tmp_track_point);
             }
           }
           else
@@ -647,16 +611,23 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
             CURRENT_POSITION.VALID_GPS_FIX = false;
           }
 
-          ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
-          CURRENT_POSITION.CHANGED = true;
+          CURRENT_POSITION.SATILITE_COUNT = NUMBER_OF_SATILITES;
         }
 
+        // Update Date and Time
         else if (INPUT_LINE[0] == "$GPRMC" || INPUT_LINE[0] == "$GNRMC")
         {
           // Global Positioning System Fix Data
           translate_gnrmc(INPUT_LINE);
 
+          // Return true for updated position
+          ret_updated = true;
+          CURRENT_POSITION.CHANGED_TIME = true;
+
           UNIX_EPOC_NMEA_TIME = unix_epoch_nmea_time(UTC_DATE, UTC_TIME);
+          NMEA_SYSTEM_TIME_DIFF = UNIX_EPOC_NMEA_TIME - getCurrentTimestampAsDouble();
+          CURRENT_POSITION.UNIX_EPOC_NMEA_TIME = UNIX_EPOC_NMEA_TIME;
+          CURRENT_POSITION.NMEA_SYSTEM_TIME_DIFF = NMEA_SYSTEM_TIME_DIFF;
         }
       }
 
@@ -664,40 +635,20 @@ void NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
       INPUT_LINE.clear();
     }
   }
-
-  // Save Track
-  if (SAVE_TRACK_TIMER.is_ready(tmeFrame_Time))
+  
+  /*
+  if (ret_updated)
   {
-    SAVE_TRACK_TIMER.set(tmeFrame_Time, PROPS.SAVE_TRACK_TIMER);
-    if (Current_map.save_track(TRACK, PROPS.CURRENT_TRACK_FILENAME))
-    {
-      cons.printw("Successfully saved \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
-    }
-    else
-    {
-      cons.printw("Failed to save \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
-    }
+    ACTIVITY_TIMER.ping_up(tmeFrame_Time, 5000);
   }
-}
+  */
 
-GLOBAL_POSITION_DETAILED NMEA::current_position()
-{
-  return CURRENT_POSITION;
-}
-
-void NMEA::current_position_change_acknowleged()
-{
-  CURRENT_POSITION.CHANGED = false;
+  return ret_updated;
 }
 
 bool NMEA::active(unsigned long tmeFrame_Time)
 {
   return ACTIVITY_TIMER.ping_down(tmeFrame_Time) && CURRENT_POSITION.VALID_COORDS;
-}
-
-double NMEA::unix_epoch_nmea_time()
-{
-  return UNIX_EPOC_NMEA_TIME;
 }
 
 // -------------------------------------------------------------------------------------

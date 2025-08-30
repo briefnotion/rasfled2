@@ -983,37 +983,37 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
       NOVA_2_GPS_ACTIVE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time())));
       NOVA_2_GPS_ACTIVE.draw(draw_list_nova, sdSysData);
       ImGui::SameLine();
-      NOVA_2_GPS_CURRENT_LOCATION_LATITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().LATITUDE));
+      NOVA_2_GPS_CURRENT_LOCATION_LATITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.CURRENT_POSITION.LATITUDE));
       NOVA_2_GPS_CURRENT_LOCATION_LATITUDE.draw(draw_list_nova, sdSysData);
       ImGui::SameLine();
-      NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().LONGITUDE));
+      NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.CURRENT_POSITION.LONGITUDE));
       NOVA_2_GPS_CURRENT_LOCATION_LONGITUDE.draw(draw_list_nova, sdSysData);
 
-      NOVA_2_GPS_SPEED.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().SPEED.val_mph()));
+      NOVA_2_GPS_SPEED.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.CURRENT_POSITION.SPEED.val_mph()));
       NOVA_2_GPS_SPEED.draw(draw_list_nova, sdSysData);
       ImGui::SameLine();
-      NOVA_2_GPS_CURRENT_HEADING.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().TRUE_HEADING.VALUE));
+      NOVA_2_GPS_CURRENT_HEADING.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALUE));
       NOVA_2_GPS_CURRENT_HEADING.draw(draw_list_nova, sdSysData);
 
-      NOVA_2_GPS_CURRENT_ALTITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.current_position().ALTITUDE.feet_val()));
+      NOVA_2_GPS_CURRENT_ALTITUDE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.CURRENT_POSITION.ALTITUDE.feet_val()));
       NOVA_2_GPS_CURRENT_ALTITUDE.draw(draw_list_nova, sdSysData);
 
-      NOVA_2_GPS_SATILITES.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.satilite_count()));
+      NOVA_2_GPS_SATILITES.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.CURRENT_POSITION.SATILITE_COUNT));
       NOVA_2_GPS_SATILITES.draw(draw_list_nova, sdSysData);
       ImGui::SameLine();
-      string phv =  "P:" + to_string_round_to_nth(sdSysData.GPS_SYSTEM.pdop(), 2) + "  " + 
-                    "H:" + to_string_round_to_nth(sdSysData.GPS_SYSTEM.hdop(), 2) + "  " + 
-                    "V:" + to_string_round_to_nth(sdSysData.GPS_SYSTEM.vdop(), 2) ;
+      string phv =  "P:" + to_string_round_to_nth(sdSysData.GPS_SYSTEM.CURRENT_POSITION.PDOP, 2) + "  " + 
+                    "H:" + to_string_round_to_nth(sdSysData.GPS_SYSTEM.CURRENT_POSITION.HDOP, 2) + "  " + 
+                    "V:" + to_string_round_to_nth(sdSysData.GPS_SYSTEM.CURRENT_POSITION.VDOP, 2) ;
       NOVA_2_GPS_PHV.update_value(sdSysData, phv);
       NOVA_2_GPS_PHV.draw(draw_list_nova, sdSysData);
 
-      NOVA_2_GPS_NMEA_TIMESTAMP.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.unix_epoch_nmea_time()));
+      NOVA_2_GPS_NMEA_TIMESTAMP.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.CURRENT_POSITION.UNIX_EPOC_NMEA_TIME));
       NOVA_2_GPS_NMEA_TIMESTAMP.draw(draw_list_nova, sdSysData);
 
       NOVA_2_GPS_SYSTEM_TIMESTAMP.update_value(sdSysData, to_string(getCurrentTimestampAsDouble()));
       NOVA_2_GPS_SYSTEM_TIMESTAMP.draw(draw_list_nova, sdSysData);
 
-      NOVA_2_TIMESTAMP_DIFFERENCE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.unix_epoch_nmea_time() - getCurrentTimestampAsDouble()));
+      NOVA_2_TIMESTAMP_DIFFERENCE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.CURRENT_POSITION.NMEA_SYSTEM_TIME_DIFF));
       NOVA_2_TIMESTAMP_DIFFERENCE.draw(draw_list_nova, sdSysData);
     }
 
@@ -1023,8 +1023,8 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
     ImGui::Text("          Other");
     {
       NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.update_value(sdSysData, to_string(
-              getCurrentDaylightFactor((float)sdSysData.GPS_SYSTEM.current_position().LATITUDE, 
-                                        (float)sdSysData.GPS_SYSTEM.current_position().LONGITUDE)));
+              getCurrentDaylightFactor((float)sdSysData.GPS_SYSTEM.CURRENT_POSITION.LATITUDE, 
+                                        (float)sdSysData.GPS_SYSTEM.CURRENT_POSITION.LONGITUDE)));
       NOVA_2_GLOBE_HELPER_BRIGHTNESS_FACTOR.draw(draw_list_nova, sdSysData);
     }
   }

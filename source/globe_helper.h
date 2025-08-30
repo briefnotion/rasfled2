@@ -119,23 +119,36 @@ class GLOBAL_POSITION_DETAILED
   public:
 
   unsigned long SYSTEM_UPDATE_TIME = 0;
+  
+  double      UNIX_EPOC_NMEA_TIME = 0.0;
+  double      NMEA_SYSTEM_TIME_DIFF = 0.0;
 
-  double LATITUDE = 0.0;
-  double LONGITUDE = 0.0;
-  DISTANCE ALTITUDE;     // M
-  DISTANCE GEOID_HEIGHT; // M (mean sea level above WGS84 ellipsoid)
+  double      LATITUDE = 0.0;
+  double      LONGITUDE = 0.0;
+  DISTANCE    ALTITUDE;     // M
+  DISTANCE    GEOID_HEIGHT; // M (mean sea level above WGS84 ellipsoid)
   
   FLOAT_VALID TRUE_HEADING;
-  VELOCITY SPEED;
+  VELOCITY    SPEED;
 
-  float DILUTION_OF_POSITION = 0;
+  float       DILUTION_OF_POSITION = 0;
 
   // Post Processing
-  bool VALID_GPS_FIX = false;
-  bool VALID_COORDS = false;
-  bool VALID_TRACK = false;
+  bool        VALID_GPS_FIX = false;
+  bool        VALID_COORDS = false;
+  bool        VALID_TRACK = false; 
 
-  bool CHANGED = false;
+  int         SATILITE_COUNT = 0;
+  float       PDOP = 0.0f;
+  float       HDOP = 0.0f;
+  float       VDOP = 0.0f;
+  float       ACCURACY_SCORE = 0.0f;  // Returns pecentile 0.0f to 1.0f, weak to strong.
+
+  bool        CHANGED_SPEED             = false;
+  bool        CHANGED_RECEPTION         = false;
+  bool        CHANGED_POSITION          = false;
+  bool        CHANGED_POSITION_FOR_DRAW = false;
+  bool        CHANGED_TIME              = false;
 };
 
 class GLOBAL_POSITION
@@ -191,6 +204,21 @@ class DETAILED_TRACK
   // Points are stored in TRACK_POINTS_DETAILED.
   // When TRACK_POINTS_DETAILED gets too big, points are 
   //  transfed to TRACK_POINTS_SIMPLE.
+};
+
+class DETAILED_TRACK_ALTERNATIVE
+{
+  private:
+  
+  int MAX_SIZE_DETAILED = 1024;
+  
+  public:
+
+  vector<DETAILED_TRACK_POINT> TRACK_POINTS_DETAILED;
+  
+  void clear();
+
+  void store(DETAILED_TRACK_POINT New_Track_Point);
 };
 
 // -------------------------------------------------------------------------------------

@@ -1059,10 +1059,10 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   }
 
   // Calibration compass heading with GPS heading
-  if (GPS_System.active(tmeFrame_Time) && GPS_System.current_position().TRUE_HEADING.VALID) // Enable
+  if (GPS_System.active(tmeFrame_Time) && GPS_System.CURRENT_POSITION.TRUE_HEADING.VALID) // Enable
   {
     // save error to error mean variable
-    float error_current = signed_angular_error(bearing, GPS_System.current_position().TRUE_HEADING.VALUE);
+    float error_current = signed_angular_error(bearing, GPS_System.CURRENT_POSITION.TRUE_HEADING.VALUE);
     GPS_ERROR_MEAN.store_value(error_current);
     
     // if gps assist calibration enabled, set bearing offset,
