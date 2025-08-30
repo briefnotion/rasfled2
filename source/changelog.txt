@@ -1,3 +1,6 @@
+2.306_250830A
+  - Reset save timer to 9 minutes.
+
 2.306_250830
   - Moved the stored gps track out of nmea to maps.
   - Removed massive memory leak:

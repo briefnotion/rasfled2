@@ -65,8 +65,8 @@ class MAP_PROPERTIES
   string FILENAME_ROADS_MAP = "";
   string CURRENT_TRACK_FILENAME = "";
 
-  //unsigned long SAVE_TRACK_TIMER =  9 * 60 * 1000;
-  unsigned long SAVE_TRACK_TIMER =  10 * 1000;
+  unsigned long SAVE_TRACK_TIMER =  9 * 60 * 1000;
+  //unsigned long SAVE_TRACK_TIMER =  10 * 1000;
 
 };
 
