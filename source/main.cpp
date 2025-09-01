@@ -262,7 +262,7 @@ int loop_2(bool TTY_Only)
   //sdSystem.PANEL_CONTROL.COLOR_SELECT.init_and_set_intensity(sdSystem.PROGRAM_TIME.current_frame_time(), 1.0f);
   sdSystem.PANEL_CONTROL.color_set_initial_values(true, 1.00f, 1.00f);
   sdSystem.PANEL_CONTROL.color_start(sdSystem.PROGRAM_TIME.current_frame_time());
-  
+
   // Load Windows or Console
   SCREEN4 cons_2;
 
@@ -361,6 +361,8 @@ int loop_2(bool TTY_Only)
 
   sdSystem.COMMS_GPS.PROPS.RECEIVE_TEST_DATA = TEST_DATA_GPS;
   sdSystem.COMMS_GPS.PROPS.TEST_DATA_FILENAME = sdSystem.FILE_NAMES.GPS_TEST_FILE;
+  //sdSystem.COMMS_GPS.PROPS.TEST_DATA_MS_DELAY_BETWEEN_MESSAGES = 1000 / 13; // 13 messages per second
+  sdSystem.COMMS_GPS.PROPS.TEST_DATA_MS_DELAY_BETWEEN_MESSAGES = 1000 / 10 / 13; // playback times 10
 
   sdSystem.COMMS_GPS.device_baud_rate_change_to_target_string(
     sdSystem.GPS_SYSTEM.device_change_baud_rate_string(COMMS_BAUD_TARGET_GPS));
@@ -1100,7 +1102,11 @@ int loop_2(bool TTY_Only)
 
       if (sdSystem.GPS_SYSTEM.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time()))
       {
-        sdSystem.MAP_SYSTEM.update(sdSystem.SCREEN_COMMS, sdSystem.GPS_SYSTEM, sdSystem.PROGRAM_TIME.current_frame_time(), sdSystem.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK);
+        sdSystem.MAP_SYSTEM.update( sdSystem.SCREEN_COMMS, sdSystem.GPS_SYSTEM, 
+                                    sdSystem.PROGRAM_TIME.current_frame_time(), 
+                                    sdSystem.PANEL_CONTROL.PANELS.RANGE_RADIUS_CIRCLE_POINT_SIZE, 
+                                    sdSystem.PANEL_CONTROL.PANELS.CURRENT_DISPLAYED_LOD, 
+                                    sdSystem.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK);
       }
 
       sdSystem.dblCOMMS_GPS_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());

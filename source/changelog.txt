@@ -1,3 +1,6 @@
+2.307_250831
+  - Continued GPS Map developement. Should not get artifacts.
+
 2.306_250830A
   - Reset save timer to 9 minutes.
 

@@ -18,6 +18,39 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
+void PIXEL_SIZE_META_DATA::create()
+{
+  LOD.clear();
+
+  LOD.push_back(  0.01  / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back(  0.03  / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back(  0.05  / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back(  0.1   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back(  0.25  / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back(  0.5   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back(  1.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back(  2.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back(  5.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back(  7.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back( 10.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back( 15.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back( 25.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back( 35.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back( 50.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back( 75.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+  LOD.push_back(100.0   / (double)CURRENT_CIRCLE_SIZE_PIXELS);
+}
+
+void PIXEL_SIZE_META_DATA::check_circle_size_pixels(float Circle_Size_Pixels)
+{
+  if (Circle_Size_Pixels != CURRENT_CIRCLE_SIZE_PIXELS)
+  {
+    if (Circle_Size_Pixels >= 1.0f)
+    CURRENT_CIRCLE_SIZE_PIXELS = Circle_Size_Pixels;
+    create();
+  }
+}
+
 void MAP_INFO::clear()
 {
   LAT_LON = DOUBLE_VEC2(0.0, 0.0);
@@ -1301,6 +1334,9 @@ bool MAP::track_save_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename
   {
     JSON_ENTRY position_info;
     position_info.create_label_value(quotify("unix_epoch_nmea_time"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].TIMESTAMP)));
+    position_info.create_label_value(quotify("accuracy"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].ACCURACY)));
+    position_info.create_label_value(quotify("value"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].VALUE)));
+    position_info.create_label_value(quotify("lod"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LOD)));
 
     JSON_ENTRY latitude_longitude;
     latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LATITUDE)));
@@ -1359,6 +1395,9 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename
               {
                 DETAILED_TRACK_POINT location;
                 STRING_DOUBLE timestamp;
+                STRING_FLOAT accuracy;
+                STRING_FLOAT value;  
+                STRING_INT lod;  
                 STRING_DOUBLE location_latitude;
                 STRING_DOUBLE location_longitude;
 
@@ -1366,6 +1405,9 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename
                       entry < track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA.size(); entry++)
                 {
                   track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("unix_epoch_nmea_time", timestamp);
+                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("accuracy", accuracy);
+                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("value", value);
+                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("lod", lod);
 
                   if (track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].label() == "location")
                   {
@@ -1380,8 +1422,12 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename
                 }
 
                 location.TIMESTAMP = timestamp.get_double_value();
+                location.ACCURACY = accuracy.get_float_value();
+                location.VALUE = value.get_float_value();
+                location.LOD = lod.get_int_value();
                 location.LATITUDE = location_latitude.get_double_value();
                 location.LONGITUDE = location_longitude.get_double_value();
+
                 Track.TRACK_POINTS_DETAILED.push_back(location);
               }
             }
@@ -1392,6 +1438,19 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename
   }
 
   return ret_success;
+}
+
+void MAP::generate_displayed_track()
+{
+  DISPLAYED_TRACK.clear();
+
+  for (size_t pos = 0; pos < TRACK_2.TRACK_POINTS_DETAILED.size(); pos++)
+  {
+    DETAILED_TRACK_POINT tmp_track_point;
+    tmp_track_point = TRACK_2.TRACK_POINTS_DETAILED[pos];
+    DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(tmp_track_point);
+  }
+
 }
 
 bool MAP::create()
@@ -1434,7 +1493,8 @@ void MAP::load_track(CONSOLE_COMMUNICATION &cons)
   }
 }
 
-void MAP::update(CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, bool Test_Alternative)
+void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, 
+                  float Radius_Circle_Point_Size, int Current_LOD, bool Test_Alternative)
 {
 
   TEST_ALTERNATIVE = Test_Alternative;
@@ -1446,20 +1506,78 @@ void MAP::update(CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tm
     GPS_System.CURRENT_POSITION.CHANGED_POSITION = false;
     GPS_System.CURRENT_POSITION.CHANGED_TIME = false;
 
-    DETAILED_TRACK_POINT tmp_track_point;
-
-    tmp_track_point.TIMESTAMP = GPS_System.CURRENT_POSITION.UNIX_EPOC_NMEA_TIME;
-    tmp_track_point.LATITUDE = GPS_System.CURRENT_POSITION.LATITUDE;
-    tmp_track_point.LONGITUDE = GPS_System.CURRENT_POSITION.LONGITUDE;
-    tmp_track_point.TRUE_HEADING = GPS_System.CURRENT_POSITION.TRUE_HEADING.VALUE;
-    tmp_track_point.ALTITUDE = GPS_System.CURRENT_POSITION.SPEED.val_mph();
-    tmp_track_point.ACCURACY = GPS_System.CURRENT_POSITION.ACCURACY_SCORE;
-
-    TRACK.store(tmp_track_point);
-    if (TEST_ALTERNATIVE)
+    if (GPS_System.valid_position())
     {
-      TRACK_2.store(tmp_track_point);
-    }
+      DETAILED_TRACK_POINT tmp_track_point;
+      LEVEL_OF_DETAIL_META.check_circle_size_pixels(Radius_Circle_Point_Size);
+
+      // get distand from previous point
+      if (TRACK_2.TRACK_POINTS_DETAILED.size() > 0)
+      {
+        //double distance_prev_point = calculate_distance(TRACK_2.TRACK_POINTS_DETAILED.back().LATITUDE, 
+        //                                                TRACK_2.TRACK_POINTS_DETAILED.back().LONGITUDE, 
+        //                                                GPS_System.CURRENT_POSITION.LATITUDE, 
+        //                                                GPS_System.CURRENT_POSITION.LONGITUDE);
+
+        // Determine LOD
+        // Step backwards through the list to find the highest lod
+        int found_pos = 0;
+        for (int search = (int)LEVEL_OF_DETAIL_META.LOD.size() -1; search > 0 && found_pos == 0; search--)
+        {
+          double distance_lod_pos = calculate_distance(LOD_TRACK_LIST[search].x, 
+                                                        LOD_TRACK_LIST[search].y, 
+                                                        GPS_System.CURRENT_POSITION.LATITUDE, 
+                                                        GPS_System.CURRENT_POSITION.LONGITUDE);
+
+          if (distance_lod_pos >= LEVEL_OF_DETAIL_META.LOD[search])
+          {
+            found_pos = search;
+          }
+        }
+        
+        // Replace current and below with point
+        for (int search = 0; search <= found_pos; search++)
+        {
+          LOD_TRACK_LIST[search].x = GPS_System.CURRENT_POSITION.LATITUDE;
+          LOD_TRACK_LIST[search].y = GPS_System.CURRENT_POSITION.LONGITUDE;
+        }
+
+        tmp_track_point.LOD = found_pos;
+      }
+      else
+      {
+        // build LOD Track List
+
+        DOUBLE_VEC2 tmp_gp;
+        tmp_gp.x =  GPS_System.CURRENT_POSITION.LATITUDE;
+        tmp_gp.y =  GPS_System.CURRENT_POSITION.LONGITUDE;
+
+        for (size_t lodpos = 0; lodpos < LEVEL_OF_DETAIL_META.LOD.size(); lodpos++)
+        {
+          LOD_TRACK_LIST.push_back(tmp_gp);
+        }
+  
+        tmp_track_point.LOD = LEVEL_OF_DETAIL_META.LOD.size() -1;
+      }
+
+      tmp_track_point.TIMESTAMP = GPS_System.CURRENT_POSITION.UNIX_EPOC_NMEA_TIME;
+      tmp_track_point.LATITUDE = GPS_System.CURRENT_POSITION.LATITUDE;
+      tmp_track_point.LONGITUDE = GPS_System.CURRENT_POSITION.LONGITUDE;
+      tmp_track_point.TRUE_HEADING = GPS_System.CURRENT_POSITION.TRUE_HEADING.VALUE;
+      tmp_track_point.VALUE = GPS_System.CURRENT_POSITION.SPEED.val_mph();
+      tmp_track_point.ACCURACY = GPS_System.CURRENT_POSITION.ACCURACY_SCORE;
+
+      TRACK.store(tmp_track_point);
+      if (TEST_ALTERNATIVE)
+      {
+        TRACK_2.store(tmp_track_point);
+      }
+
+      if (Current_LOD >= -1)
+      {
+        generate_displayed_track();
+      }
+    } 
   }
 
   // Save Track
@@ -1478,6 +1596,7 @@ void MAP::update(CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tm
 
     if (TEST_ALTERNATIVE)
     {
+      /*
       if (track_save_detailed(TRACK_2, PROPS.CURRENT_TRACK_FILENAME + ".DEETS"))
       {
         cons.printw("Successfully saved \"" + PROPS.CURRENT_TRACK_FILENAME + ".DEETS" + "\"\n");
@@ -1486,6 +1605,7 @@ void MAP::update(CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tm
       {
         cons.printw("Failed to save \"" + PROPS.CURRENT_TRACK_FILENAME + ".DEETS" + "\"\n");
       }
+      */
     }
   }
 

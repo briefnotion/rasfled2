@@ -32,6 +32,20 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
+class PIXEL_SIZE_META_DATA
+{
+  private:
+  float CURRENT_CIRCLE_SIZE_PIXELS = 0.0f;
+
+  void create();
+
+  public:
+  vector<double> LOD;
+  // Pixel size in miles per LOD
+
+  void check_circle_size_pixels(float Circle_Size_Pixels);
+};
+
 class MAP_INFO
 {
   public:
@@ -90,6 +104,9 @@ class MAP
 
   bool track_save_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
   bool track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
+  void generate_displayed_track();
+
+  vector<DOUBLE_VEC2> LOD_TRACK_LIST;
 
   bool TEST_ALTERNATIVE = false;
 
@@ -99,6 +116,9 @@ class MAP
   deque<MAP_INFO> LANDMARKS;
   DETAILED_TRACK              TRACK;
   DETAILED_TRACK_ALTERNATIVE  TRACK_2;
+  DETAILED_TRACK_ALTERNATIVE  DISPLAYED_TRACK;
+
+  PIXEL_SIZE_META_DATA LEVEL_OF_DETAIL_META;
 
   string INFORMATION = "";
 
@@ -106,7 +126,8 @@ class MAP
 
   void load_track(CONSOLE_COMMUNICATION &cons);
 
-  void update(CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, bool Test_Alternative);
+  void update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, 
+                  float Radius_Circle_Point_Size, int Current_LOD, bool Test_Alternative);
 };
 
 // -------------------------------------------------------------------------------------

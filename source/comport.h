@@ -97,6 +97,7 @@ class COMPORT_PROPERTIES
   // Reads data generated in save log as if from serial port.
   bool RECEIVE_TEST_DATA = false;
   string TEST_DATA_FILENAME = "";
+  int TEST_DATA_MS_DELAY_BETWEEN_MESSAGES = 100;
 
   // Flash Data Recorder
   bool FLASH_DATA_RECORDER_ACTIVE = false;  // Enable cacheing of serial data.
@@ -131,6 +132,7 @@ class COMPORT
   // list of received data from com port
   
   deque<string> TEST_DATA;
+  TIMED_IS_READY TEST_DATA_DELAY_TIMER;
 
   string RESPONSE = "";
   // Retain partially received responses for when data is 

@@ -174,6 +174,7 @@ class SIMPLE_TRACK_POINT
 class DETAILED_TRACK_POINT
 {
   public:
+  int LOD = 0;
   
   double TIMESTAMP = 0.0;
   double LATITUDE = 0.0f;
@@ -182,8 +183,7 @@ class DETAILED_TRACK_POINT
   float TRUE_HEADING = 0;
 
   float ACCURACY = 0.0f;  // 0% to 100%, 0.0f to 1.0f
-  
-  float ALTITUDE = 0.0f;
+  float VALUE = 0.0f;     // can be speed or altitude
 };
 
 class DETAILED_TRACK

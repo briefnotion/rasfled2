@@ -223,7 +223,7 @@ void AIRCRAFT_MAP_DETAILS::update_aircraft(AIRCRAFT Aircraft_o, unsigned long tm
         DETAILED_TRACK_POINT new_lat_lon;
         new_lat_lon.LATITUDE = AIRCRAFT_ITEM.POSITION.LATITUDE.get_double_value();
         new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_double_value();
-        new_lat_lon.ALTITUDE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
+        new_lat_lon.VALUE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
         new_lat_lon.TIMESTAMP = getCurrentTimestampAsDouble();
         new_lat_lon.ACCURACY = calculate_accuracy_score(AIRCRAFT_ITEM.RSSI.get_float_value());
 
@@ -236,7 +236,7 @@ void AIRCRAFT_MAP_DETAILS::update_aircraft(AIRCRAFT Aircraft_o, unsigned long tm
       DETAILED_TRACK_POINT new_lat_lon;
       new_lat_lon.LATITUDE = AIRCRAFT_ITEM.POSITION.LATITUDE.get_double_value();
       new_lat_lon.LONGITUDE = AIRCRAFT_ITEM.POSITION.LONGITUDE.get_double_value();
-      new_lat_lon.ALTITUDE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
+      new_lat_lon.VALUE = (float)AIRCRAFT_ITEM.ALTITUDE.get_int_value();
       new_lat_lon.TIMESTAMP = getCurrentTimestampAsDouble();
       new_lat_lon.ACCURACY = calculate_accuracy_score(AIRCRAFT_ITEM.RSSI.get_float_value());
 

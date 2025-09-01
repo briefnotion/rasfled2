@@ -411,7 +411,7 @@ void NMEA::translate_gnrmc(vector<string> &Input)
     }
 
     // Status. "A" means the data is valid or "Active." A "V" would mean it's invalid.
-    //if(string_to_value(Input[2], tmp_float))
+    VALID_POSITION = Input[2];
 
     //  Latitude. The position is at 30 degrees, 14.84041 minutes North.
     //if(string_to_value(Input[3], tmp_float))
@@ -649,6 +649,19 @@ bool NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
 bool NMEA::active(unsigned long tmeFrame_Time)
 {
   return ACTIVITY_TIMER.ping_down(tmeFrame_Time) && CURRENT_POSITION.VALID_COORDS;
+}
+
+bool NMEA::valid_position()
+{
+  if (VALID_POSITION == "A"  &&
+      LATITUDE != 0.0 && LONGITUDE != 0.0)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
 }
 
 // -------------------------------------------------------------------------------------

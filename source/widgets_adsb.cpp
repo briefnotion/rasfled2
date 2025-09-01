@@ -205,7 +205,8 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
 
       if (draw_0 || draw_1)
       {
-        ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position - 1].ALTITUDE));
+        ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position - 1].VALUE));
+        point_color.Value.w = 0.75f;
 
         Draw_List->AddLine(track_position_0, track_position_1, point_color, 
                             (1.0f + (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].ACCURACY)));
@@ -220,7 +221,8 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
 void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData, 
                 ImVec4 &Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
                 float Initial_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
-                DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK_ALTERNATIVE &Track)
+                DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK_ALTERNATIVE &Track, 
+                int Current_LOD)
 {
   // Seperate simple and detailed tracks from each other
   //  There is no guarantee that they are connected.
@@ -247,26 +249,32 @@ void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData,
                                                       Map_Bearing, draw_1);
 
     // Detailed step through
-    for(int position = 1; position < (int)Track.TRACK_POINTS_DETAILED.size(); position++)
+    for(size_t position = 1; position < Track.TRACK_POINTS_DETAILED.size(); position++)
     {
-      track_position_0 = track_position_1;
-      draw_0 = draw_1;
 
-      track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                      DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, 
-                                                                  Track.TRACK_POINTS_DETAILED[position].LONGITUDE), 
-                                                      Map_Bearing, draw_1);
-
-      if (draw_0 || draw_1)
+      if (Track.TRACK_POINTS_DETAILED[position].LOD >= Current_LOD || position == Track.TRACK_POINTS_DETAILED.size() -1)
       {
-        ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position - 1].ALTITUDE));
+        track_position_0 = track_position_1;
+        draw_0 = draw_1;
 
-        Draw_List->AddLine(track_position_0, track_position_1, point_color, 
-                            (1.0f + (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].ACCURACY)));
+        track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                        DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, 
+                                                                    Track.TRACK_POINTS_DETAILED[position].LONGITUDE), 
+                                                        Map_Bearing, draw_1);
 
-        Draw_List->AddLine( track_position_0, track_position_1, 
-                            sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
+        if (draw_0 || draw_1)
+        {
+          ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position - 1].VALUE));
+          point_color.Value.w = 0.75f;
+
+          Draw_List->AddLine(track_position_0, track_position_1, point_color, 
+                              (1.0f + (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].ACCURACY)));
+
+          Draw_List->AddLine( track_position_0, track_position_1, 
+                              sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
+        }
       }
+
     }
   }
 }
@@ -289,7 +297,7 @@ AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Dra
     // Draw track first then overlay aircraft.
     if (Aircraft.TRACK.TRACK_POINTS_DETAILED.size() > 1)
     {
-      draw_track( Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 8.0f, 
+      draw_track( Draw_List, sdSysData, Working_Area, Scale, Draw_Level_Of_Detail, 6.0f, 
                   Altitude_Color_Scale, Center_Lat_Lon, Map_Bearing, Aircraft.TRACK);
     }
 
@@ -707,6 +715,11 @@ void ADSB_RANGE::zoom_return()
   set_zoom_level();
 }
 
+int ADSB_RANGE::zoom_level()
+{
+  return ZOOM_LEVEL;
+}
+
 void ADSB_RANGE::draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area)
 {
   WORKING_AREA = Working_Area;
@@ -715,6 +728,7 @@ void ADSB_RANGE::draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec
   if (ZOOM_LEVEL == -1)
   {
     RADIUS_CIRCLE_POINT_SIZE = WORKING_AREA.w / 2.0f * 0.6f;
+    sdSysData.PANEL_CONTROL.PANELS.RANGE_RADIUS_CIRCLE_POINT_SIZE = RADIUS_CIRCLE_POINT_SIZE;
 
     ZOOM_LEVEL = 13;     // Default start zoom level
     set_zoom_level();
@@ -748,6 +762,10 @@ void ADSB_RANGE::draw_info()
   ImGui::Text("RNG: %.2f mi", RANGE_IMP_LATEST);
 
   // test
+
+  ImGui::Text("RADIUS_CIRCLE_POINT_SIZE: %f", RADIUS_CIRCLE_POINT_SIZE);
+  ImGui::Text("Pixel Size: %f", RANGE_IMP_LATEST / RADIUS_CIRCLE_POINT_SIZE);
+
   /*
   for (int degrees = 0; degrees < 360; degrees = degrees + 15)
   {  
@@ -1306,6 +1324,11 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.PDOP,  
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.HDOP, 
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.VDOP);
+
+      //for(size_t lod_pos = 0; lod_pos < sdSysData.MAP_SYSTEM.LOD.LOD.size(); lod_pos++)
+      //{
+      //  ImGui::Text(" LOD (%ld): %f mi", lod_pos, sdSysData.MAP_SYSTEM.LOD.LOD[lod_pos]);
+      //}
     }
 
     // Compass Information
@@ -1347,12 +1370,15 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
   {
     if (sdSysData.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK)
     {
-      draw_track_2(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 8.0f, 
-                  GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.TRACK_2);
+      //draw_track_2(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 6.0f, 
+      //            GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.TRACK_2);
+      draw_track_2(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 6.0f, 
+                  GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.DISPLAYED_TRACK, 
+                  RANGE_INDICATOR.zoom_level());
     }
     else
     {
-      draw_track(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 8.0f, 
+      draw_track(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 6.0f, 
                   GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.TRACK);
     }
   }
@@ -1734,6 +1760,8 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // Draw Aircraft
   screen_draw_aircraft(draw_list_map, sdSysData);
 
+  // Report back to panels the current Zoom level for LOD
+  sdSysData.PANEL_CONTROL.PANELS.CURRENT_DISPLAYED_LOD = RANGE_INDICATOR.zoom_level();
 }
 
 void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)

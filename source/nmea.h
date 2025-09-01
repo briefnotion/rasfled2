@@ -48,6 +48,8 @@ class NMEA
   double    UNIX_EPOC_NMEA_TIME;
   double    NMEA_SYSTEM_TIME_DIFF = 0.0;
 
+  string    VALID_POSITION = "";            // Status. "A" means the data is valid or "Active." A "V" would mean it's invalid.
+
   float     TRUE_TRACK_PREV = 0.0f;
   float     TRUE_TRACK = 0.0f;
   float     TRUE_TRACK_ASSIST = 0.0f;
@@ -124,8 +126,8 @@ class NMEA
   // -------------------------------------------------------------------------------------
   // Global Positioning System Fix Data
 
-  double LATITUDE = 0;
-  double LONGITUDE = 0;
+  double LATITUDE = 0.0;
+  double LONGITUDE = 0.0;
   DISTANCE ALTITUDE;     // M
   DISTANCE GEOID_HEIGHT; // M (mean sea level above WGS84 ellipsoid)
 
@@ -170,6 +172,7 @@ class NMEA
   bool process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time);
 
   bool active(unsigned long tmeFrame_Time);
+  bool valid_position();
 };
 
 // -------------------------------------------------------------------------------------

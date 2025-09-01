@@ -582,11 +582,27 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
     }
     else
     {
+      /*
       // get test data from file
       for (int count = 0; count < 6; count++)   // Count is the number of messages
       {                                         //  sent per cycle.
         if (TEST_DATA.size() > 0)
         {
+          DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
+        
+          READ_FROM_COMM.push_back(TEST_DATA.front());
+          
+          TEST_DATA.pop_front();
+        }
+      }
+      */
+
+      // get test data from file
+      if (TEST_DATA.size() > 0)
+      {
+        if (TEST_DATA_DELAY_TIMER.is_ready(tmeFrame_Time))
+        {
+          TEST_DATA_DELAY_TIMER.set(tmeFrame_Time, PROPS.TEST_DATA_MS_DELAY_BETWEEN_MESSAGES);
           DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
         
           READ_FROM_COMM.push_back(TEST_DATA.front());
