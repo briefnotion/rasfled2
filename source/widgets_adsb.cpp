@@ -221,8 +221,7 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
 void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData, 
                 ImVec4 &Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
                 float Initial_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
-                DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK_ALTERNATIVE &Track, 
-                int Current_LOD)
+                DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK_ALTERNATIVE &Track)
 {
   // Seperate simple and detailed tracks from each other
   //  There is no guarantee that they are connected.
@@ -251,8 +250,6 @@ void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData,
     // Detailed step through
     for(size_t position = 1; position < Track.TRACK_POINTS_DETAILED.size(); position++)
     {
-
-      if (Track.TRACK_POINTS_DETAILED[position].LOD >= Current_LOD || position == Track.TRACK_POINTS_DETAILED.size() -1)
       {
         track_position_0 = track_position_1;
         draw_0 = draw_1;
@@ -274,7 +271,6 @@ void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData,
                               sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
         }
       }
-
     }
   }
 }
@@ -715,9 +711,9 @@ void ADSB_RANGE::zoom_return()
   set_zoom_level();
 }
 
-int ADSB_RANGE::zoom_level()
+double ADSB_RANGE::resolution()
 {
-  return ZOOM_LEVEL;
+  return (double)RANGE_IMP_LATEST / (double)RADIUS_CIRCLE_POINT_SIZE;
 }
 
 void ADSB_RANGE::draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area)
@@ -763,10 +759,10 @@ void ADSB_RANGE::draw_info()
 
   // test
 
+  /*
   ImGui::Text("RADIUS_CIRCLE_POINT_SIZE: %f", RADIUS_CIRCLE_POINT_SIZE);
   ImGui::Text("Pixel Size: %f", RANGE_IMP_LATEST / RADIUS_CIRCLE_POINT_SIZE);
 
-  /*
   for (int degrees = 0; degrees < 360; degrees = degrees + 15)
   {  
     ImVec2 x_miles_west;
@@ -1041,7 +1037,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
     }
   }
 
-  if (ACTIVE_AUTOMOBILE && ACTIVE_GPS)
+  if (ACTIVE_GPS)
   {
     // Driving 
     ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (8.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
@@ -1324,11 +1320,7 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.PDOP,  
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.HDOP, 
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.VDOP);
-
-      //for(size_t lod_pos = 0; lod_pos < sdSysData.MAP_SYSTEM.LOD.LOD.size(); lod_pos++)
-      //{
-      //  ImGui::Text(" LOD (%ld): %f mi", lod_pos, sdSysData.MAP_SYSTEM.LOD.LOD[lod_pos]);
-      //}
+      ImGui::Text("DSP TRK SZ: %.ld", sdSysData.MAP_SYSTEM.DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size());
     }
 
     // Compass Information
@@ -1370,11 +1362,8 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
   {
     if (sdSysData.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK)
     {
-      //draw_track_2(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 6.0f, 
-      //            GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.TRACK_2);
       draw_track_2(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 6.0f, 
-                  GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.DISPLAYED_TRACK, 
-                  RANGE_INDICATOR.zoom_level());
+                  GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.DISPLAYED_TRACK);
     }
     else
     {
@@ -1582,7 +1571,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
     else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX == 3)
     {
       // Check all ADSB_RANGE_INDICATOR driving zooming
-      if (ACTIVE_AUTOMOBILE && ACTIVE_GPS)
+      if (ACTIVE_AUTOMOBILE)
       {
         if (sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() < 10.0f)
         {
@@ -1591,6 +1580,17 @@ void ADSB_MAP::draw(system_data &sdSysData)
         else 
         {
           RANGE_INDICATOR.set_range(((sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() - 10.0f) * (0.5f / 60.0f)) + 0.03f);
+        }
+      }
+      else if (ACTIVE_GPS)
+      {
+        if (sdSysData.GPS_SYSTEM.CURRENT_POSITION.SPEED.val_mph() < 10.0f)
+        {
+          RANGE_INDICATOR.set_range(.03f);
+        }
+        else 
+        {
+          RANGE_INDICATOR.set_range(((sdSysData.GPS_SYSTEM.CURRENT_POSITION.SPEED.val_mph() - 10.0f) * (0.5f / 60.0f)) + 0.03f);
         }
       }
       else
@@ -1761,7 +1761,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
   screen_draw_aircraft(draw_list_map, sdSysData);
 
   // Report back to panels the current Zoom level for LOD
-  sdSysData.PANEL_CONTROL.PANELS.CURRENT_DISPLAYED_LOD = RANGE_INDICATOR.zoom_level();
+  sdSysData.PANEL_CONTROL.PANELS.CURRENT_RESOLUTION = RANGE_INDICATOR.resolution();
 }
 
 void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)

@@ -326,8 +326,8 @@ class STRING_FLOAT
 {
   private:
   string  STR_VALUE = "";
-  float   FLOAT_VALUE = 0;
-  float   NEW_FLOAT_VALUE = 0;
+  float   FLOAT_VALUE = 0.0f;
+  float   NEW_FLOAT_VALUE = 0.0f;
   bool    CONVERSION_SUCCESS = false;
 
   public:
@@ -351,8 +351,8 @@ class STRING_DOUBLE
 {
   private:
   string  STR_VALUE = "";
-  double   DOUBLE_VALUE = 0;
-  double   NEW_DOUBLE_VALUE = 0;
+  double   DOUBLE_VALUE = 0.0;
+  double   NEW_DOUBLE_VALUE = 0.0;
   bool    CONVERSION_SUCCESS = false;
 
   public:

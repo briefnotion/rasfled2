@@ -1,3 +1,9 @@
+2.308_250902
+  - Track should now display properly on screen zoom changes
+  - Reenabled load and save of detailed tracks.  Expecting time delay 
+      alerts, every 9 minutes, when track is large, due to slow write 
+      speed.
+
 2.307_250831
   - Continued GPS Map developement. Should not get artifacts.
 

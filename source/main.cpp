@@ -1105,7 +1105,7 @@ int loop_2(bool TTY_Only)
         sdSystem.MAP_SYSTEM.update( sdSystem.SCREEN_COMMS, sdSystem.GPS_SYSTEM, 
                                     sdSystem.PROGRAM_TIME.current_frame_time(), 
                                     sdSystem.PANEL_CONTROL.PANELS.RANGE_RADIUS_CIRCLE_POINT_SIZE, 
-                                    sdSystem.PANEL_CONTROL.PANELS.CURRENT_DISPLAYED_LOD, 
+                                    sdSystem.PANEL_CONTROL.PANELS.CURRENT_RESOLUTION, 
                                     sdSystem.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK);
       }
 

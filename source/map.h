@@ -22,13 +22,9 @@
 #include "json_interface.h"
 #include "screen4_helper.h"
 #include "nmea.h"
+#include "map_hardcode.h"
 
 using namespace std;
-
-#define MAP_POINT_TYPE_GENERIC  0
-#define MAP_POINT_TYPE_AIRPORT  1
-#define MAP_POINT_TYPE_REGION   2
-#define MAP_POINT_TYPE_ROAD     3
 
 // -------------------------------------------------------------------------------------
 
@@ -42,32 +38,10 @@ class PIXEL_SIZE_META_DATA
   public:
   vector<double> LOD;
   // Pixel size in miles per LOD
+  vector<DOUBLE_VEC2> LOD_TRACK_LIST;
 
   void check_circle_size_pixels(float Circle_Size_Pixels);
 };
-
-class MAP_INFO
-{
-  public:
-
-  DOUBLE_VEC2 LAT_LON;
-  string DISPLAY_NAME = "";
-  string LONG_NAME = "";
-  int TYPE = 0;
-
-  // Type 1
-  vector<float> AIRPORT_LANDING_VECTORS;
-  vector<DOUBLE_VEC2> REGION_GPS_COORDS;
-
-  // Types:
-  //  0 - Generic
-  //  1 - Airport
-  //  2 - Region
-  //  3 - Interstate
-
-  void clear();
-};
-
 
 class MAP_PROPERTIES
 {
@@ -92,8 +66,6 @@ class MAP
   void add_landmark(DOUBLE_VEC2 Lat_Lon, string Display_Name, int Type);
   // Adds landmark to vector list.
 
-  bool map_hardcoded_load();
-
   bool map_load_json(string Filename);
 
   bool map_save();
@@ -104,9 +76,7 @@ class MAP
 
   bool track_save_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
   bool track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
-  void generate_displayed_track();
-
-  vector<DOUBLE_VEC2> LOD_TRACK_LIST;
+  void generate_displayed_track(double Resolution);
 
   bool TEST_ALTERNATIVE = false;
 
@@ -127,7 +97,7 @@ class MAP
   void load_track(CONSOLE_COMMUNICATION &cons);
 
   void update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, 
-                  float Radius_Circle_Point_Size, int Current_LOD, bool Test_Alternative);
+                  float Radius_Circle_Point_Size, double Current_Resolution, bool Test_Alternative);
 };
 
 // -------------------------------------------------------------------------------------

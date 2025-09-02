@@ -26,6 +26,13 @@
 #include "comport.h"
 
 // ---------------------------------------------------------------------------------------
+
+#define MAP_POINT_TYPE_GENERIC  0
+#define MAP_POINT_TYPE_AIRPORT  1
+#define MAP_POINT_TYPE_REGION   2
+#define MAP_POINT_TYPE_ROAD     3
+
+// ---------------------------------------------------------------------------------------
 // Map Tools
 
 double degToRad(double deg);
@@ -174,7 +181,7 @@ class SIMPLE_TRACK_POINT
 class DETAILED_TRACK_POINT
 {
   public:
-  int LOD = 0;
+  double RESOLUTION = 0.01;
   
   double TIMESTAMP = 0.0;
   double LATITUDE = 0.0f;
@@ -219,6 +226,28 @@ class DETAILED_TRACK_ALTERNATIVE
   void clear();
 
   void store(DETAILED_TRACK_POINT New_Track_Point);
+};
+
+class MAP_INFO
+{
+  public:
+
+  DOUBLE_VEC2 LAT_LON;
+  string DISPLAY_NAME = "";
+  string LONG_NAME = "";
+  int TYPE = 0;
+
+  // Type 1
+  vector<float> AIRPORT_LANDING_VECTORS;
+  vector<DOUBLE_VEC2> REGION_GPS_COORDS;
+
+  // Types:
+  //  0 - Generic
+  //  1 - Airport
+  //  2 - Region
+  //  3 - Interstate
+
+  void clear();
 };
 
 // -------------------------------------------------------------------------------------

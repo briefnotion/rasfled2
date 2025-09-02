@@ -89,8 +89,7 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
 void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData, 
                   ImVec4 &Working_Area, ImVec2 Scale, int Draw_Level_Of_Detail, 
                   float Initial_Point_Size, NEW_COLOR_SCALE &Color_Scale, 
-                  DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track, 
-                  int Current_LOD);
+                  DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, DETAILED_TRACK &Track);
 
 AIRCRAFT draw_aircraft_map_marker(AIRCRAFT_MAP_DETAILS Aircraft, ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area, ImVec2 Scale, 
                                   int Draw_Level_Of_Detail, DOUBLE_VEC2 Center_Lat_Lon, float Map_Bearing, NEW_COLOR_SCALE &Altitude_Color_Scale);
@@ -192,9 +191,8 @@ class ADSB_RANGE
   void zoom_return();
   // Set the zoom scale back to level.
 
-  int zoom_level();
-  // current int val of zoom used for lod.
-  //  possibly better to use a range value.
+  double resolution();
+  // Current pixel size in miles.
   
   void draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area);
   // Draws range circle onto the screen.

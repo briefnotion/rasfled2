@@ -385,4 +385,18 @@ void DETAILED_TRACK_ALTERNATIVE::store(DETAILED_TRACK_POINT New_Track_Point)
   TRACK_POINTS_DETAILED.push_back(New_Track_Point);
 }
 
+// ---------------------------------------------------------------------------------------
+
+void MAP_INFO::clear()
+{
+  LAT_LON = DOUBLE_VEC2(0.0, 0.0);
+  DISPLAY_NAME = "";
+  LONG_NAME = "";
+  TYPE = MAP_POINT_TYPE_GENERIC;
+  AIRPORT_LANDING_VECTORS.clear();
+  REGION_GPS_COORDS.clear();
+}
+
+// ---------------------------------------------------------------------------------------
+
 #endif
