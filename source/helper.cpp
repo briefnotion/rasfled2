@@ -1432,23 +1432,34 @@ string file_format_system_date()
   return ret_date_time;
 }
 
-string file_format_system_hour_minutes_seconds()
+/**
+ * @brief Formats a given system time (in seconds since epoch) into a YYYYMMDD_HH.MM.SS string.
+ *
+ * This function uses modern C++ standard libraries to achieve the desired output format.
+ * It takes a double representing the number of seconds since the Unix epoch (January 1, 1970).
+ *
+ * @param time_since_epoch The time to format, as a double representing seconds since the epoch.
+ * @return A string containing the formatted date and time.
+ */
+std::string file_format_system_time(double time_since_epoch) 
 {
-  FLED_TIME_VAR time; 
-  string ret_date_time = "";
+  // Convert the double seconds to a std::time_t object.
+  // This is the format required by std::gmtime.
+  std::time_t now_c = static_cast<std::time_t>(time_since_epoch);
 
-  std::chrono::time_point<std::chrono::system_clock> tmeNow = std::chrono::system_clock::now();
-  std::chrono::duration<double>  dur = tmeNow.time_since_epoch();
+  // Convert the std::time_t object to a GMT time structure (struct tm).
+  // This provides access to year, month, day, etc., in UTC/GMT.
+  // std::gmtime is non-thread-safe, but sufficient for this example.
+  struct tm* local_tm = std::gmtime(&now_c);
 
-  time.put_seconds((unsigned long)dur.count());
+  // Use a stringstream to build the formatted string.
+  std::ostringstream oss;
 
-  ret_date_time = linemerge_right_justify(2, "00", to_string(time.get_hour())) + 
-                  "." + 
-                  linemerge_right_justify(2, "00", to_string(time.get_minute())) + 
-                  "." + 
-                  linemerge_right_justify(2, "00", to_string(time.get_second()));
+  // Use std::put_time from the <iomanip> header to format the time.
+  oss << std::put_time(local_tm, "%Y%m%d_%H.%M.%S");
 
-  return ret_date_time;
+  // Return the formatted string from the stringstream.
+  return oss.str();
 }
 
 /**
@@ -1459,7 +1470,7 @@ string file_format_system_hour_minutes_seconds()
  *
  * @return The current timestamp as a double.
  */
-double getCurrentTimestampAsDouble() 
+double get_current_timestamp() 
 {
   // Get the current time point from the system clock.
   const auto now = std::chrono::system_clock::now();

@@ -90,7 +90,6 @@ class SCREEN4_PANELS
   // 2  - MAX (On)
   // 3  - DRV (On)
 
-  bool MAP_ALTERNATIVE_TRACK = true;
   float RANGE_RADIUS_CIRCLE_POINT_SIZE = 136.800003f;
   double CURRENT_RESOLUTION = -1.0;
 };

@@ -52,9 +52,9 @@ class MAP_PROPERTIES
   string FILENAME_REGIONS_MAP = "";
   string FILENAME_ROADS_MAP = "";
   string CURRENT_TRACK_FILENAME = "";
+  string TRACK_HISTORY_FOLDER = "";
 
-  unsigned long SAVE_TRACK_TIMER =  9 * 60 * 1000;
-  //unsigned long SAVE_TRACK_TIMER =  10 * 1000;
+  unsigned long SAVE_TRACK_TIMER =   9 * 60 * 1000;
 
 };
 
@@ -75,17 +75,17 @@ class MAP
   bool track_load(DETAILED_TRACK &Track, string Filename);
 
   bool track_save_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
-  bool track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
+  bool track_load_detailed( DETAILED_TRACK_ALTERNATIVE &Track, 
+                            DETAILED_TRACK_ALTERNATIVE &Track_Discard, 
+                            string Filename);
   void generate_displayed_track(double Resolution);
-
-  bool TEST_ALTERNATIVE = false;
 
   public:
   MAP_PROPERTIES PROPS;
   
   deque<MAP_INFO> LANDMARKS;
-  DETAILED_TRACK              TRACK;
   DETAILED_TRACK_ALTERNATIVE  TRACK_2;
+  DETAILED_TRACK_ALTERNATIVE  TRACK_2_DISCARD;
   DETAILED_TRACK_ALTERNATIVE  DISPLAYED_TRACK;
 
   PIXEL_SIZE_META_DATA LEVEL_OF_DETAIL_META;
@@ -97,7 +97,7 @@ class MAP
   void load_track(CONSOLE_COMMUNICATION &cons);
 
   void update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, 
-                  float Radius_Circle_Point_Size, double Current_Resolution, bool Test_Alternative);
+                  float Radius_Circle_Point_Size, double Current_Resolution);
 };
 
 // -------------------------------------------------------------------------------------

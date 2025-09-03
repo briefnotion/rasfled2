@@ -18,6 +18,9 @@
 #include <string>
 #include <chrono>
 #include <functional>
+#include <iomanip>
+#include <sstream>
+#include <ctime>
 
 #include <cmath>
 
@@ -735,15 +738,16 @@ int two_byte_complement_signed(unsigned char byte1, unsigned char byte2);
 //  Returns a hacked int, the system undermined.
 
 string file_format_system_time();
-// Return format "20230628_22.44.39"
+// Return format "22.44.39"
 
 string file_format_system_date();
-// Return format "20230628_22.44.39"
+// Return format "20230628"
 
-string file_format_system_hour_minutes_seconds();
+string file_format_system_time(double time_since_epoch);
 // Return format "20230628_22.44.39"
+// Returns GMT
 
-double getCurrentTimestampAsDouble();
+double get_current_timestamp();
 //The value represents the number of seconds since the Unix epoch (January 1, 1970, 00:00:00 UTC),
 // including a fractional part for sub-second precision.
 // @return The current timestamp as a double.

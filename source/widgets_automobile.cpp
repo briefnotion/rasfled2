@@ -1010,7 +1010,7 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
       NOVA_2_GPS_NMEA_TIMESTAMP.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.CURRENT_POSITION.UNIX_EPOC_NMEA_TIME));
       NOVA_2_GPS_NMEA_TIMESTAMP.draw(draw_list_nova, sdSysData);
 
-      NOVA_2_GPS_SYSTEM_TIMESTAMP.update_value(sdSysData, to_string(getCurrentTimestampAsDouble()));
+      NOVA_2_GPS_SYSTEM_TIMESTAMP.update_value(sdSysData, to_string(get_current_timestamp()));
       NOVA_2_GPS_SYSTEM_TIMESTAMP.draw(draw_list_nova, sdSysData);
 
       NOVA_2_TIMESTAMP_DIFFERENCE.update_value(sdSysData, to_string(sdSysData.GPS_SYSTEM.CURRENT_POSITION.NMEA_SYSTEM_TIME_DIFF));

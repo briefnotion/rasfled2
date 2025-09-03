@@ -699,10 +699,21 @@ int loop_2(bool TTY_Only)
   // Map load and initialize
   sdSystem.SCREEN_COMMS.printw("Initializing Map ...");
 
+  if (TEST_DATA_GPS)
+  {
+    sdSystem.MAP_SYSTEM.PROPS.SAVE_TRACK_TIMER = 10 * 1000;     // 10 sec
+  }
+  else
+  {
+    sdSystem.MAP_SYSTEM.PROPS.SAVE_TRACK_TIMER = 9 * 60 * 1000; // 9 min
+  }
+
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_GENERICS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_GENERICS_JSON;
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_AIRPORTS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_AIRPORTS_JSON;
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_REGIONS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_REGIONS_JSON;
   sdSystem.MAP_SYSTEM.PROPS.FILENAME_ROADS_MAP = sdSystem.FILE_NAMES.LOGS_MAPS_ROADS_JSON;
+  sdSystem.MAP_SYSTEM.PROPS.TRACK_HISTORY_FOLDER = sdSystem.FILE_NAMES.TRACK_ARCHIVE_DIR;
+  
   sdSystem.MAP_SYSTEM.create();
   sdSystem.SCREEN_COMMS.printw(sdSystem.MAP_SYSTEM.INFORMATION);
 
@@ -1105,8 +1116,7 @@ int loop_2(bool TTY_Only)
         sdSystem.MAP_SYSTEM.update( sdSystem.SCREEN_COMMS, sdSystem.GPS_SYSTEM, 
                                     sdSystem.PROGRAM_TIME.current_frame_time(), 
                                     sdSystem.PANEL_CONTROL.PANELS.RANGE_RADIUS_CIRCLE_POINT_SIZE, 
-                                    sdSystem.PANEL_CONTROL.PANELS.CURRENT_RESOLUTION, 
-                                    sdSystem.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK);
+                                    sdSystem.PANEL_CONTROL.PANELS.CURRENT_RESOLUTION);
       }
 
       sdSystem.dblCOMMS_GPS_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());

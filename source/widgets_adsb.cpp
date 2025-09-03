@@ -1358,18 +1358,11 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
   // For Active GPS and Valid Coordinates
 
   // Draw track of GPS Position.
-  if (sdSysData.MAP_SYSTEM.TRACK.TRACK_POINTS_DETAILED.size() > 1)
+  if (sdSysData.MAP_SYSTEM.TRACK_2.TRACK_POINTS_DETAILED.size() > 1)
   {
-    if (sdSysData.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK)
-    {
-      draw_track_2(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 6.0f, 
-                  GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.DISPLAYED_TRACK);
-    }
-    else
-    {
-      draw_track(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 6.0f, 
-                  GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.TRACK);
-    }
+    draw_track_2(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 6.0f, 
+                GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.DISPLAYED_TRACK);
+
   }
 
   bool draw = false;

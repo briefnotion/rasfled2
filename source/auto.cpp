@@ -3075,7 +3075,7 @@ void AUTOMOBILE::translate(DNFWTS_ &Dnfwts, unsigned long tmeFrame_Time)
     if (STATUS_HISTORY_TIMER.ping_down(tmeFrame_Time) == false && TEST_DATA_CAN_BUS == false)
     {
       STATUS_HISTORY_MESSAGE.push_back(
-                  file_format_system_hour_minutes_seconds() + ", " +
+                  file_format_system_time(get_current_timestamp()) + ", " +
                   "Voltage, " + STATUS.ELECTRICAL.CONTROL_UNIT_42.v() + ", " + 
                   "Amiant Air Temp, " + STATUS.TEMPS.AMBIANT_AIR_46.c() + ", " + 
                   "Air Intake Temp, " + STATUS.TEMPS.AIR_INTAKE_0f.c() + ", " + 

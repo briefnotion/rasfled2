@@ -346,15 +346,6 @@ void DOT_DOT_DOT_SCREEN::display(system_data &sdSysData, ANIMATION_HANDLER &Anim
           }
         }
 
-        ImGui::SameLine();
-        
-        if (ALTERNATIVE_TRACK.button_toggle_color(sdSysData, "ALT\nTRACK", "ALT\nTRACK", 
-                                                sdSysData.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK, 
-                                              RAS_GREEN, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
-        {
-          sdSysData.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK = !sdSysData.PANEL_CONTROL.PANELS.MAP_ALTERNATIVE_TRACK;
-        }
-
         //ImGui::SameLine();
 
         if (AUTO_TO_CONSOLE.button_color(sdSysData, "AUTO\nCONS", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))

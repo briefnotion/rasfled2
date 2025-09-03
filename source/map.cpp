@@ -608,10 +608,18 @@ bool MAP::track_save_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename
   return !(json_saved.has_false());
 }
 
-bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename)
+bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, 
+                              DETAILED_TRACK_ALTERNATIVE &Track_Discard, 
+                              string Filename)
 {
   bool ret_success = false;
   bool tmp_success = false;
+
+  double current_system_time = get_current_timestamp();
+  double track_history_cutoff = 8.0 * 60.0 * 60.0;   // 8 hours
+
+  Track.clear();
+  Track_Discard.clear();
   
   // Load Map
   JSON_INTERFACE track_json;
@@ -670,7 +678,14 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename
                 location.LATITUDE = location_latitude.get_double_value();
                 location.LONGITUDE = location_longitude.get_double_value();
 
-                Track.TRACK_POINTS_DETAILED.push_back(location);
+                if (current_system_time - location.TIMESTAMP < track_history_cutoff)
+                {
+                  Track.TRACK_POINTS_DETAILED.push_back(location);
+                }
+                else
+                {
+                  Track_Discard.TRACK_POINTS_DETAILED.push_back(location);
+                }
               }
             }
           }
@@ -727,30 +742,37 @@ bool MAP::create()
 
 void MAP::load_track(CONSOLE_COMMUNICATION &cons)
 {
-  if (track_load(TRACK, PROPS.CURRENT_TRACK_FILENAME))
+  if (track_load_detailed(TRACK_2, TRACK_2_DISCARD, PROPS.CURRENT_TRACK_FILENAME))
   {
     cons.printw("Successfully loaded \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+
+    if (TRACK_2_DISCARD.TRACK_POINTS_DETAILED.size() > 0)
+    {
+      string track_history_filename = PROPS.TRACK_HISTORY_FOLDER + "track_" + 
+                                      file_format_system_time(TRACK_2_DISCARD.TRACK_POINTS_DETAILED[0].TIMESTAMP) + 
+                                      ".json";
+
+      if (track_save_detailed(TRACK_2_DISCARD, track_history_filename))
+      {
+        cons.printw("Successfully saved history \"" + track_history_filename + "\"\n");
+      }
+      else
+      {
+        cons.printw("Failed to save history \"" + track_history_filename + "\"\n");
+      }
+
+      TRACK_2_DISCARD.clear();
+    }
   }
   else
   {
     cons.printw("Failed to loaded \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
   }
-
-  if (track_load_detailed(TRACK_2, PROPS.CURRENT_TRACK_FILENAME + ".DEETS"))
-  {
-    cons.printw("Successfully loaded \"" + PROPS.CURRENT_TRACK_FILENAME + ".DEETS" + "\"\n");
-  }
-  else
-  {
-    cons.printw("Failed to loaded \"" + PROPS.CURRENT_TRACK_FILENAME + ".DEETS" + "\"\n");
-  }
 }
 
 void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, 
-                  float Radius_Circle_Point_Size, double Current_Resolution, bool Test_Alternative)
+                  float Radius_Circle_Point_Size, double Current_Resolution)
 {
-  TEST_ALTERNATIVE = Test_Alternative;
-
   // Save new track point
   if (GPS_System.CURRENT_POSITION.CHANGED_POSITION && 
       GPS_System.CURRENT_POSITION.CHANGED_TIME)
@@ -814,11 +836,7 @@ void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long t
       tmp_track_point.VALUE = GPS_System.CURRENT_POSITION.SPEED.val_mph();
       tmp_track_point.ACCURACY = GPS_System.CURRENT_POSITION.ACCURACY_SCORE;
 
-      TRACK.store(tmp_track_point);
-      if (TEST_ALTERNATIVE)
-      {
-        TRACK_2.store(tmp_track_point);
-      }
+      TRACK_2.store(tmp_track_point);
 
       if (Current_Resolution >= -1.0f)
       {
@@ -831,26 +849,14 @@ void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long t
   if (SAVE_TRACK_TIMER.is_ready(tmeFrame_Time))
   {
     SAVE_TRACK_TIMER.set(tmeFrame_Time, PROPS.SAVE_TRACK_TIMER);
-
-    if (track_save(TRACK, PROPS.CURRENT_TRACK_FILENAME))
+  
+    if (track_save_detailed(TRACK_2, PROPS.CURRENT_TRACK_FILENAME))
     {
       cons.printw("Successfully saved \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
     }
     else
     {
       cons.printw("Failed to save \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
-    }
-
-    if (TEST_ALTERNATIVE)
-    {
-      if (track_save_detailed(TRACK_2, PROPS.CURRENT_TRACK_FILENAME + ".DEETS"))
-      {
-        cons.printw("Successfully saved \"" + PROPS.CURRENT_TRACK_FILENAME + ".DEETS" + "\"\n");
-      }
-      else
-      {
-        cons.printw("Failed to save \"" + PROPS.CURRENT_TRACK_FILENAME + ".DEETS" + "\"\n");
-      }
     }
   }
 
