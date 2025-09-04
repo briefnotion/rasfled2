@@ -239,6 +239,10 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   // Is_Ready varibles for main loop.
+
+  int             shutdown_procedure_step = 0;  // 0 = keep running, >= 100 = stop program
+  TIMED_IS_READY  shutdown_procedure_delay;     // Delay for the hardware switches.
+
   TIMED_IS_READY  input_from_switches;    // Delay for the hardware switches.
   TIMED_IS_READY  input_from_user;        // Delay for the input from mouse and keyboard.
   TIMED_IS_READY  display;                // Delay for displaying information on the console.
@@ -742,7 +746,8 @@ int loop_2(bool TTY_Only)
   // **************************************************************************************
 
   // MAIN LOOP START
-  while(sdSystem.SCREEN_COMMS.WINDOW_CLOSE == false)
+  //while(sdSystem.SCREEN_COMMS.WINDOW_CLOSE == false)
+  while(shutdown_procedure_step < 100)
   {
     // ---------------------------------------------------------------------------------------
     // Thread Management
@@ -1212,6 +1217,32 @@ int loop_2(bool TTY_Only)
       sdSystem.ALL_ALERTS.alert_list_clean(sdSystem.COMMAND_THREADS, sdSystem.SOUND_SYSTEM);
 
     } // Is display to console ready -----------------
+
+    // Shutdown Procedures if started.
+    if (sdSystem.SCREEN_COMMS.WINDOW_CLOSE)
+    {
+      if (shutdown_procedure_delay.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()))
+      {
+        shutdown_procedure_delay.set(sdSystem.PROGRAM_TIME.current_frame_time(), 1000);
+
+        if (shutdown_procedure_step == 0)
+        {
+          // Save any pending maps
+          sdSystem.MAP_SYSTEM.close(sdSystem.SCREEN_COMMS);
+          shutdown_procedure_step++;
+        }
+        else if (shutdown_procedure_step == 1)
+        {
+          // Turn off the lights
+          sdSystem.SCREEN_COMMS.command_text_set(" lightsoff");
+          shutdown_procedure_step++;
+        }
+        else
+        {
+          shutdown_procedure_step = 100;
+        }
+      }
+    }
 
     // Run external commands, if pending
     {

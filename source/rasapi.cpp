@@ -544,6 +544,50 @@ bool file_to_deque_string(string Dir_Filename, deque<string> &qFile)
   return booSuccess;
 }
 
+// -------------------------------------------------------------------------------------
+
+/**
+ * @brief The core routine that performs the file saving.
+ * * It takes the filename and the content as arguments to avoid any data races.
+ * @param dir_filename The path to the file to save.
+ * @param file_contents The content to write to the file.
+ */
+void save_routine(const std::string& dir_filename, const std::string& file_contents)
+{
+  // Use an RAII approach to handle file streams.
+  std::fstream fsFile;
+  std::ios_base::openmode openMode = std::ios::out;
+  fsFile.open(dir_filename, openMode);
+
+  if (fsFile.is_open()) 
+  {
+    fsFile << file_contents;
+  }
+}
+
+/**
+ * @brief A public, standalone function to save a deque of strings to a file in a detached thread.
+ * * This function encapsulates the logic for preparing the data and offloading the
+ * I/O operation to a separate thread, returning immediately.
+ * @param dir_filename The path to the file to save.
+ * @param qFile The deque of strings to save.
+ */
+void threaded_deque_string_to_file(const std::string& dir_filename, const std::deque<std::string>& qFile)
+{
+  if (!qFile.empty())
+  {
+    std::string file_contents;
+    for (const auto& line : qFile)
+    {
+      file_contents += line + "\n";
+    }
+
+    // We now pass a copy of the data and the filename to the detached thread.
+    thread_and_forget(save_routine, dir_filename, file_contents);
+  }
+}
+
+// -------------------------------------------------------------------------------------
 
 
 #endif

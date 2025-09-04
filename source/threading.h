@@ -10,6 +10,23 @@ using namespace std;
 
 // ------------------------------------------------------------------------- //
 
+/**
+ * @brief A corrected version of the function that truly "fires and forgets" the thread.
+ * * It uses variadic templates to accept any function and its arguments,
+ * allowing the function to be called in a detached thread.
+ * * @param func The function to execute in the new thread.
+ * * @param args The arguments to pass to the function.
+ */
+template <typename Function, typename... Args>
+void thread_and_forget(Function&& func, Args&&... args)
+{
+  // The std::thread is detached, allowing it to run independently.
+  std::thread render_thread(std::forward<Function>(func), std::forward<Args>(args)...);
+  render_thread.detach();
+}
+
+// ------------------------------------------------------------------------- //
+
 //  Class to manage threading-related information.
 class THREADING_INFO
 {

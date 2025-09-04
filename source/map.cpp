@@ -596,14 +596,7 @@ bool MAP::track_save_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename
   track_map.ROOT.put_json_in_set(quotify("track"), all_track);
   track_map.json_print_build_to_string_deque(track_json_deque);
 
-  if(deque_string_to_file(Filename, track_json_deque, false))
-  {
-    json_saved.catch_false(true);
-  }
-  else
-  {
-    json_saved.catch_false(false);
-  }
+  threaded_deque_string_to_file(Filename, track_json_deque);
 
   return !(json_saved.has_false());
 }
@@ -852,7 +845,7 @@ void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long t
   
     if (track_save_detailed(TRACK_2, PROPS.CURRENT_TRACK_FILENAME))
     {
-      cons.printw("Successfully saved \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+      cons.printw("Initiated save \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
     }
     else
     {
@@ -860,6 +853,18 @@ void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long t
     }
   }
 
+}
+
+void MAP::close(CONSOLE_COMMUNICATION &cons)
+{
+  if (track_save_detailed(TRACK_2, PROPS.CURRENT_TRACK_FILENAME))
+  {
+    cons.printw("Initiated save \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+  }
+  else
+  {
+    cons.printw("Failed to save \"" + PROPS.CURRENT_TRACK_FILENAME + "\"\n");
+  }
 }
 
 // -------------------------------------------------------------------------------------

@@ -566,7 +566,7 @@ class HMC5883L
   // Amount of time that is waited before the system stores its calibration history
   // to file.
   TIMED_IS_READY  CALIBRATION_DATA_SAVE;
-  int             CALIBRATION_DATA_SAVE_DELAY = 60000;
+  int             CALIBRATION_DATA_SAVE_DELAY = 60 * 1000;
 
   // Preload Calibration Data
   bool PRELOAD_DATA_LOADED = false;
@@ -651,11 +651,6 @@ class HMC5883L
   void close_port();
   // External close port call.
   //  Turns off autoconnect and stops continuous data checks.
-
-  //bool active(unsigned long tmeFrame_Time);
-  // check to see if data recieved recently.
-  // Not needed at this point. Instead, access 
-  // connected.
 
   void bearing_known_offset_calibration_to_gps();
   void bearing_known_offset_clear();

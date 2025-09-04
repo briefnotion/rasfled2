@@ -84,7 +84,6 @@ void THREADING_INFO::wait_for_thread_to_finish()
   }
 }
 
-
 // ------------------------------------------------------------------------- //
 
 #endif //THREADING_CPP

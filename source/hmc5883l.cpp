@@ -1078,6 +1078,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   }
 
   // Save compass history and settings on timed inteval
+  // Initial calibration at 10 minutes.  CALIBRATION_DATA_SAVE_DELAY afterwards.
   if (CALIBRATION_DATA_SAVE.is_ready(tmeFrame_Time))
   {
     CALIBRATION_DATA_SAVE.set(tmeFrame_Time, CALIBRATION_DATA_SAVE_DELAY);
@@ -1203,6 +1204,10 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
       CYCLE_CHANGE = 2;
       ret_cycle_changed = true;
 
+      // Set initial calibration save routine to wait 10 minutes 
+      //  to allow it time before it potentially overwrites good data.
+      CALIBRATION_DATA_SAVE.set(tmeFrame_Time, 10 * 60 * 1000);
+
       //  Open a new connection at current baud rate.
       //  Don't prepare check baud rate if autoconnect if not on
       if (PROPS.AUTOSTART == true)
@@ -1321,11 +1326,6 @@ void HMC5883L::close_port()
   CYCLE = -1;
   stop();
 }
-
-//bool HMC5883L::active(unsigned long tmeFrame_Time)
-//{
-//  return DATA_RECIEVED_TIMER.ping_down(tmeFrame_Time);
-//}
 
 void HMC5883L::bearing_known_offset_calibration_to_gps()
 {

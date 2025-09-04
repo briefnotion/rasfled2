@@ -98,6 +98,8 @@ class MAP
 
   void update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, 
                   float Radius_Circle_Point_Size, double Current_Resolution);
+
+  void close(CONSOLE_COMMUNICATION &cons);
 };
 
 // -------------------------------------------------------------------------------------

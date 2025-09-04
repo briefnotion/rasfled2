@@ -262,7 +262,7 @@ void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData,
         if (draw_0 || draw_1)
         {
           ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position - 1].VALUE));
-          point_color.Value.w = 0.75f;
+          point_color.Value.w = 0.50f;
 
           Draw_List->AddLine(track_position_0, track_position_1, point_color, 
                               (1.0f + (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].ACCURACY)));
