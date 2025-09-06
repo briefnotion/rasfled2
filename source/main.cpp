@@ -240,7 +240,6 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
   // Is_Ready varibles for main loop.
 
-  int             shutdown_procedure_step = 0;  // 0 = keep running, >= 100 = stop program
   TIMED_IS_READY  shutdown_procedure_delay;     // Delay for the hardware switches.
 
   TIMED_IS_READY  input_from_switches;    // Delay for the hardware switches.
@@ -747,7 +746,7 @@ int loop_2(bool TTY_Only)
 
   // MAIN LOOP START
   //while(sdSystem.SCREEN_COMMS.WINDOW_CLOSE == false)
-  while(shutdown_procedure_step < 100)
+  while(sdSystem.PANEL_CONTROL.shutdown_procedure_step < 100)
   {
     // ---------------------------------------------------------------------------------------
     // Thread Management
@@ -1119,9 +1118,7 @@ int loop_2(bool TTY_Only)
       if (sdSystem.GPS_SYSTEM.process(sdSystem.SCREEN_COMMS, sdSystem.COMMS_GPS, sdSystem.PROGRAM_TIME.current_frame_time()))
       {
         sdSystem.MAP_SYSTEM.update( sdSystem.SCREEN_COMMS, sdSystem.GPS_SYSTEM, 
-                                    sdSystem.PROGRAM_TIME.current_frame_time(), 
-                                    sdSystem.PANEL_CONTROL.PANELS.RANGE_RADIUS_CIRCLE_POINT_SIZE, 
-                                    sdSystem.PANEL_CONTROL.PANELS.CURRENT_RESOLUTION);
+                                    sdSystem.PROGRAM_TIME.current_frame_time());
       }
 
       sdSystem.dblCOMMS_GPS_TRANSFER_TIME.end_timer(sdSystem.PROGRAM_TIME.now());
@@ -1219,27 +1216,93 @@ int loop_2(bool TTY_Only)
     } // Is display to console ready -----------------
 
     // Shutdown Procedures if started.
-    if (sdSystem.SCREEN_COMMS.WINDOW_CLOSE)
+    if (sdSystem.SCREEN_COMMS.WINDOW_CLOSE || sdSystem.PANEL_CONTROL.shutdown_procedure_step > 0)
     {
       if (shutdown_procedure_delay.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()))
       {
         shutdown_procedure_delay.set(sdSystem.PROGRAM_TIME.current_frame_time(), 1000);
 
-        if (shutdown_procedure_step == 0)
+        //sdSystem.SCREEN_COMMS.printw("Shutdown Step " + to_string(sdSystem.PANEL_CONTROL.shutdown_procedure_step));
+
+        if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 0)
         {
+          // Panel close called in gui
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step = 2;
+        }
+        else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 1 ||
+                  sdSystem.PANEL_CONTROL.shutdown_procedure_step == 11|| 
+                  sdSystem.PANEL_CONTROL.shutdown_procedure_step == 21)
+        {
+          // Panel close called in interface
+          sdSystem.SCREEN_COMMS.WINDOW_CLOSE = true;
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
+        }
+        else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 2 ||
+                  sdSystem.PANEL_CONTROL.shutdown_procedure_step == 12|| 
+                  sdSystem.PANEL_CONTROL.shutdown_procedure_step == 22)
+        {
+          // Change to console
+          sdSystem.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 0;
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
           // Save any pending maps
           sdSystem.MAP_SYSTEM.close(sdSystem.SCREEN_COMMS);
-          shutdown_procedure_step++;
         }
-        else if (shutdown_procedure_step == 1)
+        else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 3 ||
+                  sdSystem.PANEL_CONTROL.shutdown_procedure_step == 13 || 
+                  sdSystem.PANEL_CONTROL.shutdown_procedure_step == 23)
+        {
+          // Start Power Down Animation
+          process_power_animation(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations, CRGB(25, 0, 0));
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
+        }
+        else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 4 ||
+                  sdSystem.PANEL_CONTROL.shutdown_procedure_step == 14 || 
+                  sdSystem.PANEL_CONTROL.shutdown_procedure_step == 24)
+        {
+          // Doing Nothing
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
+        }
+        else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 5 ||
+                  sdSystem.PANEL_CONTROL.shutdown_procedure_step == 15 || 
+                  sdSystem.PANEL_CONTROL.shutdown_procedure_step == 25)
         {
           // Turn off the lights
           sdSystem.SCREEN_COMMS.command_text_set(" lightsoff");
-          shutdown_procedure_step++;
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
         }
-        else
+        else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 6)
         {
-          shutdown_procedure_step = 100;
+          // Set Progrgam Exit
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step = 100;
+        }
+
+        // Rasfled Reboot Called
+        else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 10)
+        {
+          // Start Shutdown
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step = 12;
+        }
+        else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 16)
+        {
+          // Call Shutdown command.
+          COMMANDS command;
+          command.reboot();
+          // Set Progrgam Exit
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step = 100;
+        }
+
+        // Rasfled Shutdown Called
+        else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 20)
+        {
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step = 22;
+        }
+        else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 26)
+        {
+          // Call Reboot command.
+          COMMANDS command;
+          command.shutdown_now();
+          // Set Progrgam Exit
+          sdSystem.PANEL_CONTROL.shutdown_procedure_step = 100;
         }
       }
     }

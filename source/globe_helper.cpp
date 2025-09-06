@@ -106,6 +106,70 @@ float wrap_degrees(float angle)
   return result;
 }
 
+void rotate_point(ImVec2 Center, float Angle_In_Rads, ImVec2 &Point) 
+{
+  float s = sin(Angle_In_Rads);
+  float c = cos(Angle_In_Rads);
+
+  // Translate point back to origin
+  Point.x -= Center.x;
+  Point.y -= Center.y;
+
+  // Rotate point
+  float xnew = Point.x * c + Point.y * s;
+  float ynew = -Point.x * s + Point.y * c;
+
+  // Translate point back
+  Point.x = xnew + Center.x;
+  Point.y = ynew + Center.y;
+}
+
+float degrees_to_radians(float Degrees)
+{
+  return ((Degrees * float_PI) / 180.0f);
+}
+
+ImVec2 point_position_center(ImVec4 Working_Area)
+{
+  ImVec2 ret_center;
+  ret_center.x = Working_Area.x + Working_Area.z / 2.0f;
+  ret_center.y = Working_Area.y + Working_Area.w / 2.0f;
+  return ret_center;
+}
+
+ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
+                                DOUBLE_VEC2 Lat_Lon_Center, DOUBLE_VEC2 Lat_Lon, 
+                                float Degrees, bool &Drawn)
+{
+  ImVec2 center = point_position_center(Working_Area);
+
+  ImVec2 ret_point;
+
+  double lat_diff = Lat_Lon.x - Lat_Lon_Center.x;
+  double lon_diff = Lat_Lon.y - Lat_Lon_Center.y;
+
+  ret_point.y = -(lat_diff * (double)Scale.x) + (double)center.y;
+  ret_point.x = (lon_diff * (double)Scale.y) + (double)center.x;
+
+  if (Degrees != 0.0f)
+  {
+    rotate_point(center, degrees_to_radians(Degrees), ret_point);
+  }
+
+  // check if draw_position is within screen size + offset.
+  if (ret_point.x >= Working_Area.x && ret_point.x <= Working_Area.x + Working_Area.z && 
+      ret_point.y >= Working_Area.y && ret_point.y <= Working_Area.y + Working_Area.w)
+  {
+    Drawn = true;
+  }
+  else
+  {
+    Drawn = false;
+  }
+
+  return ret_point;
+}
+
 // -------------------------------------------------------------------------------------
 
 // Sun altitude calculation

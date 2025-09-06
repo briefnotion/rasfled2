@@ -59,6 +59,25 @@ float wrap_degrees(float angle);
 //  0° to less than 360°, regardless of whether it's positive, 
 //  negative, or beyond a full rotation.
 
+void rotate_point(ImVec2 Center, float Angle_In_Rads, ImVec2 &Point);
+// Returns coordinates of Point when rotated at Angle_In_Rads from Center.
+
+float degrees_to_radians(float Degrees);
+// Convert Degees to Radians.
+
+ImVec2 point_position_center(ImVec4 Working_Area);
+// Returns Screen coordinates of center of working area.
+
+
+ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
+                                DOUBLE_VEC2 Lat_Lon_Center, DOUBLE_VEC2 Lat_Lon, 
+                                float Degrees, bool &Drawn);
+// Returns Screen coordinanates x and y pixel position of Latitude and Longitude.
+// Scale needs to be established.
+// Working area needs to established.  
+// Lat and Lon of Center of Working area needs to be established.
+// Map rotation in Degrees need to be established.
+
 // -------------------------------------------------------------------------------------
 
 double getSunAltitude(double lat, double lon, int year, int month, int day, double hourUTC);
@@ -191,6 +210,8 @@ class DETAILED_TRACK_POINT
 
   float ACCURACY = 0.0f;  // 0% to 100%, 0.0f to 1.0f
   float VALUE = 0.0f;     // can be speed or altitude
+
+  bool END_POINT = false;
 };
 
 class DETAILED_TRACK

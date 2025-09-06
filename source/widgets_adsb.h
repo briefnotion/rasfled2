@@ -46,24 +46,6 @@ using namespace std;
 // ---------------------------------------------------------------------------------------
 // Map Tools
 
-float degrees_to_radians(float Degrees);
-// Convert Degees to Radians.
-
-void rotate_point(ImVec2 Center, float Angle_In_Rads, ImVec2 &Point);
-// Returns coordinates of Point when rotated at Angle_In_Rads from Center.
-
-ImVec2 point_position_center(ImVec4 Working_Area);
-// Returns Screen coordinates of center of working area.
-
-ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
-                                DOUBLE_VEC2 Lat_Lon_Center, DOUBLE_VEC2 Lat_Lon, 
-                                float Degrees, bool &Drawn);
-// Returns Screen coordinanates x and y pixel position of Latitude and Longitude.
-// Scale needs to be established.
-// Working area needs to established.  
-// Lat and Lon of Center of Working area needs to be established.
-// Map rotation in Degrees need to be established.
-
 ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position);
 // Returns Screen coordinates of center of working area offset by Position.
 
@@ -118,8 +100,6 @@ class ADSB_RANGE
   float RANGE_BLOCK_CURRENT = 0.0f;       // Current range block size determined by RANGE_IMP_LATEST
   float RANGE_POINT_DISTANCE = 0.0f;
 
-
-  float RADIUS_CIRCLE_POINT_SIZE = 0.0f;
   ImVec2 LAT_LON_TO_POINT_SCALE;          // Required for calculating map draw routines
                                           // in point_position_lat_lon
 
@@ -148,6 +128,8 @@ class ADSB_RANGE
     //  0 - No Location
     //  1 - Center on current location
     //  2 - Center on aircraft
+
+  float RADIUS_CIRCLE_POINT_SIZE = 0.0f;
 
   bool AIRCRAFT_COUNT_ZERO = false;
 
@@ -269,9 +251,11 @@ class ADSB_MAP
   //  GPS info
   //  Compass info
 
+  void screen_draw_map_tracks(ImDrawList *Draw_List, system_data &sdSysData);
+  //  Draws Map Tracks
+
   void screen_draw_position_marker(ImDrawList *Draw_List, system_data &sdSysData);
   //  Draw map position marker onto the screen
-  //    Draws Tracks
   
   void screen_draw_compass_center(ImDrawList *Draw_List, system_data &sdSysData);
 

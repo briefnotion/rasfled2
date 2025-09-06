@@ -148,7 +148,6 @@ class NMEA
   // -------------------------------------------------------------------------------------
 
   float calculate_accuracy_score();
-  double unix_epoch_nmea_time(int utc_date, float utc_time);
 
   // Routines:
   void translate_gnvtg(vector<string> &Input, unsigned long tmeFrame_Time);   //  Track made good and ground speed

@@ -537,14 +537,14 @@ void processcommandlineinput(system_data &sdSysData,
       // Program Exit
       if (check_command(sdSysData.SCREEN_COMMS,"X", "Program Exit") || check_command(sdSysData.SCREEN_COMMS, "exit", "Program Exit"))
       {
-        sdSysData.SCREEN_COMMS.WINDOW_CLOSE = true;
+        sdSysData.PANEL_CONTROL.shutdown_procedure_step = 1;
       }
 
       // Program Restart
       if (check_command(sdSysData.SCREEN_COMMS, " restart", "Restart Program"))
       {
         sdSysData.booREBOOT = true;
-        sdSysData.SCREEN_COMMS.WINDOW_CLOSE = true;
+        sdSysData.PANEL_CONTROL.shutdown_procedure_step = 1;
       }
 
       // print help
@@ -730,30 +730,13 @@ void processcommandlineinput(system_data &sdSysData,
       if (check_command(sdSysData.SCREEN_COMMS, " shutdown", "Shutdown Started"))
       {
         command_desc(sdSysData.SCREEN_COMMS, "Shutting System Down.");
-        
-        // Call Shutdown command.
-        command.shutdown_now();
-
-        // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
-
-        // Set system to exit
-        sdSysData.SCREEN_COMMS.WINDOW_CLOSE = true;
+        sdSysData.PANEL_CONTROL.shutdown_procedure_step = 20;
       }
 
       // Command Line (sudo reboot)
       if (check_command(sdSysData.SCREEN_COMMS, " reboot", "Reboot Started"))
       {
-        command_desc(sdSysData.SCREEN_COMMS, "Rebooting System.");
-        
-        // Call Shutdown command.
-        command.reboot();
-
-        // Start Power Down Animation
-        process_power_animation(sdSysData, tmeCurrentTime, Animations, CRGB(25, 0, 0));
-
-        // Set system to exit
-        sdSysData.SCREEN_COMMS.WINDOW_CLOSE = true;
+        sdSysData.PANEL_CONTROL.shutdown_procedure_step = 10;
       }
 
       // -------------------------------------------------------------------------------------

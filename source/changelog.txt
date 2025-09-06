@@ -1,3 +1,12 @@
+2.311_250905
+  - Added some optiomations to the map track draw routine.
+  - Program close now will run shutdown procedures on system reboot and 
+      system shutdown.  System is still capable of turning off before 
+      the program exits, but now lights should turn off and track 
+      save should work before the shutdown or reboot starts.
+  - Still trying to locate a bug where the track loaded from a previous 
+      day is not properly spit at the 8 hour mark.
+
 2.310_250904
   - Made several changes to appearence.
   - Made sveral changes to the way the track is saved.

@@ -89,9 +89,7 @@ class SCREEN4_PANELS
   // 1  - MIN (On)
   // 2  - MAX (On)
   // 3  - DRV (On)
-
-  float RANGE_RADIUS_CIRCLE_POINT_SIZE = 136.800003f;
-  double CURRENT_RESOLUTION = -1.0;
+  
 };
 
 
@@ -141,6 +139,13 @@ class SCREEN4_PANEL_CONTROL
   void set_adsb_map_max_distance();
 
   public:
+  // Main Panel Shutdown Steps
+  int shutdown_procedure_step = 0;
+  //  0     = keep running
+  // 10     = reboot
+  // 20     = shutdown
+  // >= 100 = main loop exit
+
   // Colors
   COLOR_COMBOS    COLOR_SELECT;     // All Working Colors
 

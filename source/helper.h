@@ -752,6 +752,15 @@ double get_current_timestamp();
 // including a fractional part for sub-second precision.
 // @return The current timestamp as a double.
 
+double unix_epoch_nmea_time(int utc_date, float utc_time);
+/**
+ * @brief Converts UTC date and time from NMEA format to a Unix epoch timestamp.
+ *
+ * @param utc_date An integer representing the UTC date in DDMMYY format.
+ * @param utc_time A float representing the UTC time in HHMMSS.ss format.
+ * @return A double representing the Unix epoch timestamp, including fractional seconds.
+ */
+
 // ---------------------------------------------------------------------------------------
 
 

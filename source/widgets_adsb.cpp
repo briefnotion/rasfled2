@@ -16,69 +16,6 @@
 
 // ---------------------------------------------------------------------------------------
 
-float degrees_to_radians(float Degrees)
-{
-  return ((Degrees * float_PI) / 180.0f);
-}
-
-void rotate_point(ImVec2 Center, float Angle_In_Rads, ImVec2 &Point) 
-{
-  float s = sin(Angle_In_Rads);
-  float c = cos(Angle_In_Rads);
-
-  // Translate point back to origin
-  Point.x -= Center.x;
-  Point.y -= Center.y;
-
-  // Rotate point
-  float xnew = Point.x * c + Point.y * s;
-  float ynew = -Point.x * s + Point.y * c;
-
-  // Translate point back
-  Point.x = xnew + Center.x;
-  Point.y = ynew + Center.y;
-}
-
-ImVec2 point_position_center(ImVec4 Working_Area)
-{
-  ImVec2 ret_center;
-  ret_center.x = Working_Area.x + Working_Area.z / 2.0f;
-  ret_center.y = Working_Area.y + Working_Area.w / 2.0f;
-  return ret_center;
-}
-
-ImVec2 point_position_lat_lon(ImVec4 Working_Area, ImVec2 Scale, 
-                                DOUBLE_VEC2 Lat_Lon_Center, DOUBLE_VEC2 Lat_Lon, 
-                                float Degrees, bool &Drawn)
-{
-  ImVec2 center = point_position_center(Working_Area);
-
-  ImVec2 ret_point;
-
-  double lat_diff = Lat_Lon.x - Lat_Lon_Center.x;
-  double lon_diff = Lat_Lon.y - Lat_Lon_Center.y;
-
-  ret_point.y = -(lat_diff * (double)Scale.x) + (double)center.y;
-  ret_point.x = (lon_diff * (double)Scale.y) + (double)center.x;
-
-  if (Degrees != 0.0f)
-  {
-    rotate_point(center, degrees_to_radians(Degrees), ret_point);
-  }
-
-  // check if draw_position is within screen size + offset.
-  if (ret_point.x >= Working_Area.x && ret_point.x <= Working_Area.x + Working_Area.z && 
-      ret_point.y >= Working_Area.y && ret_point.y <= Working_Area.y + Working_Area.w)
-  {
-    Drawn = true;
-  }
-  else
-  {
-    Drawn = false;
-  }
-
-  return ret_point;
-}
 
 ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position)
 {
@@ -228,6 +165,7 @@ void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData,
 
   bool draw_0 = false;
   bool draw_1 = false;
+  bool prev_is_end = false;
 
   ImVec2 track_position_0;
   ImVec2 track_position_1;
@@ -250,27 +188,28 @@ void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData,
     // Detailed step through
     for(size_t position = 1; position < Track.TRACK_POINTS_DETAILED.size(); position++)
     {
+      track_position_0 = track_position_1;
+      draw_0 = draw_1;
+
+      track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
+                                                      DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, 
+                                                                  Track.TRACK_POINTS_DETAILED[position].LONGITUDE), 
+                                                      Map_Bearing, draw_1);
+
+      if ((draw_0 || draw_1) && !prev_is_end)
       {
-        track_position_0 = track_position_1;
-        draw_0 = draw_1;
+        ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position - 1].VALUE));
+        point_color.Value.w = 0.50f;
 
-        track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
-                                                        DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, 
-                                                                    Track.TRACK_POINTS_DETAILED[position].LONGITUDE), 
-                                                        Map_Bearing, draw_1);
+        Draw_List->AddLine(track_position_0, track_position_1, point_color, 
+                            (1.0f + (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].ACCURACY)));
 
-        if (draw_0 || draw_1)
-        {
-          ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position - 1].VALUE));
-          point_color.Value.w = 0.50f;
-
-          Draw_List->AddLine(track_position_0, track_position_1, point_color, 
-                              (1.0f + (Initial_Point_Size * Track.TRACK_POINTS_DETAILED[position].ACCURACY)));
-
-          Draw_List->AddLine( track_position_0, track_position_1, 
-                              sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
-        }
+        Draw_List->AddLine( track_position_0, track_position_1, 
+                            sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
       }
+
+      // set prev_is_end for next round
+      prev_is_end = Track.TRACK_POINTS_DETAILED[position].END_POINT;
     }
   }
 }
@@ -724,7 +663,6 @@ void ADSB_RANGE::draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec
   if (ZOOM_LEVEL == -1)
   {
     RADIUS_CIRCLE_POINT_SIZE = WORKING_AREA.w / 2.0f * 0.6f;
-    sdSysData.PANEL_CONTROL.PANELS.RANGE_RADIUS_CIRCLE_POINT_SIZE = RADIUS_CIRCLE_POINT_SIZE;
 
     ZOOM_LEVEL = 13;     // Default start zoom level
     set_zoom_level();
@@ -1320,8 +1258,8 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.PDOP,  
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.HDOP, 
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.VDOP);
-      ImGui::Text("DSP TRK SZ: %.ld", sdSysData.MAP_SYSTEM.DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size());
     }
+    ImGui::Text("DSP TRK SZ: %.ld", sdSysData.MAP_SYSTEM.DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size());
 
     // Compass Information
     if (ACTIVE_COMPASS)
@@ -1353,9 +1291,15 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
   ImGui::PopStyleColor();
 }
 
-void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &sdSysData)
+void ADSB_MAP::screen_draw_map_tracks(ImDrawList *Draw_List, system_data &sdSysData)
 {
-  // For Active GPS and Valid Coordinates
+  // Load Current Values for Map Draw Routine, likely once per second.
+  sdSysData.MAP_SYSTEM.RANGE_RADIUS_CIRCLE_POINT_SIZE = RANGE_INDICATOR.RADIUS_CIRCLE_POINT_SIZE;
+  sdSysData.MAP_SYSTEM.CURRENT_RESOLUTION = RANGE_INDICATOR.resolution();
+  sdSysData.MAP_SYSTEM.CURRENT_WORKING_AREA = WORKING_AREA;
+  sdSysData.MAP_SYSTEM.CURRENT_CENTER_LAT_LON = RANGE_INDICATOR.get_center_lat_lon();
+  sdSysData.MAP_SYSTEM.CURRENT_MAP_BEARING = MAP_HEADING_DEGREES_LATEST;
+  sdSysData.MAP_SYSTEM.CURRENT_LAT_LON_SCALE = RANGE_INDICATOR.ll_2_pt_scale();
 
   // Draw track of GPS Position.
   if (sdSysData.MAP_SYSTEM.TRACK_2.TRACK_POINTS_DETAILED.size() > 1)
@@ -1364,7 +1308,10 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
                 GPS_ALTITUDE_COLOR_SCALE, RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.DISPLAYED_TRACK);
 
   }
+}
 
+void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &sdSysData)
+{
   bool draw = false;
   ImVec2 gps_pos = point_position_lat_lon(WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), RANGE_INDICATOR.get_center_lat_lon(), 
                                           RANGE_INDICATOR.get_gps_lat_lon(), MAP_HEADING_DEGREES_LATEST, draw);
@@ -1740,6 +1687,9 @@ void ADSB_MAP::draw(system_data &sdSysData)
                     RANGE_INDICATOR.get_center_lat_lon(), MAP_HEADING_DEGREES_LATEST, RANGE_INDICATOR.range());
   }
 
+  // Draw map tracks
+  screen_draw_map_tracks(draw_list_map, sdSysData);
+
   // Draw Current Position Marker
   if (ACTIVE_GPS && sdSysData.GPS_SYSTEM.CURRENT_POSITION.VALID_COORDS)
   {
@@ -1752,9 +1702,6 @@ void ADSB_MAP::draw(system_data &sdSysData)
   
   // Draw Aircraft
   screen_draw_aircraft(draw_list_map, sdSysData);
-
-  // Report back to panels the current Zoom level for LOD
-  sdSysData.PANEL_CONTROL.PANELS.CURRENT_RESOLUTION = RANGE_INDICATOR.resolution();
 }
 
 void ADSB_SCREEN::adsb_table_draw(system_data &sdSysData)

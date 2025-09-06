@@ -23,8 +23,11 @@
 #include "screen4_helper.h"
 #include "nmea.h"
 #include "map_hardcode.h"
+#include "threading.h"
 
 using namespace std;
+
+void track_save_detailed(const DETAILED_TRACK_ALTERNATIVE &Track, const string Filename);
 
 // -------------------------------------------------------------------------------------
 
@@ -74,7 +77,7 @@ class MAP
   bool track_save(DETAILED_TRACK &Track, string Filename);
   bool track_load(DETAILED_TRACK &Track, string Filename);
 
-  bool track_save_detailed(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
+  void track_save_detailed_forgetable(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
   bool track_load_detailed( DETAILED_TRACK_ALTERNATIVE &Track, 
                             DETAILED_TRACK_ALTERNATIVE &Track_Discard, 
                             string Filename);
@@ -92,12 +95,19 @@ class MAP
 
   string INFORMATION = "";
 
+  // For Map Draw Routines, set in widgets_adsb
+  float       RANGE_RADIUS_CIRCLE_POINT_SIZE = 136.800003f;
+  double      CURRENT_RESOLUTION = -1.0;
+  ImVec4      CURRENT_WORKING_AREA;
+  DOUBLE_VEC2 CURRENT_CENTER_LAT_LON;
+  float       CURRENT_MAP_BEARING;
+  ImVec2      CURRENT_LAT_LON_SCALE;
+
   bool create();
 
   void load_track(CONSOLE_COMMUNICATION &cons);
 
-  void update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time, 
-                  float Radius_Circle_Point_Size, double Current_Resolution);
+  void update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time);
 
   void close(CONSOLE_COMMUNICATION &cons);
 };

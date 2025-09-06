@@ -1486,6 +1486,65 @@ double get_current_timestamp()
   return seconds_double.count();
 }
 
+/**
+ * @brief Converts UTC date and time from NMEA format to a Unix epoch timestamp.
+ *
+ * @param utc_date An integer representing the UTC date in DDMMYY format.
+ * @param utc_time A float representing the UTC time in HHMMSS.ss format.
+ * @return A double representing the Unix epoch timestamp, including fractional seconds.
+ */
+double unix_epoch_nmea_time(int utc_date, float utc_time) 
+{
+  // --- Step 1: Parse the UTC Date (DDMMYY) ---
+  // Extract day, month, and year from the integer.
+  int day = utc_date / 10000;
+  int month = (utc_date / 100) % 100;
+  int year = utc_date % 100;
+
+  // --- Step 2: Parse the UTC Time (HHMMSS.ss) ---
+  // Extract hours, minutes, and seconds from the float.
+  int hours = static_cast<int>(utc_time / 10000);
+  int minutes = static_cast<int>(utc_time / 100) % 100;
+  int seconds = static_cast<int>(utc_time) % 100;
+  double fractional_seconds = utc_time - static_cast<int>(utc_time);
+
+  // --- Step 3: Populate a struct tm ---
+  // This structure is used by C functions to handle date and time.
+  // We adjust the values to match the tm structure's requirements (e.g., 0-indexed month).
+  std::tm time_struct = {};
+  
+  // tm_year is years since 1900.
+  // We assume the year is in the 21st century (e.g., 24 is 2024).
+  time_struct.tm_year = year + 2000 - 1900;
+  
+  // tm_mon is 0-11, so we subtract 1 from the month.
+  time_struct.tm_mon = month - 1;
+  
+  // tm_mday is 1-31, which matches our day value.
+  time_struct.tm_mday = day;
+  
+  // tm_hour is 0-23, which matches our hours value.
+  time_struct.tm_hour = hours;
+  
+  // tm_min is 0-59, which matches our minutes value.
+  time_struct.tm_min = minutes;
+  
+  // tm_sec is 0-60, which matches our seconds value.
+  time_struct.tm_sec = seconds;
+
+  // --- Step 4: Convert to UTC time_t using timegm ---
+  // timegm() is a GNU extension that converts the time structure to a Unix epoch timestamp,
+  // assuming the input time is UTC. On other platforms, you might need an alternative.
+  std::time_t time_t_value = timegm(&time_struct);
+
+  // --- Step 5: Add the fractional seconds for high precision ---
+  // The Unix epoch timestamp is the total number of seconds.
+  // We add the fractional part to the time_t value to get a double with precision.
+  double unix_timestamp = static_cast<double>(time_t_value) + fractional_seconds;
+
+  return unix_timestamp;
+}
+
 // ---------------------------------------------------------------------------------------
 
 void EMPERICAL::add_value(float Value)
