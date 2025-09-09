@@ -1,6 +1,8 @@
 2.312_250908
   - Removed JSON 10,000 entry hardcode limit.
   - Renamed the "ADSB" tab to "MAP".
+  - If you dont know how to convert a bespoke JSON file to a KML file, 
+      you are in the wrong damn bussiness.  Stop bothering me. 
 
 2.311_250905
   - Added some optiomations to the map track draw routine.
