@@ -53,7 +53,7 @@ class JSON_ENTRY
 {
   private:
   
-  int errcountcap = 10000;
+  //int errcountcap = 10000;  // Hardcode Limit
 
   int find_closing(string Text, int Start_Pos, char Opening, char Closing);
   // Find matching position of closing character matching opening character.

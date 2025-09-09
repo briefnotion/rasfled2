@@ -694,6 +694,27 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
     }
   }
 
+  /*
+  if (!Track.TRACK_POINTS_DETAILED.empty())
+  {
+  cout << "     Track track size: " << Track.TRACK_POINTS_DETAILED.size() << endl;
+  cout << "Track timestamp front: " << to_string(Track.TRACK_POINTS_DETAILED.front().TIMESTAMP) << endl;
+  cout << "Track timestamp back : " << to_string(Track.TRACK_POINTS_DETAILED.back().TIMESTAMP) << endl;
+  cout << "Track diff      front: " << to_string(current_system_time - Track.TRACK_POINTS_DETAILED.front().TIMESTAMP) << endl;
+  cout << "Track diff      back : " << to_string(current_system_time - Track.TRACK_POINTS_DETAILED.back().TIMESTAMP) << endl;
+  }
+
+  if (!Track_Discard.TRACK_POINTS_DETAILED.empty())
+  {
+    
+  cout << "     Track_Discard track size: " << Track_Discard.TRACK_POINTS_DETAILED.size() << endl;
+  cout << "Track_Discard timestamp front: " << to_string(Track_Discard.TRACK_POINTS_DETAILED.front().TIMESTAMP) << endl;
+  cout << "Track_Discard timestamp back : " << to_string(Track_Discard.TRACK_POINTS_DETAILED.back().TIMESTAMP) << endl;
+  cout << "Track_Discard diff      front: " << to_string(current_system_time - Track_Discard.TRACK_POINTS_DETAILED.front().TIMESTAMP) << endl;
+  cout << "Track_Discard diff      back : " << to_string(current_system_time - Track_Discard.TRACK_POINTS_DETAILED.back().TIMESTAMP) << endl;
+  }
+  */
+
   return ret_success;
 }
 

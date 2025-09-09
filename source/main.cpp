@@ -704,7 +704,7 @@ int loop_2(bool TTY_Only)
 
   if (TEST_DATA_GPS)
   {
-    sdSystem.MAP_SYSTEM.PROPS.SAVE_TRACK_TIMER = 10 * 1000;     // 10 sec
+    sdSystem.MAP_SYSTEM.PROPS.SAVE_TRACK_TIMER = 60 * 1000;     // 60 sec
   }
   else
   {

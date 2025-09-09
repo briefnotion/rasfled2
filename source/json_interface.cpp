@@ -211,7 +211,8 @@ bool JSON_ENTRY::parse_item_list(string Entry, bool Is_Set, string Set_Name)
     int errcount = 0;
 
     // Continue to process Entry as long as info is within
-    while (Entry.size() > 0 && errcount < errcountcap)
+    //while (Entry.size() > 0 && errcount < errcountcap)  // Hardcode Limited
+    while (Entry.size() > 0)
     {
       entry_size =0;
       label_size =0;
@@ -627,6 +628,12 @@ void JSON_INTERFACE::json_to_string_deque(deque<string> &JSON_Print_Build, JSON_
 bool JSON_INTERFACE::load_json_from_string(string JSON_Text)
 {
   bool ret_success = false;
+
+  if (JSON_Text.size() >500000)
+  {
+    cout << "JSON file is " << ((float)JSON_Text.size() / 1048576.0f) << " MB in size." << endl;
+    cout << "Parsing may take a while." << endl;
+  }
 
   // Clear Contents
   ROOT.clear_data();
