@@ -1,3 +1,7 @@
+2.313_250910
+  - If the time from the gps or the system changes dramaticly, the 
+      track should rebuild and spit if necessary.
+
 2.312_250908
   - Removed JSON 10,000 entry hardcode limit.
   - Renamed the "ADSB" tab to "MAP".

@@ -155,7 +155,7 @@ class NMEA
   void translate_gngga(vector<string> &Input);    //  Global Positioning System Fix Data
   //void translate_gpgsv(vector<string> &Input);  //  GPS Satellites in view
   //void translate_gngll(vector<string> &Input);  //  Geographic Position, Latitude/Longitude
-  void translate_gnrmc(vector<string> &Input);    //  Recommended minimum specific GPS/Transit data
+  void translate_gnrmc(vector<string> &Input);    //  Date and Time, Recommended minimum specific GPS/Transit data
 
   TIMED_PING      ADD_TRACK_POINT_TIMER;
   
@@ -169,6 +169,9 @@ class NMEA
   string device_change_baud_rate_string(int Baud_Rate);
   
   bool process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long tmeFrame_Time);
+
+  double current_time_error();
+  // Returns time error.  no save. no connection verification.
 
   bool active(unsigned long tmeFrame_Time);
   bool valid_position();

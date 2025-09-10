@@ -597,6 +597,19 @@ bool NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
   return ret_updated;
 }
 
+double NMEA::current_time_error()
+{
+  double unix_epoc_nmea_time = unix_epoch_nmea_time(UTC_DATE, UTC_TIME);
+
+  //cout << "dt: " << UTC_DATE << " \ttm: " << UTC_TIME
+  //      << " \ttm: " << to_string(unix_epoc_nmea_time)
+  //      << " \tsys_time: " << to_string(get_current_timestamp())
+  //      << " \tdiff: " << to_string(unix_epoc_nmea_time - get_current_timestamp()) << endl;
+  
+  return (unix_epoc_nmea_time - get_current_timestamp());
+}
+
+
 bool NMEA::active(unsigned long tmeFrame_Time)
 {
   return ACTIVITY_TIMER.ping_down(tmeFrame_Time) && CURRENT_POSITION.VALID_COORDS;

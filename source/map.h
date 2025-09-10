@@ -58,6 +58,7 @@ class MAP_PROPERTIES
   string TRACK_HISTORY_FOLDER = "";
 
   unsigned long SAVE_TRACK_TIMER =   9 * 60 * 1000;
+  double TRACK_HISTORY_CUTOFF = 8.0 * 60.0 * 60.0;   // 8 hours
 
 };
 
@@ -65,6 +66,8 @@ class MAP
 {
   private:
   TIMED_IS_READY  SAVE_TRACK_TIMER;
+
+  double TIME_ERROR = 0.0;
 
   void add_landmark(DOUBLE_VEC2 Lat_Lon, string Display_Name, int Type);
   // Adds landmark to vector list.
@@ -74,13 +77,20 @@ class MAP
   bool map_save();
   bool map_load();
 
-  bool track_save(DETAILED_TRACK &Track, string Filename);
-  bool track_load(DETAILED_TRACK &Track, string Filename);
+  void track_distill( DETAILED_TRACK_ALTERNATIVE &Original_Track, 
+                      DETAILED_TRACK_ALTERNATIVE &Recent_Track, 
+                      DETAILED_TRACK_ALTERNATIVE &Old_Track);
+  // Reads Original Track. Splits and 
+  // Returns Recent Track and Old track  
 
   void track_save_detailed_forgetable(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
   bool track_load_detailed( DETAILED_TRACK_ALTERNATIVE &Track, 
                             DETAILED_TRACK_ALTERNATIVE &Track_Discard, 
                             string Filename);
+
+  void rebuild_track(CONSOLE_COMMUNICATION &cons);
+  // Starts a track_distill on current track.
+
   void generate_displayed_track(double Resolution);
 
   public:
@@ -88,7 +98,6 @@ class MAP
   
   deque<MAP_INFO> LANDMARKS;
   DETAILED_TRACK_ALTERNATIVE  TRACK_2;
-  DETAILED_TRACK_ALTERNATIVE  TRACK_2_DISCARD;
   DETAILED_TRACK_ALTERNATIVE  DISPLAYED_TRACK;
 
   PIXEL_SIZE_META_DATA LEVEL_OF_DETAIL_META;
@@ -105,7 +114,7 @@ class MAP
 
   bool create();
 
-  void load_track(CONSOLE_COMMUNICATION &cons);
+  void load_track(CONSOLE_COMMUNICATION &cons, double Time_error);
 
   void update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time);
 

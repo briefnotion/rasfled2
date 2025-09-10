@@ -1455,7 +1455,6 @@ void ADSB_MAP::draw(system_data &sdSysData)
   ACTIVE_AUTOMOBILE = sdSysData.CAR_INFO.active();
   
   // Update range if changing dynamicly with min max aircraft data.
-  //if (ACTIVE_ADSB && ACTIVE_GPS)
   {
     // Monitor zoom level changes from internal or panel control.
     // zoom return if min or max or drv turned off.

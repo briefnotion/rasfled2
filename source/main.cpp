@@ -722,7 +722,7 @@ int loop_2(bool TTY_Only)
 
   // Load Track into GPS_System
   sdSystem.MAP_SYSTEM.PROPS.CURRENT_TRACK_FILENAME = sdSystem.FILE_NAMES.TRACK_CURRENT_JSON;
-  sdSystem.MAP_SYSTEM.load_track(sdSystem.SCREEN_COMMS);
+  sdSystem.MAP_SYSTEM.load_track(sdSystem.SCREEN_COMMS, sdSystem.GPS_SYSTEM.current_time_error());
 
   // -------------------------------------------------------------------------------------
   // Initialize Audio Filenames

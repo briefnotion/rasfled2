@@ -479,125 +479,26 @@ bool MAP::map_load()
   return !(ret_failure.has_false());
 }
 
-bool MAP::track_save(DETAILED_TRACK &Track, string Filename)
+void MAP::track_distill(DETAILED_TRACK_ALTERNATIVE &Original_Track, 
+                        DETAILED_TRACK_ALTERNATIVE &Recent_Track, 
+                        DETAILED_TRACK_ALTERNATIVE &Old_Track)
 {
-  // Track
-  JSON_INTERFACE track_map;
-  JSON_ENTRY all_track;
-  deque<string> track_json_deque;
+  double current_system_time = get_current_timestamp();
 
-  JSON_ENTRY points;
+  Recent_Track.clear();
+  Old_Track.clear();
 
-  // Simple
-  for (size_t pos = 0; pos < Track.TRACK_POINTS_SIMPLE.size(); pos++)
+  for (size_t pos = 0; pos < Original_Track.TRACK_POINTS_DETAILED.size(); pos++)
   {
-    JSON_ENTRY position_info;
-    position_info.create_label_value(quotify("unix_epoch_nmea_time"), quotify(to_string(Track.TRACK_POINTS_SIMPLE[pos].TIMESTAMP)));
-
-    JSON_ENTRY latitude_longitude;
-    latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(Track.TRACK_POINTS_SIMPLE[pos].LATITUDE)));
-    latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(Track.TRACK_POINTS_SIMPLE[pos].LONGITUDE)));
-
-    position_info.put_json_in_set(quotify("location"), latitude_longitude);
-    points.put_json_in_list(position_info);
-  }
-
-  // Detailed
-  for (size_t pos = 0; pos < Track.TRACK_POINTS_DETAILED.size(); pos++)
-  {
-    JSON_ENTRY position_info;
-    position_info.create_label_value(quotify("unix_epoch_nmea_time"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].TIMESTAMP)));
-
-    JSON_ENTRY latitude_longitude;
-    latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LATITUDE)));
-    latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LONGITUDE)));
-
-    position_info.put_json_in_set(quotify("location"), latitude_longitude);
-    points.put_json_in_list(position_info);
-  }
-
-  all_track.put_json_in_set(quotify("points"), points);
-
-  // Save Track
-  FALSE_CATCH json_saved;
-
-  track_map.ROOT.put_json_in_set(quotify("track"), all_track);
-  track_map.json_print_build_to_string_deque(track_json_deque);
-
-  if(deque_string_to_file(Filename, track_json_deque, false))
-  {
-    json_saved.catch_false(true);
-  }
-  else
-  {
-    json_saved.catch_false(false);
-  }
-
-  return !(json_saved.has_false());
-}
-
-bool MAP::track_load(DETAILED_TRACK &Track, string Filename)
-{
-  bool ret_success = false;
-  bool tmp_success = false;
-  
-  // Load Map
-  JSON_INTERFACE track_json;
-  string json_track_file = file_to_string(Filename, tmp_success);
-  if (tmp_success)
-  {
-    // parse file
-    ret_success = track_json.load_json_from_string(json_track_file);
-
-    if (ret_success == true)
+    if (current_system_time - Original_Track.TRACK_POINTS_DETAILED[pos].TIMESTAMP < PROPS.TRACK_HISTORY_CUTOFF)
     {
-      for(size_t root = 0; root < track_json.ROOT.DATA.size(); root++)        //root
-      {
-        if (track_json.ROOT.DATA[root].label() == "track")
-        {
-          for (size_t marker_list = 0;                                        //root/marker_list
-                      marker_list < track_json.ROOT.DATA[root].DATA.size(); marker_list++)
-          {
-            if (track_json.ROOT.DATA[root].DATA[marker_list].label() == "points")
-            {
-              for (size_t points_entry = 0;                                         //root/marker_list/points_entry
-                    points_entry < track_json.ROOT.DATA[root].DATA[marker_list].DATA.size(); points_entry++)
-              {
-                SIMPLE_TRACK_POINT location;
-                STRING_DOUBLE timestamp;
-                STRING_DOUBLE location_latitude;
-                STRING_DOUBLE location_longitude;
-
-                for (size_t entry = 0;                                         //root/marker_list/points_entry/entry
-                      entry < track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA.size(); entry++)
-                {
-                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("unix_epoch_nmea_time", timestamp);
-
-                  if (track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].label() == "location")
-                  {
-                    for (size_t location = 0; 
-                          location < track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].DATA.size(); 
-                          location++)
-                    {
-                      track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].DATA[location].get_if_is("latitude", location_latitude);
-                      track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].DATA[location].get_if_is("longitude", location_longitude);
-                    }
-                  }
-                }
-
-                location.TIMESTAMP = timestamp.get_double_value();
-                location.LATITUDE = location_latitude.get_double_value();
-                location.LONGITUDE = location_longitude.get_double_value();
-                Track.TRACK_POINTS_SIMPLE.push_back(location);
-              }
-            }
-          }
-        }
-      }
+      Recent_Track.TRACK_POINTS_DETAILED.push_back(Original_Track.TRACK_POINTS_DETAILED[pos]);
+    }
+    else
+    {
+      Old_Track.TRACK_POINTS_DETAILED.push_back(Original_Track.TRACK_POINTS_DETAILED[pos]);
     }
   }
-
-  return ret_success;
 }
 
 void MAP::track_save_detailed_forgetable(DETAILED_TRACK_ALTERNATIVE &Track, string Filename)
@@ -615,11 +516,7 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
   bool ret_success = false;
   bool tmp_success = false;
 
-  double current_system_time = get_current_timestamp();
-  double track_history_cutoff = 8.0 * 60.0 * 60.0;   // 8 hours
-
-  Track.clear();
-  Track_Discard.clear();
+  DETAILED_TRACK_ALTERNATIVE tmp_load_track;
   
   // Load Map
   JSON_INTERFACE track_json;
@@ -678,20 +575,15 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
                 location.LATITUDE = location_latitude.get_double_value();
                 location.LONGITUDE = location_longitude.get_double_value();
 
-                if (current_system_time - location.TIMESTAMP < track_history_cutoff)
-                {
-                  Track.TRACK_POINTS_DETAILED.push_back(location);
-                }
-                else
-                {
-                  Track_Discard.TRACK_POINTS_DETAILED.push_back(location);
-                }
+                tmp_load_track.TRACK_POINTS_DETAILED.push_back(location);
               }
             }
           }
         }
       }
     }
+
+    track_distill(tmp_load_track, Track, Track_Discard);
   }
 
   /*
@@ -716,6 +608,25 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
   */
 
   return ret_success;
+}
+
+void MAP::rebuild_track(CONSOLE_COMMUNICATION &cons)
+{
+  DETAILED_TRACK_ALTERNATIVE new_track;
+  DETAILED_TRACK_ALTERNATIVE discard_track;
+
+  track_distill(TRACK_2, new_track, discard_track);
+  TRACK_2 = new_track;
+
+  if (discard_track.TRACK_POINTS_DETAILED.size() > 0)
+  {
+    string track_history_filename = PROPS.TRACK_HISTORY_FOLDER + "track_" + 
+                                    file_format_system_time(discard_track.TRACK_POINTS_DETAILED[0].TIMESTAMP) + 
+                                    ".json";
+
+    cons.printw("Initiated history save \"" + track_history_filename);
+    track_save_detailed_forgetable(discard_track, track_history_filename);
+  }
 }
 
 void MAP::generate_displayed_track(double Resolution)
@@ -811,22 +722,24 @@ bool MAP::create()
   return ret_suc;
 }
 
-void MAP::load_track(CONSOLE_COMMUNICATION &cons)
+void MAP::load_track(CONSOLE_COMMUNICATION &cons, double Time_error)
 {
-  if (track_load_detailed(TRACK_2, TRACK_2_DISCARD, PROPS.CURRENT_TRACK_FILENAME))
+  DETAILED_TRACK_ALTERNATIVE  tmp_discard_track;
+
+  TIME_ERROR = Time_error;
+
+  if (track_load_detailed(TRACK_2, tmp_discard_track, PROPS.CURRENT_TRACK_FILENAME))
   {
     cons.printw("Successfully loaded \"" + PROPS.CURRENT_TRACK_FILENAME);
 
-    if (TRACK_2_DISCARD.TRACK_POINTS_DETAILED.size() > 0)
+    if (tmp_discard_track.TRACK_POINTS_DETAILED.size() > 0)
     {
       string track_history_filename = PROPS.TRACK_HISTORY_FOLDER + "track_" + 
-                                      file_format_system_time(TRACK_2_DISCARD.TRACK_POINTS_DETAILED[0].TIMESTAMP) + 
+                                      file_format_system_time(tmp_discard_track.TRACK_POINTS_DETAILED[0].TIMESTAMP) + 
                                       ".json";
 
-      track_save_detailed_forgetable(TRACK_2_DISCARD, track_history_filename);
-      cons.printw("Initiated save \"" + track_history_filename);
-
-      TRACK_2_DISCARD.clear();
+      cons.printw("Initiated history save \"" + track_history_filename);
+      track_save_detailed_forgetable(tmp_discard_track, track_history_filename);
     }
   }
   else
@@ -837,6 +750,16 @@ void MAP::load_track(CONSOLE_COMMUNICATION &cons)
 
 void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time)
 {
+
+  // Determine if the track should be rebuilt
+  double new_time_error = GPS_System.current_time_error();
+  if (abs(TIME_ERROR - new_time_error) > PROPS.TRACK_HISTORY_CUTOFF)
+  {
+    cons.printw("Track rebuild initiated because of time change.");
+    TIME_ERROR = new_time_error;
+    rebuild_track(cons);
+  }
+
   // Save new track point
   if (GPS_System.CURRENT_POSITION.CHANGED_POSITION && 
       GPS_System.CURRENT_POSITION.CHANGED_TIME)
