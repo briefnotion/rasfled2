@@ -339,6 +339,34 @@ class JSON_INTERFACE
       ]
     }
 
+    ALTERNATIVE METHOD:
+      string json_state_file = file_to_string(strFilename, ret_success);
+
+      if (ret_success == true)
+      {
+        ret_success = state_json.load_json_from_string(json_state_file);
+
+        if (ret_success == true)
+        {
+          cons.printw("  " + strFilename + " read success");
+        
+          // Parse the settings
+          red = state_json.ROOT.value_from_list("red");
+          green = state_json.ROOT.value_from_list("green");
+          blue = state_json.ROOT.value_from_list("blue");
+
+          color_string = red + "," + green + "," + blue;
+
+          color = color.StringtoCRGB(color_string);
+
+          color_desc = state_json.ROOT.value_from_list("description");
+
+          cons.printw("  Setting running color to CRGB(" + color.CRGBtoString() + 
+                                                      "), " + color_desc);                                          
+
+          sdSysData.set_running_color(color , color_desc);
+        }
+      }
 
   */
 

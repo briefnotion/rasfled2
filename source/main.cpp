@@ -252,6 +252,9 @@ int loop_2(bool TTY_Only)
   TIMED_IS_READY  compass_timer;          // Delay for communicating with compass
                                           // serial comms.
 
+  TIMED_IS_READY  save_running_state_timer;          // Delay for communicating with compass
+                                          // serial comms.
+
   // Define System Data and Console
   int return_code = 0;
   system_data sdSystem;
@@ -475,7 +478,7 @@ int loop_2(bool TTY_Only)
       //sdSystem.ALERTS.add_generic_alert("Configuration file not created.");
     }
   }
-  
+
   // Loading Running State
   sdSystem.SCREEN_COMMS.printw("  Loading running state ...");
   // yes, it resaves the file.  as is for now.
@@ -733,6 +736,11 @@ int loop_2(bool TTY_Only)
 
   // Start Power On Animation
   process_power_animation(sdSystem, sdSystem.PROGRAM_TIME.now(), animations, CRGB(0, 0, 25));
+
+  // -------------------------------------------------------------------------------------
+
+  // Set initial save_running_state_timer 5 minutes out for first save
+  save_running_state_timer.set(sdSystem.PROGRAM_TIME.now(), 5 * 60 * 1000);
 
   // ---------------------------------------------------------------------------------------
   //  Repeating Sleeping Loop until eXit is triggered.
@@ -1011,12 +1019,22 @@ int loop_2(bool TTY_Only)
       extraanimationdoorcheck2(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
 
       // Also delayed, File maintenance.
-      if (sdSystem.booRunning_State_File_Dirty == true)
+      //if (sdSystem.booRunning_State_File_Dirty == true)
+      if (save_running_state_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
       {
-        save_running_state_json(sdSystem, Running_State_Filename);
+        // Set Last Known Good Position
+        if (sdSystem.GPS_SYSTEM.active(sdSystem.PROGRAM_TIME.current_frame_time()))
+        {
+          if (sdSystem.GPS_SYSTEM.valid_position())
+          {
+            sdSystem.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.x = sdSystem.GPS_SYSTEM.CURRENT_POSITION.LATITUDE;
+            sdSystem.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.y = sdSystem.GPS_SYSTEM.CURRENT_POSITION.LONGITUDE;
+          }
+        }
 
-        // set false even if there was a save error to avoid repeats.
-        sdSystem.booRunning_State_File_Dirty = false;
+        // save running state every 30 seconds.
+        save_running_state_timer.set(sdSystem.PROGRAM_TIME.current_frame_time(), 30 * 1000);
+        save_running_state_json(sdSystem, Running_State_Filename);
       }
     }
 

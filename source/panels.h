@@ -126,9 +126,6 @@ class SCREEN4_PANEL_CONTROL
   // 1 - On
   // 2 - Active
 
-  // Panel backups
-  SCREEN4_PANELS PANELS_ON;
-
   // Set Panels
   void set_auto_temperature();
   void set_auto_malfunction();
@@ -141,7 +138,7 @@ class SCREEN4_PANEL_CONTROL
   public:
   // Main Panel Shutdown Steps
   int shutdown_procedure_step = 0;
-  //  0     = keep running
+  //  0     = normal run mode
   // 10     = reboot
   // 20     = shutdown
   // >= 100 = main loop exit
@@ -152,6 +149,9 @@ class SCREEN4_PANEL_CONTROL
   // Main working panel
   SCREEN4_PANELS  PANELS;
 
+  // Panel backups
+  SCREEN4_PANELS PANELS_ON;
+
   // Panel Control variables from alert system coordinator
   PANEL AUTO_TEMPERATURE;
   PANEL AUTO_MALFUNCTION;
@@ -160,6 +160,10 @@ class SCREEN4_PANEL_CONTROL
   //PANEL ADSB_MAP;
   PANEL ADSB_MAP_MIN_DISTANCE;
   PANEL ADSB_MAP_MAX_DISTANCE;
+
+  // Last Known Good Position
+  DOUBLE_VEC2 LAST_KNOWN_GOOD_POSITION;
+  bool MAP_CENTER_TO_LAST_KNOWN_POSITION = false;
 
   // Notation 
   string EXTRA;

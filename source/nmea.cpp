@@ -575,7 +575,16 @@ bool NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
           ret_updated = true;
           CURRENT_POSITION.CHANGED_TIME = true;
 
-          UNIX_EPOC_NMEA_TIME = unix_epoch_nmea_time(UTC_DATE, UTC_TIME);
+          // for testing data from file, have option to inject current time
+          if (TEST_DATA_GPS && TEST_DATA_GPS_INJECT_CURRENT_TIME)
+          {
+            UNIX_EPOC_NMEA_TIME = get_current_timestamp();
+          }
+          else
+          {
+            UNIX_EPOC_NMEA_TIME = unix_epoch_nmea_time(UTC_DATE, UTC_TIME);
+          }
+
           NMEA_SYSTEM_TIME_DIFF = UNIX_EPOC_NMEA_TIME - get_current_timestamp();
           CURRENT_POSITION.UNIX_EPOC_NMEA_TIME = UNIX_EPOC_NMEA_TIME;
           CURRENT_POSITION.NMEA_SYSTEM_TIME_DIFF = NMEA_SYSTEM_TIME_DIFF;

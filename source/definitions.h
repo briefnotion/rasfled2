@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.313_250910"
+#define Revision "2.314_250915"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -31,6 +31,7 @@
 #define TEST_DATA_CAN_BUS   false   // "rascomms.txt" in the auto dir
 #define TEST_DATA_AIRCRAFT  false   //
 #define TEST_DATA_GPS       false   //
+#define   TEST_DATA_GPS_INJECT_CURRENT_TIME false   //
 
 // -------------------------------------------------------------------------------------
 // CONSOLE AND INTEFACE SETUP

@@ -205,9 +205,6 @@ class system_data
   bool            Day_On = false;
   BOOL_WITH_OVERRIDE Day_On_With_Override;
 
-  // Files
-  bool            booRunning_State_File_Dirty = false;
-
   // Event System
   deque<int>      intCHANNEL_GROUP_EVENTS_COUNTS;
 

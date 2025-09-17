@@ -265,7 +265,6 @@ void system_data::set_running_color(CRGB Running_Color, string strColor)
 {
   running_color_list.color[0] = Running_Color;
   running_color_list.strRunningColor = strColor;
-  booRunning_State_File_Dirty = true;
 }
 
 void system_data::start_timer(int Seconds)

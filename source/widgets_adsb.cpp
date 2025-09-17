@@ -1454,6 +1454,17 @@ void ADSB_MAP::draw(system_data &sdSysData)
   ACTIVE_ADSB       = sdSysData.AIRCRAFT_COORD.is_active();
   ACTIVE_AUTOMOBILE = sdSysData.CAR_INFO.active();
   
+  // Update current position if requested by panel
+  if (sdSysData.PANEL_CONTROL.MAP_CENTER_TO_LAST_KNOWN_POSITION)
+  {
+    // Will force map to center on current location
+    // Set to map to focus on current location.  first start, likely -9 meaning no location
+    RANGE_INDICATOR.CENTER_ON_LOCATION = 1;
+
+    sdSysData.PANEL_CONTROL.MAP_CENTER_TO_LAST_KNOWN_POSITION = false;
+    RANGE_INDICATOR.set_gps_pos_lat_lon(sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION);
+  }
+
   // Update range if changing dynamicly with min max aircraft data.
   {
     // Monitor zoom level changes from internal or panel control.

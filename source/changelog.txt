@@ -1,3 +1,11 @@
+2.314_250915
+  - Some screen status and selections will be persistant over sessions. 
+      Including current position, selected tab, and tab panels. Not all 
+      settings are saved, such as map zoom level and so on.  Saves occur 
+      every 30 seconds starting 5 minutes after startup.
+  - Any track in histor should now display properly if no GPS signal is 
+      available.
+
 2.313_250910
   - If the time from the gps or the system changes dramaticly, the 
       track should rebuild and spit if necessary.

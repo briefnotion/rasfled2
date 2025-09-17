@@ -631,73 +631,76 @@ void MAP::rebuild_track(CONSOLE_COMMUNICATION &cons)
 
 void MAP::generate_displayed_track(double Resolution)
 {
-  DISPLAYED_TRACK.clear();
-
-  // Always include first and last point
-  if (TRACK_2.TRACK_POINTS_DETAILED.size() > 1)
+  if (CURRENT_RESOLUTION >= -1.0f)
   {
-    // Skip map generation is screen size is zero.  Likely never opened.
-    if (CURRENT_WORKING_AREA.z > 0.0 && CURRENT_WORKING_AREA.w > 0.0f)
+    DISPLAYED_TRACK.clear();
+
+    // Always include first and last point
+    if (TRACK_2.TRACK_POINTS_DETAILED.size() > 1)
     {
-      // To determine if track point should be included.
-      ImVec2 screen_position_not_used;
-      bool add_track_point = false;     // add point if within working area.
-      ImVec4 extar_working_area;
-
-      // give working area extra room
-      // for now, just increas the size by 50 pixels top down left right
-      // X = x starting pos (position of left most window, if no write)
-      // Y = y starting pos (position of top most window, if no write)
-      // Z = x size
-      // W = y size
-      extar_working_area.x = CURRENT_WORKING_AREA.x - 50.0f;
-      extar_working_area.y = CURRENT_WORKING_AREA.y - 50.0f;
-      extar_working_area.z = CURRENT_WORKING_AREA.z + 100.0f;
-      extar_working_area.w = CURRENT_WORKING_AREA.w + 100.0f;
-
-      // First point
-      screen_position_not_used = point_position_lat_lon(extar_working_area, CURRENT_LAT_LON_SCALE, CURRENT_CENTER_LAT_LON, 
-                                                        DOUBLE_VEC2(TRACK_2.TRACK_POINTS_DETAILED.front().LATITUDE, 
-                                                                    TRACK_2.TRACK_POINTS_DETAILED.front().LONGITUDE ), 
-                                                        CURRENT_MAP_BEARING, add_track_point);
-
-      if (add_track_point)
+      // Skip map generation is screen size is zero.  Likely never opened.
+      if (CURRENT_WORKING_AREA.z > 0.0 && CURRENT_WORKING_AREA.w > 0.0f)
       {
-        DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED.front());
-      }
+        // To determine if track point should be included.
+        ImVec2 screen_position_not_used;
+        bool add_track_point = false;     // add point if within working area.
+        ImVec4 extar_working_area;
 
-      // Points in middle
-      for (size_t pos = 1; pos < TRACK_2.TRACK_POINTS_DETAILED.size() -1; pos++)
-      {
-        if (TRACK_2.TRACK_POINTS_DETAILED[pos].RESOLUTION >= Resolution)
+        // give working area extra room
+        // for now, just increas the size by 50 pixels top down left right
+        // X = x starting pos (position of left most window, if no write)
+        // Y = y starting pos (position of top most window, if no write)
+        // Z = x size
+        // W = y size
+        extar_working_area.x = CURRENT_WORKING_AREA.x - 50.0f;
+        extar_working_area.y = CURRENT_WORKING_AREA.y - 50.0f;
+        extar_working_area.z = CURRENT_WORKING_AREA.z + 100.0f;
+        extar_working_area.w = CURRENT_WORKING_AREA.w + 100.0f;
+
+        // First point
+        screen_position_not_used = point_position_lat_lon(extar_working_area, CURRENT_LAT_LON_SCALE, CURRENT_CENTER_LAT_LON, 
+                                                          DOUBLE_VEC2(TRACK_2.TRACK_POINTS_DETAILED.front().LATITUDE, 
+                                                                      TRACK_2.TRACK_POINTS_DETAILED.front().LONGITUDE ), 
+                                                          CURRENT_MAP_BEARING, add_track_point);
+
+        if (add_track_point)
         {
-          screen_position_not_used = point_position_lat_lon(extar_working_area, CURRENT_LAT_LON_SCALE, CURRENT_CENTER_LAT_LON, 
-                                                  DOUBLE_VEC2(TRACK_2.TRACK_POINTS_DETAILED[pos].LATITUDE, 
-                                                              TRACK_2.TRACK_POINTS_DETAILED[pos].LONGITUDE ), 
-                                                  CURRENT_MAP_BEARING, add_track_point);
+          DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED.front());
+        }
 
-          if (add_track_point)
+        // Points in middle
+        for (size_t pos = 1; pos < TRACK_2.TRACK_POINTS_DETAILED.size() -1; pos++)
+        {
+          if (TRACK_2.TRACK_POINTS_DETAILED[pos].RESOLUTION >= Resolution)
           {
-            DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED[pos]);
-          }
-          else
-          {
-            if (!DISPLAYED_TRACK.TRACK_POINTS_DETAILED.empty())
+            screen_position_not_used = point_position_lat_lon(extar_working_area, CURRENT_LAT_LON_SCALE, CURRENT_CENTER_LAT_LON, 
+                                                    DOUBLE_VEC2(TRACK_2.TRACK_POINTS_DETAILED[pos].LATITUDE, 
+                                                                TRACK_2.TRACK_POINTS_DETAILED[pos].LONGITUDE ), 
+                                                    CURRENT_MAP_BEARING, add_track_point);
+
+            if (add_track_point)
             {
-              DISPLAYED_TRACK.TRACK_POINTS_DETAILED.back().END_POINT = true;
+              DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED[pos]);
+            }
+            else
+            {
+              if (!DISPLAYED_TRACK.TRACK_POINTS_DETAILED.empty())
+              {
+                DISPLAYED_TRACK.TRACK_POINTS_DETAILED.back().END_POINT = true;
+              }
             }
           }
         }
-      }
 
-      screen_position_not_used = point_position_lat_lon(extar_working_area, CURRENT_LAT_LON_SCALE, CURRENT_CENTER_LAT_LON, 
-                                                        DOUBLE_VEC2(TRACK_2.TRACK_POINTS_DETAILED.back().LATITUDE, 
-                                                                    TRACK_2.TRACK_POINTS_DETAILED.back().LONGITUDE ), 
-                                                        CURRENT_MAP_BEARING, add_track_point);
+        screen_position_not_used = point_position_lat_lon(extar_working_area, CURRENT_LAT_LON_SCALE, CURRENT_CENTER_LAT_LON, 
+                                                          DOUBLE_VEC2(TRACK_2.TRACK_POINTS_DETAILED.back().LATITUDE, 
+                                                                      TRACK_2.TRACK_POINTS_DETAILED.back().LONGITUDE ), 
+                                                          CURRENT_MAP_BEARING, add_track_point);
 
-      if (add_track_point)
-      {
-        DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED.back());
+        if (add_track_point)
+        {
+          DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED.back());
+        }
       }
     }
   }
@@ -740,6 +743,8 @@ void MAP::load_track(CONSOLE_COMMUNICATION &cons, double Time_error)
 
       cons.printw("Initiated history save \"" + track_history_filename);
       track_save_detailed_forgetable(tmp_discard_track, track_history_filename);
+
+
     }
   }
   else
@@ -750,7 +755,6 @@ void MAP::load_track(CONSOLE_COMMUNICATION &cons, double Time_error)
 
 void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long tmeFrame_Time)
 {
-
   // Determine if the track should be rebuilt
   double new_time_error = GPS_System.current_time_error();
   if (abs(TIME_ERROR - new_time_error) > PROPS.TRACK_HISTORY_CUTOFF)
@@ -816,6 +820,9 @@ void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long t
         tmp_track_point.RESOLUTION = LEVEL_OF_DETAIL_META.LOD[LEVEL_OF_DETAIL_META.LOD.size() -1];
       }
 
+
+
+
       tmp_track_point.TIMESTAMP = GPS_System.CURRENT_POSITION.UNIX_EPOC_NMEA_TIME;
       tmp_track_point.LATITUDE = GPS_System.CURRENT_POSITION.LATITUDE;
       tmp_track_point.LONGITUDE = GPS_System.CURRENT_POSITION.LONGITUDE;
@@ -824,12 +831,14 @@ void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long t
       tmp_track_point.ACCURACY = GPS_System.CURRENT_POSITION.ACCURACY_SCORE;
 
       TRACK_2.store(tmp_track_point);
+    }
 
-      if (CURRENT_RESOLUTION >= -1.0f)
-      {
-        generate_displayed_track(CURRENT_RESOLUTION);
-      }
-    } 
+    // Generate a new display track once per second
+    if (NEW_DISPLAY_TRACK_GENERATION_TIMER.is_ready(tmeFrame_Time))
+    {
+      NEW_DISPLAY_TRACK_GENERATION_TIMER.set(tmeFrame_Time, 1000);
+      generate_displayed_track(CURRENT_RESOLUTION);
+    }
   }
 
   // Save Track

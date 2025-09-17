@@ -280,45 +280,131 @@ bool save_json_configuration(system_data &sdSysData, string Filename)
 // Load Saved State
 bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdSysData, string strFilename)
 {
-  JSON_INTERFACE state_json;
+  bool ret_success = false;
 
+  // Colors
   CRGB color;
-
   string red = "";
   string green = "";
   string blue = "";
-
   string color_string = "";
-
   string color_desc = "";
-
-  bool ret_success = false;
 
   string json_state_file = file_to_string(strFilename, ret_success);
 
   if (ret_success == true)
   {
+    JSON_INTERFACE state_json;
     ret_success = state_json.load_json_from_string(json_state_file);
 
     if (ret_success == true)
     {
       cons.printw("  " + strFilename + " read success");
-    
-      // Parse the settings
+
+      STRING_DOUBLE last_known_latitude;
+      STRING_DOUBLE last_known_longitude;
+      STRING_INT main_display_screen;
+      STRING_INT automobile_display_nova;
+      STRING_INT automobile_display_nova_screen;
+      STRING_INT automobile_nova_2_selection;
+      STRING_INT automobile_display_mid_top;
+      STRING_INT automobile_display_mid_bottom;
+      STRING_INT adsb_display_table;
+      STRING_INT adsb_display_map;
+      STRING_INT adsb_range_indicator_zoom_min_max;
+      STRING_INT atonomous;
+
+      for(int root = 0; root < (int)state_json.ROOT.DATA.size(); root++)
+      {
+        state_json.ROOT.DATA[root].get_if_is("red", red);
+        state_json.ROOT.DATA[root].get_if_is("green", green);
+        state_json.ROOT.DATA[root].get_if_is("blue", blue);
+        state_json.ROOT.DATA[root].get_if_is("description", color_desc);
+
+        state_json.ROOT.DATA[root].get_if_is("last known latitude", last_known_latitude);
+        state_json.ROOT.DATA[root].get_if_is("last known longitude", last_known_longitude);
+        state_json.ROOT.DATA[root].get_if_is("MAIN_DISPLAY_SCREEN", main_display_screen);
+        state_json.ROOT.DATA[root].get_if_is("AUTOMOBILE_DISPLAY_NOVA", automobile_display_nova);
+        state_json.ROOT.DATA[root].get_if_is("AUTOMOBILE_DISPLAY_NOVA_SCREEN", automobile_display_nova_screen);
+        state_json.ROOT.DATA[root].get_if_is("AUTOMOBILE_NOVA_2_SELECTION", automobile_nova_2_selection);
+        state_json.ROOT.DATA[root].get_if_is("AUTOMOBILE_DISPLAY_MID_TOP", automobile_display_mid_top);
+        state_json.ROOT.DATA[root].get_if_is("AUTOMOBILE_DISPLAY_MID_BOTTOM", automobile_display_mid_bottom);
+        state_json.ROOT.DATA[root].get_if_is("ADSB_DISPLAY_TABLE", adsb_display_table);
+        state_json.ROOT.DATA[root].get_if_is("ADSB_DISPLAY_MAP", adsb_display_map);
+        state_json.ROOT.DATA[root].get_if_is("ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX", adsb_range_indicator_zoom_min_max);
+        state_json.ROOT.DATA[root].get_if_is("ATONOMOUS", atonomous);
+      }
+
+      // assign color settings
       red = state_json.ROOT.value_from_list("red");
       green = state_json.ROOT.value_from_list("green");
       blue = state_json.ROOT.value_from_list("blue");
-
       color_string = red + "," + green + "," + blue;
-
       color = color.StringtoCRGB(color_string);
-
       color_desc = state_json.ROOT.value_from_list("description");
-
       cons.printw("  Setting running color to CRGB(" + color.CRGBtoString() + 
                                                   "), " + color_desc);                                          
-
       sdSysData.set_running_color(color , color_desc);
+
+      // assign panels settings
+      if (last_known_latitude.conversion_success() && last_known_longitude.conversion_success())
+      {
+        cout << last_known_latitude.get_str_value()<< endl;
+        cout << to_string(last_known_latitude.get_double_value()) << endl;
+        sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.x = last_known_latitude.get_double_value();
+        sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.y = last_known_longitude.get_double_value();
+        sdSysData.PANEL_CONTROL.MAP_CENTER_TO_LAST_KNOWN_POSITION = true;
+      }
+      if (main_display_screen.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = main_display_screen.get_int_value();
+      }
+      if (automobile_display_nova.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_NOVA = automobile_display_nova.get_int_value();
+      }
+      if (automobile_display_nova_screen.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_NOVA_SCREEN = automobile_display_nova_screen.get_int_value();
+      }
+      if (automobile_nova_2_selection.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION = automobile_nova_2_selection.get_int_value();
+      }
+      if (automobile_display_mid_top.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_MID_TOP = automobile_display_mid_top.get_int_value();
+      }
+      if (automobile_display_mid_bottom.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_MID_BOTTOM = automobile_display_mid_bottom.get_int_value();
+      }
+      if (adsb_display_table.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE = adsb_display_table.get_int_value();
+      }
+      if (adsb_display_map.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_MAP = adsb_display_map.get_int_value();
+      }
+      if (adsb_range_indicator_zoom_min_max.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = adsb_range_indicator_zoom_min_max.get_int_value();
+      }
+      if (atonomous.conversion_success())
+      {
+        // Set both set of panels the same
+        sdSysData.PANEL_CONTROL.PANELS_ON = sdSysData.PANEL_CONTROL.PANELS;
+        
+        if (atonomous.get_int_value() == 0)
+        {
+          sdSysData.PANEL_CONTROL.autonomous_off();
+        }
+        else
+        {
+          sdSysData.PANEL_CONTROL.autonomous_on();
+        }
+      }
     }
   }
 
@@ -338,20 +424,48 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
 // Save Saved State
 bool save_running_state_json(system_data &sdSysData, string strFilename)
 {
-  JSON_INTERFACE state_json;
-  deque<string> state_dq_string;
-
   bool ret_success = false;
 
-  CRGB color = sdSysData.get_running_color();
+  // do not save panels if in process of shutting down.
+  if (sdSysData.PANEL_CONTROL.shutdown_procedure_step == 0)
+  {
+    JSON_INTERFACE state_json;
+    deque<string> state_dq_string;
 
-  state_json.ROOT.create_label_value(quotify("red"), quotify(to_string((int)(color.r))));
-  state_json.ROOT.create_label_value(quotify("green"), quotify(to_string((int)(color.g))));
-  state_json.ROOT.create_label_value(quotify("blue"), quotify(to_string((int)(color.b))));
-  state_json.ROOT.create_label_value(quotify("description"), quotify(sdSysData.get_running_color_str()));
+    CRGB color = sdSysData.get_running_color();
 
-  state_json.json_print_build_to_string_deque(state_dq_string);
-  ret_success = deque_string_to_file(strFilename, state_dq_string, false);
+    state_json.ROOT.create_label_value(quotify("red"), quotify(to_string((int)(color.r))));
+    state_json.ROOT.create_label_value(quotify("green"), quotify(to_string((int)(color.g))));
+    state_json.ROOT.create_label_value(quotify("blue"), quotify(to_string((int)(color.b))));
+    state_json.ROOT.create_label_value(quotify("description"), quotify(sdSysData.get_running_color_str()));
+
+    // Last known position
+    state_json.ROOT.create_label_value(quotify("last known latitude"), quotify(to_string(sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.x)));
+    state_json.ROOT.create_label_value(quotify("last known longitude"), quotify(to_string(sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.y)));
+
+    // Main Screen
+    state_json.ROOT.create_label_value(quotify("MAIN_DISPLAY_SCREEN"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN)));
+    
+    // Automobile
+    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_NOVA"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_NOVA)));
+    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_NOVA_SCREEN"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_NOVA_SCREEN)));
+    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_NOVA_2_SELECTION"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION)));
+    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_MID_TOP"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_MID_TOP)));
+    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_MID_BOTTOM"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_MID_BOTTOM)));
+
+    // ADSB
+    state_json.ROOT.create_label_value(quotify("ADSB_DISPLAY_TABLE"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE)));
+    state_json.ROOT.create_label_value(quotify("ADSB_DISPLAY_MAP"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_MAP)));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX)));
+
+    // Panel Settings
+    state_json.ROOT.create_label_value(quotify("ATONOMOUS"), quotify(to_string(sdSysData.PANEL_CONTROL.autonomous_state())));
+    //state_json.ROOT.create_label_value(quotify("COLOR_SELECT"), quotify(to_string((sdSysData.PANEL_CONTROL.co)));
+
+    state_json.json_print_build_to_string_deque(state_dq_string);
+    threaded_deque_string_to_file(strFilename, state_dq_string);
+    ret_success = true;
+  }
 
   return ret_success;
 }
