@@ -89,7 +89,7 @@ class ADSB_RANGE
 {
   private:
   
-  int ZOOM_LEVEL = -1;
+  //int ZOOM_LEVEL = -1;
   
   ImVec4 WORKING_AREA;
   ImVec2 CENTER;
@@ -113,7 +113,7 @@ class ADSB_RANGE
 
   private:
 
-  void set_zoom_level();
+  void set_zoom_level(int Zoom_Level);
 
   public:
 
@@ -131,7 +131,7 @@ class ADSB_RANGE
 
   float RADIUS_CIRCLE_POINT_SIZE = 0.0f;
 
-  bool AIRCRAFT_COUNT_ZERO = false;
+  bool AIRCRAFT_COUNT_ZERO_HOLD_OFF = false;
 
   ImVec2 ll_2_pt_scale();
 
@@ -162,15 +162,15 @@ class ADSB_RANGE
   void set_range(float Range_Miles);
   // Set the distance in miles, the range is set at for viewing.
 
-  void zoom_in();
+  void zoom_in(system_data &sdSysData);
   // Decrease the distance in miles, the range is set at for viewing, 
   //  by one.
 
-  void zoom_out();
+  void zoom_out(system_data &sdSysData);
   // Increase the distance in miles, the range is set at for viewing, 
   //  by one.
 
-  void zoom_return();
+  void zoom_return(int Zoom_Level);
   // Set the zoom scale back to level.
 
   double resolution();
@@ -225,9 +225,6 @@ class ADSB_MAP
   bool ACTIVE_COMPASS = false;
   bool ACTIVE_ADSB = false;
   bool ACTIVE_AUTOMOBILE = false;
-
-  int PREVIOUS_ZOOM_LEVEL = 0; // Used to determine if zoom level has changed
-                                // through the panels.
 
   ImVec4 WORKING_AREA;
 

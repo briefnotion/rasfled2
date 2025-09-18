@@ -106,6 +106,94 @@ float FLOAT_ON_OFF_AUTOMATIC::value()
 
 // ---------------------------------------------------------------------------------------
 
+void INT_MULTI_SELECT::set_initial_values(int Selection, int Selection_0, int Selection_1)
+{
+  SELECTION = Selection;
+  VALUE_SELECTION_0 = Selection_0;
+  VALUE_SELECTION_1 = Selection_1;
+}
+
+bool INT_MULTI_SELECT::set_selection_value(int Selection, int Value)
+{
+  bool ret_change = false;
+
+  if (SELECTION != Selection)
+  {
+    SELECTION = Selection;
+    ret_change = true;
+  }
+
+  if (SELECTION == 0)
+  {
+    if (VALUE_SELECTION_0 != Value)
+    {
+      VALUE_SELECTION_0 = Value;
+      ret_change = true;
+    }
+  }
+
+  if (SELECTION == 1)
+  {
+    if (VALUE_SELECTION_1 != Value)
+    {
+      VALUE_SELECTION_1 = Value;
+      ret_change = true;
+    }
+  }
+
+  if (ret_change)
+  {
+    CHANGED = true;
+  }
+  return ret_change;
+}
+
+bool INT_MULTI_SELECT::set_selection(int Selection)
+{
+  bool ret_change = false;
+
+  if (SELECTION != Selection)
+  {
+    SELECTION = Selection;
+    ret_change = true;
+  }
+
+  if (ret_change)
+  {
+    CHANGED = true;
+  }
+  return ret_change;
+}
+
+int INT_MULTI_SELECT::value_selection()
+{
+  return SELECTION;
+}
+
+int INT_MULTI_SELECT::value_selection_0()
+{
+  return VALUE_SELECTION_0;
+}
+
+int INT_MULTI_SELECT::value_selection_1()
+{
+  return VALUE_SELECTION_1;
+}
+
+int INT_MULTI_SELECT::value()
+{
+  if (SELECTION == 0)
+  {
+    return VALUE_SELECTION_0;
+  }
+  else
+  {
+    return VALUE_SELECTION_1;
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
 void PANEL::request(unsigned long Time, int Linger_Time, string Description)
 {
   REQUESTED = true;
@@ -180,7 +268,7 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_min_distance()
   //PANELS.ADSB_DISPLAY_TABLE = false;
   PANELS.ADSB_DISPLAY_MAP = true;
   
-  PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 1;
+  PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 1);
 }
 
 void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
@@ -189,7 +277,7 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
   //PANELS.ADSB_DISPLAY_TABLE = false;
   PANELS.ADSB_DISPLAY_MAP = true;
   
-  PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 2;
+  PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 2);
 }
 
 // ---

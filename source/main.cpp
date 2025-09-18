@@ -739,8 +739,8 @@ int loop_2(bool TTY_Only)
 
   // -------------------------------------------------------------------------------------
 
-  // Set initial save_running_state_timer 5 minutes out for first save
-  save_running_state_timer.set(sdSystem.PROGRAM_TIME.now(), 5 * 60 * 1000);
+  // Set initial save_running_state_timer 15 seconds out for first save
+  save_running_state_timer.set(sdSystem.PROGRAM_TIME.now(), 15 * 1000);
 
   // ---------------------------------------------------------------------------------------
   //  Repeating Sleeping Loop until eXit is triggered.

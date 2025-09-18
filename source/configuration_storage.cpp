@@ -311,7 +311,10 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
       STRING_INT automobile_display_mid_bottom;
       STRING_INT adsb_display_table;
       STRING_INT adsb_display_map;
-      STRING_INT adsb_range_indicator_zoom_min_max;
+      STRING_INT adsb_range_indicator_zoom_selection;
+      STRING_INT adsb_range_indicator_zoom_selection_0;
+      STRING_INT adsb_range_indicator_zoom_selection_1;
+      STRING_INT adsb_zoom_level;
       STRING_INT atonomous;
 
       for(int root = 0; root < (int)state_json.ROOT.DATA.size(); root++)
@@ -331,7 +334,10 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
         state_json.ROOT.DATA[root].get_if_is("AUTOMOBILE_DISPLAY_MID_BOTTOM", automobile_display_mid_bottom);
         state_json.ROOT.DATA[root].get_if_is("ADSB_DISPLAY_TABLE", adsb_display_table);
         state_json.ROOT.DATA[root].get_if_is("ADSB_DISPLAY_MAP", adsb_display_map);
-        state_json.ROOT.DATA[root].get_if_is("ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX", adsb_range_indicator_zoom_min_max);
+        state_json.ROOT.DATA[root].get_if_is("ADSB_RANGE_INDICATOR_ZOOM_SELECTION", adsb_range_indicator_zoom_selection);
+        state_json.ROOT.DATA[root].get_if_is("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_0", adsb_range_indicator_zoom_selection_0);
+        state_json.ROOT.DATA[root].get_if_is("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_1", adsb_range_indicator_zoom_selection_1);
+        state_json.ROOT.DATA[root].get_if_is("ADSB_RANGE_INDICATOR_ZOOM_LEVEL", adsb_zoom_level);
         state_json.ROOT.DATA[root].get_if_is("ATONOMOUS", atonomous);
       }
 
@@ -349,8 +355,6 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
       // assign panels settings
       if (last_known_latitude.conversion_success() && last_known_longitude.conversion_success())
       {
-        cout << last_known_latitude.get_str_value()<< endl;
-        cout << to_string(last_known_latitude.get_double_value()) << endl;
         sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.x = last_known_latitude.get_double_value();
         sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.y = last_known_longitude.get_double_value();
         sdSysData.PANEL_CONTROL.MAP_CENTER_TO_LAST_KNOWN_POSITION = true;
@@ -387,9 +391,17 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
       {
         sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_MAP = adsb_display_map.get_int_value();
       }
-      if (adsb_range_indicator_zoom_min_max.conversion_success())
+      if (adsb_range_indicator_zoom_selection.conversion_success() && 
+          adsb_range_indicator_zoom_selection_0.conversion_success() && 
+          adsb_range_indicator_zoom_selection_1.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = adsb_range_indicator_zoom_min_max.get_int_value();
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection(adsb_range_indicator_zoom_selection.get_int_value());
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, adsb_range_indicator_zoom_selection_0.get_int_value());
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, adsb_range_indicator_zoom_selection_1.get_int_value());
+      }
+      if (adsb_zoom_level.conversion_success())
+      {
+        //sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL = adsb_zoom_level.get_int_value();
       }
       if (atonomous.conversion_success())
       {
@@ -456,10 +468,15 @@ bool save_running_state_json(system_data &sdSysData, string strFilename)
     // ADSB
     state_json.ROOT.create_label_value(quotify("ADSB_DISPLAY_TABLE"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE)));
     state_json.ROOT.create_label_value(quotify("ADSB_DISPLAY_MAP"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_MAP)));
-    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX)));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection())));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_0"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0())));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_1"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_1())));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_LEVEL"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL)));
 
     // Panel Settings
     state_json.ROOT.create_label_value(quotify("ATONOMOUS"), quotify(to_string(sdSysData.PANEL_CONTROL.autonomous_state())));
+
+    // causes system crash
     //state_json.ROOT.create_label_value(quotify("COLOR_SELECT"), quotify(to_string((sdSysData.PANEL_CONTROL.co)));
 
     state_json.json_print_build_to_string_deque(state_dq_string);
