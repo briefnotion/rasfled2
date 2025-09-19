@@ -1,3 +1,7 @@
+2.316_250919
+  - More work and cleaning code routines to save zoom current zoom 
+      level.
+
 2.315_250918
   - Started coding routines to save zoom current zoom level.
 

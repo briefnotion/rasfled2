@@ -102,14 +102,14 @@ class ADSB_RANGE
 
   ImVec2 LAT_LON_TO_POINT_SCALE;          // Required for calculating map draw routines
                                           // in point_position_lat_lon
-
-  DOUBLE_VEC2 NO_POS_LAT_LON;
-  DOUBLE_VEC2 GPS_POS_LAT_LON;
-  DOUBLE_VEC2 AIRCRAFT_POS_LAT_LON;
+                                          
+  DOUBLE_VEC2 NO_POS_LAT_LON;       // Stores focus point when map focus set to 0
+  DOUBLE_VEC2 GPS_POS_LAT_LON;      // Stores focus point when map focus set to 1
+  DOUBLE_VEC2 AIRCRAFT_POS_LAT_LON; // Stores focus point when map focus set to 2
 
   ImVec2 CENTER_POS_LAT_LON;
 
-  void calculate_lat_lon_to_point_scale();
+  void calculate_lat_lon_to_point_scale(int &Map_Location_Focus);
 
   private:
 
@@ -120,7 +120,7 @@ class ADSB_RANGE
   ADSB_RANGE_Properties PROPS;
 
   // Center of map at location
-  int CENTER_ON_LOCATION = -9;
+  //int CENTER_ON_LOCATION = 1;
     // -9 - No Location
 
     // -2 - Center on aircraft not set
@@ -135,15 +135,15 @@ class ADSB_RANGE
 
   ImVec2 ll_2_pt_scale();
 
-  void gps_display_current_location_toggle();
+  void gps_display_current_location_toggle(int &Map_Location_Focus);
 
-  bool gps_display_current_location();
+  bool gps_display_current_location(int &Map_Location_Focus);
 
   void set_no_pos_lat_lon(DOUBLE_VEC2 Lat_Lon);
-  void set_gps_pos_lat_lon(DOUBLE_VEC2 Lat_Lon);
-  void set_aircraft_pos_lat_lon(DOUBLE_VEC2 Lat_Lon);
+  void set_gps_pos_lat_lon(DOUBLE_VEC2 Lat_Lon, int &Map_Location_Focus);
+  void set_aircraft_pos_lat_lon(DOUBLE_VEC2 Lat_Lon, int &Map_Location_Focus);
 
-  DOUBLE_VEC2 get_center_lat_lon();
+  DOUBLE_VEC2 get_center_lat_lon(int &Map_Location_Focus);
   DOUBLE_VEC2 get_gps_lat_lon();
 
   void create();
@@ -152,7 +152,7 @@ class ADSB_RANGE
   void update_range_block_size();
   // Get size of current range block after RANGE_IMP_LATEST is updated.
 
-  void range_update(unsigned long Frame_Time);
+  void range_update(unsigned long Frame_Time, int &Map_Location_Focus);
   // Update the impact returned range value for futer request. 
   //  Run once at begining of every frame for range.
 
@@ -179,7 +179,7 @@ class ADSB_RANGE
   void draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec4 Working_Area);
   // Draws range circle onto the screen.
 
-  void draw_info();
+  void draw_info(int &Map_Location_Focus);
   // Draws ledgend info onto the screen
   //  Text Lat Lon Range
 };

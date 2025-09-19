@@ -18,52 +18,6 @@
 
 // ---------------------------------------------------------------------------------------
 
-// Stores Two float values. 
-//  Returns VALUE_AUTOMATIC when AUTOMATIC_ON
-//  Returns VALUE_MANUAL when AUTOMATIC_ON == false
-class FLOAT_ON_OFF_AUTOMATIC
-{
-  private:
-  float VALUE_MANUAL    = 0.0f;
-  float VALUE_AUTOMATIC = 0.0f;
-  bool  AUTOMATIC_ON    = false;
-
-  public:
-  void set_initial_values(bool Automatic_On_or_Off, float Manual_Value, float Automatic_value);
-  bool set_manual_value(float Value);     // Returns true if value changed.  Will swicth to manual.
-  bool set_automatic_value(float Value);  // Returns true if value changed
-  bool set_automatic(bool On_or_Off);
-  bool automatic_value();
-  float value();
-};
-
-// Simple two value selector
-// Stores two int values
-//  Returns VALUE_SELECTION_0 when SELECTION = 0
-//  Returns VALUE_SELECTION_1 when SELECTION = 1
-class INT_MULTI_SELECT
-{
-  private:
-  int SELECTION = 0;
-  int VALUE_SELECTION_0 = 0;
-  int VALUE_SELECTION_1 = 0;
-
-  public:
-
-  bool CHANGED = false; // Alternative Changed tag.  Needs manual
-
-  void set_initial_values(int Selection, int Selection_0, int Selection_1);
-  bool set_selection_value(int Selection, int Value); // Returns true if selection or value changes.
-  bool set_selection(int Selection);                  // Returns true if changed.
-
-  int value_selection();
-  int value_selection_0();
-  int value_selection_1();
-  int value();
-};
-
-// ---------------------------------------------------------------------------------------
-
 class SCREEN4_PANELS
 {
   public:
@@ -117,20 +71,6 @@ class SCREEN4_PANELS
   // 1  - MIN (On)
   // 2  - MAX (On)
   // 3  - DRV (On)
-
-  INT_MULTI_SELECT ADSB_ZOOM_MODE_SELECTION;
-  // Selecion 0 - Aircraft
-  //  0 = off
-  //  1 = min
-  //  2 = max
-  // Selecion 1 - Driving
-  //  0 = off
-  //  1 = driving
-  
-  bool ADSB_ZOOM_LEVEL_CHANGED = true;  // Used to determine if zoom level has changed
-                                        // through the panels.
-  
-  int ADSB_ZOOM_LEVEL = -1;
 };
 
 
@@ -150,7 +90,7 @@ class PANEL
   bool display();
 };
 
-
+// Contains Persistant display controls
 class SCREEN4_PANEL_CONTROL
 {
   private:
@@ -198,10 +138,31 @@ class SCREEN4_PANEL_CONTROL
   PANEL AUTO_MALFUNCTION;
   PANEL AUTO_PRESSURE;
   PANEL AUTO_ACCELERATION;
+
   //PANEL ADSB_MAP;
   PANEL ADSB_MAP_MIN_DISTANCE;
   PANEL ADSB_MAP_MAX_DISTANCE;
+  
+  INT_MULTI_SELECT ADSB_ZOOM_MODE_SELECTION;
+  // Selecion 0 - Aircraft
+  //  0 = off
+  //  1 = min
+  //  2 = max
+  // Selecion 1 - Driving
+  //  0 = off
+  //  1 = driving
 
+  int ADSB_MAP_LOCATION_FOCUS = 0;
+  // -2 - not on aircraft (counnter for toggle)
+  // -1 - on gps_pos (counnter for toggle)
+  //  0 - not specified
+  //  1 - on gps_pos
+  //  2 - on aircraft
+
+  int ADSB_ZOOM_LEVEL = -1;
+  bool ADSB_ZOOM_LEVEL_CHANGED = true;  // Used to determine if zoom level has changed
+                                        // through the panels.
+  
   // Last Known Good Position
   DOUBLE_VEC2 LAST_KNOWN_GOOD_POSITION;
   bool MAP_CENTER_TO_LAST_KNOWN_POSITION = false;

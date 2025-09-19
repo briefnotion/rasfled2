@@ -1084,4 +1084,50 @@ public:
   }
 };
 
+// ---------------------------------------------------------------------------------------
+
+// Stores Two float values. 
+//  Returns VALUE_AUTOMATIC when AUTOMATIC_ON
+//  Returns VALUE_MANUAL when AUTOMATIC_ON == false
+class FLOAT_ON_OFF_AUTOMATIC
+{
+  private:
+  float VALUE_MANUAL    = 0.0f;
+  float VALUE_AUTOMATIC = 0.0f;
+  bool  AUTOMATIC_ON    = false;
+
+  public:
+  void set_initial_values(bool Automatic_On_or_Off, float Manual_Value, float Automatic_value);
+  bool set_manual_value(float Value);     // Returns true if value changed.  Will swicth to manual.
+  bool set_automatic_value(float Value);  // Returns true if value changed
+  bool set_automatic(bool On_or_Off);
+  bool automatic_value();
+  float value();
+};
+
+// Simple two value selector
+// Stores two int values
+//  Returns VALUE_SELECTION_0 when SELECTION = 0
+//  Returns VALUE_SELECTION_1 when SELECTION = 1
+class INT_MULTI_SELECT
+{
+  private:
+  int SELECTION = 0;
+  int VALUE_SELECTION_0 = 0;
+  int VALUE_SELECTION_1 = 0;
+
+  public:
+
+  bool CHANGED = false; // Alternative Changed tag.  Needs manual
+
+  void set_initial_values(int Selection, int Selection_0, int Selection_1);
+  bool set_selection_value(int Selection, int Value); // Returns true if selection or value changes.
+  bool set_selection(int Selection);                  // Returns true if changed.
+
+  int value_selection();
+  int value_selection_0();
+  int value_selection_1();
+  int value();
+};
+
 #endif

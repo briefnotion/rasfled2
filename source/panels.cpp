@@ -18,182 +18,6 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
-void FLOAT_ON_OFF_AUTOMATIC::set_initial_values(bool Automatic_On_or_Off, float Manual_Value, float Automatic_value)
-{
-  AUTOMATIC_ON = Automatic_On_or_Off;
-  VALUE_MANUAL = Manual_Value;
-  VALUE_AUTOMATIC = Automatic_value;
-}
-
-bool FLOAT_ON_OFF_AUTOMATIC::set_manual_value(float Value)
-{
-  if (AUTOMATIC_ON)
-  {
-    AUTOMATIC_ON = false;
-    if (VALUE_AUTOMATIC != Value)
-    {
-      VALUE_MANUAL = Value;
-      return true;
-    }
-    else
-    {
-      return false;
-    }
-  }
-  else
-  {
-    if (Value != VALUE_MANUAL)
-    {
-      VALUE_MANUAL = Value;
-      return true;
-    }
-    else
-    {
-      return false;
-    }
-  }
-}
-
-bool FLOAT_ON_OFF_AUTOMATIC::set_automatic_value(float Value)
-{
-  if (VALUE_AUTOMATIC != Value)
-  {
-    VALUE_AUTOMATIC = Value;
-    if (AUTOMATIC_ON)
-    {
-      return true;
-    }
-    else
-    {
-      return false;
-    }
-  }
-  else
-  {
-    return false;
-  }
-}
-
-bool FLOAT_ON_OFF_AUTOMATIC::set_automatic(bool On_or_Off)
-{
-  if (AUTOMATIC_ON != On_or_Off)
-  {
-    AUTOMATIC_ON = On_or_Off;
-    return true;
-  }
-  else
-  {
-    return false;
-  }
-}
-
-bool FLOAT_ON_OFF_AUTOMATIC::automatic_value()
-{
-  return AUTOMATIC_ON;
-}
-
-float FLOAT_ON_OFF_AUTOMATIC::value()
-{
-  if (AUTOMATIC_ON)
-  {
-    return VALUE_AUTOMATIC;
-  }
-  else
-  {
-    return VALUE_MANUAL;
-  }
-}
-
-// ---------------------------------------------------------------------------------------
-
-void INT_MULTI_SELECT::set_initial_values(int Selection, int Selection_0, int Selection_1)
-{
-  SELECTION = Selection;
-  VALUE_SELECTION_0 = Selection_0;
-  VALUE_SELECTION_1 = Selection_1;
-}
-
-bool INT_MULTI_SELECT::set_selection_value(int Selection, int Value)
-{
-  bool ret_change = false;
-
-  if (SELECTION != Selection)
-  {
-    SELECTION = Selection;
-    ret_change = true;
-  }
-
-  if (SELECTION == 0)
-  {
-    if (VALUE_SELECTION_0 != Value)
-    {
-      VALUE_SELECTION_0 = Value;
-      ret_change = true;
-    }
-  }
-
-  if (SELECTION == 1)
-  {
-    if (VALUE_SELECTION_1 != Value)
-    {
-      VALUE_SELECTION_1 = Value;
-      ret_change = true;
-    }
-  }
-
-  if (ret_change)
-  {
-    CHANGED = true;
-  }
-  return ret_change;
-}
-
-bool INT_MULTI_SELECT::set_selection(int Selection)
-{
-  bool ret_change = false;
-
-  if (SELECTION != Selection)
-  {
-    SELECTION = Selection;
-    ret_change = true;
-  }
-
-  if (ret_change)
-  {
-    CHANGED = true;
-  }
-  return ret_change;
-}
-
-int INT_MULTI_SELECT::value_selection()
-{
-  return SELECTION;
-}
-
-int INT_MULTI_SELECT::value_selection_0()
-{
-  return VALUE_SELECTION_0;
-}
-
-int INT_MULTI_SELECT::value_selection_1()
-{
-  return VALUE_SELECTION_1;
-}
-
-int INT_MULTI_SELECT::value()
-{
-  if (SELECTION == 0)
-  {
-    return VALUE_SELECTION_0;
-  }
-  else
-  {
-    return VALUE_SELECTION_1;
-  }
-}
-
-// ---------------------------------------------------------------------------------------
-
 void PANEL::request(unsigned long Time, int Linger_Time, string Description)
 {
   REQUESTED = true;
@@ -268,7 +92,7 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_min_distance()
   //PANELS.ADSB_DISPLAY_TABLE = false;
   PANELS.ADSB_DISPLAY_MAP = true;
   
-  PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 1);
+  ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 1);
 }
 
 void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
@@ -277,7 +101,7 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
   //PANELS.ADSB_DISPLAY_TABLE = false;
   PANELS.ADSB_DISPLAY_MAP = true;
   
-  PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 2);
+  ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 2);
 }
 
 // ---
