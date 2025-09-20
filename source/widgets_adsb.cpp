@@ -629,19 +629,19 @@ void ADSB_RANGE::set_range(float Range_Miles)
 
 void ADSB_RANGE::zoom_in(system_data &sdSysData)
 { 
-  if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL > 0)
+  if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL > 0)
   {
-    sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL -= 1;
-    set_zoom_level(sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL);
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL -= 1;
+    set_zoom_level(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
   }
 }
 
 void ADSB_RANGE::zoom_out(system_data &sdSysData)
 {
-  if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL < 16)
+  if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL < 16)
   {
-    sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL += 1;
-    set_zoom_level(sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL);
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL += 1;
+    set_zoom_level(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
   }
 }
 
@@ -659,13 +659,15 @@ void ADSB_RANGE::draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec
 {
   WORKING_AREA = Working_Area;
 
-  // initial start
-  if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL == -1)
+  // initial start  (CRITICAL.  PROGRAM WILL HARD LOCK IF NOT RAN)
+  if (ZOOM_LEVEL_UNSET == true)
   {
+    ZOOM_LEVEL_UNSET = false;
+
     RADIUS_CIRCLE_POINT_SIZE = WORKING_AREA.w / 2.0f * 0.6f;
 
-    sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL = 13;     // Default start zoom level
-    set_zoom_level(sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL);
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL = 1;     // Default start zoom level
+    set_zoom_level(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
   }
 
   CENTER = point_position_center(WORKING_AREA);
@@ -870,7 +872,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
   if (BC_MINUS.button_color(sdSysData, "-", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
   {
     SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-    sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, 0);
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, 0);
     RANGE_INDICATOR.zoom_in(sdSysData);
   }
 
@@ -881,7 +883,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
   if (BC_PLUS.button_color(sdSysData, "+", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
   {
     SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-    sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, 0);
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, 0);
     RANGE_INDICATOR.zoom_out(sdSysData);
   }
 
@@ -902,12 +904,13 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
   {
     ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (4.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
-    if (BTC_CENT.button_toggle_color(sdSysData, "CENT\n(On)", "CENT\n(Off)", RANGE_INDICATOR.gps_display_current_location(sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS),
-                                    RAS_GREEN, RAS_BLUE, 
-                                    sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    if (BTC_CENT.button_toggle_color( sdSysData, "CENT\n(On)", "CENT\n(Off)", 
+                                      RANGE_INDICATOR.gps_display_current_location(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS),
+                                      RAS_GREEN, RAS_BLUE, 
+                                      sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-      RANGE_INDICATOR.gps_display_current_location_toggle(sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS);
+      RANGE_INDICATOR.gps_display_current_location_toggle(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
     }
   }
   else
@@ -918,7 +921,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
   }
 
   // Center on location
-  if (ACTIVE_GPS && sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS != 1)
+  if (ACTIVE_GPS && sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS != 1)
   {
     ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (5.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
@@ -927,7 +930,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
     if (BC_CENT_LOCATION.button_color(sdSysData, "CENT\nLOC", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-      sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS = 1;
+      sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS = 1;
     }
   }
   
@@ -938,24 +941,24 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
 
     if (BC_MIN.button_toggle_color(sdSysData, "MIN\n(On)", "MIN", 
-                                      ( sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0 && 
-                                        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 1), 
+                                      ( sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0 && 
+                                        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 1), 
                                       RAS_GREEN, RAS_BLUE, 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
 
-      if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1)
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1)
       {
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 1);
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 1);
       }
-      else if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 1)
+      else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 1)
       {
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 0);
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 0);
       }
       else
       {
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 1);
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 1);
       }
     }
 
@@ -965,24 +968,24 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
 
 
     if (BC_MAX.button_toggle_color(sdSysData, "MAX\n(On)", "MAX", 
-                                      ( sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0 && 
-                                        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 2), 
+                                      ( sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0 && 
+                                        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 2), 
                                       RAS_GREEN, RAS_BLUE, 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
 
-      if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1)
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1)
       {
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 2);
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 2);
       }
-      else if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 2)
+      else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 2)
       {
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 0);
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 0);
       }
       else
       {
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 2);
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 2);
       }
     }
   }
@@ -995,24 +998,24 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
 
 
     if (BC_DRV.button_toggle_color(sdSysData, "DRV\n(On)", "DRV", 
-                                      ( sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1 && 
-                                        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_1() == 1),
+                                      ( sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1 && 
+                                        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_1() == 1),
                                       RAS_GREEN, RAS_BLUE, 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
 
-      if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0)
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0)
       {
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, 1);
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, 1);
       }
-      else if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_1() == 1)
+      else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_1() == 1)
       {
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, 0);
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, 0);
       }
       else
       {
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, 1);
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, 1);
       }
     }
   }
@@ -1261,7 +1264,7 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
     ImGui::Text("  POS: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_AIRCRAFT.c_str());
 
     // Maps and Other Information
-    RANGE_INDICATOR.draw_info(sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS);
+    RANGE_INDICATOR.draw_info(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
 
     // GPS Information
     if (ACTIVE_GPS)
@@ -1315,7 +1318,7 @@ void ADSB_MAP::screen_draw_map_tracks(ImDrawList *Draw_List, system_data &sdSysD
   sdSysData.MAP_SYSTEM.RANGE_RADIUS_CIRCLE_POINT_SIZE = RANGE_INDICATOR.RADIUS_CIRCLE_POINT_SIZE;
   sdSysData.MAP_SYSTEM.CURRENT_RESOLUTION = RANGE_INDICATOR.resolution();
   sdSysData.MAP_SYSTEM.CURRENT_WORKING_AREA = WORKING_AREA;
-  sdSysData.MAP_SYSTEM.CURRENT_CENTER_LAT_LON = RANGE_INDICATOR.get_center_lat_lon(sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS);
+  sdSysData.MAP_SYSTEM.CURRENT_CENTER_LAT_LON = RANGE_INDICATOR.get_center_lat_lon(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
   sdSysData.MAP_SYSTEM.CURRENT_MAP_BEARING = MAP_HEADING_DEGREES_LATEST;
   sdSysData.MAP_SYSTEM.CURRENT_LAT_LON_SCALE = RANGE_INDICATOR.ll_2_pt_scale();
 
@@ -1325,7 +1328,7 @@ void ADSB_MAP::screen_draw_map_tracks(ImDrawList *Draw_List, system_data &sdSysD
     draw_track_2(Draw_List, sdSysData, WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), 
                 (int)RANGE_INDICATOR.range(), 6.0f, 
                 GPS_ALTITUDE_COLOR_SCALE, 
-                RANGE_INDICATOR.get_center_lat_lon(sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS), 
+                RANGE_INDICATOR.get_center_lat_lon(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS), 
                 MAP_HEADING_DEGREES_LATEST, sdSysData.MAP_SYSTEM.DISPLAYED_TRACK);
 
   }
@@ -1335,7 +1338,7 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
 {
   bool draw = false;
   ImVec2 gps_pos = point_position_lat_lon(WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), 
-                                          RANGE_INDICATOR.get_center_lat_lon(sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS), 
+                                          RANGE_INDICATOR.get_center_lat_lon(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS), 
                                           RANGE_INDICATOR.get_gps_lat_lon(), MAP_HEADING_DEGREES_LATEST, draw);
 
   // Draw point position compass
@@ -1362,7 +1365,7 @@ void ADSB_MAP::screen_draw_position_marker(ImDrawList *Draw_List, system_data &s
     ImGui::SetCursorScreenPos(ImVec2(gps_pos.x - 20.0f, gps_pos.y - 20.0f));
     if (ImGui::InvisibleButton("GPS CURRENT POSITION COMPASS", ImVec2(40.0f, 40.0f)))
     {
-      sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS = 1;
+      sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS = 1;
     }
   }
 }
@@ -1403,7 +1406,7 @@ void ADSB_MAP::screen_draw_aircraft(ImDrawList *Draw_List, system_data &sdSysDat
       AIRCRAFT tmp_clicked_aircraft = draw_aircraft_map_marker(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.AIRCRAFT_DETAIL_LIST[aircraft], 
                                                                 Draw_List, sdSysData, WORKING_AREA, 
                                                                 RANGE_INDICATOR.ll_2_pt_scale(), (int)RANGE_INDICATOR.range(), 
-                                                                RANGE_INDICATOR.get_center_lat_lon(sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS), 
+                                                                RANGE_INDICATOR.get_center_lat_lon(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS), 
                                                                 MAP_HEADING_DEGREES_LATEST, 
                                                                 ALTITUDE_COLOR_SCALE);
       
@@ -1411,7 +1414,7 @@ void ADSB_MAP::screen_draw_aircraft(ImDrawList *Draw_List, system_data &sdSysDat
       {
         sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT = tmp_clicked_aircraft;
         sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT_HEX = tmp_clicked_aircraft.HEX.get_str_value();
-        sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS = 2;
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS = 2;
       }
     }
   }
@@ -1480,15 +1483,15 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // -------------------------------------------------------------------------------------
 
   // Update current position if requested by panel
-  if (sdSysData.PANEL_CONTROL.MAP_CENTER_TO_LAST_KNOWN_POSITION)
+  if (sdSysData.PANEL_CONTROL.PANELS.MAP_CENTER_TO_LAST_KNOWN_POSITION)
   {
     // Will force map to center on current location
     // Set to map to focus on current location.  first start, likely -9 meaning no location
-    sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS = 1;
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS = 1;
 
-    sdSysData.PANEL_CONTROL.MAP_CENTER_TO_LAST_KNOWN_POSITION = false;
-    RANGE_INDICATOR.set_gps_pos_lat_lon(sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION, 
-                                        sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS);
+    sdSysData.PANEL_CONTROL.PANELS.MAP_CENTER_TO_LAST_KNOWN_POSITION = false;
+    RANGE_INDICATOR.set_gps_pos_lat_lon(sdSysData.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION, 
+                                        sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
   }
 
   // -------------------------------------------------------------------------------------
@@ -1497,39 +1500,39 @@ void ADSB_MAP::draw(system_data &sdSysData)
   //  And, back again when Airplanes show up.
   bool ACTIVE_ADSB_WITH_AIRCRAFT = ACTIVE_ADSB && sdSysData.AIRCRAFT_COORD.DATA.POSITIONED_AIRCRAFT > 0;
   if (ACTIVE_ADSB_WITH_AIRCRAFT == false && 
-      sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0)
+      sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0)
   {
     RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO_HOLD_OFF = true;
-    sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection(1);
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection(1);
   }
   else if ( ACTIVE_ADSB_WITH_AIRCRAFT && 
             RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO_HOLD_OFF)
   {
     RANGE_INDICATOR.AIRCRAFT_COUNT_ZERO_HOLD_OFF = false;
-    sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection(0);
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection(0);
   }
   
 
   // Return to normal zoom level if drv minmax turned off.  
-  if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.CHANGED)
+  if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.CHANGED)
   {
     // Monitor zoom level changes from internal or panel control.
     // zoom return if min or max or drv turned off.
 
-    sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.CHANGED = false;
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.CHANGED = false;
 
-    if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0)
+    if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0)
     {
-      if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 0)
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 0)
       {
-        RANGE_INDICATOR.zoom_return(sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL);
+        RANGE_INDICATOR.zoom_return(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
       }
     }
-    else if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1)
+    else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1)
     {
-      if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_1() == 0)
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_1() == 0)
       {
-        RANGE_INDICATOR.zoom_return(sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL);
+        RANGE_INDICATOR.zoom_return(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
       }
     }
   }
@@ -1537,17 +1540,17 @@ void ADSB_MAP::draw(system_data &sdSysData)
   // Adjust dynamic zooms, but only if GPS Active, bc all mesured from position
   if (ACTIVE_GPS)
   {
-    if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0)
+    if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0)
     {
       // set ADSB Range if min or max
-      if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_0() > 0)
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() > 0)
       { 
         // Set zoom level to range.
-        if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 1)        // Zoom at MIN aircraft distance
+        if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 1)        // Zoom at MIN aircraft distance
         {
           RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_CLOSEST * 0.75f);
         }
-        else if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 2)   // Zoom at MAX aircraft distance
+        else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 2)   // Zoom at MAX aircraft distance
         {
           RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_FURTHEST * 0.75f);
         }
@@ -1557,7 +1560,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
     else // if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1)
     {
       // set Driving Range in DRV
-      if (sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_1() == 1)
+      if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_1() == 1)
       {    
         // Check all ADSB_RANGE_INDICATOR driving zooming
         if (ACTIVE_AUTOMOBILE)
@@ -1599,7 +1602,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
       // Check and store GPS Current Location
       RANGE_INDICATOR.set_gps_pos_lat_lon(DOUBLE_VEC2(sdSysData.GPS_SYSTEM.CURRENT_POSITION.LATITUDE, 
                                                       sdSysData.GPS_SYSTEM.CURRENT_POSITION.LONGITUDE), 
-                                                      sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS);
+                                                      sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
     }
   }
 
@@ -1610,13 +1613,13 @@ void ADSB_MAP::draw(system_data &sdSysData)
       // Check and store AIRCRAFT Current Location
       RANGE_INDICATOR.set_aircraft_pos_lat_lon(DOUBLE_VEC2( sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.POSITION.LATITUDE.get_double_value(), 
                                                             sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.POSITION.LONGITUDE.get_double_value()), 
-                                                            sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS);
+                                                            sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
     }
   }
 
   // -------------------------------------------------------------------------------------
 
-  RANGE_INDICATOR.range_update(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS);
+  RANGE_INDICATOR.range_update(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
 
   // -------------------------------------------------------------------------------------
 
@@ -1624,7 +1627,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
 
   if (!NORTH_UP)
   {
-    if (sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS == 1)
+    if (sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS == 1)
     {
       // Map direction for GPS
       if (ACTIVE_COMPASS && ACTIVE_GPS)
@@ -1651,7 +1654,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
         MAP_HEADING_DEGREES.set_value(0.0f);
       }
     }
-    else if (sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS == 2)
+    else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS == 2)
     {
       // Map Heading for Aircraft
       if (sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TRACKED_AIRCRAFT.TRACK.conversion_success())
@@ -1727,7 +1730,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
   {
     draw_landmark(draw_list_map, sdSysData, sdSysData.MAP_SYSTEM.LANDMARKS[landmark], 
                     WORKING_AREA, RANGE_INDICATOR.ll_2_pt_scale(), 
-                    RANGE_INDICATOR.get_center_lat_lon(sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS), 
+                    RANGE_INDICATOR.get_center_lat_lon(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS), 
                     MAP_HEADING_DEGREES_LATEST, RANGE_INDICATOR.range());
   }
 

@@ -92,7 +92,7 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_min_distance()
   //PANELS.ADSB_DISPLAY_TABLE = false;
   PANELS.ADSB_DISPLAY_MAP = true;
   
-  ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 1);
+  PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 1);
 }
 
 void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
@@ -101,7 +101,7 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
   //PANELS.ADSB_DISPLAY_TABLE = false;
   PANELS.ADSB_DISPLAY_MAP = true;
   
-  ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 2);
+  PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 2);
 }
 
 // ---

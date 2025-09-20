@@ -69,6 +69,7 @@ target_sources(rasfled PRIVATE
   animations_handler.cpp
   automobile_handler.cpp
   interface.cpp
+  terminal.cpp
   map_hardcode.cpp
   map.cpp
   aircraft_coordinator.cpp
@@ -79,6 +80,7 @@ target_sources(rasfled PRIVATE
   widgets_adsb.cpp
   widgets_alerts.cpp
   widgets_dot_dot_dot.cpp
+  widgets_terminal.cpp
   sounds.cpp
   screen4.cpp
   system.cpp

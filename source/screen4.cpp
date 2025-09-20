@@ -574,6 +574,8 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
     glfwPollEvents();
 
     // Check for keybaord input
+    // Disable if on terminal screen
+    if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN != 6)
     {
       int character_pressed = 0;
       bool shift_pressed = false;
@@ -1091,6 +1093,37 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               }
             }
 
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6)
+            {
+              if (sdSysData.CAR_INFO.active())
+              {
+                ImGui::BeginChild("TERMINAL", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
+                  ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+
+                  TERMINAL.display(sdSysData);
+                }
+                ImGui::EndChild();
+
+                ImGui::SameLine();
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
+              }
+              else
+              {
+                ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
+                ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+                TERMINAL.display(sdSysData);
+              }
+            }
+
             else
             {
               ImGui::Begin(" ", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
@@ -1111,7 +1144,6 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x - sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB.x - (15.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
-
             if (BTC_TAB_CONSOLE.button_toggle_color(sdSysData, "Console", "Console", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 0, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 0;
@@ -1154,6 +1186,13 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             if (BTC_TAB_DOTDOTDOT.button_toggle_color(sdSysData, "...", "...", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 5, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 5;
+            }
+
+            ImGui::SameLine();
+
+            if (BTC_TAB_TERMINAL.button_toggle_color(sdSysData, "TERMINAL", "TERMINAL", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            {
+              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 6;
             }
 
             ImGui::SameLine();

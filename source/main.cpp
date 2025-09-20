@@ -742,6 +742,11 @@ int loop_2(bool TTY_Only)
   // Set initial save_running_state_timer 15 seconds out for first save
   save_running_state_timer.set(sdSystem.PROGRAM_TIME.now(), 15 * 1000);
 
+  // -------------------------------------------------------------------------------------
+
+  // Create Terminal Thread
+  sdSystem.TERMINAL_THREAD.create();
+
   // ---------------------------------------------------------------------------------------
   //  Repeating Sleeping Loop until eXit is triggered.
   // ---------------------------------------------------------------------------------------
@@ -1027,8 +1032,8 @@ int loop_2(bool TTY_Only)
         {
           if (sdSystem.GPS_SYSTEM.valid_position())
           {
-            sdSystem.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.x = sdSystem.GPS_SYSTEM.CURRENT_POSITION.LATITUDE;
-            sdSystem.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.y = sdSystem.GPS_SYSTEM.CURRENT_POSITION.LONGITUDE;
+            sdSystem.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION.x = sdSystem.GPS_SYSTEM.CURRENT_POSITION.LATITUDE;
+            sdSystem.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION.y = sdSystem.GPS_SYSTEM.CURRENT_POSITION.LONGITUDE;
           }
         }
 
@@ -1183,10 +1188,7 @@ int loop_2(bool TTY_Only)
 
     // ---------------------------------------------------------------------------------------
     // Process Alerts
-    if (automobile_handler.CHANGED)
-    {
-      ALERTS_COORDINATOR.check_for_alerts(sdSystem, automobile_handler);
-    }
+    ALERTS_COORDINATOR.check_for_alerts(sdSystem, automobile_handler);
 
     // ---------------------------------------------------------------------------------------
     // Is display to console ready -----------------

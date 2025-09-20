@@ -35,6 +35,7 @@
 #include "rasapi.h"
 #include "panels.h"
 #include "map.h"
+#include "terminal.h"
 
 #include "screen4_helper.h"
 
@@ -209,6 +210,9 @@ class system_data
   deque<int>      intCHANNEL_GROUP_EVENTS_COUNTS;
 
   COMMAND_THREAD  COMMAND_THREADS;
+
+  // Terminal
+  TERMINAL        TERMINAL_THREAD;
 
   // Radio Variables
   AIRCRAFT_COORDINATOR AIRCRAFT_COORD;

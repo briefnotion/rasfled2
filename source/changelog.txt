@@ -1,3 +1,11 @@
+2.317_250920
+  - Corrected a few errors related to the Save Running State.
+  - Added a very simple "Terminal" tab.  Likely to be moved or hidden 
+      in the future. Simple text only. Does not support, color, vt escape  
+      sequences, or any bash features. Does not support CTRL sequences, 
+      including CTRL-C. Good only for ls, cat, cd, cp, and the like. 
+      Mostly for testing at this time.
+
 2.316_250919
   - More work and cleaning code routines to save zoom current zoom 
       level.

@@ -26,6 +26,7 @@
 #include "widgets_advertisement.h"
 #include "widgets_alerts.h"
 #include "widgets_dot_dot_dot.h"
+#include "widgets_terminal.h"
 #include "stringthings.h"
 #include "fled_time.h"
 #include "animations_handler.h"
@@ -83,6 +84,7 @@ class SCREEN4
   BUTTON_TOGGLE_COLOR BTC_TAB_ADSB;
   BUTTON_TOGGLE_COLOR BTC_TAB_LOGS;
   BUTTON_TOGGLE_COLOR BTC_TAB_DOTDOTDOT;
+  BUTTON_TOGGLE_COLOR BTC_TAB_TERMINAL;
 
   BUTTON_TOGGLE_COLOR BTC_TIMER;
   BUTTON_TOGGLE_COLOR BTC_OVER_HEAD_LIGHTS;
@@ -176,6 +178,7 @@ class SCREEN4
   TEXT_CONSOLE DAEMON_LOG;
   ADVERTISEMENT_SCREENS ADVERTISEMENTS;
   DOT_DOT_DOT_SCREEN DOT_DOT_DOT;
+  TERMINAL_SCREEN TERMINAL;
 
   // --- 
 

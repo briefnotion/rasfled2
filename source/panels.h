@@ -33,6 +33,7 @@ class SCREEN4_PANELS
   //  3 - not coded
   //  4 - Logs
   //  5 - Dot Dot Dot
+  //  6 - Terminal
 
 
 
@@ -66,11 +67,29 @@ class SCREEN4_PANELS
   bool ADSB_DISPLAY_TABLE = false;
   bool ADSB_DISPLAY_MAP = true;
 
-  //int ADSB_RANGE_INDICATOR_ZOOM_MIN_MAX = 0;
-  // 0  - OFF
-  // 1  - MIN (On)
-  // 2  - MAX (On)
-  // 3  - DRV (On)
+  INT_MULTI_SELECT ADSB_ZOOM_MODE_SELECTION;
+  // Selecion 0 - Aircraft
+  //  0 = off
+  //  1 = min
+  //  2 = max
+  // Selecion 1 - Driving
+  //  0 = off
+  //  1 = driving
+
+  int ADSB_MAP_LOCATION_FOCUS = 0;
+  // -2 - not on aircraft (counnter for toggle)
+  // -1 - on gps_pos (counnter for toggle)
+  //  0 - not specified
+  //  1 - on gps_pos
+  //  2 - on aircraft
+
+  int ADSB_ZOOM_LEVEL = 1;
+  bool ADSB_ZOOM_LEVEL_CHANGED = true;  // Used to determine if zoom level has changed
+                                        // through the panels.
+  
+  // Last Known Good Position
+  DOUBLE_VEC2 LAST_KNOWN_GOOD_POSITION;
+  bool MAP_CENTER_TO_LAST_KNOWN_POSITION = false;
 };
 
 
@@ -143,30 +162,6 @@ class SCREEN4_PANEL_CONTROL
   PANEL ADSB_MAP_MIN_DISTANCE;
   PANEL ADSB_MAP_MAX_DISTANCE;
   
-  INT_MULTI_SELECT ADSB_ZOOM_MODE_SELECTION;
-  // Selecion 0 - Aircraft
-  //  0 = off
-  //  1 = min
-  //  2 = max
-  // Selecion 1 - Driving
-  //  0 = off
-  //  1 = driving
-
-  int ADSB_MAP_LOCATION_FOCUS = 0;
-  // -2 - not on aircraft (counnter for toggle)
-  // -1 - on gps_pos (counnter for toggle)
-  //  0 - not specified
-  //  1 - on gps_pos
-  //  2 - on aircraft
-
-  int ADSB_ZOOM_LEVEL = -1;
-  bool ADSB_ZOOM_LEVEL_CHANGED = true;  // Used to determine if zoom level has changed
-                                        // through the panels.
-  
-  // Last Known Good Position
-  DOUBLE_VEC2 LAST_KNOWN_GOOD_POSITION;
-  bool MAP_CENTER_TO_LAST_KNOWN_POSITION = false;
-
   // Notation 
   string EXTRA;
 

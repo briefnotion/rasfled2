@@ -89,7 +89,7 @@ class ADSB_RANGE
 {
   private:
   
-  //int ZOOM_LEVEL = -1;
+  bool ZOOM_LEVEL_UNSET = true;
   
   ImVec4 WORKING_AREA;
   ImVec2 CENTER;

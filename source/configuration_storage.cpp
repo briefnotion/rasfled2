@@ -357,9 +357,9 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
       // assign panels settings
       if (last_known_latitude.conversion_success() && last_known_longitude.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.x = last_known_latitude.get_double_value();
-        sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.y = last_known_longitude.get_double_value();
-        sdSysData.PANEL_CONTROL.MAP_CENTER_TO_LAST_KNOWN_POSITION = true;
+        sdSysData.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION.x = last_known_latitude.get_double_value();
+        sdSysData.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION.y = last_known_longitude.get_double_value();
+        sdSysData.PANEL_CONTROL.PANELS.MAP_CENTER_TO_LAST_KNOWN_POSITION = true;
       }
       if (main_display_screen.conversion_success())
       {
@@ -397,17 +397,17 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
           adsb_range_indicator_zoom_selection_0.conversion_success() && 
           adsb_range_indicator_zoom_selection_1.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection(adsb_range_indicator_zoom_selection.get_int_value());
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, adsb_range_indicator_zoom_selection_0.get_int_value());
-        sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, adsb_range_indicator_zoom_selection_1.get_int_value());
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection(adsb_range_indicator_zoom_selection.get_int_value());
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, adsb_range_indicator_zoom_selection_0.get_int_value());
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, adsb_range_indicator_zoom_selection_1.get_int_value());
       }
       if (adsb_zoom_level.conversion_success())
       {
-        //sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL = adsb_zoom_level.get_int_value();
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL = adsb_zoom_level.get_int_value();
       }
       if (adsb_map_location_focus.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS = adsb_map_location_focus.get_int_value();
+        sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS = adsb_map_location_focus.get_int_value();
       }
       if (atonomous.conversion_success())
       {
@@ -458,8 +458,8 @@ bool save_running_state_json(system_data &sdSysData, string strFilename)
     state_json.ROOT.create_label_value(quotify("description"), quotify(sdSysData.get_running_color_str()));
 
     // Last known position
-    state_json.ROOT.create_label_value(quotify("last known latitude"), quotify(to_string(sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.x)));
-    state_json.ROOT.create_label_value(quotify("last known longitude"), quotify(to_string(sdSysData.PANEL_CONTROL.LAST_KNOWN_GOOD_POSITION.y)));
+    state_json.ROOT.create_label_value(quotify("last known latitude"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION.x)));
+    state_json.ROOT.create_label_value(quotify("last known longitude"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION.y)));
 
     // Main Screen
     state_json.ROOT.create_label_value(quotify("MAIN_DISPLAY_SCREEN"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN)));
@@ -474,11 +474,11 @@ bool save_running_state_json(system_data &sdSysData, string strFilename)
     // ADSB
     state_json.ROOT.create_label_value(quotify("ADSB_DISPLAY_TABLE"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE)));
     state_json.ROOT.create_label_value(quotify("ADSB_DISPLAY_MAP"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_MAP)));
-    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION"), quotify(to_string(sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection())));
-    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_0"), quotify(to_string(sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_0())));
-    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_1"), quotify(to_string(sdSysData.PANEL_CONTROL.ADSB_ZOOM_MODE_SELECTION.value_selection_1())));
-    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_LEVEL"), quotify(to_string(sdSysData.PANEL_CONTROL.ADSB_ZOOM_LEVEL)));
-    state_json.ROOT.create_label_value(quotify("ADSB_MAP_LOCATION_FOCUS"), quotify(to_string(sdSysData.PANEL_CONTROL.ADSB_MAP_LOCATION_FOCUS)));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection())));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_0"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0())));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_1"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_1())));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_LEVEL"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL)));
+    state_json.ROOT.create_label_value(quotify("ADSB_MAP_LOCATION_FOCUS"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS)));
 
     // Panel Settings
     state_json.ROOT.create_label_value(quotify("ATONOMOUS"), quotify(to_string(sdSysData.PANEL_CONTROL.autonomous_state())));
