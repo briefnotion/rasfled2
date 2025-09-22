@@ -70,6 +70,9 @@ class MAP
 
   double TIME_ERROR = 0.0;
 
+  void build_kml_header(deque<string> &KML_Track, DETAILED_TRACK_POINT &First_Point);
+  void build_kml_footer(deque<string> &KML_Track);
+
   void add_landmark(DOUBLE_VEC2 Lat_Lon, string Display_Name, int Type);
   // Adds landmark to vector list.
 
@@ -80,17 +83,21 @@ class MAP
 
   void track_distill( DETAILED_TRACK_ALTERNATIVE &Original_Track, 
                       DETAILED_TRACK_ALTERNATIVE &Recent_Track, 
-                      DETAILED_TRACK_ALTERNATIVE &Old_Track);
+                      DETAILED_TRACK_ALTERNATIVE &Old_Track,
+                      deque<string> &KML_Track);
   // Reads Original Track. Splits and 
   // Returns Recent Track and Old track  
 
   void track_save_detailed_forgetable(DETAILED_TRACK_ALTERNATIVE &Track, string Filename);
+  void track_save_kml_forgetable(deque<string> &KML_Track, string Filename);
   bool track_load_detailed( DETAILED_TRACK_ALTERNATIVE &Track, 
                             DETAILED_TRACK_ALTERNATIVE &Track_Discard, 
+                            deque<string> &KML_Track, 
                             string Filename);
 
   void rebuild_track(CONSOLE_COMMUNICATION &cons);
   // Starts a track_distill on current track.
+  // Track rebuild on large system time change.
 
   void generate_displayed_track(double Resolution);
 

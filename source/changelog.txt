@@ -1,3 +1,9 @@
+2.318_250922
+  - Added altitude to the saved track information.
+  - History save will also create a kml file (simple method), actually 
+      kinda interesting. it lacks details, but easy to view.  Unsure 
+      if kml altitude distance should be ft or m. Stored in meters.
+
 2.317_250920
   - Corrected a few errors related to the Save Running State.
   - Added a very simple "Terminal" tab.  Likely to be moved or hidden 

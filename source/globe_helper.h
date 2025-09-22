@@ -203,8 +203,10 @@ class DETAILED_TRACK_POINT
   double RESOLUTION = 0.01;
   
   double TIMESTAMP = 0.0;
-  double LATITUDE = 0.0f;
-  double LONGITUDE = 0.0f;
+
+  double LATITUDE = 0.0;
+  double LONGITUDE = 0.0;
+  float ALTITUDE = 0.0f;
 
   float TRUE_HEADING = 0;
 

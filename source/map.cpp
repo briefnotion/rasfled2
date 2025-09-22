@@ -35,6 +35,7 @@ void track_save_detailed(const DETAILED_TRACK_ALTERNATIVE &Track, const string F
     position_info.create_label_value(quotify("accuracy"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].ACCURACY)));
     position_info.create_label_value(quotify("value"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].VALUE)));
     position_info.create_label_value(quotify("resolution"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].RESOLUTION)));
+    position_info.create_label_value(quotify("altitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].ALTITUDE)));
 
     JSON_ENTRY latitude_longitude;
     latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LATITUDE)));
@@ -98,6 +99,68 @@ void PIXEL_SIZE_META_DATA::check_circle_size_pixels(float Circle_Size_Pixels)
 }
 
 // -------------------------------------------------------------------------------------
+
+void MAP::build_kml_header(deque<string> &KML_Track, DETAILED_TRACK_POINT &First_Point)
+{
+  KML_Track.push_back("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
+  KML_Track.push_back("<kml xmlns=\"http://www.opengis.net/kml/2.2\"");
+  KML_Track.push_back(" xmlns:gx=\"http://www.google.com/kml/ext/2.2\">");
+
+  KML_Track.push_back("");
+
+  KML_Track.push_back("<Document>");
+  KML_Track.push_back("<Style id=\"track\">");
+  KML_Track.push_back("  <LineStyle>");
+  KML_Track.push_back("    <color>ff0000ff</color>");
+  KML_Track.push_back("    <width>5</width>");
+  KML_Track.push_back("  </LineStyle>");
+  KML_Track.push_back("</Style>");
+  
+  KML_Track.push_back("<Style id=\"track0\">");
+  KML_Track.push_back("  <LineStyle>");
+  KML_Track.push_back("    <color>ff0000ff</color>");
+  KML_Track.push_back("    <width>5</width>");
+  KML_Track.push_back("  </LineStyle>");
+  KML_Track.push_back("</Style>");
+  
+  KML_Track.push_back("<StyleMap id=\"track1\">");
+  KML_Track.push_back("  <Pair>");
+  KML_Track.push_back("    <key>normal</key>");
+  KML_Track.push_back("    <styleUrl>#track</styleUrl>");
+  KML_Track.push_back("  </Pair>");
+  KML_Track.push_back("  <Pair>");
+  KML_Track.push_back("    <key>highlight</key>");
+  KML_Track.push_back("    <styleUrl>#track0</styleUrl>");
+  KML_Track.push_back("  </Pair>");
+  KML_Track.push_back("</StyleMap>");
+  
+  KML_Track.push_back("");
+
+  KML_Track.push_back("<Placemark>");
+  KML_Track.push_back("  <name>gx:" + file_format_system_time(First_Point.TIMESTAMP) + "</name>");
+  KML_Track.push_back("  <LookAt>");
+  KML_Track.push_back("    <longitude>" + to_string(First_Point.LONGITUDE) + "</longitude>");
+  KML_Track.push_back("    <latitude>" + to_string(First_Point.LATITUDE) + "</latitude>");
+  //KML_Track.push_back("    <heading>0</heading>");
+  //KML_Track.push_back("    <tilt>0</tilt>");
+  KML_Track.push_back("    <range>5000</range>");
+  KML_Track.push_back("    <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>");
+  KML_Track.push_back("  </LookAt>");
+  KML_Track.push_back("  <styleUrl>#track1</styleUrl>");
+  KML_Track.push_back("  <LineString>");
+  KML_Track.push_back("    <extrude>1</extrude>");
+  KML_Track.push_back("    <gx:altitudeMode>relativeToSeaFloor</gx:altitudeMode>");
+  KML_Track.push_back("    <coordinates>");
+}
+
+void MAP::build_kml_footer(deque<string> &KML_Track)
+{
+  KML_Track.push_back("    </coordinates>");
+  KML_Track.push_back("  </LineString>");
+  KML_Track.push_back("</Placemark>");
+  KML_Track.push_back("</Document>");
+  KML_Track.push_back("</kml>");
+}
 
 void MAP::add_landmark(DOUBLE_VEC2 Lat_Lon, string Display_Name, int Type)
 {
@@ -481,12 +544,15 @@ bool MAP::map_load()
 
 void MAP::track_distill(DETAILED_TRACK_ALTERNATIVE &Original_Track, 
                         DETAILED_TRACK_ALTERNATIVE &Recent_Track, 
-                        DETAILED_TRACK_ALTERNATIVE &Old_Track)
+                        DETAILED_TRACK_ALTERNATIVE &Old_Track,
+                        deque<string> &KML_Track)
 {
   double current_system_time = get_current_timestamp();
 
   Recent_Track.clear();
   Old_Track.clear();
+
+  bool header_set = false;
 
   for (size_t pos = 0; pos < Original_Track.TRACK_POINTS_DETAILED.size(); pos++)
   {
@@ -497,7 +563,27 @@ void MAP::track_distill(DETAILED_TRACK_ALTERNATIVE &Original_Track,
     else
     {
       Old_Track.TRACK_POINTS_DETAILED.push_back(Original_Track.TRACK_POINTS_DETAILED[pos]);
+
+      // Build KML
+      {
+        if (header_set == false)
+        {
+          build_kml_header(KML_Track, Original_Track.TRACK_POINTS_DETAILED[pos]);
+          header_set = true;
+        }
+        
+        string kml_coordinate =  "      " + to_string(Original_Track.TRACK_POINTS_DETAILED[pos].LONGITUDE) +  // Longitude
+                                      "," + to_string(Original_Track.TRACK_POINTS_DETAILED[pos].LATITUDE) +   // Latitude
+                                      "," + to_string(Original_Track.TRACK_POINTS_DETAILED[pos].ALTITUDE);    // Altitude
+
+        KML_Track.push_back(kml_coordinate);
+      }
     }
+  }
+
+  if (KML_Track.size() > 0)
+  {
+    build_kml_footer(KML_Track);
   }
 }
 
@@ -510,7 +596,8 @@ void MAP::track_save_detailed_forgetable(DETAILED_TRACK_ALTERNATIVE &Track, stri
 }
 
 bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track, 
-                              DETAILED_TRACK_ALTERNATIVE &Track_Discard, 
+                              DETAILED_TRACK_ALTERNATIVE &Track_Discard,
+                              deque<string> &KML_Track, 
                               string Filename)
 {
   bool ret_success = false;
@@ -545,6 +632,7 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
                 STRING_FLOAT  accuracy;
                 STRING_FLOAT  value;  
                 STRING_DOUBLE resolution;  
+                STRING_FLOAT altitude;  
                 STRING_DOUBLE location_latitude;
                 STRING_DOUBLE location_longitude;
 
@@ -555,6 +643,7 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
                   track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("accuracy", accuracy);
                   track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("value", value);
                   track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("resolution", resolution);
+                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("altitude", altitude);
 
                   if (track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].label() == "location")
                   {
@@ -572,6 +661,7 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
                 location.ACCURACY = accuracy.get_float_value();
                 location.VALUE = value.get_float_value();
                 location.RESOLUTION = resolution.get_double_value();
+                location.ALTITUDE = altitude.get_float_value();
                 location.LATITUDE = location_latitude.get_double_value();
                 location.LONGITUDE = location_longitude.get_double_value();
 
@@ -583,7 +673,7 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
       }
     }
 
-    track_distill(tmp_load_track, Track, Track_Discard);
+    track_distill(tmp_load_track, Track, Track_Discard, KML_Track);
   }
 
   /*
@@ -614,8 +704,9 @@ void MAP::rebuild_track(CONSOLE_COMMUNICATION &cons)
 {
   DETAILED_TRACK_ALTERNATIVE new_track;
   DETAILED_TRACK_ALTERNATIVE discard_track;
+  deque<string>             discard_kml_track;
 
-  track_distill(TRACK_2, new_track, discard_track);
+  track_distill(TRACK_2, new_track, discard_track, discard_kml_track);
   TRACK_2 = new_track;
 
   if (discard_track.TRACK_POINTS_DETAILED.size() > 0)
@@ -623,9 +714,13 @@ void MAP::rebuild_track(CONSOLE_COMMUNICATION &cons)
     string track_history_filename = PROPS.TRACK_HISTORY_FOLDER + "track_" + 
                                     file_format_system_time(discard_track.TRACK_POINTS_DETAILED[0].TIMESTAMP) + 
                                     ".json";
+    string track_kml_filename =     PROPS.TRACK_HISTORY_FOLDER + "track_" + 
+                                    file_format_system_time(discard_track.TRACK_POINTS_DETAILED[0].TIMESTAMP) + 
+                                    ".kml";
 
     cons.printw("Initiated history save \"" + track_history_filename);
     track_save_detailed_forgetable(discard_track, track_history_filename);
+    deque_string_to_file(track_kml_filename, discard_kml_track, false);
   }
 }
 
@@ -728,10 +823,11 @@ bool MAP::create()
 void MAP::load_track(CONSOLE_COMMUNICATION &cons, double Time_error)
 {
   DETAILED_TRACK_ALTERNATIVE  tmp_discard_track;
+  deque<string>             discard_kml_track;
 
   TIME_ERROR = Time_error;
 
-  if (track_load_detailed(TRACK_2, tmp_discard_track, PROPS.CURRENT_TRACK_FILENAME))
+  if (track_load_detailed(TRACK_2, tmp_discard_track, discard_kml_track, PROPS.CURRENT_TRACK_FILENAME))
   {
     cons.printw("Successfully loaded \"" + PROPS.CURRENT_TRACK_FILENAME);
 
@@ -740,11 +836,13 @@ void MAP::load_track(CONSOLE_COMMUNICATION &cons, double Time_error)
       string track_history_filename = PROPS.TRACK_HISTORY_FOLDER + "track_" + 
                                       file_format_system_time(tmp_discard_track.TRACK_POINTS_DETAILED[0].TIMESTAMP) + 
                                       ".json";
+      string track_kml_filename =     PROPS.TRACK_HISTORY_FOLDER + "track_" + 
+                                      file_format_system_time(tmp_discard_track.TRACK_POINTS_DETAILED[0].TIMESTAMP) + 
+                                      ".kml";
 
       cons.printw("Initiated history save \"" + track_history_filename);
       track_save_detailed_forgetable(tmp_discard_track, track_history_filename);
-
-
+      deque_string_to_file(track_kml_filename, discard_kml_track, false);
     }
   }
   else
@@ -820,12 +918,10 @@ void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long t
         tmp_track_point.RESOLUTION = LEVEL_OF_DETAIL_META.LOD[LEVEL_OF_DETAIL_META.LOD.size() -1];
       }
 
-
-
-
       tmp_track_point.TIMESTAMP = GPS_System.CURRENT_POSITION.UNIX_EPOC_NMEA_TIME;
       tmp_track_point.LATITUDE = GPS_System.CURRENT_POSITION.LATITUDE;
       tmp_track_point.LONGITUDE = GPS_System.CURRENT_POSITION.LONGITUDE;
+      tmp_track_point.ALTITUDE = GPS_System.CURRENT_POSITION.ALTITUDE.meters_val();
       tmp_track_point.TRUE_HEADING = GPS_System.CURRENT_POSITION.TRUE_HEADING.VALUE;
       tmp_track_point.VALUE = GPS_System.CURRENT_POSITION.SPEED.val_mph();
       tmp_track_point.ACCURACY = GPS_System.CURRENT_POSITION.ACCURACY_SCORE;
