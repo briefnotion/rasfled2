@@ -339,7 +339,11 @@ int SCREEN4::create(system_data &sdSysData)
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL2_Init();
+    
+    //ImGui_ImplOpenGL2_Init();
+
+    const char* glsl_version = "#version 300 es"; // For OpenGL ES 3.0+
+    ImGui_ImplOpenGL3_Init(glsl_version);
 
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
@@ -353,7 +357,8 @@ int SCREEN4::create(system_data &sdSysData)
     // Will track as "io.Fonts->Fonts.Data[1]" manually, for now.
 
     // Start the Dear ImGui frame
-    ImGui_ImplOpenGL2_NewFrame();
+    //ImGui_ImplOpenGL2_NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
     // Generate an empty from on create so Fonts, and whatever else is needed, can load.
@@ -660,7 +665,8 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
     // ---------------------------------------------------------------------------------------
 
     // Start the Dear ImGui frame
-    ImGui_ImplOpenGL2_NewFrame();
+    //ImGui_ImplOpenGL2_NewFrame();
+    ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
 
@@ -1871,7 +1877,8 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
     glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+    //ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+    ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     //glUseProgram(last_program);
 
     glfwMakeContextCurrent(window);
@@ -1961,7 +1968,8 @@ void SCREEN4::shutdown(system_data &sdSysData)
 {
   if (sdSysData.TTY_ONLY == false)
   {
-    ImGui_ImplOpenGL2_Shutdown();
+    //ImGui_ImplOpenGL2_Shutdown();
+    ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
 
     ImGui::DestroyContext();

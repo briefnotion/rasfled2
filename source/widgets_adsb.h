@@ -42,7 +42,6 @@
 
 using namespace std;
 
-
 // ---------------------------------------------------------------------------------------
 // Map Tools
 
@@ -113,7 +112,7 @@ class ADSB_RANGE
 
   private:
 
-  void set_zoom_level(int Zoom_Level);
+  void set_zoom_level(int Zoom_Level, int &Map_Location_Focus);
 
   public:
 
@@ -159,7 +158,7 @@ class ADSB_RANGE
   float range();
   // Distance in miles, the range is set at for viewing.
 
-  void set_range(float Range_Miles);
+  void set_range(float Range_Miles, int &Map_Location_Focus);
   // Set the distance in miles, the range is set at for viewing.
 
   void zoom_in(system_data &sdSysData);
@@ -170,7 +169,7 @@ class ADSB_RANGE
   // Increase the distance in miles, the range is set at for viewing, 
   //  by one.
 
-  void zoom_return(int Zoom_Level);
+  void zoom_return(int Zoom_Level,  int &Map_Location_Focus);
   // Set the zoom scale back to level.
 
   double resolution();

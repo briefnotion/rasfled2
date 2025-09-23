@@ -354,65 +354,69 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
                                                   "), " + color_desc);                                          
       sdSysData.set_running_color(color , color_desc);
 
+      // Create the panels in a local var.  set both later.
+      SCREEN4_PANELS panels_to_restore;
+
       // assign panels settings
       if (last_known_latitude.conversion_success() && last_known_longitude.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION.x = last_known_latitude.get_double_value();
-        sdSysData.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION.y = last_known_longitude.get_double_value();
-        sdSysData.PANEL_CONTROL.PANELS.MAP_CENTER_TO_LAST_KNOWN_POSITION = true;
+        panels_to_restore.LAST_KNOWN_GOOD_POSITION.x = last_known_latitude.get_double_value();
+        panels_to_restore.LAST_KNOWN_GOOD_POSITION.y = last_known_longitude.get_double_value();
+        panels_to_restore.MAP_CENTER_TO_LAST_KNOWN_POSITION = true;
       }
       if (main_display_screen.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = main_display_screen.get_int_value();
+        panels_to_restore.MAIN_DISPLAY_SCREEN = main_display_screen.get_int_value();
       }
       if (automobile_display_nova.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_NOVA = automobile_display_nova.get_int_value();
+        panels_to_restore.AUTOMOBILE_DISPLAY_NOVA = automobile_display_nova.get_int_value();
       }
       if (automobile_display_nova_screen.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_NOVA_SCREEN = automobile_display_nova_screen.get_int_value();
+        panels_to_restore.AUTOMOBILE_DISPLAY_NOVA_SCREEN = automobile_display_nova_screen.get_int_value();
       }
       if (automobile_nova_2_selection.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION = automobile_nova_2_selection.get_int_value();
+        panels_to_restore.AUTOMOBILE_NOVA_2_SELECTION = automobile_nova_2_selection.get_int_value();
       }
       if (automobile_display_mid_top.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_MID_TOP = automobile_display_mid_top.get_int_value();
+        panels_to_restore.AUTOMOBILE_DISPLAY_MID_TOP = automobile_display_mid_top.get_int_value();
       }
       if (automobile_display_mid_bottom.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_MID_BOTTOM = automobile_display_mid_bottom.get_int_value();
+        panels_to_restore.AUTOMOBILE_DISPLAY_MID_BOTTOM = automobile_display_mid_bottom.get_int_value();
       }
       if (adsb_display_table.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE = adsb_display_table.get_int_value();
+        panels_to_restore.ADSB_DISPLAY_TABLE = adsb_display_table.get_int_value();
       }
       if (adsb_display_map.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_MAP = adsb_display_map.get_int_value();
+        panels_to_restore.ADSB_DISPLAY_MAP = adsb_display_map.get_int_value();
       }
       if (adsb_range_indicator_zoom_selection.conversion_success() && 
           adsb_range_indicator_zoom_selection_0.conversion_success() && 
           adsb_range_indicator_zoom_selection_1.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection(adsb_range_indicator_zoom_selection.get_int_value());
-        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, adsb_range_indicator_zoom_selection_0.get_int_value());
-        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, adsb_range_indicator_zoom_selection_1.get_int_value());
+        panels_to_restore.ADSB_ZOOM_MODE_SELECTION.set_selection(adsb_range_indicator_zoom_selection.get_int_value());
+        panels_to_restore.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, adsb_range_indicator_zoom_selection_0.get_int_value());
+        panels_to_restore.ADSB_ZOOM_MODE_SELECTION.set_selection_value(1, adsb_range_indicator_zoom_selection_1.get_int_value());
       }
       if (adsb_zoom_level.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL = adsb_zoom_level.get_int_value();
+        panels_to_restore.ADSB_ZOOM_LEVEL = adsb_zoom_level.get_int_value();
       }
       if (adsb_map_location_focus.conversion_success())
       {
-        sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS = adsb_map_location_focus.get_int_value();
+        panels_to_restore.ADSB_MAP_LOCATION_FOCUS = adsb_map_location_focus.get_int_value();
       }
       if (atonomous.conversion_success())
       {
-        // Set both set of panels the same
-        sdSysData.PANEL_CONTROL.PANELS_ON = sdSysData.PANEL_CONTROL.PANELS;
+        // Set both set of panels the same not necessary, but for safe keeping.
+        sdSysData.PANEL_CONTROL.PANELS_ON = panels_to_restore;
+        sdSysData.PANEL_CONTROL.PANELS    = panels_to_restore;
         
         if (atonomous.get_int_value() == 0)
         {
@@ -452,33 +456,47 @@ bool save_running_state_json(system_data &sdSysData, string strFilename)
 
     CRGB color = sdSysData.get_running_color();
 
+    // Make a copy of the panels that need to be saved
+    // If atonomous has control (engaged), do not save them, instead save the backups.
+
+    SCREEN4_PANELS panels_to_save;
+
+    if (sdSysData.PANEL_CONTROL.autonomous_state() == 2)
+    {
+      panels_to_save = sdSysData.PANEL_CONTROL.PANELS_ON;
+    }
+    else
+    {
+      panels_to_save = sdSysData.PANEL_CONTROL.PANELS;
+    }
+
     state_json.ROOT.create_label_value(quotify("red"), quotify(to_string((int)(color.r))));
     state_json.ROOT.create_label_value(quotify("green"), quotify(to_string((int)(color.g))));
     state_json.ROOT.create_label_value(quotify("blue"), quotify(to_string((int)(color.b))));
     state_json.ROOT.create_label_value(quotify("description"), quotify(sdSysData.get_running_color_str()));
 
     // Last known position
-    state_json.ROOT.create_label_value(quotify("last known latitude"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION.x)));
-    state_json.ROOT.create_label_value(quotify("last known longitude"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.LAST_KNOWN_GOOD_POSITION.y)));
+    state_json.ROOT.create_label_value(quotify("last known latitude"), quotify(to_string(panels_to_save.LAST_KNOWN_GOOD_POSITION.x)));
+    state_json.ROOT.create_label_value(quotify("last known longitude"), quotify(to_string(panels_to_save.LAST_KNOWN_GOOD_POSITION.y)));
 
     // Main Screen
-    state_json.ROOT.create_label_value(quotify("MAIN_DISPLAY_SCREEN"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN)));
+    state_json.ROOT.create_label_value(quotify("MAIN_DISPLAY_SCREEN"), quotify(to_string(panels_to_save.MAIN_DISPLAY_SCREEN)));
     
     // Automobile
-    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_NOVA"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_NOVA)));
-    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_NOVA_SCREEN"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_NOVA_SCREEN)));
-    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_NOVA_2_SELECTION"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_NOVA_2_SELECTION)));
-    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_MID_TOP"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_MID_TOP)));
-    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_MID_BOTTOM"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.AUTOMOBILE_DISPLAY_MID_BOTTOM)));
+    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_NOVA"), quotify(to_string(panels_to_save.AUTOMOBILE_DISPLAY_NOVA)));
+    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_NOVA_SCREEN"), quotify(to_string(panels_to_save.AUTOMOBILE_DISPLAY_NOVA_SCREEN)));
+    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_NOVA_2_SELECTION"), quotify(to_string(panels_to_save.AUTOMOBILE_NOVA_2_SELECTION)));
+    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_MID_TOP"), quotify(to_string(panels_to_save.AUTOMOBILE_DISPLAY_MID_TOP)));
+    state_json.ROOT.create_label_value(quotify("AUTOMOBILE_DISPLAY_MID_BOTTOM"), quotify(to_string(panels_to_save.AUTOMOBILE_DISPLAY_MID_BOTTOM)));
 
     // ADSB
-    state_json.ROOT.create_label_value(quotify("ADSB_DISPLAY_TABLE"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_TABLE)));
-    state_json.ROOT.create_label_value(quotify("ADSB_DISPLAY_MAP"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_DISPLAY_MAP)));
-    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection())));
-    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_0"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0())));
-    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_1"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_1())));
-    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_LEVEL"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL)));
-    state_json.ROOT.create_label_value(quotify("ADSB_MAP_LOCATION_FOCUS"), quotify(to_string(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS)));
+    state_json.ROOT.create_label_value(quotify("ADSB_DISPLAY_TABLE"), quotify(to_string(panels_to_save.ADSB_DISPLAY_TABLE)));
+    state_json.ROOT.create_label_value(quotify("ADSB_DISPLAY_MAP"), quotify(to_string(panels_to_save.ADSB_DISPLAY_MAP)));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION"), quotify(to_string(panels_to_save.ADSB_ZOOM_MODE_SELECTION.value_selection())));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_0"), quotify(to_string(panels_to_save.ADSB_ZOOM_MODE_SELECTION.value_selection_0())));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_1"), quotify(to_string(panels_to_save.ADSB_ZOOM_MODE_SELECTION.value_selection_1())));
+    state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_LEVEL"), quotify(to_string(panels_to_save.ADSB_ZOOM_LEVEL)));
+    state_json.ROOT.create_label_value(quotify("ADSB_MAP_LOCATION_FOCUS"), quotify(to_string(panels_to_save.ADSB_MAP_LOCATION_FOCUS)));
 
     // Panel Settings
     state_json.ROOT.create_label_value(quotify("ATONOMOUS"), quotify(to_string(sdSysData.PANEL_CONTROL.autonomous_state())));

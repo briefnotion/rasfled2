@@ -16,7 +16,6 @@
 
 // ---------------------------------------------------------------------------------------
 
-
 ImVec2 point_position(ImVec4 Working_Area, ImVec2 Position)
 {
   ImVec2 ret_center;
@@ -328,109 +327,109 @@ void ADSB_RANGE::calculate_lat_lon_to_point_scale(int &Map_Location_Focus)
   LAT_LON_TO_POINT_SCALE.y = (RADIUS_CIRCLE_POINT_SIZE / longitude_diff);
 }
 
-void ADSB_RANGE::set_zoom_level(int Zoom_Level)
+void ADSB_RANGE::set_zoom_level(int Zoom_Level, int &Map_Location_Focus)
 {
   switch (Zoom_Level)
   {
     case 0:
     {
-      set_range(0.01f);
+      set_range(0.01f, Map_Location_Focus);
       break;
     }
 
     case 1:
     {
-      set_range(0.03f);
+      set_range(0.03f, Map_Location_Focus);
       break;
     }
 
     case 2:
     {
-      set_range(0.05f);
+      set_range(0.05f, Map_Location_Focus);
       break;
     }
     
     case 3:
     {
-      set_range(0.1f);
+      set_range(0.1f, Map_Location_Focus);
       break;
     }
     
     case 4:
     {
-      set_range(0.25f);
+      set_range(0.25f, Map_Location_Focus);
       break;
     }
     
     case 5:
     {
-      set_range(0.5f);
+      set_range(0.5f, Map_Location_Focus);
       break;
     }
 
     case 6:
     {
-      set_range(1.0f);
+      set_range(1.0f, Map_Location_Focus);
       break;
     }
 
     case 7:
     {
-      set_range(2.0f);
+      set_range(2.0f, Map_Location_Focus);
       break;
     }
 
     case 8:
     {
-      set_range(5.0f);
+      set_range(5.0f, Map_Location_Focus);
       break;
     }
     
     case 9:
     {
-      set_range(7.0f);
+      set_range(7.0f, Map_Location_Focus);
       break;
     }
     
     case 10:
     {
-      set_range(10.0f);
+      set_range(10.0f, Map_Location_Focus);
       break;
     }
     
     case 11:
     {
-      set_range(15.0f);
+      set_range(15.0f, Map_Location_Focus);
       break;
     }
     
     case 12:
     {
-      set_range(25.0f);
+      set_range(25.0f, Map_Location_Focus);
       break;
     }
     
     case 13:
     {
-      set_range(35.0f);
+      set_range(35.0f, Map_Location_Focus);
       break;
     }
     
     case 14:
     {
-      set_range(50.0f);
+      set_range(50.0f, Map_Location_Focus);
       break;
     }
     
     case 15:
     {
-      set_range(75.0f);
+      set_range(75.0f, Map_Location_Focus);
       break;
     }
     
     case 16:
     {
-      set_range(100.0f);
+      set_range(100.0f, Map_Location_Focus);
       break;
     }
   }
@@ -521,7 +520,8 @@ float ADSB_RANGE::range()
 void ADSB_RANGE::create()
 {
   PROPS.COLOR = RAS_ORANGE;
-  set_range(25.0f);
+  //int tmp_map_loc_focus = 0;
+  //set_range(25.0f, tmp_map_loc_focus);
   RANGE_IMP.set_size(180);
   RANGE_IMP.set_alive_time(6000);
 }
@@ -621,10 +621,10 @@ void ADSB_RANGE::range_update(unsigned long Frame_Time, int &Map_Location_Focus)
   }
 }
 
-void ADSB_RANGE::set_range(float Range_Miles)
+void ADSB_RANGE::set_range(float Range_Miles, int &Map_Location_Focus)
 {
   RANGE = Range_Miles;
-  //calculate_lat_lon_to_point_scale();
+  calculate_lat_lon_to_point_scale(Map_Location_Focus);
 }
 
 void ADSB_RANGE::zoom_in(system_data &sdSysData)
@@ -632,7 +632,7 @@ void ADSB_RANGE::zoom_in(system_data &sdSysData)
   if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL > 0)
   {
     sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL -= 1;
-    set_zoom_level(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
+    set_zoom_level(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
   }
 }
 
@@ -641,13 +641,13 @@ void ADSB_RANGE::zoom_out(system_data &sdSysData)
   if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL < 16)
   {
     sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL += 1;
-    set_zoom_level(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
+    set_zoom_level(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
   }
 }
 
-void ADSB_RANGE::zoom_return(int Zoom_Level)
+void ADSB_RANGE::zoom_return(int Zoom_Level,  int &Map_Location_Focus)
 {
-  set_zoom_level(Zoom_Level);
+  set_zoom_level(Zoom_Level, Map_Location_Focus);
 }
 
 double ADSB_RANGE::resolution()
@@ -663,11 +663,16 @@ void ADSB_RANGE::draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec
   if (ZOOM_LEVEL_UNSET == true)
   {
     ZOOM_LEVEL_UNSET = false;
-
+    
     RADIUS_CIRCLE_POINT_SIZE = WORKING_AREA.w / 2.0f * 0.6f;
 
-    sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL = 1;     // Default start zoom level
-    set_zoom_level(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
+    if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL == -1)
+    {
+      // Default start zoom level if not defined.
+      sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL = 1;
+    }
+
+    set_zoom_level(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
   }
 
   CENTER = point_position_center(WORKING_AREA);
@@ -1280,7 +1285,8 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.HDOP, 
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.VDOP);
     }
-    ImGui::Text("DSP TRK SZ: %.ld", sdSysData.MAP_SYSTEM.DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size());
+    //ImGui::Text("DSP TRK SZ: %.ld", sdSysData.MAP_SYSTEM.DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size());
+    ImGui::Text("Zoom Level: %d", sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
 
     // Compass Information
     if (ACTIVE_COMPASS)
@@ -1525,14 +1531,14 @@ void ADSB_MAP::draw(system_data &sdSysData)
     {
       if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 0)
       {
-        RANGE_INDICATOR.zoom_return(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
+        RANGE_INDICATOR.zoom_return(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
       }
     }
     else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1)
     {
       if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_1() == 0)
       {
-        RANGE_INDICATOR.zoom_return(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
+        RANGE_INDICATOR.zoom_return(sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
       }
     }
   }
@@ -1548,11 +1554,11 @@ void ADSB_MAP::draw(system_data &sdSysData)
         // Set zoom level to range.
         if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 1)        // Zoom at MIN aircraft distance
         {
-          RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_CLOSEST * 0.75f);
+          RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_CLOSEST * 0.75f, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
         }
         else if (sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 2)   // Zoom at MAX aircraft distance
         {
-          RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_FURTHEST * 0.75f);
+          RANGE_INDICATOR.set_range(sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.DISTANCE_FURTHEST * 0.75f, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
         }
 
       }
@@ -1567,22 +1573,22 @@ void ADSB_MAP::draw(system_data &sdSysData)
         {
           if (sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() < 10.0f)
           {
-            RANGE_INDICATOR.set_range(.03f);
+            RANGE_INDICATOR.set_range(.03f, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
           }
           else 
           {
-            RANGE_INDICATOR.set_range(((sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() - 10.0f) * (0.5f / 60.0f)) + 0.03f);
+            RANGE_INDICATOR.set_range(((sdSysData.CAR_INFO.STATUS.SPEED.SPEED_ALL_TIRES_AVERAGE.val_mph() - 10.0f) * (0.5f / 60.0f)) + 0.03f, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
           }
         }
         else if (ACTIVE_GPS)
         {
           if (sdSysData.GPS_SYSTEM.CURRENT_POSITION.SPEED.val_mph() < 10.0f)
           {
-            RANGE_INDICATOR.set_range(.03f);
+            RANGE_INDICATOR.set_range(.03f, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
           }
           else 
           {
-            RANGE_INDICATOR.set_range(((sdSysData.GPS_SYSTEM.CURRENT_POSITION.SPEED.val_mph() - 10.0f) * (0.5f / 60.0f)) + 0.03f);
+            RANGE_INDICATOR.set_range(((sdSysData.GPS_SYSTEM.CURRENT_POSITION.SPEED.val_mph() - 10.0f) * (0.5f / 60.0f)) + 0.03f, sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
           }
         }
       }

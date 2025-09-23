@@ -156,14 +156,17 @@ int SCREEN4_PANEL_CONTROL::autonomous_state()
 
 void SCREEN4_PANEL_CONTROL::autonomous_on()
 {
-  ATONOMOUS = 1;
   PANELS_ON = PANELS;
+  ATONOMOUS = 1;
 }
 
 void SCREEN4_PANEL_CONTROL::autonomous_off()
 {
+  if (ATONOMOUS == 2)
+  {
+    PANELS = PANELS_ON;
+  }
   ATONOMOUS = 0;
-  PANELS = PANELS_ON;
 }
 
 void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
@@ -184,7 +187,7 @@ void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
     ADSB_MAP_MAX_DISTANCE.requested(Time, panel_requested);
 
     // If the panels are requested, set the autonomous state and remember the panels.
-    if (panel_requested)
+    if (set_bool_with_change_notify(panel_requested, PANEL_ALERT_REQUESTED))
     {
       if (ATONOMOUS == 1)
       {

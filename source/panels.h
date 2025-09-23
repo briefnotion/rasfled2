@@ -83,7 +83,7 @@ class SCREEN4_PANELS
   //  1 - on gps_pos
   //  2 - on aircraft
 
-  int ADSB_ZOOM_LEVEL = 1;
+  int ADSB_ZOOM_LEVEL = -1;
   bool ADSB_ZOOM_LEVEL_CHANGED = true;  // Used to determine if zoom level has changed
                                         // through the panels.
   
@@ -149,7 +149,9 @@ class SCREEN4_PANEL_CONTROL
   // Main working panel
   SCREEN4_PANELS  PANELS;
 
-  // Panel backups
+  // Panel backups. When autonomouse takes control, a copy 
+  //  of the normal working panels are stored here.  
+  //  These panels are restored when autonoumous returns to 0 or 1
   SCREEN4_PANELS PANELS_ON;
 
   // Panel Control variables from alert system coordinator
@@ -164,6 +166,10 @@ class SCREEN4_PANEL_CONTROL
   
   // Notation 
   string EXTRA;
+
+  // Persistant panels requested, to monitor change for 
+  //  autonomouse mode.
+  bool PANEL_ALERT_REQUESTED = false;
 
   // Color Intensity
   void color_start(unsigned long Time);

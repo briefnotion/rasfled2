@@ -40,7 +40,8 @@ target_sources(rasfled PRIVATE
   ../../imgui/imgui_widgets.cpp
   ../../imgui/misc/cpp/imgui_stdlib.cpp
   ../../imgui/backends/imgui_impl_glfw.cpp
-  ../../imgui/backends/imgui_impl_opengl2.cpp
+  #../../imgui/backends/imgui_impl_opengl2.cpp
+  ../../imgui/backends/imgui_impl_opengl3.cpp
   stringthings.cpp
   helper.cpp
   globe_helper.cpp
@@ -81,6 +82,7 @@ target_sources(rasfled PRIVATE
   widgets_alerts.cpp
   widgets_dot_dot_dot.cpp
   widgets_terminal.cpp
+  widgets_placeholder.cpp
   sounds.cpp
   screen4.cpp
   system.cpp

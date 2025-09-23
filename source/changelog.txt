@@ -1,3 +1,11 @@
+2.319_250923
+  - Changed some of the Panel Autonomouse behaviour.
+  - Added an endpoint tag true for the saved list to prevent connection 
+      if loaded from save at a different geo position.
+  - Changed the program to OpenGL3 instead of OpenGL2.  I dont see any 
+      maintain code for the rpi3.
+  - Made some changes to how the map loads on start.
+
 2.318_250922
   - Added altitude to the saved track information.
   - History save will also create a kml file (simple method), actually 

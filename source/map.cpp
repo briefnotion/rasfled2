@@ -37,6 +37,13 @@ void track_save_detailed(const DETAILED_TRACK_ALTERNATIVE &Track, const string F
     position_info.create_label_value(quotify("resolution"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].RESOLUTION)));
     position_info.create_label_value(quotify("altitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].ALTITUDE)));
 
+    // Only save as endpoint if set or is last position.
+    if (Track.TRACK_POINTS_DETAILED[pos].END_POINT || 
+        pos == Track.TRACK_POINTS_DETAILED.size() - 1)
+    {
+      position_info.create_label_value(quotify("end point"), quotify("true"));
+    }
+
     JSON_ENTRY latitude_longitude;
     latitude_longitude.create_label_value(quotify("latitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LATITUDE)));
     latitude_longitude.create_label_value(quotify("longitude"), quotify(to_string(Track.TRACK_POINTS_DETAILED[pos].LONGITUDE)));
@@ -631,8 +638,9 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
                 STRING_DOUBLE timestamp;
                 STRING_FLOAT  accuracy;
                 STRING_FLOAT  value;  
-                STRING_DOUBLE resolution;  
-                STRING_FLOAT altitude;  
+                STRING_DOUBLE resolution;
+                STRING_FLOAT altitude;
+                string end_point = "";
                 STRING_DOUBLE location_latitude;
                 STRING_DOUBLE location_longitude;
 
@@ -644,6 +652,7 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
                   track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("value", value);
                   track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("resolution", resolution);
                   track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("altitude", altitude);
+                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("end_point", end_point);
 
                   if (track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].label() == "location")
                   {
@@ -664,6 +673,11 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
                 location.ALTITUDE = altitude.get_float_value();
                 location.LATITUDE = location_latitude.get_double_value();
                 location.LONGITUDE = location_longitude.get_double_value();
+
+                if (end_point == "true")
+                {
+                  location.END_POINT = true;
+                }
 
                 tmp_load_track.TRACK_POINTS_DETAILED.push_back(location);
               }
