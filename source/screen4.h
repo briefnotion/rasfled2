@@ -27,6 +27,7 @@
 #include "widgets_alerts.h"
 #include "widgets_dot_dot_dot.h"
 #include "widgets_terminal.h"
+#include "widgets_camera.h"
 #include "stringthings.h"
 #include "fled_time.h"
 #include "animations_handler.h"
@@ -72,9 +73,13 @@ class SCREEN4
   GLFWmonitor * monitor = nullptr;
   const GLFWvidmode * mode = nullptr;
   
+  // CAMERAS
+  CAMERA_WIDGET   BACKUP_CAMERA;
+
   // HIDDEN BUTTONS
   BUTTON_INVISIBLE COROP_VOID;
   BUTTON_INVISIBLE RUNNING_COLOR;
+  BUTTON_INVISIBLE BACKUP_CAMERA_ACTIVATE;
 
   // CORNFIRM DIAG
   CONFIRM_DIALOG CONFIRM;
@@ -110,6 +115,7 @@ class SCREEN4
   BUTTON_COLOR BT_EXIT;
   BUTTON_COLOR BT_SYSTEM_SHUT_DOWN;
   BUTTON_COLOR BT_REBOOT;
+  BUTTON_COLOR BT_TERMINAL;
   BUTTON_COLOR BT_DEBUG;
   BUTTON_COLOR BT_BACK_2;
   BUTTON_COLOR BT_AUTONOMOUS;

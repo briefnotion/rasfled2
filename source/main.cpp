@@ -263,6 +263,7 @@ int loop_2(bool TTY_Only)
   // Control for threads.
   //THREAD_COMMAND.create();
   sdSystem.THREAD_RENDER.create(get_frame_interval(sdSystem.CONFIG.iFRAMES_PER_SECOND));
+  sdSystem.THREAD_BACKUP_CAMERA.create(30); // 30 fps camera
 
   // Load Color System
   //sdSystem.PANEL_CONTROL.COLOR_SELECT.init_and_set_intensity(sdSystem.PROGRAM_TIME.current_frame_time(), 1.0f);
@@ -299,6 +300,8 @@ int loop_2(bool TTY_Only)
   FILE_WATCH watcher_daemon_log;
   watcher_daemon_log.start(sdSystem.FILE_NAMES.DEAMON_LOG);
 
+  // ---------------------------------------------------------------------------------------
+
   // System LogFile Variables
   FILE_WATCH watcher_aircraft_json;
   watcher_aircraft_json.PROP.READ_FROM_BEGINNING = true;
@@ -330,6 +333,8 @@ int loop_2(bool TTY_Only)
 
   sdSystem.COMMS_AUTO.PROPS.RECEIVE_TEST_DATA = TEST_DATA_CAN_BUS;
   sdSystem.COMMS_AUTO.PROPS.TEST_DATA_FILENAME = sdSystem.FILE_NAMES.CAN_BUS_TEST_FILE;
+  sdSystem.COMMS_AUTO.PROPS.TEST_DATA_MS_DELAY_BETWEEN_MESSAGES = 15;
+  sdSystem.COMMS_AUTO.PROPS.TEST_DATA_MS_MESSAGE_COUNT_PER_ITTERATION = 5;
 
   sdSystem.COMMS_AUTO.PROPS.FLASH_DATA_RECORDER_ACTIVE = COMMS_FLASH_DATA_RECORDER_ACTIVE;
 
@@ -340,7 +345,7 @@ int loop_2(bool TTY_Only)
   sdSystem.CAR_INFO.set_default_request_pid_list();
 
   // ---------------------------------------------------------------------------------------
-  // GPS Comm Port Setup
+  // GPS Compass Timer Set
   compass_timer.set( COMMS_COMPASS_POLLING_RATE_MS );
 
   // ---------------------------------------------------------------------------------------
@@ -405,8 +410,19 @@ int loop_2(bool TTY_Only)
   // System Init
 
   // ---------------------------------------------------------------------------------------
-  // Init Error Capture
-  //  Not coded. Rediecting cerr is problematic.
+  // Initialize Camera
+  
+  //sdSystem.CAMERAS.PROPS.AUTO_FOCUS = 0;
+  //sdSystem.CAMERAS.PROPS.WIDTH = 640;
+  //sdSystem.CAMERAS.PROPS.HEIGHT = 480;
+  //sdSystem.CAMERAS.PROPS.WIDTH = 1280;
+  //sdSystem.CAMERAS.PROPS.HEIGHT = 720;
+
+  sdSystem.CAMERAS.PROPS.WIDTH = 800;
+  sdSystem.CAMERAS.PROPS.HEIGHT = 600;
+  sdSystem.CAMERAS.PROPS.FLIP_HORIZONTAL = true;
+
+  sdSystem.CAMERAS.create();
 
   // ---------------------------------------------------------------------------------------
   // Initialize Alert System
@@ -767,6 +783,14 @@ int loop_2(bool TTY_Only)
     // Close all completed and active threads after sleep cycle is complete.
     sdSystem.THREAD_RENDER.check_for_completition();
 
+    // Temporary solution
+    {    
+      if (sdSystem.THREAD_BACKUP_CAMERA.check_for_completition())
+      {
+        sdSystem.CAMERAS.process_frame();
+      }
+    }
+
     // ---------------------------------------------------------------------------------------
     // --- Prpare the Loop ---
 
@@ -991,6 +1015,23 @@ int loop_2(bool TTY_Only)
         }
       }
     } // Is Events and Render ready -----------------
+    
+    // ---------------------------------------------------------------------------------------
+
+    // Check Camera Frame Grab on thread
+
+    // Temporary solution
+    //if(sdSystem.PANEL_CONTROL.CAMERA_AUTO_GEAR > 0 &&
+    //    sdSystem.PANEL_CONTROL.CAMERA_SELECTION > 0)
+    {   
+      if (sdSystem.THREAD_BACKUP_CAMERA.check_to_run_routine_on_thread(sdSystem.PROGRAM_TIME.current_frame_time())) 
+      {
+        // 5. Start the camera update on a separate thread.
+        // This call is non-blocking, so the main loop can continue immediately.
+        sdSystem.THREAD_BACKUP_CAMERA.start_render_thread([&]() 
+                  {  sdSystem.CAMERAS.update_frame();  });
+      }
+    }
 
     // ---------------------------------------------------------------------------------------
     // Now that we have done all the hard work, read hardware, computed, generated, displayed
@@ -1346,6 +1387,7 @@ int loop_2(bool TTY_Only)
     // Make sure non of these are commented out, or the system will never sleep.
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_switches.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.THREAD_RENDER.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.THREAD_BACKUP_CAMERA.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_user.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(display.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(comms_auto_timer.get_ready_time());
@@ -1361,6 +1403,9 @@ int loop_2(bool TTY_Only)
 
   // Wait for threads to end before continuing to shutdown.
   sdSystem.THREAD_RENDER.wait_for_thread_to_finish();
+  sdSystem.THREAD_BACKUP_CAMERA.wait_for_thread_to_finish();
+
+  sdSystem.CAMERAS.close();
 
   // Shutdown RPI.
   if (sdSystem.WS2811_ENABLED)

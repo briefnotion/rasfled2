@@ -86,6 +86,8 @@ class SCREEN4_PANELS
   int ADSB_ZOOM_LEVEL = -1;
   bool ADSB_ZOOM_LEVEL_CHANGED = true;  // Used to determine if zoom level has changed
                                         // through the panels.
+
+  bool ADSB_NORTH_UP = false;
   
   // Last Known Good Position
   DOUBLE_VEC2 LAST_KNOWN_GOOD_POSITION;
@@ -163,13 +165,18 @@ class SCREEN4_PANEL_CONTROL
   //PANEL ADSB_MAP;
   PANEL ADSB_MAP_MIN_DISTANCE;
   PANEL ADSB_MAP_MAX_DISTANCE;
+
+  // CAMERA 
+  int CAMERA_SELECTION = 0;
+  int CAMERA_AUTO_GEAR = 0;
+  // 0 - park
+  // 1 - reverse
+  // 2 - neutral
+  // 3 - drive
+  // 4 - low
   
   // Notation 
   string EXTRA;
-
-  // Persistant panels requested, to monitor change for 
-  //  autonomouse mode.
-  bool PANEL_ALERT_REQUESTED = false;
 
   // Color Intensity
   void color_start(unsigned long Time);

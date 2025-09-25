@@ -896,12 +896,12 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
   ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (3.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
                                     WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
 
-  if (BTC_NORTH_UP.button_toggle_color(sdSysData, "NORTH\nUP", "DIR\nUP", NORTH_UP,
+  if (BTC_NORTH_UP.button_toggle_color(sdSysData, "NORTH\nUP", "DIR\nUP", sdSysData.PANEL_CONTROL.PANELS.ADSB_NORTH_UP,
                                   RAS_GREEN, RAS_BLUE, 
                                   sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
   {
     SHOW_BUTTONS_TIMER.ping_up(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
-    NORTH_UP = !NORTH_UP;
+    sdSysData.PANEL_CONTROL.PANELS.ADSB_NORTH_UP = !sdSysData.PANEL_CONTROL.PANELS.ADSB_NORTH_UP;
   }
   
   // Current Location Toggle
@@ -1631,7 +1631,7 @@ void ADSB_MAP::draw(system_data &sdSysData)
 
   // Before drawing the map, get map heading in degrees from sources Compass or GPS or both
 
-  if (!NORTH_UP)
+  if (!sdSysData.PANEL_CONTROL.PANELS.ADSB_NORTH_UP)
   {
     if (sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS == 1)
     {

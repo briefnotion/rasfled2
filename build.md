@@ -38,6 +38,10 @@ Installs the graphics drivers that imgui uses to access the OpenGL lay.  May not
 The booste libraries are used to show the core temps on the main screen.  
 `sudo apt install libboost-all-dev`
 
+## Install Camera libraries
+For the USB backup camera.
+`sudo apt install libopencv-dev`
+
 ## Install wiringpi
 WiringPi is, last I checked, required to run the rpi_ws281x LED drivers.  
 https://github.com/WiringPi/WiringPi?form=MG0AV3

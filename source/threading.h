@@ -58,7 +58,7 @@ class THREADING_INFO
   unsigned long get_ready_time();
 
   // Checks whether the rendering thread has completed its execution.
-  void check_for_completition();
+  bool check_for_completition();
 
   // Starts a new render thread with the specified function as its execution target.
   // @param Function The function to be executed by the render thread.

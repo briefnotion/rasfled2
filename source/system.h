@@ -36,6 +36,7 @@
 #include "panels.h"
 #include "map.h"
 #include "terminal.h"
+#include "camera_system.h"
 
 #include "screen4_helper.h"
 
@@ -150,6 +151,7 @@ class system_data
   //THREADING_INFO  THREAD_COMMAND;     // This handling called system commands.
   THREADING_INFO  THREAD_RENDER;      // The thread containing function to send the led color array 
                                       //  to the leds.
+  THREADING_INFO  THREAD_BACKUP_CAMERA;
 
   // Files
   FILES           FILE_NAMES;
@@ -254,6 +256,8 @@ class system_data
   int             RUNNING_COLOR = 3;
 
   SOUNDS          SOUND_SYSTEM;  // Primitive sound system.
+
+  CAMERA          CAMERAS;
 
   // -------------------------------------------------------------------------------------
 

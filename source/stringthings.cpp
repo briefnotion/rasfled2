@@ -216,6 +216,14 @@ string trim(const string &Text)
   return right_trim(left_trim(Text));
 }
 
+string lower_case(const std::string &Text) 
+{
+  string result = Text;
+  transform(result.begin(), result.end(), result.begin(),
+                  [](unsigned char c) { return std::tolower(c); });
+  return result;
+}
+
 string quotify(string Text)
 {
   return "\"" + Text + "\"";
@@ -489,6 +497,48 @@ bool STRING_STRING::conversion_success()
   return CONVERSION_SUCCESS;
 }
 
+void STRING_BOOL::store(string str_value)
+{
+  STR_VALUE = str_value;
+
+  string eval = lower_case(trim(str_value));
+
+  if (eval == "1" ||
+      eval == "true")
+  {
+    BOOL_VALUE = true;
+    CONVERSION_SUCCESS = true;
+  }
+  else if (eval == "0" ||
+            eval == "false")
+  {
+    BOOL_VALUE = false;
+    CONVERSION_SUCCESS = true;
+  }
+  else
+  {
+    CONVERSION_SUCCESS = false;
+  }
+}
+
+string STRING_BOOL::get_str_value()
+// Return original number string value.
+{
+  return STR_VALUE;
+}
+
+bool STRING_BOOL::get_bool_value()
+// Return converted number string value.
+{
+  return BOOL_VALUE;
+}
+
+bool STRING_BOOL::conversion_success()
+// Returns true if conversion was unsucessful.
+{
+  return CONVERSION_SUCCESS;
+}
+
 void STRING_INT::store(string str_value)
 {
   STR_VALUE = str_value;
@@ -521,6 +571,7 @@ bool STRING_INT::conversion_success()
 {
   return CONVERSION_SUCCESS;
 }
+
 
 void STRING_FLOAT::store(string str_value)
 {

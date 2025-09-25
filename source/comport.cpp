@@ -605,9 +605,14 @@ bool COMPORT::cycle(unsigned long tmeFrame_Time)
           TEST_DATA_DELAY_TIMER.set(tmeFrame_Time, PROPS.TEST_DATA_MS_DELAY_BETWEEN_MESSAGES);
           DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
         
-          READ_FROM_COMM.push_back(TEST_DATA.front());
-          
-          TEST_DATA.pop_front();
+          for (int message_count = 0; message_count < PROPS.TEST_DATA_MS_MESSAGE_COUNT_PER_ITTERATION; message_count++)
+          {
+            if (TEST_DATA.size() > 0)
+            {
+              READ_FROM_COMM.push_back(TEST_DATA.front());
+              TEST_DATA.pop_front();
+            }
+          }
         }
       }
     }

@@ -16,6 +16,7 @@ project(RasFled)
 find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(Boost COMPONENTS system thread filesystem REQUIRED)
+find_package(OpenCV REQUIRED)
 
 find_library(WIRINGPI_LIBRARIES NAMES wiringPi)
 find_library(WS2811_LIBRARIES NAMES ws2811)
@@ -73,6 +74,7 @@ target_sources(rasfled PRIVATE
   terminal.cpp
   map_hardcode.cpp
   map.cpp
+  camera_system.cpp
   aircraft_coordinator.cpp
   widgets_advertisement.cpp
   widgets.cpp
@@ -82,7 +84,7 @@ target_sources(rasfled PRIVATE
   widgets_alerts.cpp
   widgets_dot_dot_dot.cpp
   widgets_terminal.cpp
-  widgets_placeholder.cpp
+  widgets_camera.cpp
   sounds.cpp
   screen4.cpp
   system.cpp
@@ -100,6 +102,8 @@ target_link_libraries(rasfled
   ${PTHREAD_LIBRARIES}
   ${LIBRT}
   ${Boost_LIBRARIES}
+  ${OpenCV_LIBS}
+  GL
 )
 
 # Strict

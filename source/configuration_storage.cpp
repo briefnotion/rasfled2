@@ -316,6 +316,7 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
       STRING_INT adsb_range_indicator_zoom_selection_1;
       STRING_INT adsb_zoom_level;
       STRING_INT adsb_map_location_focus;
+      STRING_BOOL adsb_north_up;
       STRING_INT atonomous;
 
       for(int root = 0; root < (int)state_json.ROOT.DATA.size(); root++)
@@ -340,6 +341,7 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
         state_json.ROOT.DATA[root].get_if_is("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_1", adsb_range_indicator_zoom_selection_1);
         state_json.ROOT.DATA[root].get_if_is("ADSB_RANGE_INDICATOR_ZOOM_LEVEL", adsb_zoom_level);
         state_json.ROOT.DATA[root].get_if_is("ADSB_MAP_LOCATION_FOCUS", adsb_map_location_focus);
+        state_json.ROOT.DATA[root].get_if_is("ADSB_NORTH_UP", adsb_north_up);
         state_json.ROOT.DATA[root].get_if_is("ATONOMOUS", atonomous);
       }
 
@@ -411,6 +413,10 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
       if (adsb_map_location_focus.conversion_success())
       {
         panels_to_restore.ADSB_MAP_LOCATION_FOCUS = adsb_map_location_focus.get_int_value();
+      }
+      if (adsb_north_up.conversion_success())
+      {
+        panels_to_restore.ADSB_NORTH_UP = adsb_north_up.get_bool_value();
       }
       if (atonomous.conversion_success())
       {
@@ -496,6 +502,9 @@ bool save_running_state_json(system_data &sdSysData, string strFilename)
     state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_0"), quotify(to_string(panels_to_save.ADSB_ZOOM_MODE_SELECTION.value_selection_0())));
     state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_SELECTION_1"), quotify(to_string(panels_to_save.ADSB_ZOOM_MODE_SELECTION.value_selection_1())));
     state_json.ROOT.create_label_value(quotify("ADSB_RANGE_INDICATOR_ZOOM_LEVEL"), quotify(to_string(panels_to_save.ADSB_ZOOM_LEVEL)));
+    state_json.ROOT.create_label_value(quotify("ADSB_MAP_LOCATION_FOCUS"), quotify(to_string(panels_to_save.ADSB_MAP_LOCATION_FOCUS)));
+    state_json.ROOT.create_label_value(quotify("ADSB_NORTH_UP"), quotify(to_string(panels_to_save.ADSB_NORTH_UP)));
+    
     state_json.ROOT.create_label_value(quotify("ADSB_MAP_LOCATION_FOCUS"), quotify(to_string(panels_to_save.ADSB_MAP_LOCATION_FOCUS)));
 
     // Panel Settings

@@ -459,6 +459,19 @@ bool JSON_ENTRY::get_if_is(string Label, STRING_STRING &Value)
   }
 }
 
+bool JSON_ENTRY::get_if_is(string Label, STRING_BOOL &Value)
+{
+  if (LABEL == Label)
+  {
+    Value.store(VALUE);
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
 bool JSON_ENTRY::get_if_is(string Label, STRING_INT &Value)
 {
   if (LABEL == Label)

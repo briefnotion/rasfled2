@@ -22,7 +22,7 @@ unsigned long THREADING_INFO::get_ready_time()
   return THREAD_TIMER.get_ready_time();
 }
 
-void THREADING_INFO::check_for_completition()
+bool THREADING_INFO::check_for_completition()
 {
   if(IS_RUNNING == true)
   // Check to see if render thread was started before checking the completion status.
@@ -38,6 +38,8 @@ void THREADING_INFO::check_for_completition()
       //cout << "Thread still open" << endl;
     }
   }
+
+  return !IS_RUNNING;
 }
 
 bool THREADING_INFO::check_to_run_routine_on_thread(unsigned long Time_Frame)
@@ -58,8 +60,16 @@ bool THREADING_INFO::check_to_run_routine_on_thread(unsigned long Time_Frame)
 
 void THREADING_INFO::start_render_thread(std::function<void()> Function)
 {
-  RENDER_THREAD = async(launch::async, Function);
-  IS_RUNNING = true;
+  try
+  {
+    RENDER_THREAD = async(launch::async, Function);
+    IS_RUNNING = true;
+  }
+  catch (const std::system_error& e)
+  {
+    cout << "Error: Could not start thread. What: " << e.what() << endl;
+    IS_RUNNING = false;
+  }
 }
 
 void THREADING_INFO::wait_for_thread_to_finish()

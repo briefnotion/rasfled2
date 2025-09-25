@@ -137,6 +137,11 @@ class JSON_ENTRY
   // Returns true  if label within a json does match and changes.
   //  Value to JSON value.
 
+  bool get_if_is(string Label, STRING_BOOL &Value);
+  // Returns false if label within a json does not match.
+  // Returns true  if label within a json does match and changes.
+  //  Value to JSON value.
+
   bool get_if_is(string Label, STRING_INT &Value);
   // Returns false if label within a json does not match.
   // Returns true  if label within a json does match and changes.

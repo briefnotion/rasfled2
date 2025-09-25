@@ -79,6 +79,9 @@ string right_trim(const string &Text);
 string trim(const string &Text);
 // Remove leading and trailing spaces and special characters from text.
 
+string lower_case(const string &Text);
+// converts text to lower case.
+
 string quotify(string Text);
 // Put quotes around string;
 
@@ -292,6 +295,28 @@ class STRING_STRING
   void store(string str_value);
 
   string get_str_value();
+
+  bool conversion_success();
+
+};
+
+class STRING_BOOL
+// Variable stores original string number and converted value.
+// Sets error if conversion unsucessful.
+// Retains value if conversion not sucessful.
+// Sets to true if string == true or 1;
+{
+  private:
+  string  STR_VALUE = "";
+  bool    BOOL_VALUE = false;
+  bool    CONVERSION_SUCCESS = false;
+
+  public:
+  void store(string str_value);
+
+  string get_str_value();
+
+  bool get_bool_value();
 
   bool conversion_success();
 

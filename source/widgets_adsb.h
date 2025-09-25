@@ -218,8 +218,6 @@ class ADSB_MAP
   IMPACT_RESISTANCE_FLOAT_FRAME_COUNT MAP_HEADING_DEGREES;
   float MAP_HEADING_DEGREES_LATEST = 0.0f;
 
-  bool NORTH_UP = false;
-
   bool ACTIVE_GPS = false;
   bool ACTIVE_COMPASS = false;
   bool ACTIVE_ADSB = false;

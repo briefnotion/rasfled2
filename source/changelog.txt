@@ -1,3 +1,10 @@
+2.320_250924
+  - Added north up to the save configuration settings.
+  - Corrected a problem with the Autonomous not reverting back when 
+      not active.
+  - Added a few more options to comm port from file properties.
+  - Added a backup camera for testing. Not optimized.
+
 2.319_250923
   - Changed some of the Panel Autonomouse behaviour.
   - Added an endpoint tag true for the saved list to prevent connection 

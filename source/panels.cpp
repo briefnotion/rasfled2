@@ -187,7 +187,7 @@ void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
     ADSB_MAP_MAX_DISTANCE.requested(Time, panel_requested);
 
     // If the panels are requested, set the autonomous state and remember the panels.
-    if (set_bool_with_change_notify(panel_requested, PANEL_ALERT_REQUESTED))
+    if (panel_requested)
     {
       if (ATONOMOUS == 1)
       {
@@ -203,7 +203,6 @@ void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
         PANELS = PANELS_ON;
       }
     }
-
     // If the panels are requested, call the panels.
     // Start with the least important first so that they can be overlaped and 
     //  the most important or least likely panels will be prominant.

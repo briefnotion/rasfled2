@@ -15,13 +15,12 @@
 #define COMPORT_H
 
 // Standard Header Files
-#include <stdio.h>
 #include <string>
 #include <deque>
+#include <cstring>      // for memcpy
 
 #include <stdio.h>      // standard input / output functions
 #include <stdlib.h>
-//#include <string.h>     // old c style string function definitions
 #include <unistd.h>     // UNIX standard function definitions
 #include <fcntl.h>      // File control definitions
 #include <errno.h>      // Error number definitions
@@ -98,6 +97,7 @@ class COMPORT_PROPERTIES
   bool RECEIVE_TEST_DATA = false;
   string TEST_DATA_FILENAME = "";
   int TEST_DATA_MS_DELAY_BETWEEN_MESSAGES = 100;
+  int TEST_DATA_MS_MESSAGE_COUNT_PER_ITTERATION = 1;
 
   // Flash Data Recorder
   bool FLASH_DATA_RECORDER_ACTIVE = false;  // Enable cacheing of serial data.
