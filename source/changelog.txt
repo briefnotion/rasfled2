@@ -1,3 +1,7 @@
+2.321_250926
+  - Added a few functions to the camera system.
+  - Autofocus will be turned off (0), and Focus will be set to max (0).
+
 2.320_250924
   - Added north up to the save configuration settings.
   - Corrected a problem with the Autonomous not reverting back when 

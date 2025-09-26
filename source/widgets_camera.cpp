@@ -14,13 +14,18 @@
 
 #include "widgets_camera.h"
 
+using namespace std;
 // ---------------------------------------------------------------------------------------
 
 void CAMERA_WIDGET::display(system_data &sdSysData)
 {
   // Check if the camera and video are available.
-  if (sdSysData.CAMERAS.VIDEO_AVAILABLE)
+  if (sdSysData.CAMERAS.CAM_VIDEO_AVAILABLE)
   {
+    // Show some settings
+    ImGui::Text("Auto Focus: %d", sdSysData.CAMERAS.CAM_FOCUS_AUTO);
+    ImGui::Text("Absl Focus: %d", sdSysData.CAMERAS.CAM_FOCUS_ABSOLUTE);
+
     // Get the current texture ID from the camera system.
     GLuint textureID = sdSysData.CAMERAS.TEXTURE_ID;
     

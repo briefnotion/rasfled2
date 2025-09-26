@@ -13,6 +13,11 @@
 #define CAMARA_SYSTEM_H
 
 //#include <stdio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/ioctl.h>
+#include <linux/videodev2.h>
+#include <string>
 #include <iostream>
 
 #include <opencv2/opencv.hpp>
@@ -33,26 +38,45 @@ class CAMERA_PROPERTIES
   //double FOCUS = 100.0;      // 0 - 255
 
   bool FLIP_HORIZONTAL = false;
+
+  // Control Addresses:
+  uint32_t CTRL_ADDR_FOCUS_AUTO     = 0x009a090c;
+  uint32_t CTRL_ADDR_FOCUS_ABSOLUTE = 0x009a090a;
 };
 
 class CAMERA
 {
 private:
-
-  GLuint matToTexture(const cv::Mat& frame, GLuint textureID);
   cv::Mat FRAME;
+  cv::Mat FRAME_DUMMY;
   cv::Mat PROCESSED_FRAME;
 
   bool NEW_FRAME_AVAILABLE = false;
+  
+  int set_control(int fd, uint32_t id, int32_t value);
+  int get_control(int fd, uint32_t id);
+
+  GLuint matToTexture(const cv::Mat& frame, GLuint textureID);
+  cv::Mat generateDummyFrame(int width, int height);
 
 public:
   cv::VideoCapture CAMERA_CAPTURE;
   GLuint TEXTURE_ID = 0;
-  bool CAMERA_AVAILABLE = false;
-  bool VIDEO_AVAILABLE = false;
+  
+  bool CAM_AVAILABLE = false;
+  bool CAM_VIDEO_AVAILABLE = false;
+  
+  // Camera Settings
+  int CAM_FOCUS_AUTO      = 0;
+  int CAM_FOCUS_ABSOLUTE  = 0;
+
+  string INFORMATION              = "Not Available";
+  string INFORMATION_COMMAND_LIST = "Not Available";
 
   CAMERA_PROPERTIES PROPS;
   
+  void list_controls(const char* device);
+
   // Public method to create the camera capture.
   void create();
 
@@ -64,7 +88,7 @@ public:
   // Public method to get a thread-safe copy of the current frame.
   cv::Mat get_current_frame();
 
-  void close();
+  void close_camera();
 };
 
 

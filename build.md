@@ -39,8 +39,31 @@ The booste libraries are used to show the core temps on the main screen.
 `sudo apt install libboost-all-dev`
 
 ## Install Camera libraries
-For the USB backup camera.
+Libraries used by the USB backup camera.  
 `sudo apt install libopencv-dev`
+
+Note:
+
+It seems that most cameras have their own api's, with their own way of 
+being handled. i.e: differnt names for common items (such as auto focus,) 
+different addresses to those functions, and different defaults and ranges for 
+thos functions. So, OpenCV does not support all camera controls. Instead, 
+camera contols need to be set in properties before compile. The following 
+tools should assist.
+
+To install `v4l2-ctl command`, if not already present:  
+`sudo apt install v4l-utils`
+
+List available camera controls, labels, addreess, ranges, and defaults.  
+`v4l2-ctl -d /dev/video0 --list-ctrls`
+
+Code that may work in c:  
+`system("v4l2-ctl -d /dev/video0 --set-ctrl=focus_automatic_continuous=0");`  
+`system("v4l2-ctl -d /dev/video0 --set-ctrl=focus_absolute=20");`
+
+Code that does work on command line, after camera is running:  
+`v4l2-ctl -d /dev/video0 --set-ctrl=focus_automatic_continuous=0`  
+`v4l2-ctl -d /dev/video0 --set-ctrl=focus_absolute=20`
 
 ## Install wiringpi
 WiringPi is, last I checked, required to run the rpi_ws281x LED drivers.  

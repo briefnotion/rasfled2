@@ -422,7 +422,13 @@ int loop_2(bool TTY_Only)
   sdSystem.CAMERAS.PROPS.HEIGHT = 600;
   sdSystem.CAMERAS.PROPS.FLIP_HORIZONTAL = true;
 
+  // Get list of controls to print to screen.
+  sdSystem.SCREEN_COMMS.printw("Initializing Camera ...");
+  sdSystem.CAMERAS.list_controls("/dev/video0");
+  sdSystem.SCREEN_COMMS.printw(sdSystem.CAMERAS.INFORMATION_COMMAND_LIST);
+
   sdSystem.CAMERAS.create();
+  sdSystem.SCREEN_COMMS.printw(sdSystem.CAMERAS.INFORMATION);
 
   // ---------------------------------------------------------------------------------------
   // Initialize Alert System
@@ -1405,7 +1411,7 @@ int loop_2(bool TTY_Only)
   sdSystem.THREAD_RENDER.wait_for_thread_to_finish();
   sdSystem.THREAD_BACKUP_CAMERA.wait_for_thread_to_finish();
 
-  sdSystem.CAMERAS.close();
+  sdSystem.CAMERAS.close_camera();
 
   // Shutdown RPI.
   if (sdSystem.WS2811_ENABLED)
