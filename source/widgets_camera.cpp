@@ -22,10 +22,6 @@ void CAMERA_WIDGET::display(system_data &sdSysData)
   // Check if the camera and video are available.
   if (sdSysData.CAMERAS.CAM_VIDEO_AVAILABLE)
   {
-    // Show some settings
-    ImGui::Text("Auto Focus: %d", sdSysData.CAMERAS.CAM_FOCUS_AUTO);
-    ImGui::Text("Absl Focus: %d", sdSysData.CAMERAS.CAM_FOCUS_ABSOLUTE);
-
     // Get the current texture ID from the camera system.
     GLuint textureID = sdSysData.CAMERAS.TEXTURE_ID;
     
@@ -35,37 +31,121 @@ void CAMERA_WIDGET::display(system_data &sdSysData)
     // Check if the texture ID and frame are valid before displaying.
     if (textureID != 0 && !currentFrame.empty()) 
     {
-      // 1. Get the available space in the current window.
-      ImVec2 availRegion = ImGui::GetContentRegionAvail();
-
-      float frame_aspect = (float)currentFrame.cols / (float)currentFrame.rows;
-      float region_aspect = availRegion.x / availRegion.y;
-
-      ImVec2 final_size;
-      if (region_aspect > frame_aspect)
+      // Draw video frame
       {
-        // The available region is wider than the frame, so we scale by height.
-        final_size.y = availRegion.y;
-        final_size.x = availRegion.y * frame_aspect;
-      }
-      else
-      {
-        // The available region is taller or has the same aspect ratio, so we scale by width.
-        final_size.x = availRegion.x;
-        final_size.y = availRegion.x / frame_aspect;
-      }
-      
-      // 2. Center the image horizontally.
-      // Calculate the padding needed to center the image.
-      float padding_x = (availRegion.x - final_size.x) * 0.5f;
-      float padding_y = (availRegion.y - final_size.y) * 0.5f;
+        // 1. Get the available space in the current window.
+        ImVec2 availRegion = ImGui::GetContentRegionAvail();
 
-      // Use Dummy to create the centering space.
-      ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding_x);
-      ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding_y);
-      
-      // 3. Display the image with the calculated size.
-      ImGui::Image((ImTextureID)textureID, final_size);
+        float frame_aspect = (float)currentFrame.cols / (float)currentFrame.rows;
+        float region_aspect = availRegion.x / availRegion.y;
+
+        ImVec2 final_size;
+        if (region_aspect > frame_aspect)
+        {
+          // The available region is wider than the frame, so we scale by height.
+          final_size.y = availRegion.y;
+          final_size.x = availRegion.y * frame_aspect;
+        }
+        else
+        {
+          // The available region is taller or has the same aspect ratio, so we scale by width.
+          final_size.x = availRegion.x;
+          final_size.y = availRegion.x / frame_aspect;
+        }
+        
+        // 2. Center the image horizontally.
+        // Calculate the padding needed to center the image.
+        float padding_x = (availRegion.x - final_size.x) * 0.5f;
+        float padding_y = (availRegion.y - final_size.y) * 0.5f;
+
+        // Use Dummy to create the centering space.
+        ImGui::SetCursorPosX(ImGui::GetCursorPosX() + padding_x);
+        ImGui::SetCursorPosY(ImGui::GetCursorPosY() + padding_y);
+        
+        // 3. Display the image with the calculated size.
+        ImGui::Image((ImTextureID)textureID, final_size);
+      }
+
+      // Draw Camera Controls
+      {
+        ImGui::SetCursorPos(ImVec2(0, 0));
+
+        // Show some settings
+
+        // Auto Focus
+        ImGui::Text("Auto Focus:");
+        ImGui::Text("%d", sdSysData.CAMERAS.PROPS.CTRL_FOCUS_AUTO.SET_VALUE);
+
+        if (BC_AUTO_FOCUS_MINUS.button_color(sdSysData, "-##Auto_Focus", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_FOCUS_AUTO, 
+                                                sdSysData.CAMERAS.PROPS.CTRL_FOCUS_AUTO.SET_VALUE - 1);
+        }
+
+        ImGui::SameLine();
+
+        if (BC_AUTO_FOCUS_PLUS.button_color(sdSysData, "+##Auto_Focus", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_FOCUS_AUTO, 
+                                                sdSysData.CAMERAS.PROPS.CTRL_FOCUS_AUTO.SET_VALUE + 1);
+        }
+
+        // Focus Absolute
+        ImGui::Text("Absl Focus:");
+        ImGui::Text("%d", sdSysData.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE.SET_VALUE);
+
+        if (BC_ABSL_FOCUS_MINUS.button_color(sdSysData, "-##Absl_Focus", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE, 
+                                                sdSysData.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE.SET_VALUE - 1);
+        }
+
+        ImGui::SameLine();
+
+        if (BC_ABSL_FOCUS_PLUS.button_color(sdSysData, "+##Absl_Focus", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE, 
+                                                sdSysData.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE.SET_VALUE + 1);
+        }
+
+        // Auto Exposure (menu)
+        ImGui::Text("Auto Exp:");
+        ImGui::Text("%d", sdSysData.CAMERAS.PROPS.CTRL_EXPOSURE_AUTO.SET_VALUE);
+
+        if (BC_AUTO_EXPOSURE_PLUS.button_color(sdSysData, "-##Auto_Exposure", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_EXPOSURE_AUTO, 
+                                                sdSysData.CAMERAS.PROPS.CTRL_EXPOSURE_AUTO.SET_VALUE - 1);
+        }
+
+        ImGui::SameLine();
+
+        if (BC_AUTO_EXPOSURE_MINUS.button_color(sdSysData, "+##Auto_Exposure", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_EXPOSURE_AUTO, 
+                                                sdSysData.CAMERAS.PROPS.CTRL_EXPOSURE_AUTO.SET_VALUE + 1);
+        }
+
+        // Backlight Compensation
+        ImGui::Text("Backlight Comp:");
+        ImGui::Text("%d", sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION.SET_VALUE);
+
+        if (BC_BACKLIGHT_COMP_PLUS.button_color(sdSysData, "-##Backlight_Comp", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION, 
+                                                sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION.SET_VALUE - 1);
+        }
+
+        ImGui::SameLine();
+
+        if (BC_BACKLIGHT_COMP_MINUS.button_color(sdSysData, "+##Backlight_Comp", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION, 
+                                                sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION.SET_VALUE + 1);
+        }
+
+        // ...
+      }
     } 
     else 
     {

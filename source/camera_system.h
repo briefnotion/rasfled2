@@ -29,9 +29,23 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
+class CAMERA_SETTING
+{
+  public:
+  uint32_t  ADDRESS = 0x0;
+  int       MINIMUM = 0;
+  int       MAXIMUM = 0;
+  int       DEFAULT = 0;
+  int     SET_VALUE = -1;
+};
+
 class CAMERA_PROPERTIES
 {
   public:
+
+  string CAMERA_DEVICE_NAME = "";
+  int    CAMERA_DEVICE_ID   = -1;
+
   int WIDTH = 640;
   int HEIGHT = 480;
   //int AUTO_FOCUS = 0;  // 0 off
@@ -39,9 +53,23 @@ class CAMERA_PROPERTIES
 
   bool FLIP_HORIZONTAL = false;
 
-  // Control Addresses:
-  uint32_t CTRL_ADDR_FOCUS_AUTO     = 0x009a090c;
-  uint32_t CTRL_ADDR_FOCUS_ABSOLUTE = 0x009a090a;
+  // Controls:
+
+  CAMERA_SETTING CTRL_FOCUS_AUTO;
+  CAMERA_SETTING CTRL_FOCUS_ABSOLUTE;
+
+  CAMERA_SETTING CTRL_EXPOSURE_AUTO;
+  CAMERA_SETTING CTRL_EXPOSURE_TIME_ABSOLUTE;
+  
+  CAMERA_SETTING CTRL_BACKLIGHT_COMENSATION;
+  CAMERA_SETTING CTRL_SHARPNESS;
+
+  CAMERA_SETTING CTRL_WHITE_BALANCE_AUTOMATIC;
+  CAMERA_SETTING CTRL_WHITE_BALANCE_TEMP;
+
+  CAMERA_SETTING CTRL_GAIN;
+  CAMERA_SETTING CTRL_GAMA;
+  CAMERA_SETTING CTRL_HUE;
 };
 
 class CAMERA
@@ -53,8 +81,8 @@ private:
 
   bool NEW_FRAME_AVAILABLE = false;
   
-  int set_control(int fd, uint32_t id, int32_t value);
-  int get_control(int fd, uint32_t id);
+  bool set_control(uint32_t id, int32_t value); // returns true on success
+  int get_control(uint32_t id);                 // returns -1 on failure, otherwise returns value.
 
   GLuint matToTexture(const cv::Mat& frame, GLuint textureID);
   cv::Mat generateDummyFrame(int width, int height);
@@ -65,17 +93,16 @@ public:
   
   bool CAM_AVAILABLE = false;
   bool CAM_VIDEO_AVAILABLE = false;
-  
-  // Camera Settings
-  int CAM_FOCUS_AUTO      = 0;
-  int CAM_FOCUS_ABSOLUTE  = 0;
 
   string INFORMATION              = "Not Available";
   string INFORMATION_COMMAND_LIST = "Not Available";
 
   CAMERA_PROPERTIES PROPS;
   
-  void list_controls(const char* device);
+  void list_controls();
+
+  bool set_camera_control(CAMERA_SETTING &Setting, int Value);
+  int get_camera_control_value(CAMERA_SETTING &Setting);
 
   // Public method to create the camera capture.
   void create();

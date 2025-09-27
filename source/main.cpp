@@ -412,23 +412,97 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
   // Initialize Camera
   
-  //sdSystem.CAMERAS.PROPS.AUTO_FOCUS = 0;
+  // Assign Camera C0ordinator
+  CAMERA_SYSTEM_COORDINATOR CAMERA_COORDINATOR;
+
+  // Assign Properties and Controls
+  sdSystem.CAMERAS.PROPS.CAMERA_DEVICE_NAME = "/dev/video0";
+  sdSystem.CAMERAS.PROPS.CAMERA_DEVICE_ID   = 0;
+
+  sdSystem.CAMERAS.PROPS.CTRL_FOCUS_AUTO.ADDRESS = 0x009a090c;
+  sdSystem.CAMERAS.PROPS.CTRL_FOCUS_AUTO.MINIMUM = 0;
+  sdSystem.CAMERAS.PROPS.CTRL_FOCUS_AUTO.MAXIMUM = 1;
+  sdSystem.CAMERAS.PROPS.CTRL_FOCUS_AUTO.DEFAULT = 1;
+
+  sdSystem.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE.ADDRESS = 0x009a090a;
+  sdSystem.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE.MINIMUM = 0;
+  sdSystem.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE.MAXIMUM = 21;
+  sdSystem.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE.DEFAULT = 16;
+
+  sdSystem.CAMERAS.PROPS.CTRL_EXPOSURE_AUTO.ADDRESS = 0x009a0901;
+  sdSystem.CAMERAS.PROPS.CTRL_EXPOSURE_AUTO.MINIMUM = 0;
+  sdSystem.CAMERAS.PROPS.CTRL_EXPOSURE_AUTO.MAXIMUM = 3;
+  sdSystem.CAMERAS.PROPS.CTRL_EXPOSURE_AUTO.DEFAULT = 0;
+
+  sdSystem.CAMERAS.PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.ADDRESS = 0x009a0902;
+  sdSystem.CAMERAS.PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.MINIMUM = 4;
+  sdSystem.CAMERAS.PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.MAXIMUM = 5000;
+  sdSystem.CAMERAS.PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.DEFAULT = 625;
+
+  sdSystem.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION.ADDRESS = 0x0098091c;
+  sdSystem.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION.MINIMUM = 0;
+  sdSystem.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION.MAXIMUM = 1;
+  sdSystem.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION.DEFAULT = 1;
+
+  sdSystem.CAMERAS.PROPS.CTRL_SHARPNESS.ADDRESS = 0x0098091b;
+  sdSystem.CAMERAS.PROPS.CTRL_SHARPNESS.MINIMUM = 0;
+  sdSystem.CAMERAS.PROPS.CTRL_SHARPNESS.MAXIMUM = 15;
+  sdSystem.CAMERAS.PROPS.CTRL_SHARPNESS.DEFAULT = 6;
+
+  sdSystem.CAMERAS.PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.ADDRESS = 0x0098090c;
+  sdSystem.CAMERAS.PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.MINIMUM = 0;
+  sdSystem.CAMERAS.PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.MAXIMUM = 1;
+  sdSystem.CAMERAS.PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.DEFAULT = 1;
+
+  sdSystem.CAMERAS.PROPS.CTRL_WHITE_BALANCE_TEMP.ADDRESS = 0x0098091a;
+  sdSystem.CAMERAS.PROPS.CTRL_WHITE_BALANCE_TEMP.MINIMUM = 2800;
+  sdSystem.CAMERAS.PROPS.CTRL_WHITE_BALANCE_TEMP.MAXIMUM = 6500;
+  sdSystem.CAMERAS.PROPS.CTRL_WHITE_BALANCE_TEMP.DEFAULT = 2800;
+
+  sdSystem.CAMERAS.PROPS.CTRL_GAIN.ADDRESS = 0x00980913;
+  sdSystem.CAMERAS.PROPS.CTRL_GAIN.MINIMUM = 0;
+  sdSystem.CAMERAS.PROPS.CTRL_GAIN.MAXIMUM = 0;
+  sdSystem.CAMERAS.PROPS.CTRL_GAIN.DEFAULT = 0;
+
+  sdSystem.CAMERAS.PROPS.CTRL_GAMA.ADDRESS = 0x00980910;
+  sdSystem.CAMERAS.PROPS.CTRL_GAMA.MINIMUM = 1;
+  sdSystem.CAMERAS.PROPS.CTRL_GAMA.MAXIMUM = 10;
+  sdSystem.CAMERAS.PROPS.CTRL_GAMA.DEFAULT = 7;
+
+  sdSystem.CAMERAS.PROPS.CTRL_HUE.ADDRESS = 0x00980903;
+  sdSystem.CAMERAS.PROPS.CTRL_HUE.MINIMUM = 10;
+  sdSystem.CAMERAS.PROPS.CTRL_HUE.MAXIMUM = 10;
+  sdSystem.CAMERAS.PROPS.CTRL_HUE.DEFAULT = 10;
+
+  // Set Camera Screen Properties
   //sdSystem.CAMERAS.PROPS.WIDTH = 640;
   //sdSystem.CAMERAS.PROPS.HEIGHT = 480;
+
   //sdSystem.CAMERAS.PROPS.WIDTH = 1280;
   //sdSystem.CAMERAS.PROPS.HEIGHT = 720;
-
+  
   sdSystem.CAMERAS.PROPS.WIDTH = 800;
   sdSystem.CAMERAS.PROPS.HEIGHT = 600;
+  
   sdSystem.CAMERAS.PROPS.FLIP_HORIZONTAL = true;
 
   // Get list of controls to print to screen.
   sdSystem.SCREEN_COMMS.printw("Initializing Camera ...");
-  sdSystem.CAMERAS.list_controls("/dev/video0");
+  sdSystem.CAMERAS.list_controls();
   sdSystem.SCREEN_COMMS.printw(sdSystem.CAMERAS.INFORMATION_COMMAND_LIST);
 
   sdSystem.CAMERAS.create();
   sdSystem.SCREEN_COMMS.printw(sdSystem.CAMERAS.INFORMATION);
+
+  // Initial Camera Setup
+  // disable continuous autofocus
+  sdSystem.CAMERAS.set_camera_control(sdSystem.CAMERAS.PROPS.CTRL_FOCUS_AUTO, 0);
+  // set manual focus value (depends on your camera’s supported range)
+  sdSystem.CAMERAS.set_camera_control(sdSystem.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE, 0);
+
+  // Verify settings
+  sdSystem.SCREEN_COMMS.printw("Auto Focus: " + to_string(sdSystem.CAMERAS.get_camera_control_value(sdSystem.CAMERAS.PROPS.CTRL_FOCUS_AUTO)));
+  sdSystem.SCREEN_COMMS.printw("Absl Focus: " + to_string(sdSystem.CAMERAS.get_camera_control_value(sdSystem.CAMERAS.PROPS.CTRL_FOCUS_ABSOLUTE)));
 
   // ---------------------------------------------------------------------------------------
   // Initialize Alert System
@@ -1253,6 +1327,9 @@ int loop_2(bool TTY_Only)
         // Automobile - Update all automobile Reference Data
         sdSystem.CAR_INFO.translate(sdSystem.DNFWTS, sdSystem.PROGRAM_TIME.current_frame_time());
         cons_2.update_automobile_gadgets(sdSystem);
+
+        // Check camera handler to see if camera should be on.
+        CAMERA_COORDINATOR.check(sdSystem);
 
         // Check DNFWTS
         if (sdSystem.DNFWTS.check_for_change())

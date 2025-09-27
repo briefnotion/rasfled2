@@ -90,7 +90,7 @@ void v_DoorMonitorAndAnimationControlModule2(CONSOLE_COMMUNICATION &cons, system
   if (changes > 0)
   {
     // Update system open doors count var so other routines can check door status.
-    sdSysData.intDoorsOpen = prev_open_door_count + recent_opened_door_count - recent_closed_door_count;
+    sdSysData.PANEL_CONTROL.AUTO_DOOR_OPEN_COUNT = prev_open_door_count + recent_opened_door_count - recent_closed_door_count;
 
     //cons.printw("prev_open_door_count:" + to_string(prev_open_door_count) +
     //               " recent_opened_door_count:" + to_string(recent_opened_door_count) +

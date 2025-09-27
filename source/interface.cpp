@@ -253,14 +253,14 @@ void processcommandoverheadillum(system_data &sdSysData, unsigned long tmeCurren
 void processcommandhazardend(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
   Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD STOP");
-  sdSysData.booHazardRunning = false;
+  sdSysData.PANEL_CONTROL.AUTO_HAZARDS = false;
 }
 
 // Hazard
 void processcommandhazard(system_data &sdSysData, unsigned long tmeCurrentTime, ANIMATION_HANDLER &Animations)
 {
   Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD");
-  sdSysData.booHazardRunning = true;
+  sdSysData.PANEL_CONTROL.AUTO_HAZARDS = true;
 }
 
 // -------------------------------------------------------------------------------------
@@ -1348,9 +1348,9 @@ void extraanimationdoorcheck2(system_data &sdSysData, unsigned long tmeCurrentTi
       processcommandflash(sdSysData, tmeCurrentTime, Animations);
     }
 
-    if (sdSysData.intDoorsOpen > 0)
+    if (sdSysData.PANEL_CONTROL.AUTO_DOOR_OPEN_COUNT > 0)
     {
-      sdSysData.SCREEN_COMMS.printw(to_string(sdSysData.intDoorsOpen));
+      // sdSysData.SCREEN_COMMS.printw(to_string(sdSysData.PANEL_CONTROL.AUTO_DOOR_OPEN_COUNT));
       // End pulses when door is opened and end countdown timer.
       sdSysData.cdTIMER.end();
       processcommandpulseend(sdSysData, tmeCurrentTime, Animations);

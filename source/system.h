@@ -182,10 +182,8 @@ class system_data
   // Door Module Support
   deque<bool>     boolDOOR_SENSOR_STATUS;
 
-  int             intDoorsOpen = 0;           // Amount of doors open.
   bool            booPulsesRunning = false;   // Are exta anims running.
   bool            booOverheadRunning = false; // Are exta anims running.
-  bool            booHazardRunning = false;   // Are exta anims running.
 
   CRGB            PULSE_COLOR;
   CRGB            CUSTOM_COLOR;

@@ -117,6 +117,7 @@
 #include "animations_handler.h"
 #include "automobile_handler.h"
 #include "alert_system_coordinator.h"
+#include "camera_coordinator.h"
 
 // ***************************************************************************************
 // FUNCTION AND PROCEDURES

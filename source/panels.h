@@ -167,13 +167,12 @@ class SCREEN4_PANEL_CONTROL
   PANEL ADSB_MAP_MAX_DISTANCE;
 
   // CAMERA 
-  int CAMERA_SELECTION = 0;
-  int CAMERA_AUTO_GEAR = 0;
-  // 0 - park
-  // 1 - reverse
-  // 2 - neutral
-  // 3 - drive
-  // 4 - low
+  bool CAMERA_BACKUP_ON_SYSTEM = false;
+  bool CAMERA_BACKUP_ON_TOGGLE = false;
+
+  // AUTO
+  bool            AUTO_HAZARDS = false;   // Are exta anims running.
+  int     AUTO_DOOR_OPEN_COUNT = 0;       // Amount of doors open.
   
   // Notation 
   string EXTRA;

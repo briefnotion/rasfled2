@@ -75,6 +75,7 @@ target_sources(rasfled PRIVATE
   map_hardcode.cpp
   map.cpp
   camera_system.cpp
+  camera_coordinator.cpp
   aircraft_coordinator.cpp
   widgets_advertisement.cpp
   widgets.cpp

@@ -28,6 +28,7 @@
 
 // Rasfled Includes
 #include "system.h"
+#include "widgets.h"
 
 // IMGui Includes
 
@@ -38,6 +39,31 @@ using namespace std;
 class CAMERA_WIDGET
 {
   private:
+
+  BUTTON_COLOR        BC_AUTO_FOCUS_PLUS;
+  BUTTON_COLOR        BC_AUTO_FOCUS_MINUS;
+
+  BUTTON_COLOR        BC_ABSL_FOCUS_PLUS;
+  BUTTON_COLOR        BC_ABSL_FOCUS_MINUS;
+
+  BUTTON_COLOR        BC_AUTO_EXPOSURE_PLUS;
+  BUTTON_COLOR        BC_AUTO_EXPOSURE_MINUS;
+
+  BUTTON_COLOR        BC_BACKLIGHT_COMP_PLUS;
+  BUTTON_COLOR        BC_BACKLIGHT_COMP_MINUS;
+
+  BUTTON_COLOR        BC_HUE_PLUS;
+  BUTTON_COLOR        BC_HUE_MINUS;
+
+  BUTTON_COLOR        BC_GAMA_PLUS;
+  BUTTON_COLOR        BC_GAMA_MINUS;
+
+  BUTTON_COLOR        BC_GAIN_PLUS;
+  BUTTON_COLOR        BC_GAIN_MINUS;
+
+  BUTTON_COLOR        BC_SHARPMESS_PLUS;
+  BUTTON_COLOR        BC_SHARPMESS_MINUS;
+
   public:
 
   void display(system_data &sdSysData);

@@ -103,13 +103,13 @@ void SCREEN4::door_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 
 
 void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec2 Window_Size)
 {
-  if (sdSysData.CAR_INFO.active() || sdSysData.booHazardRunning)
+  if (sdSysData.CAR_INFO.active() || sdSysData.PANEL_CONTROL.AUTO_HAZARDS)
   {
     // Set Blinker Color Value
     if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left() || 
         sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right() || 
         sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards() || 
-        sdSysData.booHazardRunning)
+        sdSysData.PANEL_CONTROL.AUTO_HAZARDS)
     {
       if (PING_BLINKER.ping_down(sdSysData.PROGRAM_TIME.current_frame_time()) == false)
       {
@@ -128,7 +128,7 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
             BLINKER_INDICATOR_RIGHT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_ORANGE));
           }
 
-          if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards() || sdSysData.booHazardRunning)
+          if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards() || sdSysData.PANEL_CONTROL.AUTO_HAZARDS)
           {
             BLINKER_INDICATOR_HAZARD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_RED));
           }
@@ -145,7 +145,7 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
             BLINKER_INDICATOR_RIGHT.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
           }
 
-          if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards() || sdSysData.booHazardRunning)
+          if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards() || sdSysData.PANEL_CONTROL.AUTO_HAZARDS)
           {
             BLINKER_INDICATOR_HAZARD.set_color(sdSysData.PROGRAM_TIME.current_frame_time(), BLACK_QPAQUE);
           }
@@ -179,7 +179,7 @@ void SCREEN4::signal_lights(ImDrawList *Draw_List, system_data &sdSysData, ImVec
     }
 
     // Hazard Blinker
-    if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards() || sdSysData.booHazardRunning || BLINKER_INDICATOR_HAZARD.is_changing())
+    if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_hazards() || sdSysData.PANEL_CONTROL.AUTO_HAZARDS || BLINKER_INDICATOR_HAZARD.is_changing())
     {
       Draw_List->AddRectFilledMultiColor(ImVec2(Window_Size.x * 0.0f, 0.0f), ImVec2(Window_Size.x * 0.5f, Window_Size.y), 
           BLACK_QPAQUE, BLINKER_INDICATOR_HAZARD.color(sdSysData.PROGRAM_TIME.current_frame_time()), 
@@ -801,7 +801,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 OVERHEAD.update_tf(sdSysData.booOverheadRunning);
                 OVERHEAD.draw(sdSysData);
 
-                HAZARD.update_tf(sdSysData.booHazardRunning);
+                HAZARD.update_tf(sdSysData.PANEL_CONTROL.AUTO_HAZARDS);
                 HAZARD.draw(sdSysData);
               }
               ImGui::EndGroup();
@@ -931,10 +931,9 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - (48 * DEF_SCREEN_SIZE_Y_MULTIPLIER)), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
-
-            if (sdSysData.PANEL_CONTROL.CAMERA_AUTO_GEAR == 1 ||
-                sdSysData.PANEL_CONTROL.CAMERA_AUTO_GEAR == 2 || 
-                sdSysData.PANEL_CONTROL.CAMERA_SELECTION)
+            // Is Camera On
+            if (sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM ||
+                sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE)
             {
               // Backup Camera
               {
@@ -963,9 +962,6 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                   BACKUP_CAMERA.display(sdSysData);
                 }
               }
-
-
-
             }
             else
             {
@@ -1281,14 +1277,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                                                           ImVec2(working_area_info_bar.x, working_area_info_bar.y), 
                                                           ImVec2(working_area_info_bar.z, working_area_info_bar.w)))
               {
-                if (sdSysData.PANEL_CONTROL.CAMERA_SELECTION == 0)
-                {
-                  sdSysData.PANEL_CONTROL.CAMERA_SELECTION = 1;
-                }
-                else
-                {
-                  sdSysData.PANEL_CONTROL.CAMERA_SELECTION = 0;
-                }
+                sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE = !sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE;
               }
             }
             ImGui::EndChild();
@@ -1412,9 +1401,9 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           }
           else if (DISPLAY_MENU == 1)
           {
-            if (BTC_HAZARD.button_toggle_color(sdSysData, "HAZARD\n(On)", "HAZARD\n(Off)", sdSysData.booHazardRunning, RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_HAZARD.button_toggle_color(sdSysData, "HAZARD\n(On)", "HAZARD\n(Off)", sdSysData.PANEL_CONTROL.AUTO_HAZARDS, RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
-              if (sdSysData.booHazardRunning == true)
+              if (sdSysData.PANEL_CONTROL.AUTO_HAZARDS == true)
               {
                 sdSysData.SCREEN_COMMS.command_text_set("h`");
               }

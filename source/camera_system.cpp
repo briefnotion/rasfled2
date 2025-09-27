@@ -50,31 +50,47 @@ cv::Mat CAMERA::generateDummyFrame(int width, int height)
   return dummy;
 }
 
-int CAMERA::set_control(int fd, uint32_t id, int32_t value)
+bool CAMERA::set_control(uint32_t id, int32_t value)
 {
-  struct v4l2_control control;
-  std::memset(&control, 0, sizeof(control));
-  control.id = id;
-  control.value = value;
-  if (ioctl(fd, VIDIOC_S_CTRL, &control) == -1)
+  bool ret_success = false;
+
+  // --- Step 1: open V4L2 device ---
+  int fd = open(PROPS.CAMERA_DEVICE_NAME.c_str(), O_RDWR);
+  if (fd != -1) 
   {
-    perror("Setting control failed");
-    return -1;
+    struct v4l2_control control;
+    std::memset(&control, 0, sizeof(control));
+    control.id = id;
+    control.value = value;
+    if (ioctl(fd, VIDIOC_S_CTRL, &control) != -1)
+    {
+      ret_success = true;
+
+    }
+    close(fd);
   }
-  return 0;
+
+  return ret_success;
 }
 
-int CAMERA::get_control(int fd, uint32_t id) 
+int CAMERA::get_control(uint32_t id) 
 {
-  struct v4l2_control control;
-  std::memset(&control, 0, sizeof(control));
-  control.id = id;
-  if (ioctl(fd, VIDIOC_G_CTRL, &control) == -1) 
+  int ret_value = -1;
+  
+  int fd = open(PROPS.CAMERA_DEVICE_NAME.c_str(), O_RDWR);
+  if (fd != -1) 
   {
-    perror("Getting control failed");
-    return -1;
+    struct v4l2_control control;
+    std::memset(&control, 0, sizeof(control));
+    control.id = id;
+    if (ioctl(fd, VIDIOC_G_CTRL, &control) != -1) 
+    {
+      ret_value = control.value;
+    }
+    close(fd);
   }
-  return control.value;
+
+  return ret_value;
 }
 
 /**
@@ -128,11 +144,62 @@ GLuint CAMERA::matToTexture(const cv::Mat& frame, GLuint textureID)
   return textureID;
 }
 
-void CAMERA::list_controls(const char* device)
+bool CAMERA::set_camera_control(CAMERA_SETTING &Setting, int Value)
+{
+  bool ret_success = false;
+
+  if (CAM_AVAILABLE && Value != Setting.SET_VALUE)
+  {
+    if (Value < Setting.MINIMUM)
+    {
+      if (set_control(Setting.ADDRESS, (int32_t)Setting.MINIMUM))
+      {
+        Setting.SET_VALUE = Setting.MINIMUM;
+        ret_success = true;
+      }
+    }
+    else if (Value > Setting.MAXIMUM)
+    {
+      if (set_control(Setting.ADDRESS, (int32_t)Setting.MAXIMUM))
+      {
+        Setting.SET_VALUE = Setting.MAXIMUM;
+        ret_success = true;
+      }
+    }
+    else 
+    {
+      if (set_control(Setting.ADDRESS, (int32_t)Value))
+      {
+        Setting.SET_VALUE = Value;
+        ret_success = true;
+      }
+    }
+  }
+
+  return ret_success;
+}
+
+int CAMERA::get_camera_control_value(CAMERA_SETTING &Setting)
+{
+  int ret_value = -1;
+
+  if (CAM_AVAILABLE)
+  {
+    ret_value = get_control(Setting.ADDRESS);
+    if (ret_value != -1)
+    {
+      Setting.SET_VALUE = ret_value;
+    }
+  }
+
+  return ret_value;
+}
+
+void CAMERA::list_controls()
 {
   INFORMATION_COMMAND_LIST = "";
   
-  int fd = open(device, O_RDWR);
+  int fd = open(PROPS.CAMERA_DEVICE_NAME.c_str(), O_RDWR);
   if (fd == -1) 
   {
     //perror("Opening video device failed");
@@ -172,7 +239,7 @@ void CAMERA::create()
   std::stringstream ss;
   
   // Attempt to open the default camera (index 0).
-  CAMERA_CAPTURE.open(0);
+  CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID);
 
   // Check if the camera was successfully opened.
   CAM_AVAILABLE = CAMERA_CAPTURE.isOpened();
@@ -181,37 +248,6 @@ void CAMERA::create()
     // If the camera is opened, set its frame width and height.
     CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
     CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
-    //CAMERA_CAPTURE.set(cv::CAP_PROP_AUTOFOCUS, PROPS.AUTO_FOCUS);
-    //CAMERA_CAPTURE.set(cv::CAP_PROP_FOCUS, PROPS.FOCUS);
-
-    // Hardcoding settings for my camera. May change in the future.
-    {
-      const char* device = "/dev/video0";
-
-      // --- Step 1: open V4L2 device ---
-      int fd = open(device, O_RDWR);
-      if (fd == -1) 
-      {
-        //perror("Opening video device failed");
-        ss << "Opening video device failed" << endl;
-      }
-
-      // --- Step 2: set focus controls ---
-      // disable continuous autofocus
-      set_control(fd, PROPS.CTRL_ADDR_FOCUS_AUTO, 0);   // V4L2_CID_FOCUS_AUTO_CONTINUOUS
-      // set manual focus value (depends on your camera’s supported range)
-      set_control(fd, PROPS.CTRL_ADDR_FOCUS_ABSOLUTE, 0);  // V4L2_CID_FOCUS_ABSOLUTE
-
-      // Get settings
-      CAM_FOCUS_AUTO = get_control(fd, PROPS.CTRL_ADDR_FOCUS_AUTO); // focus_absolute
-      CAM_FOCUS_ABSOLUTE = get_control(fd, PROPS.CTRL_ADDR_FOCUS_ABSOLUTE); // focus_absolute
-
-      ss << "Auto Focus: " << CAM_FOCUS_AUTO << endl;
-      ss << "Absl Focus: " << CAM_FOCUS_ABSOLUTE << endl;
-
-      // --- Step 3: close fd (controls persist in the driver) ---
-      close(fd);
-    }
 
     ss << "Camera successfully opened and properties set." << std::endl;
 

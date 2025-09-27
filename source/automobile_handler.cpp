@@ -446,7 +446,6 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     {
       if (GEAR_PARK == true)
       {
-        sdSysData.PANEL_CONTROL.CAMERA_AUTO_GEAR = 0;
         sdSysData.SOUND_SYSTEM.play_gear_park(sdSysData.COMMAND_THREADS);
         
         // Call animation to turn on Park color.
@@ -464,7 +463,6 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     {
       if (GEAR_NEUTRAL == true)
       {
-        sdSysData.PANEL_CONTROL.CAMERA_AUTO_GEAR = 2;
         sdSysData.SOUND_SYSTEM.play_gear_neutral(sdSysData.COMMAND_THREADS);
 
         // Call animation to turn on Neutral color.
@@ -482,7 +480,6 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     {
       if (GEAR_REVERSE == true)
       {
-        sdSysData.PANEL_CONTROL.CAMERA_AUTO_GEAR = 1;
         sdSysData.SOUND_SYSTEM.play_gear_reverse(sdSysData.COMMAND_THREADS);
 
         // Call animation to turn on Reverse color.
@@ -500,7 +497,6 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     {
       if (GEAR_DRIVE == true)
       {
-        sdSysData.PANEL_CONTROL.CAMERA_AUTO_GEAR = 3;
         sdSysData.SOUND_SYSTEM.play_gear_drive(sdSysData.COMMAND_THREADS);
         
         // Call animation to turn on Drive color.
@@ -518,7 +514,6 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     {
       if (GEAR_LOW == true)
       {
-        sdSysData.PANEL_CONTROL.CAMERA_AUTO_GEAR = 4;
         sdSysData.SOUND_SYSTEM.play_gear_low(sdSysData.COMMAND_THREADS);
         
         // Call animation to turn on Drive color.
@@ -568,12 +563,12 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
       if (HAZARDS)
       {
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD");
-        sdSysData.booHazardRunning = true;
+        sdSysData.PANEL_CONTROL.AUTO_HAZARDS = true;
       }
       else
       {
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "HAZARD STOP");
-        sdSysData.booHazardRunning = false;
+        sdSysData.PANEL_CONTROL.AUTO_HAZARDS = false;
       }
     }
 
