@@ -29,6 +29,29 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
+// --- Helper class for RAII (Resource Acquisition Is Initialization) ---
+// This ensures the file descriptor is closed automatically when the function exits.
+class FdCloser 
+{
+  public:
+  int fd;
+  // Constructor initializes with the file descriptor
+  FdCloser(int descriptor) : fd(descriptor) {}
+  // Destructor automatically calls close()
+  ~FdCloser() 
+  {
+    if (fd != -1) 
+    {
+        close(fd);
+    }
+  }
+  // Prevent copying (since file descriptors should not be copied)
+  FdCloser(const FdCloser&) = delete;
+  FdCloser& operator=(const FdCloser&) = delete;
+};
+
+// ---------------------------------------------------------------------------------------
+
 class CAMERA_SETTING
 {
   public:
@@ -61,8 +84,7 @@ class CAMERA_PROPERTIES
   CAMERA_SETTING CTRL_EXPOSURE_AUTO;
   CAMERA_SETTING CTRL_EXPOSURE_TIME_ABSOLUTE;
   
-  CAMERA_SETTING CTRL_BACKLIGHT_COMENSATION;
-  CAMERA_SETTING CTRL_SHARPNESS;
+  CAMERA_SETTING CTRL_BACKLIGHT_COMPENSATION;
 
   CAMERA_SETTING CTRL_WHITE_BALANCE_AUTOMATIC;
   CAMERA_SETTING CTRL_WHITE_BALANCE_TEMP;
@@ -70,24 +92,32 @@ class CAMERA_PROPERTIES
   CAMERA_SETTING CTRL_GAIN;
   CAMERA_SETTING CTRL_GAMA;
   CAMERA_SETTING CTRL_HUE;
+  CAMERA_SETTING CTRL_SHARPNESS;
 };
 
 class CAMERA
 {
-private:
+  private:
   cv::Mat FRAME;
   cv::Mat FRAME_DUMMY;
   cv::Mat PROCESSED_FRAME;
 
   bool NEW_FRAME_AVAILABLE = false;
-  
+
   bool set_control(uint32_t id, int32_t value); // returns true on success
   int get_control(uint32_t id);                 // returns -1 on failure, otherwise returns value.
 
-  GLuint matToTexture(const cv::Mat& frame, GLuint textureID);
   cv::Mat generateDummyFrame(int width, int height);
+  GLuint matToTexture(const cv::Mat& frame, GLuint textureID);
 
-public:
+  void prepare();
+  // Until a load from json is created, manually keyt this routine up.
+
+  void init(stringstream &Print_Stream);
+  // Until camera properties are in a vector, manually set and get each control
+  //  as necessary for first run.
+
+  public:
   cv::VideoCapture CAMERA_CAPTURE;
   GLuint TEXTURE_ID = 0;
   
@@ -99,10 +129,10 @@ public:
 
   CAMERA_PROPERTIES PROPS;
   
-  void list_controls();
-
   bool set_camera_control(CAMERA_SETTING &Setting, int Value);
   int get_camera_control_value(CAMERA_SETTING &Setting);
+  
+  void list_controls();
 
   // Public method to create the camera capture.
   void create();

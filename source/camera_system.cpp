@@ -14,6 +14,7 @@
 
 #include "camera_system.h"
 
+
 // ---------------------------------------------------------------------------------------
 /*
 
@@ -36,19 +37,6 @@ Notes:
 
 */
 // ---------------------------------------------------------------------------------------
-
-cv::Mat CAMERA::generateDummyFrame(int width, int height) 
-{
-  cv::Mat dummy(height, width, CV_8UC3);
-  for (int y = 0; y < dummy.rows; ++y)
-  {
-    for (int x = 0; x < dummy.cols; ++x)
-    {
-      dummy.at<cv::Vec3b>(y, x) = cv::Vec3b(x % 256, y % 256, (x + y) % 256);
-    }
-  }
-  return dummy;
-}
 
 bool CAMERA::set_control(uint32_t id, int32_t value)
 {
@@ -91,6 +79,19 @@ int CAMERA::get_control(uint32_t id)
   }
 
   return ret_value;
+}
+
+cv::Mat CAMERA::generateDummyFrame(int width, int height) 
+{
+  cv::Mat dummy(height, width, CV_8UC3);
+  for (int y = 0; y < dummy.rows; ++y)
+  {
+    for (int x = 0; x < dummy.cols; ++x)
+    {
+      dummy.at<cv::Vec3b>(y, x) = cv::Vec3b(x % 256, y % 256, (x + y) % 256);
+    }
+  }
+  return dummy;
 }
 
 /**
@@ -144,6 +145,86 @@ GLuint CAMERA::matToTexture(const cv::Mat& frame, GLuint textureID)
   return textureID;
 }
 
+void CAMERA::prepare()
+{
+  PROPS.CTRL_FOCUS_AUTO.ADDRESS = 0x009a090c;
+  PROPS.CTRL_FOCUS_AUTO.MINIMUM = 0;
+  PROPS.CTRL_FOCUS_AUTO.MAXIMUM = 1;
+  PROPS.CTRL_FOCUS_AUTO.DEFAULT = 1;
+
+  PROPS.CTRL_FOCUS_ABSOLUTE.ADDRESS = 0x009a090a;
+  PROPS.CTRL_FOCUS_ABSOLUTE.MINIMUM = 0;
+  PROPS.CTRL_FOCUS_ABSOLUTE.MAXIMUM = 21;
+  PROPS.CTRL_FOCUS_ABSOLUTE.DEFAULT = 16;
+
+  PROPS.CTRL_EXPOSURE_AUTO.ADDRESS = 0x009a0901;
+  PROPS.CTRL_EXPOSURE_AUTO.MINIMUM = 0;
+  PROPS.CTRL_EXPOSURE_AUTO.MAXIMUM = 3;
+  PROPS.CTRL_EXPOSURE_AUTO.DEFAULT = 3;
+
+  PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.ADDRESS = 0x009a0902;
+  PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.MINIMUM = 4;
+  PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.MAXIMUM = 5000;
+  PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.DEFAULT = 625;
+
+  PROPS.CTRL_BACKLIGHT_COMPENSATION.ADDRESS = 0x0098091c;
+  PROPS.CTRL_BACKLIGHT_COMPENSATION.MINIMUM = 0;
+  PROPS.CTRL_BACKLIGHT_COMPENSATION.MAXIMUM = 1;
+  PROPS.CTRL_BACKLIGHT_COMPENSATION.DEFAULT = 1;
+
+  PROPS.CTRL_SHARPNESS.ADDRESS = 0x0098091b;
+  PROPS.CTRL_SHARPNESS.MINIMUM = 0;
+  PROPS.CTRL_SHARPNESS.MAXIMUM = 15;
+  PROPS.CTRL_SHARPNESS.DEFAULT = 6;
+
+  PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.ADDRESS = 0x0098090c;
+  PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.MINIMUM = 0;
+  PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.MAXIMUM = 1;
+  PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.DEFAULT = 1;
+
+  PROPS.CTRL_WHITE_BALANCE_TEMP.ADDRESS = 0x0098091a;
+  PROPS.CTRL_WHITE_BALANCE_TEMP.MINIMUM = 2800;
+  PROPS.CTRL_WHITE_BALANCE_TEMP.MAXIMUM = 6500;
+  PROPS.CTRL_WHITE_BALANCE_TEMP.DEFAULT = 2800;
+
+  PROPS.CTRL_GAIN.ADDRESS = 0x00980913;
+  PROPS.CTRL_GAIN.MINIMUM = 0;
+  PROPS.CTRL_GAIN.MAXIMUM = 0;
+  PROPS.CTRL_GAIN.DEFAULT = 0;
+
+  PROPS.CTRL_GAMA.ADDRESS = 0x00980910;
+  PROPS.CTRL_GAMA.MINIMUM = 1;
+  PROPS.CTRL_GAMA.MAXIMUM = 10;
+  PROPS.CTRL_GAMA.DEFAULT = 7;
+
+  PROPS.CTRL_HUE.ADDRESS = 0x00980903;
+  PROPS.CTRL_HUE.MINIMUM = 10;
+  PROPS.CTRL_HUE.MAXIMUM = 10;
+  PROPS.CTRL_HUE.DEFAULT = 10;
+}
+
+void CAMERA::init(stringstream &Print_Stream)
+{
+  // Initial Camera Setup
+  // disable continuous autofocus
+  set_camera_control(PROPS.CTRL_FOCUS_AUTO, 0);
+  // set manual focus value (depends on your camera’s supported range)
+  set_camera_control(PROPS.CTRL_FOCUS_ABSOLUTE, 0);
+
+  // Verify settings
+  Print_Stream << "               Auto Focus: " << get_camera_control_value(PROPS.CTRL_FOCUS_AUTO) << endl;
+  Print_Stream << "          Abslolute Focus: " << get_camera_control_value(PROPS.CTRL_FOCUS_ABSOLUTE) << endl;
+  Print_Stream << "            Exposure Auto: " << get_camera_control_value(PROPS.CTRL_EXPOSURE_AUTO) << endl;
+  Print_Stream << "   Absolute Exposure Time: " << get_camera_control_value(PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE) << endl;
+  Print_Stream << "   Backlight Compensation: " << get_camera_control_value(PROPS.CTRL_BACKLIGHT_COMPENSATION) << endl;
+  Print_Stream << "       White Balance Auto: " << get_camera_control_value(PROPS.CTRL_WHITE_BALANCE_AUTOMATIC) << endl;
+  Print_Stream << "White Balance Temperature: " << get_camera_control_value(PROPS.CTRL_WHITE_BALANCE_TEMP) << endl;
+  Print_Stream << "                     Gain: " << get_camera_control_value(PROPS.CTRL_GAIN) << endl;
+  Print_Stream << "                     Gama: " << get_camera_control_value(PROPS.CTRL_GAMA) << endl;
+  Print_Stream << "                      Hue: " << get_camera_control_value(PROPS.CTRL_HUE) << endl;
+  Print_Stream << "                Sharpness: " << get_camera_control_value(PROPS.CTRL_SHARPNESS) << endl;
+}
+
 bool CAMERA::set_camera_control(CAMERA_SETTING &Setting, int Value)
 {
   bool ret_success = false;
@@ -195,19 +276,30 @@ int CAMERA::get_camera_control_value(CAMERA_SETTING &Setting)
   return ret_value;
 }
 
+
+// Assuming CAMERA is a class and PROPS/INFORMATION_COMMAND_LIST are members
 void CAMERA::list_controls()
 {
+  // 1. Clear the output buffer
   INFORMATION_COMMAND_LIST = "";
-  
-  int fd = open(PROPS.CAMERA_DEVICE_NAME.c_str(), O_RDWR);
-  if (fd == -1) 
+
+  // 2. Open the device and use RAII for safe closing
+  int device_fd = open(PROPS.CAMERA_DEVICE_NAME.c_str(), O_RDWR);
+  if (device_fd == -1) 
   {
-    //perror("Opening video device failed");
-    INFORMATION_COMMAND_LIST = "Opening video device failed\n";
+    // Use strerror(errno) for detailed error information
+    INFORMATION_COMMAND_LIST = "Error: Opening video device failed. Reason: " + 
+                                std::string(strerror(errno)) + "\n";
     return;
   }
+  
+  // The file descriptor will be closed when 'fd_closer' goes out of scope.
+  FdCloser fd_closer(device_fd); 
 
-  INFORMATION_COMMAND_LIST = "Command List:\n\n";
+  // Define the table header with aligned columns
+  INFORMATION_COMMAND_LIST = "Command List:\n\n"
+                              "| ID         | Control Name                   |Type  |Min   |Max   |Defaul|Step  |\n"
+                              "|------------|--------------------------------|------|------|------|------|------|\n";
 
   struct v4l2_queryctrl queryctrl;
   std::memset(&queryctrl, 0, sizeof(queryctrl));
@@ -215,28 +307,62 @@ void CAMERA::list_controls()
   // Start with the first control ID
   queryctrl.id = V4L2_CID_BASE;
 
-  while (0 == ioctl(fd, VIDIOC_QUERYCTRL, &queryctrl)) 
+  // Loop through controls until ioctl fails (i.e., returns -1)
+  while (ioctl(device_fd, VIDIOC_QUERYCTRL, &queryctrl) == 0) 
   {
+    // 3. Skip disabled controls
     if (!(queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)) 
     {
-      std::stringstream ss;
-      ss << "Control: " << queryctrl.name
-        << "  ID: 0x" << std::hex << queryctrl.id
-        << "  Type: " << std::dec << queryctrl.type
-        << "\n";
+      std::stringstream print_stream;
+      
+      // Start row and set alignment to left
+      print_stream << std::left << "| ";
 
-      INFORMATION_COMMAND_LIST += ss.str();
+      // ID (Hex) - 8 chars for hex, plus "0x" prefix
+      print_stream << "0x" << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << queryctrl.id << std::dec << " | ";
+      
+      // Reset fill/case and use appropriate widths for text/decimal
+      print_stream << std::setfill(' ') << std::left;
+
+      // Control Name - max 32 chars
+      print_stream << std::setw(30) << queryctrl.name << " |";
+      
+      // Type
+      print_stream << std::setw(6) << queryctrl.type << "|";
+
+      // Min, Max, Default, Step - right aligned numbers
+      print_stream << std::right;
+      print_stream << std::setw(5) << queryctrl.minimum << "|";
+      print_stream << std::setw(5) << queryctrl.maximum << "|";
+      print_stream << std::setw(5) << queryctrl.default_value << "|";
+      print_stream << std::setw(5) << queryctrl.step << "|\n"; // End of row
+
+      INFORMATION_COMMAND_LIST += print_stream.str();
     }
+
+    // 4. Set the flag to query the *next* control. This is the V4L2 iteration pattern.
     queryctrl.id |= V4L2_CTRL_FLAG_NEXT_CTRL;
   }
 
-  close(fd);
+  // 5. Check ioctl failure reason
+  // The loop breaks when ioctl returns -1. We must check if it was the expected end condition (EINVAL).
+  if (errno != EINVAL) 
+  {
+    // If the error is anything other than EINVAL, it's a real IO error during control enumeration.
+    std::string error_msg = "\nError during control enumeration: " + 
+                            std::string(strerror(errno)) + "\n";
+    INFORMATION_COMMAND_LIST += error_msg;
+  }
+
+  // The file descriptor is automatically closed by FdCloser destructor here.
 }
 
 void CAMERA::create()
 {
-  INFORMATION = ""; 
-  std::stringstream ss;
+  std::stringstream print_stream;
+
+  // Set up all camera properties.
+  prepare();
   
   // Attempt to open the default camera (index 0).
   CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID);
@@ -249,24 +375,28 @@ void CAMERA::create()
     CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
     CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
 
-    ss << "Camera successfully opened and properties set." << std::endl;
+    print_stream << "Camera successfully opened and properties set." << std::endl;
 
     // Now, probe the camera for its actual capabilities and print them.
     double actual_width = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
     double actual_height = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
     double actual_fps = CAMERA_CAPTURE.get(cv::CAP_PROP_FPS);
 
-    ss << "Actual camera resolution: " << actual_width << "x" << actual_height << std::endl;
-    ss << "Actual camera FPS: " << actual_fps << std::endl;
+    // Show some of the cv settings
+    print_stream << "Actual camera resolution: " << actual_width << "x" << actual_height << std::endl;
+    print_stream << "Actual camera FPS: " << actual_fps << std::endl;
+
+    // Initialize camera via backend.  First set normal operation mode, then gather all properties.
+    init(print_stream);
   }
   else
   {
     FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
-    ss << "Could not open camera. Please check your camera connection." << std::endl;
+    print_stream << "Could not open camera. Please check your camera connection." << std::endl;
     CAM_AVAILABLE = false;
   }
 
-  INFORMATION += ss.str();
+  INFORMATION = print_stream.str();
 }
 
 void CAMERA::update_frame()

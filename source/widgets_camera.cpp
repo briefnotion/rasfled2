@@ -128,20 +128,20 @@ void CAMERA_WIDGET::display(system_data &sdSysData)
 
         // Backlight Compensation
         ImGui::Text("Backlight Comp:");
-        ImGui::Text("%d", sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION.SET_VALUE);
+        ImGui::Text("%d", sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMPENSATION.SET_VALUE);
 
         if (BC_BACKLIGHT_COMP_PLUS.button_color(sdSysData, "-##Backlight_Comp", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
-          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION, 
-                                                sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION.SET_VALUE - 1);
+          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMPENSATION, 
+                                                sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMPENSATION.SET_VALUE - 1);
         }
 
         ImGui::SameLine();
 
         if (BC_BACKLIGHT_COMP_MINUS.button_color(sdSysData, "+##Backlight_Comp", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
-          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION, 
-                                                sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMENSATION.SET_VALUE + 1);
+          sdSysData.CAMERAS.set_camera_control(sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMPENSATION, 
+                                                sdSysData.CAMERAS.PROPS.CTRL_BACKLIGHT_COMPENSATION.SET_VALUE + 1);
         }
 
         // ...

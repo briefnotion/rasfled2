@@ -1,3 +1,7 @@
+2.323_250928
+  - Changed the way the camera properties are loaded.
+  - Added a few more persistant panel settings.
+
 2.322_250927
   - Created a camera coordinator to determine when the camera should 
       be on.

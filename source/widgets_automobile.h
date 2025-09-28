@@ -354,7 +354,6 @@ class DISPLAY_DATA_AUTOMOBILE
 
   // ------------------------------------------
   // Outside
-  bool L_SPEED_OUTSIDE_DRAW = false;
   T_LARGE_NUMBER_DISPLAY L_SPEED_OUTSIDE;
 
   // ------------------------------------------

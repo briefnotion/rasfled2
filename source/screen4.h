@@ -153,7 +153,6 @@ class SCREEN4
   bool DISPLAY_RUNNING_COLOR = false;
   bool DISPLAY_QR_CODE = false;
   bool DISPLAY_REFERENCE_CARD = false;
-  bool DISPLAY_COMPASS_WINDOW = false;
   bool DISPLAY_CARDS_WINDOW = false;
 
   bool DISPLAY_DNFWTS_SHOW = true;

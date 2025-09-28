@@ -90,7 +90,7 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_min_distance()
 {
   PANELS.MAIN_DISPLAY_SCREEN = 2;
   //PANELS.ADSB_DISPLAY_TABLE = false;
-  PANELS.ADSB_DISPLAY_MAP = true;
+  //PANELS.ADSB_DISPLAY_MAP = true;
   
   PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 1);
 }
@@ -99,7 +99,7 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
 {
   PANELS.MAIN_DISPLAY_SCREEN = 2;
   //PANELS.ADSB_DISPLAY_TABLE = false;
-  PANELS.ADSB_DISPLAY_MAP = true;
+  //PANELS.ADSB_DISPLAY_MAP = true;
   
   PANELS.ADSB_ZOOM_MODE_SELECTION.set_selection_value(0, 2);
 }
@@ -156,7 +156,7 @@ int SCREEN4_PANEL_CONTROL::autonomous_state()
 
 void SCREEN4_PANEL_CONTROL::autonomous_on()
 {
-  PANELS_ON = PANELS;
+  PANELS_BACKUP = PANELS;
   ATONOMOUS = 1;
 }
 
@@ -164,7 +164,7 @@ void SCREEN4_PANEL_CONTROL::autonomous_off()
 {
   if (ATONOMOUS == 2)
   {
-    PANELS = PANELS_ON;
+    PANELS = PANELS_BACKUP;
   }
   ATONOMOUS = 0;
 }
@@ -192,7 +192,7 @@ void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
       if (ATONOMOUS == 1)
       {
         ATONOMOUS = 2;
-        PANELS_ON = PANELS;
+        PANELS_BACKUP = PANELS;
       }
     }
     else
@@ -200,7 +200,7 @@ void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
       if (ATONOMOUS == 2)
       {
         ATONOMOUS = 1;
-        PANELS = PANELS_ON;
+        PANELS = PANELS_BACKUP;
       }
     }
     // If the panels are requested, call the panels.

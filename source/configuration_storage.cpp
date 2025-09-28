@@ -318,6 +318,9 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
       STRING_INT adsb_map_location_focus;
       STRING_BOOL adsb_north_up;
       STRING_INT atonomous;
+      STRING_BOOL void_color;
+      STRING_BOOL display_speed_window;
+      STRING_BOOL display_compass_window;
 
       for(int root = 0; root < (int)state_json.ROOT.DATA.size(); root++)
       {
@@ -343,6 +346,9 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
         state_json.ROOT.DATA[root].get_if_is("ADSB_MAP_LOCATION_FOCUS", adsb_map_location_focus);
         state_json.ROOT.DATA[root].get_if_is("ADSB_NORTH_UP", adsb_north_up);
         state_json.ROOT.DATA[root].get_if_is("ATONOMOUS", atonomous);
+        state_json.ROOT.DATA[root].get_if_is("VOID_COLOR", void_color);
+        state_json.ROOT.DATA[root].get_if_is("DISPLAY_SPEED_WINDOW", display_speed_window);
+        state_json.ROOT.DATA[root].get_if_is("DISPLAY_COMPASS_WINDOW", display_compass_window);
       }
 
       // assign color settings
@@ -421,7 +427,7 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
       if (atonomous.conversion_success())
       {
         // Set both set of panels the same not necessary, but for safe keeping.
-        sdSysData.PANEL_CONTROL.PANELS_ON = panels_to_restore;
+        sdSysData.PANEL_CONTROL.PANELS_BACKUP = panels_to_restore;
         sdSysData.PANEL_CONTROL.PANELS    = panels_to_restore;
         
         if (atonomous.get_int_value() == 0)
@@ -432,6 +438,18 @@ bool load_saved_running_state_json(CONSOLE_COMMUNICATION &cons, system_data &sdS
         {
           sdSysData.PANEL_CONTROL.autonomous_on();
         }
+      }
+      if (void_color.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_v_set(sdSysData.PROGRAM_TIME.current_frame_time(), void_color.get_bool_value());
+      }
+      if (display_speed_window.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.DISPLAY_SPEED_WINDOW = display_speed_window.get_bool_value();
+      }
+      if (display_compass_window.conversion_success())
+      {
+        sdSysData.PANEL_CONTROL.DISPLAY_COMPASS_WINDOW = display_compass_window.get_bool_value();
       }
     }
   }
@@ -469,7 +487,7 @@ bool save_running_state_json(system_data &sdSysData, string strFilename)
 
     if (sdSysData.PANEL_CONTROL.autonomous_state() == 2)
     {
-      panels_to_save = sdSysData.PANEL_CONTROL.PANELS_ON;
+      panels_to_save = sdSysData.PANEL_CONTROL.PANELS_BACKUP;
     }
     else
     {
@@ -509,6 +527,11 @@ bool save_running_state_json(system_data &sdSysData, string strFilename)
 
     // Panel Settings
     state_json.ROOT.create_label_value(quotify("ATONOMOUS"), quotify(to_string(sdSysData.PANEL_CONTROL.autonomous_state())));
+
+    // Other Settings
+    state_json.ROOT.create_label_value(quotify("VOID_COLOR"), quotify(to_string(sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_v())));
+    state_json.ROOT.create_label_value(quotify("DISPLAY_SPEED_WINDOW"), quotify(to_string(sdSysData.PANEL_CONTROL.DISPLAY_SPEED_WINDOW)));
+    state_json.ROOT.create_label_value(quotify("DISPLAY_COMPASS_WINDOW"), quotify(to_string(sdSysData.PANEL_CONTROL.DISPLAY_COMPASS_WINDOW)));
 
     state_json.json_print_build_to_string_deque(state_dq_string);
     threaded_deque_string_to_file(strFilename, state_dq_string);

@@ -154,7 +154,7 @@ class SCREEN4_PANEL_CONTROL
   // Panel backups. When autonomouse takes control, a copy 
   //  of the normal working panels are stored here.  
   //  These panels are restored when autonoumous returns to 0 or 1
-  SCREEN4_PANELS PANELS_ON;
+  SCREEN4_PANELS PANELS_BACKUP;
 
   // Panel Control variables from alert system coordinator
   PANEL AUTO_TEMPERATURE;
@@ -173,6 +173,10 @@ class SCREEN4_PANEL_CONTROL
   // AUTO
   bool            AUTO_HAZARDS = false;   // Are exta anims running.
   int     AUTO_DOOR_OPEN_COUNT = 0;       // Amount of doors open.
+
+  // OPEN WINDOWS
+  bool DISPLAY_SPEED_WINDOW = false;
+  bool DISPLAY_COMPASS_WINDOW = false;
   
   // Notation 
   string EXTRA;

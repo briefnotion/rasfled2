@@ -2913,7 +2913,7 @@ void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData, bool Automobile_
 {
   if (SDATA.L_SPEED_SB.draw(sdSysData, !Automobile_Screen_Selected))
   {
-    SDATA.L_SPEED_OUTSIDE_DRAW = !SDATA.L_SPEED_OUTSIDE_DRAW;
+    sdSysData.PANEL_CONTROL.DISPLAY_SPEED_WINDOW = !sdSysData.PANEL_CONTROL.DISPLAY_SPEED_WINDOW;
   }
 
   if (SDATA.L_TACH_SB.draw(sdSysData))
@@ -2941,7 +2941,7 @@ void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData, bool Automobile_
     //
   }
 
-  if (SDATA.L_SPEED_OUTSIDE_DRAW && Restack_Windows == false)
+  if (sdSysData.PANEL_CONTROL.DISPLAY_SPEED_WINDOW && Restack_Windows == false)
   {
     ImGui::SetNextWindowSize(ImVec2(140, 210));
 
@@ -2949,7 +2949,7 @@ void AUTOMOBILE_SCREEN::display_sidebar(system_data &sdSysData, bool Automobile_
     {
       if (SDATA.L_SPEED_OUTSIDE.draw(sdSysData, true, ImGui::GetContentRegionAvail().y))
       {
-        SDATA.L_SPEED_OUTSIDE_DRAW = !SDATA.L_SPEED_OUTSIDE_DRAW;
+        sdSysData.PANEL_CONTROL.DISPLAY_SPEED_WINDOW = !sdSysData.PANEL_CONTROL.DISPLAY_SPEED_WINDOW;
       }
     }
 

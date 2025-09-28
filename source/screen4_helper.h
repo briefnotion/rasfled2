@@ -350,6 +350,8 @@ class COLOR_COMBOS
   
   bool neo_color_is_changing();
 
+  bool void_color_v();
+  void void_color_v_set(unsigned long Time, bool On_or_Off);
   void toggle_void_color(unsigned long Time);
   void void_color_set(unsigned long Time, int Color);
   void void_color_set(unsigned long Time, float R, float G, float B, float Intensity);

@@ -700,6 +700,17 @@ bool COLOR_COMBOS::neo_color_is_changing()
   return COLOR_COMBINATIONS_NEO[RAS_WHITE].STANDARD.is_changing();
 }
 
+bool COLOR_COMBOS::void_color_v()
+{
+  return void_color;
+}
+
+void COLOR_COMBOS::void_color_v_set(unsigned long Time, bool On_or_Off)
+{
+  void_color = On_or_Off;
+  set_neo_colors_with_color_change(Time);
+}
+
 void COLOR_COMBOS::toggle_void_color(unsigned long Time)
 {
   void_color = !void_color;

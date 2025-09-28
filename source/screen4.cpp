@@ -918,7 +918,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 // Change Screens
                 if (button_area(working_area))
                 {
-                  DISPLAY_COMPASS_WINDOW = !DISPLAY_COMPASS_WINDOW;
+                  sdSysData.PANEL_CONTROL.DISPLAY_COMPASS_WINDOW = !sdSysData.PANEL_CONTROL.DISPLAY_COMPASS_WINDOW;
                 }
               }
             }
@@ -1869,7 +1869,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
       // ---------------------------------------------------------------------------------------
       
-      if (DISPLAY_COMPASS_WINDOW == true)
+      if (sdSysData.PANEL_CONTROL.DISPLAY_COMPASS_WINDOW == true)
       {
         if (sdSysData.COMMS_COMPASS.connected())
         {
@@ -1891,7 +1891,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             if (button_area(working_area))
             {
-              DISPLAY_COMPASS_WINDOW = false;
+              sdSysData.PANEL_CONTROL.DISPLAY_COMPASS_WINDOW = false;
             }
           }
           ImGui::End();
