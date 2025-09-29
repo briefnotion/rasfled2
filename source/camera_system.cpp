@@ -298,8 +298,8 @@ void CAMERA::list_controls()
 
   // Define the table header with aligned columns
   INFORMATION_COMMAND_LIST = "Command List:\n\n"
-                              "| ID         | Control Name                   |Type  |Min   |Max   |Defaul|Step  |\n"
-                              "|------------|--------------------------------|------|------|------|------|------|\n";
+                              "| ID         | Control Name                   |Type  |Min  |Max  |Dflt |Step |\n"
+                              "|------------|--------------------------------|------|-----|-----|-----|-----|\n";
 
   struct v4l2_queryctrl queryctrl;
   std::memset(&queryctrl, 0, sizeof(queryctrl));
@@ -319,7 +319,7 @@ void CAMERA::list_controls()
       print_stream << std::left << "| ";
 
       // ID (Hex) - 8 chars for hex, plus "0x" prefix
-      print_stream << "0x" << std::hex << std::uppercase << std::setw(8) << std::setfill('0') << queryctrl.id << std::dec << " | ";
+      print_stream << "0x" << std::hex << std::uppercase << std::setw(8) << std::setfill(' ') << queryctrl.id << std::dec << " | ";
       
       // Reset fill/case and use appropriate widths for text/decimal
       print_stream << std::setfill(' ') << std::left;
@@ -328,7 +328,22 @@ void CAMERA::list_controls()
       print_stream << std::setw(30) << queryctrl.name << " |";
       
       // Type
-      print_stream << std::setw(6) << queryctrl.type << "|";
+      if (queryctrl.type == 1)
+      {
+        print_stream << std::setw(6) << "int" << "|";
+      }
+      else if (queryctrl.type == 2)
+      {
+        print_stream << std::setw(6) << "bool" << "|";
+      }
+      else if (queryctrl.type == 3)
+      {
+        print_stream << std::setw(6) << "menu" << "|";
+      }
+      else 
+      {
+        print_stream << std::setw(6) << queryctrl.type << "|";
+      }
 
       // Min, Max, Default, Step - right aligned numbers
       print_stream << std::right;
@@ -451,6 +466,8 @@ cv::Mat CAMERA::get_current_frame()
 void CAMERA::close_camera()
 {
   CAMERA_CAPTURE.release();
+  CAM_AVAILABLE = false;
+  CAM_VIDEO_AVAILABLE = false;
 }
 
 // ---------------------------------------------------------------------------------------

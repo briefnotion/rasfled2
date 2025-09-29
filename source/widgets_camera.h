@@ -40,6 +40,19 @@ class CAMERA_WIDGET
 {
   private:
 
+  bool DISPLAY_CAMERA_SETTINGS = false;
+
+  BUTTON_COLOR        BC_DISPLAY_SETTINGS;
+
+  // ---
+
+  BUTTON_COLOR        BC_CONNECT;
+  BUTTON_COLOR        BC_DISCONNECT;
+
+  BUTTON_COLOR        BC_DISPLAY_PATH;
+  BUTTON_COLOR        BC_DISPLAY_PATH_SETTINGS;
+
+  // ---
   BUTTON_COLOR        BC_AUTO_FOCUS_PLUS;
   BUTTON_COLOR        BC_AUTO_FOCUS_MINUS;
 
@@ -63,6 +76,34 @@ class CAMERA_WIDGET
 
   BUTTON_COLOR        BC_SHARPMESS_PLUS;
   BUTTON_COLOR        BC_SHARPMESS_MINUS;
+
+  // Path Values
+  bool                DISPLAY_PATH = false;
+  bool                DISPLAY_PATH_SETTINGS = false;
+  // Define normalized path coordinates (0.0=top/left, 1.0=bottom/right).
+  // These coordinates create the three connected trapezoids.
+  
+  // Level 0: Closest to the car (Bottom of Green)
+  float Y0 = 1.0f;
+  float XL0 = -0.1f;
+  float XR0 = 1.1f;
+  
+  // Level 1: Green/Yellow boundary
+  float Y1 = 0.8f;
+  float XL1 = 0.0f;
+  float XR1 = 1.0f;
+  
+  // Level 2: Yellow/Red boundary
+  float Y2 = 0.33f;
+  float XL2 = 0.3f;
+  float XR2 = 0.7f;
+
+  // Level 3: Farthest point (Top of Red)
+  float Y3 = 0.2f;
+  float XL3 = 0.4f;
+  float XR3 = 0.6f;
+
+  void display_camera_settings_window(system_data &sdSysData);
 
   public:
 

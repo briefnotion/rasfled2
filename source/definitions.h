@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.323_250928"
+#define Revision "2.324_250929"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -31,7 +31,6 @@
 #define TEST_DATA_CAN_BUS   false   // "rascomms.txt" in the auto dir
 #define TEST_DATA_AIRCRAFT  false   //
 #define TEST_DATA_GPS       false   //
-#define   TEST_DATA_GPS_INJECT_CURRENT_TIME false   //
 
 // -------------------------------------------------------------------------------------
 // CONSOLE AND INTEFACE SETUP
@@ -138,6 +137,7 @@
 #define DEF_GPS_DEV_NAME                  "/dev/ttyAMA0"                                                    // GPS via ttyAMA0  
 #define DEF_GPS_SAVE_LOG_NAME             "gpscomms"
 #define DEF_GPS_TEST_DATA_NAME            "gpscomms_test.txt"
+#define TEST_DATA_GPS_INJECT_CURRENT_TIME false   //
 
 // Compass
 #define ENABLE_TEST_COMPASS               false                   // Sets the fake compass in hmc5883.h properties
