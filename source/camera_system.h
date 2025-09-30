@@ -66,7 +66,7 @@ class CAMERA_PROPERTIES
 {
   public:
 
-  string CAMERA_DEVICE_NAME = "";
+  std::string CAMERA_DEVICE_NAME = "";
   int    CAMERA_DEVICE_ID   = -1;
 
   int WIDTH = 640;
@@ -74,7 +74,8 @@ class CAMERA_PROPERTIES
   //int AUTO_FOCUS = 0;  // 0 off
   //double FOCUS = 100.0;      // 0 - 255
 
-  bool FLIP_HORIZONTAL = false;
+  bool FLIP_HORIZONTAL = false; // (horizontal flip, around Y-axis)
+  bool FLIP_VERTICAL = false;   // (vertical flip, around X-axis)
 
   // Controls:
 
@@ -124,8 +125,8 @@ class CAMERA
   bool CAM_AVAILABLE = false;
   bool CAM_VIDEO_AVAILABLE = false;
 
-  string INFORMATION              = "Not Available";
-  string INFORMATION_COMMAND_LIST = "Not Available";
+  std::string INFORMATION              = "Not Available";
+  std::string INFORMATION_COMMAND_LIST = "Not Available";
 
   CAMERA_PROPERTIES PROPS;
   

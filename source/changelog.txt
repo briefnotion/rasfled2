@@ -1,3 +1,6 @@
+2.325_250930
+  - Added FLIP_VERTICAL property to camera.
+
 2.324_250929
   - Modified some of the camera settings.
   - Added some camera path lines, defaulted to off.

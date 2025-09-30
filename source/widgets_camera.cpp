@@ -294,31 +294,37 @@ void CAMERA_WIDGET::display(system_data &sdSysData)
         ImGui::Text("Error: Could not display camera feed.");
       }
     }
-
-    // Show Display Camera Setting Button
-    ImGui::SetCursorPos(ImVec2(0,0));
-    if (BC_DISPLAY_SETTINGS.button_color(sdSysData, "...##Display Camera Settings", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      DISPLAY_CAMERA_SETTINGS = !DISPLAY_CAMERA_SETTINGS;
-    }
-
-    // Draw Camera Controls
-    {
-      if (DISPLAY_CAMERA_SETTINGS)
-      {
-        ImGui::SetNextWindowSize(ImVec2(290.0f, 475.0f));
-        if (ImGui::Begin("CAMERA SETTINGS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
-        {
-          display_camera_settings_window(sdSysData);
-        }
-        ImGui::End();
-      }
-    }
   }
   else
   {
     ImGui::Text("Waiting for camera feed...");
   }
+
+  // Show Display Camera Setting Button
+  ImGui::SetCursorPos(ImVec2(0,0));
+  if (BC_DISPLAY_SETTINGS.button_color(sdSysData, "...##Display Camera Settings", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  {
+    DISPLAY_CAMERA_SETTINGS = !DISPLAY_CAMERA_SETTINGS;
+  }
+
+  if (sdSysData.CAMERAS.CAM_AVAILABLE == false)
+  {
+    ImGui::Text("Camera offline");
+  }
+
+  // Draw Camera Controls
+  {
+    if (DISPLAY_CAMERA_SETTINGS)
+    {
+      ImGui::SetNextWindowSize(ImVec2(290.0f, 475.0f));
+      if (ImGui::Begin("CAMERA SETTINGS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+      {
+        display_camera_settings_window(sdSysData);
+      }
+      ImGui::End();
+    }
+  }
+
 }
 
 // ---------------------------------------------------------------------------------------

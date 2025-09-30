@@ -81,16 +81,68 @@ int CAMERA::get_control(uint32_t id)
   return ret_value;
 }
 
+// Assuming this is inside your CAMERA class or a namespace
 cv::Mat CAMERA::generateDummyFrame(int width, int height) 
 {
   cv::Mat dummy(height, width, CV_8UC3);
+  
+  // 1. Generate the initial color pattern
   for (int y = 0; y < dummy.rows; ++y)
   {
     for (int x = 0; x < dummy.cols; ++x)
     {
+      // Original color pattern
       dummy.at<cv::Vec3b>(y, x) = cv::Vec3b(x % 256, y % 256, (x + y) % 256);
     }
   }
+  
+  // 2. Define text drawing properties
+  int font = cv::FONT_HERSHEY_SIMPLEX;
+  double scale = 1.5;
+  int thickness = 2;
+  // Use White color for text (B, G, R)
+  cv::Scalar color(255, 255, 255); 
+  
+  // Calculate basic positions (adjust as needed for margins)
+  int margin = 20;
+  int centerX = width / 2;
+  int centerY = height / 2;
+
+  // A utility function to get text size for better placement
+  auto getTextSize = [&](const std::string& text) 
+  {
+    int baseline = 0;
+    return cv::getTextSize(text, font, scale, thickness, &baseline);
+  };
+
+  // 3. Draw "UP" (Top Center)
+  std::string text_up = "UP";
+  cv::Size size_up = getTextSize(text_up);
+  cv::putText(dummy, text_up, 
+      cv::Point(centerX - size_up.width / 2, margin + size_up.height), // Center aligned at top margin
+      font, scale, color, thickness);
+
+  // 4. Draw "DOWN" (Bottom Center)
+  std::string text_down = "DOWN";
+  cv::Size size_down = getTextSize(text_down);
+  cv::putText(dummy, text_down, 
+      cv::Point(centerX - size_down.width / 2, height - margin), // Center aligned at bottom margin
+      font, scale, color, thickness);
+
+  // 5. Draw "LEFT" (Mid Left)
+  std::string text_left = "LEFT";
+  cv::Size size_left = getTextSize(text_left);
+  cv::putText(dummy, text_left, 
+      cv::Point(margin, centerY + size_left.height / 2), // Vertical center aligned at left margin
+      font, scale, color, thickness);
+
+  // 6. Draw "RIGHT" (Mid Right)
+  std::string text_right = "RIGHT";
+  cv::Size size_right = getTextSize(text_right);
+  cv::putText(dummy, text_right, 
+      cv::Point(width - margin - size_right.width, centerY + size_right.height / 2), // Right aligned at right margin
+      font, scale, color, thickness);
+  
   return dummy;
 }
 
@@ -376,40 +428,49 @@ void CAMERA::create()
 {
   std::stringstream print_stream;
 
-  // Set up all camera properties.
-  prepare();
-  
-  // Attempt to open the default camera (index 0).
-  CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID);
-
-  // Check if the camera was successfully opened.
-  CAM_AVAILABLE = CAMERA_CAPTURE.isOpened();
-  if (CAM_AVAILABLE)
+  if (CAMERA_CAPTURE.isOpened())
   {
-    // If the camera is opened, set its frame width and height.
-    CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
-    CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
-
-    print_stream << "Camera successfully opened and properties set." << std::endl;
-
-    // Now, probe the camera for its actual capabilities and print them.
-    double actual_width = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
-    double actual_height = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
-    double actual_fps = CAMERA_CAPTURE.get(cv::CAP_PROP_FPS);
-
-    // Show some of the cv settings
-    print_stream << "Actual camera resolution: " << actual_width << "x" << actual_height << std::endl;
-    print_stream << "Actual camera FPS: " << actual_fps << std::endl;
-
-    // Initialize camera via backend.  First set normal operation mode, then gather all properties.
-    init(print_stream);
+    print_stream << "Camera already open. Needs to be closed first." << endl;
   }
   else
   {
-    FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
-    print_stream << "Could not open camera. Please check your camera connection." << std::endl;
-    CAM_AVAILABLE = false;
+    // Set up all camera properties.
+    prepare();
+    
+    // Attempt to open the default camera (index 0).
+    CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID);
+
+    // Check if the camera was successfully opened.
+    CAM_AVAILABLE = CAMERA_CAPTURE.isOpened();
+    if (CAM_AVAILABLE)
+    {
+      // If the camera is opened, set its frame width and height.
+      CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
+      CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
+
+      print_stream << "Camera successfully opened and properties set." << std::endl;
+
+      // Now, probe the camera for its actual capabilities and print them.
+      double actual_width = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
+      double actual_height = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
+      double actual_fps = CAMERA_CAPTURE.get(cv::CAP_PROP_FPS);
+
+      // Show some of the cv settings
+      print_stream << "Actual camera resolution: " << actual_width << "x" << actual_height << std::endl;
+      print_stream << "Actual camera FPS: " << actual_fps << std::endl;
+
+      // Initialize camera via backend.  First set normal operation mode, then gather all properties.
+      init(print_stream);
+    }
+    else
+    {
+      FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
+      print_stream << "Could not open camera. Please check your camera connection." << std::endl;
+      CAM_AVAILABLE = false;
+    }
+
   }
+
 
   INFORMATION = print_stream.str();
 }
@@ -437,12 +498,22 @@ void CAMERA::process_frame()
 
     if (!FRAME.empty())
     {
-      PROCESSED_FRAME = FRAME;
-
-      // Flip the processed frame horizontally for a mirror effect.
-      if (PROPS.FLIP_HORIZONTAL)
+      // Flip the processed frame.
+      if (PROPS.FLIP_HORIZONTAL || PROPS.FLIP_VERTICAL)
       {
-        cv::flip(PROCESSED_FRAME, PROCESSED_FRAME, 1);
+        cv::flip(FRAME, PROCESSED_FRAME, -1);
+      }
+      else if (PROPS.FLIP_HORIZONTAL)
+      {
+        cv::flip(FRAME, PROCESSED_FRAME, 1);
+      }
+      else if (PROPS.FLIP_VERTICAL)
+      {
+        cv::flip(FRAME, PROCESSED_FRAME, 0);
+      }
+      else
+      {
+        PROCESSED_FRAME = FRAME;
       }
 
       // Convert the frame to an OpenGL texture.
