@@ -499,7 +499,7 @@ void CAMERA::process_frame()
     if (!FRAME.empty())
     {
       // Flip the processed frame.
-      if (PROPS.FLIP_HORIZONTAL || PROPS.FLIP_VERTICAL)
+      if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
       {
         cv::flip(FRAME, PROCESSED_FRAME, -1);
       }

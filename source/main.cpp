@@ -431,7 +431,7 @@ int loop_2(bool TTY_Only)
   sdSystem.CAMERAS.PROPS.HEIGHT = 600;
   
   // Flip horizontal and vertical
-  sdSystem.CAMERAS.PROPS.FLIP_HORIZONTAL  = true;
+  sdSystem.CAMERAS.PROPS.FLIP_HORIZONTAL  = false;
   sdSystem.CAMERAS.PROPS.FLIP_VERTICAL    = true;
 
   // Get list of controls to print to screen.

@@ -85,23 +85,23 @@ class CAMERA_WIDGET
   
   // Level 0: Closest to the car (Bottom of Green)
   float Y0 = 1.0f;
-  float XL0 = -0.1f;
-  float XR0 = 1.1f;
+  float XL0 = -0.100f;
+  float XR0 = 1.0f;
   
   // Level 1: Green/Yellow boundary
   float Y1 = 0.8f;
   float XL1 = 0.0f;
-  float XR1 = 1.0f;
+  float XR1 = 0.90f;
   
   // Level 2: Yellow/Red boundary
   float Y2 = 0.33f;
-  float XL2 = 0.3f;
-  float XR2 = 0.7f;
+  float XL2 = 0.229f;
+  float XR2 = 0.640f;
 
   // Level 3: Farthest point (Top of Red)
   float Y3 = 0.2f;
-  float XL3 = 0.4f;
-  float XR3 = 0.6f;
+  float XL3 = 0.29f;
+  float XR3 = 0.570f;
 
   void display_camera_settings_window(system_data &sdSysData);
 
