@@ -21,6 +21,9 @@
 #include <iostream>
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+
 #include <GLFW/glfw3.h>
 
 // Rasfled Includes
@@ -94,6 +97,17 @@ class CAMERA_PROPERTIES
   CAMERA_SETTING CTRL_GAMA;
   CAMERA_SETTING CTRL_HUE;
   CAMERA_SETTING CTRL_SHARPNESS;
+
+  // Camera Enhancements
+
+  // Median blur is excellent for removing "salt-and-pepper" noise.
+  bool ENH_MEDIAN_BLUR    = false;
+  bool ENH_LOW_LIGHT      = false;
+  bool ENH_SHARPEN        = false;
+  bool ENH_LINE_DETECTION = false;
+  bool ENH_ROAD_MASK      = false;
+  bool ENH_CAR_DETECTION  = false;
+
 };
 
 class CAMERA
@@ -105,6 +119,15 @@ class CAMERA
 
   bool NEW_FRAME_AVAILABLE = false;
 
+  // Object detection member
+  bool CAR_CASCADE_LOADED = false;
+  cv::CascadeClassifier CAR_CASCADE;
+
+  // Camera CV Helper
+  bool is_low_light(const cv::Mat& frame, int threshold);
+  cv::Mat get_road_mask(const cv::Mat& frame);
+
+  // Change Settings
   bool set_control(uint32_t id, int32_t value); // returns true on success
   int get_control(uint32_t id);                 // returns -1 on failure, otherwise returns value.
 
@@ -119,6 +142,11 @@ class CAMERA
   //  as necessary for first run.
 
   public:
+  bool CAM_BEING_VIEWED = false;
+  // Temporary fix to turn off high level processing if 
+  //  camera display is not shown.  Manually set until 
+  //  later.
+
   cv::VideoCapture CAMERA_CAPTURE;
   GLuint TEXTURE_ID = 0;
   

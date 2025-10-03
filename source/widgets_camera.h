@@ -41,16 +41,17 @@ class CAMERA_WIDGET
   private:
 
   bool DISPLAY_CAMERA_SETTINGS = false;
+  bool DISPLAY_ADJUSTMENTS = false;
+  bool DISPLAY_ENHANCEMENTS = false;
 
-  BUTTON_COLOR        BC_DISPLAY_SETTINGS;
+  BUTTON_TOGGLE_COLOR BC_DISPLAY_SETTINGS;
+  BUTTON_TOGGLE_COLOR BC_DISPLAY_ADJUSTMENTS;
+  BUTTON_TOGGLE_COLOR BC_DISPLAY_ENHANCEMENTS;
 
   // ---
-
+  // Camera Settings
   BUTTON_COLOR        BC_CONNECT;
   BUTTON_COLOR        BC_DISCONNECT;
-
-  BUTTON_COLOR        BC_DISPLAY_PATH;
-  BUTTON_COLOR        BC_DISPLAY_PATH_SETTINGS;
 
   // ---
   BUTTON_COLOR        BC_AUTO_FOCUS_PLUS;
@@ -77,37 +78,62 @@ class CAMERA_WIDGET
   BUTTON_COLOR        BC_SHARPMESS_PLUS;
   BUTTON_COLOR        BC_SHARPMESS_MINUS;
 
+  // Enhancements
+  BUTTON_TOGGLE_COLOR        BC_DISPLAY_PATH;
+  BUTTON_TOGGLE_COLOR        BC_ENH_MEDIAN_BLUR;
+  BUTTON_TOGGLE_COLOR        BC_ENH_LOW_LIGHT;
+  BUTTON_TOGGLE_COLOR        BC_ENH_ENH_SHARPEN;
+  BUTTON_TOGGLE_COLOR        BC_ENH_LINE_DETECTION;
+  BUTTON_TOGGLE_COLOR        BC_ENH_ROAD_MASK;
+  BUTTON_TOGGLE_COLOR        BC_ENH_CAR_DETECTION;
+
   // Path Values
-  bool                DISPLAY_PATH = false;
-  bool                DISPLAY_PATH_SETTINGS = false;
+  bool                DISPLAY_PATH = true;
+
+  //---
+
   // Define normalized path coordinates (0.0=top/left, 1.0=bottom/right).
   // These coordinates create the three connected trapezoids.
   
+  // Angle Muliplier
+  float ANGLE_MULTIPLIER = 5.0f;
+
+  // Line Thickness
+  float THICKNESS_1 = 10.0f;
+  float THICKNESS_2 = 7.0f;
+  float THICKNESS_3 = 5.0f;
+
   // Level 0: Closest to the car (Bottom of Green)
   float Y0 = 1.0f;
   float XL0 = -0.100f;
-  float XR0 = 1.0f;
+  float XR0 = 1.16f;
   
   // Level 1: Green/Yellow boundary
-  float Y1 = 0.8f;
-  float XL1 = 0.0f;
-  float XR1 = 0.90f;
+  float Y1 = 0.80f;
+  float XL1 = 0.00f;
+  float XR1 = 1.02f;
   
   // Level 2: Yellow/Red boundary
   float Y2 = 0.33f;
   float XL2 = 0.229f;
-  float XR2 = 0.640f;
+  float XR2 = 0.72f;
 
   // Level 3: Farthest point (Top of Red)
-  float Y3 = 0.2f;
+  float Y3 = 0.20f;
   float XL3 = 0.29f;
-  float XR3 = 0.570f;
+  float XR3 = 0.639f;
+
+  ImVec2 norm_to_screen(float &Nx, float &Ny, float &Slide, 
+                        ImVec2 &Image_Start_Position, 
+                        ImVec2 &Final_Size);
 
   void display_camera_settings_window(system_data &sdSysData);
+  void display_camera_adjustments_window(system_data &sdSysData);
+  void display_camera_enhancements_window(system_data &sdSysData);
 
   public:
 
-  void display(system_data &sdSysData);
+  void display(system_data &sdSysData, float Angle);
 };
 
 

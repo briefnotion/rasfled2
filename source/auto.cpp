@@ -976,6 +976,18 @@ float AUTOMOBILE_STEERING::val_steering_wheel_angle()
   return VAL_STEERING_WHEEL_ANGLE;
 }
 
+float AUTOMOBILE_STEERING::val_steering_wheel_angle_adjusted()
+{
+  if (LEFT_OF_CENTER)
+  {
+    return -VAL_STEERING_WHEEL_ANGLE;
+  }
+  else
+  {
+    return VAL_STEERING_WHEEL_ANGLE;
+  }
+}
+
 string AUTOMOBILE_STEERING::steering_wheel_angle()
 {
   return to_string_round_to_nth(VAL_STEERING_WHEEL_ANGLE, 1) + " deg";

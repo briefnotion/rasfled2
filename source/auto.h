@@ -545,6 +545,7 @@ class AUTOMOBILE_STEERING
 
   void store_steering_wheel_angle(int Angle, int Direction);
   float val_steering_wheel_angle();
+  float val_steering_wheel_angle_adjusted();  // Represents steering wheel angle in + or -
   string steering_wheel_angle();
   string turning_direction();
   bool clockwise();

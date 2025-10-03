@@ -935,6 +935,9 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             if (sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM ||
                 sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE)
             {
+              // Turn on processing.
+              sdSysData.CAMERA_BACKUP.CAM_BEING_VIEWED = true;
+
               // Backup Camera
               {
                 if (sdSysData.CAR_INFO.active())
@@ -942,7 +945,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                   ImGui::BeginChild("Backup Camera", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
                   {
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                    BACKUP_CAMERA.display(sdSysData);
+                    BACKUP_CAMERA.display(sdSysData, degrees_to_radians(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle_adjusted() / 12.0f));
                     ImGui::PopStyleColor();
                   }
                   ImGui::EndChild();
@@ -959,12 +962,15 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 }
                 else
                 {
-                  BACKUP_CAMERA.display(sdSysData);
+                  BACKUP_CAMERA.display(sdSysData, degrees_to_radians(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle_adjusted() / 12.0f));
                 }
               }
             }
             else
             {
+              // Turn off processing.
+              sdSysData.CAMERA_BACKUP.CAM_BEING_VIEWED = false;
+
               if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 0)
               {
                 if (sdSysData.CAR_INFO.active())

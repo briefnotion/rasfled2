@@ -38,6 +38,46 @@ Notes:
 */
 // ---------------------------------------------------------------------------------------
 
+// Helper function implementation: checks the mean brightness of the frame
+bool CAMERA::is_low_light(const cv::Mat& frame, int threshold) 
+{
+  if (frame.empty()) return false;
+  
+  // Convert to grayscale to check overall luminance
+  cv::Mat gray;
+  cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
+
+  // Calculate the mean intensity (0-255). If it's below the threshold, it's dark.
+  cv::Scalar mean_intensity = cv::mean(gray);
+  return mean_intensity[0] < threshold;
+}
+
+// NEW Helper function: Generates a trapezoidal mask focusing on the road ahead.
+cv::Mat CAMERA::get_road_mask(const cv::Mat& frame) 
+{
+  cv::Mat mask = cv::Mat::zeros(frame.size(), CV_8UC1);
+  int width = frame.cols;
+  int height = frame.rows;
+
+  // Define the vertices of the trapezoid (ROI). These points are tuned 
+  // for a typical dashcam view, focusing on the bottom half and center.
+  std::vector<cv::Point> vertices = 
+  {
+    cv::Point(0, height),             // Bottom left (full width)
+    cv::Point(width, height),         // Bottom right (full width)
+    cv::Point(width * 0.55, height * 0.6), // Top right (near horizon)
+    cv::Point(width * 0.45, height * 0.6)  // Top left (near horizon)
+  };
+
+  const cv::Point* points[1] = { &vertices[0] };
+  int npoints[] = { (int)vertices.size() };
+  
+  // Fill the trapezoid area on the mask with white (255)
+  cv::fillPoly(mask, points, npoints, 1, cv::Scalar(255));
+  
+  return mask;
+}
+
 bool CAMERA::set_control(uint32_t id, int32_t value)
 {
   bool ret_success = false;
@@ -434,6 +474,23 @@ void CAMERA::create()
   }
   else
   {
+    // Load Cascades
+    // --- Object Detection Setup ---
+    // NOTE: In a real environment, you must have the XML file available 
+    // (e.g., 'haarcascade_car.xml' or 'haarcascade_fullbody.xml')
+    std::string cascade_path = "/home/delmane/rasfled/test/cars.xml"; // Mock path
+    if (!CAR_CASCADE.load(cascade_path)) 
+    {
+      std::cerr << "WARNING: Could not load car cascade classifier from " << cascade_path << std::endl;
+      std::cerr << "Car detection will be disabled." << std::endl;
+      CAR_CASCADE_LOADED = false;
+    } 
+    else 
+    {
+      CAR_CASCADE_LOADED = true;
+      std::cout << "Car cascade loaded successfully." << std::endl;
+    }
+
     // Set up all camera properties.
     prepare();
     
@@ -471,7 +528,6 @@ void CAMERA::create()
 
   }
 
-
   INFORMATION = print_stream.str();
 }
 
@@ -480,12 +536,179 @@ void CAMERA::update_frame()
   // Capture the camera frame.
   if (CAM_AVAILABLE)
   {
+    // NOTE: If using a real camera, remove the dummy logic and ensure CAM_AVAILABLE is true
+    // CAMERA_CAPTURE.open(0);
     CAMERA_CAPTURE >> FRAME;
   }
   else
   {
-    FRAME = FRAME_DUMMY;
+    // Use copyTo to ensure FRAME is modifiable and doesn't share data with FRAME_DUMMY
+    FRAME_DUMMY.copyTo(FRAME); 
   }
+
+  if (!FRAME.empty())
+  {
+    // 1. Initial Frame Preparation (Flip logic)
+    if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
+    {
+      cv::flip(FRAME, PROCESSED_FRAME, -1);
+    }
+    else if (PROPS.FLIP_HORIZONTAL)
+    {
+      cv::flip(FRAME, PROCESSED_FRAME, 1);
+    }
+    else if (PROPS.FLIP_VERTICAL)
+    {
+      cv::flip(FRAME, PROCESSED_FRAME, 0);
+    }
+    else
+    {
+      // Use clone to prevent FRAME from being modified by subsequent operations on PROCESSED_FRAME
+      PROCESSED_FRAME = FRAME.clone(); 
+    }
+  }
+
+  // CV Code Here: Conditional and Controllable Image Enhancement Pipeline
+  // The entire processing block is now conditional on the user controls.
+  if (CAM_BEING_VIEWED && !PROCESSED_FRAME.empty())
+  {
+    if (PROPS.ENH_MEDIAN_BLUR)
+    {
+      // Check for low light conditions using a mean intensity threshold (50 out of 255)
+
+      bool low_light_detected = false;
+      if (PROPS.ENH_LOW_LIGHT)
+      {
+        low_light_detected = is_low_light(PROCESSED_FRAME, 50);
+      }
+
+      if (low_light_detected || PROPS.ENH_LOW_LIGHT == false)
+      {
+        // --- LOW LIGHT PATH (Low FPS is tolerated here) ---
+        
+        // --- Step 1A: Stronger Denoising with Median Blur (5x5 kernel) ---
+        int ksize = 5; 
+        cv::medianBlur(PROCESSED_FRAME, PROCESSED_FRAME, ksize);
+
+        // --- Step 2A: Low-Light Contrast Enhancement (CLAHE) ---
+        // Grayscale conversion is required to isolate the luminance channel for CLAHE.
+        cv::Mat gray_image;
+        cv::cvtColor(PROCESSED_FRAME, gray_image, cv::COLOR_BGR2GRAY);
+
+        // CLAHE settings: Clip Limit 2.0, Tile Size 8x8
+        cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
+        clahe->apply(gray_image, gray_image); 
+
+        // Apply enhanced luminance back to the color frame (making it grayscale enhanced)
+        cv::cvtColor(gray_image, PROCESSED_FRAME, cv::COLOR_GRAY2BGR);
+      }
+      else
+      {
+        // --- NORMAL LIGHT PATH (Must maintain 30 FPS) ---
+        
+        // --- Step 1B: Light Denoising with Median Blur (3x3 kernel) ---
+        // Skip CLAHE to ensure performance is maintained.
+        int ksize = 3; 
+        cv::medianBlur(PROCESSED_FRAME, PROCESSED_FRAME, ksize);
+      }
+    }
+
+    // NEW BLOCK 2: Image Sharpening (Optional)
+    if (PROPS.ENH_SHARPEN)
+    {
+      // Sharpening is typically done after denoising/contrast adjustment.
+      // We use a simple high-pass filter (Laplacian-like kernel) for a quick sharpen.
+
+      cv::Mat kernel = (cv::Mat_<float>(3, 3) <<
+          0, -1, 0,
+          -1, 5, -1,
+          0, -1, 0);
+
+      // Apply the kernel to the frame using a 2D convolution filter.
+      // The DDepth of -1 means the destination image will have the same depth (type) as the source.
+      cv::filter2D(PROCESSED_FRAME, PROCESSED_FRAME, -1, kernel);
+    }
+    // If CAM_BEING_VIEWED, PROPS.ENH_MEDIAN_BLUR, or PROPS.ENH_SHARPEN is false, 
+    // PROCESSED_FRAME remains the flipped copy of FRAME, potentially with the intermediate effects.
+
+
+    // Block 2: Road Line Detection (Hough Transform)
+    if (PROPS.ENH_LINE_DETECTION)
+    {
+      // Line detection works best after denoising but before sharpening.
+      
+      // --- Step 1: Prepare for Edge Detection ---
+      cv::Mat gray_for_canny;
+      cv::cvtColor(PROCESSED_FRAME, gray_for_canny, cv::COLOR_BGR2GRAY);
+
+      // --- Step 1.5: Apply Region of Interest (ROI) Mask (New) ---
+      if (PROPS.ENH_ROAD_MASK)
+      {
+        // Generate and apply the trapezoidal mask.
+        cv::Mat mask = get_road_mask(PROCESSED_FRAME);
+        // Only keep the edges that fall within the white (255) area of the mask.
+        cv::bitwise_and(gray_for_canny, mask, gray_for_canny);
+      }
+
+      // --- Step 2: Canny Edge Detection ---
+      // Generates a binary image showing only edges.
+      cv::Mat edges;
+      cv::Canny(gray_for_canny, edges, 50, 150, 3); // Thresholds (50, 150)
+
+      // --- Step 3: Probabilistic Hough Line Transform ---
+      std::vector<cv::Vec4i> lines;
+      // Arguments: Canny output, resolution rho, resolution theta, threshold (min votes) 
+      // minLineLength, maxLineGap
+      cv::HoughLinesP(edges, lines, 1, CV_PI / 180, 80, 50, 10);
+
+      // --- Step 4: Draw the detected lines onto the color frame ---
+      for (const auto& l : lines)
+      {
+        // Draw a green line segment onto the processed frame
+        cv::line(PROCESSED_FRAME, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), 
+                  cv::Scalar(0, 255, 0), 2, cv::LINE_AA); 
+      }
+    }
+
+    // Block 4: Car Detection (Haar Cascade)
+    if (PROPS.ENH_CAR_DETECTION && CAR_CASCADE_LOADED)
+    {
+      // Cascade classifiers are faster on smaller images and grayscale.
+      cv::Mat gray_for_detection;
+      cv::cvtColor(PROCESSED_FRAME, gray_for_detection, cv::COLOR_BGR2GRAY);
+      
+      // Reduce the size of the frame before detection to significantly boost speed.
+      cv::Mat small_frame;
+      float scale_factor = 0.5f; // Detect on half-size image (4x faster)
+      cv::resize(gray_for_detection, small_frame, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
+
+      // Perform the detection
+      std::vector<cv::Rect> cars;
+      CAR_CASCADE.detectMultiScale(small_frame, cars, 
+                                    1.1, // Scale factor
+                                    5,   // Minimum neighbors
+                                    0,   // Flags
+                                    cv::Size(30, 30)); // Minimum object size (in scaled image)
+
+      // Draw bounding boxes on the original size PROCESSED_FRAME
+      for (const auto& rect : cars)
+      {
+        // Rescale the coordinates back to the original frame size
+        cv::Rect original_rect(
+            (int)(rect.x / scale_factor),
+            (int)(rect.y / scale_factor),
+            (int)(rect.width / scale_factor),
+            (int)(rect.height / scale_factor)
+        );
+        
+        // Draw a red rectangle (BGR: 0, 0, 255)
+        cv::rectangle(PROCESSED_FRAME, original_rect, cv::Scalar(0, 0, 255), 2);
+        cv::putText(PROCESSED_FRAME, "CAR", cv::Point(original_rect.x, original_rect.y - 10), 
+                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
+      }
+    }
+  }
+
   NEW_FRAME_AVAILABLE = true;
 }
 
@@ -498,27 +721,12 @@ void CAMERA::process_frame()
 
     if (!FRAME.empty())
     {
-      // Flip the processed frame.
-      if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
+      if (CAM_BEING_VIEWED)
       {
-        cv::flip(FRAME, PROCESSED_FRAME, -1);
+        // Convert the frame to an OpenGL texture.
+        // We pass the member variable to reuse the same texture.
+        TEXTURE_ID = matToTexture(PROCESSED_FRAME, TEXTURE_ID);
       }
-      else if (PROPS.FLIP_HORIZONTAL)
-      {
-        cv::flip(FRAME, PROCESSED_FRAME, 1);
-      }
-      else if (PROPS.FLIP_VERTICAL)
-      {
-        cv::flip(FRAME, PROCESSED_FRAME, 0);
-      }
-      else
-      {
-        PROCESSED_FRAME = FRAME;
-      }
-
-      // Convert the frame to an OpenGL texture.
-      // We pass the member variable to reuse the same texture.
-      TEXTURE_ID = matToTexture(PROCESSED_FRAME, TEXTURE_ID);
       CAM_VIDEO_AVAILABLE = true;
     }
     else

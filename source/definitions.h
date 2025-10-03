@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.326_251001"
+#define Revision "2.327_251002"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -145,6 +145,10 @@
 //#define DEF_COMPASS_DEV_NAME            "/dev/i2c-2"            // System File
 
 #define DEF_COMPASS_OFFSET_HISTORY        "compass_settings.json"
+
+// Cameras
+#define DEF_CAMERA_BACKUP                 "/dev/video0"
+#define DEF_CAMERA_BACKUP_ID              0
 
 
 // -------------------------------------------------------------------------------------

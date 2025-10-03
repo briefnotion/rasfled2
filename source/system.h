@@ -102,6 +102,10 @@ class FILES
   string COMPASS_DEVICE_FILE = "";
   string COMPASS_OFFSET_HISTORY_FILE = "";
 
+  // Cameras
+  string CAMERA_BACKUP = "";
+  int    CAMERA_BACKUP_ID = 0;
+
   // Map
   string LOGS_MAPS_GENERICS_JSON = "";
   string LOGS_MAPS_AIRPORTS_JSON = "";
@@ -255,7 +259,7 @@ class system_data
 
   SOUNDS          SOUND_SYSTEM;  // Primitive sound system.
 
-  CAMERA          CAMERAS;
+  CAMERA          CAMERA_BACKUP;
 
   // -------------------------------------------------------------------------------------
 

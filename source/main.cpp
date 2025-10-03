@@ -417,30 +417,30 @@ int loop_2(bool TTY_Only)
 
   // Assign Properties and Controls
 
-  sdSystem.CAMERAS.PROPS.CAMERA_DEVICE_NAME = "/dev/video0";
-  sdSystem.CAMERAS.PROPS.CAMERA_DEVICE_ID   = 0;
+  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DEVICE_NAME = sdSystem.FILE_NAMES.CAMERA_BACKUP;
+  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DEVICE_ID   = sdSystem.FILE_NAMES.CAMERA_BACKUP_ID;
 
   // Set Camera Screen Properties
-  //sdSystem.CAMERAS.PROPS.WIDTH = 640;
-  //sdSystem.CAMERAS.PROPS.HEIGHT = 480;
+  //sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 640;
+  //sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 480;
 
-  //sdSystem.CAMERAS.PROPS.WIDTH = 1280;
-  //sdSystem.CAMERAS.PROPS.HEIGHT = 720;
+  //sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 1280;
+  //sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 720;
   
-  sdSystem.CAMERAS.PROPS.WIDTH = 800;
-  sdSystem.CAMERAS.PROPS.HEIGHT = 600;
+  sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 800;
+  sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 600;
   
   // Flip horizontal and vertical
-  sdSystem.CAMERAS.PROPS.FLIP_HORIZONTAL  = false;
-  sdSystem.CAMERAS.PROPS.FLIP_VERTICAL    = true;
+  sdSystem.CAMERA_BACKUP.PROPS.FLIP_HORIZONTAL  = false;
+  sdSystem.CAMERA_BACKUP.PROPS.FLIP_VERTICAL    = true;
 
   // Get list of controls to print to screen.
   sdSystem.SCREEN_COMMS.printw("Initializing Camera ...");
-  sdSystem.CAMERAS.list_controls();
-  sdSystem.SCREEN_COMMS.printw(sdSystem.CAMERAS.INFORMATION_COMMAND_LIST);
+  sdSystem.CAMERA_BACKUP.list_controls();
+  sdSystem.SCREEN_COMMS.printw(sdSystem.CAMERA_BACKUP.INFORMATION_COMMAND_LIST);
 
-  sdSystem.CAMERAS.create();
-  sdSystem.SCREEN_COMMS.printw(sdSystem.CAMERAS.INFORMATION);
+  sdSystem.CAMERA_BACKUP.create();
+  sdSystem.SCREEN_COMMS.printw(sdSystem.CAMERA_BACKUP.INFORMATION);
 
   // ---------------------------------------------------------------------------------------
   // Initialize Alert System
@@ -805,7 +805,7 @@ int loop_2(bool TTY_Only)
     {    
       if (sdSystem.THREAD_BACKUP_CAMERA.check_for_completition())
       {
-        sdSystem.CAMERAS.process_frame();
+        sdSystem.CAMERA_BACKUP.process_frame();
       }
     }
 
@@ -1047,7 +1047,7 @@ int loop_2(bool TTY_Only)
         // 5. Start the camera update on a separate thread.
         // This call is non-blocking, so the main loop can continue immediately.
         sdSystem.THREAD_BACKUP_CAMERA.start_render_thread([&]() 
-                  {  sdSystem.CAMERAS.update_frame();  });
+                  {  sdSystem.CAMERA_BACKUP.update_frame();  });
       }
     }
 
@@ -1426,7 +1426,7 @@ int loop_2(bool TTY_Only)
   sdSystem.THREAD_RENDER.wait_for_thread_to_finish();
   sdSystem.THREAD_BACKUP_CAMERA.wait_for_thread_to_finish();
 
-  sdSystem.CAMERAS.close_camera();
+  sdSystem.CAMERA_BACKUP.close_camera();
 
   // Shutdown RPI.
   if (sdSystem.WS2811_ENABLED)
