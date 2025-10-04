@@ -885,7 +885,10 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
   
     NOVA_2_STEERING_WHEEL_ANGLE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.steering_wheel_angle());
     NOVA_2_STEERING_WHEEL_ANGLE.draw(draw_list_nova, sdSysData);
-    ImGui::SameLine();
+
+    NOVA_2_STEERING_WHEEL_ANGLE_ADJUSTED.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle_adjusted()));
+    NOVA_2_STEERING_WHEEL_ANGLE_ADJUSTED.draw(draw_list_nova, sdSysData);
+
     NOVA_2_STEERING_LEFT_OF_CENTER.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.left_of_center());
     NOVA_2_STEERING_LEFT_OF_CENTER.draw(draw_list_nova, sdSysData);
   
@@ -2157,6 +2160,10 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     NOVA_2_STEERING_WHEEL_ANGLE.PROPS = tmp_defalt_props;
     NOVA_2_STEERING_WHEEL_ANGLE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "ANGLE ");
     NOVA_2_STEERING_WHEEL_ANGLE.create(sdSysData);
+
+    NOVA_2_STEERING_WHEEL_ANGLE_ADJUSTED.PROPS = tmp_defalt_props;
+    NOVA_2_STEERING_WHEEL_ANGLE_ADJUSTED.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "ANG A ");
+    NOVA_2_STEERING_WHEEL_ANGLE_ADJUSTED.create(sdSysData);
 
     NOVA_2_STEERING_DIRECTION.PROPS = tmp_defalt_props;
     NOVA_2_STEERING_DIRECTION.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "DIR ");

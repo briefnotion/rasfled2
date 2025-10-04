@@ -84,6 +84,7 @@ class CAMERA_WIDGET
   BUTTON_TOGGLE_COLOR        BC_ENH_LOW_LIGHT;
   BUTTON_TOGGLE_COLOR        BC_ENH_ENH_SHARPEN;
   BUTTON_TOGGLE_COLOR        BC_ENH_LINE_DETECTION;
+  BUTTON_TOGGLE_COLOR        BC_ENH_ENH_CURVE_FIT;
   BUTTON_TOGGLE_COLOR        BC_ENH_ROAD_MASK;
   BUTTON_TOGGLE_COLOR        BC_ENH_CAR_DETECTION;
 
@@ -96,7 +97,7 @@ class CAMERA_WIDGET
   // These coordinates create the three connected trapezoids.
   
   // Angle Muliplier
-  float ANGLE_MULTIPLIER = 5.0f;
+  float ANGLE_MULTIPLIER = 2.5f;
 
   // Line Thickness
   float THICKNESS_1 = 10.0f;
@@ -115,13 +116,13 @@ class CAMERA_WIDGET
   
   // Level 2: Yellow/Red boundary
   float Y2 = 0.33f;
-  float XL2 = 0.229f;
-  float XR2 = 0.72f;
+  float XL2 = 0.227f;
+  float XR2 = 0.725f;
 
   // Level 3: Farthest point (Top of Red)
   float Y3 = 0.20f;
-  float XL3 = 0.29f;
-  float XR3 = 0.639f;
+  float XL3 = 0.295f;
+  float XR3 = 0.637f;
 
   ImVec2 norm_to_screen(float &Nx, float &Ny, float &Slide, 
                         ImVec2 &Image_Start_Position, 

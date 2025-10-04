@@ -78,6 +78,38 @@ cv::Mat CAMERA::get_road_mask(const cv::Mat& frame)
   return mask;
 }
 
+// NEW Helper function: Detects and draws general contours (outlines of objects).
+void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame) 
+{
+  if (processed_frame.empty()) return;
+
+  // --- 1. Isolate Edges/Outlines ---
+  cv::Mat gray_edges;
+  cv::cvtColor(processed_frame, gray_edges, cv::COLOR_BGR2GRAY);
+  
+  // Use Canny Edge Detection to find sharp boundaries
+  cv::Mat edges;
+  cv::Canny(gray_edges, edges, 50, 150, 3);
+  
+  // --- 2. Find Contours ---
+  // cv::RETR_EXTERNAL retrieves only the extreme outer contours.
+  std::vector<std::vector<cv::Point>> contours;
+  std::vector<cv::Vec4i> hierarchy;
+  cv::findContours(edges, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
+
+  // --- 3. Filter and Draw Contours ---
+  for (size_t i = 0; i < contours.size(); ++i) 
+  {
+    // Filter contours by area to ignore small noise
+    double area = cv::contourArea(contours[i]);
+    if (area > 500) 
+    { 
+      // Draw the contour (Cyan color: B=255, G=255, R=0)
+      cv::drawContours(processed_frame, contours, (int)i, cv::Scalar(255, 255, 0), 2, cv::LINE_AA, hierarchy, 0);
+    }
+  }
+}
+
 bool CAMERA::set_control(uint32_t id, int32_t value)
 {
   bool ret_success = false;
@@ -613,24 +645,15 @@ void CAMERA::update_frame()
       }
     }
 
-    // NEW BLOCK 2: Image Sharpening (Optional)
+    // Block 3: Image Sharpening (Optional)
     if (PROPS.ENH_SHARPEN)
     {
-      // Sharpening is typically done after denoising/contrast adjustment.
-      // We use a simple high-pass filter (Laplacian-like kernel) for a quick sharpen.
-
       cv::Mat kernel = (cv::Mat_<float>(3, 3) <<
           0, -1, 0,
           -1, 5, -1,
           0, -1, 0);
-
-      // Apply the kernel to the frame using a 2D convolution filter.
-      // The DDepth of -1 means the destination image will have the same depth (type) as the source.
       cv::filter2D(PROCESSED_FRAME, PROCESSED_FRAME, -1, kernel);
     }
-    // If CAM_BEING_VIEWED, PROPS.ENH_MEDIAN_BLUR, or PROPS.ENH_SHARPEN is false, 
-    // PROCESSED_FRAME remains the flipped copy of FRAME, potentially with the intermediate effects.
-
 
     // Block 2: Road Line Detection (Hough Transform)
     if (PROPS.ENH_LINE_DETECTION)
@@ -670,6 +693,13 @@ void CAMERA::update_frame()
       }
     }
 
+    // Block 5: Contour and Shape Detection (General Curves)
+    if (PROPS.ENH_CURVE_FIT)
+    {
+      // This block runs general contour detection to find outlines of objects (cars, signs, potholes).
+      detect_and_draw_contours(PROCESSED_FRAME);
+    }
+    
     // Block 4: Car Detection (Haar Cascade)
     if (PROPS.ENH_CAR_DETECTION && CAR_CASCADE_LOADED)
     {

@@ -538,6 +538,8 @@ class AUTOMOBILE_STEERING
 
   float VAL_STEERING_WHEEL_ANGLE = -1;
 
+  int sensed_clockwise = 0;
+
   public:
 
   void set_source_availability(bool Available);
@@ -548,7 +550,7 @@ class AUTOMOBILE_STEERING
   float val_steering_wheel_angle_adjusted();  // Represents steering wheel angle in + or -
   string steering_wheel_angle();
   string turning_direction();
-  bool clockwise();
+  int clockwise();
   bool val_left_of_center();
   string left_of_center();
 };

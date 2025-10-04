@@ -945,7 +945,7 @@ void AUTOMOBILE_STEERING::store_steering_wheel_angle(int Angle, int Direction)
     {
       CLOCKWISE = 1;
     }
-    else
+    else if (Direction > 0)
     {
       CLOCKWISE = -1;
     }
@@ -1010,7 +1010,7 @@ string AUTOMOBILE_STEERING::turning_direction()
   return "XX";
 }
 
-bool AUTOMOBILE_STEERING::clockwise()
+int AUTOMOBILE_STEERING::clockwise()
 {
   return CLOCKWISE;
 }

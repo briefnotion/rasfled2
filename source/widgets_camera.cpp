@@ -233,8 +233,6 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT = !sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT;
     }
 
-    
-
     // Display Median Blur
     if (BC_ENH_ENH_SHARPEN.button_toggle_color(sdSysData, "SHARP", "SHARP", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_SHARPEN, 
@@ -243,15 +241,13 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.PROPS.ENH_SHARPEN = !sdSysData.CAMERA_BACKUP.PROPS.ENH_SHARPEN;
     }
 
-    
-
-    // Display Median Blur
+    // Display 
     if (BC_ENH_LINE_DETECTION.button_toggle_color(sdSysData, "LINE\nDET", "LINE\nDET", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_LINE_DETECTION, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       sdSysData.CAMERA_BACKUP.PROPS.ENH_LINE_DETECTION = !sdSysData.CAMERA_BACKUP.PROPS.ENH_LINE_DETECTION;
-    }
+    }    
 
     ImGui::SameLine();
     // Display Road Mask
@@ -260,6 +256,14 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       sdSysData.CAMERA_BACKUP.PROPS.ENH_ROAD_MASK = !sdSysData.CAMERA_BACKUP.PROPS.ENH_ROAD_MASK;
+    }
+    
+    // Display 
+    if (BC_ENH_ENH_CURVE_FIT.button_toggle_color(sdSysData, "CUR\nFIT", "CUR\nFIT", 
+                                              sdSysData.CAMERA_BACKUP.PROPS.ENH_CURVE_FIT, 
+                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.CAMERA_BACKUP.PROPS.ENH_CURVE_FIT = !sdSysData.CAMERA_BACKUP.PROPS.ENH_CURVE_FIT;
     }
 
     // Display Road Mask

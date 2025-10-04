@@ -777,9 +777,18 @@ void MAP::generate_displayed_track(double Resolution)
           DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED.front());
         }
 
+        bool end_point_flag = false;
+
         // Points in middle
         for (size_t pos = 1; pos < TRACK_2.TRACK_POINTS_DETAILED.size() -1; pos++)
         {
+          // Check to see if there are any endpoints along the way.
+          if (TRACK_2.TRACK_POINTS_DETAILED[pos].END_POINT)
+          {
+            end_point_flag = true;
+          }
+
+          // Check to see if its within map display resolution.
           if (TRACK_2.TRACK_POINTS_DETAILED[pos].RESOLUTION >= Resolution)
           {
             screen_position_not_used = point_position_lat_lon(extar_working_area, CURRENT_LAT_LON_SCALE, CURRENT_CENTER_LAT_LON, 
@@ -790,11 +799,9 @@ void MAP::generate_displayed_track(double Resolution)
             if (add_track_point)
             {
               DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED[pos]);
-            }
-            else
-            {
-              if (!DISPLAYED_TRACK.TRACK_POINTS_DETAILED.empty())
+              if (end_point_flag)
               {
+                end_point_flag = false;
                 DISPLAYED_TRACK.TRACK_POINTS_DETAILED.back().END_POINT = true;
               }
             }

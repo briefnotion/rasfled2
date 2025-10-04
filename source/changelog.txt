@@ -1,3 +1,9 @@
+2.328_251004
+  - Made changes to the AUTOMOBILE_STEERING.
+  - Added contour detection to the camera for testing.
+  - Enabled default on for some of the enhancements that work.
+  - Adjusted some backup camera values.
+
 2.327_251002
   - Modifed the Rear Camera View path draw.
   - Added a simple steering wheel info to the path draw. 

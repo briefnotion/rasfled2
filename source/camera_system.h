@@ -23,6 +23,7 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
+#include <opencv2/objdetect.hpp> 
 
 #include <GLFW/glfw3.h>
 
@@ -101,10 +102,11 @@ class CAMERA_PROPERTIES
   // Camera Enhancements
 
   // Median blur is excellent for removing "salt-and-pepper" noise.
-  bool ENH_MEDIAN_BLUR    = false;
-  bool ENH_LOW_LIGHT      = false;
+  bool ENH_MEDIAN_BLUR    = true;
+  bool ENH_LOW_LIGHT      = true;
   bool ENH_SHARPEN        = false;
-  bool ENH_LINE_DETECTION = false;
+  bool ENH_LINE_DETECTION = true;
+  bool ENH_CURVE_FIT      = false;
   bool ENH_ROAD_MASK      = false;
   bool ENH_CAR_DETECTION  = false;
 
@@ -126,6 +128,7 @@ class CAMERA
   // Camera CV Helper
   bool is_low_light(const cv::Mat& frame, int threshold);
   cv::Mat get_road_mask(const cv::Mat& frame);
+  void detect_and_draw_contours(cv::Mat& processed_frame);
 
   // Change Settings
   bool set_control(uint32_t id, int32_t value); // returns true on success
