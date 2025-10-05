@@ -912,7 +912,6 @@ void AUTOMOBILE_STEERING::set_source_availability(bool Available)
 {
   if (SOURCE_AVAILABILITY == true && Available == false)
   {
-    PREVIOUS_STEERING_WHEEL_ANGLE = -1;
     REPORTED_STEERING_WHEEL_ANGLE = -1;
     VAL_STEERING_WHEEL_ANGLE = -1;
   }
@@ -925,50 +924,30 @@ bool AUTOMOBILE_STEERING::available()
   return check_availability(CODED_AVAILABILITY, SOURCE_AVAILABILITY);
 }
 
-void AUTOMOBILE_STEERING::store_steering_wheel_angle(int Angle, int Direction)
+void AUTOMOBILE_STEERING::store_steering_wheel_angle(int Angle, int Data, int Torque)
 {
   // x8000 at 0 deg. x8500 at 90 deg. x9000 at 180 deg.
   //VAL_STEERING_WHEEL_ANGLE = ((float)Angle - 32768);
 
-  VAL_STEERING_WHEEL_ANGLE = (((float)Angle - (float)32768) / 4.0f ) * 0.18f;
+  float angle_magnitude = (((float)Angle - (float)32768) / 4.0f ) * 0.18f;
 
-  // MSB for Direction
+  // Check if the MSB (128) of the new sign byte (Byte [4]) is set.
+  bool signage = (Data & 0x80) != 0; // Check if Bit 7 is set (value >= 128)
 
-  // Determine direction of wheel turn.
-  if (VAL_STEERING_WHEEL_ANGLE == PREVIOUS_STEERING_WHEEL_ANGLE)
+  if (signage)  // bit set indicates postive right turn
   {
-    CLOCKWISE = 0;
+    VAL_STEERING_WHEEL_ANGLE = angle_magnitude;
   }
   else
   {
-    if (Direction >= 128)
-    {
-      CLOCKWISE = 1;
-    }
-    else if (Direction > 0)
-    {
-      CLOCKWISE = -1;
-    }
-
-    // Determine if wheel is left or right of center.
-    if (CLOCKWISE == 1)
-    {
-      if (VAL_STEERING_WHEEL_ANGLE > PREVIOUS_STEERING_WHEEL_ANGLE)
-      {
-        LEFT_OF_CENTER = false;
-      }
-    }
-    else if (CLOCKWISE == -1)
-    {
-      if (VAL_STEERING_WHEEL_ANGLE > PREVIOUS_STEERING_WHEEL_ANGLE)
-      {
-        LEFT_OF_CENTER = true;
-      }
-    }
-
-    // Set Display Variables
-    PREVIOUS_STEERING_WHEEL_ANGLE = VAL_STEERING_WHEEL_ANGLE;
+    VAL_STEERING_WHEEL_ANGLE = -angle_magnitude;
   }
+
+  VAL_TORQUE = Torque;  // UnProcessed.
+
+  // test compare data
+  //[0]: 10         [1]: 66         [2]: 0          [3]: 163        [4]: 128        [5]: 163        [6]: 129        [7]: 249        Suspected Angle: 22.725
+  //[0]: 14         [1]: 155        [2]: 1          [3]: 6          [4]: 0          [5]: 229        [6]: 152        [7]: 135        Suspected Angle: -282.555
 }
 
 float AUTOMOBILE_STEERING::val_steering_wheel_angle()
@@ -976,60 +955,9 @@ float AUTOMOBILE_STEERING::val_steering_wheel_angle()
   return VAL_STEERING_WHEEL_ANGLE;
 }
 
-float AUTOMOBILE_STEERING::val_steering_wheel_angle_adjusted()
-{
-  if (LEFT_OF_CENTER)
-  {
-    return -VAL_STEERING_WHEEL_ANGLE;
-  }
-  else
-  {
-    return VAL_STEERING_WHEEL_ANGLE;
-  }
-}
-
 string AUTOMOBILE_STEERING::steering_wheel_angle()
 {
   return to_string_round_to_nth(VAL_STEERING_WHEEL_ANGLE, 1) + " deg";
-}
-
-string AUTOMOBILE_STEERING::turning_direction()
-{
-  if (CLOCKWISE == 0)
-  {
-    return "--";
-  }
-  if (CLOCKWISE == 1)
-  {
-    return "->";
-  }
-  if (CLOCKWISE == -1)
-  {
-    return "<-";
-  }
-  return "XX";
-}
-
-int AUTOMOBILE_STEERING::clockwise()
-{
-  return CLOCKWISE;
-}
-
-bool AUTOMOBILE_STEERING::val_left_of_center()
-{
-  return LEFT_OF_CENTER;
-}
-
-string AUTOMOBILE_STEERING::left_of_center()
-{
-  if (LEFT_OF_CENTER)
-  {
-    return "<-";
-  }
-  else
-  {
-    return "->";
-  }
 }
 
 //-----------
@@ -2796,7 +2724,40 @@ void AUTOMOBILE::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigne
             else if (pid_recieved == 0x0010)
             {
               STATUS.STEERING.store_steering_wheel_angle((DATA.AD_10.DATA[6] *256) + DATA.AD_10.DATA[7], 
-                                                          DATA.AD_10.DATA[2]);
+                                                          DATA.AD_10.DATA[4], DATA.AD_10.DATA[2]);
+
+              /*
+              {  // debug test kept for posible reuse.
+                // 1. Declare a static file stream to open the file once in append mode.
+                static std::ofstream log_file("/home/delmane/rasfled-t/test/steering_debug.txt", std::ios::app);
+
+                // 2. Check if the file successfully opened before attempting to write.
+                if (log_file.is_open()) 
+                {
+                  //if (STATUS.STEERING.val_steering_wheel_angle_adjusted() == 22.725f ||
+                  //    STATUS.STEERING.val_steering_wheel_angle_adjusted() == -282.555f)
+                  {
+                  // 3. Write the debugging data to the file stream.
+                  log_file  << "\t  [0]: " << DATA.AD_10.DATA[0]
+                            << "\t  [1]: " << DATA.AD_10.DATA[1]
+                            << "\t  [2]: " << DATA.AD_10.DATA[2]
+                            << "\t  [3]: " << DATA.AD_10.DATA[3]
+                            << "\t  [4]: " << DATA.AD_10.DATA[4]
+                            << "\t  [5]: " << DATA.AD_10.DATA[5]
+                            << "\t  [6]: " << DATA.AD_10.DATA[6]
+                            << "\t  [7]: " << DATA.AD_10.DATA[7]
+                            //<< "\t  Suspected Angle: " << STATUS.STEERING.val_steering_wheel_angle_adjusted()
+                            << "\t  Suspected Angle: " << STATUS.STEERING.val_steering_wheel_angle()
+                            << "\n";
+                  }
+                }
+              
+                if (STATUS.STEERING.val_steering_wheel_angle() == -282.555f)
+                {
+                  exit(0);
+                }
+              } 
+              */
             }
                   
             // --------------------------------------------------------------------------------------

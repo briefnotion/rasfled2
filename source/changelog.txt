@@ -1,3 +1,9 @@
+2.329_251005
+  - Made changes to the AUTOMOBILE_STEERING.
+  - Removed some unnecessary variables from AUTOMOBILE_STEERING.
+  - Enabled default on for Sharpen.
+  - Adjusted some backup camera values.
+
 2.328_251004
   - Made changes to the AUTOMOBILE_STEERING.
   - Added contour detection to the camera for testing.

@@ -530,29 +530,20 @@ class AUTOMOBILE_STEERING
   bool CODED_AVAILABILITY = true;
   bool SOURCE_AVAILABILITY = false;
 
-  float PREVIOUS_STEERING_WHEEL_ANGLE = -1;
-
   int REPORTED_STEERING_WHEEL_ANGLE = -1;
-  int CLOCKWISE = -1;
-  bool LEFT_OF_CENTER = false;
 
   float VAL_STEERING_WHEEL_ANGLE = -1;
 
-  int sensed_clockwise = 0;
+  int VAL_TORQUE = 0;
 
   public:
 
   void set_source_availability(bool Available);
   bool available();
 
-  void store_steering_wheel_angle(int Angle, int Direction);
+  void store_steering_wheel_angle(int Angle, int Data, int Torque);
   float val_steering_wheel_angle();
-  float val_steering_wheel_angle_adjusted();  // Represents steering wheel angle in + or -
   string steering_wheel_angle();
-  string turning_direction();
-  int clockwise();
-  bool val_left_of_center();
-  string left_of_center();
 };
 
 class AUTOMOBILE_VELOCITY

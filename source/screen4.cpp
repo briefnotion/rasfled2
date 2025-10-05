@@ -945,7 +945,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                   ImGui::BeginChild("Backup Camera", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
                   {
                     ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                    BACKUP_CAMERA.display(sdSysData, degrees_to_radians(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle_adjusted() / 12.0f));
+                    BACKUP_CAMERA.display(sdSysData, degrees_to_radians(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle() / 12.0f));
                     ImGui::PopStyleColor();
                   }
                   ImGui::EndChild();
@@ -962,7 +962,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 }
                 else
                 {
-                  BACKUP_CAMERA.display(sdSysData, degrees_to_radians(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle_adjusted() / 12.0f));
+                  BACKUP_CAMERA.display(sdSysData, degrees_to_radians(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle() / 12.0f));
                 }
               }
             }

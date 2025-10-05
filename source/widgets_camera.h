@@ -105,24 +105,24 @@ class CAMERA_WIDGET
   float THICKNESS_3 = 5.0f;
 
   // Level 0: Closest to the car (Bottom of Green)
-  float Y0 = 1.0f;
+  float Y0 = 1.000f;
   float XL0 = -0.100f;
-  float XR0 = 1.16f;
+  float XR0 = 1.160f;
   
   // Level 1: Green/Yellow boundary
-  float Y1 = 0.80f;
+  float Y1 = 0.800f;
   float XL1 = 0.00f;
-  float XR1 = 1.02f;
+  float XR1 = 1.020f;
   
   // Level 2: Yellow/Red boundary
-  float Y2 = 0.33f;
+  float Y2 = 0.330f;
   float XL2 = 0.227f;
-  float XR2 = 0.725f;
+  float XR2 = 0.700f;
 
   // Level 3: Farthest point (Top of Red)
-  float Y3 = 0.20f;
+  float Y3 = 0.200f;
   float XL3 = 0.295f;
-  float XR3 = 0.637f;
+  float XR3 = 0.610f;
 
   ImVec2 norm_to_screen(float &Nx, float &Ny, float &Slide, 
                         ImVec2 &Image_Start_Position, 

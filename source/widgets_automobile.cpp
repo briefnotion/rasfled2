@@ -885,18 +885,6 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
   
     NOVA_2_STEERING_WHEEL_ANGLE.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.steering_wheel_angle());
     NOVA_2_STEERING_WHEEL_ANGLE.draw(draw_list_nova, sdSysData);
-
-    NOVA_2_STEERING_WHEEL_ANGLE_ADJUSTED.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle_adjusted()));
-    NOVA_2_STEERING_WHEEL_ANGLE_ADJUSTED.draw(draw_list_nova, sdSysData);
-
-    NOVA_2_STEERING_LEFT_OF_CENTER.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.left_of_center());
-    NOVA_2_STEERING_LEFT_OF_CENTER.draw(draw_list_nova, sdSysData);
-  
-    NOVA_2_STEERING_DIRECTION.update_value(sdSysData, sdSysData.CAR_INFO.STATUS.STEERING.turning_direction());
-    NOVA_2_STEERING_DIRECTION.draw(draw_list_nova, sdSysData);
-  
-    NOVA_2_STEERING_CLOCKWISE.update_value(sdSysData, to_string(sdSysData.CAR_INFO.STATUS.STEERING.clockwise()));
-    NOVA_2_STEERING_CLOCKWISE.draw(draw_list_nova, sdSysData);
   }
   
   // ---
@@ -2161,22 +2149,6 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     NOVA_2_STEERING_WHEEL_ANGLE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "ANGLE ");
     NOVA_2_STEERING_WHEEL_ANGLE.create(sdSysData);
 
-    NOVA_2_STEERING_WHEEL_ANGLE_ADJUSTED.PROPS = tmp_defalt_props;
-    NOVA_2_STEERING_WHEEL_ANGLE_ADJUSTED.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "ANG A ");
-    NOVA_2_STEERING_WHEEL_ANGLE_ADJUSTED.create(sdSysData);
-
-    NOVA_2_STEERING_DIRECTION.PROPS = tmp_defalt_props;
-    NOVA_2_STEERING_DIRECTION.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "DIR ");
-    NOVA_2_STEERING_DIRECTION.create(sdSysData);
-
-    NOVA_2_STEERING_CLOCKWISE.PROPS = tmp_defalt_props;
-    NOVA_2_STEERING_CLOCKWISE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "CLOCKW ");
-    NOVA_2_STEERING_CLOCKWISE.create(sdSysData);
-
-    NOVA_2_STEERING_LEFT_OF_CENTER.PROPS = tmp_defalt_props;
-    NOVA_2_STEERING_LEFT_OF_CENTER.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "LEFTOC ");
-    NOVA_2_STEERING_LEFT_OF_CENTER.create(sdSysData);
-
     // GPS COMPASS OTHER
     NOVA_2_GPS_ACTIVE.PROPS = tmp_defalt_props;
     NOVA_2_GPS_ACTIVE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "GPS ACT ");
@@ -2303,10 +2275,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   // Steering
 
   SDATA.STEERING_WHEEL_ANGLE_VAL = sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle();
-  SDATA.STEERING_WHEEL_LEFT_OF_CENTER_VAL = sdSysData.CAR_INFO.STATUS.STEERING.val_left_of_center();
   SDATA.STEERING_WHEEL_ANGLE = sdSysData.CAR_INFO.STATUS.STEERING.steering_wheel_angle();
-  SDATA.STEERING_WHEEL_LEFT_OF_CENTER = sdSysData.CAR_INFO.STATUS.STEERING.left_of_center();
-  SDATA.STEERING_WHEEL_TURNING_DIRECTION = sdSysData.CAR_INFO.STATUS.STEERING.turning_direction();
 
   // Temp
 
@@ -2514,14 +2483,7 @@ void AUTOMOBILE_SCREEN::update(system_data &sdSysData)
   {
     // DISPLAY_MID_BOTTOM = 0
     {
-      if (SDATA.STEERING_WHEEL_LEFT_OF_CENTER_VAL)
-      {
-        SDATA.TB_STEERING.update_value(sdSysData, -(SDATA.STEERING_WHEEL_ANGLE_VAL) + 180.0f);
-      }
-      else
-      {
-        SDATA.TB_STEERING.update_value(sdSysData, (SDATA.STEERING_WHEEL_ANGLE_VAL) + 180.0f);
-      }
+      SDATA.TB_STEERING.update_value(sdSysData, (SDATA.STEERING_WHEEL_ANGLE_VAL) + 180.0f);
 
       SDATA.TB_SPEED.update_value(sdSysData, SDATA.SPEED_RAW);
       SDATA.TB_ACCELERATION.update_value(sdSysData, SDATA.ACCELERATION_IMPACT);

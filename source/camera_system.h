@@ -104,7 +104,7 @@ class CAMERA_PROPERTIES
   // Median blur is excellent for removing "salt-and-pepper" noise.
   bool ENH_MEDIAN_BLUR    = true;
   bool ENH_LOW_LIGHT      = true;
-  bool ENH_SHARPEN        = false;
+  bool ENH_SHARPEN        = true;
   bool ENH_LINE_DETECTION = true;
   bool ENH_CURVE_FIT      = false;
   bool ENH_ROAD_MASK      = false;
