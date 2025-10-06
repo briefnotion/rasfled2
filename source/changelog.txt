@@ -1,3 +1,12 @@
+2.330_251006
+  - Corrected a problem where errornous future time stamps in the 
+      future would be held until it was 9 hours from whatever 
+      date was set.  So, if the date was 5 months in the future, 
+      it would take 5 months and 8 hours to be stored to the history 
+      file.
+  - Set up the directories for the camera and camera settings.
+  - Added a ENH_CARTOONIFY to the camera system for testing.
+
 2.329_251005
   - Made changes to the AUTOMOBILE_STEERING.
   - Removed some unnecessary variables from AUTOMOBILE_STEERING.

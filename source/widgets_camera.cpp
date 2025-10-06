@@ -225,7 +225,7 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
     }
 
     ImGui::SameLine();
-    // Display Median Blur
+    // Display Median Blur only when low light
     if (BC_ENH_LOW_LIGHT.button_toggle_color(sdSysData, "LOW\nLIGHT", "LOW\nLIGHT", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -233,15 +233,23 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT = !sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT;
     }
 
-    // Display Median Blur
-    if (BC_ENH_ENH_SHARPEN.button_toggle_color(sdSysData, "SHARP", "SHARP", 
+    // Display Median Blur only when low light
+    if (BC_ENH_CARTOONIFY.button_toggle_color(sdSysData, "TOON", "TOON", 
+                                              sdSysData.CAMERA_BACKUP.PROPS.ENH_CARTOONIFY, 
+                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.CAMERA_BACKUP.PROPS.ENH_CARTOONIFY = !sdSysData.CAMERA_BACKUP.PROPS.ENH_CARTOONIFY;
+    }
+
+    // Display Sharpen
+    if (BC_ENH_SHARPEN.button_toggle_color(sdSysData, "SHARP", "SHARP", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_SHARPEN, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       sdSysData.CAMERA_BACKUP.PROPS.ENH_SHARPEN = !sdSysData.CAMERA_BACKUP.PROPS.ENH_SHARPEN;
     }
 
-    // Display 
+    // Display Line Detection
     if (BC_ENH_LINE_DETECTION.button_toggle_color(sdSysData, "LINE\nDET", "LINE\nDET", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_LINE_DETECTION, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -250,7 +258,7 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
     }    
 
     ImGui::SameLine();
-    // Display Road Mask
+    // Display Road Mask when Line Detection is on
     if (BC_ENH_ROAD_MASK.button_toggle_color(sdSysData, "ROAD\nMASK", "ROAD\nMASK", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_ROAD_MASK, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -258,7 +266,7 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.PROPS.ENH_ROAD_MASK = !sdSysData.CAMERA_BACKUP.PROPS.ENH_ROAD_MASK;
     }
     
-    // Display 
+    // Display Curve Detection
     if (BC_ENH_ENH_CURVE_FIT.button_toggle_color(sdSysData, "CUR\nFIT", "CUR\nFIT", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_CURVE_FIT, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -266,7 +274,7 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.PROPS.ENH_CURVE_FIT = !sdSysData.CAMERA_BACKUP.PROPS.ENH_CURVE_FIT;
     }
 
-    // Display Road Mask
+    // Display Car Detection
     if (BC_ENH_CAR_DETECTION.button_toggle_color(sdSysData, "CAR\nDET", "CAR\nDET", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_CAR_DETECTION, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -421,6 +429,15 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
   // Show Display Camera Setting Button
   ImGui::SetCursorPos(ImVec2(0,0));
 
+  // Take a photo
+  if (BC_SNAPSHOT.button_color(sdSysData, "SNAP\nSHOT", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  {
+    sdSysData.CAMERA_BACKUP.SAVE_NEXT_RECEIVED_FRAME = true;
+  }
+
+  ImGui::InvisibleButton("camera_no_show", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
+
+  // Open Settings Screen
   if (BC_DISPLAY_SETTINGS.button_toggle_color(sdSysData, "CAM##Display Camera Settings", "CAM##Display Camera Settings", 
                                               DISPLAY_CAMERA_SETTINGS, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -428,6 +445,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
     DISPLAY_CAMERA_SETTINGS = !DISPLAY_CAMERA_SETTINGS;
   }
 
+  // Open Adjustments Screen
   if (BC_DISPLAY_ADJUSTMENTS.button_toggle_color(sdSysData, "ADJ##Display Camera Adjustments", "ADJ##Display Camera Adjustments", 
                                               DISPLAY_ADJUSTMENTS, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -435,6 +453,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
     DISPLAY_ADJUSTMENTS = !DISPLAY_ADJUSTMENTS;
   }
 
+  // Open Enhancements Screen
   if (BC_DISPLAY_ENHANCEMENTS.button_toggle_color(sdSysData, "ENH##Display Camera Enhancements", "ENH##Display Camera Enhancements",
                                               DISPLAY_ENHANCEMENTS, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))

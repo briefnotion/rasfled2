@@ -563,7 +563,7 @@ void MAP::track_distill(DETAILED_TRACK_ALTERNATIVE &Original_Track,
 
   for (size_t pos = 0; pos < Original_Track.TRACK_POINTS_DETAILED.size(); pos++)
   {
-    if (current_system_time - Original_Track.TRACK_POINTS_DETAILED[pos].TIMESTAMP < PROPS.TRACK_HISTORY_CUTOFF)
+    if (abs(current_system_time - Original_Track.TRACK_POINTS_DETAILED[pos].TIMESTAMP) < PROPS.TRACK_HISTORY_CUTOFF)
     {
       Recent_Track.TRACK_POINTS_DETAILED.push_back(Original_Track.TRACK_POINTS_DETAILED[pos]);
     }

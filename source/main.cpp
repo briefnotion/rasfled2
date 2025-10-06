@@ -417,8 +417,11 @@ int loop_2(bool TTY_Only)
 
   // Assign Properties and Controls
 
-  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DEVICE_NAME = sdSystem.FILE_NAMES.CAMERA_BACKUP;
-  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DEVICE_ID   = sdSystem.FILE_NAMES.CAMERA_BACKUP_ID;
+  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DEVICE_NAME   = sdSystem.FILE_NAMES.CAMERA_BACKUP;
+  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DEVICE_ID     = sdSystem.FILE_NAMES.CAMERA_BACKUP_ID;
+
+  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DIRECTORY     = sdSystem.FILE_NAMES.CAMERA_DIR;
+  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_SETTINGS_DIR  = sdSystem.FILE_NAMES.CAMERA_SETTINGS_DIR;
 
   // Set Camera Screen Properties
   //sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 640;
@@ -1037,14 +1040,10 @@ int loop_2(bool TTY_Only)
     // ---------------------------------------------------------------------------------------
 
     // Check Camera Frame Grab on thread
-
-    // Temporary solution
-    //if(sdSystem.PANEL_CONTROL.CAMERA_AUTO_GEAR > 0 &&
-    //    sdSystem.PANEL_CONTROL.CAMERA_SELECTION > 0)
     {   
       if (sdSystem.THREAD_BACKUP_CAMERA.check_to_run_routine_on_thread(sdSystem.PROGRAM_TIME.current_frame_time())) 
       {
-        // 5. Start the camera update on a separate thread.
+        // Start the camera update on a separate thread.
         // This call is non-blocking, so the main loop can continue immediately.
         sdSystem.THREAD_BACKUP_CAMERA.start_render_thread([&]() 
                   {  sdSystem.CAMERA_BACKUP.update_frame();  });

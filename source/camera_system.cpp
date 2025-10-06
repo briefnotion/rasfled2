@@ -110,6 +110,43 @@ void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame)
   }
 }
 
+// NEW Helper function: Applies a cartoon/toon shader effect.
+void CAMERA::cartoonify_image(cv::Mat& processed_frame)
+{
+  if (processed_frame.empty()) return;
+
+  // --- Step 1: Smooth / Quantize Colors (Bilateral Filter) ---
+  // Bilateral Filter smoothes colors while preserving strong edges.
+  // D=9, SigmaColor=200, SigmaSpace=200 -> strong smoothing effect.
+  cv::Mat color_quantized;
+  cv::bilateralFilter(processed_frame, color_quantized, 9, 200, 200);
+
+  // --- Step 2: Find Edges (Adaptive Thresholding) ---
+  // 2a. Convert to grayscale and apply median blur for clean input edges
+  cv::Mat gray, blurred;
+  cv::cvtColor(processed_frame, gray, cv::COLOR_BGR2GRAY);
+  cv::medianBlur(gray, blurred, 7); // 7x7 median blur
+
+  // 2b. Use Adaptive Thresholding to find strong edges and make them black.
+  cv::Mat edges;
+  // cv::ADAPTIVE_THRESH_GAUSSIAN_C uses a weighted average of neighbor pixels
+  // Block size=9, C=2 (subtract this constant from the mean)
+  cv::adaptiveThreshold(blurred, edges, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, 
+                        cv::THRESH_BINARY, 9, 2);
+  
+  // Invert the edges so the lines are black (0) and the background is white (255)
+  cv::bitwise_not(edges, edges);
+  
+  // Convert edges back to a 3-channel image for merging
+  cv::Mat edges_color;
+  cv::cvtColor(edges, edges_color, cv::COLOR_GRAY2BGR);
+  
+  // --- Step 3: Combine ---
+  // The final image is created by setting the pixels where edges are black (0) 
+  // in the smoothed image (color_quantized).
+  cv::bitwise_and(color_quantized, edges_color, processed_frame);
+}
+
 bool CAMERA::set_control(uint32_t id, int32_t value)
 {
   bool ret_success = false;
@@ -565,6 +602,20 @@ void CAMERA::create()
 
 void CAMERA::update_frame()
 {
+  // If snapshot requested.
+  if (SAVE_NEXT_RECEIVED_FRAME)
+  {
+    SAVE_NEXT_RECEIVED_FRAME = false;
+    if (!FRAME.empty())
+    {
+      cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_raw.jpg", FRAME);
+    }
+    if (!PROCESSED_FRAME.empty())
+    {
+      cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_prc.jpg", PROCESSED_FRAME);
+    }
+  }
+
   // Capture the camera frame.
   if (CAM_AVAILABLE)
   {
@@ -645,7 +696,7 @@ void CAMERA::update_frame()
       }
     }
 
-    // Block 3: Image Sharpening (Optional)
+    // Image Sharpening (Optional)
     if (PROPS.ENH_SHARPEN)
     {
       cv::Mat kernel = (cv::Mat_<float>(3, 3) <<
@@ -653,6 +704,14 @@ void CAMERA::update_frame()
           -1, 5, -1,
           0, -1, 0);
       cv::filter2D(PROCESSED_FRAME, PROCESSED_FRAME, -1, kernel);
+    }
+
+    // Cartoonify Effect (Runs first to create the base look)
+    if (PROPS.ENH_CARTOONIFY)
+    {
+      cartoonify_image(PROCESSED_FRAME);
+      // If the image is cartoonified, many other blocks (like Denoising/Sharpening) 
+      // will have reduced effect or may be skipped for speed.
     }
 
     // Block 2: Road Line Detection (Hough Transform)
@@ -693,14 +752,14 @@ void CAMERA::update_frame()
       }
     }
 
-    // Block 5: Contour and Shape Detection (General Curves)
+    // Contour and Shape Detection (General Curves)
     if (PROPS.ENH_CURVE_FIT)
     {
       // This block runs general contour detection to find outlines of objects (cars, signs, potholes).
       detect_and_draw_contours(PROCESSED_FRAME);
     }
     
-    // Block 4: Car Detection (Haar Cascade)
+    // Car Detection (Haar Cascade)
     if (PROPS.ENH_CAR_DETECTION && CAR_CASCADE_LOADED)
     {
       // Cascade classifiers are faster on smaller images and grayscale.

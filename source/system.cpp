@@ -53,6 +53,8 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
   LOGS_SETTINGS_DIR = WORKING_DIR + (string)DEF_SETTINGS_DIR;
   LOGS_COMPASS_DIR = WORKING_DIR + (string)DEF_COMPASS_SUB_DIR;
   LOGS_MAPS_DIR = WORKING_DIR + (string)DEF_MAP_DIR;
+  CAMERA_DIR = WORKING_DIR + (string)DEF_CAMERA_DIR;
+  CAMERA_SETTINGS_DIR = CAMERA_DIR + (string)DEF_CAMERA_SETTINGS_DIR;
 
   LOGS_CAN_BUS_HISTORY_SUB_DIR = LOGS_CAN_BUS_DIR + (string)DEF_CAN_BUS_HISTORY_LOG_SUB_DIR;
   TRACK_ARCHIVE_DIR = LOGS_MAPS_DIR + (string)DEF_TRACK_ARCHIVE_DIR;
@@ -70,6 +72,9 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
   ret_success.catch_false(check_create_working_dir(LOGS_COMPASS_DIR, true));
   ret_success.catch_false(check_create_working_dir(LOGS_MAPS_DIR, true));
   ret_success.catch_false(check_create_working_dir(TRACK_ARCHIVE_DIR, true));
+  ret_success.catch_false(check_create_working_dir(CAMERA_DIR, true));
+  ret_success.catch_false(check_create_working_dir(CAMERA_SETTINGS_DIR, true));
+
   
   if (!ret_success.has_false())
   {

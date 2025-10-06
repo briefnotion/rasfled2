@@ -21,16 +21,16 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.329_251005"
+#define Revision "2.330_251006"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
 // TEST MODES
-#define TEST_MODE           false   // file accessed will be the in test dir, "~/rasfled-t"
+#define TEST_MODE           true   // file accessed will be the in test dir, "~/rasfled-t"
 
-#define TEST_DATA_CAN_BUS   false   // "rascomms.txt" in the auto dir
+#define TEST_DATA_CAN_BUS   true   // "rascomms.txt" in the auto dir
 #define TEST_DATA_AIRCRAFT  false   //
-#define TEST_DATA_GPS       false   //
+#define TEST_DATA_GPS       true   //
 
 // -------------------------------------------------------------------------------------
 // CONSOLE AND INTEFACE SETUP
@@ -109,6 +109,8 @@
 #define DEF_COMPASS_SUB_DIR               "compass/"              // Create Directory
 #define DEF_MAP_DIR                       "maps/"                 // Create Directory
 #define DEF_TRACK_ARCHIVE_DIR             "tracks/"               // Create Directory
+#define DEF_CAMERA_DIR                    "camera/"               // Create Directory
+#define DEF_CAMERA_SETTINGS_DIR           "settings/"             // Create Directory
 
 // Files
 #define DEF_ANIMATIONS_FILE               "animations.json"
@@ -137,8 +139,8 @@
 #define DEF_GPS_DEV_NAME                  "/dev/ttyAMA0"                                                    // GPS via ttyAMA0  
 #define DEF_GPS_SAVE_LOG_NAME             "gpscomms"
 #define DEF_GPS_TEST_DATA_NAME            "gpscomms_test.txt"
-#define TEST_DATA_GPS_INJECT_CURRENT_TIME true  // When using gps log data, change the date and time of log file 
-                                                // read to current date and time.  Makes the gps data look fresh.
+#define DEF_GPS_TEST_DATA_GPS_INJECT_CURRENT_TIME true  // When using gps log data, change the date and time of log file 
+                                                        // read to current date and time.  Makes the gps data look fresh.
 
 // Compass
 #define ENABLE_TEST_COMPASS               false                   // Sets the fake compass in hmc5883.h properties

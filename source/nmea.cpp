@@ -576,7 +576,7 @@ bool NMEA::process(CONSOLE_COMMUNICATION &cons, COMPORT &Com_Port, unsigned long
           CURRENT_POSITION.CHANGED_TIME = true;
 
           // for testing data from file, have option to inject current time
-          if (TEST_DATA_GPS && TEST_DATA_GPS_INJECT_CURRENT_TIME)
+          if (TEST_DATA_GPS && DEF_GPS_TEST_DATA_GPS_INJECT_CURRENT_TIME)
           {
             UNIX_EPOC_NMEA_TIME = get_current_timestamp();
           }

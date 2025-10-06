@@ -738,7 +738,7 @@ int two_byte_complement_signed(unsigned char byte1, unsigned char byte2);
 //  Returns a hacked int, the system undermined.
 
 string file_format_system_time();
-// Return format "22.44.39"
+// Return format "20251005_23.19.10"
 
 string file_format_system_date();
 // Return format "20230628"

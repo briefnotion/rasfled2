@@ -28,6 +28,7 @@
 #include <GLFW/glfw3.h>
 
 // Rasfled Includes
+#include "helper.h"
 
 using namespace std;
 
@@ -73,10 +74,11 @@ class CAMERA_PROPERTIES
   std::string CAMERA_DEVICE_NAME = "";
   int    CAMERA_DEVICE_ID   = -1;
 
+  std::string CAMERA_DIRECTORY = "";     // e.g. .../rasfled-t/camera/
+  std::string CAMERA_SETTINGS_DIR = "";  // e.g. .../rasfled-t/camera/settings/
+
   int WIDTH = 640;
   int HEIGHT = 480;
-  //int AUTO_FOCUS = 0;  // 0 off
-  //double FOCUS = 100.0;      // 0 - 255
 
   bool FLIP_HORIZONTAL = false; // (horizontal flip, around Y-axis)
   bool FLIP_VERTICAL = false;   // (vertical flip, around X-axis)
@@ -109,6 +111,7 @@ class CAMERA_PROPERTIES
   bool ENH_CURVE_FIT      = false;
   bool ENH_ROAD_MASK      = false;
   bool ENH_CAR_DETECTION  = false;
+  bool ENH_CARTOONIFY  = false;
 
 };
 
@@ -129,6 +132,7 @@ class CAMERA
   bool is_low_light(const cv::Mat& frame, int threshold);
   cv::Mat get_road_mask(const cv::Mat& frame);
   void detect_and_draw_contours(cv::Mat& processed_frame);
+  void cartoonify_image(cv::Mat& processed_frame);
 
   // Change Settings
   bool set_control(uint32_t id, int32_t value); // returns true on success
@@ -145,6 +149,9 @@ class CAMERA
   //  as necessary for first run.
 
   public:
+
+  bool SAVE_NEXT_RECEIVED_FRAME = false;
+
   bool CAM_BEING_VIEWED = false;
   // Temporary fix to turn off high level processing if 
   //  camera display is not shown.  Manually set until 

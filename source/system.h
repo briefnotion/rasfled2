@@ -105,6 +105,8 @@ class FILES
   // Cameras
   string CAMERA_BACKUP = "";
   int    CAMERA_BACKUP_ID = 0;
+  string CAMERA_DIR = "";
+  string CAMERA_SETTINGS_DIR = "";
 
   // Map
   string LOGS_MAPS_GENERICS_JSON = "";
