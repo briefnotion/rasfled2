@@ -76,6 +76,7 @@ class CAMERA_PROPERTIES
 
   std::string CAMERA_DIRECTORY = "";     // e.g. .../rasfled-t/camera/
   std::string CAMERA_SETTINGS_DIR = "";  // e.g. .../rasfled-t/camera/settings/
+  std::string CAMERA_TEST_FILE_NAME = "";  // e.g. .../rasfled-t/camera/settings/
 
   int WIDTH = 640;
   int HEIGHT = 480;
@@ -104,14 +105,20 @@ class CAMERA_PROPERTIES
   // Camera Enhancements
 
   // Median blur is excellent for removing "salt-and-pepper" noise.
-  bool ENH_MEDIAN_BLUR    = true;
+  
+  //bool ENH_SHARPEN        = true;
+
+  //bool ENH_MEDIAN_BLUR    = true;
   bool ENH_LOW_LIGHT      = true;
-  bool ENH_SHARPEN        = true;
-  bool ENH_LINE_DETECTION = true;
+
+  bool ENH_OVERLAY_LINES  = true;
+
+  //bool ENH_LINE_DETECTION = false;
   bool ENH_CURVE_FIT      = false;
-  bool ENH_ROAD_MASK      = false;
+
+  //bool ENH_ROAD_MASK      = false;  // Doesnt work
+
   bool ENH_CAR_DETECTION  = false;
-  bool ENH_CARTOONIFY  = false;
 
 };
 
@@ -120,9 +127,14 @@ class CAMERA
   private:
   cv::Mat FRAME;
   cv::Mat FRAME_DUMMY;
+
   cv::Mat PROCESSED_FRAME;
+  cv::Mat PROCESSED_FRAME_DOWNSIZED;
+  cv::Mat MASK_FRAME;
 
   bool NEW_FRAME_AVAILABLE = false;
+
+  double DOWN_SCALE_FACTOR = 2.0;
 
   // Object detection member
   bool CAR_CASCADE_LOADED = false;
@@ -132,7 +144,7 @@ class CAMERA
   bool is_low_light(const cv::Mat& frame, int threshold);
   cv::Mat get_road_mask(const cv::Mat& frame);
   void detect_and_draw_contours(cv::Mat& processed_frame);
-  void cartoonify_image(cv::Mat& processed_frame);
+  cv::Mat overlay_lines(cv::Mat& processed_frame);
 
   // Change Settings
   bool set_control(uint32_t id, int32_t value); // returns true on success
@@ -165,6 +177,8 @@ class CAMERA
 
   std::string INFORMATION              = "Not Available";
   std::string INFORMATION_COMMAND_LIST = "Not Available";
+
+  double PROCESSING_TIME = 0.0;
 
   CAMERA_PROPERTIES PROPS;
   

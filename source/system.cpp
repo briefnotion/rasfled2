@@ -136,6 +136,10 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
     TRACK_CURRENT_JSON = LOGS_MAPS_DIR + (string)DEF_CURRENT_TRACK_JSON;
     cons.printw("  " + TRACK_CURRENT_JSON);
 
+    // Camera
+    CAMERA_TEST_IMAGE_FILENAME = CAMERA_DIR + (string)DEF_CAMERA_TEST_IMAGE;
+    cons.printw("  " + CAMERA_TEST_IMAGE_FILENAME);
+
     // Specific Hardware Directories and Files
     cons.printw("");
     cons.printw("Hardware and External Sources:");

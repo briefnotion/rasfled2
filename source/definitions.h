@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.330_251006A"
+#define Revision "2.331_251007"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -149,10 +149,12 @@
 
 #define DEF_COMPASS_OFFSET_HISTORY        "compass_settings.json"
 
-// Cameras
+// -------------------------------------------------------------------------------------
+// Camera Setup
+
 #define DEF_CAMERA_BACKUP                 "/dev/video0"
 #define DEF_CAMERA_BACKUP_ID              0
-
+#define DEF_CAMERA_TEST_IMAGE             "test.jpg"
 
 // -------------------------------------------------------------------------------------
 // AUDIO SETUP

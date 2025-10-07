@@ -110,41 +110,50 @@ void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame)
   }
 }
 
-// NEW Helper function: Applies a cartoon/toon shader effect.
-void CAMERA::cartoonify_image(cv::Mat& processed_frame)
+// Implementation of the image stylization filter: quantize_and_outline.
+// It detects black outlines via adaptive thresholding and overlays them 
+// directly onto the original image, preserving the original color palette.
+// This version is significantly faster as it removes the Bilateral Filter.
+//
+// Arguments:
+// - processed_frame: Input/Output image (cv::Mat, modified in place)
+cv::Mat CAMERA::overlay_lines(cv::Mat& processed_frame)
 {
-  if (processed_frame.empty()) return;
+    // --- Fixed Parameters ---
+    const int EDGE_BLUR_KSIZE = 7;    // Median Blur: Noise reduction and simplification for edges
+    const int EDGE_BLOCK_SIZE = 5;    // Adaptive Threshold: Local neighborhood size
+    const int EDGE_C = 2;             // Adaptive Threshold: Line thickness control (higher = thicker)
 
-  // --- Step 1: Smooth / Quantize Colors (Bilateral Filter) ---
-  // Bilateral Filter smoothes colors while preserving strong edges.
-  // D=9, SigmaColor=200, SigmaSpace=200 -> strong smoothing effect.
-  cv::Mat color_quantized;
-  cv::bilateralFilter(processed_frame, color_quantized, 9, 200, 200);
+    // --- Step 1: Find Edges (Adaptive Thresholding) ---
+    // 1a. Convert to grayscale and apply median blur for clean input edges
+    cv::Mat gray, blurred;
+    cv::cvtColor(processed_frame, gray, cv::COLOR_BGR2GRAY);
+    cv::medianBlur(gray, blurred, EDGE_BLUR_KSIZE); 
 
-  // --- Step 2: Find Edges (Adaptive Thresholding) ---
-  // 2a. Convert to grayscale and apply median blur for clean input edges
-  cv::Mat gray, blurred;
-  cv::cvtColor(processed_frame, gray, cv::COLOR_BGR2GRAY);
-  cv::medianBlur(gray, blurred, 7); // 7x7 median blur
+    // 1b. Use Adaptive Thresholding to find strong edges and make them black.
+    cv::Mat edges;
+    // 'edges' is created with 0 (black) for lines and 255 (white) for background
+    cv::adaptiveThreshold(blurred, 
+                          edges, 
+                          255, 
+                          cv::ADAPTIVE_THRESH_GAUSSIAN_C, 
+                          cv::THRESH_BINARY, 
+                          EDGE_BLOCK_SIZE, 
+                          EDGE_C);
+    
+    // Removed: cv::bitwise_not(edges, edges); - This inversion is no longer needed.
+    
+    // --- Step 2: Overlay Black Lines onto the Original Image ---
+    
+    // Create a 1-channel mask where edge pixels (which are 0 in 'edges') are 255.
+    cv::Mat line_mask;
+    // line_mask is 255 where edges == 0 (the black line pixels)
+    cv::compare(edges, 0, line_mask, cv::CMP_EQ); 
 
-  // 2b. Use Adaptive Thresholding to find strong edges and make them black.
-  cv::Mat edges;
-  // cv::ADAPTIVE_THRESH_GAUSSIAN_C uses a weighted average of neighbor pixels
-  // Block size=9, C=2 (subtract this constant from the mean)
-  cv::adaptiveThreshold(blurred, edges, 255, cv::ADAPTIVE_THRESH_GAUSSIAN_C, 
-                        cv::THRESH_BINARY, 9, 2);
-  
-  // Invert the edges so the lines are black (0) and the background is white (255)
-  cv::bitwise_not(edges, edges);
-  
-  // Convert edges back to a 3-channel image for merging
-  cv::Mat edges_color;
-  cv::cvtColor(edges, edges_color, cv::COLOR_GRAY2BGR);
-  
-  // --- Step 3: Combine ---
-  // The final image is created by setting the pixels where edges are black (0) 
-  // in the smoothed image (color_quantized).
-  cv::bitwise_and(color_quantized, edges_color, processed_frame);
+    // Use the mask to set the line pixels (where line_mask is 255) in 'processed_frame' to pure black (0, 0, 0).
+    //processed_frame.setTo(cv::Scalar(0, 0, 0), line_mask);
+
+    return line_mask;
 }
 
 bool CAMERA::set_control(uint32_t id, int32_t value)
@@ -590,11 +599,14 @@ void CAMERA::create()
     }
     else
     {
-      FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
+      FRAME_DUMMY = cv::imread(PROPS.CAMERA_TEST_FILE_NAME, cv::IMREAD_COLOR); // Load test image as color
+      if (FRAME_DUMMY.empty())
+      {
+        FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
+      }
       print_stream << "Could not open camera. Please check your camera connection." << std::endl;
       CAM_AVAILABLE = false;
     }
-
   }
 
   INFORMATION = print_stream.str();
@@ -602,6 +614,9 @@ void CAMERA::create()
 
 void CAMERA::update_frame()
 {
+  // Measure the time to run the routine.
+  auto start = std::chrono::high_resolution_clock::now();
+
   // If snapshot requested.
   if (SAVE_NEXT_RECEIVED_FRAME)
   {
@@ -655,24 +670,26 @@ void CAMERA::update_frame()
   // The entire processing block is now conditional on the user controls.
   if (CAM_BEING_VIEWED && !PROCESSED_FRAME.empty())
   {
-    if (PROPS.ENH_MEDIAN_BLUR)
+    // Always Apply Routines
     {
-      // Check for low light conditions using a mean intensity threshold (50 out of 255)
+      // --- Stronger Denoising with Median Blur (5x5 kernel) ---
+      int ksize = 5; 
+      cv::medianBlur(PROCESSED_FRAME, PROCESSED_FRAME, ksize);
 
-      bool low_light_detected = false;
-      if (PROPS.ENH_LOW_LIGHT)
+      // Sharpen
+      cv::Mat kernel = (cv::Mat_<float>(3, 3) <<
+          0, -1, 0,
+          -1, 5, -1,
+          0, -1, 0);
+      cv::filter2D(PROCESSED_FRAME, PROCESSED_FRAME, -1, kernel);
+    }
+
+    //---
+
+    if (PROPS.ENH_LOW_LIGHT)
+    {
+      if (is_low_light(PROCESSED_FRAME, 50))
       {
-        low_light_detected = is_low_light(PROCESSED_FRAME, 50);
-      }
-
-      if (low_light_detected || PROPS.ENH_LOW_LIGHT == false)
-      {
-        // --- LOW LIGHT PATH (Low FPS is tolerated here) ---
-        
-        // --- Step 1A: Stronger Denoising with Median Blur (5x5 kernel) ---
-        int ksize = 5; 
-        cv::medianBlur(PROCESSED_FRAME, PROCESSED_FRAME, ksize);
-
         // --- Step 2A: Low-Light Contrast Enhancement (CLAHE) ---
         // Grayscale conversion is required to isolate the luminance channel for CLAHE.
         cv::Mat gray_image;
@@ -685,72 +702,25 @@ void CAMERA::update_frame()
         // Apply enhanced luminance back to the color frame (making it grayscale enhanced)
         cv::cvtColor(gray_image, PROCESSED_FRAME, cv::COLOR_GRAY2BGR);
       }
-      else
-      {
-        // --- NORMAL LIGHT PATH (Must maintain 30 FPS) ---
-        
-        // --- Step 1B: Light Denoising with Median Blur (3x3 kernel) ---
-        // Skip CLAHE to ensure performance is maintained.
-        int ksize = 3; 
-        cv::medianBlur(PROCESSED_FRAME, PROCESSED_FRAME, ksize);
-      }
     }
 
-    // Image Sharpening (Optional)
-    if (PROPS.ENH_SHARPEN)
+    //---
+
+    // Previous functions are fast.  
+    // Generate Downsized Frame for difficult proccessing
     {
-      cv::Mat kernel = (cv::Mat_<float>(3, 3) <<
-          0, -1, 0,
-          -1, 5, -1,
-          0, -1, 0);
-      cv::filter2D(PROCESSED_FRAME, PROCESSED_FRAME, -1, kernel);
+      cv::resize(PROCESSED_FRAME, PROCESSED_FRAME_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
     }
 
-    // Cartoonify Effect (Runs first to create the base look)
-    if (PROPS.ENH_CARTOONIFY)
+    //---
+
+    // Overlay lines
+    if (PROPS.ENH_OVERLAY_LINES)
     {
-      cartoonify_image(PROCESSED_FRAME);
-      // If the image is cartoonified, many other blocks (like Denoising/Sharpening) 
-      // will have reduced effect or may be skipped for speed.
+      MASK_FRAME = overlay_lines(PROCESSED_FRAME_DOWNSIZED);
     }
 
-    // Block 2: Road Line Detection (Hough Transform)
-    if (PROPS.ENH_LINE_DETECTION)
-    {
-      // Line detection works best after denoising but before sharpening.
-      
-      // --- Step 1: Prepare for Edge Detection ---
-      cv::Mat gray_for_canny;
-      cv::cvtColor(PROCESSED_FRAME, gray_for_canny, cv::COLOR_BGR2GRAY);
-
-      // --- Step 1.5: Apply Region of Interest (ROI) Mask (New) ---
-      if (PROPS.ENH_ROAD_MASK)
-      {
-        // Generate and apply the trapezoidal mask.
-        cv::Mat mask = get_road_mask(PROCESSED_FRAME);
-        // Only keep the edges that fall within the white (255) area of the mask.
-        cv::bitwise_and(gray_for_canny, mask, gray_for_canny);
-      }
-
-      // --- Step 2: Canny Edge Detection ---
-      // Generates a binary image showing only edges.
-      cv::Mat edges;
-      cv::Canny(gray_for_canny, edges, 50, 150, 3); // Thresholds (50, 150)
-
-      // --- Step 3: Probabilistic Hough Line Transform ---
-      std::vector<cv::Vec4i> lines;
-      // Arguments: Canny output, resolution rho, resolution theta, threshold (min votes) 
-      // minLineLength, maxLineGap
-      cv::HoughLinesP(edges, lines, 1, CV_PI / 180, 80, 50, 10);
-
-      // --- Step 4: Draw the detected lines onto the color frame ---
-      for (const auto& l : lines)
-      {
-        // Draw a green line segment onto the processed frame
-        cv::line(PROCESSED_FRAME, cv::Point(l[0], l[1]), cv::Point(l[2], l[3]), 
-                  cv::Scalar(0, 255, 0), 2, cv::LINE_AA); 
-      }
-    }
+    //---
 
     // Contour and Shape Detection (General Curves)
     if (PROPS.ENH_CURVE_FIT)
@@ -759,6 +729,8 @@ void CAMERA::update_frame()
       detect_and_draw_contours(PROCESSED_FRAME);
     }
     
+    //---
+
     // Car Detection (Haar Cascade)
     if (PROPS.ENH_CAR_DETECTION && CAR_CASCADE_LOADED)
     {
@@ -796,6 +768,19 @@ void CAMERA::update_frame()
                     cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
       }
     }
+  }
+
+  if (PROPS.ENH_OVERLAY_LINES)
+  {
+    cv::resize(MASK_FRAME, MASK_FRAME, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
+    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME);
+  }
+
+  // Calculate and store Processing Time
+  {
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::milli> duration_ms = end - start;
+    PROCESSING_TIME = duration_ms.count();
   }
 
   NEW_FRAME_AVAILABLE = true;

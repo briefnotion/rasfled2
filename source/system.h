@@ -103,10 +103,11 @@ class FILES
   string COMPASS_OFFSET_HISTORY_FILE = "";
 
   // Cameras
-  string CAMERA_BACKUP = "";
-  int    CAMERA_BACKUP_ID = 0;
   string CAMERA_DIR = "";
   string CAMERA_SETTINGS_DIR = "";
+  string CAMERA_BACKUP = "";
+  int    CAMERA_BACKUP_ID = 0;
+  string CAMERA_TEST_IMAGE_FILENAME = "";
 
   // Map
   string LOGS_MAPS_GENERICS_JSON = "";

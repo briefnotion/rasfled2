@@ -1,3 +1,8 @@
+2.331_251007
+  - Made a few Camera Enhancements always on.
+  - Removed a few Camera Enhancements.
+  - Added Lines Enhancement to Camera.
+
 2.330_251006A
   - Corrected a problem where errornous future time stamps in the 
       future would be held until it was 9 hours from whatever 
