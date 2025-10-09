@@ -107,14 +107,6 @@ void draw_track(ImDrawList *Draw_List, system_data &sdSysData,
 
       Draw_List->AddLine(track_position_0, track_position_1, 
                           sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
-
-      /*
-      cout << position << endl;
-      cout << Track.TRACK_POINTS_SIMPLE[position].LATITUDE << " \t" << Track.TRACK_POINTS_SIMPLE[position].LONGITUDE << endl;
-      cout << track_position_1.x << " \t" << track_position_1.y << endl;
-
-      cout << endl;
-      */
     }
   }
 
@@ -162,12 +154,13 @@ void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData,
   // Seperate simple and detailed tracks from each other
   //  There is no guarantee that they are connected.
 
-  bool draw_0 = false;
-  bool draw_1 = false;
-  bool prev_is_end = false;
-
+  //bool draw_0 = false;
   ImVec2 track_position_0;
+  bool   track_position_0_end = false;
+  
+  bool draw_1 = false;
   ImVec2 track_position_1;
+  bool   track_position_1_end = false;
 
   // LOD
   if (Draw_Level_Of_Detail < 1)
@@ -183,19 +176,24 @@ void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData,
                                                       DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[0].LATITUDE, 
                                                                   Track.TRACK_POINTS_DETAILED[0].LONGITUDE), 
                                                       Map_Bearing, draw_1);
+    track_position_1_end = Track.TRACK_POINTS_DETAILED[0].END_POINT;
 
     // Detailed step through
     for(size_t position = 1; position < Track.TRACK_POINTS_DETAILED.size(); position++)
     {
       track_position_0 = track_position_1;
-      draw_0 = draw_1;
+      track_position_0_end = track_position_1_end;
+      //draw_0 = draw_1;
 
       track_position_1 = point_position_lat_lon(Working_Area, Scale, Center_Lat_Lon, 
                                                       DOUBLE_VEC2(Track.TRACK_POINTS_DETAILED[position].LATITUDE, 
                                                                   Track.TRACK_POINTS_DETAILED[position].LONGITUDE), 
                                                       Map_Bearing, draw_1);
+      track_position_1_end = Track.TRACK_POINTS_DETAILED[position].END_POINT;
 
-      if ((draw_0 || draw_1) && !prev_is_end)
+      //if ((draw_0 || draw_1) && track_position_0_end == false)
+      if (track_position_0_end == false)  // Dont worry about off screen.  Track.TRACK_POINTS_DETAILED[position] will limit.
+                                          //  draw_0 = draw_1; wasnt working right anyway because the values were carried over.
       {
         ImColor point_color = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(Color_Scale.get_color(Track.TRACK_POINTS_DETAILED[position - 1].VALUE));
         point_color.Value.w = 0.50f;
@@ -206,9 +204,6 @@ void draw_track_2(ImDrawList *Draw_List, system_data &sdSysData,
         Draw_List->AddLine( track_position_0, track_position_1, 
                             sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY), 1.0f);
       }
-
-      // set prev_is_end for next round
-      prev_is_end = Track.TRACK_POINTS_DETAILED[position].END_POINT;
     }
   }
 }

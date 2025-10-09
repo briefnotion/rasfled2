@@ -1,3 +1,7 @@
+2.332_251008
+  - Corrected several display problems with the map track.
+  - Added Glare Mask as a camera enhancement.
+
 2.331_251007
   - Made a few Camera Enhancements always on.
   - Removed a few Camera Enhancements.

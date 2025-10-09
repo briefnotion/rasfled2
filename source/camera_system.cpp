@@ -156,6 +156,33 @@ cv::Mat CAMERA::overlay_lines(cv::Mat& processed_frame)
     return line_mask;
 }
 
+// It detects areas in the image that are close to pure white (glare/overexposure)
+// and returns a mask that can be used to set these areas to black.
+//
+// Arguments:
+// - processed_frame: Input image (cv::Mat, read-only)
+// Returns:
+// - cv::Mat: A 1-channel binary mask (CV_8UC1) where 255 represents a glare pixel.
+cv::Mat CAMERA::suppress_glare_mask(cv::Mat& processed_frame)
+{
+  // --- Glare Detection Parameter ---
+  // Pixels where all B, G, and R channels are above this threshold will be masked.
+  // 230 is a good starting point for bright white light (0-255 scale).
+  const int GLARE_THRESHOLD = 230;
+
+  cv::Mat glare_mask;
+  
+  // Use cv::inRange to find pixels where the B, G, and R values are all 
+  // within the range [GLARE_THRESHOLD, 255].
+  cv::inRange(processed_frame, 
+              cv::Scalar(GLARE_THRESHOLD, GLARE_THRESHOLD, GLARE_THRESHOLD), 
+              cv::Scalar(255, 255, 255), 
+              glare_mask);
+
+  // glare_mask is now a 1-channel mask where 255 indicates a glare pixel.
+  return glare_mask;
+}
+
 bool CAMERA::set_control(uint32_t id, int32_t value)
 {
   bool ret_success = false;
@@ -612,10 +639,11 @@ void CAMERA::create()
   INFORMATION = print_stream.str();
 }
 
+// Be careful with this function. It is ran in its own thread.
 void CAMERA::update_frame()
 {
   // Measure the time to run the routine.
-  auto start = std::chrono::high_resolution_clock::now();
+  TIME_SE_FRAME_RETRIEVAL.start_clock();
 
   // If snapshot requested.
   if (SAVE_NEXT_RECEIVED_FRAME)
@@ -643,6 +671,11 @@ void CAMERA::update_frame()
     // Use copyTo to ensure FRAME is modifiable and doesn't share data with FRAME_DUMMY
     FRAME_DUMMY.copyTo(FRAME); 
   }
+
+  TIME_SE_FRAME_RETRIEVAL.end_clock();
+
+  // Measure the time to process frame:
+  TIME_SE_FRAME_PROCESSING.start_clock();
 
   if (!FRAME.empty())
   {
@@ -717,7 +750,15 @@ void CAMERA::update_frame()
     // Overlay lines
     if (PROPS.ENH_OVERLAY_LINES)
     {
-      MASK_FRAME = overlay_lines(PROCESSED_FRAME_DOWNSIZED);
+      MASK_FRAME_OVERLAY_LINES = overlay_lines(PROCESSED_FRAME_DOWNSIZED);
+    }
+
+    //---
+
+    // Glare Mask
+    if (PROPS.ENH_GLARE_MASK)
+    {
+      MASK_FRAME_GLARE = suppress_glare_mask(PROCESSED_FRAME_DOWNSIZED);
     }
 
     //---
@@ -772,15 +813,23 @@ void CAMERA::update_frame()
 
   if (PROPS.ENH_OVERLAY_LINES)
   {
-    cv::resize(MASK_FRAME, MASK_FRAME, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
-    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME);
+    cv::resize(MASK_FRAME_OVERLAY_LINES, MASK_FRAME_OVERLAY_LINES, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
+    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_OVERLAY_LINES);
   }
 
-  // Calculate and store Processing Time
+  if (PROPS.ENH_GLARE_MASK)
   {
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::milli> duration_ms = end - start;
-    PROCESSING_TIME = duration_ms.count();
+    cv::resize(MASK_FRAME_GLARE, MASK_FRAME_GLARE, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
+    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_GLARE);
+  }
+
+  // Store Processing Time
+  TIME_SE_FRAME_PROCESSING.end_clock();
+
+  // store clock times
+  {
+    TIME_FRAME_RETRIEVAL = TIME_SE_FRAME_RETRIEVAL.duration_ms();
+    TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
   }
 
   NEW_FRAME_AVAILABLE = true;
@@ -788,6 +837,11 @@ void CAMERA::update_frame()
 
 void CAMERA::process_frame()
 {
+  // Grab start to loop times.
+  TIME_SE_MAX_FPS.end_clock();
+  TIME_MAX_FPS = TIME_SE_MAX_FPS.duration_fps();
+  TIME_SE_MAX_FPS.start_clock();
+
   // Only proceed if the frame is not empty.
   if (NEW_FRAME_AVAILABLE)
   {

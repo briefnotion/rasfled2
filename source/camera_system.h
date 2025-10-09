@@ -113,6 +113,8 @@ class CAMERA_PROPERTIES
 
   bool ENH_OVERLAY_LINES  = true;
 
+  bool ENH_GLARE_MASK     = true;
+
   //bool ENH_LINE_DETECTION = false;
   bool ENH_CURVE_FIT      = false;
 
@@ -130,7 +132,8 @@ class CAMERA
 
   cv::Mat PROCESSED_FRAME;
   cv::Mat PROCESSED_FRAME_DOWNSIZED;
-  cv::Mat MASK_FRAME;
+  cv::Mat MASK_FRAME_OVERLAY_LINES;
+  cv::Mat MASK_FRAME_GLARE;
 
   bool NEW_FRAME_AVAILABLE = false;
 
@@ -140,11 +143,16 @@ class CAMERA
   bool CAR_CASCADE_LOADED = false;
   cv::CascadeClassifier CAR_CASCADE;
 
+  MEASURE_TIME_START_END TIME_SE_MAX_FPS;
+  MEASURE_TIME_START_END TIME_SE_FRAME_RETRIEVAL;
+  MEASURE_TIME_START_END TIME_SE_FRAME_PROCESSING;
+
   // Camera CV Helper
   bool is_low_light(const cv::Mat& frame, int threshold);
   cv::Mat get_road_mask(const cv::Mat& frame);
   void detect_and_draw_contours(cv::Mat& processed_frame);
   cv::Mat overlay_lines(cv::Mat& processed_frame);
+  cv::Mat suppress_glare_mask(cv::Mat& processed_frame);
 
   // Change Settings
   bool set_control(uint32_t id, int32_t value); // returns true on success
@@ -178,7 +186,9 @@ class CAMERA
   std::string INFORMATION              = "Not Available";
   std::string INFORMATION_COMMAND_LIST = "Not Available";
 
-  double PROCESSING_TIME = 0.0;
+  double TIME_MAX_FPS;
+  double TIME_FRAME_RETRIEVAL;
+  double TIME_FRAME_PROCESSING;
 
   CAMERA_PROPERTIES PROPS;
   
@@ -190,6 +200,7 @@ class CAMERA
   // Public method to create the camera capture.
   void create();
 
+  // Be careful with this function. It is ran in its own thread.
   // Public method to update the frame and texture in a thread-safe manner.
   void update_frame();
 

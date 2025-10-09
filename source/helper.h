@@ -543,6 +543,25 @@ class MIN_MAX_TIME
 };
 
 // ---------------------------------------------------------------------------------------
+// MEASURE_TIME_START_END
+
+// Simple class to measer time between two points of code.
+// Needs no parameters.
+
+class MEASURE_TIME_START_END
+{
+  private:
+  std::chrono::_V2::system_clock::time_point start;
+  std::chrono::_V2::system_clock::time_point end;
+
+  public:
+  void start_clock();
+  void end_clock();
+  double duration_ms();
+  double duration_fps();
+};
+
+// ---------------------------------------------------------------------------------------
 // Impact Resistance
 
 struct IMPACT_RESISTANCE_VALUE

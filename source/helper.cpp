@@ -826,6 +826,31 @@ int MIN_MAX_TIME::direction()
 }
 
 // ---------------------------------------------------------------------------------------
+// MEASURE_TIME_START_END
+
+void MEASURE_TIME_START_END::start_clock()
+{
+  start = std::chrono::high_resolution_clock::now();
+} 
+
+void MEASURE_TIME_START_END::end_clock()
+{
+  end = std::chrono::high_resolution_clock::now();
+}
+
+double MEASURE_TIME_START_END::duration_ms()
+{
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  return duration_ms.count();
+}
+
+double MEASURE_TIME_START_END::duration_fps()
+{
+  std::chrono::duration<double, std::milli> duration_ms = end - start;
+  return (1000.0 / duration_ms.count());
+}
+
+// ---------------------------------------------------------------------------------------
 // Impact Resistance
 
 int IMPACT_RESISTANCE_FLOAT::collection_size()

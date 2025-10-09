@@ -85,6 +85,7 @@ class CAMERA_WIDGET
   //BUTTON_TOGGLE_COLOR        BC_ENH_MEDIAN_BLUR;
   BUTTON_TOGGLE_COLOR        BC_ENH_LOW_LIGHT;
   BUTTON_TOGGLE_COLOR        BC_ENH_OVERLAY_LINES;
+  BUTTON_TOGGLE_COLOR        BC_ENH_GLARE_MASK;
   //BUTTON_TOGGLE_COLOR        BC_ENH_SHARPEN;
   //BUTTON_TOGGLE_COLOR        BC_ENH_LINE_DETECTION;
   BUTTON_TOGGLE_COLOR        BC_ENH_ENH_CURVE_FIT;
@@ -103,9 +104,17 @@ class CAMERA_WIDGET
   float ANGLE_MULTIPLIER = 2.5f;
 
   // Line Thickness
-  float THICKNESS_1 = 10.0f;
-  float THICKNESS_2 = 7.0f;
-  float THICKNESS_3 = 5.0f;
+  float THICKNESS_1_A = 16.0f;
+  float THICKNESS_1_B = 10.0f;
+  float THICKNESS_2_A = 13.0f;
+  float THICKNESS_2_B = 7.0f;
+  float THICKNESS_3_A = 11.0f;
+  float THICKNESS_3_B = 5.0f;
+
+  const ImU32 COLOR_BLK = IM_COL32(0, 0, 0, 255);   // 5ft
+  const ImU32 COLOR_GRN = IM_COL32(0, 255, 0, 255);   // 5ft
+  const ImU32 COLOR_YLW = IM_COL32(255, 255, 0, 255); // 10ft 
+  const ImU32 COLOR_RED = IM_COL32(255, 0, 0, 255);   // 15ft
 
   // Level 0: Closest to the car (Bottom of Green)
   float Y0 = 1.000f;
@@ -127,9 +136,18 @@ class CAMERA_WIDGET
   float XL3 = 0.295f;
   float XR3 = 0.610f;
 
+  // Some working class variables
+  // Variables for image size and centering, declared here to be accessible in class scopes.
+  float ANGLE = 0.0f;
+  ImVec4 WORKING_AREA;
+  ImVec2 FINAL_SIZE = {0, 0};
+  ImVec2 PADDING;
+
   ImVec2 norm_to_screen(float &Nx, float &Ny, float &Slide, 
                         ImVec2 &Image_Start_Position, 
                         ImVec2 &Final_Size);
+
+  void display_path();
 
   void display_camera_settings_window(system_data &sdSysData);
   void display_camera_adjustments_window(system_data &sdSysData);

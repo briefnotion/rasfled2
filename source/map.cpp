@@ -652,7 +652,7 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
                   track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("value", value);
                   track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("resolution", resolution);
                   track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("altitude", altitude);
-                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("end_point", end_point);
+                  track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].get_if_is("end point", end_point);
 
                   if (track_json.ROOT.DATA[root].DATA[marker_list].DATA[points_entry].DATA[entry].label() == "location")
                   {
@@ -689,27 +689,6 @@ bool MAP::track_load_detailed(DETAILED_TRACK_ALTERNATIVE &Track,
 
     track_distill(tmp_load_track, Track, Track_Discard, KML_Track);
   }
-
-  /*
-  if (!Track.TRACK_POINTS_DETAILED.empty())
-  {
-  cout << "     Track track size: " << Track.TRACK_POINTS_DETAILED.size() << endl;
-  cout << "Track timestamp front: " << to_string(Track.TRACK_POINTS_DETAILED.front().TIMESTAMP) << endl;
-  cout << "Track timestamp back : " << to_string(Track.TRACK_POINTS_DETAILED.back().TIMESTAMP) << endl;
-  cout << "Track diff      front: " << to_string(current_system_time - Track.TRACK_POINTS_DETAILED.front().TIMESTAMP) << endl;
-  cout << "Track diff      back : " << to_string(current_system_time - Track.TRACK_POINTS_DETAILED.back().TIMESTAMP) << endl;
-  }
-
-  if (!Track_Discard.TRACK_POINTS_DETAILED.empty())
-  {
-    
-  cout << "     Track_Discard track size: " << Track_Discard.TRACK_POINTS_DETAILED.size() << endl;
-  cout << "Track_Discard timestamp front: " << to_string(Track_Discard.TRACK_POINTS_DETAILED.front().TIMESTAMP) << endl;
-  cout << "Track_Discard timestamp back : " << to_string(Track_Discard.TRACK_POINTS_DETAILED.back().TIMESTAMP) << endl;
-  cout << "Track_Discard diff      front: " << to_string(current_system_time - Track_Discard.TRACK_POINTS_DETAILED.front().TIMESTAMP) << endl;
-  cout << "Track_Discard diff      back : " << to_string(current_system_time - Track_Discard.TRACK_POINTS_DETAILED.back().TIMESTAMP) << endl;
-  }
-  */
 
   return ret_success;
 }
@@ -761,10 +740,20 @@ void MAP::generate_displayed_track(double Resolution)
         // Y = y starting pos (position of top most window, if no write)
         // Z = x size
         // W = y size
-        extar_working_area.x = CURRENT_WORKING_AREA.x - 50.0f;
-        extar_working_area.y = CURRENT_WORKING_AREA.y - 50.0f;
-        extar_working_area.z = CURRENT_WORKING_AREA.z + 100.0f;
-        extar_working_area.w = CURRENT_WORKING_AREA.w + 100.0f;
+        if (true) // normal 
+        {
+          extar_working_area.x = CURRENT_WORKING_AREA.x - 100.0f;
+          extar_working_area.y = CURRENT_WORKING_AREA.y - 100.0f;
+          extar_working_area.z = CURRENT_WORKING_AREA.z + 200.0f;
+          extar_working_area.w = CURRENT_WORKING_AREA.w + 200.0f;
+        }
+        else  // for debugging the line connections visually
+        {
+          extar_working_area.x = CURRENT_WORKING_AREA.x + 50.0f;
+          extar_working_area.y = CURRENT_WORKING_AREA.y + 50.0f;
+          extar_working_area.z = CURRENT_WORKING_AREA.z - 100.0f;
+          extar_working_area.w = CURRENT_WORKING_AREA.w - 100.0f;
+        }
 
         // First point
         screen_position_not_used = point_position_lat_lon(extar_working_area, CURRENT_LAT_LON_SCALE, CURRENT_CENTER_LAT_LON, 
@@ -777,15 +766,16 @@ void MAP::generate_displayed_track(double Resolution)
           DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED.front());
         }
 
-        bool end_point_flag = false;
+        bool line_break           = false;
+        bool line_break_in_route  = false;
 
         // Points in middle
-        for (size_t pos = 1; pos < TRACK_2.TRACK_POINTS_DETAILED.size() -1; pos++)
+        for (size_t pos = 1; pos < TRACK_2.TRACK_POINTS_DETAILED.size(); pos++)
         {
           // Check to see if there are any endpoints along the way.
           if (TRACK_2.TRACK_POINTS_DETAILED[pos].END_POINT)
           {
-            end_point_flag = true;
+            line_break_in_route = true;
           }
 
           // Check to see if its within map display resolution.
@@ -798,24 +788,37 @@ void MAP::generate_displayed_track(double Resolution)
 
             if (add_track_point)
             {
+              // Add track point to the list if it is on screen
+              line_break = false;
               DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED[pos]);
-              if (end_point_flag)
+
+              // if line_break_in_route set end_flag
+              if (line_break_in_route)
               {
-                end_point_flag = false;
-                DISPLAYED_TRACK.TRACK_POINTS_DETAILED.back().END_POINT = true;
+                if (DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size() > 1)
+                {
+                  DISPLAYED_TRACK.TRACK_POINTS_DETAILED[DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size() -1].END_POINT = true;
+                }
+
+                // clear line_break_in_route flag
+                line_break_in_route = false;
+              }
+            }
+            else // point found that shouldnt bedrawn
+            {
+              // set last point added as end
+              // skip setting point as end if already set
+              if (line_break == false)
+              {
+                line_break = true;
+                
+                if (DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size() > 0)
+                {
+                  DISPLAYED_TRACK.TRACK_POINTS_DETAILED.back().END_POINT = true;
+                }
               }
             }
           }
-        }
-
-        screen_position_not_used = point_position_lat_lon(extar_working_area, CURRENT_LAT_LON_SCALE, CURRENT_CENTER_LAT_LON, 
-                                                          DOUBLE_VEC2(TRACK_2.TRACK_POINTS_DETAILED.back().LATITUDE, 
-                                                                      TRACK_2.TRACK_POINTS_DETAILED.back().LONGITUDE ), 
-                                                          CURRENT_MAP_BEARING, add_track_point);
-
-        if (add_track_point)
-        {
-          DISPLAYED_TRACK.TRACK_POINTS_DETAILED.push_back(TRACK_2.TRACK_POINTS_DETAILED.back());
         }
       }
     }
