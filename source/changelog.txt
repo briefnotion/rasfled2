@@ -1,3 +1,20 @@
+2.333_251009
+  - Moved the camera_system's threading logic into the 
+      camera_system's class.
+  - Double buffered the camera live feed.
+  - Seperated read camera frame and frame processing into 
+      seperate threads.  Frame processing should only be 
+      working on the most recent fully captured frame 
+      while the camera is loading the next frame into the 
+      other buffer. I havent yet decided whether i should 
+      drop the WORKING_FRAME to take advantage of the 
+      double buffer, or drop the double buffer and only 
+      work with the WORKING_FRAME. Either way would me 
+      more optimal. Will likely stay with double buffer 
+      method to avoid new fast frame from steping on the 
+      working frame being processed. Did not encounter errors 
+      when it happened though.
+
 2.332_251008
   - Corrected several display problems with the map track.
   - Added Glare Mask as a camera enhancement.

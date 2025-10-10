@@ -29,6 +29,8 @@
 
 // Rasfled Includes
 #include "helper.h"
+#include "fled_time.h"
+#include "threading.h"
 
 using namespace std;
 
@@ -84,6 +86,8 @@ class CAMERA_PROPERTIES
   bool FLIP_HORIZONTAL = false; // (horizontal flip, around Y-axis)
   bool FLIP_VERTICAL = false;   // (vertical flip, around X-axis)
 
+  double FORCED_FRAME_LIMIT_MS  = 30;
+
   // Controls:
 
   CAMERA_SETTING CTRL_FOCUS_AUTO;
@@ -127,15 +131,12 @@ class CAMERA_PROPERTIES
 class CAMERA
 {
   private:
-  cv::Mat FRAME;
   cv::Mat FRAME_DUMMY;
+  //cv::Mat FRAME_DUMMY2; // for testing double buffer
 
-  cv::Mat PROCESSED_FRAME;
-  cv::Mat PROCESSED_FRAME_DOWNSIZED;
-  cv::Mat MASK_FRAME_OVERLAY_LINES;
-  cv::Mat MASK_FRAME_GLARE;
+  cv::Mat LIVE_FRAME;
 
-  bool NEW_FRAME_AVAILABLE = false;
+  bool NEW_FRAME_AVAILABLE = false; // Delete?
 
   double DOWN_SCALE_FACTOR = 2.0;
 
@@ -168,6 +169,48 @@ class CAMERA
   // Until camera properties are in a vector, manually set and get each control
   //  as necessary for first run.
 
+  // ---------------------------------------------------------------------------------------
+  //Multithreaded routines and vaiables. Access with caution.
+  
+  int     WORKING_BUFFER = 0;
+  cv::Mat FRAME_BUFFER_0;
+  cv::Mat FRAME_BUFFER_1;
+  
+  bool    WORKING_FRAME_HANDOFF_READY = false;  // Needs Lock
+  bool    WORKING_FRAME_FULLY_PROCESSED = true; // Needs Lock
+
+  cv::Mat WORKING_FRAME;            // Generated in update_frame
+  cv::Mat PROCESSED_FRAME;
+  cv::Mat PROCESSED_FRAME_DOWNSIZED;
+  cv::Mat MASK_FRAME_OVERLAY_LINES;
+  cv::Mat MASK_FRAME_GLARE;
+
+  void check_for_image_save();
+  // check to see if current images should be saved to disk.
+
+  void run_preprocessing();
+  // Apply orientation (flip logic)
+  // Apply Denoising
+  // Apply Sharpening
+  // Create Downsized image
+
+  void apply_ehancements();
+  // Apply all prop enable enhancements.
+  // PROCESSED_FRAME created upon completion.
+
+  void update_frame();
+  // Pull in latest frame from camera in a non thread-safe manner.
+
+  void process_enhancements_frame();
+  // Process all enhancements to working frame in a non thread-safe manner.
+  
+  // ---------------------------------------------------------------------------------------
+
+  void generate_imgui_texture_frame();
+  // Converts PROCESSED_FRAME into ImGui Texture to be rendered
+  //  into program display.
+  // Copies PROCESSED_FRAME to LIVE_FRAME for thread safe access.
+
   public:
 
   bool SAVE_NEXT_RECEIVED_FRAME = false;
@@ -190,6 +233,11 @@ class CAMERA
   double TIME_FRAME_RETRIEVAL;
   double TIME_FRAME_PROCESSING;
 
+  TIMED_IS_READY  FORCED_FRAME_LIMIT;
+  
+  THREADING_INFO  THREAD_CAMERA;
+  THREADING_INFO  THREAD_IMAGE_PROCESSING;
+
   CAMERA_PROPERTIES PROPS;
   
   bool set_camera_control(CAMERA_SETTING &Setting, int Value);
@@ -200,11 +248,7 @@ class CAMERA
   // Public method to create the camera capture.
   void create();
 
-  // Be careful with this function. It is ran in its own thread.
-  // Public method to update the frame and texture in a thread-safe manner.
-  void update_frame();
-
-  void process_frame();
+  void process(unsigned long Frame_Time);
 
   // Public method to get a thread-safe copy of the current frame.
   cv::Mat get_current_frame();

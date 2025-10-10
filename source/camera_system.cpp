@@ -422,6 +422,284 @@ void CAMERA::init(stringstream &Print_Stream)
   Print_Stream << "                Sharpness: " << get_camera_control_value(PROPS.CTRL_SHARPNESS) << endl;
 }
 
+// Be careful with this function. It is ran in its own thread.
+void CAMERA::check_for_image_save()
+{
+  // If snapshot requested.
+  if (SAVE_NEXT_RECEIVED_FRAME)
+  {
+    SAVE_NEXT_RECEIVED_FRAME = false;
+    if (!WORKING_FRAME.empty())
+    {
+      cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_raw.jpg", WORKING_FRAME);
+    }
+    if (!PROCESSED_FRAME.empty())
+    {
+      cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_prc.jpg", PROCESSED_FRAME);
+    }
+  }
+}
+
+// Be careful with this function. It is ran in its own thread.
+void CAMERA::run_preprocessing()
+{
+  if (!WORKING_FRAME.empty())
+  {
+    // 1. Initial Frame Preparation (Flip logic)
+    if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
+    {
+      cv::flip(WORKING_FRAME, PROCESSED_FRAME, -1);
+    }
+    else if (PROPS.FLIP_HORIZONTAL)
+    {
+      cv::flip(WORKING_FRAME, PROCESSED_FRAME, 1);
+    }
+    else if (PROPS.FLIP_VERTICAL)
+    {
+      cv::flip(WORKING_FRAME, PROCESSED_FRAME, 0);
+    }
+    else
+    {
+      // Use clone to prevent FRAME from being modified by subsequent operations on PROCESSED_FRAME
+      PROCESSED_FRAME = WORKING_FRAME.clone(); 
+    }
+  }
+
+  // CV Code Here: Conditional and Controllable Image Enhancement Pipeline
+  // The entire processing block is now conditional on the user controls.
+  if (!PROCESSED_FRAME.empty())
+  {
+    // Always Apply Routines
+    {
+      // --- Stronger Denoising with Median Blur (5x5 kernel) ---
+      int ksize = 5; 
+      cv::medianBlur(PROCESSED_FRAME, PROCESSED_FRAME, ksize);
+
+      // Sharpen
+      cv::Mat kernel = (cv::Mat_<float>(3, 3) <<
+          0, -1, 0,
+          -1, 5, -1,
+          0, -1, 0);
+      cv::filter2D(PROCESSED_FRAME, PROCESSED_FRAME, -1, kernel);
+    }
+
+    // Previous functions are fast.  
+    // Generate Downsized Frame for difficult proccessing
+    {
+      cv::resize(PROCESSED_FRAME, PROCESSED_FRAME_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
+    }
+
+  }
+}
+
+// Be careful with this function. It is ran in its own thread.
+void CAMERA::apply_ehancements()
+{
+  if (!WORKING_FRAME.empty())
+  {
+    if (PROPS.ENH_LOW_LIGHT)
+    {
+      if (is_low_light(PROCESSED_FRAME, 50))
+      {
+        // --- Step 2A: Low-Light Contrast Enhancement (CLAHE) ---
+        // Grayscale conversion is required to isolate the luminance channel for CLAHE.
+        cv::Mat gray_image;
+        cv::cvtColor(PROCESSED_FRAME, gray_image, cv::COLOR_BGR2GRAY);
+
+        // CLAHE settings: Clip Limit 2.0, Tile Size 8x8
+        cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
+        clahe->apply(gray_image, gray_image); 
+
+        // Apply enhanced luminance back to the color frame (making it grayscale enhanced)
+        cv::cvtColor(gray_image, PROCESSED_FRAME, cv::COLOR_GRAY2BGR);
+      }
+    }
+
+    // Overlay lines
+    if (PROPS.ENH_OVERLAY_LINES)
+    {
+      MASK_FRAME_OVERLAY_LINES = overlay_lines(PROCESSED_FRAME_DOWNSIZED);
+    }
+
+    //---
+
+    // Glare Mask
+    if (PROPS.ENH_GLARE_MASK)
+    {
+      MASK_FRAME_GLARE = suppress_glare_mask(PROCESSED_FRAME_DOWNSIZED);
+    }
+
+    //---
+
+    // Contour and Shape Detection (General Curves)
+    if (PROPS.ENH_CURVE_FIT)
+    {
+      // This block runs general contour detection to find outlines of objects (cars, signs, potholes).
+      detect_and_draw_contours(PROCESSED_FRAME);
+    }
+    
+    //---
+
+    // Car Detection (Haar Cascade)
+    if (PROPS.ENH_CAR_DETECTION && CAR_CASCADE_LOADED)
+    {
+      // Cascade classifiers are faster on smaller images and grayscale.
+      cv::Mat gray_for_detection;
+      cv::cvtColor(PROCESSED_FRAME, gray_for_detection, cv::COLOR_BGR2GRAY);
+      
+      // Reduce the size of the frame before detection to significantly boost speed.
+      cv::Mat small_frame;
+      float scale_factor = 0.5f; // Detect on half-size image (4x faster)
+      cv::resize(gray_for_detection, small_frame, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
+
+      // Perform the detection
+      std::vector<cv::Rect> cars;
+      CAR_CASCADE.detectMultiScale(small_frame, cars, 
+                                    1.1, // Scale factor
+                                    5,   // Minimum neighbors
+                                    0,   // Flags
+                                    cv::Size(30, 30)); // Minimum object size (in scaled image)
+
+      // Draw bounding boxes on the original size PROCESSED_FRAME
+      for (const auto& rect : cars)
+      {
+        // Rescale the coordinates back to the original frame size
+        cv::Rect original_rect(
+            (int)(rect.x / scale_factor),
+            (int)(rect.y / scale_factor),
+            (int)(rect.width / scale_factor),
+            (int)(rect.height / scale_factor)
+        );
+        
+        // Draw a red rectangle (BGR: 0, 0, 255)
+        cv::rectangle(PROCESSED_FRAME, original_rect, cv::Scalar(0, 0, 255), 2);
+        cv::putText(PROCESSED_FRAME, "CAR", cv::Point(original_rect.x, original_rect.y - 10), 
+                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
+      }
+    }
+  }
+
+  if (PROPS.ENH_OVERLAY_LINES)
+  {
+    cv::resize(MASK_FRAME_OVERLAY_LINES, MASK_FRAME_OVERLAY_LINES, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
+    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_OVERLAY_LINES);
+  }
+
+  if (PROPS.ENH_GLARE_MASK)
+  {
+    cv::resize(MASK_FRAME_GLARE, MASK_FRAME_GLARE, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
+    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_GLARE);
+  }
+}
+
+// Be careful with this function. It is ran in its own thread.
+void CAMERA::update_frame()
+{
+  // Save image to disk and get captured frame from camera.
+  {
+    // Measure the time to run the routine.
+    TIME_SE_FRAME_RETRIEVAL.start_clock();
+
+    check_for_image_save();
+
+    // Capture the camera frame.
+    if (CAM_AVAILABLE)
+    {
+      if (WORKING_BUFFER == 0)
+      {
+        CAMERA_CAPTURE >> FRAME_BUFFER_0;
+      }
+      else if (WORKING_BUFFER == 1)
+      {
+        CAMERA_CAPTURE >> FRAME_BUFFER_1;
+      }
+    }
+    else
+    {
+      if (WORKING_BUFFER == 0)
+      {
+        FRAME_DUMMY.copyTo(FRAME_BUFFER_0);
+      }
+      else if (WORKING_BUFFER == 1)
+      {
+        FRAME_DUMMY.copyTo(FRAME_BUFFER_1);
+        //FRAME_DUMMY2.copyTo(FRAME_BUFFER_1); // for testing double buffer
+      }
+    }
+
+    // Image is now captured into frame buffer.  
+    // Move active frame buffer to WORKING_FRAME
+    if (WORKING_BUFFER == 0)
+    {
+      if (CAM_BEING_VIEWED)
+      {
+        FRAME_BUFFER_0.copyTo(WORKING_FRAME);
+      }
+      WORKING_BUFFER = 1;
+    }
+    else if (WORKING_BUFFER == 1)
+    {
+      if (CAM_BEING_VIEWED)
+      {
+        FRAME_BUFFER_1.copyTo(WORKING_FRAME);
+      }
+      WORKING_BUFFER = 0;
+    }
+
+    WORKING_FRAME_HANDOFF_READY = true;
+
+    TIME_SE_FRAME_RETRIEVAL.end_clock();
+    TIME_FRAME_RETRIEVAL = TIME_SE_FRAME_RETRIEVAL.duration_ms();
+  }
+}
+
+void CAMERA::process_enhancements_frame()
+{  
+  // Process captured image.
+  if (CAM_BEING_VIEWED)
+  {
+    TIME_SE_FRAME_PROCESSING.start_clock();
+
+    run_preprocessing();
+    apply_ehancements();
+
+    TIME_SE_FRAME_PROCESSING.end_clock();
+    TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
+  }
+  
+  NEW_FRAME_AVAILABLE = true;
+
+}
+
+void CAMERA::generate_imgui_texture_frame()
+{
+  // Only proceed if the frame is not empty.
+  if (NEW_FRAME_AVAILABLE)
+  {
+    NEW_FRAME_AVAILABLE = false;
+
+    if (!PROCESSED_FRAME.empty())
+    {
+      if (CAM_BEING_VIEWED)
+      {
+        // Convert the frame to an OpenGL texture.
+        // We pass the member variable to reuse the same texture.
+        TEXTURE_ID = matToTexture(PROCESSED_FRAME, TEXTURE_ID);
+
+        // Create Thread safe mat frame to access
+        PROCESSED_FRAME.copyTo(LIVE_FRAME);
+      }
+      CAM_VIDEO_AVAILABLE = true;
+    }
+    else
+    {
+      CAM_VIDEO_AVAILABLE = false;
+    }
+  }
+
+  WORKING_FRAME_FULLY_PROCESSED = true;
+}
+
 bool CAMERA::set_camera_control(CAMERA_SETTING &Setting, int Value)
 {
   bool ret_success = false;
@@ -579,6 +857,10 @@ void CAMERA::create()
   }
   else
   {
+    // Create Thread (safe to recreate if already created)
+    THREAD_CAMERA.create(15);           // Longest wait im main process
+    THREAD_IMAGE_PROCESSING.create(15); // Longest wait im main process
+
     // Load Cascades
     // --- Object Detection Setup ---
     // NOTE: In a real environment, you must have the XML file available 
@@ -631,6 +913,8 @@ void CAMERA::create()
       {
         FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
       }
+      //FRAME_DUMMY2 = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT); // for testing double buffer
+
       print_stream << "Could not open camera. Please check your camera connection." << std::endl;
       CAM_AVAILABLE = false;
     }
@@ -639,227 +923,59 @@ void CAMERA::create()
   INFORMATION = print_stream.str();
 }
 
-// Be careful with this function. It is ran in its own thread.
-void CAMERA::update_frame()
+void CAMERA::process(unsigned long Frame_Time)
 {
-  // Measure the time to run the routine.
-  TIME_SE_FRAME_RETRIEVAL.start_clock();
+  // Check to see if camera frame read thread is complete.
+  THREAD_CAMERA.check_for_completition();
 
-  // If snapshot requested.
-  if (SAVE_NEXT_RECEIVED_FRAME)
+  // When the working frame has been fully process, render the 
+  //  texture to be drawn in opengl.
+  if (THREAD_IMAGE_PROCESSING.check_for_completition())
   {
-    SAVE_NEXT_RECEIVED_FRAME = false;
-    if (!FRAME.empty())
-    {
-      cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_raw.jpg", FRAME);
-    }
-    if (!PROCESSED_FRAME.empty())
-    {
-      cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_prc.jpg", PROCESSED_FRAME);
-    }
+    // Converts PROCESSED_FRAME into ImGui Texture to be rendered
+    //  into program display.
+    // Copies PROCESSED_FRAME to LIVE_FRAME for thread safe access.
+    generate_imgui_texture_frame();
   }
 
-  // Capture the camera frame.
-  if (CAM_AVAILABLE)
-  {
-    // NOTE: If using a real camera, remove the dummy logic and ensure CAM_AVAILABLE is true
-    // CAMERA_CAPTURE.open(0);
-    CAMERA_CAPTURE >> FRAME;
-  }
-  else
-  {
-    // Use copyTo to ensure FRAME is modifiable and doesn't share data with FRAME_DUMMY
-    FRAME_DUMMY.copyTo(FRAME); 
-  }
+  // ---------------------------------------------------------------------------------------
 
-  TIME_SE_FRAME_RETRIEVAL.end_clock();
-
-  // Measure the time to process frame:
-  TIME_SE_FRAME_PROCESSING.start_clock();
-
-  if (!FRAME.empty())
-  {
-    // 1. Initial Frame Preparation (Flip logic)
-    if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
+  // Check Camera for new frame and alternate the frame bufffer.
+  // Forced frame limit will prevent another frame from being read 
+  //  until limit time is reached.
+  {   
+    if (THREAD_CAMERA.check_to_run_routine_on_thread(Frame_Time)) 
     {
-      cv::flip(FRAME, PROCESSED_FRAME, -1);
-    }
-    else if (PROPS.FLIP_HORIZONTAL)
-    {
-      cv::flip(FRAME, PROCESSED_FRAME, 1);
-    }
-    else if (PROPS.FLIP_VERTICAL)
-    {
-      cv::flip(FRAME, PROCESSED_FRAME, 0);
-    }
-    else
-    {
-      // Use clone to prevent FRAME from being modified by subsequent operations on PROCESSED_FRAME
-      PROCESSED_FRAME = FRAME.clone(); 
-    }
-  }
-
-  // CV Code Here: Conditional and Controllable Image Enhancement Pipeline
-  // The entire processing block is now conditional on the user controls.
-  if (CAM_BEING_VIEWED && !PROCESSED_FRAME.empty())
-  {
-    // Always Apply Routines
-    {
-      // --- Stronger Denoising with Median Blur (5x5 kernel) ---
-      int ksize = 5; 
-      cv::medianBlur(PROCESSED_FRAME, PROCESSED_FRAME, ksize);
-
-      // Sharpen
-      cv::Mat kernel = (cv::Mat_<float>(3, 3) <<
-          0, -1, 0,
-          -1, 5, -1,
-          0, -1, 0);
-      cv::filter2D(PROCESSED_FRAME, PROCESSED_FRAME, -1, kernel);
-    }
-
-    //---
-
-    if (PROPS.ENH_LOW_LIGHT)
-    {
-      if (is_low_light(PROCESSED_FRAME, 50))
+      if (FORCED_FRAME_LIMIT.is_ready(Frame_Time))
       {
-        // --- Step 2A: Low-Light Contrast Enhancement (CLAHE) ---
-        // Grayscale conversion is required to isolate the luminance channel for CLAHE.
-        cv::Mat gray_image;
-        cv::cvtColor(PROCESSED_FRAME, gray_image, cv::COLOR_BGR2GRAY);
+        FORCED_FRAME_LIMIT.set(Frame_Time, PROPS.FORCED_FRAME_LIMIT_MS); 
 
-        // CLAHE settings: Clip Limit 2.0, Tile Size 8x8
-        cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
-        clahe->apply(gray_image, gray_image); 
+        // Grab start to loop times to compute fps.
+        TIME_SE_MAX_FPS.end_clock();
+        TIME_MAX_FPS = TIME_SE_MAX_FPS.duration_fps();
+        TIME_SE_MAX_FPS.start_clock();
 
-        // Apply enhanced luminance back to the color frame (making it grayscale enhanced)
-        cv::cvtColor(gray_image, PROCESSED_FRAME, cv::COLOR_GRAY2BGR);
-      }
-    }
-
-    //---
-
-    // Previous functions are fast.  
-    // Generate Downsized Frame for difficult proccessing
-    {
-      cv::resize(PROCESSED_FRAME, PROCESSED_FRAME_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
-    }
-
-    //---
-
-    // Overlay lines
-    if (PROPS.ENH_OVERLAY_LINES)
-    {
-      MASK_FRAME_OVERLAY_LINES = overlay_lines(PROCESSED_FRAME_DOWNSIZED);
-    }
-
-    //---
-
-    // Glare Mask
-    if (PROPS.ENH_GLARE_MASK)
-    {
-      MASK_FRAME_GLARE = suppress_glare_mask(PROCESSED_FRAME_DOWNSIZED);
-    }
-
-    //---
-
-    // Contour and Shape Detection (General Curves)
-    if (PROPS.ENH_CURVE_FIT)
-    {
-      // This block runs general contour detection to find outlines of objects (cars, signs, potholes).
-      detect_and_draw_contours(PROCESSED_FRAME);
-    }
-    
-    //---
-
-    // Car Detection (Haar Cascade)
-    if (PROPS.ENH_CAR_DETECTION && CAR_CASCADE_LOADED)
-    {
-      // Cascade classifiers are faster on smaller images and grayscale.
-      cv::Mat gray_for_detection;
-      cv::cvtColor(PROCESSED_FRAME, gray_for_detection, cv::COLOR_BGR2GRAY);
-      
-      // Reduce the size of the frame before detection to significantly boost speed.
-      cv::Mat small_frame;
-      float scale_factor = 0.5f; // Detect on half-size image (4x faster)
-      cv::resize(gray_for_detection, small_frame, cv::Size(), scale_factor, scale_factor, cv::INTER_LINEAR);
-
-      // Perform the detection
-      std::vector<cv::Rect> cars;
-      CAR_CASCADE.detectMultiScale(small_frame, cars, 
-                                    1.1, // Scale factor
-                                    5,   // Minimum neighbors
-                                    0,   // Flags
-                                    cv::Size(30, 30)); // Minimum object size (in scaled image)
-
-      // Draw bounding boxes on the original size PROCESSED_FRAME
-      for (const auto& rect : cars)
-      {
-        // Rescale the coordinates back to the original frame size
-        cv::Rect original_rect(
-            (int)(rect.x / scale_factor),
-            (int)(rect.y / scale_factor),
-            (int)(rect.width / scale_factor),
-            (int)(rect.height / scale_factor)
-        );
-        
-        // Draw a red rectangle (BGR: 0, 0, 255)
-        cv::rectangle(PROCESSED_FRAME, original_rect, cv::Scalar(0, 0, 255), 2);
-        cv::putText(PROCESSED_FRAME, "CAR", cv::Point(original_rect.x, original_rect.y - 10), 
-                    cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
+        // Start the camera update on a separate thread.
+        // This call is non-blocking, so the main loop can continue immediately.
+        THREAD_CAMERA.start_render_thread([&]() 
+                  {  update_frame();  });
       }
     }
   }
 
-  if (PROPS.ENH_OVERLAY_LINES)
+  // Only try to process frames when a haldoff is complete and 
+  //  the texture is created.
+  if (WORKING_FRAME_HANDOFF_READY && WORKING_FRAME_FULLY_PROCESSED)
   {
-    cv::resize(MASK_FRAME_OVERLAY_LINES, MASK_FRAME_OVERLAY_LINES, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
-    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_OVERLAY_LINES);
-  }
-
-  if (PROPS.ENH_GLARE_MASK)
-  {
-    cv::resize(MASK_FRAME_GLARE, MASK_FRAME_GLARE, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
-    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_GLARE);
-  }
-
-  // Store Processing Time
-  TIME_SE_FRAME_PROCESSING.end_clock();
-
-  // store clock times
-  {
-    TIME_FRAME_RETRIEVAL = TIME_SE_FRAME_RETRIEVAL.duration_ms();
-    TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
-  }
-
-  NEW_FRAME_AVAILABLE = true;
-}
-
-void CAMERA::process_frame()
-{
-  // Grab start to loop times.
-  TIME_SE_MAX_FPS.end_clock();
-  TIME_MAX_FPS = TIME_SE_MAX_FPS.duration_fps();
-  TIME_SE_MAX_FPS.start_clock();
-
-  // Only proceed if the frame is not empty.
-  if (NEW_FRAME_AVAILABLE)
-  {
-    NEW_FRAME_AVAILABLE = false;
-
-    if (!FRAME.empty())
+    if (THREAD_IMAGE_PROCESSING.check_to_run_routine_on_thread(Frame_Time)) 
     {
-      if (CAM_BEING_VIEWED)
-      {
-        // Convert the frame to an OpenGL texture.
-        // We pass the member variable to reuse the same texture.
-        TEXTURE_ID = matToTexture(PROCESSED_FRAME, TEXTURE_ID);
-      }
-      CAM_VIDEO_AVAILABLE = true;
-    }
-    else
-    {
-      CAM_VIDEO_AVAILABLE = false;
+      WORKING_FRAME_HANDOFF_READY = false;
+      WORKING_FRAME_FULLY_PROCESSED = false;
+
+      // Start the camera update on a separate thread.
+      // This call is non-blocking, so the main loop can continue immediately.
+      THREAD_IMAGE_PROCESSING.start_render_thread([&]() 
+                {  process_enhancements_frame();  });
     }
   }
 }
@@ -867,7 +983,7 @@ void CAMERA::process_frame()
 cv::Mat CAMERA::get_current_frame()
 {
   // Return a copy of the FRAME to the caller.
-  return PROCESSED_FRAME;
+  return LIVE_FRAME;
 }
 
 void CAMERA::close_camera()

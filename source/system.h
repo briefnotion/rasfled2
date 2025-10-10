@@ -158,7 +158,6 @@ class system_data
   //THREADING_INFO  THREAD_COMMAND;     // This handling called system commands.
   THREADING_INFO  THREAD_RENDER;      // The thread containing function to send the led color array 
                                       //  to the leds.
-  THREADING_INFO  THREAD_BACKUP_CAMERA;
 
   // Files
   FILES           FILE_NAMES;

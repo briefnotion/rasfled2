@@ -263,7 +263,6 @@ int loop_2(bool TTY_Only)
   // Control for threads.
   //THREAD_COMMAND.create();
   sdSystem.THREAD_RENDER.create(get_frame_interval(sdSystem.CONFIG.iFRAMES_PER_SECOND));
-  sdSystem.THREAD_BACKUP_CAMERA.create(30); // 30 fps camera
 
   // Load Color System
   //sdSystem.PANEL_CONTROL.COLOR_SELECT.init_and_set_intensity(sdSystem.PROGRAM_TIME.current_frame_time(), 1.0f);
@@ -434,6 +433,8 @@ int loop_2(bool TTY_Only)
   
   sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 800;
   sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 600;
+
+  sdSystem.CAMERA_BACKUP.PROPS.FORCED_FRAME_LIMIT_MS = 30;
   
   // Flip horizontal and vertical
   sdSystem.CAMERA_BACKUP.PROPS.FLIP_HORIZONTAL  = false;
@@ -806,14 +807,6 @@ int loop_2(bool TTY_Only)
     // Close all completed and active threads after sleep cycle is complete.
     sdSystem.THREAD_RENDER.check_for_completition();
 
-    // Temporary solution
-    {    
-      if (sdSystem.THREAD_BACKUP_CAMERA.check_for_completition())
-      {
-        sdSystem.CAMERA_BACKUP.process_frame();
-      }
-    }
-
     // ---------------------------------------------------------------------------------------
     // --- Prpare the Loop ---
 
@@ -835,6 +828,10 @@ int loop_2(bool TTY_Only)
     //    This vabiable will be checked at the end of the loop.  If nothing was updated,
     //    the loop will just walk on past any hardware updates that would otherwise be
     //    sent.
+
+    // ---------------------------------------------------------------------------------------
+
+    sdSystem.CAMERA_BACKUP.process(sdSystem.PROGRAM_TIME.current_frame_time());
 
     // ---------------------------------------------------------------------------------------
 
@@ -1038,19 +1035,6 @@ int loop_2(bool TTY_Only)
         }
       }
     } // Is Events and Render ready -----------------
-    
-    // ---------------------------------------------------------------------------------------
-
-    // Check Camera Frame Grab on thread
-    {   
-      if (sdSystem.THREAD_BACKUP_CAMERA.check_to_run_routine_on_thread(sdSystem.PROGRAM_TIME.current_frame_time())) 
-      {
-        // Start the camera update on a separate thread.
-        // This call is non-blocking, so the main loop can continue immediately.
-        sdSystem.THREAD_BACKUP_CAMERA.start_render_thread([&]() 
-                  {  sdSystem.CAMERA_BACKUP.update_frame();  });
-      }
-    }
 
     // ---------------------------------------------------------------------------------------
     // Now that we have done all the hard work, read hardware, computed, generated, displayed
@@ -1409,7 +1393,8 @@ int loop_2(bool TTY_Only)
     // Make sure non of these are commented out, or the system will never sleep.
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_switches.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.THREAD_RENDER.get_ready_time());
-    sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.THREAD_BACKUP_CAMERA.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_CAMERA.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_user.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(display.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(comms_auto_timer.get_ready_time());
@@ -1425,7 +1410,8 @@ int loop_2(bool TTY_Only)
 
   // Wait for threads to end before continuing to shutdown.
   sdSystem.THREAD_RENDER.wait_for_thread_to_finish();
-  sdSystem.THREAD_BACKUP_CAMERA.wait_for_thread_to_finish();
+  sdSystem.CAMERA_BACKUP.THREAD_CAMERA.wait_for_thread_to_finish();
+  sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.wait_for_thread_to_finish();
 
   sdSystem.CAMERA_BACKUP.close_camera();
 
