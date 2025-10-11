@@ -423,16 +423,42 @@ void CAMERA::init(stringstream &Print_Stream)
 }
 
 // Be careful with this function. It is ran in its own thread.
-void CAMERA::check_for_image_save()
+void CAMERA::check_for_save_image_buffer_frame()
 {
   // If snapshot requested.
-  if (SAVE_NEXT_RECEIVED_FRAME)
+  if (SAVE_IMAGE_BUFFER_FRAME)
   {
-    SAVE_NEXT_RECEIVED_FRAME = false;
-    if (!WORKING_FRAME.empty())
+    SAVE_IMAGE_BUFFER_FRAME = false;
+
+    // Its possible the most buffer frame that was process was overwritten,
+    //  so save the most recent buffer frame thats not locked out.
+
+    if (LATEST_READY_FRAME == 0)
     {
-      cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_raw.jpg", WORKING_FRAME);
+      if (!FRAME_BUFFER_0.empty())
+      {
+        cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_raw.jpg", FRAME_BUFFER_0);
+      }
     }
+    else
+    if (LATEST_READY_FRAME == 1)
+    {
+      if (!FRAME_BUFFER_1.empty())
+      {
+        cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_raw.jpg", FRAME_BUFFER_1);
+      }
+    }
+  }
+}
+
+// Be careful with this function. It is ran in its own thread.
+void CAMERA::check_for_save_image_buffer_processed()
+{
+  // If snapshot requested.
+  if (SAVE_IMAGE_PROCESSED_FRAME)
+  {
+    SAVE_IMAGE_PROCESSED_FRAME = false;
+
     if (!PROCESSED_FRAME.empty())
     {
       cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_prc.jpg", PROCESSED_FRAME);
@@ -441,27 +467,27 @@ void CAMERA::check_for_image_save()
 }
 
 // Be careful with this function. It is ran in its own thread.
-void CAMERA::run_preprocessing()
+void CAMERA::run_preprocessing(cv::Mat &Frame)
 {
-  if (!WORKING_FRAME.empty())
+  if (!Frame.empty())
   {
     // 1. Initial Frame Preparation (Flip logic)
     if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
     {
-      cv::flip(WORKING_FRAME, PROCESSED_FRAME, -1);
+      cv::flip(Frame, PROCESSED_FRAME, -1);
     }
     else if (PROPS.FLIP_HORIZONTAL)
     {
-      cv::flip(WORKING_FRAME, PROCESSED_FRAME, 1);
+      cv::flip(Frame, PROCESSED_FRAME, 1);
     }
     else if (PROPS.FLIP_VERTICAL)
     {
-      cv::flip(WORKING_FRAME, PROCESSED_FRAME, 0);
+      cv::flip(Frame, PROCESSED_FRAME, 0);
     }
     else
     {
       // Use clone to prevent FRAME from being modified by subsequent operations on PROCESSED_FRAME
-      PROCESSED_FRAME = WORKING_FRAME.clone(); 
+      PROCESSED_FRAME = Frame.clone(); 
     }
   }
 
@@ -495,7 +521,7 @@ void CAMERA::run_preprocessing()
 // Be careful with this function. It is ran in its own thread.
 void CAMERA::apply_ehancements()
 {
-  if (!WORKING_FRAME.empty())
+  if (!PROCESSED_FRAME.empty())
   {
     if (PROPS.ENH_LOW_LIGHT)
     {
@@ -595,61 +621,107 @@ void CAMERA::apply_ehancements()
 // Be careful with this function. It is ran in its own thread.
 void CAMERA::update_frame()
 {
-  // Save image to disk and get captured frame from camera.
+  // The THREAD_CAMERA should manage itself, similare to the main.cpp main loop.
+  //  Its sleep time should either be limited to the FORCED_FRAME_LIMIT_MS or the 
+  //  hardware io limits of the camera read.
+  // BUFFER_FRAME_HANDOFF_READY will signal to enhancement proccessing when 
+  //  a new frame is ready, then continue the loop.
+  // BEING_PROCESSED_FRAME is checked to ensure the new frame isnt placed in a 
+  //  frame that is being processed.
+  // Considering multiple new frames can be captured durng the processing phrase, 
+  //  LATEST_READY_FRAME should report the newest frame.
+  // FRAME_BUFFER_0, FRAME_BUFFER_1, BUFFER_FRAME_HANDOFF_READY, LATEST_READY_FRAME
+  //  and BEING_PROCESSED_FRAME should be MUTEXed (mutex) to prevent data races, 
+  //  but as is, the variables are playing nicely in their respective threads. 
+
+  CAMERA_READ_THREAD_TIME.create();
+
+  while (CAMERA_READ_THREAD_STOP == false)
   {
-    // Measure the time to run the routine.
-    TIME_SE_FRAME_RETRIEVAL.start_clock();
+    //  Get current time.  This will be our timeframe to work in.
+    CAMERA_READ_THREAD_TIME.setframetime();
 
-    check_for_image_save();
-
-    // Capture the camera frame.
-    if (CAM_AVAILABLE)
+    // Enforce hard frame limit time.
+    if (FORCED_FRAME_LIMIT.is_ready(CAMERA_READ_THREAD_TIME.current_frame_time()))
     {
-      if (WORKING_BUFFER == 0)
+      FORCED_FRAME_LIMIT.set(CAMERA_READ_THREAD_TIME.current_frame_time(), PROPS.FORCED_FRAME_LIMIT_MS); 
+
+      // Grab start to loop times to compute fps.
+      TIME_SE_MAX_FPS.end_clock();
+      TIME_MAX_FPS = TIME_SE_MAX_FPS.duration_fps();
+      TIME_SE_MAX_FPS.start_clock();
+      
+      // Save image to disk and get captured frame from camera.
+      check_for_save_image_buffer_frame();
+
+      // Determine which buffer to put frame in.
+      if (BEING_PROCESSED_FRAME == -1)
       {
-        CAMERA_CAPTURE >> FRAME_BUFFER_0;
+        if (FRAME_TO_BUFFER == 0)
+        {
+          FRAME_TO_BUFFER = 1;
+        }
+        else
+        if (FRAME_TO_BUFFER == 1)
+        {
+          FRAME_TO_BUFFER = 0;
+        }
       }
-      else if (WORKING_BUFFER == 1)
+      else
       {
-        CAMERA_CAPTURE >> FRAME_BUFFER_1;
+        if (BEING_PROCESSED_FRAME == 0)
+        {
+          FRAME_TO_BUFFER = 1;
+        }
+        else
+        if (BEING_PROCESSED_FRAME == 1)
+        {
+          FRAME_TO_BUFFER = 0;
+        }
       }
-    }
-    else
-    {
-      if (WORKING_BUFFER == 0)
+
+      // Measure the time to run the routine.
+      TIME_SE_FRAME_RETRIEVAL.start_clock();
+
+      // Capture the camera frame.
+      if (CAM_AVAILABLE)
       {
-        FRAME_DUMMY.copyTo(FRAME_BUFFER_0);
+        if (FRAME_TO_BUFFER == 0)
+        {
+          CAMERA_CAPTURE >> FRAME_BUFFER_0;
+          LATEST_READY_FRAME = 0;
+        }
+        else if (FRAME_TO_BUFFER == 1)
+        {
+          CAMERA_CAPTURE >> FRAME_BUFFER_1;
+          LATEST_READY_FRAME = 1;
+        }
       }
-      else if (WORKING_BUFFER == 1)
+      else
       {
-        FRAME_DUMMY.copyTo(FRAME_BUFFER_1);
-        //FRAME_DUMMY2.copyTo(FRAME_BUFFER_1); // for testing double buffer
+        if (FRAME_TO_BUFFER == 0)
+        {
+          FRAME_DUMMY.copyTo(FRAME_BUFFER_0);
+          LATEST_READY_FRAME = 0;
+        }
+        else if (FRAME_TO_BUFFER == 1)
+        {
+          FRAME_DUMMY2.copyTo(FRAME_BUFFER_1);
+          LATEST_READY_FRAME = 1;
+        }
       }
+
+      // Save the amout of time it took to read the frame.
+      TIME_SE_FRAME_RETRIEVAL.end_clock();
+      TIME_FRAME_RETRIEVAL = TIME_SE_FRAME_RETRIEVAL.duration_ms();
+
+      // Signal the enhancement processor that a new frame is available
+      BUFFER_FRAME_HANDOFF_READY = true;
     }
 
-    // Image is now captured into frame buffer.  
-    // Move active frame buffer to WORKING_FRAME
-    if (WORKING_BUFFER == 0)
-    {
-      if (CAM_BEING_VIEWED)
-      {
-        FRAME_BUFFER_0.copyTo(WORKING_FRAME);
-      }
-      WORKING_BUFFER = 1;
-    }
-    else if (WORKING_BUFFER == 1)
-    {
-      if (CAM_BEING_VIEWED)
-      {
-        FRAME_BUFFER_1.copyTo(WORKING_FRAME);
-      }
-      WORKING_BUFFER = 0;
-    }
-
-    WORKING_FRAME_HANDOFF_READY = true;
-
-    TIME_SE_FRAME_RETRIEVAL.end_clock();
-    TIME_FRAME_RETRIEVAL = TIME_SE_FRAME_RETRIEVAL.duration_ms();
+    // Thread will need to sleep, governed by the FORCED_FRAME_LIMIT.
+    CAMERA_READ_THREAD_TIME.request_ready_time(FORCED_FRAME_LIMIT.get_ready_time());
+    CAMERA_READ_THREAD_TIME.sleep_till_next_frame();
   }
 }
 
@@ -660,8 +732,25 @@ void CAMERA::process_enhancements_frame()
   {
     TIME_SE_FRAME_PROCESSING.start_clock();
 
-    run_preprocessing();
-    apply_ehancements();
+    check_for_save_image_buffer_processed();
+
+    BEING_PROCESSED_FRAME = LATEST_READY_FRAME;
+
+    if (BEING_PROCESSED_FRAME == 0)
+    {
+      run_preprocessing(FRAME_BUFFER_0);
+      // No longer dependant on Buffer frame.  Release.
+      BEING_PROCESSED_FRAME = -1;
+      apply_ehancements();
+    }
+    else
+    if (BEING_PROCESSED_FRAME == 1)
+    {
+      run_preprocessing(FRAME_BUFFER_1);
+      // No longer dependant on Buffer frame.  Release.
+      BEING_PROCESSED_FRAME = -1;
+      apply_ehancements();
+    }
 
     TIME_SE_FRAME_PROCESSING.end_clock();
     TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
@@ -858,7 +947,7 @@ void CAMERA::create()
   else
   {
     // Create Thread (safe to recreate if already created)
-    THREAD_CAMERA.create(15);           // Longest wait im main process
+    THREAD_CAMERA.create(60);           // Longest wait im main process
     THREAD_IMAGE_PROCESSING.create(15); // Longest wait im main process
 
     // Load Cascades
@@ -908,16 +997,29 @@ void CAMERA::create()
     }
     else
     {
+      // If camera not found DUMMY images to FRAME_DUMMY and FRAME_DUMMY2
+      // If multi frame test, gen image to FRAME_DUMMY2.
       FRAME_DUMMY = cv::imread(PROPS.CAMERA_TEST_FILE_NAME, cv::IMREAD_COLOR); // Load test image as color
       if (FRAME_DUMMY.empty())
       {
         FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
       }
-      //FRAME_DUMMY2 = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT); // for testing double buffer
+
+      if (FRAME_DUMMY_MULTI_FRAME_TEST)
+      {
+        FRAME_DUMMY2 = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
+      }
+      else
+      {
+        FRAME_DUMMY.copyTo(FRAME_DUMMY2);
+      }
 
       print_stream << "Could not open camera. Please check your camera connection." << std::endl;
       CAM_AVAILABLE = false;
     }
+
+    // Signal thread that it should be safe to start.
+    CAMERA_READ_THREAD_STOP = false;
   }
 
   INFORMATION = print_stream.str();
@@ -925,7 +1027,7 @@ void CAMERA::create()
 
 void CAMERA::process(unsigned long Frame_Time)
 {
-  // Check to see if camera frame read thread is complete.
+  // Check to see if THREAD_CAMERA has stopped for any reason. 
   THREAD_CAMERA.check_for_completition();
 
   // When the working frame has been fully process, render the 
@@ -940,21 +1042,13 @@ void CAMERA::process(unsigned long Frame_Time)
 
   // ---------------------------------------------------------------------------------------
 
-  // Check Camera for new frame and alternate the frame bufffer.
-  // Forced frame limit will prevent another frame from being read 
-  //  until limit time is reached.
-  {   
-    if (THREAD_CAMERA.check_to_run_routine_on_thread(Frame_Time)) 
+  // Starts the THREAD_CAMERA unless CAMERA_READ_THREAD_STOP is true. 
+  //  THREAD_CAMERA will continue running until the camera is closed.
+  {
+    if (CAMERA_READ_THREAD_STOP == false)
     {
-      if (FORCED_FRAME_LIMIT.is_ready(Frame_Time))
+      if (THREAD_CAMERA.check_to_run_routine_on_thread(Frame_Time)) 
       {
-        FORCED_FRAME_LIMIT.set(Frame_Time, PROPS.FORCED_FRAME_LIMIT_MS); 
-
-        // Grab start to loop times to compute fps.
-        TIME_SE_MAX_FPS.end_clock();
-        TIME_MAX_FPS = TIME_SE_MAX_FPS.duration_fps();
-        TIME_SE_MAX_FPS.start_clock();
-
         // Start the camera update on a separate thread.
         // This call is non-blocking, so the main loop can continue immediately.
         THREAD_CAMERA.start_render_thread([&]() 
@@ -965,11 +1059,11 @@ void CAMERA::process(unsigned long Frame_Time)
 
   // Only try to process frames when a haldoff is complete and 
   //  the texture is created.
-  if (WORKING_FRAME_HANDOFF_READY && WORKING_FRAME_FULLY_PROCESSED)
+  if (BUFFER_FRAME_HANDOFF_READY && WORKING_FRAME_FULLY_PROCESSED)
   {
     if (THREAD_IMAGE_PROCESSING.check_to_run_routine_on_thread(Frame_Time)) 
     {
-      WORKING_FRAME_HANDOFF_READY = false;
+      BUFFER_FRAME_HANDOFF_READY = false;
       WORKING_FRAME_FULLY_PROCESSED = false;
 
       // Start the camera update on a separate thread.
@@ -986,8 +1080,15 @@ cv::Mat CAMERA::get_current_frame()
   return LIVE_FRAME;
 }
 
+void CAMERA::take_snapshot()
+{
+  SAVE_IMAGE_BUFFER_FRAME = true;
+  SAVE_IMAGE_PROCESSED_FRAME = true;
+}
+
 void CAMERA::close_camera()
 {
+  CAMERA_READ_THREAD_STOP = true;
   CAMERA_CAPTURE.release();
   CAM_AVAILABLE = false;
   CAM_VIDEO_AVAILABLE = false;

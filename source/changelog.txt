@@ -1,3 +1,10 @@
+2.334_251010
+  - Camera system is now running with its double buffer.
+  - Created an always running thread for the camera frame 
+      read. Much faster, lower system overhead.  But I 
+      still havent made it fully thread safe. 
+  - Small change made to compass.
+
 2.333_251009
   - Moved the camera_system's threading logic into the 
       camera_system's class.

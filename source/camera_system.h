@@ -86,7 +86,7 @@ class CAMERA_PROPERTIES
   bool FLIP_HORIZONTAL = false; // (horizontal flip, around Y-axis)
   bool FLIP_VERTICAL = false;   // (vertical flip, around X-axis)
 
-  double FORCED_FRAME_LIMIT_MS  = 30;
+  int FORCED_FRAME_LIMIT_MS  = 30;
 
   // Controls:
 
@@ -132,7 +132,8 @@ class CAMERA
 {
   private:
   cv::Mat FRAME_DUMMY;
-  //cv::Mat FRAME_DUMMY2; // for testing double buffer
+  cv::Mat FRAME_DUMMY2; // for testing double buffer
+  bool    FRAME_DUMMY_MULTI_FRAME_TEST = false;
 
   cv::Mat LIVE_FRAME;
 
@@ -147,6 +148,9 @@ class CAMERA
   MEASURE_TIME_START_END TIME_SE_MAX_FPS;
   MEASURE_TIME_START_END TIME_SE_FRAME_RETRIEVAL;
   MEASURE_TIME_START_END TIME_SE_FRAME_PROCESSING;
+
+  bool SAVE_IMAGE_BUFFER_FRAME = false;
+  bool SAVE_IMAGE_PROCESSED_FRAME = false;
 
   // Camera CV Helper
   bool is_low_light(const cv::Mat& frame, int threshold);
@@ -172,23 +176,38 @@ class CAMERA
   // ---------------------------------------------------------------------------------------
   //Multithreaded routines and vaiables. Access with caution.
   
-  int     WORKING_BUFFER = 0;
+  // Thread Update
+  
+  FLED_TIME         CAMERA_READ_THREAD_TIME;              // Thread gets its own Time 
+                                                          // Variable.
+  bool              CAMERA_READ_THREAD_STOP     = true;  // Keep reading camera in thread 
+                                                          // until told to stop
+  cv::VideoCapture  CAMERA_CAPTURE;
+  int               FRAME_TO_BUFFER = 0;
+
+  // Thread Update and process_enhancements_frame
   cv::Mat FRAME_BUFFER_0;
   cv::Mat FRAME_BUFFER_1;
+  bool    BUFFER_FRAME_HANDOFF_READY = false;  // Needs Lock
+  int     LATEST_READY_FRAME         = -1;
+  int     BEING_PROCESSED_FRAME      = -1;
   
-  bool    WORKING_FRAME_HANDOFF_READY = false;  // Needs Lock
-  bool    WORKING_FRAME_FULLY_PROCESSED = true; // Needs Lock
-
-  cv::Mat WORKING_FRAME;            // Generated in update_frame
-  cv::Mat PROCESSED_FRAME;
+  // Thread process_enhancements_frame
   cv::Mat PROCESSED_FRAME_DOWNSIZED;
   cv::Mat MASK_FRAME_OVERLAY_LINES;
   cv::Mat MASK_FRAME_GLARE;
 
-  void check_for_image_save();
-  // check to see if current images should be saved to disk.
+  // Thread process_enhancements_frame and generate_imgui_texture_frame
+  cv::Mat PROCESSED_FRAME;
+  bool    WORKING_FRAME_FULLY_PROCESSED = true; // Needs Lock
 
-  void run_preprocessing();
+  void check_for_save_image_buffer_frame();
+  // check to see if current buffer should be saved to disk.
+
+  void check_for_save_image_buffer_processed();
+  // check to see if current buffer should be saved to disk.
+
+  void run_preprocessing(cv::Mat &Frame);
   // Apply orientation (flip logic)
   // Apply Denoising
   // Apply Sharpening
@@ -213,14 +232,11 @@ class CAMERA
 
   public:
 
-  bool SAVE_NEXT_RECEIVED_FRAME = false;
-
   bool CAM_BEING_VIEWED = false;
   // Temporary fix to turn off high level processing if 
   //  camera display is not shown.  Manually set until 
   //  later.
 
-  cv::VideoCapture CAMERA_CAPTURE;
   GLuint TEXTURE_ID = 0;
   
   bool CAM_AVAILABLE = false;
@@ -252,6 +268,8 @@ class CAMERA
 
   // Public method to get a thread-safe copy of the current frame.
   cv::Mat get_current_frame();
+
+  void take_snapshot();
 
   void close_camera();
 };

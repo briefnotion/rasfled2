@@ -1063,7 +1063,23 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   {
     // save error to error mean variable
     float error_current = signed_angular_error(bearing, GPS_System.CURRENT_POSITION.TRUE_HEADING.VALUE);
-    GPS_ERROR_MEAN.store_value(error_current);
+    
+    // Reset the GPS_ERROR_MEAN every 30 minutes
+    //  Rotation over 3 would be better, but this will work for now.
+    if (GPS_ERROR_MEAN_RESET_TIMER.is_ready(tmeFrame_Time))
+    {
+      GPS_ERROR_MEAN_RESET_TIMER.set(tmeFrame_Time, 30 * 60 * 1000);
+      if (GPS_ERROR_MEAN.samples() > 0)
+      {
+        float tmp_prv_value = GPS_ERROR_MEAN.mean();
+        GPS_ERROR_MEAN.clear(tmeFrame_Time);
+        GPS_ERROR_MEAN.store_value(tmp_prv_value);
+      }
+    }
+    else
+    {
+      GPS_ERROR_MEAN.store_value(error_current);
+    }
     
     // if gps assist calibration enabled, set bearing offset,
     if (PROPS.GPS_ASSIST_HEADING)

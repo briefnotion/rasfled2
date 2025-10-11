@@ -466,7 +466,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
   // Take a photo
   if (BC_SNAPSHOT.button_color(sdSysData, "SNAP\nSHOT", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
   {
-    sdSysData.CAMERA_BACKUP.SAVE_NEXT_RECEIVED_FRAME = true;
+    sdSysData.CAMERA_BACKUP.take_snapshot();
   }
 
   //ImGui::InvisibleButton("camera_no_show", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
@@ -478,12 +478,11 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
   }
   //else
   {
-    ImGui::Text("FPS:");
-    ImGui::Text("  %2.1f", sdSysData.CAMERA_BACKUP.TIME_MAX_FPS);
+    ImGui::Text("%2.1f fps", sdSysData.CAMERA_BACKUP.TIME_MAX_FPS);
     ImGui::Text("Grab:");
-    ImGui::Text("  %2.1f", sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL);
+    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL);
     ImGui::Text("Prc Tme:");
-    ImGui::Text("  %2.1f", sdSysData.CAMERA_BACKUP.TIME_FRAME_PROCESSING);
+    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_FRAME_PROCESSING);
   }
 
   // Open Settings Screen

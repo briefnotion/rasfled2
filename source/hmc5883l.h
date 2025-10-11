@@ -573,6 +573,8 @@ class HMC5883L
 
   bool CONNECTED = false;                     // Set to true if connected.
 
+  // Tracks the ongoing error mean. i.e magnetic north deviation
+  TIMED_IS_READY     GPS_ERROR_MEAN_RESET_TIMER;
   MIN_MAX_TIME_SLICE GPS_ERROR_MEAN;
 
   public:

@@ -1393,7 +1393,7 @@ int loop_2(bool TTY_Only)
     // Make sure non of these are commented out, or the system will never sleep.
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_switches.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.THREAD_RENDER.get_ready_time());
-    sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_CAMERA.get_ready_time());
+    //sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_CAMERA.get_ready_time());  manages its own sleep time.
     sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_user.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(display.get_ready_time());
@@ -1407,23 +1407,34 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   // If we are here, then we are closing the program.
+  cout << endl;
+
+  cout << "Closing CAMERA_BACKUP" << endl;
+  sdSystem.CAMERA_BACKUP.close_camera();
+
+  cout << endl;
 
   // Wait for threads to end before continuing to shutdown.
+  cout << "THREAD_RENDER" << endl;
   sdSystem.THREAD_RENDER.wait_for_thread_to_finish();
-  sdSystem.CAMERA_BACKUP.THREAD_CAMERA.wait_for_thread_to_finish();
-  sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.wait_for_thread_to_finish();
 
-  sdSystem.CAMERA_BACKUP.close_camera();
+  cout << "THREAD_CAMERA" << endl;
+  sdSystem.CAMERA_BACKUP.THREAD_CAMERA.wait_for_thread_to_finish();
+  
+  cout << "THREAD_IMAGE_PROCESSING" << endl;
+  sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.wait_for_thread_to_finish();
 
   // Shutdown RPI.
   if (sdSystem.WS2811_ENABLED)
   {
+    cout << "WS2811_ENABLED shutdown" << endl;
     shutdown();
   }
 
   // Shutdown Graphical Window
   if (TTY_Only == false)
   {
+    cout << "cons_2 shutdown" << endl;
     cons_2.shutdown(sdSystem);
   }
 
