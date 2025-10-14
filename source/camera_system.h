@@ -19,6 +19,7 @@
 #include <linux/videodev2.h>
 #include <string>
 #include <iostream>
+#include <vector>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc.hpp>
@@ -31,6 +32,7 @@
 #include "helper.h"
 #include "fled_time.h"
 #include "threading.h"
+#include "screen4_helper.h"
 
 using namespace std;
 
@@ -176,6 +178,9 @@ class CAMERA
   // ---------------------------------------------------------------------------------------
   //Multithreaded routines and vaiables. Access with caution.
   
+  // All Threads
+  vector<string>    PRINTW_QUEUE;
+
   // Thread Update
   
   FLED_TIME         CAMERA_READ_THREAD_TIME;              // Thread gets its own Time 
@@ -184,6 +189,9 @@ class CAMERA
                                                           // until told to stop
   cv::VideoCapture  CAMERA_CAPTURE;
   int               FRAME_TO_BUFFER = 0;
+
+  bool CAM_AVAILABLE = false;
+  bool CAM_VIDEO_AVAILABLE = false;
 
   // Thread Update and process_enhancements_frame
   cv::Mat FRAME_BUFFER_0;
@@ -217,6 +225,10 @@ class CAMERA
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
+  // Public method to create the camera capture.
+  void open_camera();
+  // Step through the process of starting the camera.
+
   void update_frame();
   // Pull in latest frame from camera in a non thread-safe manner.
 
@@ -239,10 +251,6 @@ class CAMERA
 
   GLuint TEXTURE_ID = 0;
   
-  bool CAM_AVAILABLE = false;
-  bool CAM_VIDEO_AVAILABLE = false;
-
-  std::string INFORMATION              = "Not Available";
   std::string INFORMATION_COMMAND_LIST = "Not Available";
 
   double TIME_MAX_FPS;
@@ -259,19 +267,26 @@ class CAMERA
   bool set_camera_control(CAMERA_SETTING &Setting, int Value);
   int get_camera_control_value(CAMERA_SETTING &Setting);
   
-  void list_controls();
+  void list_controls(CONSOLE_COMMUNICATION &cons);
 
-  // Public method to create the camera capture.
-  void create();
+  // Manually print output stream
+  void print_stream(CONSOLE_COMMUNICATION &cons);
 
-  void process(unsigned long Frame_Time);
+  void process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time);
 
   // Public method to get a thread-safe copy of the current frame.
   cv::Mat get_current_frame();
 
   void take_snapshot();
 
-  void close_camera();
+  // Public method to start and stop the camera capture by 
+  //  truning off and on the thread.
+  void camera_start();
+  void camera_stop();
+
+  // Report if camera is opened.
+  bool camera_avalable();
+  bool video_avalable();
 };
 
 

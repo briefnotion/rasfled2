@@ -1280,8 +1280,8 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.HDOP, 
                                                         sdSysData.GPS_SYSTEM.CURRENT_POSITION.VDOP);
     }
-    //ImGui::Text("DSP TRK SZ: %.ld", sdSysData.MAP_SYSTEM.DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size());
-    ImGui::Text("Zoom Level: %d", sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
+    ImGui::Text("DSP TRK SZ: %.ld", sdSysData.MAP_SYSTEM.DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size());
+    //ImGui::Text("Zoom Level: %d", sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
 
     // Compass Information
     if (ACTIVE_COMPASS)

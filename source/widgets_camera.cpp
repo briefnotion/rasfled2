@@ -108,14 +108,14 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
     // Connect to camera
     if (BC_CONNECT.button_color(sdSysData, "CONNECT##Connect to camera", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
-      sdSysData.CAMERA_BACKUP.create();
+      sdSysData.CAMERA_BACKUP.camera_start();
     }
 
     ImGui:: SameLine();
     // Disconnect from camera
     if (BC_DISCONNECT.button_color(sdSysData, "CLOSE##Disconnect from camera", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
-      sdSysData.CAMERA_BACKUP.close_camera();
+      sdSysData.CAMERA_BACKUP.camera_stop();
     }
   }
   ImGui::EndChild();
@@ -213,19 +213,6 @@ void CAMERA_WIDGET::display_camera_adjustments_window(system_data &sdSysData)
   // Divide sub window into 3
   ImGui::BeginChild("Col1", ImVec2((working_area_col.z) / column_count, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    // Connect to camera
-    if (BC_CONNECT.button_color(sdSysData, "CONNECT##Connect to camera", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      sdSysData.CAMERA_BACKUP.create();
-    }
-
-    ImGui:: SameLine();
-    // Disconnect from camera
-    if (BC_DISCONNECT.button_color(sdSysData, "CLOSE##Disconnect from camera", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      sdSysData.CAMERA_BACKUP.close_camera();
-    }
-
     // Temporary for path calibration
     {
       ImGui::InputFloat("AMLT", &ANGLE_MULTIPLIER);
@@ -383,7 +370,7 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
 void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
 {
   // Check if the camera and video are available.
-  if (sdSysData.CAMERA_BACKUP.CAM_VIDEO_AVAILABLE)
+  if (sdSysData.CAMERA_BACKUP.video_avalable())
   {
     ANGLE = Angle;
 
@@ -471,7 +458,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
 
   //ImGui::InvisibleButton("camera_no_show", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
   // Notification
-  if (sdSysData.CAMERA_BACKUP.CAM_AVAILABLE == false)
+  if (sdSysData.CAMERA_BACKUP.camera_avalable() == false)
   {
     ImGui::Text("Camera");
     ImGui::Text("  Offline");

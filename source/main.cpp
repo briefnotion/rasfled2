@@ -442,11 +442,10 @@ int loop_2(bool TTY_Only)
 
   // Get list of controls to print to screen.
   sdSystem.SCREEN_COMMS.printw("Initializing Camera ...");
-  sdSystem.CAMERA_BACKUP.list_controls();
-  sdSystem.SCREEN_COMMS.printw(sdSystem.CAMERA_BACKUP.INFORMATION_COMMAND_LIST);
+  sdSystem.CAMERA_BACKUP.list_controls(sdSystem.SCREEN_COMMS);
 
-  sdSystem.CAMERA_BACKUP.create();
-  sdSystem.SCREEN_COMMS.printw(sdSystem.CAMERA_BACKUP.INFORMATION);
+  sdSystem.CAMERA_BACKUP.camera_start();
+  sdSystem.CAMERA_BACKUP.print_stream(sdSystem.SCREEN_COMMS);
 
   // ---------------------------------------------------------------------------------------
   // Initialize Alert System
@@ -831,7 +830,7 @@ int loop_2(bool TTY_Only)
 
     // ---------------------------------------------------------------------------------------
 
-    sdSystem.CAMERA_BACKUP.process(sdSystem.PROGRAM_TIME.current_frame_time());
+    sdSystem.CAMERA_BACKUP.process(sdSystem.SCREEN_COMMS, sdSystem.PROGRAM_TIME.current_frame_time());
 
     // ---------------------------------------------------------------------------------------
 
@@ -1410,7 +1409,7 @@ int loop_2(bool TTY_Only)
   cout << endl;
 
   cout << "Closing CAMERA_BACKUP" << endl;
-  sdSystem.CAMERA_BACKUP.close_camera();
+  sdSystem.CAMERA_BACKUP.camera_stop();
 
   cout << endl;
 

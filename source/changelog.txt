@@ -1,3 +1,9 @@
+2.335_251013
+  - Added "DSP TRK SZ" back to the map screen to help 
+      determine the maximum amount of points that can 
+      be drawn to the screen path.
+  - Modified the way the camera is opened and closed.
+
 2.334_251010
   - Camera system is now running with its double buffer.
   - Created an always running thread for the camera frame 

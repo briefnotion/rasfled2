@@ -618,6 +618,94 @@ void CAMERA::apply_ehancements()
   }
 }
 
+
+void CAMERA::open_camera()
+{
+  std::stringstream print_stream;
+
+  if (CAMERA_CAPTURE.isOpened())
+  {
+    print_stream << "Camera already open. Needs to be closed first." << endl;
+  }
+  else
+  {
+    // Create Thread (safe to recreate if already created)
+    THREAD_CAMERA.create(60);           // Longest wait im main process
+    THREAD_IMAGE_PROCESSING.create(15); // Longest wait im main process
+
+    // Load Cascades
+    // --- Object Detection Setup ---
+    // NOTE: In a real environment, you must have the XML file available 
+    // (e.g., 'haarcascade_car.xml' or 'haarcascade_fullbody.xml')
+    std::string cascade_path = "/home/delmane/rasfled/test/cars.xml"; // Mock path
+    if (!CAR_CASCADE.load(cascade_path)) 
+    {
+      std::cerr << "WARNING: Could not load car cascade classifier from " << cascade_path << std::endl;
+      std::cerr << "Car detection will be disabled." << std::endl;
+      CAR_CASCADE_LOADED = false;
+    } 
+    else 
+    {
+      CAR_CASCADE_LOADED = true;
+      std::cout << "Car cascade loaded successfully." << std::endl;
+    }
+
+    // Set up all camera properties.
+    prepare();
+    
+    // Attempt to open the default camera (index 0).
+    CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID);
+
+    // Check if the camera was successfully opened.
+    CAM_AVAILABLE = CAMERA_CAPTURE.isOpened();
+    if (CAM_AVAILABLE)
+    {
+      // If the camera is opened, set its frame width and height.
+      CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
+      CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
+
+      print_stream << "Camera successfully opened and properties set." << std::endl;
+
+      // Now, probe the camera for its actual capabilities and print them.
+      double actual_width = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
+      double actual_height = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
+      double actual_fps = CAMERA_CAPTURE.get(cv::CAP_PROP_FPS);
+
+      // Show some of the cv settings
+      print_stream << "Actual camera resolution: " << actual_width << "x" << actual_height << std::endl;
+      print_stream << "Actual camera FPS: " << actual_fps << std::endl;
+
+      // Initialize camera via backend.  First set normal operation mode, then gather all properties.
+      init(print_stream);
+    }
+    else
+    {
+      // If camera not found DUMMY images to FRAME_DUMMY and FRAME_DUMMY2
+      // If multi frame test, gen image to FRAME_DUMMY2.
+      FRAME_DUMMY = cv::imread(PROPS.CAMERA_TEST_FILE_NAME, cv::IMREAD_COLOR); // Load test image as color
+      if (FRAME_DUMMY.empty())
+      {
+        FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
+      }
+
+      if (FRAME_DUMMY_MULTI_FRAME_TEST)
+      {
+        FRAME_DUMMY2 = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
+      }
+      else
+      {
+        FRAME_DUMMY.copyTo(FRAME_DUMMY2);
+      }
+
+      print_stream << "Could not open camera. Please check your camera connection." << std::endl;
+      CAM_AVAILABLE = false;
+    }
+  }
+
+  PRINTW_QUEUE.push_back(print_stream.str());
+}
+
+
 // Be careful with this function. It is ran in its own thread.
 void CAMERA::update_frame()
 {
@@ -635,6 +723,8 @@ void CAMERA::update_frame()
   //  but as is, the variables are playing nicely in their respective threads. 
 
   CAMERA_READ_THREAD_TIME.create();
+
+  open_camera();
 
   while (CAMERA_READ_THREAD_STOP == false)
   {
@@ -723,6 +813,13 @@ void CAMERA::update_frame()
     CAMERA_READ_THREAD_TIME.request_ready_time(FORCED_FRAME_LIMIT.get_ready_time());
     CAMERA_READ_THREAD_TIME.sleep_till_next_frame();
   }
+
+  // Close Camera if thread stops.
+  CAMERA_CAPTURE.release();
+  CAM_AVAILABLE = false;
+  CAM_VIDEO_AVAILABLE = false;
+
+  PRINTW_QUEUE.push_back("Camera Closed");
 }
 
 void CAMERA::process_enhancements_frame()
@@ -842,7 +939,7 @@ int CAMERA::get_camera_control_value(CAMERA_SETTING &Setting)
 
 
 // Assuming CAMERA is a class and PROPS/INFORMATION_COMMAND_LIST are members
-void CAMERA::list_controls()
+void CAMERA::list_controls(CONSOLE_COMMUNICATION &cons)
 {
   // 1. Clear the output buffer
   INFORMATION_COMMAND_LIST = "";
@@ -933,99 +1030,26 @@ void CAMERA::list_controls()
     INFORMATION_COMMAND_LIST += error_msg;
   }
 
+  cons.printw(INFORMATION_COMMAND_LIST);
+
   // The file descriptor is automatically closed by FdCloser destructor here.
 }
 
-void CAMERA::create()
+void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
 {
-  std::stringstream print_stream;
-
-  if (CAMERA_CAPTURE.isOpened())
+  if (PRINTW_QUEUE.size() > 0)
   {
-    print_stream << "Camera already open. Needs to be closed first." << endl;
+    string print_buffer = "";
+    for (size_t pos = 0; pos < PRINTW_QUEUE.size(); pos++)
+    {
+      print_buffer += PRINTW_QUEUE[pos];
+    }
+    PRINTW_QUEUE.clear();
+    cons.printw(print_buffer);
   }
-  else
-  {
-    // Create Thread (safe to recreate if already created)
-    THREAD_CAMERA.create(60);           // Longest wait im main process
-    THREAD_IMAGE_PROCESSING.create(15); // Longest wait im main process
-
-    // Load Cascades
-    // --- Object Detection Setup ---
-    // NOTE: In a real environment, you must have the XML file available 
-    // (e.g., 'haarcascade_car.xml' or 'haarcascade_fullbody.xml')
-    std::string cascade_path = "/home/delmane/rasfled/test/cars.xml"; // Mock path
-    if (!CAR_CASCADE.load(cascade_path)) 
-    {
-      std::cerr << "WARNING: Could not load car cascade classifier from " << cascade_path << std::endl;
-      std::cerr << "Car detection will be disabled." << std::endl;
-      CAR_CASCADE_LOADED = false;
-    } 
-    else 
-    {
-      CAR_CASCADE_LOADED = true;
-      std::cout << "Car cascade loaded successfully." << std::endl;
-    }
-
-    // Set up all camera properties.
-    prepare();
-    
-    // Attempt to open the default camera (index 0).
-    CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID);
-
-    // Check if the camera was successfully opened.
-    CAM_AVAILABLE = CAMERA_CAPTURE.isOpened();
-    if (CAM_AVAILABLE)
-    {
-      // If the camera is opened, set its frame width and height.
-      CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
-      CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
-
-      print_stream << "Camera successfully opened and properties set." << std::endl;
-
-      // Now, probe the camera for its actual capabilities and print them.
-      double actual_width = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
-      double actual_height = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
-      double actual_fps = CAMERA_CAPTURE.get(cv::CAP_PROP_FPS);
-
-      // Show some of the cv settings
-      print_stream << "Actual camera resolution: " << actual_width << "x" << actual_height << std::endl;
-      print_stream << "Actual camera FPS: " << actual_fps << std::endl;
-
-      // Initialize camera via backend.  First set normal operation mode, then gather all properties.
-      init(print_stream);
-    }
-    else
-    {
-      // If camera not found DUMMY images to FRAME_DUMMY and FRAME_DUMMY2
-      // If multi frame test, gen image to FRAME_DUMMY2.
-      FRAME_DUMMY = cv::imread(PROPS.CAMERA_TEST_FILE_NAME, cv::IMREAD_COLOR); // Load test image as color
-      if (FRAME_DUMMY.empty())
-      {
-        FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
-      }
-
-      if (FRAME_DUMMY_MULTI_FRAME_TEST)
-      {
-        FRAME_DUMMY2 = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
-      }
-      else
-      {
-        FRAME_DUMMY.copyTo(FRAME_DUMMY2);
-      }
-
-      print_stream << "Could not open camera. Please check your camera connection." << std::endl;
-      CAM_AVAILABLE = false;
-    }
-
-    // Signal thread that it should be safe to start.
-    CAMERA_READ_THREAD_STOP = false;
-  }
-
-  INFORMATION = print_stream.str();
 }
 
-void CAMERA::process(unsigned long Frame_Time)
+void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time)
 {
   // Check to see if THREAD_CAMERA has stopped for any reason. 
   THREAD_CAMERA.check_for_completition();
@@ -1072,6 +1096,9 @@ void CAMERA::process(unsigned long Frame_Time)
                 {  process_enhancements_frame();  });
     }
   }
+
+  // Print whatever is in the console print_wait queue.
+  print_stream(cons);
 }
 
 cv::Mat CAMERA::get_current_frame()
@@ -1086,12 +1113,32 @@ void CAMERA::take_snapshot()
   SAVE_IMAGE_PROCESSED_FRAME = true;
 }
 
-void CAMERA::close_camera()
+void CAMERA::camera_start()
 {
-  CAMERA_READ_THREAD_STOP = true;
-  CAMERA_CAPTURE.release();
-  CAM_AVAILABLE = false;
-  CAM_VIDEO_AVAILABLE = false;
+  if (CAMERA_READ_THREAD_STOP == true)
+  {
+    // Signal stop thread.
+    CAMERA_READ_THREAD_STOP = false;
+  }
+}
+
+void CAMERA::camera_stop()
+{
+  if (CAMERA_READ_THREAD_STOP == false)
+  {
+    // Signal stop thread.
+    CAMERA_READ_THREAD_STOP = true;
+  }
+}
+
+bool CAMERA::camera_avalable()
+{
+  return CAM_AVAILABLE;
+}
+
+bool CAMERA::video_avalable()
+{
+  return CAM_VIDEO_AVAILABLE;
 }
 
 // ---------------------------------------------------------------------------------------
