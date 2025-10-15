@@ -423,6 +423,10 @@ int loop_2(bool TTY_Only)
   sdSystem.CAMERA_BACKUP.PROPS.CAMERA_SETTINGS_DIR    = sdSystem.FILE_NAMES.CAMERA_SETTINGS_DIR;
 
   sdSystem.CAMERA_BACKUP.PROPS.CAMERA_TEST_FILE_NAME  = sdSystem.FILE_NAMES.CAMERA_TEST_IMAGE_FILENAME;
+  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_SETTINGS_FILE_NAME  = sdSystem.FILE_NAMES.CAMERA_SETTINGS_FILENAME;
+  
+  // ---
+  // Default settings.  Ignored if camera settings file overrides.
 
   // Set Camera Screen Properties
   //sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 640;
@@ -439,6 +443,10 @@ int loop_2(bool TTY_Only)
   // Flip horizontal and vertical
   sdSystem.CAMERA_BACKUP.PROPS.FLIP_HORIZONTAL  = false;
   sdSystem.CAMERA_BACKUP.PROPS.FLIP_VERTICAL    = true;
+  
+  sdSystem.CAMERA_BACKUP.PROPS.IS_BACKUP_CAMERA = true;
+
+  // ---
 
   // Get list of controls to print to screen.
   sdSystem.SCREEN_COMMS.printw("Initializing Camera ...");

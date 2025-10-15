@@ -1,3 +1,8 @@
+2.336_251015
+  - Added a simple camera save and load settings when 
+    the camera is opened and closed.
+      Only backup camera path points saved at this time.
+
 2.335_251013
   - Added "DSP TRK SZ" back to the map screen to help 
       determine the maximum amount of points that can 

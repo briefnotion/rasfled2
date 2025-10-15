@@ -108,6 +108,7 @@ class FILES
   string CAMERA_BACKUP = "";
   int    CAMERA_BACKUP_ID = 0;
   string CAMERA_TEST_IMAGE_FILENAME = "";
+  string CAMERA_SETTINGS_FILENAME = "";
 
   // Map
   string LOGS_MAPS_GENERICS_JSON = "";

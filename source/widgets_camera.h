@@ -116,26 +116,6 @@ class CAMERA_WIDGET
   const ImU32 COLOR_YLW = IM_COL32(255, 255, 0, 255); // 10ft 
   const ImU32 COLOR_RED = IM_COL32(255, 0, 0, 255);   // 15ft
 
-  // Level 0: Closest to the car (Bottom of Green)
-  float Y0 = 1.000f;
-  float XL0 = -0.100f;
-  float XR0 = 1.160f;
-  
-  // Level 1: Green/Yellow boundary
-  float Y1 = 0.800f;
-  float XL1 = 0.00f;
-  float XR1 = 1.020f;
-  
-  // Level 2: Yellow/Red boundary
-  float Y2 = 0.330f;
-  float XL2 = 0.227f;
-  float XR2 = 0.700f;
-
-  // Level 3: Farthest point (Top of Red)
-  float Y3 = 0.200f;
-  float XL3 = 0.295f;
-  float XR3 = 0.610f;
-
   // Some working class variables
   // Variables for image size and centering, declared here to be accessible in class scopes.
   float ANGLE = 0.0f;
@@ -147,7 +127,7 @@ class CAMERA_WIDGET
                         ImVec2 &Image_Start_Position, 
                         ImVec2 &Final_Size);
 
-  void display_path();
+  void display_path(system_data &sdSysData);
 
   void display_camera_settings_window(system_data &sdSysData);
   void display_camera_adjustments_window(system_data &sdSysData);

@@ -14,6 +14,7 @@
 
 #include "camera_system.h"
 
+using namespace std;
 
 // ---------------------------------------------------------------------------------------
 /*
@@ -422,6 +423,170 @@ void CAMERA::init(stringstream &Print_Stream)
   Print_Stream << "                Sharpness: " << get_camera_control_value(PROPS.CTRL_SHARPNESS) << endl;
 }
 
+void CAMERA::save_settings()
+{
+  JSON_INTERFACE settings;
+  JSON_ENTRY camera_settings;
+  JSON_ENTRY backup_camera_settings;
+
+  backup_camera_settings.create_label_value(quotify("IS_BACKUP_CAMERA"), quotify(to_string(PROPS.IS_BACKUP_CAMERA)));
+
+  backup_camera_settings.create_label_value(quotify("Y0"), quotify(to_string(PROPS.Y0)));
+  backup_camera_settings.create_label_value(quotify("XL0"), quotify(to_string(PROPS.XL0)));
+  backup_camera_settings.create_label_value(quotify("XR0"), quotify(to_string(PROPS.XR0)));
+  backup_camera_settings.create_label_value(quotify("Y1"), quotify(to_string(PROPS.Y1)));
+  backup_camera_settings.create_label_value(quotify("XL1"), quotify(to_string(PROPS.XL1)));
+  backup_camera_settings.create_label_value(quotify("XR1"), quotify(to_string(PROPS.XR1)));
+  backup_camera_settings.create_label_value(quotify("Y2"), quotify(to_string(PROPS.Y2)));
+  backup_camera_settings.create_label_value(quotify("XL2"), quotify(to_string(PROPS.XL2)));
+  backup_camera_settings.create_label_value(quotify("XR2"), quotify(to_string(PROPS.XR2)));
+  backup_camera_settings.create_label_value(quotify("Y3"), quotify(to_string(PROPS.Y3)));
+  backup_camera_settings.create_label_value(quotify("XL3"), quotify(to_string(PROPS.XL3)));
+  backup_camera_settings.create_label_value(quotify("XR3"), quotify(to_string(PROPS.XR3)));
+
+  camera_settings.put_json_in_set(quotify("backup camera settings"), backup_camera_settings);
+  settings.ROOT.put_json_in_set(quotify("camera settings"), camera_settings);
+
+  deque<string> camera_settings_json_deque;
+  settings.json_print_build_to_string_deque(camera_settings_json_deque);
+
+  threaded_deque_string_to_file(PROPS.CAMERA_SETTINGS_FILE_NAME, camera_settings_json_deque);
+}
+
+void CAMERA::load_settings()
+{
+  bool tmp_success = false;
+
+  string camera_settings_json = file_to_string(PROPS.CAMERA_SETTINGS_FILE_NAME, tmp_success);
+
+  if (tmp_success == false)
+  {
+    save_settings();
+  }
+  else
+  {
+    // Load Settings
+    JSON_INTERFACE settings;
+
+    // parse file
+    tmp_success = settings.load_json_from_string(camera_settings_json);
+
+    if (tmp_success)
+    {
+      for(size_t root = 0; root < settings.ROOT.DATA.size(); root++)        //root
+      {
+        if (settings.ROOT.DATA[root].label() == "camera settings")
+        {
+          for (size_t entry_list = 0;                                        //root/marker_list
+                      entry_list < settings.ROOT.DATA[root].DATA.size(); entry_list++)
+          {
+            if (settings.ROOT.DATA[root].DATA[entry_list].label() == "backup camera settings")
+            {
+
+              STRING_BOOL  sb_is_backup_camera;
+
+              STRING_FLOAT sf_y0;
+              STRING_FLOAT sf_xl0;
+              STRING_FLOAT sf_rl0;
+
+              STRING_FLOAT sf_y1;
+              STRING_FLOAT sf_xl1;
+              STRING_FLOAT sf_rl1;
+
+              STRING_FLOAT sf_y2;
+              STRING_FLOAT sf_xl2;
+              STRING_FLOAT sf_rl2;
+
+              STRING_FLOAT sf_y3;
+              STRING_FLOAT sf_xl3;
+              STRING_FLOAT sf_rl3;
+
+              for (size_t backup_cam_entry_list = 0;                                        //root/marker_list
+              backup_cam_entry_list < settings.ROOT.DATA[root].DATA[entry_list].DATA.size(); backup_cam_entry_list++)
+              {
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("IS_BACKUP_CAMERA", sb_is_backup_camera);
+
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("Y0", sf_y0);
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XL0", sf_xl0);
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XR0", sf_rl0);
+
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("Y1", sf_y1);
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XL1", sf_xl1);
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XR1", sf_rl1);
+
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("Y2", sf_y2);
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XL2", sf_xl2);
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XR2", sf_rl2);
+
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("Y3", sf_y3);
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XL3", sf_xl3);
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XR3", sf_rl3);
+              }
+
+              if (sb_is_backup_camera.conversion_success())
+              {
+                PROPS.IS_BACKUP_CAMERA = sb_is_backup_camera.get_bool_value();
+              }
+
+              if (sf_y0.conversion_success())
+              {
+                PROPS.Y0 = sf_y0.get_float_value();
+              }
+              if (sf_xl0.conversion_success())
+              {
+                PROPS.XL0 = sf_xl0.get_float_value();
+              }
+              if (sf_rl0.conversion_success())
+              {
+                PROPS.XR0 = sf_rl0.get_float_value();
+              }
+
+              if (sf_y1.conversion_success())
+              {
+                PROPS.Y1 = sf_y1.get_float_value();
+              }
+              if (sf_xl1.conversion_success())
+              {
+                PROPS.XL1 = sf_xl1.get_float_value();
+              }
+              if (sf_rl1.conversion_success())
+              {
+                PROPS.XR1 = sf_rl1.get_float_value();
+              }
+
+              if (sf_y2.conversion_success())
+              {
+                PROPS.Y2 = sf_y2.get_float_value();
+              }
+              if (sf_xl2.conversion_success())
+              {
+                PROPS.XL2 = sf_xl2.get_float_value();
+              }
+              if (sf_rl2.conversion_success())
+              {
+                PROPS.XR2 = sf_rl2.get_float_value();
+              }
+
+              if (sf_y3.conversion_success())
+              {
+                PROPS.Y3 = sf_y3.get_float_value();
+              }
+              if (sf_xl3.conversion_success())
+              {
+                PROPS.XL3 = sf_xl3.get_float_value();
+              }
+              if (sf_rl3.conversion_success())
+              {
+                PROPS.XR3 = sf_rl3.get_float_value();
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
 // Be careful with this function. It is ran in its own thread.
 void CAMERA::check_for_save_image_buffer_frame()
 {
@@ -724,6 +889,7 @@ void CAMERA::update_frame()
 
   CAMERA_READ_THREAD_TIME.create();
 
+  load_settings();
   open_camera();
 
   while (CAMERA_READ_THREAD_STOP == false)
@@ -819,6 +985,7 @@ void CAMERA::update_frame()
   CAM_AVAILABLE = false;
   CAM_VIDEO_AVAILABLE = false;
 
+  save_settings();
   PRINTW_QUEUE.push_back("Camera Closed");
 }
 

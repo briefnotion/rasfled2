@@ -33,6 +33,7 @@
 #include "fled_time.h"
 #include "threading.h"
 #include "screen4_helper.h"
+#include "json_interface.h"
 
 using namespace std;
 
@@ -81,6 +82,7 @@ class CAMERA_PROPERTIES
   std::string CAMERA_DIRECTORY = "";     // e.g. .../rasfled-t/camera/
   std::string CAMERA_SETTINGS_DIR = "";  // e.g. .../rasfled-t/camera/settings/
   std::string CAMERA_TEST_FILE_NAME = "";  // e.g. .../rasfled-t/camera/settings/
+  std::string CAMERA_SETTINGS_FILE_NAME = "";  // e.g. .../rasfled-t/camera/settings/
 
   int WIDTH = 640;
   int HEIGHT = 480;
@@ -128,6 +130,31 @@ class CAMERA_PROPERTIES
 
   bool ENH_CAR_DETECTION  = false;
 
+  // ---------------------------------------------------------------------------------------
+  
+  // Adjustments for the backup camera
+    // Level 0: Closest to the car (Bottom of Green)
+  bool IS_BACKUP_CAMERA = false;
+  
+  float Y0 = 1.000f;
+  float XL0 = -0.100f;
+  float XR0 = 1.160f;
+  
+  // Level 1: Green/Yellow boundary
+  float Y1 = 0.800f;
+  float XL1 = 0.00f;
+  float XR1 = 1.020f;
+  
+  // Level 2: Yellow/Red boundary
+  float Y2 = 0.330f;
+  float XL2 = 0.227f;
+  float XR2 = 0.700f;
+
+  // Level 3: Farthest point (Top of Red)
+  float Y3 = 0.200f;
+  float XL3 = 0.295f;
+  float XR3 = 0.610f;
+
 };
 
 class CAMERA
@@ -154,6 +181,8 @@ class CAMERA
   bool SAVE_IMAGE_BUFFER_FRAME = false;
   bool SAVE_IMAGE_PROCESSED_FRAME = false;
 
+  // ---------------------------------------------------------------------------------------
+  
   // Camera CV Helper
   bool is_low_light(const cv::Mat& frame, int threshold);
   cv::Mat get_road_mask(const cv::Mat& frame);
@@ -208,6 +237,10 @@ class CAMERA
   // Thread process_enhancements_frame and generate_imgui_texture_frame
   cv::Mat PROCESSED_FRAME;
   bool    WORKING_FRAME_FULLY_PROCESSED = true; // Needs Lock
+
+  // Load and Save settings
+  void save_settings();
+  void load_settings();
 
   void check_for_save_image_buffer_frame();
   // check to see if current buffer should be saved to disk.

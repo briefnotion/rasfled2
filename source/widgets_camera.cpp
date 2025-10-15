@@ -30,7 +30,7 @@ ImVec2 CAMERA_WIDGET::norm_to_screen( float &Nx, float &Ny, float &Slide,
   );
 }
 
-void CAMERA_WIDGET::display_path()
+void CAMERA_WIDGET::display_path(system_data &sdSysData)
 {
   // Get the current window's draw list for overlay graphics.
   ImDrawList* draw_list = ImGui::GetWindowDrawList();
@@ -44,14 +44,14 @@ void CAMERA_WIDGET::display_path()
   float slide = ANGLE * ANGLE_MULTIPLIER;
 
   // Convert all 4 levels of points to screen coordinates
-  ImVec2 P0L = norm_to_screen(XL0, Y0, slide, image_start_pos, FINAL_SIZE); // Closest Left
-  ImVec2 P0R = norm_to_screen(XR0, Y0, slide, image_start_pos, FINAL_SIZE); // Closest Right
-  ImVec2 P1L = norm_to_screen(XL1, Y1, slide, image_start_pos, FINAL_SIZE); // Boundary 1 Left
-  ImVec2 P1R = norm_to_screen(XR1, Y1, slide, image_start_pos, FINAL_SIZE); // Boundary 1 Right
-  ImVec2 P2L = norm_to_screen(XL2, Y2, slide, image_start_pos, FINAL_SIZE); // Boundary 2 Left
-  ImVec2 P2R = norm_to_screen(XR2, Y2, slide, image_start_pos, FINAL_SIZE); // Boundary 2 Right
-  ImVec2 P3L = norm_to_screen(XL3, Y3, slide, image_start_pos, FINAL_SIZE); // Farthest Left
-  ImVec2 P3R = norm_to_screen(XR3, Y3, slide, image_start_pos, FINAL_SIZE); // Farthest Right
+  ImVec2 P0L = norm_to_screen(sdSysData.CAMERA_BACKUP.PROPS.XL0, sdSysData.CAMERA_BACKUP.PROPS.Y0, slide, image_start_pos, FINAL_SIZE); // Closest Left
+  ImVec2 P0R = norm_to_screen(sdSysData.CAMERA_BACKUP.PROPS.XR0, sdSysData.CAMERA_BACKUP.PROPS.Y0, slide, image_start_pos, FINAL_SIZE); // Closest Right
+  ImVec2 P1L = norm_to_screen(sdSysData.CAMERA_BACKUP.PROPS.XL1, sdSysData.CAMERA_BACKUP.PROPS.Y1, slide, image_start_pos, FINAL_SIZE); // Boundary 1 Left
+  ImVec2 P1R = norm_to_screen(sdSysData.CAMERA_BACKUP.PROPS.XR1, sdSysData.CAMERA_BACKUP.PROPS.Y1, slide, image_start_pos, FINAL_SIZE); // Boundary 1 Right
+  ImVec2 P2L = norm_to_screen(sdSysData.CAMERA_BACKUP.PROPS.XL2, sdSysData.CAMERA_BACKUP.PROPS.Y2, slide, image_start_pos, FINAL_SIZE); // Boundary 2 Left
+  ImVec2 P2R = norm_to_screen(sdSysData.CAMERA_BACKUP.PROPS.XR2, sdSysData.CAMERA_BACKUP.PROPS.Y2, slide, image_start_pos, FINAL_SIZE); // Boundary 2 Right
+  ImVec2 P3L = norm_to_screen(sdSysData.CAMERA_BACKUP.PROPS.XL3, sdSysData.CAMERA_BACKUP.PROPS.Y3, slide, image_start_pos, FINAL_SIZE); // Farthest Left
+  ImVec2 P3R = norm_to_screen(sdSysData.CAMERA_BACKUP.PROPS.XR3, sdSysData.CAMERA_BACKUP.PROPS.Y3, slide, image_start_pos, FINAL_SIZE); // Farthest Right
 
   // Black Lines
   {
@@ -218,21 +218,21 @@ void CAMERA_WIDGET::display_camera_adjustments_window(system_data &sdSysData)
       ImGui::InputFloat("AMLT", &ANGLE_MULTIPLIER);
 
       //ImGui::Text("Path Points:");
-      ImGui::InputFloat("Y0", &Y0);
-      ImGui::InputFloat("XL0", &XL0);
-      ImGui::InputFloat("XR0", &XR0);
+      ImGui::InputFloat("Y0", &sdSysData.CAMERA_BACKUP.PROPS.Y0);
+      ImGui::InputFloat("XL0", &sdSysData.CAMERA_BACKUP.PROPS.XL0);
+      ImGui::InputFloat("XR0", &sdSysData.CAMERA_BACKUP.PROPS.XR0);
 
-      ImGui::InputFloat("Y1", &Y1);
-      ImGui::InputFloat("XL1", &XL1);
-      ImGui::InputFloat("XR1", &XR1);
+      ImGui::InputFloat("Y1", &sdSysData.CAMERA_BACKUP.PROPS.Y1);
+      ImGui::InputFloat("XL1", &sdSysData.CAMERA_BACKUP.PROPS.XL1);
+      ImGui::InputFloat("XR1", &sdSysData.CAMERA_BACKUP.PROPS.XR1);
       
-      ImGui::InputFloat("Y2", &Y2);
-      ImGui::InputFloat("XL2", &XL2);
-      ImGui::InputFloat("XR2", &XR2);
+      ImGui::InputFloat("Y2", &sdSysData.CAMERA_BACKUP.PROPS.Y2);
+      ImGui::InputFloat("XL2", &sdSysData.CAMERA_BACKUP.PROPS.XL2);
+      ImGui::InputFloat("XR2", &sdSysData.CAMERA_BACKUP.PROPS.XR2);
       
-      ImGui::InputFloat("Y3", &Y3);
-      ImGui::InputFloat("XL3", &XL3);
-      ImGui::InputFloat("XR3", &XR3);
+      ImGui::InputFloat("Y3", &sdSysData.CAMERA_BACKUP.PROPS.Y3);
+      ImGui::InputFloat("XL3", &sdSysData.CAMERA_BACKUP.PROPS.XL3);
+      ImGui::InputFloat("XR3", &sdSysData.CAMERA_BACKUP.PROPS.XR3);
     }
 
   }
@@ -422,7 +422,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
       // Draw Path Lines
       if (DISPLAY_PATH)
       {
-        display_path();
+        display_path(sdSysData);
       }
     } 
     else 

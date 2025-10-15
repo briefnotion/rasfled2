@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.335_251013"
+#define Revision "2.336_251015"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -155,6 +155,7 @@
 #define DEF_CAMERA_BACKUP                 "/dev/video0"
 #define DEF_CAMERA_BACKUP_ID              0
 #define DEF_CAMERA_TEST_IMAGE             "test.jpg"
+#define DEF_CAMERA_SETTINGS_FILE          "camera_settings.json"
 
 // -------------------------------------------------------------------------------------
 // AUDIO SETUP
