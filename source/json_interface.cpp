@@ -29,7 +29,7 @@ using namespace std;
 // -------------------------------------------------------------------------------------
 //  Supporting Functions
 
-bool remove_opens_and_closes(string &Entry, char Open, char Close)
+bool remove_opens_and_closes(std::string &Entry, char Open, char Close)
 {
   bool ret_success = false;
 
@@ -51,17 +51,17 @@ bool remove_opens_and_closes(string &Entry, char Open, char Close)
   return ret_success;
 }
 
-string parse_label(string Text, int Label_Size)
+std::string parse_label(std::string Text, int Label_Size)
 {
   return Text.substr(0, Label_Size);
 }
 
-string parse_value(string Text, int Label_Size)
+std::string parse_value(std::string Text, int Label_Size)
 {
   return Text.erase(0, Label_Size +1);
 }
 
-int pos_of_first_non_space(int Start, string Text)
+int pos_of_first_non_space(int Start, std::string Text)
 {
   for (int pos = Start; pos < (int)Text.size() && Text[pos] == ' '; pos++)
   {
@@ -73,7 +73,7 @@ int pos_of_first_non_space(int Start, string Text)
 // -------------------------------------------------------------------------------------
 //  JSON Class
 
-int JSON_ENTRY::find_closing(string Text, int Start_Pos, char Opening, char Closing)
+int JSON_ENTRY::find_closing(std::string Text, int Start_Pos, char Opening, char Closing)
 {
   int ret_position = 0;
   int counter = 1;
@@ -93,7 +93,7 @@ int JSON_ENTRY::find_closing(string Text, int Start_Pos, char Opening, char Clos
   return ret_position;
 }
 
-bool JSON_ENTRY::check_entry(string &Entry, int &Size_Of_Entry, int &Size_Of_Label, 
+bool JSON_ENTRY::check_entry(std::string &Entry, int &Size_Of_Entry, int &Size_Of_Label, 
                               bool &Is_A_Set, bool &Is_A_List, bool &Is_A_Value)
 {
 
@@ -169,13 +169,13 @@ bool JSON_ENTRY::check_entry(string &Entry, int &Size_Of_Entry, int &Size_Of_Lab
   return true;
 }
 
-bool JSON_ENTRY::parse_item_list(string Entry, bool Is_Set, string Set_Name)
+bool JSON_ENTRY::parse_item_list(std::string Entry, bool Is_Set, std::string Set_Name)
 {
   bool ret_success = true;
 
-  string sub_entry = "";
-  string sub_label = "";
-  string sub_value = "";
+  std::string sub_entry = "";
+  std::string sub_label = "";
+  std::string sub_value = "";
 
   int entry_size = 0;
   int label_size = 0;
@@ -184,8 +184,8 @@ bool JSON_ENTRY::parse_item_list(string Entry, bool Is_Set, string Set_Name)
   bool is_value_list = false;
   bool is_value_value = false;
 
-  string label = "";
-  string value = "";
+  std::string label = "";
+  std::string value = "";
 
   Entry = trim(Entry);
 
@@ -293,7 +293,7 @@ void JSON_ENTRY::clear_data()
   DATA.clear();
 }
 
-int JSON_ENTRY::find_label_pos(string Label_In_List)
+int JSON_ENTRY::find_label_pos(std::string Label_In_List)
 {
   int ret_pos = -1;
 
@@ -308,12 +308,12 @@ int JSON_ENTRY::find_label_pos(string Label_In_List)
   return ret_pos;
 }
 
-int JSON_ENTRY::size_of_set(string Set_Label)
+int JSON_ENTRY::size_of_set(std::string Set_Label)
 {
   return DATA[find_label_pos(Set_Label)].DATA.size();
 }
 
-bool JSON_ENTRY::set_list(string Entry)
+bool JSON_ENTRY::set_list(std::string Entry)
 {
   bool ret_success = false;
 
@@ -325,7 +325,7 @@ bool JSON_ENTRY::set_list(string Entry)
   return ret_success;
 }
 
-bool JSON_ENTRY::set_set(string Entry, string Set_Name)
+bool JSON_ENTRY::set_set(std::string Entry, std::string Set_Name)
 {
   bool ret_success = false;
 
@@ -337,19 +337,19 @@ bool JSON_ENTRY::set_set(string Entry, string Set_Name)
   return ret_success;
 }
 
-string JSON_ENTRY::label()
+std::string JSON_ENTRY::label()
 {
   return LABEL;
 }
 
-string JSON_ENTRY::value()
+std::string JSON_ENTRY::value()
 {
   return VALUE;
 }
 
-string JSON_ENTRY::value_from_list(string Label_In_List)
+std::string JSON_ENTRY::value_from_list(std::string Label_In_List)
 {
-  string ret_value = "";
+  std::string ret_value = "";
 
   int pos = find_label_pos(Label_In_List);
 
@@ -361,7 +361,7 @@ string JSON_ENTRY::value_from_list(string Label_In_List)
   return ret_value;
 }
 
-bool JSON_ENTRY::get_if_is(string Label, int &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, int &Value)
 {
   if (LABEL == Label)
   {
@@ -374,7 +374,7 @@ bool JSON_ENTRY::get_if_is(string Label, int &Value)
   }
 }
 
-bool JSON_ENTRY::get_if_is(string Label, float &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, float &Value)
 {
   if (LABEL == Label)
   {
@@ -387,7 +387,7 @@ bool JSON_ENTRY::get_if_is(string Label, float &Value)
   }
 }
 
-bool JSON_ENTRY::get_if_is(string Label, char &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, char &Value)
 {
   if (LABEL == Label)
   {
@@ -400,7 +400,7 @@ bool JSON_ENTRY::get_if_is(string Label, char &Value)
   }
 }
 
-bool JSON_ENTRY::get_if_is(string Label, bool &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, bool &Value)
 {
   if (LABEL == Label)
   {
@@ -420,7 +420,7 @@ bool JSON_ENTRY::get_if_is(string Label, bool &Value)
   }
 }
 
-bool JSON_ENTRY::get_if_is(string Label, CRGB &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, CRGB &Value)
 {
   if (LABEL == Label)
   {
@@ -433,7 +433,7 @@ bool JSON_ENTRY::get_if_is(string Label, CRGB &Value)
   }
 }
 
-bool JSON_ENTRY::get_if_is(string Label, string &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, std::string &Value)
 {
   if (LABEL == Label)
   {
@@ -446,7 +446,7 @@ bool JSON_ENTRY::get_if_is(string Label, string &Value)
   }
 }
 
-bool JSON_ENTRY::get_if_is(string Label, STRING_STRING &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, STRING_STRING &Value)
 {
   if (LABEL == Label)
   {
@@ -459,7 +459,7 @@ bool JSON_ENTRY::get_if_is(string Label, STRING_STRING &Value)
   }
 }
 
-bool JSON_ENTRY::get_if_is(string Label, STRING_BOOL &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, STRING_BOOL &Value)
 {
   if (LABEL == Label)
   {
@@ -472,7 +472,7 @@ bool JSON_ENTRY::get_if_is(string Label, STRING_BOOL &Value)
   }
 }
 
-bool JSON_ENTRY::get_if_is(string Label, STRING_INT &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, STRING_INT &Value)
 {
   if (LABEL == Label)
   {
@@ -485,7 +485,7 @@ bool JSON_ENTRY::get_if_is(string Label, STRING_INT &Value)
   }
 }
 
-bool JSON_ENTRY::get_if_is(string Label, STRING_FLOAT &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, STRING_FLOAT &Value)
 {
   if (LABEL == Label)
   {
@@ -498,7 +498,7 @@ bool JSON_ENTRY::get_if_is(string Label, STRING_FLOAT &Value)
   }
 }
 
-bool JSON_ENTRY::get_if_is(string Label, STRING_DOUBLE &Value)
+bool JSON_ENTRY::get_if_is(std::string Label, STRING_DOUBLE &Value)
 {
   if (LABEL == Label)
   {
@@ -511,7 +511,7 @@ bool JSON_ENTRY::get_if_is(string Label, STRING_DOUBLE &Value)
   }
 }
 
-void JSON_ENTRY::create_label_value(string Label, string Value)
+void JSON_ENTRY::create_label_value(std::string Label, std::string Value)
 {
   JSON_ENTRY new_entry;
 
@@ -538,7 +538,7 @@ void JSON_ENTRY::put_json_in_list(JSON_ENTRY Entry)
   DATA.push_back(new_list);
 }
 
-void JSON_ENTRY::put_json_in_set(string Set_Name, JSON_ENTRY Entry)
+void JSON_ENTRY::put_json_in_set(std::string Set_Name, JSON_ENTRY Entry)
 {
   JSON_ENTRY new_set;
 
@@ -552,7 +552,7 @@ void JSON_ENTRY::put_json_in_set(string Set_Name, JSON_ENTRY Entry)
   DATA.push_back(new_set);
 }
 
-void JSON_INTERFACE::json_debug_to_string_deque(deque<string> &JSON_Print_Build, JSON_ENTRY Json_entry, int Level, int Count)
+void JSON_INTERFACE::json_debug_to_string_deque(deque<std::string> &JSON_Print_Build, JSON_ENTRY Json_entry, int Level, int Count)
 {
   Level++;
 
@@ -586,7 +586,7 @@ void JSON_INTERFACE::json_debug_to_string_deque(deque<string> &JSON_Print_Build,
   }
 }
 
-void JSON_INTERFACE::json_to_string_deque(deque<string> &JSON_Print_Build, JSON_ENTRY Json_entry, int Level, string Trailing_Seperator)
+void JSON_INTERFACE::json_to_string_deque(deque<std::string> &JSON_Print_Build, JSON_ENTRY Json_entry, int Level, std::string Trailing_Seperator)
 {
   Level++;
 
@@ -611,7 +611,7 @@ void JSON_INTERFACE::json_to_string_deque(deque<string> &JSON_Print_Build, JSON_
       for (int x = 0; x < (int)Json_entry.DATA.size(); x++)
       {
         {
-          string New_Trailing_Seperator = "";
+          std::string New_Trailing_Seperator = "";
 
           if ( x < (int)Json_entry.DATA.size() -1)
           {
@@ -638,7 +638,7 @@ void JSON_INTERFACE::json_to_string_deque(deque<string> &JSON_Print_Build, JSON_
   }
 }
 
-bool JSON_INTERFACE::load_json_from_string(string JSON_Text)
+bool JSON_INTERFACE::load_json_from_string(std::string JSON_Text)
 {
   bool ret_success = false;
 
@@ -667,12 +667,12 @@ bool JSON_INTERFACE::load_json_from_string(string JSON_Text)
   return ret_success;
 }
 
-void JSON_INTERFACE::json_debug_build_to_string_deque(deque<string> &JSON_Print_Build)
+void JSON_INTERFACE::json_debug_build_to_string_deque(deque<std::string> &JSON_Print_Build)
 {
   json_debug_to_string_deque(JSON_Print_Build, ROOT, 0, 0);
 }
 
-void JSON_INTERFACE::json_print_build_to_string_deque(deque<string> &JSON_Print_Build)
+void JSON_INTERFACE::json_print_build_to_string_deque(deque<std::string> &JSON_Print_Build)
 {
   JSON_Print_Build.push_back("{");
   json_to_string_deque(JSON_Print_Build, ROOT, -1, "");

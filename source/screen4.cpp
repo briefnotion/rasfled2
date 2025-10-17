@@ -1319,7 +1319,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           // Main Menu
           if (DISPLAY_MENU == 0)
           {
-            if (BTC_TIMER.button_toggle_color(sdSysData, "TIMER\n(On)", "TIMER\n(Off)", sdSysData.cdTIMER.is_active(), RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_TIMER.button_toggle_color(sdSysData, "TIMER", "TIMER", sdSysData.cdTIMER.is_active(), RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               if (sdSysData.cdTIMER.is_active() == false)
               {
@@ -1333,31 +1333,32 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             //ImGui::InvisibleButton("noshow2", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
-            if (sdSysData.PANEL_CONTROL.autonomous_state() == 0)  // Off
+            // Autononoumous button (3 values on a toggle)
+            if (sdSysData.PANEL_CONTROL.autonomous_state() == 0 || sdSysData.PANEL_CONTROL.autonomous_state() == 1)  // On or Off
             {
-              // Turn on autonomous mode
-              if (BT_AUTONOMOUS.button_color(sdSysData, "AUTON\n(Off)", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+              if (BTC_AUTONOMOUS.button_toggle_color(sdSysData, "AUTON\n(On)", "AUTON\n(Off)", sdSysData.PANEL_CONTROL.autonomous_state() == 1, 
+                                                  RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
               {
-                sdSysData.PANEL_CONTROL.autonomous_on();
+                if (sdSysData.PANEL_CONTROL.autonomous_state() == 1)
+                {
+                  sdSysData.PANEL_CONTROL.autonomous_off();
+                }
+                else
+                {
+                  sdSysData.PANEL_CONTROL.autonomous_on();
+                }
               }
             }
-            else if (sdSysData.PANEL_CONTROL.autonomous_state() == 1) // On
+            else // if (sdSysData.PANEL_CONTROL.autonomous_state() == 2)
             {
-              // Turn Off Sleeping autonomous mode
-              if (BT_AUTONOMOUS.button_color(sdSysData, "AUTON\n(On)", RAS_RED, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
-              {
-                sdSysData.PANEL_CONTROL.autonomous_off();
-              }
-            }
-            else // Active
-            {
-              // Turn Off Active autonomous mode
-              if (BT_AUTONOMOUS.button_color(sdSysData, "AUTON\n(Active)", RAS_WHITE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+              if (BTC_AUTONOMOUS.button_toggle_color(sdSysData, "AUTON\n(Active)", "INVALID\nSTATE", sdSysData.PANEL_CONTROL.autonomous_state() == 2, 
+                                    RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
               {
                 sdSysData.PANEL_CONTROL.autonomous_off();
               }
             }
 
+            // Overhead Lights
             if (BTC_OVER_HEAD_LIGHTS.button_toggle_color(sdSysData, "OVER\nHEAD\nLIGHTS", "OVER\nHEAD\nLIGHTS", sdSysData.booOverheadRunning, RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               if (sdSysData.booOverheadRunning == true)
@@ -1388,7 +1389,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               DISPLAY_CARDS_WINDOW = !DISPLAY_CARDS_WINDOW;
             } 
 
-            if (BTC_LIGHTS.button_toggle_color(sdSysData, "LIGHTS\n(On)", "LIGHTS\n(Off)", sdSysData.Lights_On.value(), RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_LIGHTS.button_toggle_color(sdSysData, "LIGHTS", "LIGHTS", sdSysData.Lights_On.value(), RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               if (sdSysData.Lights_On.value() == true)
               {
@@ -1407,7 +1408,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           }
           else if (DISPLAY_MENU == 1)
           {
-            if (BTC_HAZARD.button_toggle_color(sdSysData, "HAZARD\n(On)", "HAZARD\n(Off)", sdSysData.PANEL_CONTROL.AUTO_HAZARDS, RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_HAZARD.button_toggle_color(sdSysData, "HAZARD", "HAZARD", sdSysData.PANEL_CONTROL.AUTO_HAZARDS, RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
               if (sdSysData.PANEL_CONTROL.AUTO_HAZARDS == true)
               {
@@ -1970,7 +1971,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
     if (COMMAND_TEXT_CHANGED)
     {
-      string command_display = left_justify((int)TERMINAL_WINDOW.ws_col, "CMD: " + COMMAND_TEXT) + "\n" + 
+      string command_display = left_justify((int)TERMINAL_WINDOW.ws_col, "CMD: " + COMMAND_TEXT) + "" + 
                                left_justify((int)TERMINAL_WINDOW.ws_col, " ") + "\n";
 
       printf ("\033[1;1H%s\033[%d;1H", command_display.c_str(), TERMINAL_WINDOW.ws_row);

@@ -1092,13 +1092,13 @@ void AUTOMOBILE_SCREEN::nova(system_data &sdSysData)
 {
   ImGui::BeginChild("Nova Display Buttons", ImVec2(90.0f * DEF_SCREEN_SIZE_X_MULTIPLIER, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    if (BTC_ENABLED.button_toggle_color(sdSysData, "ENABLE\n(On)", "ENABLE\n(Off)", sdSysData.CAR_INFO.NOVA.ENABLED, 
+    if (BTC_ENABLED.button_toggle_color(sdSysData, "ENABLE", "ENABLE", sdSysData.CAR_INFO.NOVA.ENABLED, 
                     RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       sdSysData.CAR_INFO.NOVA.ENABLED = !sdSysData.CAR_INFO.NOVA.ENABLED;
     }
 
-    if (BTC_VAL.button_toggle_color(sdSysData, "VAL\n(On)", "VAL\n(Off)", NOVA_CLIP_DETAIL, 
+    if (BTC_VAL.button_toggle_color(sdSysData, "VAL", "VAL", NOVA_CLIP_DETAIL, 
                     RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       NOVA_CLIP_DETAIL = !NOVA_CLIP_DETAIL;
@@ -2776,7 +2776,7 @@ void AUTOMOBILE_SCREEN::display(system_data &sdSysData, bool &Display_Confirm)
 
             ImGui::SameLine();
 
-            if (BTC_RECORD.button_toggle_color(sdSysData, "RECORD\n(On)", "RECORD", sdSysData.COMMS_AUTO.record_in_progress(), 
+            if (BTC_RECORD.button_toggle_color(sdSysData, "RECORD", "RECORD", sdSysData.COMMS_AUTO.record_in_progress(), 
                                   RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
               if (sdSysData.COMMS_AUTO.record_in_progress())

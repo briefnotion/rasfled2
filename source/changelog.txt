@@ -1,3 +1,11 @@
+2.337_251016
+  - Adjusted the toggle button colors so they are white 
+      when value is true (On).
+  - Added a few more camera properties to the save and 
+      load settings.
+  - Added a few mor AI generated camera enhancements to 
+      see what works. Default off.
+
 2.336_251015
   - Added a simple camera save and load settings when 
     the camera is opened and closed.

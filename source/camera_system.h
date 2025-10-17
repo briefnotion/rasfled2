@@ -21,12 +21,13 @@
 #include <iostream>
 #include <vector>
 
+#include <GLFW/glfw3.h>
+
 #include <opencv2/opencv.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/objdetect.hpp> 
 
-#include <GLFW/glfw3.h>
 
 // Rasfled Includes
 #include "helper.h"
@@ -124,6 +125,9 @@ class CAMERA_PROPERTIES
   bool ENH_GLARE_MASK     = true;
 
   //bool ENH_LINE_DETECTION = false;
+  bool ENH_COLOR          = false;
+  bool ENH_HOUGH          = false;
+  bool ENH_CURVE_IMPROVED = false;
   bool ENH_CURVE_FIT      = false;
 
   //bool ENH_ROAD_MASK      = false;  // Doesnt work
@@ -134,8 +138,12 @@ class CAMERA_PROPERTIES
   
   // Adjustments for the backup camera
     // Level 0: Closest to the car (Bottom of Green)
-  bool IS_BACKUP_CAMERA = false;
+  bool SHOW_PATH = false;
   
+  // Angle Muliplier
+  float ANGLE_MULTIPLIER = 2.5f;
+
+  // Level 0: Closest Green boundary
   float Y0 = 1.000f;
   float XL0 = -0.100f;
   float XR0 = 1.160f;
@@ -186,6 +194,11 @@ class CAMERA
   // Camera CV Helper
   bool is_low_light(const cv::Mat& frame, int threshold);
   cv::Mat get_road_mask(const cv::Mat& frame);
+
+  void detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame);
+  void detect_hough_circles(cv::Mat& processed_frame);
+  void detect_and_draw_contours_improved(cv::Mat& processed_frame);
+
   void detect_and_draw_contours(cv::Mat& processed_frame);
   cv::Mat overlay_lines(cv::Mat& processed_frame);
   cv::Mat suppress_glare_mask(cv::Mat& processed_frame);
@@ -208,7 +221,7 @@ class CAMERA
   //Multithreaded routines and vaiables. Access with caution.
   
   // All Threads
-  vector<string>    PRINTW_QUEUE;
+  vector<std::string>    PRINTW_QUEUE;
 
   // Thread Update
   

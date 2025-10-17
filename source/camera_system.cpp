@@ -79,6 +79,63 @@ cv::Mat CAMERA::get_road_mask(const cv::Mat& frame)
   return mask;
 }
 
+/**
+ * @brief BASIC CONTOUR DETECTION (Based on user's original logic with retrieval fix).
+ * * This version finds all contours but does NOT use pre-blurring, which can lead 
+ * * to noisy results compared to the 'improved' version.
+ * * @param processed_frame The input/output BGR frame. Contours will be drawn on it.
+ */
+void CAMERA::detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame) 
+{
+  if (processed_frame.empty()) return;
+
+  // --- NEW: Visual Color Contrast Enhancement (Applied to BGR frame) ---
+  // Boosts contrast for better visual representation of the final output.
+  // We use convertTo to adjust contrast (alpha) and brightness (beta) directly on the BGR frame.
+  double visual_alpha = 1.5; // Mild contrast boost for display
+  double visual_beta = 0.0;
+  processed_frame.convertTo(processed_frame, -1, visual_alpha, visual_beta);
+  // --- END: Visual Color Contrast Enhancement ---
+
+  // --- 1. Isolate Edges/Outlines ---
+  cv::Mat gray_edges;
+  // NOTE: The frame passed here now has its contrast visually boosted.
+  cv::cvtColor(processed_frame, gray_edges, cv::COLOR_BGR2GRAY);
+  
+  // --- Extreme Contrast Enhancement on Grayscale (Pre-Canny) ---
+  // This is a common contrast stretch: new_pixel = alpha * old_pixel + beta
+  cv::Mat contrasted_edges;
+  double alpha = 2.5; // Controls contrast: Values > 1.0 increase contrast aggressively
+  double beta = 0.0;  // Controls brightness: 0.0 means no overall brightness shift
+  
+  // This maximizes the difference between light and dark areas for the Canny detector
+  cv::convertScaleAbs(gray_edges, contrasted_edges, alpha, beta);
+  // --- END: Contrast Enhancement ---
+  
+  // Use Canny Edge Detection on the highly contrasted image
+  cv::Mat edges;
+  cv::Canny(contrasted_edges, edges, 50, 150, 3);
+  
+  // --- 2. Find Contours ---
+  std::vector<std::vector<cv::Point>> contours;
+  std::vector<cv::Vec4i> hierarchy;
+  // RETR_LIST finds ALL contours.
+  cv::findContours(edges, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
+
+  // --- 3. Filter and Draw Contours ---
+  for (size_t i = 0; i < contours.size(); ++i) 
+  {
+    // Filter contours by area to ignore small noise
+    double area = cv::contourArea(contours[i]);
+    // The original area filter of > 500 is used here
+    if (area > 500) 
+    { 
+      // Draw the contour (Cyan color: B=255, G=255, R=0)
+      cv::drawContours(processed_frame, contours, (int)i, cv::Scalar(255, 255, 0), 2, cv::LINE_AA, hierarchy, 0);
+    }
+  }
+}
+
 // NEW Helper function: Detects and draws general contours (outlines of objects).
 void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame) 
 {
@@ -93,7 +150,104 @@ void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame)
   cv::Canny(gray_edges, edges, 50, 150, 3);
   
   // --- 2. Find Contours ---
-  // cv::RETR_EXTERNAL retrieves only the extreme outer contours.
+  // FIX: Changed from cv::RETR_EXTERNAL to cv::RETR_LIST.
+  // RETR_EXTERNAL only finds the outermost contour of an entire connected set,
+  // which makes it seem like it's "stopping at the first thing." RETR_LIST finds ALL contours.
+  std::vector<std::vector<cv::Point>> contours;
+  std::vector<cv::Vec4i> hierarchy;
+  cv::findContours(edges, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
+
+  // --- 3. Filter and Draw Contours ---
+  for (size_t i = 0; i < contours.size(); ++i) 
+  {
+    // Filter contours by area to ignore small noise
+    double area = cv::contourArea(contours[i]);
+    // The original area filter of > 500 is used here
+    if (area > 500) 
+    { 
+      // Draw the contour (Cyan color: B=255, G=255, R=0)
+      cv::drawContours(processed_frame, contours, (int)i, cv::Scalar(255, 255, 0), 2, cv::LINE_AA, hierarchy, 0);
+    }
+  }
+}
+
+/**
+ * @brief RECOMMENDED: Detects and draws circles using the Hough Circle Transform.
+ * * This method is far superior for finding circular shapes compared to general 
+ * contour analysis, especially when dealing with noisy or low-contrast images.
+ * * @param processed_frame The input/output BGR frame. Circles will be drawn on it.
+ */
+void CAMERA::detect_hough_circles(cv::Mat& processed_frame) 
+{
+  if (processed_frame.empty()) return;
+
+  // --- 1. Pre-process: Convert to grayscale and blur ---
+  cv::Mat gray, blurred;
+  cv::cvtColor(processed_frame, gray, cv::COLOR_BGR2GRAY);
+  
+  // Applying Gaussian blur is CRUCIAL for HoughCircles to work correctly, 
+  // as it smooths edges and reduces false positives (noise).
+  cv::GaussianBlur(gray, blurred, cv::Size(9, 9), 2, 2);
+
+  // --- 2. Find Circles using Hough Transform ---
+  std::vector<cv::Vec3f> circles;
+  
+  // Parameters:
+  // 1. image: Input image (8-bit, single-channel, grayscale)
+  // 2. circles: Output vector of circles (x, y, radius)
+  // 3. method: Detection method (HOUGH_GRADIENT is currently the only one)
+  // 4. dp: Inverse ratio of the accumulator resolution (1 = same resolution as input)
+  // 5. minDist: Minimum distance between the centers of the detected circles (prevents duplicate detections)
+  // 6. param1: Canny edge detection high threshold (the low threshold is half of this)
+  // 7. param2: Accumulator threshold for the Canny gradient output (smaller means more circles found, higher means stricter)
+  // 8. minRadius: Minimum radius (in pixels) to search for
+  // 9. maxRadius: Maximum radius (in pixels) to search for
+  cv::HoughCircles(blurred, circles, cv::HOUGH_GRADIENT, 
+                    1,         // dp: Default (accumulator same resolution as input)
+                    30,        // minDist: Min distance between centers (e.g., 30 pixels)
+                    100,       // param1: Canny high threshold 
+                    30,        // param2: Accumulator threshold (Tune this! Lower if you're missing circles)
+                    5,         // minRadius: Start checking from 5 pixels
+                    100        // maxRadius: Stop checking at 100 pixels
+  );
+
+  // --- 3. Draw the detected circles ---
+  for (size_t i = 0; i < circles.size(); i++)
+  {
+    cv::Vec3i c = circles[i];
+    cv::Point center = cv::Point(c[0], c[1]);
+    int radius = c[2];
+
+    // Draw the circle center (Red dot)
+    // cv::circle(processed_frame, center, 3, cv::Scalar(255, 0, 255), -1, cv::LINE_AA);
+    
+    // Draw the circle outline (Green: B=0, G=255, R=0)
+    cv::circle(processed_frame, center, radius, cv::Scalar(255, 255, 0), 2, cv::LINE_AA);
+  }
+}
+
+/**
+ * @brief IMPROVED: General contour detection (for non-circular shapes).
+ * * This is a refinement of your original function, adding crucial pre-processing.
+ * * @param processed_frame The input/output BGR frame. Contours will be drawn on it.
+ */
+void CAMERA::detect_and_draw_contours_improved(cv::Mat& processed_frame) 
+{
+  if (processed_frame.empty()) return;
+
+  // --- 1. Pre-process: Convert to grayscale and blur (CRUCIAL FIX) ---
+  // Blurring significantly reduces noise and helps Canny find cleaner, continuous edges.
+  cv::Mat gray_edges;
+  cv::cvtColor(processed_frame, gray_edges, cv::COLOR_BGR2GRAY);
+  
+  cv::Mat blurred;
+  cv::GaussianBlur(gray_edges, blurred, cv::Size(5, 5), 0);
+  
+  // Use Canny Edge Detection to find sharp boundaries
+  cv::Mat edges;
+  cv::Canny(blurred, edges, 50, 150, 3); // Canny thresholds (50, 150) may need tuning
+  
+  // --- 2. Find Contours ---
   std::vector<std::vector<cv::Point>> contours;
   std::vector<cv::Vec4i> hierarchy;
   cv::findContours(edges, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
@@ -101,10 +255,21 @@ void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame)
   // --- 3. Filter and Draw Contours ---
   for (size_t i = 0; i < contours.size(); ++i) 
   {
-    // Filter contours by area to ignore small noise
     double area = cv::contourArea(contours[i]);
-    if (area > 500) 
-    { 
+
+    // A. Filter by a minimum area to ignore noise (TUNE THIS: e.g., 100)
+    if (area < 100) continue; 
+    
+    // B. Filter for *smooth* or geometrically simple shapes (optional)
+    // Approximate the contour to a polygon to simplify jagged lines
+    double peri = cv::arcLength(contours[i], true);
+    std::vector<cv::Point> approx;
+    cv::approxPolyDP(contours[i], approx, 0.02 * peri, true);
+    
+    // Filter 2: Ignore contours that are too simple (e.g., just 3-4 points from noise)
+    // or too complex (e.g., too many vertices, indicating a jagged outline)
+    if (approx.size() > 5 && approx.size() < 20)
+    {
       // Draw the contour (Cyan color: B=255, G=255, R=0)
       cv::drawContours(processed_frame, contours, (int)i, cv::Scalar(255, 255, 0), 2, cv::LINE_AA, hierarchy, 0);
     }
@@ -429,7 +594,16 @@ void CAMERA::save_settings()
   JSON_ENTRY camera_settings;
   JSON_ENTRY backup_camera_settings;
 
-  backup_camera_settings.create_label_value(quotify("IS_BACKUP_CAMERA"), quotify(to_string(PROPS.IS_BACKUP_CAMERA)));
+  // Standar Settings
+  camera_settings.create_label_value(quotify("WIDTH"), quotify(to_string(PROPS.WIDTH)));
+  camera_settings.create_label_value(quotify("HEIGHT"), quotify(to_string(PROPS.HEIGHT)));
+  camera_settings.create_label_value(quotify("FLIP_HORIZONTAL"), quotify(to_string(PROPS.FLIP_HORIZONTAL)));
+  camera_settings.create_label_value(quotify("FLIP_VERTICAL"), quotify(to_string(PROPS.FLIP_VERTICAL)));
+  camera_settings.create_label_value(quotify("FORCED_FRAME_LIMIT_MS"), quotify(to_string(PROPS.FORCED_FRAME_LIMIT_MS)));
+
+  // Backup Camera Settings
+  backup_camera_settings.create_label_value(quotify("SHOW_PATH"), quotify(to_string(PROPS.SHOW_PATH)));
+  backup_camera_settings.create_label_value(quotify("ANGLE_MULTIPLIER"), quotify(to_string(PROPS.ANGLE_MULTIPLIER)));
 
   backup_camera_settings.create_label_value(quotify("Y0"), quotify(to_string(PROPS.Y0)));
   backup_camera_settings.create_label_value(quotify("XL0"), quotify(to_string(PROPS.XL0)));
@@ -447,7 +621,7 @@ void CAMERA::save_settings()
   camera_settings.put_json_in_set(quotify("backup camera settings"), backup_camera_settings);
   settings.ROOT.put_json_in_set(quotify("camera settings"), camera_settings);
 
-  deque<string> camera_settings_json_deque;
+  deque<std::string> camera_settings_json_deque;
   settings.json_print_build_to_string_deque(camera_settings_json_deque);
 
   threaded_deque_string_to_file(PROPS.CAMERA_SETTINGS_FILE_NAME, camera_settings_json_deque);
@@ -457,7 +631,7 @@ void CAMERA::load_settings()
 {
   bool tmp_success = false;
 
-  string camera_settings_json = file_to_string(PROPS.CAMERA_SETTINGS_FILE_NAME, tmp_success);
+  std::string camera_settings_json = file_to_string(PROPS.CAMERA_SETTINGS_FILE_NAME, tmp_success);
 
   if (tmp_success == false)
   {
@@ -477,34 +651,47 @@ void CAMERA::load_settings()
       {
         if (settings.ROOT.DATA[root].label() == "camera settings")
         {
+          STRING_INT    si_width;
+          STRING_INT    si_height;
+          STRING_BOOL   sb_flip_horizontal;
+          STRING_BOOL   sb_flip_vertical;
+          STRING_INT    si_forced_frame_limit;
+
+          STRING_BOOL   sb_show_path;
+          STRING_FLOAT  sb_angle_multiplier;
+
+          STRING_FLOAT  sf_y0;
+          STRING_FLOAT  sf_xl0;
+          STRING_FLOAT  sf_rl0;
+
+          STRING_FLOAT  sf_y1;
+          STRING_FLOAT  sf_xl1;
+          STRING_FLOAT  sf_rl1;
+
+          STRING_FLOAT  sf_y2;
+          STRING_FLOAT  sf_xl2;
+          STRING_FLOAT  sf_rl2;
+
+          STRING_FLOAT  sf_y3;
+          STRING_FLOAT  sf_xl3;
+          STRING_FLOAT  sf_rl3;
+
           for (size_t entry_list = 0;                                        //root/marker_list
                       entry_list < settings.ROOT.DATA[root].DATA.size(); entry_list++)
           {
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("WIDTH", si_width);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("HEIGHT", si_height);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_HORIZONTAL", sb_flip_horizontal);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_VERTICAL", sb_flip_vertical);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FORCED_FRAME_LIMIT_MS", si_forced_frame_limit);
+
             if (settings.ROOT.DATA[root].DATA[entry_list].label() == "backup camera settings")
             {
-
-              STRING_BOOL  sb_is_backup_camera;
-
-              STRING_FLOAT sf_y0;
-              STRING_FLOAT sf_xl0;
-              STRING_FLOAT sf_rl0;
-
-              STRING_FLOAT sf_y1;
-              STRING_FLOAT sf_xl1;
-              STRING_FLOAT sf_rl1;
-
-              STRING_FLOAT sf_y2;
-              STRING_FLOAT sf_xl2;
-              STRING_FLOAT sf_rl2;
-
-              STRING_FLOAT sf_y3;
-              STRING_FLOAT sf_xl3;
-              STRING_FLOAT sf_rl3;
-
               for (size_t backup_cam_entry_list = 0;                                        //root/marker_list
               backup_cam_entry_list < settings.ROOT.DATA[root].DATA[entry_list].DATA.size(); backup_cam_entry_list++)
               {
-                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("IS_BACKUP_CAMERA", sb_is_backup_camera);
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("SHOW_PATH", sb_show_path);
+                settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("ANGLE_MULTIPLIER", sb_angle_multiplier);
 
                 settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("Y0", sf_y0);
                 settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XL0", sf_xl0);
@@ -522,63 +709,94 @@ void CAMERA::load_settings()
                 settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XL3", sf_xl3);
                 settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XR3", sf_rl3);
               }
+            }
 
-              if (sb_is_backup_camera.conversion_success())
-              {
-                PROPS.IS_BACKUP_CAMERA = sb_is_backup_camera.get_bool_value();
-              }
+            // ---
+            if (si_width.conversion_success())
+            {
+              PROPS.WIDTH = si_width.get_int_value();
+            }
+            
+            if (si_height.conversion_success())
+            {
+              PROPS.HEIGHT = si_height.get_int_value();
+            }
+            
+            if (sb_flip_horizontal.conversion_success())
+            {
+              PROPS.FLIP_HORIZONTAL = sb_flip_horizontal.get_bool_value();
+            }
+            
+            if (sb_flip_vertical.conversion_success())
+            {
+              PROPS.FLIP_VERTICAL = sb_flip_vertical.get_bool_value();
+            }
+            
+            if (si_forced_frame_limit.conversion_success())
+            {
+              PROPS.FORCED_FRAME_LIMIT_MS = si_forced_frame_limit.get_int_value();
+            }
+            
+            if (sb_show_path.conversion_success())
+            {
+              PROPS.SHOW_PATH = sb_show_path.get_bool_value();
+            }
+            
+            if (sb_angle_multiplier.conversion_success())
+            {
+              PROPS.ANGLE_MULTIPLIER = sb_angle_multiplier.get_float_value();
+            }
 
-              if (sf_y0.conversion_success())
-              {
-                PROPS.Y0 = sf_y0.get_float_value();
-              }
-              if (sf_xl0.conversion_success())
-              {
-                PROPS.XL0 = sf_xl0.get_float_value();
-              }
-              if (sf_rl0.conversion_success())
-              {
-                PROPS.XR0 = sf_rl0.get_float_value();
-              }
+            if (sf_y0.conversion_success())
+            {
+              PROPS.Y0 = sf_y0.get_float_value();
+            }
+            if (sf_xl0.conversion_success())
+            {
+              PROPS.XL0 = sf_xl0.get_float_value();
+            }
+            if (sf_rl0.conversion_success())
+            {
+              PROPS.XR0 = sf_rl0.get_float_value();
+            }
 
-              if (sf_y1.conversion_success())
-              {
-                PROPS.Y1 = sf_y1.get_float_value();
-              }
-              if (sf_xl1.conversion_success())
-              {
-                PROPS.XL1 = sf_xl1.get_float_value();
-              }
-              if (sf_rl1.conversion_success())
-              {
-                PROPS.XR1 = sf_rl1.get_float_value();
-              }
+            if (sf_y1.conversion_success())
+            {
+              PROPS.Y1 = sf_y1.get_float_value();
+            }
+            if (sf_xl1.conversion_success())
+            {
+              PROPS.XL1 = sf_xl1.get_float_value();
+            }
+            if (sf_rl1.conversion_success())
+            {
+              PROPS.XR1 = sf_rl1.get_float_value();
+            }
 
-              if (sf_y2.conversion_success())
-              {
-                PROPS.Y2 = sf_y2.get_float_value();
-              }
-              if (sf_xl2.conversion_success())
-              {
-                PROPS.XL2 = sf_xl2.get_float_value();
-              }
-              if (sf_rl2.conversion_success())
-              {
-                PROPS.XR2 = sf_rl2.get_float_value();
-              }
+            if (sf_y2.conversion_success())
+            {
+              PROPS.Y2 = sf_y2.get_float_value();
+            }
+            if (sf_xl2.conversion_success())
+            {
+              PROPS.XL2 = sf_xl2.get_float_value();
+            }
+            if (sf_rl2.conversion_success())
+            {
+              PROPS.XR2 = sf_rl2.get_float_value();
+            }
 
-              if (sf_y3.conversion_success())
-              {
-                PROPS.Y3 = sf_y3.get_float_value();
-              }
-              if (sf_xl3.conversion_success())
-              {
-                PROPS.XL3 = sf_xl3.get_float_value();
-              }
-              if (sf_rl3.conversion_success())
-              {
-                PROPS.XR3 = sf_rl3.get_float_value();
-              }
+            if (sf_y3.conversion_success())
+            {
+              PROPS.Y3 = sf_y3.get_float_value();
+            }
+            if (sf_xl3.conversion_success())
+            {
+              PROPS.XL3 = sf_xl3.get_float_value();
+            }
+            if (sf_rl3.conversion_success())
+            {
+              PROPS.XR3 = sf_rl3.get_float_value();
             }
           }
         }
@@ -722,10 +940,29 @@ void CAMERA::apply_ehancements()
 
     //---
 
-    // Contour and Shape Detection (General Curves)
+    if (PROPS.ENH_COLOR)
+    {
+      detect_and_draw_contours_basic_fixed(PROCESSED_FRAME);
+    }
+
+    //---
+
+    if (PROPS.ENH_HOUGH)
+    {
+      detect_hough_circles(PROCESSED_FRAME);
+    }
+
+    //---
+
+    if (PROPS.ENH_CURVE_IMPROVED)
+    {
+      detect_and_draw_contours_improved(PROCESSED_FRAME);
+    }
+
+    //---
+
     if (PROPS.ENH_CURVE_FIT)
     {
-      // This block runs general contour detection to find outlines of objects (cars, signs, potholes).
       detect_and_draw_contours(PROCESSED_FRAME);
     }
     
@@ -1206,7 +1443,7 @@ void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
 {
   if (PRINTW_QUEUE.size() > 0)
   {
-    string print_buffer = "";
+    std::string print_buffer = "";
     for (size_t pos = 0; pos < PRINTW_QUEUE.size(); pos++)
     {
       print_buffer += PRINTW_QUEUE[pos];

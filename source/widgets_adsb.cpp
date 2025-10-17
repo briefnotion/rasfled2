@@ -904,7 +904,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
   {
     ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (4.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
-    if (BTC_CENT.button_toggle_color( sdSysData, "CENT\n(On)", "CENT\n(Off)", 
+    if (BTC_CENT.button_toggle_color( sdSysData, "CENT", "CENT", 
                                       RANGE_INDICATOR.gps_display_current_location(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS),
                                       RAS_GREEN, RAS_BLUE, 
                                       sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -917,7 +917,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
   {
     ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (4.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
-    button_simple_enabled(sdSysData, "GPS\n", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
+    button_simple_enabled(sdSysData, "GPS", false, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
   }
 
   // Center on location
@@ -940,7 +940,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
     ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - (6.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)), 
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
 
-    if (BC_MIN.button_toggle_color(sdSysData, "MIN\n(On)", "MIN", 
+    if (BC_MIN.button_toggle_color(sdSysData, "MIN", "MIN", 
                                       ( sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0 && 
                                         sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 1), 
                                       RAS_GREEN, RAS_BLUE, 
@@ -967,7 +967,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
 
 
-    if (BC_MAX.button_toggle_color(sdSysData, "MAX\n(On)", "MAX", 
+    if (BC_MAX.button_toggle_color(sdSysData, "MAX", "MAX", 
                                       ( sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 0 && 
                                         sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_0() == 2), 
                                       RAS_GREEN, RAS_BLUE, 
@@ -997,7 +997,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
                                       WORKING_AREA.y + WORKING_AREA.w - (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + 5.0f)));
 
 
-    if (BC_DRV.button_toggle_color(sdSysData, "DRV\n(On)", "DRV", 
+    if (BC_DRV.button_toggle_color(sdSysData, "DRV", "DRV", 
                                       ( sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection() == 1 && 
                                         sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_MODE_SELECTION.value_selection_1() == 1),
                                       RAS_GREEN, RAS_BLUE, 
@@ -1037,7 +1037,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
     {
       ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 2.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                         WORKING_AREA.y));
-      if (BTC_LOCK.button_toggle_color(sdSysData, "CALI\n(On)", "CALI\n(Off)", sdSysData.COMMS_COMPASS.PROPS.CALIBRATION_ENABLED,
+      if (BTC_LOCK.button_toggle_color(sdSysData, "CALI", "CALI", sdSysData.COMMS_COMPASS.PROPS.CALIBRATION_ENABLED,
                                     RAS_GREEN, RAS_BLUE, 
                                     sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
@@ -1062,7 +1062,7 @@ void ADSB_MAP::screen_buttons(system_data &sdSysData)
 
       ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + WORKING_AREA.z - 6.0f * (sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x + 5.0f), 
                                         WORKING_AREA.y));
-      if (BTC_GPS_ASSIST.button_toggle_color(sdSysData, "GPS-A\n(On)", "GPS-A\n(Off)", sdSysData.COMMS_COMPASS.PROPS.GPS_ASSIST_HEADING, 
+      if (BTC_GPS_ASSIST.button_toggle_color(sdSysData, "GPS-A", "GPS-A", sdSysData.COMMS_COMPASS.PROPS.GPS_ASSIST_HEADING, 
                                         RAS_GREEN, RAS_BLUE, 
                                         sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
       {
@@ -1906,7 +1906,7 @@ void ADSB_SCREEN::display(system_data &sdSysData)
 
   ImGui::BeginChild("ADSB Buttons", ImVec2(90 * DEF_SCREEN_SIZE_X_MULTIPLIER, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    if (BTC_ADSB.button_toggle_color(sdSysData, "ADSB\n(On)", "ADSB\n(Off)", sdSysData.AIRCRAFT_COORD.is_active(), RAS_RED, RAS_GREY, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+    if (BTC_ADSB.button_toggle_color(sdSysData, "ADSB", "ADSB", sdSysData.AIRCRAFT_COORD.is_active(), RAS_RED, RAS_GREY, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
     {
       if (sdSysData.AIRCRAFT_COORD.is_active() == true)
       {

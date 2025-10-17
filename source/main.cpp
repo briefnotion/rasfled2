@@ -444,7 +444,7 @@ int loop_2(bool TTY_Only)
   sdSystem.CAMERA_BACKUP.PROPS.FLIP_HORIZONTAL  = false;
   sdSystem.CAMERA_BACKUP.PROPS.FLIP_VERTICAL    = true;
   
-  sdSystem.CAMERA_BACKUP.PROPS.IS_BACKUP_CAMERA = true;
+  sdSystem.CAMERA_BACKUP.PROPS.SHOW_PATH = true;
 
   // ---
 

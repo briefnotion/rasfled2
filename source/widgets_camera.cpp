@@ -41,7 +41,7 @@ void CAMERA_WIDGET::display_path(system_data &sdSysData)
   );
 
   // Determine the cars steering roation skew
-  float slide = ANGLE * ANGLE_MULTIPLIER;
+  float slide = ANGLE * sdSysData.CAMERA_BACKUP.PROPS.ANGLE_MULTIPLIER;
 
   // Convert all 4 levels of points to screen coordinates
   ImVec2 P0L = norm_to_screen(sdSysData.CAMERA_BACKUP.PROPS.XL0, sdSysData.CAMERA_BACKUP.PROPS.Y0, slide, image_start_pos, FINAL_SIZE); // Closest Left
@@ -215,7 +215,7 @@ void CAMERA_WIDGET::display_camera_adjustments_window(system_data &sdSysData)
   {
     // Temporary for path calibration
     {
-      ImGui::InputFloat("AMLT", &ANGLE_MULTIPLIER);
+      ImGui::InputFloat("AMLT", &sdSysData.CAMERA_BACKUP.PROPS.ANGLE_MULTIPLIER);
 
       //ImGui::Text("Path Points:");
       ImGui::InputFloat("Y0", &sdSysData.CAMERA_BACKUP.PROPS.Y0);
@@ -262,11 +262,11 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
   ImGui::BeginChild("Col1", ImVec2((working_area_col.z) / column_count, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
     // Display Path
-    if (BC_DISPLAY_PATH.button_toggle_color(sdSysData, "PATH##Display_Path", "PATH##Display_Path", 
-                                              DISPLAY_PATH, 
+    if (BC_SHOW_PATH.button_toggle_color(sdSysData, "PATH##Display_Path", "PATH##Display_Path", 
+                                              sdSysData.CAMERA_BACKUP.PROPS.SHOW_PATH, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
-      DISPLAY_PATH = !DISPLAY_PATH;
+      sdSysData.CAMERA_BACKUP.PROPS.SHOW_PATH = !sdSysData.CAMERA_BACKUP.PROPS.SHOW_PATH;
     }
 
     /*
@@ -287,7 +287,6 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT = !sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT;
     }
 
-    // Display Median Blur only when low light
     if (BC_ENH_OVERLAY_LINES.button_toggle_color(sdSysData, "LINES", "LINES", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_OVERLAY_LINES, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -295,7 +294,7 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.PROPS.ENH_OVERLAY_LINES = !sdSysData.CAMERA_BACKUP.PROPS.ENH_OVERLAY_LINES;
     }
 
-    // Display Median Blur only when low light
+    ImGui::SameLine();
     if (BC_ENH_GLARE_MASK.button_toggle_color(sdSysData, "GLARE\nMASK", "GLARE\nMASK", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_GLARE_MASK, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -334,6 +333,29 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
     }
     */
     
+    if (BC_ENH_COLOR.button_toggle_color(sdSysData, "COLOR", "COLOR", 
+                                              sdSysData.CAMERA_BACKUP.PROPS.ENH_COLOR, 
+                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.CAMERA_BACKUP.PROPS.ENH_COLOR = !sdSysData.CAMERA_BACKUP.PROPS.ENH_COLOR;
+    }
+    
+    ImGui::SameLine();
+    if (BC_ENH_HOUGH.button_toggle_color(sdSysData, "HOUGH", "HOUGH", 
+                                              sdSysData.CAMERA_BACKUP.PROPS.ENH_HOUGH, 
+                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.CAMERA_BACKUP.PROPS.ENH_HOUGH = !sdSysData.CAMERA_BACKUP.PROPS.ENH_HOUGH;
+    }
+
+    if (BC_ENH_CURVE_IMPROVED.button_toggle_color(sdSysData, "CUR\nFIT E", "CUR\nFIT E", 
+                                              sdSysData.CAMERA_BACKUP.PROPS.ENH_CURVE_IMPROVED, 
+                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.CAMERA_BACKUP.PROPS.ENH_CURVE_IMPROVED = !sdSysData.CAMERA_BACKUP.PROPS.ENH_CURVE_IMPROVED;
+    }
+    
+    ImGui::SameLine();
     // Display Curve Detection
     if (BC_ENH_ENH_CURVE_FIT.button_toggle_color(sdSysData, "CUR\nFIT", "CUR\nFIT", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_CURVE_FIT, 
@@ -420,7 +442,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
       }
 
       // Draw Path Lines
-      if (DISPLAY_PATH)
+      if (sdSysData.CAMERA_BACKUP.PROPS.SHOW_PATH)
       {
         display_path(sdSysData);
       }

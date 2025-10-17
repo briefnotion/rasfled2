@@ -510,10 +510,9 @@ bool BUTTON_TOGGLE_COLOR::button_toggle_color(system_data &sdSysData, string Tru
   // Does not control toggle, just shows value.
   bool ret_value = false;
 
-  ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
-
   if (Toggle == false)
   {
+    ImGui::PushStyleColor(ImGuiCol_Text, ImU32(BUTTON_TEXT_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE))));
     ImGui::PushStyleColor(ImGuiCol_Button, ImU32(BUTTON_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(False_Color))));
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_HOVERED(False_Color))));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_ACTIVE(False_Color))));
@@ -527,8 +526,16 @@ bool BUTTON_TOGGLE_COLOR::button_toggle_color(system_data &sdSysData, string Tru
   }
   else
   {
-    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(BUTTON_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(True_Color))));
-    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_HOVERED(True_Color))));
+    if(sdSysData.PANEL_CONTROL.COLOR_SELECT.void_color_v())
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(BUTTON_TEXT_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_BLACK))));
+    }
+    else
+    {
+      ImGui::PushStyleColor(ImGuiCol_Text, ImU32(BUTTON_TEXT_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE))));
+    }
+    ImGui::PushStyleColor(ImGuiCol_Button, ImU32(BUTTON_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(True_Color))));
+    ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImU32(BUTTON_HOVERED_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(True_Color))));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImU32(BUTTON_ACTIVE_COLOR.color(sdSysData.PROGRAM_TIME.current_frame_time(), sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_ACTIVE(True_Color))));
 
     //if (ImGui::Button(TEXT.value(True_Value_Text).c_str(), ImVec2_Size))

@@ -81,27 +81,24 @@ class CAMERA_WIDGET
   BUTTON_COLOR        BC_SHARPMESS_MINUS;
 
   // Enhancements
-  BUTTON_TOGGLE_COLOR        BC_DISPLAY_PATH;
+  BUTTON_TOGGLE_COLOR        BC_SHOW_PATH;
   //BUTTON_TOGGLE_COLOR        BC_ENH_MEDIAN_BLUR;
   BUTTON_TOGGLE_COLOR        BC_ENH_LOW_LIGHT;
   BUTTON_TOGGLE_COLOR        BC_ENH_OVERLAY_LINES;
   BUTTON_TOGGLE_COLOR        BC_ENH_GLARE_MASK;
   //BUTTON_TOGGLE_COLOR        BC_ENH_SHARPEN;
   //BUTTON_TOGGLE_COLOR        BC_ENH_LINE_DETECTION;
+  BUTTON_TOGGLE_COLOR        BC_ENH_COLOR;
+  BUTTON_TOGGLE_COLOR        BC_ENH_HOUGH;
+  BUTTON_TOGGLE_COLOR        BC_ENH_CURVE_IMPROVED;
   BUTTON_TOGGLE_COLOR        BC_ENH_ENH_CURVE_FIT;
   BUTTON_TOGGLE_COLOR        BC_ENH_ROAD_MASK;
   BUTTON_TOGGLE_COLOR        BC_ENH_CAR_DETECTION;
-
-  // Path Values
-  bool                DISPLAY_PATH = true;
 
   //---
 
   // Define normalized path coordinates (0.0=top/left, 1.0=bottom/right).
   // These coordinates create the three connected trapezoids.
-  
-  // Angle Muliplier
-  float ANGLE_MULTIPLIER = 2.5f;
 
   // Line Thickness
   float THICKNESS_1_A = 16.0f;
