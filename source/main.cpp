@@ -449,6 +449,8 @@ int loop_2(bool TTY_Only)
   // ---
 
   // Get list of controls to print to screen.
+  
+  sdSystem.CAMERA_BACKUP.load_settings();
   sdSystem.SCREEN_COMMS.printw("Initializing Camera ...");
   sdSystem.CAMERA_BACKUP.list_controls(sdSystem.SCREEN_COMMS);
 

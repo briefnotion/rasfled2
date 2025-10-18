@@ -449,6 +449,28 @@ void processcommandlineinput(system_data &sdSysData,
       }
 
       // -------------------------------------------------------------------------------------
+      // Camera Comms
+
+      // Start all cameras
+      if (check_command(sdSysData.SCREEN_COMMS," camo", "Start All Cameras"))
+      {
+        sdSysData.CAMERA_BACKUP.camera_start();
+      }
+
+      // Stop all cameras
+      if (check_command(sdSysData.SCREEN_COMMS," camf", "Stop All Cameras"))
+      {
+        sdSysData.CAMERA_BACKUP.camera_stop();
+      }
+
+      // Stop all cameras
+      if (check_command(sdSysData.SCREEN_COMMS," camt", "All Cameras Enter or Exit TEST Mode"))
+      {
+        sdSysData.CAMERA_BACKUP.PROPS.TEST = !sdSysData.CAMERA_BACKUP.PROPS.TEST;
+        sdSysData.SCREEN_COMMS.printw("Camera test mode set to = " + to_string(sdSysData.CAMERA_BACKUP.PROPS.TEST));
+      }
+
+      // -------------------------------------------------------------------------------------
       // GPS Comms
 
       // Start GPS Comm Port

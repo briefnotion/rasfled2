@@ -378,6 +378,10 @@ int SCREEN4::create(system_data &sdSysData)
     LIGHTS.PROPS.COLOR_FALSE = RAS_BLUE;
     LIGHTS.update_text("LED ILLUM", "LED ILLUM");
 
+    CAMERA.PROPS.COLOR_TRUE = RAS_WHITE;
+    CAMERA.PROPS.COLOR_FALSE = RAS_BLUE;
+    CAMERA.update_text(" CAMERA  ", " CAMERA  ");
+
     DEBUG.PROPS.COLOR_TRUE = RAS_RED;
     DEBUG.PROPS.COLOR_FALSE = RAS_WHITE;
     DEBUG.update_text("  DEBUG  ", "         ");
@@ -788,8 +792,16 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 LIGHTS.update_tf(sdSysData.Lights_On.value());
                 LIGHTS.draw(sdSysData);
 
-                DEBUG.update_tf(sdSysData.SCREEN_COMMS.DEBUG_STATUS.DEBUG);
-                DEBUG.draw(sdSysData);
+                if (sdSysData.SCREEN_COMMS.DEBUG_STATUS.DEBUG)
+                {
+                  DEBUG.update_tf(sdSysData.SCREEN_COMMS.DEBUG_STATUS.DEBUG);
+                  DEBUG.draw(sdSysData);
+                }
+                else
+                {
+                  CAMERA.update_tf(sdSysData.CAMERA_BACKUP.camera_avalable());
+                  CAMERA.draw(sdSysData);
+                }
               }
               ImGui::EndGroup();
               
@@ -932,8 +944,9 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - (48 * DEF_SCREEN_SIZE_Y_MULTIPLIER)), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
             // Is Camera On
-            if (sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM ||
-                sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE)
+            if (sdSysData.CAMERA_BACKUP.camera_avalable() &&
+                    ( sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM ||
+                      sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE))
             {
               // Turn on processing.
               sdSysData.CAMERA_BACKUP.CAM_BEING_VIEWED = true;
@@ -1420,7 +1433,24 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               }
             }
 
-            ImGui::InvisibleButton("noshow2", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
+            if (BTC_RUNNING_COLOR.button_toggle_color(sdSysData, "SET\nRUNNING\nCOLOR", "SET\nRUNNING\nCOLOR", DISPLAY_RUNNING_COLOR, RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            {
+              DISPLAY_RUNNING_COLOR = !DISPLAY_RUNNING_COLOR;
+            }
+
+            if (BTC_CAMERA_START_STOP.button_toggle_color(sdSysData, "CAMERA\nSTOP", "CAMERA\nSTART", sdSysData.CAMERA_BACKUP.camera_avalable(), RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            {
+              if (sdSysData.CAMERA_BACKUP.camera_avalable())
+              {
+                sdSysData.SCREEN_COMMS.command_text_set(" camf");
+              }
+              else
+              {
+                sdSysData.SCREEN_COMMS.command_text_set(" camo");
+              }
+            }
+
+            //ImGui::InvisibleButton("noshow2", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON);
 
 
             if (sdSysData.Day_On_With_Override.value())
@@ -1446,11 +1476,6 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                   sdSysData.SCREEN_COMMS.command_text_set("dd");
                 }
               }
-            }
-
-            if (BTC_RUNNING_COLOR.button_toggle_color(sdSysData, "SET\nRUNNING\nCOLOR", "SET\nRUNNING\nCOLOR", DISPLAY_RUNNING_COLOR, RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
-            {
-                DISPLAY_RUNNING_COLOR = !DISPLAY_RUNNING_COLOR;
             }
 
             if (BT_CLEAR_ANIMS.button_color(sdSysData, "CLEAR\nANIMS", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))

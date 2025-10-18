@@ -110,6 +110,11 @@ class MAP
 
   PIXEL_SIZE_META_DATA LEVEL_OF_DETAIL_META;
 
+  // This is a temporary solution for a problem that occures when 
+  //  the track size displayed is more that 5000 points.
+  // The program will not recover this value untill restarted.
+  double MAX_TRACK_RESOLUTION_RESIZE_FACTOR = 1.0;
+
   string INFORMATION = "";
 
   // For Map Draw Routines, set in widgets_adsb

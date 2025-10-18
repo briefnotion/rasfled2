@@ -93,6 +93,10 @@ class CAMERA_PROPERTIES
 
   int FORCED_FRAME_LIMIT_MS  = 30;
 
+  bool TEST             = false;
+  bool TEST_IMAGE       = false;
+  bool TEST_MULTI_FRAME = false;
+
   // Controls:
 
   CAMERA_SETTING CTRL_FOCUS_AUTO;
@@ -111,28 +115,46 @@ class CAMERA_PROPERTIES
   CAMERA_SETTING CTRL_HUE;
   CAMERA_SETTING CTRL_SHARPNESS;
 
+  // ---
   // Camera Enhancements
 
-  // Median blur is excellent for removing "salt-and-pepper" noise.
-  
-  //bool ENH_SHARPEN        = true;
+  // Tested and working well enhancements
 
-  //bool ENH_MEDIAN_BLUR    = true;
+  // When low light triggered, turns on grayscale image 
+  //  and booste brightness
   bool ENH_LOW_LIGHT      = true;
 
+  // Finds contrast image lines and draws mask.
   bool ENH_OVERLAY_LINES  = true;
 
+  // Finds max brightness area and mask them out.
   bool ENH_GLARE_MASK     = true;
 
-  //bool ENH_LINE_DETECTION = false;
+  // Booste all colors.
   bool ENH_COLOR          = false;
+
+  // Experimental Enhancements
+
+  //bool ENH_LINE_DETECTION = false;
+
+  // May or not work. Never had a full car on screen to 
+  //  see.
+  bool ENH_CAR_DETECTION  = false;
+
+  // Draws a circle around a curved object. Use case not found.
   bool ENH_HOUGH          = false;
+
+  // Traces some random curved lines. Looks interesting, but 
+  //  use case not found.
   bool ENH_CURVE_IMPROVED = false;
+
+  // Draws lines at lines found. Looks interesting, but 
+  //  use case not found.
   bool ENH_CURVE_FIT      = false;
 
+  // Doesnt work.
   //bool ENH_ROAD_MASK      = false;  // Doesnt work
 
-  bool ENH_CAR_DETECTION  = false;
 
   // ---------------------------------------------------------------------------------------
   
@@ -233,7 +255,6 @@ class CAMERA
   int               FRAME_TO_BUFFER = 0;
 
   bool CAM_AVAILABLE = false;
-  bool CAM_VIDEO_AVAILABLE = false;
 
   // Thread Update and process_enhancements_frame
   cv::Mat FRAME_BUFFER_0;
@@ -253,7 +274,7 @@ class CAMERA
 
   // Load and Save settings
   void save_settings();
-  void load_settings();
+  void load_settings_json();
 
   void check_for_save_image_buffer_frame();
   // check to see if current buffer should be saved to disk.
@@ -325,6 +346,9 @@ class CAMERA
 
   void take_snapshot();
 
+  // Load all camera settings
+  void load_settings();
+
   // Public method to start and stop the camera capture by 
   //  truning off and on the thread.
   void camera_start();
@@ -332,7 +356,6 @@ class CAMERA
 
   // Report if camera is opened.
   bool camera_avalable();
-  bool video_avalable();
 };
 
 

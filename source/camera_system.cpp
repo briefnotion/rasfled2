@@ -116,6 +116,7 @@ void CAMERA::detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame)
   cv::Mat edges;
   cv::Canny(contrasted_edges, edges, 50, 150, 3);
   
+  /*
   // --- 2. Find Contours ---
   std::vector<std::vector<cv::Point>> contours;
   std::vector<cv::Vec4i> hierarchy;
@@ -134,6 +135,7 @@ void CAMERA::detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame)
       cv::drawContours(processed_frame, contours, (int)i, cv::Scalar(255, 255, 0), 2, cv::LINE_AA, hierarchy, 0);
     }
   }
+  */
 }
 
 // NEW Helper function: Detects and draws general contours (outlines of objects).
@@ -600,6 +602,9 @@ void CAMERA::save_settings()
   camera_settings.create_label_value(quotify("FLIP_HORIZONTAL"), quotify(to_string(PROPS.FLIP_HORIZONTAL)));
   camera_settings.create_label_value(quotify("FLIP_VERTICAL"), quotify(to_string(PROPS.FLIP_VERTICAL)));
   camera_settings.create_label_value(quotify("FORCED_FRAME_LIMIT_MS"), quotify(to_string(PROPS.FORCED_FRAME_LIMIT_MS)));
+  camera_settings.create_label_value(quotify("TEST"), quotify(to_string(PROPS.TEST)));
+  camera_settings.create_label_value(quotify("TEST_IMAGE"), quotify(to_string(PROPS.TEST_IMAGE)));
+  camera_settings.create_label_value(quotify("TEST_MULTI_FRAME"), quotify(to_string(PROPS.TEST_MULTI_FRAME)));
 
   // Backup Camera Settings
   backup_camera_settings.create_label_value(quotify("SHOW_PATH"), quotify(to_string(PROPS.SHOW_PATH)));
@@ -627,7 +632,7 @@ void CAMERA::save_settings()
   threaded_deque_string_to_file(PROPS.CAMERA_SETTINGS_FILE_NAME, camera_settings_json_deque);
 }
 
-void CAMERA::load_settings()
+void CAMERA::load_settings_json()
 {
   bool tmp_success = false;
 
@@ -656,6 +661,9 @@ void CAMERA::load_settings()
           STRING_BOOL   sb_flip_horizontal;
           STRING_BOOL   sb_flip_vertical;
           STRING_INT    si_forced_frame_limit;
+          STRING_BOOL   sb_test;
+          STRING_BOOL   sb_test_image;
+          STRING_BOOL   sb_test_multi_frame;
 
           STRING_BOOL   sb_show_path;
           STRING_FLOAT  sb_angle_multiplier;
@@ -684,6 +692,9 @@ void CAMERA::load_settings()
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_HORIZONTAL", sb_flip_horizontal);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_VERTICAL", sb_flip_vertical);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FORCED_FRAME_LIMIT_MS", si_forced_frame_limit);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("TEST", sb_test);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("TEST_IMAGE", sb_test_image);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("TEST_MULTI_FRAME", sb_test_multi_frame);
 
             if (settings.ROOT.DATA[root].DATA[entry_list].label() == "backup camera settings")
             {
@@ -736,6 +747,23 @@ void CAMERA::load_settings()
             {
               PROPS.FORCED_FRAME_LIMIT_MS = si_forced_frame_limit.get_int_value();
             }
+            
+            if (sb_test.conversion_success())
+            {
+              PROPS.TEST = sb_test.get_bool_value();
+            }
+            
+            if (sb_test_image.conversion_success())
+            {
+              PROPS.TEST_IMAGE = sb_test_image.get_bool_value();
+            }
+            
+            if (sb_test_multi_frame.conversion_success())
+            {
+              PROPS.TEST_MULTI_FRAME = sb_test_multi_frame.get_bool_value();
+            }
+
+            // ---
             
             if (sb_show_path.conversion_success())
             {
@@ -1052,55 +1080,80 @@ void CAMERA::open_camera()
       std::cout << "Car cascade loaded successfully." << std::endl;
     }
 
-    // Set up all camera properties.
-    prepare();
-    
-    // Attempt to open the default camera (index 0).
-    CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID);
-
-    // Check if the camera was successfully opened.
-    CAM_AVAILABLE = CAMERA_CAPTURE.isOpened();
-    if (CAM_AVAILABLE)
+    // Start the camera 
+    if (PROPS.TEST == false)
     {
-      // If the camera is opened, set its frame width and height.
-      CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
-      CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
+      // Set up all camera properties.
+      prepare();
+      
+      // Attempt to open the default camera (index 0).
+      CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID);
 
-      print_stream << "Camera successfully opened and properties set." << std::endl;
-
-      // Now, probe the camera for its actual capabilities and print them.
-      double actual_width = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
-      double actual_height = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
-      double actual_fps = CAMERA_CAPTURE.get(cv::CAP_PROP_FPS);
-
-      // Show some of the cv settings
-      print_stream << "Actual camera resolution: " << actual_width << "x" << actual_height << std::endl;
-      print_stream << "Actual camera FPS: " << actual_fps << std::endl;
-
-      // Initialize camera via backend.  First set normal operation mode, then gather all properties.
-      init(print_stream);
-    }
-    else
-    {
-      // If camera not found DUMMY images to FRAME_DUMMY and FRAME_DUMMY2
-      // If multi frame test, gen image to FRAME_DUMMY2.
-      FRAME_DUMMY = cv::imread(PROPS.CAMERA_TEST_FILE_NAME, cv::IMREAD_COLOR); // Load test image as color
-      if (FRAME_DUMMY.empty())
+      // Check if the camera was successfully opened.
+      CAM_AVAILABLE = CAMERA_CAPTURE.isOpened();
+      if (CAM_AVAILABLE)
       {
-        FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
-      }
+        // If the camera is opened, set its frame width and height.
+        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
+        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
 
-      if (FRAME_DUMMY_MULTI_FRAME_TEST)
-      {
-        FRAME_DUMMY2 = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
+        print_stream << "Camera successfully opened and properties set." << std::endl;
+
+        // Now, probe the camera for its actual capabilities and print them.
+        double actual_width = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
+        double actual_height = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
+        double actual_fps = CAMERA_CAPTURE.get(cv::CAP_PROP_FPS);
+
+        // Show some of the cv settings
+        print_stream << "Actual camera resolution: " << actual_width << "x" << actual_height << std::endl;
+        print_stream << "Actual camera FPS: " << actual_fps << std::endl;
+
+        // Initialize camera via backend.  First set normal operation mode, then gather all properties.
+        init(print_stream);
+        
+        CAM_AVAILABLE = true;
       }
       else
       {
-        FRAME_DUMMY.copyTo(FRAME_DUMMY2);
+        print_stream << "Could not open camera. Please check your camera connection." << std::endl;
+        CAM_AVAILABLE = false;
       }
-
-      print_stream << "Could not open camera. Please check your camera connection." << std::endl;
-      CAM_AVAILABLE = false;
+    }
+    else // TEST CAMERA = true
+    {
+      // If camera not found DUMMY images to FRAME_DUMMY and FRAME_DUMMY2
+      // If multi frame test, gen image to FRAME_DUMMY2.
+      if (PROPS.TEST_IMAGE)
+      {
+        FRAME_DUMMY = cv::imread(PROPS.CAMERA_TEST_FILE_NAME, cv::IMREAD_COLOR); // Load test image as color
+        if (!FRAME_DUMMY.empty())
+        {
+          if (PROPS.TEST_MULTI_FRAME)
+          {
+            FRAME_DUMMY2 = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
+            print_stream << "Test camera loaded with test image for frame 1 and generated for frame 2." << std::endl;
+            CAM_AVAILABLE = true;
+          }
+          else
+          {
+            print_stream << "Test camera loaded with test image." << std::endl;
+            FRAME_DUMMY.copyTo(FRAME_DUMMY2);
+            CAM_AVAILABLE = true;
+          }
+        }
+        else
+        {
+          print_stream << "Test failed to load test image." << std::endl;
+          CAM_AVAILABLE = false;
+        }
+      }
+      else
+      {
+        FRAME_DUMMY = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
+        FRAME_DUMMY2 = generateDummyFrame(PROPS.WIDTH, PROPS.HEIGHT);
+        print_stream << "Test camera loaded with generated frames." << std::endl;
+        CAM_AVAILABLE = true;
+      }
     }
   }
 
@@ -1126,7 +1179,6 @@ void CAMERA::update_frame()
 
   CAMERA_READ_THREAD_TIME.create();
 
-  load_settings();
   open_camera();
 
   while (CAMERA_READ_THREAD_STOP == false)
@@ -1177,20 +1229,7 @@ void CAMERA::update_frame()
       TIME_SE_FRAME_RETRIEVAL.start_clock();
 
       // Capture the camera frame.
-      if (CAM_AVAILABLE)
-      {
-        if (FRAME_TO_BUFFER == 0)
-        {
-          CAMERA_CAPTURE >> FRAME_BUFFER_0;
-          LATEST_READY_FRAME = 0;
-        }
-        else if (FRAME_TO_BUFFER == 1)
-        {
-          CAMERA_CAPTURE >> FRAME_BUFFER_1;
-          LATEST_READY_FRAME = 1;
-        }
-      }
-      else
+      if (PROPS.TEST)
       {
         if (FRAME_TO_BUFFER == 0)
         {
@@ -1201,6 +1240,22 @@ void CAMERA::update_frame()
         {
           FRAME_DUMMY2.copyTo(FRAME_BUFFER_1);
           LATEST_READY_FRAME = 1;
+        }
+      }
+      else
+      {
+        if (CAM_AVAILABLE)
+        {
+          if (FRAME_TO_BUFFER == 0)
+          {
+            CAMERA_CAPTURE >> FRAME_BUFFER_0;
+            LATEST_READY_FRAME = 0;
+          }
+          else if (FRAME_TO_BUFFER == 1)
+          {
+            CAMERA_CAPTURE >> FRAME_BUFFER_1;
+            LATEST_READY_FRAME = 1;
+          }
         }
       }
 
@@ -1220,7 +1275,6 @@ void CAMERA::update_frame()
   // Close Camera if thread stops.
   CAMERA_CAPTURE.release();
   CAM_AVAILABLE = false;
-  CAM_VIDEO_AVAILABLE = false;
 
   save_settings();
   PRINTW_QUEUE.push_back("Camera Closed");
@@ -1279,11 +1333,9 @@ void CAMERA::generate_imgui_texture_frame()
         // Create Thread safe mat frame to access
         PROCESSED_FRAME.copyTo(LIVE_FRAME);
       }
-      CAM_VIDEO_AVAILABLE = true;
     }
     else
     {
-      CAM_VIDEO_AVAILABLE = false;
     }
   }
 
@@ -1517,6 +1569,11 @@ void CAMERA::take_snapshot()
   SAVE_IMAGE_PROCESSED_FRAME = true;
 }
 
+void CAMERA::load_settings()
+{
+  load_settings_json();
+}
+
 void CAMERA::camera_start()
 {
   if (CAMERA_READ_THREAD_STOP == true)
@@ -1537,12 +1594,7 @@ void CAMERA::camera_stop()
 
 bool CAMERA::camera_avalable()
 {
-  return CAM_AVAILABLE;
-}
-
-bool CAMERA::video_avalable()
-{
-  return CAM_VIDEO_AVAILABLE;
+  return !CAMERA_READ_THREAD_STOP;
 }
 
 // ---------------------------------------------------------------------------------------

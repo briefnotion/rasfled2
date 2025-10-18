@@ -392,7 +392,7 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
 void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
 {
   // Check if the camera and video are available.
-  if (sdSysData.CAMERA_BACKUP.video_avalable())
+  if (sdSysData.CAMERA_BACKUP.camera_avalable())
   {
     ANGLE = Angle;
 

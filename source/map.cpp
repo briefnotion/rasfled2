@@ -740,12 +740,15 @@ void MAP::generate_displayed_track(double Resolution)
         // Y = y starting pos (position of top most window, if no write)
         // Z = x size
         // W = y size
+
+        float grace_working_area = 20.0f;
+
         if (true) // normal 
         {
-          extar_working_area.x = CURRENT_WORKING_AREA.x - 100.0f;
-          extar_working_area.y = CURRENT_WORKING_AREA.y - 100.0f;
-          extar_working_area.z = CURRENT_WORKING_AREA.z + 200.0f;
-          extar_working_area.w = CURRENT_WORKING_AREA.w + 200.0f;
+          extar_working_area.x = CURRENT_WORKING_AREA.x - grace_working_area;
+          extar_working_area.y = CURRENT_WORKING_AREA.y - grace_working_area;
+          extar_working_area.z = CURRENT_WORKING_AREA.z + (2.0f * grace_working_area);
+          extar_working_area.w = CURRENT_WORKING_AREA.w + (2.0f * grace_working_area);
         }
         else  // for debugging the line connections visually
         {
@@ -778,8 +781,12 @@ void MAP::generate_displayed_track(double Resolution)
             line_break_in_route = true;
           }
 
+          // Compute the perceived map resolution by MAX_TRACK_RESOLUTION_RESIZE_FACTOR 
+          //  to decrease the amount of point to be drawn.
+          double working_resolution = Resolution * MAX_TRACK_RESOLUTION_RESIZE_FACTOR;
+
           // Check to see if its within map display resolution.
-          if (TRACK_2.TRACK_POINTS_DETAILED[pos].RESOLUTION >= Resolution)
+          if (TRACK_2.TRACK_POINTS_DETAILED[pos].RESOLUTION >= working_resolution)
           {
             screen_position_not_used = point_position_lat_lon(extar_working_area, CURRENT_LAT_LON_SCALE, CURRENT_CENTER_LAT_LON, 
                                                     DOUBLE_VEC2(TRACK_2.TRACK_POINTS_DETAILED[pos].LATITUDE, 
@@ -822,6 +829,22 @@ void MAP::generate_displayed_track(double Resolution)
         }
       }
     }
+  }
+
+  // Warning: Either opengl or imgui cant handle more that about 5000 point
+  //  displayed in the track.
+  if (DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size() > 5000)
+  {
+    /*
+    This will need better testing.  Leave off for now
+
+    // Increase the perceived map resolution by 10%
+    MAX_TRACK_RESOLUTION_RESIZE_FACTOR *= 1.1;
+
+    // Generate the map again.  Recursive, keep regenerating map until
+    //  we get map with less than 5000 points
+    generate_displayed_track(Resolution);
+    */
   }
 }
 

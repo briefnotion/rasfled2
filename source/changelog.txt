@@ -1,3 +1,9 @@
+2.338_251017
+  - Added a few more camera properties to the save and 
+      load settings.
+  - Started refining the camera system.
+  - Several corrections.
+
 2.337_251016
   - Adjusted the toggle button colors so they are white 
       when value is true (On).
