@@ -21,7 +21,7 @@
 // DEFINITIONS
 // -------------------------------------------------------------------------------------
 
-#define Revision "2.338_251017"
+#define Revision "2.339_251018"
 #define  QACODE  "A565"
 
 // -------------------------------------------------------------------------------------
@@ -139,7 +139,7 @@
 #define DEF_GPS_DEV_NAME                  "/dev/ttyAMA0"                                                    // GPS via ttyAMA0  
 #define DEF_GPS_SAVE_LOG_NAME             "gpscomms"
 #define DEF_GPS_TEST_DATA_NAME            "gpscomms_test.txt"
-#define DEF_GPS_TEST_DATA_GPS_INJECT_CURRENT_TIME true  // When using gps log data, change the date and time of log file 
+#define DEF_GPS_TEST_DATA_GPS_INJECT_CURRENT_TIME false  // When using gps log data, change the date and time of log file 
                                                         // read to current date and time.  Makes the gps data look fresh.
 
 // Compass

@@ -287,7 +287,7 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT = !sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT;
     }
 
-    if (BC_ENH_OVERLAY_LINES.button_toggle_color(sdSysData, "LINES", "LINES", 
+    if (BC_ENH_OVERLAY_LINES.button_toggle_color(sdSysData, "LINES\nMASK", "LINES\nMASK", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_OVERLAY_LINES, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
@@ -300,6 +300,14 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       sdSysData.CAMERA_BACKUP.PROPS.ENH_GLARE_MASK = !sdSysData.CAMERA_BACKUP.PROPS.ENH_GLARE_MASK;
+    }
+
+    ImGui::SameLine();
+    if (BC_ENH_CANNY.button_toggle_color(sdSysData, "CANNY\nMASK", "CANNY\nMASK", 
+                                              sdSysData.CAMERA_BACKUP.PROPS.ENH_CANNY_MASK, 
+                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.CAMERA_BACKUP.PROPS.ENH_CANNY_MASK = !sdSysData.CAMERA_BACKUP.PROPS.ENH_CANNY_MASK;
     }
 
     /*

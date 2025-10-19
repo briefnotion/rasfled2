@@ -125,17 +125,19 @@ class CAMERA_PROPERTIES
   bool ENH_LOW_LIGHT      = true;
 
   // Finds contrast image lines and draws mask.
-  bool ENH_OVERLAY_LINES  = true;
+  bool ENH_OVERLAY_LINES  = false;
 
   // Finds max brightness area and mask them out.
   bool ENH_GLARE_MASK     = true;
 
   // Booste all colors.
-  bool ENH_COLOR          = false;
+  bool ENH_COLOR          = true;
 
   // Experimental Enhancements
 
   //bool ENH_LINE_DETECTION = false;
+
+  bool ENH_CANNY_MASK     = true;
 
   // May or not work. Never had a full car on screen to 
   //  see.
@@ -214,15 +216,16 @@ class CAMERA
   // ---------------------------------------------------------------------------------------
   
   // Camera CV Helper
-  bool is_low_light(const cv::Mat& frame, int threshold);
+  bool is_low_light(const cv::Mat& Grey_Image_Full_Size, int threshold);
+  void gray_enhance(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
   cv::Mat get_road_mask(const cv::Mat& frame);
-
-  void detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame);
-  void detect_hough_circles(cv::Mat& processed_frame);
-  void detect_and_draw_contours_improved(cv::Mat& processed_frame);
-
-  void detect_and_draw_contours(cv::Mat& processed_frame);
-  cv::Mat overlay_lines(cv::Mat& processed_frame);
+  cv::Mat generate_canny(cv::Mat& Grey_Image_Full_Size);
+  void detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
+  void detect_hough_circles(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
+  void detect_and_draw_contours_improved(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
+  void detect_and_draw_contours(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
+  cv::Mat canny_mask(cv::Mat& Processed_Frame_Canny);
+  cv::Mat overlay_lines(cv::Mat& Processed_Frame_Gray_Downsized);
   cv::Mat suppress_glare_mask(cv::Mat& processed_frame);
 
   // Change Settings
@@ -264,12 +267,17 @@ class CAMERA
   int     BEING_PROCESSED_FRAME      = -1;
   
   // Thread process_enhancements_frame
+  cv::Mat PROCESSED_FRAME;
+  cv::Mat PROCESSED_FRAME_GRAY;
   cv::Mat PROCESSED_FRAME_DOWNSIZED;
+  cv::Mat PROCESSED_FRAME_GRAY_DOWNSIZED;
+  cv::Mat PROCESSED_FRAME_CANNY;
+
   cv::Mat MASK_FRAME_OVERLAY_LINES;
   cv::Mat MASK_FRAME_GLARE;
+  cv::Mat MASK_FRAME_CANNY;
 
   // Thread process_enhancements_frame and generate_imgui_texture_frame
-  cv::Mat PROCESSED_FRAME;
   bool    WORKING_FRAME_FULLY_PROCESSED = true; // Needs Lock
 
   // Load and Save settings

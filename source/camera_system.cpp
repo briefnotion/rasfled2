@@ -40,17 +40,25 @@ Notes:
 // ---------------------------------------------------------------------------------------
 
 // Helper function implementation: checks the mean brightness of the frame
-bool CAMERA::is_low_light(const cv::Mat& frame, int threshold) 
+bool CAMERA::is_low_light(const cv::Mat& Grey_Image_Full_Size, int threshold) 
 {
-  if (frame.empty()) return false;
-  
-  // Convert to grayscale to check overall luminance
-  cv::Mat gray;
-  cv::cvtColor(frame, gray, cv::COLOR_BGR2GRAY);
-
   // Calculate the mean intensity (0-255). If it's below the threshold, it's dark.
-  cv::Scalar mean_intensity = cv::mean(gray);
+  cv::Scalar mean_intensity = cv::mean(Grey_Image_Full_Size);
   return mean_intensity[0] < threshold;
+}
+
+void  CAMERA::gray_enhance(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size)
+{
+  // --- Step 2A: Low-Light Contrast Enhancement (CLAHE) ---
+  // Grayscale conversion is required to isolate the luminance channel for CLAHE.
+  cv::cvtColor(processed_frame, Grey_Image_Full_Size, cv::COLOR_BGR2GRAY);
+
+  // CLAHE settings: Clip Limit 2.0, Tile Size 8x8
+  cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
+  clahe->apply(Grey_Image_Full_Size, Grey_Image_Full_Size); 
+
+  // Apply enhanced luminance back to the color frame (making it grayscale enhanced)
+  cv::cvtColor(Grey_Image_Full_Size, processed_frame, cv::COLOR_GRAY2BGR);
 }
 
 // NEW Helper function: Generates a trapezoidal mask focusing on the road ahead.
@@ -79,16 +87,33 @@ cv::Mat CAMERA::get_road_mask(const cv::Mat& frame)
   return mask;
 }
 
+cv::Mat CAMERA::generate_canny(cv::Mat& Grey_Image_Full_Size)
+{
+  // --- Parameters ---
+  const int BLUR_KSIZE = 7;         // Gaussian blur kernel size for noise reduction  (5)
+  const int CANNY_THRESH_LOW = 10;  // Lower threshold for edge detection (50)
+  const int CANNY_THRESH_HIGH = 100;// Upper threshold for edge detection (150)
+  const int CANNY_APERTURE = 3;     // Aperture size for Sobel operator   (3) 3 5 or 7
+
+  // --- Step 2: Denoise with Gaussian blur ---
+  cv::Mat blurred;
+  cv::GaussianBlur(Grey_Image_Full_Size, blurred, cv::Size(BLUR_KSIZE, BLUR_KSIZE), 0);
+
+  // --- Step 3: Apply Canny edge detection ---
+  cv::Mat edges;
+  cv::Canny(blurred, edges, CANNY_THRESH_LOW, CANNY_THRESH_HIGH, CANNY_APERTURE);
+
+  return edges;
+}
+
 /**
  * @brief BASIC CONTOUR DETECTION (Based on user's original logic with retrieval fix).
  * * This version finds all contours but does NOT use pre-blurring, which can lead 
  * * to noisy results compared to the 'improved' version.
  * * @param processed_frame The input/output BGR frame. Contours will be drawn on it.
  */
-void CAMERA::detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame) 
+void CAMERA::detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size) 
 {
-  if (processed_frame.empty()) return;
-
   // --- NEW: Visual Color Contrast Enhancement (Applied to BGR frame) ---
   // Boosts contrast for better visual representation of the final output.
   // We use convertTo to adjust contrast (alpha) and brightness (beta) directly on the BGR frame.
@@ -98,9 +123,6 @@ void CAMERA::detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame)
   // --- END: Visual Color Contrast Enhancement ---
 
   // --- 1. Isolate Edges/Outlines ---
-  cv::Mat gray_edges;
-  // NOTE: The frame passed here now has its contrast visually boosted.
-  cv::cvtColor(processed_frame, gray_edges, cv::COLOR_BGR2GRAY);
   
   // --- Extreme Contrast Enhancement on Grayscale (Pre-Canny) ---
   // This is a common contrast stretch: new_pixel = alpha * old_pixel + beta
@@ -109,47 +131,24 @@ void CAMERA::detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame)
   double beta = 0.0;  // Controls brightness: 0.0 means no overall brightness shift
   
   // This maximizes the difference between light and dark areas for the Canny detector
-  cv::convertScaleAbs(gray_edges, contrasted_edges, alpha, beta);
+  cv::convertScaleAbs(Grey_Image_Full_Size, contrasted_edges, alpha, beta);
   // --- END: Contrast Enhancement ---
   
   // Use Canny Edge Detection on the highly contrasted image
   cv::Mat edges;
   cv::Canny(contrasted_edges, edges, 50, 150, 3);
-  
-  /*
-  // --- 2. Find Contours ---
-  std::vector<std::vector<cv::Point>> contours;
-  std::vector<cv::Vec4i> hierarchy;
-  // RETR_LIST finds ALL contours.
-  cv::findContours(edges, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
-
-  // --- 3. Filter and Draw Contours ---
-  for (size_t i = 0; i < contours.size(); ++i) 
-  {
-    // Filter contours by area to ignore small noise
-    double area = cv::contourArea(contours[i]);
-    // The original area filter of > 500 is used here
-    if (area > 500) 
-    { 
-      // Draw the contour (Cyan color: B=255, G=255, R=0)
-      cv::drawContours(processed_frame, contours, (int)i, cv::Scalar(255, 255, 0), 2, cv::LINE_AA, hierarchy, 0);
-    }
-  }
-  */
 }
 
 // NEW Helper function: Detects and draws general contours (outlines of objects).
-void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame) 
+void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size) 
 {
-  if (processed_frame.empty()) return;
-
   // --- 1. Isolate Edges/Outlines ---
-  cv::Mat gray_edges;
-  cv::cvtColor(processed_frame, gray_edges, cv::COLOR_BGR2GRAY);
+  //cv::Mat gray_edges;
+  //cv::cvtColor(processed_frame, gray_edges, cv::COLOR_BGR2GRAY);
   
   // Use Canny Edge Detection to find sharp boundaries
   cv::Mat edges;
-  cv::Canny(gray_edges, edges, 50, 150, 3);
+  cv::Canny(Grey_Image_Full_Size, edges, 50, 150, 3);
   
   // --- 2. Find Contours ---
   // FIX: Changed from cv::RETR_EXTERNAL to cv::RETR_LIST.
@@ -179,17 +178,15 @@ void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame)
  * contour analysis, especially when dealing with noisy or low-contrast images.
  * * @param processed_frame The input/output BGR frame. Circles will be drawn on it.
  */
-void CAMERA::detect_hough_circles(cv::Mat& processed_frame) 
+void CAMERA::detect_hough_circles(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size) 
 {
-  if (processed_frame.empty()) return;
-
   // --- 1. Pre-process: Convert to grayscale and blur ---
-  cv::Mat gray, blurred;
-  cv::cvtColor(processed_frame, gray, cv::COLOR_BGR2GRAY);
+  cv::Mat blurred;
+  //cv::cvtColor(processed_frame, gray, cv::COLOR_BGR2GRAY);
   
   // Applying Gaussian blur is CRUCIAL for HoughCircles to work correctly, 
   // as it smooths edges and reduces false positives (noise).
-  cv::GaussianBlur(gray, blurred, cv::Size(9, 9), 2, 2);
+  cv::GaussianBlur(Grey_Image_Full_Size, blurred, cv::Size(9, 9), 2, 2);
 
   // --- 2. Find Circles using Hough Transform ---
   std::vector<cv::Vec3f> circles;
@@ -233,17 +230,12 @@ void CAMERA::detect_hough_circles(cv::Mat& processed_frame)
  * * This is a refinement of your original function, adding crucial pre-processing.
  * * @param processed_frame The input/output BGR frame. Contours will be drawn on it.
  */
-void CAMERA::detect_and_draw_contours_improved(cv::Mat& processed_frame) 
+void CAMERA::detect_and_draw_contours_improved(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size) 
 {
-  if (processed_frame.empty()) return;
-
   // --- 1. Pre-process: Convert to grayscale and blur (CRUCIAL FIX) ---
   // Blurring significantly reduces noise and helps Canny find cleaner, continuous edges.
-  cv::Mat gray_edges;
-  cv::cvtColor(processed_frame, gray_edges, cv::COLOR_BGR2GRAY);
-  
   cv::Mat blurred;
-  cv::GaussianBlur(gray_edges, blurred, cv::Size(5, 5), 0);
+  cv::GaussianBlur(Grey_Image_Full_Size, blurred, cv::Size(5, 5), 0);
   
   // Use Canny Edge Detection to find sharp boundaries
   cv::Mat edges;
@@ -278,6 +270,21 @@ void CAMERA::detect_and_draw_contours_improved(cv::Mat& processed_frame)
   }
 }
 
+cv::Mat CAMERA::canny_mask(cv::Mat& Processed_Frame_Canny)
+{
+  const int DILATE_ITERATIONS = 1;  // Number of times to thicken edges
+
+  // --- Step 4: Explicitly thicken edges ---
+  cv::Mat thickened;
+  cv::dilate(Processed_Frame_Canny, thickened, cv::Mat(), cv::Point(-1, -1), DILATE_ITERATIONS);
+
+  // --- Step 5: Convert to mask (255 where edges exist) ---
+  cv::Mat mask;
+  cv::compare(thickened, 0, mask, cv::CMP_GT); // mask = 255 where edges > 0
+
+  return mask;
+}
+
 // Implementation of the image stylization filter: quantize_and_outline.
 // It detects black outlines via adaptive thresholding and overlays them 
 // directly onto the original image, preserving the original color palette.
@@ -285,7 +292,7 @@ void CAMERA::detect_and_draw_contours_improved(cv::Mat& processed_frame)
 //
 // Arguments:
 // - processed_frame: Input/Output image (cv::Mat, modified in place)
-cv::Mat CAMERA::overlay_lines(cv::Mat& processed_frame)
+cv::Mat CAMERA::overlay_lines(cv::Mat& Processed_Frame_Gray_Downsized)
 {
     // --- Fixed Parameters ---
     const int EDGE_BLUR_KSIZE = 7;    // Median Blur: Noise reduction and simplification for edges
@@ -293,10 +300,9 @@ cv::Mat CAMERA::overlay_lines(cv::Mat& processed_frame)
     const int EDGE_C = 2;             // Adaptive Threshold: Line thickness control (higher = thicker)
 
     // --- Step 1: Find Edges (Adaptive Thresholding) ---
-    // 1a. Convert to grayscale and apply median blur for clean input edges
-    cv::Mat gray, blurred;
-    cv::cvtColor(processed_frame, gray, cv::COLOR_BGR2GRAY);
-    cv::medianBlur(gray, blurred, EDGE_BLUR_KSIZE); 
+    // 1a. Apply median blur for clean input edges 
+    cv::Mat blurred;
+    cv::medianBlur(Processed_Frame_Gray_Downsized, blurred, EDGE_BLUR_KSIZE); 
 
     // 1b. Use Adaptive Thresholding to find strong edges and make them black.
     cv::Mat edges;
@@ -309,17 +315,10 @@ cv::Mat CAMERA::overlay_lines(cv::Mat& processed_frame)
                           EDGE_BLOCK_SIZE, 
                           EDGE_C);
     
-    // Removed: cv::bitwise_not(edges, edges); - This inversion is no longer needed.
-    
-    // --- Step 2: Overlay Black Lines onto the Original Image ---
-    
     // Create a 1-channel mask where edge pixels (which are 0 in 'edges') are 255.
     cv::Mat line_mask;
     // line_mask is 255 where edges == 0 (the black line pixels)
     cv::compare(edges, 0, line_mask, cv::CMP_EQ); 
-
-    // Use the mask to set the line pixels (where line_mask is 255) in 'processed_frame' to pure black (0, 0, 0).
-    //processed_frame.setTo(cv::Scalar(0, 0, 0), line_mask);
 
     return line_mask;
 }
@@ -351,6 +350,8 @@ cv::Mat CAMERA::suppress_glare_mask(cv::Mat& processed_frame)
   return glare_mask;
 }
 
+// ---------------------------------------------------------------------------------------
+  
 bool CAMERA::set_control(uint32_t id, int32_t value)
 {
   bool ret_success = false;
@@ -920,12 +921,26 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
       cv::filter2D(PROCESSED_FRAME, PROCESSED_FRAME, -1, kernel);
     }
 
-    // Previous functions are fast.  
-    // Generate Downsized Frame for difficult proccessing
+    // First Level of enhancements and preprocessing
+    // Generate Processing Frames for enhancements.
     {
-      cv::resize(PROCESSED_FRAME, PROCESSED_FRAME_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
-    }
+      // If Light low, grey scale and increase contrast.
+      // Put in both PROCESSED_FRAME and PROCESSED_FRAME_GRAY
+      if (PROPS.ENH_LOW_LIGHT && is_low_light(PROCESSED_FRAME_GRAY, 50))
+      {
+        cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
+        gray_enhance(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
+        cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
+      }
+      else
+      {
+        cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
+      }
 
+      cv::resize(PROCESSED_FRAME, PROCESSED_FRAME_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
+      cv::resize(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_GRAY_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
+      PROCESSED_FRAME_CANNY = generate_canny(PROCESSED_FRAME_GRAY);
+    }
   }
 }
 
@@ -934,28 +949,16 @@ void CAMERA::apply_ehancements()
 {
   if (!PROCESSED_FRAME.empty())
   {
-    if (PROPS.ENH_LOW_LIGHT)
+    // Canny Mask
+    if (PROPS.ENH_CANNY_MASK)
     {
-      if (is_low_light(PROCESSED_FRAME, 50))
-      {
-        // --- Step 2A: Low-Light Contrast Enhancement (CLAHE) ---
-        // Grayscale conversion is required to isolate the luminance channel for CLAHE.
-        cv::Mat gray_image;
-        cv::cvtColor(PROCESSED_FRAME, gray_image, cv::COLOR_BGR2GRAY);
-
-        // CLAHE settings: Clip Limit 2.0, Tile Size 8x8
-        cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
-        clahe->apply(gray_image, gray_image); 
-
-        // Apply enhanced luminance back to the color frame (making it grayscale enhanced)
-        cv::cvtColor(gray_image, PROCESSED_FRAME, cv::COLOR_GRAY2BGR);
-      }
+      MASK_FRAME_CANNY = canny_mask(PROCESSED_FRAME_CANNY);
     }
 
     // Overlay lines
     if (PROPS.ENH_OVERLAY_LINES)
     {
-      MASK_FRAME_OVERLAY_LINES = overlay_lines(PROCESSED_FRAME_DOWNSIZED);
+      MASK_FRAME_OVERLAY_LINES = overlay_lines(PROCESSED_FRAME_GRAY_DOWNSIZED);
     }
 
     //---
@@ -970,30 +973,30 @@ void CAMERA::apply_ehancements()
 
     if (PROPS.ENH_COLOR)
     {
-      detect_and_draw_contours_basic_fixed(PROCESSED_FRAME);
+      detect_and_draw_contours_basic_fixed(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
     }
 
     //---
 
     if (PROPS.ENH_HOUGH)
     {
-      detect_hough_circles(PROCESSED_FRAME);
+      detect_hough_circles(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
     }
 
     //---
 
     if (PROPS.ENH_CURVE_IMPROVED)
     {
-      detect_and_draw_contours_improved(PROCESSED_FRAME);
+      detect_and_draw_contours_improved(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
     }
 
     //---
 
     if (PROPS.ENH_CURVE_FIT)
     {
-      detect_and_draw_contours(PROCESSED_FRAME);
+      detect_and_draw_contours(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
     }
-    
+
     //---
 
     // Car Detection (Haar Cascade)
@@ -1033,6 +1036,11 @@ void CAMERA::apply_ehancements()
                     cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
       }
     }
+  }
+
+  if (PROPS.ENH_CANNY_MASK)
+  {
+    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_CANNY);
   }
 
   if (PROPS.ENH_OVERLAY_LINES)
@@ -1244,17 +1252,32 @@ void CAMERA::update_frame()
       }
       else
       {
-        if (CAM_AVAILABLE)
+        if (FRAME_TO_BUFFER == 0)
         {
-          if (FRAME_TO_BUFFER == 0)
+          CAMERA_CAPTURE >> FRAME_BUFFER_0;
+          LATEST_READY_FRAME = 0;
+          
+          // Check for errors.  close camera if empty frame or not connected.
+          if (CAMERA_CAPTURE.isOpened() == false || FRAME_BUFFER_0.empty())
           {
-            CAMERA_CAPTURE >> FRAME_BUFFER_0;
-            LATEST_READY_FRAME = 0;
+            PRINTW_QUEUE.push_back("Camera Error");
+            PRINTW_QUEUE.push_back("Is opened = " + to_string(CAMERA_CAPTURE.isOpened()) +
+                                    " Frame Buffer Empty = " + to_string(FRAME_BUFFER_0.empty()));
+            CAMERA_READ_THREAD_STOP = true;
           }
-          else if (FRAME_TO_BUFFER == 1)
+        }
+        else if (FRAME_TO_BUFFER == 1)
+        {
+          CAMERA_CAPTURE >> FRAME_BUFFER_1;
+          LATEST_READY_FRAME = 1;
+          
+          // Check for errors.  close camera if empty frame or not connected.
+          if (CAMERA_CAPTURE.isOpened() == false || FRAME_BUFFER_1.empty())
           {
-            CAMERA_CAPTURE >> FRAME_BUFFER_1;
-            LATEST_READY_FRAME = 1;
+            PRINTW_QUEUE.push_back("Camera Error");
+            PRINTW_QUEUE.push_back("Is opened = " + to_string(CAMERA_CAPTURE.isOpened()) +
+                                    " Frame Buffer Empty = " + to_string(FRAME_BUFFER_1.empty()));
+            CAMERA_READ_THREAD_STOP = true;
           }
         }
       }

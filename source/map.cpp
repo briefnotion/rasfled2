@@ -830,22 +830,6 @@ void MAP::generate_displayed_track(double Resolution)
       }
     }
   }
-
-  // Warning: Either opengl or imgui cant handle more that about 5000 point
-  //  displayed in the track.
-  if (DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size() > 5000)
-  {
-    /*
-    This will need better testing.  Leave off for now
-
-    // Increase the perceived map resolution by 10%
-    MAX_TRACK_RESOLUTION_RESIZE_FACTOR *= 1.1;
-
-    // Generate the map again.  Recursive, keep regenerating map until
-    //  we get map with less than 5000 points
-    generate_displayed_track(Resolution);
-    */
-  }
 }
 
 bool MAP::create()
@@ -981,6 +965,14 @@ void MAP::update( CONSOLE_COMMUNICATION &cons, NMEA &GPS_System, unsigned long t
     {
       NEW_DISPLAY_TRACK_GENERATION_TIMER.set(tmeFrame_Time, 1000);
       generate_displayed_track(CURRENT_RESOLUTION);
+
+      // Warning: Either opengl or imgui cant handle more that about 5000 point
+      //  displayed in the track.
+      if (DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size() > 4900)
+      {
+        // Increase the perceived map resolution by 10%
+        MAX_TRACK_RESOLUTION_RESIZE_FACTOR = MAX_TRACK_RESOLUTION_RESIZE_FACTOR * 1.1;
+      }
     }
   }
 
