@@ -948,9 +948,6 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                     ( sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM ||
                       sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE))
             {
-              // Turn on processing.
-              sdSysData.CAMERA_BACKUP.CAM_BEING_VIEWED = true;
-
               // Backup Camera
               {
                 if (sdSysData.CAR_INFO.active())
@@ -981,9 +978,6 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             }
             else
             {
-              // Turn off processing.
-              sdSysData.CAMERA_BACKUP.CAM_BEING_VIEWED = false;
-
               if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 0)
               {
                 if (sdSysData.CAR_INFO.active())

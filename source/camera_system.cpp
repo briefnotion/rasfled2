@@ -61,115 +61,52 @@ void  CAMERA::gray_enhance(cv::Mat& processed_frame, const cv::Mat& Grey_Image_F
   cv::cvtColor(Grey_Image_Full_Size, processed_frame, cv::COLOR_GRAY2BGR);
 }
 
-// NEW Helper function: Generates a trapezoidal mask focusing on the road ahead.
-cv::Mat CAMERA::get_road_mask(const cv::Mat& frame) 
+// Rewritten function to perform Min-Max Contrast Stretching (Low Light Boost)
+void CAMERA::apply_min_max_contrast(cv::Mat& processed_frame) 
 {
-  cv::Mat mask = cv::Mat::zeros(frame.size(), CV_8UC1);
-  int width = frame.cols;
-  int height = frame.rows;
-
-  // Define the vertices of the trapezoid (ROI). These points are tuned 
-  // for a typical dashcam view, focusing on the bottom half and center.
-  std::vector<cv::Point> vertices = 
+  // Function rewritten to perform Min-Max Contrast Stretching (Low Light Boost).
+  // This technique finds the current darkest (min) and brightest (max) pixels 
+  // for each color channel and linearly scales all values so that min becomes 0 
+  // and max becomes 255, maximizing contrast.
+  
+  // --- 1. Split BGR image into channels ---
+  // We apply the stretch to Blue, Green, and Red channels independently.
+  std::vector<cv::Mat> bgr_channels;
+  cv::split(processed_frame, bgr_channels);
+  
+  // --- 2. Process each channel independently (Min-Max Stretching) ---
+  for (size_t i = 0; i < bgr_channels.size(); ++i)
   {
-    cv::Point(0, height),             // Bottom left (full width)
-    cv::Point(width, height),         // Bottom right (full width)
-    cv::Point(width * 0.55, height * 0.6), // Top right (near horizon)
-    cv::Point(width * 0.45, height * 0.6)  // Top left (near horizon)
-  };
-
-  const cv::Point* points[1] = { &vertices[0] };
-  int npoints[] = { (int)vertices.size() };
-  
-  // Fill the trapezoid area on the mask with white (255)
-  cv::fillPoly(mask, points, npoints, 1, cv::Scalar(255));
-  
-  return mask;
-}
-
-cv::Mat CAMERA::generate_canny(cv::Mat& Grey_Image_Full_Size)
-{
-  // --- Parameters ---
-  const int BLUR_KSIZE = 7;         // Gaussian blur kernel size for noise reduction  (5)
-  const int CANNY_THRESH_LOW = 10;  // Lower threshold for edge detection (50)
-  const int CANNY_THRESH_HIGH = 100;// Upper threshold for edge detection (150)
-  const int CANNY_APERTURE = 3;     // Aperture size for Sobel operator   (3) 3 5 or 7
-
-  // --- Step 2: Denoise with Gaussian blur ---
-  cv::Mat blurred;
-  cv::GaussianBlur(Grey_Image_Full_Size, blurred, cv::Size(BLUR_KSIZE, BLUR_KSIZE), 0);
-
-  // --- Step 3: Apply Canny edge detection ---
-  cv::Mat edges;
-  cv::Canny(blurred, edges, CANNY_THRESH_LOW, CANNY_THRESH_HIGH, CANNY_APERTURE);
-
-  return edges;
-}
-
-/**
- * @brief BASIC CONTOUR DETECTION (Based on user's original logic with retrieval fix).
- * * This version finds all contours but does NOT use pre-blurring, which can lead 
- * * to noisy results compared to the 'improved' version.
- * * @param processed_frame The input/output BGR frame. Contours will be drawn on it.
- */
-void CAMERA::detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size) 
-{
-  // --- NEW: Visual Color Contrast Enhancement (Applied to BGR frame) ---
-  // Boosts contrast for better visual representation of the final output.
-  // We use convertTo to adjust contrast (alpha) and brightness (beta) directly on the BGR frame.
-  double visual_alpha = 1.5; // Mild contrast boost for display
-  double visual_beta = 0.0;
-  processed_frame.convertTo(processed_frame, -1, visual_alpha, visual_beta);
-  // --- END: Visual Color Contrast Enhancement ---
-
-  // --- 1. Isolate Edges/Outlines ---
-  
-  // --- Extreme Contrast Enhancement on Grayscale (Pre-Canny) ---
-  // This is a common contrast stretch: new_pixel = alpha * old_pixel + beta
-  cv::Mat contrasted_edges;
-  double alpha = 2.5; // Controls contrast: Values > 1.0 increase contrast aggressively
-  double beta = 0.0;  // Controls brightness: 0.0 means no overall brightness shift
-  
-  // This maximizes the difference between light and dark areas for the Canny detector
-  cv::convertScaleAbs(Grey_Image_Full_Size, contrasted_edges, alpha, beta);
-  // --- END: Contrast Enhancement ---
-  
-  // Use Canny Edge Detection on the highly contrasted image
-  cv::Mat edges;
-  cv::Canny(contrasted_edges, edges, 50, 150, 3);
-}
-
-// NEW Helper function: Detects and draws general contours (outlines of objects).
-void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size) 
-{
-  // --- 1. Isolate Edges/Outlines ---
-  //cv::Mat gray_edges;
-  //cv::cvtColor(processed_frame, gray_edges, cv::COLOR_BGR2GRAY);
-  
-  // Use Canny Edge Detection to find sharp boundaries
-  cv::Mat edges;
-  cv::Canny(Grey_Image_Full_Size, edges, 50, 150, 3);
-  
-  // --- 2. Find Contours ---
-  // FIX: Changed from cv::RETR_EXTERNAL to cv::RETR_LIST.
-  // RETR_EXTERNAL only finds the outermost contour of an entire connected set,
-  // which makes it seem like it's "stopping at the first thing." RETR_LIST finds ALL contours.
-  std::vector<std::vector<cv::Point>> contours;
-  std::vector<cv::Vec4i> hierarchy;
-  cv::findContours(edges, contours, hierarchy, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
-
-  // --- 3. Filter and Draw Contours ---
-  for (size_t i = 0; i < contours.size(); ++i) 
-  {
-    // Filter contours by area to ignore small noise
-    double area = cv::contourArea(contours[i]);
-    // The original area filter of > 500 is used here
-    if (area > 500) 
-    { 
-      // Draw the contour (Cyan color: B=255, G=255, R=0)
-      cv::drawContours(processed_frame, contours, (int)i, cv::Scalar(255, 255, 0), 2, cv::LINE_AA, hierarchy, 0);
+    cv::Mat channel = bgr_channels[i];
+    
+    // Find the actual minimum and maximum pixel values in the current channel
+    double min_val, max_val;
+    cv::minMaxLoc(channel, &min_val, &max_val);
+    
+    // Critical: Check to prevent division by zero if the image channel is uniform (e.g., all one color)
+    if (min_val == max_val)
+    {
+      // If min equals max, the channel is uniform, no stretching is needed.
+      continue; 
     }
+    
+    // Calculate the scaling factor (alpha) and offset (beta) for the transformation:
+    // Output = alpha * Input + beta
+    
+    // 1. Calculate Scaling Factor (alpha): This determines how much to multiply the range by
+    // to stretch it from (max_val - min_val) to 255.
+    double alpha = 255.0 / (max_val - min_val);
+    
+    // 2. Calculate Offset (beta): This shifts the minimum value (min_val) down to 0.
+    double beta = -min_val * alpha;
+    
+    // Apply the transformation: O = alpha * I + beta. 
+    // The result is an 8-bit image where the original min is 0 and max is 255.
+    channel.convertTo(channel, -1, alpha, beta);
   }
+
+  // --- 3. Merge channels back into the processed_frame ---
+  cv::merge(bgr_channels, processed_frame);
 }
 
 /**
@@ -178,16 +115,8 @@ void CAMERA::detect_and_draw_contours(cv::Mat& processed_frame, const cv::Mat& G
  * contour analysis, especially when dealing with noisy or low-contrast images.
  * * @param processed_frame The input/output BGR frame. Circles will be drawn on it.
  */
-void CAMERA::detect_hough_circles(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size) 
+void CAMERA::detect_hough_circles(cv::Mat& processed_frame, const cv::Mat& Processed_Frame_Gaussian) 
 {
-  // --- 1. Pre-process: Convert to grayscale and blur ---
-  cv::Mat blurred;
-  //cv::cvtColor(processed_frame, gray, cv::COLOR_BGR2GRAY);
-  
-  // Applying Gaussian blur is CRUCIAL for HoughCircles to work correctly, 
-  // as it smooths edges and reduces false positives (noise).
-  cv::GaussianBlur(Grey_Image_Full_Size, blurred, cv::Size(9, 9), 2, 2);
-
   // --- 2. Find Circles using Hough Transform ---
   std::vector<cv::Vec3f> circles;
   
@@ -201,7 +130,7 @@ void CAMERA::detect_hough_circles(cv::Mat& processed_frame, const cv::Mat& Grey_
   // 7. param2: Accumulator threshold for the Canny gradient output (smaller means more circles found, higher means stricter)
   // 8. minRadius: Minimum radius (in pixels) to search for
   // 9. maxRadius: Maximum radius (in pixels) to search for
-  cv::HoughCircles(blurred, circles, cv::HOUGH_GRADIENT, 
+  cv::HoughCircles(Processed_Frame_Gaussian, circles, cv::HOUGH_GRADIENT, 
                     1,         // dp: Default (accumulator same resolution as input)
                     30,        // minDist: Min distance between centers (e.g., 30 pixels)
                     100,       // param1: Canny high threshold 
@@ -222,51 +151,6 @@ void CAMERA::detect_hough_circles(cv::Mat& processed_frame, const cv::Mat& Grey_
     
     // Draw the circle outline (Green: B=0, G=255, R=0)
     cv::circle(processed_frame, center, radius, cv::Scalar(255, 255, 0), 2, cv::LINE_AA);
-  }
-}
-
-/**
- * @brief IMPROVED: General contour detection (for non-circular shapes).
- * * This is a refinement of your original function, adding crucial pre-processing.
- * * @param processed_frame The input/output BGR frame. Contours will be drawn on it.
- */
-void CAMERA::detect_and_draw_contours_improved(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size) 
-{
-  // --- 1. Pre-process: Convert to grayscale and blur (CRUCIAL FIX) ---
-  // Blurring significantly reduces noise and helps Canny find cleaner, continuous edges.
-  cv::Mat blurred;
-  cv::GaussianBlur(Grey_Image_Full_Size, blurred, cv::Size(5, 5), 0);
-  
-  // Use Canny Edge Detection to find sharp boundaries
-  cv::Mat edges;
-  cv::Canny(blurred, edges, 50, 150, 3); // Canny thresholds (50, 150) may need tuning
-  
-  // --- 2. Find Contours ---
-  std::vector<std::vector<cv::Point>> contours;
-  std::vector<cv::Vec4i> hierarchy;
-  cv::findContours(edges, contours, hierarchy, cv::RETR_EXTERNAL, cv::CHAIN_APPROX_SIMPLE);
-
-  // --- 3. Filter and Draw Contours ---
-  for (size_t i = 0; i < contours.size(); ++i) 
-  {
-    double area = cv::contourArea(contours[i]);
-
-    // A. Filter by a minimum area to ignore noise (TUNE THIS: e.g., 100)
-    if (area < 100) continue; 
-    
-    // B. Filter for *smooth* or geometrically simple shapes (optional)
-    // Approximate the contour to a polygon to simplify jagged lines
-    double peri = cv::arcLength(contours[i], true);
-    std::vector<cv::Point> approx;
-    cv::approxPolyDP(contours[i], approx, 0.02 * peri, true);
-    
-    // Filter 2: Ignore contours that are too simple (e.g., just 3-4 points from noise)
-    // or too complex (e.g., too many vertices, indicating a jagged outline)
-    if (approx.size() > 5 && approx.size() < 20)
-    {
-      // Draw the contour (Cyan color: B=255, G=255, R=0)
-      cv::drawContours(processed_frame, contours, (int)i, cv::Scalar(255, 255, 0), 2, cv::LINE_AA, hierarchy, 0);
-    }
   }
 }
 
@@ -630,14 +514,14 @@ void CAMERA::save_settings()
   deque<std::string> camera_settings_json_deque;
   settings.json_print_build_to_string_deque(camera_settings_json_deque);
 
-  threaded_deque_string_to_file(PROPS.CAMERA_SETTINGS_FILE_NAME, camera_settings_json_deque);
+  threaded_deque_string_to_file(PROPS.CAMERA_SETTINGS_DIR + PROPS.CAMERA_NAME + "_camera_settings.json", camera_settings_json_deque);
 }
 
 void CAMERA::load_settings_json()
 {
   bool tmp_success = false;
 
-  std::string camera_settings_json = file_to_string(PROPS.CAMERA_SETTINGS_FILE_NAME, tmp_success);
+  std::string camera_settings_json = file_to_string(PROPS.CAMERA_SETTINGS_DIR + PROPS.CAMERA_NAME + "_camera_settings.json", tmp_success);
 
   if (tmp_success == false)
   {
@@ -849,7 +733,7 @@ void CAMERA::check_for_save_image_buffer_frame()
     {
       if (!FRAME_BUFFER_0.empty())
       {
-        cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_raw.jpg", FRAME_BUFFER_0);
+        cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_" + PROPS.CAMERA_NAME + "_raw.jpg", FRAME_BUFFER_0);
       }
     }
     else
@@ -857,7 +741,7 @@ void CAMERA::check_for_save_image_buffer_frame()
     {
       if (!FRAME_BUFFER_1.empty())
       {
-        cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_raw.jpg", FRAME_BUFFER_1);
+        cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_" + PROPS.CAMERA_NAME + "_raw.jpg", FRAME_BUFFER_1);
       }
     }
   }
@@ -873,7 +757,7 @@ void CAMERA::check_for_save_image_buffer_processed()
 
     if (!PROCESSED_FRAME.empty())
     {
-      cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_prc.jpg", PROCESSED_FRAME);
+      cv::imwrite(PROPS.CAMERA_DIRECTORY + file_format_system_time() + "_" + PROPS.CAMERA_NAME + "_prc.jpg", PROCESSED_FRAME);
     }
   }
 }
@@ -924,7 +808,13 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
     // First Level of enhancements and preprocessing
     // Generate Processing Frames for enhancements.
     {
-      // If Light low, grey scale and increase contrast.
+      // Boost or reduce all color brightness
+      if (PROPS.ENH_COLOR)
+      {
+        apply_min_max_contrast(PROCESSED_FRAME);
+      }
+
+      // If still low light after boost, grey scale and increase contrast.
       // Put in both PROCESSED_FRAME and PROCESSED_FRAME_GRAY
       if (PROPS.ENH_LOW_LIGHT && is_low_light(PROCESSED_FRAME_GRAY, 50))
       {
@@ -939,7 +829,8 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
 
       cv::resize(PROCESSED_FRAME, PROCESSED_FRAME_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
       cv::resize(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_GRAY_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
-      PROCESSED_FRAME_CANNY = generate_canny(PROCESSED_FRAME_GRAY);
+      cv::GaussianBlur(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_GAUSSIAN, cv::Size(BLUR_KSIZE, BLUR_KSIZE), 0);
+      cv::Canny(PROCESSED_FRAME_GAUSSIAN, PROCESSED_FRAME_CANNY, CANNY_THRESH_LOW, CANNY_THRESH_HIGH, CANNY_APERTURE);
     }
   }
 }
@@ -971,30 +862,9 @@ void CAMERA::apply_ehancements()
 
     //---
 
-    if (PROPS.ENH_COLOR)
-    {
-      detect_and_draw_contours_basic_fixed(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
-    }
-
-    //---
-
     if (PROPS.ENH_HOUGH)
     {
-      detect_hough_circles(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
-    }
-
-    //---
-
-    if (PROPS.ENH_CURVE_IMPROVED)
-    {
-      detect_and_draw_contours_improved(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
-    }
-
-    //---
-
-    if (PROPS.ENH_CURVE_FIT)
-    {
-      detect_and_draw_contours(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
+      detect_hough_circles(PROCESSED_FRAME, PROCESSED_FRAME_GAUSSIAN);
     }
 
     //---
@@ -1305,34 +1175,30 @@ void CAMERA::update_frame()
 
 void CAMERA::process_enhancements_frame()
 {  
-  // Process captured image.
-  if (CAM_BEING_VIEWED)
+  TIME_SE_FRAME_PROCESSING.start_clock();
+
+  check_for_save_image_buffer_processed();
+
+  BEING_PROCESSED_FRAME = LATEST_READY_FRAME;
+
+  if (BEING_PROCESSED_FRAME == 0)
   {
-    TIME_SE_FRAME_PROCESSING.start_clock();
-
-    check_for_save_image_buffer_processed();
-
-    BEING_PROCESSED_FRAME = LATEST_READY_FRAME;
-
-    if (BEING_PROCESSED_FRAME == 0)
-    {
-      run_preprocessing(FRAME_BUFFER_0);
-      // No longer dependant on Buffer frame.  Release.
-      BEING_PROCESSED_FRAME = -1;
-      apply_ehancements();
-    }
-    else
-    if (BEING_PROCESSED_FRAME == 1)
-    {
-      run_preprocessing(FRAME_BUFFER_1);
-      // No longer dependant on Buffer frame.  Release.
-      BEING_PROCESSED_FRAME = -1;
-      apply_ehancements();
-    }
-
-    TIME_SE_FRAME_PROCESSING.end_clock();
-    TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
+    run_preprocessing(FRAME_BUFFER_0);
+    // No longer dependant on Buffer frame.  Release.
+    BEING_PROCESSED_FRAME = -1;
+    apply_ehancements();
   }
+  else
+  if (BEING_PROCESSED_FRAME == 1)
+  {
+    run_preprocessing(FRAME_BUFFER_1);
+    // No longer dependant on Buffer frame.  Release.
+    BEING_PROCESSED_FRAME = -1;
+    apply_ehancements();
+  }
+
+  TIME_SE_FRAME_PROCESSING.end_clock();
+  TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
   
   NEW_FRAME_AVAILABLE = true;
 
@@ -1347,15 +1213,12 @@ void CAMERA::generate_imgui_texture_frame()
 
     if (!PROCESSED_FRAME.empty())
     {
-      if (CAM_BEING_VIEWED)
-      {
-        // Convert the frame to an OpenGL texture.
-        // We pass the member variable to reuse the same texture.
-        TEXTURE_ID = matToTexture(PROCESSED_FRAME, TEXTURE_ID);
+      // Convert the frame to an OpenGL texture.
+      // We pass the member variable to reuse the same texture.
+      TEXTURE_ID = matToTexture(PROCESSED_FRAME, TEXTURE_ID);
 
-        // Create Thread safe mat frame to access
-        PROCESSED_FRAME.copyTo(LIVE_FRAME);
-      }
+      // Create Thread safe mat frame to access
+      PROCESSED_FRAME.copyTo(LIVE_FRAME);
     }
     else
     {
@@ -1528,7 +1391,7 @@ void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
   }
 }
 
-void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time)
+void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool Camera_Being_Viewed)
 {
   // Check to see if THREAD_CAMERA has stopped for any reason. 
   THREAD_CAMERA.check_for_completition();
@@ -1569,10 +1432,13 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time)
       BUFFER_FRAME_HANDOFF_READY = false;
       WORKING_FRAME_FULLY_PROCESSED = false;
 
-      // Start the camera update on a separate thread.
-      // This call is non-blocking, so the main loop can continue immediately.
-      THREAD_IMAGE_PROCESSING.start_render_thread([&]() 
-                {  process_enhancements_frame();  });
+      if (Camera_Being_Viewed)
+      {
+        // Start the camera update on a separate thread.
+        // This call is non-blocking, so the main loop can continue immediately.
+        THREAD_IMAGE_PROCESSING.start_render_thread([&]() 
+                  {  process_enhancements_frame();  });
+      }
     }
   }
 

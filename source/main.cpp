@@ -416,6 +416,7 @@ int loop_2(bool TTY_Only)
 
   // Assign Properties and Controls
 
+  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_NAME            = "backup";
   sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DEVICE_NAME     = sdSystem.FILE_NAMES.CAMERA_BACKUP;
   sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DEVICE_ID       = sdSystem.FILE_NAMES.CAMERA_BACKUP_ID;
 
@@ -423,7 +424,6 @@ int loop_2(bool TTY_Only)
   sdSystem.CAMERA_BACKUP.PROPS.CAMERA_SETTINGS_DIR    = sdSystem.FILE_NAMES.CAMERA_SETTINGS_DIR;
 
   sdSystem.CAMERA_BACKUP.PROPS.CAMERA_TEST_FILE_NAME  = sdSystem.FILE_NAMES.CAMERA_TEST_IMAGE_FILENAME;
-  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_SETTINGS_FILE_NAME  = sdSystem.FILE_NAMES.CAMERA_SETTINGS_FILENAME;
   
   // ---
   // Default settings.  Ignored if camera settings file overrides.
@@ -840,7 +840,9 @@ int loop_2(bool TTY_Only)
 
     // ---------------------------------------------------------------------------------------
 
-    sdSystem.CAMERA_BACKUP.process(sdSystem.SCREEN_COMMS, sdSystem.PROGRAM_TIME.current_frame_time());
+    sdSystem.CAMERA_BACKUP.process(sdSystem.SCREEN_COMMS, sdSystem.PROGRAM_TIME.current_frame_time(), 
+                                    sdSystem.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM ||
+                                    sdSystem.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE);
 
     // ---------------------------------------------------------------------------------------
 

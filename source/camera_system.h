@@ -76,14 +76,14 @@ class CAMERA_SETTING
 class CAMERA_PROPERTIES
 {
   public:
-
+  
+  std::string CAMERA_NAME = "";
   std::string CAMERA_DEVICE_NAME = "";
   int    CAMERA_DEVICE_ID   = -1;
 
   std::string CAMERA_DIRECTORY = "";     // e.g. .../rasfled-t/camera/
   std::string CAMERA_SETTINGS_DIR = "";  // e.g. .../rasfled-t/camera/settings/
   std::string CAMERA_TEST_FILE_NAME = "";  // e.g. .../rasfled-t/camera/settings/
-  std::string CAMERA_SETTINGS_FILE_NAME = "";  // e.g. .../rasfled-t/camera/settings/
 
   int WIDTH = 640;
   int HEIGHT = 480;
@@ -135,8 +135,6 @@ class CAMERA_PROPERTIES
 
   // Experimental Enhancements
 
-  //bool ENH_LINE_DETECTION = false;
-
   bool ENH_CANNY_MASK     = true;
 
   // May or not work. Never had a full car on screen to 
@@ -145,18 +143,6 @@ class CAMERA_PROPERTIES
 
   // Draws a circle around a curved object. Use case not found.
   bool ENH_HOUGH          = false;
-
-  // Traces some random curved lines. Looks interesting, but 
-  //  use case not found.
-  bool ENH_CURVE_IMPROVED = false;
-
-  // Draws lines at lines found. Looks interesting, but 
-  //  use case not found.
-  bool ENH_CURVE_FIT      = false;
-
-  // Doesnt work.
-  //bool ENH_ROAD_MASK      = false;  // Doesnt work
-
 
   // ---------------------------------------------------------------------------------------
   
@@ -213,17 +199,36 @@ class CAMERA
   bool SAVE_IMAGE_BUFFER_FRAME = false;
   bool SAVE_IMAGE_PROCESSED_FRAME = false;
 
+  //bool CAM_BEING_VIEWED = false;
+  // Turn off high level processing if 
+  //  camera display is not shown.  Manually set until 
+  //  later.
+
   // ---------------------------------------------------------------------------------------
   
+  // Thread process_enhancements_frames
+  cv::Mat PROCESSED_FRAME;
+  cv::Mat PROCESSED_FRAME_GRAY;
+  cv::Mat PROCESSED_FRAME_DOWNSIZED;
+  cv::Mat PROCESSED_FRAME_GRAY_DOWNSIZED;
+  cv::Mat PROCESSED_FRAME_GAUSSIAN;
+  cv::Mat PROCESSED_FRAME_CANNY;
+
+  cv::Mat MASK_FRAME_OVERLAY_LINES;
+  cv::Mat MASK_FRAME_GLARE;
+  cv::Mat MASK_FRAME_CANNY;
+  
+  // Class wide enhancement settings
+  const int BLUR_KSIZE = 7;         // Gaussian blur kernel size for noise reduction  (5)
+  const int CANNY_THRESH_LOW = 10;  // Lower threshold for edge detection (50)
+  const int CANNY_THRESH_HIGH = 100;// Upper threshold for edge detection (150)
+  const int CANNY_APERTURE = 3;     // Aperture size for Sobel operator   (3) 3 5 or 7
+
   // Camera CV Helper
   bool is_low_light(const cv::Mat& Grey_Image_Full_Size, int threshold);
   void gray_enhance(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
-  cv::Mat get_road_mask(const cv::Mat& frame);
-  cv::Mat generate_canny(cv::Mat& Grey_Image_Full_Size);
-  void detect_and_draw_contours_basic_fixed(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
-  void detect_hough_circles(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
-  void detect_and_draw_contours_improved(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
-  void detect_and_draw_contours(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
+  void apply_min_max_contrast(cv::Mat& processed_frame);
+  void detect_hough_circles(cv::Mat& processed_frame, const cv::Mat& Processed_Frame_Gaussian);
   cv::Mat canny_mask(cv::Mat& Processed_Frame_Canny);
   cv::Mat overlay_lines(cv::Mat& Processed_Frame_Gray_Downsized);
   cv::Mat suppress_glare_mask(cv::Mat& processed_frame);
@@ -265,17 +270,6 @@ class CAMERA
   bool    BUFFER_FRAME_HANDOFF_READY = false;  // Needs Lock
   int     LATEST_READY_FRAME         = -1;
   int     BEING_PROCESSED_FRAME      = -1;
-  
-  // Thread process_enhancements_frame
-  cv::Mat PROCESSED_FRAME;
-  cv::Mat PROCESSED_FRAME_GRAY;
-  cv::Mat PROCESSED_FRAME_DOWNSIZED;
-  cv::Mat PROCESSED_FRAME_GRAY_DOWNSIZED;
-  cv::Mat PROCESSED_FRAME_CANNY;
-
-  cv::Mat MASK_FRAME_OVERLAY_LINES;
-  cv::Mat MASK_FRAME_GLARE;
-  cv::Mat MASK_FRAME_CANNY;
 
   // Thread process_enhancements_frame and generate_imgui_texture_frame
   bool    WORKING_FRAME_FULLY_PROCESSED = true; // Needs Lock
@@ -319,11 +313,6 @@ class CAMERA
 
   public:
 
-  bool CAM_BEING_VIEWED = false;
-  // Temporary fix to turn off high level processing if 
-  //  camera display is not shown.  Manually set until 
-  //  later.
-
   GLuint TEXTURE_ID = 0;
   
   std::string INFORMATION_COMMAND_LIST = "Not Available";
@@ -347,7 +336,7 @@ class CAMERA
   // Manually print output stream
   void print_stream(CONSOLE_COMMUNICATION &cons);
 
-  void process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time);
+  void process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool Camera_Being_Viewed);
 
   // Public method to get a thread-safe copy of the current frame.
   cv::Mat get_current_frame();

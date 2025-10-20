@@ -140,9 +140,6 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
     CAMERA_TEST_IMAGE_FILENAME = CAMERA_DIR + (string)DEF_CAMERA_TEST_IMAGE;
     cons.printw("  " + CAMERA_TEST_IMAGE_FILENAME);
 
-    CAMERA_SETTINGS_FILENAME = CAMERA_SETTINGS_DIR + (string)DEF_CAMERA_SETTINGS_FILE;
-    cons.printw("  " + CAMERA_SETTINGS_FILENAME);
-
     // Specific Hardware Directories and Files
     cons.printw("");
     cons.printw("Hardware and External Sources:");
