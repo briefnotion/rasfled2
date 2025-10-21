@@ -95,11 +95,14 @@ class DISTANCE
   public:
 
   void store_meters(float Meters);
+  void store_miles(float Miles);
 
   float meters_val();
   string meters();
 
   float feet_val();
+
+  float miles_val();
 
 };
 

@@ -528,71 +528,71 @@ void ADSB_RANGE::update_range_block_size()
 {
   if (RANGE_IMP_LATEST <= 0.01f + ((0.03f - 0.01f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 0.01f;
+    RANGE_BLOCK_CURRENT.store_miles(0.01f);
   }
   else if (RANGE_IMP_LATEST <= 0.03f + ((0.05f - 0.03f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 0.03f;
+    RANGE_BLOCK_CURRENT.store_miles(0.03f);
   }
   else if (RANGE_IMP_LATEST <= 0.05f + ((0.1f - 0.05f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 0.05f;
+    RANGE_BLOCK_CURRENT.store_miles(0.05f);
   }
   else if (RANGE_IMP_LATEST <= 0.1f + ((0.25f -  0.1f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 0.1f;
+    RANGE_BLOCK_CURRENT.store_miles(0.1f);
   }
   else if (RANGE_IMP_LATEST <= 0.25f + ((0.5f - 0.25f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 0.25f;
+    RANGE_BLOCK_CURRENT.store_miles(0.25f);
   }
   else if (RANGE_IMP_LATEST <= 0.5f + ((1.0f - 0.5f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 0.5f;
+    RANGE_BLOCK_CURRENT.store_miles(0.5f);
   }
   else if (RANGE_IMP_LATEST <= 1.0f + ((2.0f - 1.0f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 1.0f;
+    RANGE_BLOCK_CURRENT.store_miles(1.0f);
   }
   else if (RANGE_IMP_LATEST <= 2.0f + ((5.0f - 2.0f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 2.0f;
+    RANGE_BLOCK_CURRENT.store_miles(2.0f);
   }
   else if (RANGE_IMP_LATEST <= 5.0f + ((7.0f - 5.0f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 5.0f;
+    RANGE_BLOCK_CURRENT.store_miles(5.0f);
   }
   else if (RANGE_IMP_LATEST <= 7.0f + ((10.0f - 7.0f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 7.0f;
+    RANGE_BLOCK_CURRENT.store_miles(7.0f);
   }
   else if (RANGE_IMP_LATEST <= 10.0f + ((15.0f - 10.0f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 10.0f;
+    RANGE_BLOCK_CURRENT.store_miles(10.0f);
   }
   else if (RANGE_IMP_LATEST <= 15.0f + ((25.0f - 15.0f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 15.0f;
+    RANGE_BLOCK_CURRENT.store_miles(15.0f);
   }
   else if (RANGE_IMP_LATEST <= 25.0f + ((35.0f - 25.0f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 25.0f;
+    RANGE_BLOCK_CURRENT.store_miles(25.0f);
   }
   else if (RANGE_IMP_LATEST <= 35.0f + ((50.0f - 35.0f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 35.0f;
+    RANGE_BLOCK_CURRENT.store_miles(35.0f);
   }
   else if (RANGE_IMP_LATEST <= 50.0f + ((75.0f - 50.0f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 50.0f;
+    RANGE_BLOCK_CURRENT.store_miles(50.0f);
   }
   else if (RANGE_IMP_LATEST <= 75.0f + ((100.0f - 75.0f) / 2.0f))
   {
-    RANGE_BLOCK_CURRENT = 75.0f;
+    RANGE_BLOCK_CURRENT.store_miles(75.0f);
   }
   else //if (RANGE_IMP_LATEST < 100.0f)
   {
-    RANGE_BLOCK_CURRENT = 100.0f;
+    RANGE_BLOCK_CURRENT.store_miles(100.0f);
   }
 }
 
@@ -608,7 +608,7 @@ void ADSB_RANGE::range_update(unsigned long Frame_Time, int &Map_Location_Focus)
 
     bool draw = true;
     ImVec2 point_distance = point_position_lat_lon(WORKING_AREA, LAT_LON_TO_POINT_SCALE, GPS_POS_LAT_LON, 
-                                                  get_coords_x_miles_from_coords(GPS_POS_LAT_LON.x, GPS_POS_LAT_LON.y, RANGE_BLOCK_CURRENT, 0.0f), 
+                                                  get_coords_x_miles_from_coords(GPS_POS_LAT_LON.x, GPS_POS_LAT_LON.y, RANGE_BLOCK_CURRENT.miles_val(), 0.0f), 
                                                   180.0f, draw);
     RANGE_POINT_DISTANCE = abs(point_distance.y - CENTER.y);
 
@@ -680,13 +680,17 @@ void ADSB_RANGE::draw_scale(ImDrawList *Draw_List, system_data &sdSysData, ImVec
   // Text Range
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD_V(PROPS.COLOR)));
 
-  if (RANGE_BLOCK_CURRENT < 1.0f)
+  if (RANGE_BLOCK_CURRENT.miles_val() < 0.1f)
   {
-    ImGui::Text("%.2f mi", RANGE_BLOCK_CURRENT);
+    ImGui::Text("%.0f ft", RANGE_BLOCK_CURRENT.feet_val());
+  }
+  else if (RANGE_BLOCK_CURRENT.miles_val() < 1.0f)
+  {
+    ImGui::Text("%.2f mi", RANGE_BLOCK_CURRENT.miles_val());
   }
   else
   {
-    ImGui::Text("%.0f mi", RANGE_BLOCK_CURRENT);
+    ImGui::Text("%.0f mi", RANGE_BLOCK_CURRENT.miles_val());
   }
   ImGui::PopStyleColor();
 }

@@ -258,6 +258,11 @@ void DISTANCE::store_meters(float Meters)
   METERS = Meters;
 }
 
+void DISTANCE::store_miles(float Miles)
+{
+  METERS = Miles * 1609.344f;
+}
+
 float DISTANCE::meters_val()
 {
   return METERS;
@@ -271,6 +276,11 @@ string DISTANCE::meters()
 float DISTANCE::feet_val()
 {
   return (METERS * 3.2808399f);
+}
+
+float DISTANCE::miles_val()
+{
+  return (METERS * 0.00062137f);
 }
 
 // -------------------------------------------------------------------------------------

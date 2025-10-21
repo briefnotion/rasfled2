@@ -93,11 +93,11 @@ class ADSB_RANGE
   ImVec4 WORKING_AREA;
   ImVec2 CENTER;
 
-  float RANGE = 25.0f;                    // Miles for first circle
+  float                   RANGE = 25.0f;            // Miles for first circle
   IMPACT_RESISTANCE_FLOAT RANGE_IMP;
-  float RANGE_IMP_LATEST = 0.0f;          // Miles for first circle
-  float RANGE_BLOCK_CURRENT = 0.0f;       // Current range block size determined by RANGE_IMP_LATEST
-  float RANGE_POINT_DISTANCE = 0.0f;
+  float                   RANGE_IMP_LATEST = 0.0f;  // Miles for first circle
+  DISTANCE                RANGE_BLOCK_CURRENT;      // Current range block size determined by RANGE_IMP_LATEST
+  float                   RANGE_POINT_DISTANCE = 0.0f;
 
   ImVec2 LAT_LON_TO_POINT_SCALE;          // Required for calculating map draw routines
                                           // in point_position_lat_lon
