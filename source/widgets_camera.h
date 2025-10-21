@@ -83,7 +83,7 @@ class CAMERA_WIDGET
   // Enhancements
   BUTTON_TOGGLE_COLOR        BC_SHOW_PATH;
   BUTTON_TOGGLE_COLOR        BC_ENH_LOW_LIGHT;
-  BUTTON_TOGGLE_COLOR        BC_ENH_OVERLAY_LINES;
+  //BUTTON_TOGGLE_COLOR        BC_ENH_OVERLAY_LINES;
   BUTTON_TOGGLE_COLOR        BC_ENH_GLARE_MASK;
   BUTTON_TOGGLE_COLOR        BC_ENH_CANNY;
   BUTTON_TOGGLE_COLOR        BC_ENH_COLOR;
@@ -104,9 +104,6 @@ class CAMERA_WIDGET
   float THICKNESS_3_B = 5.0f;
 
   const ImU32 COLOR_BLK = IM_COL32(0, 0, 0, 255);   // 5ft
-  const ImU32 COLOR_GRN = IM_COL32(0, 255, 0, 255);   // 5ft
-  const ImU32 COLOR_YLW = IM_COL32(255, 255, 0, 255); // 10ft 
-  const ImU32 COLOR_RED = IM_COL32(255, 0, 0, 255);   // 15ft
 
   // Some working class variables
   // Variables for image size and centering, declared here to be accessible in class scopes.

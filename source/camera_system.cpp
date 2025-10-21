@@ -156,7 +156,7 @@ void CAMERA::detect_hough_circles(cv::Mat& processed_frame, const cv::Mat& Proce
 
 cv::Mat CAMERA::canny_mask(cv::Mat& Processed_Frame_Canny)
 {
-  const int DILATE_ITERATIONS = 1;  // Number of times to thicken edges
+  const int DILATE_ITERATIONS = 0;  // Number of times to thicken edges
 
   // --- Step 4: Explicitly thicken edges ---
   cv::Mat thickened;
@@ -277,6 +277,26 @@ int CAMERA::get_control(uint32_t id)
   }
 
   return ret_value;
+}
+
+cv::Mat CAMERA::generate_empty_frame(int width, int height)
+{
+  // This function creates a new OpenCV matrix (frame) that is entirely black.
+
+  // --- Parameters ---
+  // width: The desired width of the output frame in pixels.
+  // height: The desired height of the output frame in pixels.
+  
+  // --- Implementation ---
+  
+  // 1. Define the dimensions and type for the new matrix.
+  // CV_8UC3: 8-bit unsigned integer, 3 Channels (Standard BGR color format).
+  
+  // 2. Use cv::Mat::zeros to create a matrix initialized entirely to zero.
+  // For a BGR image, initializing to 0, 0, 0 results in a black pixel.
+  cv::Mat empty_frame = cv::Mat::zeros(cv::Size(width, height), CV_8UC3);
+  
+  return empty_frame;
 }
 
 // Assuming this is inside your CAMERA class or a namespace
@@ -827,8 +847,8 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
         cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
       }
 
-      cv::resize(PROCESSED_FRAME, PROCESSED_FRAME_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
-      cv::resize(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_GRAY_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
+      //cv::resize(PROCESSED_FRAME, PROCESSED_FRAME_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
+      //cv::resize(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_GRAY_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
       cv::GaussianBlur(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_GAUSSIAN, cv::Size(BLUR_KSIZE, BLUR_KSIZE), 0);
       cv::Canny(PROCESSED_FRAME_GAUSSIAN, PROCESSED_FRAME_CANNY, CANNY_THRESH_LOW, CANNY_THRESH_HIGH, CANNY_APERTURE);
     }
@@ -846,18 +866,21 @@ void CAMERA::apply_ehancements()
       MASK_FRAME_CANNY = canny_mask(PROCESSED_FRAME_CANNY);
     }
 
+    /*
     // Overlay lines
     if (PROPS.ENH_OVERLAY_LINES)
     {
       MASK_FRAME_OVERLAY_LINES = overlay_lines(PROCESSED_FRAME_GRAY_DOWNSIZED);
     }
+    */
 
     //---
 
     // Glare Mask
     if (PROPS.ENH_GLARE_MASK)
     {
-      MASK_FRAME_GLARE = suppress_glare_mask(PROCESSED_FRAME_DOWNSIZED);
+      //MASK_FRAME_GLARE = suppress_glare_mask(PROCESSED_FRAME_DOWNSIZED);
+      MASK_FRAME_GLARE = suppress_glare_mask(PROCESSED_FRAME);
     }
 
     //---
@@ -913,15 +936,17 @@ void CAMERA::apply_ehancements()
     PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_CANNY);
   }
 
+  /*
   if (PROPS.ENH_OVERLAY_LINES)
   {
     cv::resize(MASK_FRAME_OVERLAY_LINES, MASK_FRAME_OVERLAY_LINES, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
     PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_OVERLAY_LINES);
   }
+  */
 
   if (PROPS.ENH_GLARE_MASK)
   {
-    cv::resize(MASK_FRAME_GLARE, MASK_FRAME_GLARE, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
+    //cv::resize(MASK_FRAME_GLARE, MASK_FRAME_GLARE, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
     PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_GLARE);
   }
 }
@@ -957,6 +982,9 @@ void CAMERA::open_camera()
       CAR_CASCADE_LOADED = true;
       std::cout << "Car cascade loaded successfully." << std::endl;
     }
+
+    // Create an empty frame.
+    FRAME_BUFFER_EMPTY = generate_empty_frame(PROPS.WIDTH, PROPS.HEIGHT);
 
     // Start the camera 
     if (PROPS.TEST == false)
@@ -1055,9 +1083,13 @@ void CAMERA::update_frame()
   //  and BEING_PROCESSED_FRAME should be MUTEXed (mutex) to prevent data races, 
   //  but as is, the variables are playing nicely in their respective threads. 
 
+
   CAMERA_READ_THREAD_TIME.create();
 
   open_camera();
+
+  // during while, set error to trigger CAMERA_READ_THREAD_STOP
+  bool error = false;
 
   while (CAMERA_READ_THREAD_STOP == false)
   {
@@ -1077,87 +1109,109 @@ void CAMERA::update_frame()
       // Save image to disk and get captured frame from camera.
       check_for_save_image_buffer_frame();
 
-      // Determine which buffer to put frame in.
-      if (BEING_PROCESSED_FRAME == -1)
+      if (CAMERA_BEING_VIEWED || PROPS.DISABLE_CAMERA_BEING_VIEWED)
       {
-        if (FRAME_TO_BUFFER == 0)
+        // Determine which buffer to put frame in.
+        if (BEING_PROCESSED_FRAME == -1)
         {
-          FRAME_TO_BUFFER = 1;
-        }
-        else
-        if (FRAME_TO_BUFFER == 1)
-        {
-          FRAME_TO_BUFFER = 0;
-        }
-      }
-      else
-      {
-        if (BEING_PROCESSED_FRAME == 0)
-        {
-          FRAME_TO_BUFFER = 1;
-        }
-        else
-        if (BEING_PROCESSED_FRAME == 1)
-        {
-          FRAME_TO_BUFFER = 0;
-        }
-      }
-
-      // Measure the time to run the routine.
-      TIME_SE_FRAME_RETRIEVAL.start_clock();
-
-      // Capture the camera frame.
-      if (PROPS.TEST)
-      {
-        if (FRAME_TO_BUFFER == 0)
-        {
-          FRAME_DUMMY.copyTo(FRAME_BUFFER_0);
-          LATEST_READY_FRAME = 0;
-        }
-        else if (FRAME_TO_BUFFER == 1)
-        {
-          FRAME_DUMMY2.copyTo(FRAME_BUFFER_1);
-          LATEST_READY_FRAME = 1;
-        }
-      }
-      else
-      {
-        if (FRAME_TO_BUFFER == 0)
-        {
-          CAMERA_CAPTURE >> FRAME_BUFFER_0;
-          LATEST_READY_FRAME = 0;
-          
-          // Check for errors.  close camera if empty frame or not connected.
-          if (CAMERA_CAPTURE.isOpened() == false || FRAME_BUFFER_0.empty())
+          if (FRAME_TO_BUFFER == 0)
           {
-            PRINTW_QUEUE.push_back("Camera Error");
-            PRINTW_QUEUE.push_back("Is opened = " + to_string(CAMERA_CAPTURE.isOpened()) +
-                                    " Frame Buffer Empty = " + to_string(FRAME_BUFFER_0.empty()));
-            CAMERA_READ_THREAD_STOP = true;
+            FRAME_TO_BUFFER = 1;
+          }
+          else
+          if (FRAME_TO_BUFFER == 1)
+          {
+            FRAME_TO_BUFFER = 0;
           }
         }
-        else if (FRAME_TO_BUFFER == 1)
+        else
         {
-          CAMERA_CAPTURE >> FRAME_BUFFER_1;
-          LATEST_READY_FRAME = 1;
-          
-          // Check for errors.  close camera if empty frame or not connected.
-          if (CAMERA_CAPTURE.isOpened() == false || FRAME_BUFFER_1.empty())
+          if (BEING_PROCESSED_FRAME == 0)
           {
-            PRINTW_QUEUE.push_back("Camera Error");
-            PRINTW_QUEUE.push_back("Is opened = " + to_string(CAMERA_CAPTURE.isOpened()) +
-                                    " Frame Buffer Empty = " + to_string(FRAME_BUFFER_1.empty()));
-            CAMERA_READ_THREAD_STOP = true;
+            FRAME_TO_BUFFER = 1;
+          }
+          else
+          if (BEING_PROCESSED_FRAME == 1)
+          {
+            FRAME_TO_BUFFER = 0;
           }
         }
+
+        // Measure the time to run the routine.
+        TIME_SE_FRAME_RETRIEVAL.start_clock();
+
+        // Capture the camera frame.
+        if (PROPS.TEST)
+        {
+          if (FRAME_TO_BUFFER == 0)
+          {
+            FRAME_DUMMY.copyTo(FRAME_BUFFER_0);
+            LATEST_READY_FRAME = 0;
+            
+            // Check for errors.  close camera if empty frame or not connected.
+            if (FRAME_BUFFER_0.empty())
+            {
+              error = true;
+            }
+          }
+          else if (FRAME_TO_BUFFER == 1)
+          {
+            FRAME_DUMMY2.copyTo(FRAME_BUFFER_1);
+            LATEST_READY_FRAME = 1;
+            
+            // Check for errors.  close camera if empty frame or not connected.
+            if (FRAME_BUFFER_1.empty())
+            {
+              error = true;
+            }
+          }
+        }
+        else
+        {
+          if (FRAME_TO_BUFFER == 0)
+          {
+            CAMERA_CAPTURE >> FRAME_BUFFER_0;
+            LATEST_READY_FRAME = 0;
+            
+            // Check for errors.  close camera if empty frame or not connected.
+            if (FRAME_BUFFER_0.empty())
+            {
+              error = true;
+            }
+          }
+          else if (FRAME_TO_BUFFER == 1)
+          {
+            CAMERA_CAPTURE >> FRAME_BUFFER_1;
+            LATEST_READY_FRAME = 1;
+            
+            // Check for errors.  close camera if empty frame or not connected.
+            if (FRAME_BUFFER_1.empty())
+            {
+              error = true;
+            }
+          }
+        }
+
+        // Save the amout of time it took to read the frame.
+        TIME_SE_FRAME_RETRIEVAL.end_clock();
+        TIME_FRAME_RETRIEVAL = TIME_SE_FRAME_RETRIEVAL.duration_ms();
+        
+        // Signal the enhancement processor that a new frame is available
+        BUFFER_FRAME_HANDOFF_READY = true;
       }
+    }
 
-      // Save the amout of time it took to read the frame.
-      TIME_SE_FRAME_RETRIEVAL.end_clock();
-      TIME_FRAME_RETRIEVAL = TIME_SE_FRAME_RETRIEVAL.duration_ms();
+    if (PROPS.TEST == false && CAMERA_CAPTURE.isOpened() == false)
+    {
+      error = true;
+    }
 
-      // Signal the enhancement processor that a new frame is available
-      BUFFER_FRAME_HANDOFF_READY = true;
+    if (error)
+    {
+      CAMERA_READ_THREAD_STOP = true;
+      PRINTW_QUEUE.push_back("Camera Error");
+      PRINTW_QUEUE.push_back("Is opened = " + to_string(CAMERA_CAPTURE.isOpened()) +
+                              " Frame Buffer Empty = " + to_string(FRAME_BUFFER_1.empty()));
     }
 
     // Thread will need to sleep, governed by the FORCED_FRAME_LIMIT.
@@ -1213,15 +1267,23 @@ void CAMERA::generate_imgui_texture_frame()
 
     if (!PROCESSED_FRAME.empty())
     {
-      // Convert the frame to an OpenGL texture.
-      // We pass the member variable to reuse the same texture.
-      TEXTURE_ID = matToTexture(PROCESSED_FRAME, TEXTURE_ID);
+      if (GENERATE_BLANK_IMAGE)
+      {
+        // Convert the frame to an OpenGL texture.
+        // We pass the member variable to reuse the same texture.
+        TEXTURE_ID = matToTexture(PROCESSED_FRAME, TEXTURE_ID);
 
-      // Create Thread safe mat frame to access
-      PROCESSED_FRAME.copyTo(LIVE_FRAME);
-    }
-    else
-    {
+        // Create Thread safe mat frame to access
+        PROCESSED_FRAME.copyTo(LIVE_FRAME);
+      }
+      else
+      {
+        // The next few lines will copy a blank texture image so 
+        //  when the frame returns after the camera is viewed again, 
+        //  the an image of an old frame will not flash the screen.
+        TEXTURE_ID = matToTexture(FRAME_BUFFER_EMPTY, TEXTURE_ID);
+        FRAME_BUFFER_EMPTY.copyTo(LIVE_FRAME);
+      }
     }
   }
 
@@ -1384,7 +1446,7 @@ void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
     std::string print_buffer = "";
     for (size_t pos = 0; pos < PRINTW_QUEUE.size(); pos++)
     {
-      print_buffer += PRINTW_QUEUE[pos];
+      print_buffer += PRINTW_QUEUE[pos] + "\n";
     }
     PRINTW_QUEUE.clear();
     cons.printw(print_buffer);
@@ -1393,6 +1455,13 @@ void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
 
 void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool Camera_Being_Viewed)
 {
+  // Check and set Camera Being Viewed
+  if (CAMERA_BEING_VIEWED != Camera_Being_Viewed)
+  {
+    CAMERA_BEING_VIEWED = Camera_Being_Viewed;
+    GENERATE_BLANK_IMAGE = true;
+  }
+
   // Check to see if THREAD_CAMERA has stopped for any reason. 
   THREAD_CAMERA.check_for_completition();
 

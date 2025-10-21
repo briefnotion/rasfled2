@@ -122,20 +122,23 @@ class CAMERA_PROPERTIES
 
   // When low light triggered, turns on grayscale image 
   //  and booste brightness
-  bool ENH_LOW_LIGHT      = true;
+  bool ENH_LOW_LIGHT      = false;
 
   // Finds contrast image lines and draws mask.
-  bool ENH_OVERLAY_LINES  = false;
+  //bool ENH_OVERLAY_LINES  = false;
 
   // Finds max brightness area and mask them out.
   bool ENH_GLARE_MASK     = true;
 
-  // Booste all colors.
+  // Boost all colors to min max.  Very noisy at 
+  //  no light.
   bool ENH_COLOR          = true;
 
-  // Experimental Enhancements
-
+  // Finds contrast image lines and draws mask.
+  // Works better than ENH_OVERLAY_LINES
   bool ENH_CANNY_MASK     = true;
+
+  // Experimental Enhancements
 
   // May or not work. Never had a full car on screen to 
   //  see.
@@ -143,6 +146,10 @@ class CAMERA_PROPERTIES
 
   // Draws a circle around a curved object. Use case not found.
   bool ENH_HOUGH          = false;
+
+  // Temp test
+  // Disable CAMERA_BEING_VIEWED variable
+  bool DISABLE_CAMERA_BEING_VIEWED = false;
 
   // ---------------------------------------------------------------------------------------
   
@@ -209,12 +216,12 @@ class CAMERA
   // Thread process_enhancements_frames
   cv::Mat PROCESSED_FRAME;
   cv::Mat PROCESSED_FRAME_GRAY;
-  cv::Mat PROCESSED_FRAME_DOWNSIZED;
-  cv::Mat PROCESSED_FRAME_GRAY_DOWNSIZED;
+  //cv::Mat PROCESSED_FRAME_DOWNSIZED;
+  //cv::Mat PROCESSED_FRAME_GRAY_DOWNSIZED;
   cv::Mat PROCESSED_FRAME_GAUSSIAN;
   cv::Mat PROCESSED_FRAME_CANNY;
 
-  cv::Mat MASK_FRAME_OVERLAY_LINES;
+  //cv::Mat MASK_FRAME_OVERLAY_LINES;
   cv::Mat MASK_FRAME_GLARE;
   cv::Mat MASK_FRAME_CANNY;
   
@@ -237,6 +244,7 @@ class CAMERA
   bool set_control(uint32_t id, int32_t value); // returns true on success
   int get_control(uint32_t id);                 // returns -1 on failure, otherwise returns value.
 
+  cv::Mat generate_empty_frame(int width, int height);
   cv::Mat generateDummyFrame(int width, int height);
   GLuint matToTexture(const cv::Mat& frame, GLuint textureID);
 
@@ -265,6 +273,7 @@ class CAMERA
   bool CAM_AVAILABLE = false;
 
   // Thread Update and process_enhancements_frame
+  cv::Mat FRAME_BUFFER_EMPTY;
   cv::Mat FRAME_BUFFER_0;
   cv::Mat FRAME_BUFFER_1;
   bool    BUFFER_FRAME_HANDOFF_READY = false;  // Needs Lock
@@ -273,6 +282,9 @@ class CAMERA
 
   // Thread process_enhancements_frame and generate_imgui_texture_frame
   bool    WORKING_FRAME_FULLY_PROCESSED = true; // Needs Lock
+
+  bool    CAMERA_BEING_VIEWED       = false;
+  bool    GENERATE_BLANK_IMAGE      = false;
 
   // Load and Save settings
   void save_settings();

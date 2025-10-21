@@ -1,3 +1,6 @@
+2.341_251021
+  - Made a few more changes to the camera system.
+
 2.340_251019
   - Made a few more changes to the camera system.
 

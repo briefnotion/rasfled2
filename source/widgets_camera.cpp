@@ -76,6 +76,10 @@ void CAMERA_WIDGET::display_path(system_data &sdSysData)
   
   // Color Lines
   {
+    ImU32 COLOR_GRN = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_GREEN);   // 5ft
+    ImU32 COLOR_YLW = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_YELLOW);  // 10ft 
+    ImU32 COLOR_RED = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_RED);     // 15ft
+
     // --- Draw Segment 1: Green Path (Y0 to Y1) ---
     // Draw Left, Right, and Top (Y1)
     draw_list->AddLine(P0L, P1L, COLOR_GRN, THICKNESS_1_B); // Left Line
@@ -277,12 +281,14 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT = !sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT;
     }
 
+    /*
     if (BC_ENH_OVERLAY_LINES.button_toggle_color(sdSysData, "LINES\nMASK", "LINES\nMASK", 
                                               sdSysData.CAMERA_BACKUP.PROPS.ENH_OVERLAY_LINES, 
                                               RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       sdSysData.CAMERA_BACKUP.PROPS.ENH_OVERLAY_LINES = !sdSysData.CAMERA_BACKUP.PROPS.ENH_OVERLAY_LINES;
     }
+    */
 
     ImGui::SameLine();
     if (BC_ENH_GLARE_MASK.button_toggle_color(sdSysData, "GLARE\nMASK", "GLARE\nMASK", 
