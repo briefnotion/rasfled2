@@ -328,6 +328,14 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
     {
       sdSysData.CAMERA_BACKUP.PROPS.ENH_CAR_DETECTION = !sdSysData.CAMERA_BACKUP.PROPS.ENH_CAR_DETECTION;
     }
+
+    // Display Fake Frame
+    if (BC_ENH_FAKE_FRAME.button_toggle_color(sdSysData, "FAKE\nFRAME", "FAKE\nFRAME", 
+                                              sdSysData.CAMERA_BACKUP.PROPS.ENH_FAKE_FRAMES, 
+                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.CAMERA_BACKUP.PROPS.ENH_FAKE_FRAMES = !sdSysData.CAMERA_BACKUP.PROPS.ENH_FAKE_FRAMES;
+    }
   }
   ImGui::EndChild();
 
@@ -445,6 +453,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
   //else
   {
     ImGui::Text("%2.1f fps", sdSysData.CAMERA_BACKUP.TIME_MAX_FPS);
+    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_MAX_FPS_DELAY);
     ImGui::Text("Grab:");
     ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL);
     ImGui::Text("Prc Tme:");

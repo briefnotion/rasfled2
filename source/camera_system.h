@@ -24,6 +24,7 @@
 #include <GLFW/glfw3.h>
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/video.hpp>
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/objdetect.hpp> 
@@ -59,6 +60,56 @@ class FdCloser
   // Prevent copying (since file descriptors should not be copied)
   FdCloser(const FdCloser&) = delete;
   FdCloser& operator=(const FdCloser&) = delete;
+};
+
+// ---------------------------------------------------------------------------------------
+
+class FAKE_FRAME
+{
+public:
+  // Constructor is now default. Dimensions are set by the first frame in interpolateFrame.
+  FAKE_FRAME();
+
+  // Generates the interpolated frame between the previously stored frame and current_frame
+  cv::Mat interpolateFrame(const cv::Mat& current_frame);
+
+private:
+  // Called by interpolateFrame with the very first input frame. 
+  // This method now performs configuration, buffer allocation, and initial state setup.
+  void preprocess_initial_frame(const cv::Mat& initial_frame);
+  
+  // --- Configuration Variables (No longer const, initialized when the first frame arrives) ---
+  int PROCESS_WIDTH = 0;
+  int PROCESS_HEIGHT = 0;
+  int FLOW_CALC_WIDTH = 0;
+  int FLOW_CALC_HEIGHT = 0;
+  
+  // Flag to ensure configuration and buffer allocation only happens once
+  bool is_initialized_ = false;
+
+  // --- State Variables ---
+  // Stores the previous BGR frame used for interpolation. This is the frame we will remap.
+  cv::Mat prev_frame_;
+
+  // --- Intermediate Reusable Buffers (Pre-allocated in preprocess_initial_frame) ---
+
+  // Gray frames for optical flow calculation (PROCESS_SIZE)
+  cv::Mat current_gray_, prev_gray_;
+
+  // Downsampled gray frames (FLOW_CALC_SIZE)
+  cv::Mat small_prev_gray_, small_current_gray_;
+
+  // Flow field at the small resolution (FLOW_CALC_SIZE, 2-channel float)
+  cv::Mat flow_small_;
+
+  // Flow field upsampled back to the processing size (PROCESS_SIZE, 2-channel float)
+  cv::Mat flow_upsampled_;
+
+  // Pre-calculated mesh grids for vectorized map generation (PROCESS_SIZE, 1-channel float)
+  cv::Mat coords_x_, coords_y_; 
+
+  // Remapping matrices (PROCESS_SIZE, 1-channel float)
+  cv::Mat map_x_, map_y_;
 };
 
 // ---------------------------------------------------------------------------------------
@@ -139,6 +190,9 @@ class CAMERA_PROPERTIES
   bool ENH_CANNY_MASK     = true;
 
   // Experimental Enhancements
+
+  // Frame Generation, aka Frame Interpolation, aka Fake Frames
+  bool ENH_FAKE_FRAMES    = false;
 
   // May or not work. Never had a full car on screen to 
   //  see.
@@ -246,6 +300,7 @@ class CAMERA
 
   cv::Mat generate_empty_frame(int width, int height);
   cv::Mat generateDummyFrame(int width, int height);
+  cv::Mat generateDummyFrame_2(int width, int height, int frame_index);
   GLuint matToTexture(const cv::Mat& frame, GLuint textureID);
 
   void prepare();
@@ -276,6 +331,13 @@ class CAMERA
   cv::Mat FRAME_BUFFER_EMPTY;
   cv::Mat FRAME_BUFFER_0;
   cv::Mat FRAME_BUFFER_1;
+  cv::Mat FRAME_BUFFER_FAKE;
+
+  FAKE_FRAME FAKE_FRAME_GENERATOR;
+  
+  int             FRAME_TO_TEXTURE_TRACK = 0;
+  TIMED_IS_READY  FRAME_TO_TEXTURE_TIMER;
+
   bool    BUFFER_FRAME_HANDOFF_READY = false;  // Needs Lock
   int     LATEST_READY_FRAME         = -1;
   int     BEING_PROCESSED_FRAME      = -1;
@@ -285,7 +347,7 @@ class CAMERA
 
   bool    CAMERA_BEING_VIEWED       = false;
   bool    GENERATE_BLANK_IMAGE      = false;
-
+  
   // Load and Save settings
   void save_settings();
   void load_settings_json();
@@ -306,6 +368,10 @@ class CAMERA
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
+  void apply_masks();
+  // Apply all prop enable enhancements.
+  // PROCESSED_FRAME created upon completion.
+
   // Public method to create the camera capture.
   void open_camera();
   // Step through the process of starting the camera.
@@ -318,7 +384,7 @@ class CAMERA
   
   // ---------------------------------------------------------------------------------------
 
-  void generate_imgui_texture_frame();
+  void generate_imgui_texture_frame(cv::Mat& Frame);
   // Converts PROCESSED_FRAME into ImGui Texture to be rendered
   //  into program display.
   // Copies PROCESSED_FRAME to LIVE_FRAME for thread safe access.
@@ -330,6 +396,7 @@ class CAMERA
   std::string INFORMATION_COMMAND_LIST = "Not Available";
 
   double TIME_MAX_FPS;
+  double TIME_MAX_FPS_DELAY;
   double TIME_FRAME_RETRIEVAL;
   double TIME_FRAME_PROCESSING;
 

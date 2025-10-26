@@ -850,6 +850,11 @@ double MEASURE_TIME_START_END::duration_fps()
   return (1000.0 / duration_ms.count());
 }
 
+void MEASURE_TIME_START_END::sleep_ms(int Sleep_Time)
+{
+  usleep ((1000 * Sleep_Time));
+}
+
 // ---------------------------------------------------------------------------------------
 // Impact Resistance
 

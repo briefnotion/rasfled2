@@ -545,7 +545,7 @@ class MIN_MAX_TIME
 // ---------------------------------------------------------------------------------------
 // MEASURE_TIME_START_END
 
-// Simple class to measer time between two points of code.
+// Simple class to measure time between two points of code.
 // Needs no parameters.
 
 class MEASURE_TIME_START_END
@@ -555,10 +555,11 @@ class MEASURE_TIME_START_END
   std::chrono::_V2::system_clock::time_point end;
 
   public:
-  void start_clock();
-  void end_clock();
-  double duration_ms();
-  double duration_fps();
+  void start_clock();             // Starts the clock
+  void end_clock();               // Ends the clock
+  double duration_ms();           // Returns time diff in ms
+  double duration_fps();          // Returns fps of time diff
+  void sleep_ms(int Sleep_Time);  // A simple sleep routine
 };
 
 // ---------------------------------------------------------------------------------------

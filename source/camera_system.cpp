@@ -39,6 +39,155 @@ Notes:
 */
 // ---------------------------------------------------------------------------------------
 
+// Helper function to create the mesh grid (x and y coordinates)
+// This is called once when the first frame is processed.
+void createMeshGrid(int rows, int cols, cv::Mat& x_coords, cv::Mat& y_coords) 
+{
+  x_coords.create(rows, cols, CV_32FC1);
+  y_coords.create(rows, cols, CV_32FC1);
+
+  for (int y = 0; y < rows; y++) 
+  {
+    float* p_x = x_coords.ptr<float>(y);
+    float* p_y = y_coords.ptr<float>(y);
+    for (int x = 0; x < cols; x++) 
+    {
+      p_x[x] = (float)x;
+      p_y[x] = (float)y;
+    }
+  }
+}
+
+// --- Constructor: Simple initialization, no pre-allocation yet ---
+// Dimensions and buffers are set when the first frame size is known.
+FAKE_FRAME::FAKE_FRAME()
+{
+  // is_initialized_ is default-initialized to false
+}
+
+// --- Dynamic Initialization and Preprocessing ---
+// This method now handles configuration (setting sizes) and pre-allocation, 
+// ensuring it only runs once with the dimensions of the initial_frame.
+void FAKE_FRAME::preprocess_initial_frame(const cv::Mat& initial_frame)
+{
+  // Check the initialization flag
+  if (!is_initialized_)
+  {
+    // 1. Determine Dimensions and Constants based on the first frame's size
+    PROCESS_WIDTH = initial_frame.cols;
+    PROCESS_HEIGHT = initial_frame.rows;
+    
+    // Set flow size to 1/4th of process size (e.g., 640/4 = 160)
+    FLOW_CALC_WIDTH = PROCESS_WIDTH / 4; 
+    FLOW_CALC_HEIGHT = PROCESS_HEIGHT / 4; 
+    
+    cv::Size process_size(PROCESS_WIDTH, PROCESS_HEIGHT);
+    cv::Size flow_calc_size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT);
+
+    // 2. Pre-allocate all buffers
+    current_gray_.create(process_size, CV_8UC1);
+    prev_gray_.create(process_size, CV_8UC1);
+    small_prev_gray_.create(flow_calc_size, CV_8UC1);
+    small_current_gray_.create(flow_calc_size, CV_8UC1);
+    
+    flow_small_.create(flow_calc_size, CV_32FC2);
+    flow_upsampled_.create(process_size, CV_32FC2);
+    map_x_.create(process_size, CV_32FC1);
+    map_y_.create(process_size, CV_32FC1);
+
+    // 3. Pre-calculate the coordinate mesh grids
+    createMeshGrid(PROCESS_HEIGHT, PROCESS_WIDTH, coords_x_, coords_y_);
+
+    // Mark as initialized
+    is_initialized_ = true;
+  }
+  
+  // 4. Handle initial BGR frame state
+  
+  // The initial_frame size matches the newly set PROCESS_WIDTH/HEIGHT
+  initial_frame.copyTo(prev_frame_);
+  
+  // Convert the initial frame to gray for the 'current' gray state
+  cv::cvtColor(prev_frame_, current_gray_, cv::COLOR_BGR2GRAY);
+  // The very first frame is the previous frame for the next calculation
+  current_gray_.copyTo(prev_gray_);
+}
+
+
+cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame) 
+{
+  // If prev_frame_ is empty, it means this is the very first call.
+  // We run preprocess_initial_frame to initialize dimensions and buffers 
+  // based on current_frame's size, and set up the initial state.
+  if (prev_frame_.empty())
+  {
+    // INITIALIZATION STEP: Set dimensions and allocate buffers based on current_frame
+    preprocess_initial_frame(current_frame);
+    // Return the current frame, as there is no previous frame to interpolate from.
+    return current_frame;
+  }
+  else
+  {
+    // 1. Update grayscale state: Current becomes previous
+    current_gray_.copyTo(prev_gray_);
+    
+    // 2. Process the new current BGR frame
+    cv::Mat processed_current_frame;
+    // Note: Subsequent frames MUST match the size of the first frame (PROCESS_WIDTH/HEIGHT)
+    if (current_frame.cols != PROCESS_WIDTH || current_frame.rows != PROCESS_HEIGHT) 
+    {
+      // Resize BGR frame if necessary
+      cv::resize(current_frame, processed_current_frame, cv::Size(PROCESS_WIDTH, PROCESS_HEIGHT));
+    } 
+    else 
+    {
+      // Use a reference/shallow copy if sizes match to avoid BGR copy
+      processed_current_frame = current_frame; 
+    }
+
+    // Convert the new frame to gray
+    cv::cvtColor(processed_current_frame, current_gray_, cv::COLOR_BGR2GRAY);
+
+    // 3. Downsample for FAST Optical Flow Calculation
+    cv::resize(prev_gray_, small_prev_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT));
+    cv::resize(current_gray_, small_current_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT));
+
+    // 4. Calculate Optical Flow 
+    cv::calcOpticalFlowFarneback(small_prev_gray_, small_current_gray_, flow_small_, 0.5, 3, 10, 3, 5, 1.2, 0);
+    
+    // 5. Upsample the flow field
+    cv::resize(flow_small_, flow_upsampled_, cv::Size(PROCESS_WIDTH, PROCESS_HEIGHT), 0, 0, cv::INTER_NEAREST);
+
+    // 6. Apply Scaling to the flow vectors
+    const float scale_factor = (float)PROCESS_WIDTH / FLOW_CALC_WIDTH; 
+    cv::Mat flow_scaled = flow_upsampled_ * scale_factor;
+    
+    // --- OPTIMIZED REMAP MAP GENERATION (Vectorized) ---
+
+    // 7. Split the 2-channel scaled flow map into X and Y components
+    std::vector<cv::Mat> flow_channels;
+    cv::split(flow_scaled, flow_channels); // flow_channels[0] = dx, flow_channels[1] = dy
+    
+    // 8. Calculate map_x and map_y using vectorized subtraction
+    cv::Mat half_dx = flow_channels[0] * 0.5f;
+    cv::Mat half_dy = flow_channels[1] * 0.5f;
+
+    cv::subtract(coords_x_, half_dx, map_x_);
+    cv::subtract(coords_y_, half_dy, map_y_);
+
+    // 9. Perform the geometric transformation (Interpolation)
+    cv::Mat interpolated_frame = cv::Mat::zeros(prev_frame_.size(), prev_frame_.type());
+    cv::remap(prev_frame_, interpolated_frame, map_x_, map_y_, cv::INTER_LINEAR, cv::BORDER_REPLICATE);
+
+    // 10. Update class state for the next iteration
+    processed_current_frame.copyTo(prev_frame_); 
+    
+    return interpolated_frame;
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
 // Helper function implementation: checks the mean brightness of the frame
 bool CAMERA::is_low_light(const cv::Mat& Grey_Image_Full_Size, int threshold) 
 {
@@ -360,6 +509,110 @@ cv::Mat CAMERA::generateDummyFrame(int width, int height)
   cv::putText(dummy, text_right, 
       cv::Point(width - margin - size_right.width, centerY + size_right.height / 2), // Right aligned at right margin
       font, scale, color, thickness);
+  
+  return dummy;
+}
+
+/**
+ * @brief Generates a dummy frame with a dynamic bouncing text element, a grid background, random noise, and spinning lines.
+ * * This version uses a dark background and bright foreground elements for high contrast.
+ */
+cv::Mat CAMERA::generateDummyFrame_2(int width, int height, int frame_index) 
+{
+  cv::Mat dummy(height, width, CV_8UC3);
+  
+  // Set initial BLACK background
+  dummy = cv::Scalar(0, 0, 0); 
+
+  // --- ADD GRID BACKGROUND TO EXAGGERATE WARPING EFFECTS ---
+  int grid_spacing = 30;
+  cv::Scalar grid_color(255, 255, 255); // White grid lines
+  
+  // Draw vertical lines
+  for (int x = 0; x < width; x += grid_spacing) {
+      cv::line(dummy, cv::Point(x, 0), cv::Point(x, height), grid_color, 1, cv::LINE_AA);
+  }
+
+  // Draw horizontal lines
+  for (int y = 0; y < height; y += grid_spacing) {
+      cv::line(dummy, cv::Point(0, y), cv::Point(width, y), grid_color, 1, cv::LINE_AA);
+  }
+  // --- END GRID GENERATION ---
+  
+  // --- ADD STATIC (RANDOM GAUSSIAN NOISE) ---
+  cv::Mat noise(height, width, CV_8UC3);
+  cv::randn(noise, cv::Scalar::all(0), cv::Scalar::all(15));
+  // Add noise to the dark background
+  dummy += noise; 
+  // --- END STATIC GENERATION ---
+
+  // --- ADD SPINNING LINES ---
+  cv::Point center(width / 2, height / 2);
+  int num_lines = 8;
+  int line_length = std::min(width, height) / 3;
+  double angle_step = 2 * CV_PI / num_lines;
+  double rotation_speed = CV_PI / 60.0; // Rotate one full circle in 120 frames 
+  cv::Scalar line_color(255, 255, 255); // White lines
+  int line_thickness = 1;
+
+  for (int i = 0; i < num_lines; ++i) {
+      double current_angle = (i * angle_step) + (frame_index * rotation_speed);
+      cv::Point p1(center.x + static_cast<int>(line_length * std::cos(current_angle)),
+                   center.y + static_cast<int>(line_length * std::sin(current_angle)));
+      cv::Point p2(center.x - static_cast<int>(line_length * std::cos(current_angle)),
+                   center.y - static_cast<int>(line_length * std::sin(current_angle)));
+      cv::line(dummy, p1, p2, line_color, line_thickness, cv::LINE_AA);
+  }
+  // --- END SPINNING LINES ---
+
+
+  // --- Dynamic Text Bouncing Logic (Drawn over everything) ---
+  std::string bounce_text = "DVD Logo"; 
+  int font = cv::FONT_HERSHEY_SIMPLEX;
+  double scale = 1.0;
+  int thickness = 2;
+  cv::Scalar color(255, 255, 255); // White text
+  int baseline = 0;
+  cv::Size text_size = cv::getTextSize(bounce_text, font, scale, thickness, &baseline);
+
+  // Define the boundaries for the bounce
+  int margin = 5;
+  //int minX = margin;
+  int minY = margin;
+  int maxX = width - text_size.width - margin;
+  int maxY = height - text_size.height - margin;
+  
+  // Calculate Horizontal Bouncing Position (X) 
+  int stepX = 5; 
+  int bouncePeriodX = maxX / stepX;
+  int fullCycleX = 2 * bouncePeriodX; 
+  int currentStepX = frame_index % fullCycleX; 
+  
+  int offsetX = (currentStepX <= bouncePeriodX) 
+                ? (currentStepX * stepX)                      
+                : (maxX - (currentStepX - bouncePeriodX) * stepX); 
+
+  // Calculate Vertical Bouncing Position (Y) 
+  int bouncePeriodY = 80; 
+  float sin_val = std::sin(frame_index * (CV_PI / bouncePeriodY));
+  int midY = minY + (maxY - minY) / 2;
+  int amplitudeY = (maxY - minY) / 2;
+  int offsetY = midY + (int)(amplitudeY * sin_val);
+
+  // Draw the Bouncing Text
+  cv::putText(dummy, bounce_text, 
+              cv::Point(offsetX, offsetY + text_size.height), 
+              font, scale, color, thickness, cv::LINE_AA);
+
+  // --- Add Frame Index for Debugging ---
+  std::string index_text = "INDEX: " + std::to_string(frame_index);
+  cv::putText(dummy, index_text, 
+              cv::Point(10, 30), 
+              cv::FONT_HERSHEY_DUPLEX, 0.7, cv::Scalar(255, 255, 255), 2, cv::LINE_AA); // White on black background
+  
+  cv::putText(dummy, "Frame Index: " + std::to_string(frame_index), 
+              cv::Point(5, height - 5), 
+              cv::FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255, 255, 255), 1, cv::LINE_AA); // White on black background
   
   return dummy;
 }
@@ -930,27 +1183,32 @@ void CAMERA::apply_ehancements()
       }
     }
   }
-
-  if (PROPS.ENH_CANNY_MASK)
-  {
-    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_CANNY);
-  }
-
-  /*
-  if (PROPS.ENH_OVERLAY_LINES)
-  {
-    cv::resize(MASK_FRAME_OVERLAY_LINES, MASK_FRAME_OVERLAY_LINES, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
-    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_OVERLAY_LINES);
-  }
-  */
-
-  if (PROPS.ENH_GLARE_MASK)
-  {
-    //cv::resize(MASK_FRAME_GLARE, MASK_FRAME_GLARE, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
-    PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_GLARE);
-  }
 }
 
+void CAMERA::apply_masks()
+{
+  if (!PROCESSED_FRAME.empty())
+  {
+    if (PROPS.ENH_CANNY_MASK)
+    {
+      PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_CANNY);
+    }
+
+    /*
+    if (PROPS.ENH_OVERLAY_LINES)
+    {
+      cv::resize(MASK_FRAME_OVERLAY_LINES, MASK_FRAME_OVERLAY_LINES, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
+      PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_OVERLAY_LINES);
+    }
+    */
+
+    if (PROPS.ENH_GLARE_MASK)
+    {
+      cv::resize(MASK_FRAME_GLARE, MASK_FRAME_GLARE, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
+      PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_GLARE);
+    }
+  }
+}
 
 void CAMERA::open_camera()
 {
@@ -1083,9 +1341,10 @@ void CAMERA::update_frame()
   //  and BEING_PROCESSED_FRAME should be MUTEXed (mutex) to prevent data races, 
   //  but as is, the variables are playing nicely in their respective threads. 
 
-
+  // Create Process Time
   CAMERA_READ_THREAD_TIME.create();
 
+  // Start the camera
   open_camera();
 
   // during while, set error to trigger CAMERA_READ_THREAD_STOP
@@ -1104,6 +1363,7 @@ void CAMERA::update_frame()
       // Grab start to loop times to compute fps.
       TIME_SE_MAX_FPS.end_clock();
       TIME_MAX_FPS = TIME_SE_MAX_FPS.duration_fps();
+      TIME_MAX_FPS_DELAY = TIME_SE_MAX_FPS.duration_ms();
       TIME_SE_MAX_FPS.start_clock();
       
       // Save image to disk and get captured frame from camera.
@@ -1145,7 +1405,15 @@ void CAMERA::update_frame()
         {
           if (FRAME_TO_BUFFER == 0)
           {
-            FRAME_DUMMY.copyTo(FRAME_BUFFER_0);
+            if (PROPS.TEST_IMAGE)
+            {
+              FRAME_DUMMY.copyTo(FRAME_BUFFER_0);
+            }
+            else
+            {
+              FRAME_BUFFER_0 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+            }
+            
             LATEST_READY_FRAME = 0;
             
             // Check for errors.  close camera if empty frame or not connected.
@@ -1156,7 +1424,15 @@ void CAMERA::update_frame()
           }
           else if (FRAME_TO_BUFFER == 1)
           {
-            FRAME_DUMMY2.copyTo(FRAME_BUFFER_1);
+            if (PROPS.TEST_IMAGE)
+            {
+              FRAME_DUMMY2.copyTo(FRAME_BUFFER_1);
+            }
+            else
+            {
+              FRAME_BUFFER_1 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+            }
+
             LATEST_READY_FRAME = 1;
             
             // Check for errors.  close camera if empty frame or not connected.
@@ -1241,6 +1517,7 @@ void CAMERA::process_enhancements_frame()
     // No longer dependant on Buffer frame.  Release.
     BEING_PROCESSED_FRAME = -1;
     apply_ehancements();
+    apply_masks();
   }
   else
   if (BEING_PROCESSED_FRAME == 1)
@@ -1249,45 +1526,29 @@ void CAMERA::process_enhancements_frame()
     // No longer dependant on Buffer frame.  Release.
     BEING_PROCESSED_FRAME = -1;
     apply_ehancements();
+    apply_masks();
   }
 
-  TIME_SE_FRAME_PROCESSING.end_clock();
-  TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
+  if (PROPS.ENH_FAKE_FRAMES)
+  {
+    FRAME_BUFFER_FAKE = FAKE_FRAME_GENERATOR.interpolateFrame(PROCESSED_FRAME);
+  }
   
   NEW_FRAME_AVAILABLE = true;
+  TIME_SE_FRAME_PROCESSING.end_clock();
+  TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
 
 }
 
-void CAMERA::generate_imgui_texture_frame()
+void CAMERA::generate_imgui_texture_frame(cv::Mat& Frame)
 {
-  // Only proceed if the frame is not empty.
-  if (NEW_FRAME_AVAILABLE)
+  if (!PROCESSED_FRAME.empty())
   {
-    NEW_FRAME_AVAILABLE = false;
-
-    if (!PROCESSED_FRAME.empty())
-    {
-      if (GENERATE_BLANK_IMAGE)
-      {
-        // Convert the frame to an OpenGL texture.
-        // We pass the member variable to reuse the same texture.
-        TEXTURE_ID = matToTexture(PROCESSED_FRAME, TEXTURE_ID);
-
-        // Create Thread safe mat frame to access
-        PROCESSED_FRAME.copyTo(LIVE_FRAME);
-      }
-      else
-      {
-        // The next few lines will copy a blank texture image so 
-        //  when the frame returns after the camera is viewed again, 
-        //  the an image of an old frame will not flash the screen.
-        TEXTURE_ID = matToTexture(FRAME_BUFFER_EMPTY, TEXTURE_ID);
-        FRAME_BUFFER_EMPTY.copyTo(LIVE_FRAME);
-      }
-    }
+    // Convert the frame to an OpenGL texture.
+    // We pass the member variable to reuse the same texture.
+    TEXTURE_ID = matToTexture(Frame, TEXTURE_ID);
+    Frame.copyTo(LIVE_FRAME);
   }
-
-  WORKING_FRAME_FULLY_PROCESSED = true;
 }
 
 bool CAMERA::set_camera_control(CAMERA_SETTING &Setting, int Value)
@@ -1472,7 +1733,53 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
     // Converts PROCESSED_FRAME into ImGui Texture to be rendered
     //  into program display.
     // Copies PROCESSED_FRAME to LIVE_FRAME for thread safe access.
-    generate_imgui_texture_frame();
+
+    // Only proceed if the frame is not empty.
+    if (NEW_FRAME_AVAILABLE)
+    {
+      NEW_FRAME_AVAILABLE = false;
+      FRAME_TO_TEXTURE_TRACK = 1;
+    }
+  }
+
+  // ---------------------------------------------------------------------------------------
+
+  if (FRAME_TO_TEXTURE_TRACK != 0)
+  {
+    if (GENERATE_BLANK_IMAGE)
+    {
+      FRAME_TO_TEXTURE_TRACK = 0;
+      GENERATE_BLANK_IMAGE = false;
+      generate_imgui_texture_frame(FRAME_BUFFER_EMPTY);
+      WORKING_FRAME_FULLY_PROCESSED = true;
+    }
+    else
+    {
+      if (PROPS.ENH_FAKE_FRAMES == false)
+      {
+        FRAME_TO_TEXTURE_TRACK = 0;
+        generate_imgui_texture_frame(PROCESSED_FRAME);
+        WORKING_FRAME_FULLY_PROCESSED = true;
+      }
+      else  // PROPS.ENH_FAKE_FRAMES == true
+      {
+        if (FRAME_TO_TEXTURE_TRACK == 1)
+        {
+          FRAME_TO_TEXTURE_TRACK = 2;
+          FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_MAX_FPS_DELAY / 2);
+          generate_imgui_texture_frame(FRAME_BUFFER_FAKE);
+          WORKING_FRAME_FULLY_PROCESSED = true;
+        }
+        else if (FRAME_TO_TEXTURE_TRACK == 2)
+        {
+          if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
+          {
+            FRAME_TO_TEXTURE_TRACK = 0;
+            generate_imgui_texture_frame(PROCESSED_FRAME);
+          }
+        }
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------------------

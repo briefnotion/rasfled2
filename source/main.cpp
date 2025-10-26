@@ -429,14 +429,14 @@ int loop_2(bool TTY_Only)
   // Default settings.  Ignored if camera settings file overrides.
 
   // Set Camera Screen Properties
-  //sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 640;
-  //sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 480;
+  sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 640;
+  sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 480;
 
   //sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 1280;
   //sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 720;
   
-  sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 800;
-  sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 600;
+  //sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 800;
+  //sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 600;
 
   sdSystem.CAMERA_BACKUP.PROPS.FORCED_FRAME_LIMIT_MS = 30;
   

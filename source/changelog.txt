@@ -1,3 +1,9 @@
+2.343_251023
+  - Added Frame Generation, aka Frame Interpolation, 
+      aka Fake Frames, to the camera, to see if it would 
+      work.  Defaulted off.  The timing is still off, 
+      though.
+
 2.342_251022
   - Small change to map display.
 
