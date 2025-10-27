@@ -1221,8 +1221,8 @@ void CAMERA::open_camera()
   else
   {
     // Create Thread (safe to recreate if already created)
-    THREAD_CAMERA.create(60);           // Longest wait im main process
-    THREAD_IMAGE_PROCESSING.create(15); // Longest wait im main process
+    THREAD_CAMERA.create(5);           // Longest wait im main process
+    THREAD_IMAGE_PROCESSING.create(5); // Longest wait im main process
 
     // Load Cascades
     // --- Object Detection Setup ---
@@ -1369,7 +1369,7 @@ void CAMERA::update_frame()
       // Save image to disk and get captured frame from camera.
       check_for_save_image_buffer_frame();
 
-      if (CAMERA_BEING_VIEWED || PROPS.DISABLE_CAMERA_BEING_VIEWED)
+      if (CAMERA_BEING_VIEWED)
       {
         // Determine which buffer to put frame in.
         if (BEING_PROCESSED_FRAME == -1)
@@ -1534,10 +1534,10 @@ void CAMERA::process_enhancements_frame()
     FRAME_BUFFER_FAKE = FAKE_FRAME_GENERATOR.interpolateFrame(PROCESSED_FRAME);
   }
   
-  NEW_FRAME_AVAILABLE = true;
   TIME_SE_FRAME_PROCESSING.end_clock();
   TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
 
+  NEW_FRAME_AVAILABLE = true;
 }
 
 void CAMERA::generate_imgui_texture_frame(cv::Mat& Frame)
@@ -1722,10 +1722,16 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
     CAMERA_BEING_VIEWED = Camera_Being_Viewed;
     GENERATE_BLANK_IMAGE = true;
   }
-
+  
+  // ---------------------------------------------------------------------------------------
+  // Check Thread Completions
+  
   // Check to see if THREAD_CAMERA has stopped for any reason. 
   THREAD_CAMERA.check_for_completition();
 
+  // ---------------------------------------------------------------------------------------
+  // Check Thread Completions
+  
   // When the working frame has been fully process, render the 
   //  texture to be drawn in opengl.
   if (THREAD_IMAGE_PROCESSING.check_for_completition())
@@ -1739,46 +1745,6 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
     {
       NEW_FRAME_AVAILABLE = false;
       FRAME_TO_TEXTURE_TRACK = 1;
-    }
-  }
-
-  // ---------------------------------------------------------------------------------------
-
-  if (FRAME_TO_TEXTURE_TRACK != 0)
-  {
-    if (GENERATE_BLANK_IMAGE)
-    {
-      FRAME_TO_TEXTURE_TRACK = 0;
-      GENERATE_BLANK_IMAGE = false;
-      generate_imgui_texture_frame(FRAME_BUFFER_EMPTY);
-      WORKING_FRAME_FULLY_PROCESSED = true;
-    }
-    else
-    {
-      if (PROPS.ENH_FAKE_FRAMES == false)
-      {
-        FRAME_TO_TEXTURE_TRACK = 0;
-        generate_imgui_texture_frame(PROCESSED_FRAME);
-        WORKING_FRAME_FULLY_PROCESSED = true;
-      }
-      else  // PROPS.ENH_FAKE_FRAMES == true
-      {
-        if (FRAME_TO_TEXTURE_TRACK == 1)
-        {
-          FRAME_TO_TEXTURE_TRACK = 2;
-          FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_MAX_FPS_DELAY / 2);
-          generate_imgui_texture_frame(FRAME_BUFFER_FAKE);
-          WORKING_FRAME_FULLY_PROCESSED = true;
-        }
-        else if (FRAME_TO_TEXTURE_TRACK == 2)
-        {
-          if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
-          {
-            FRAME_TO_TEXTURE_TRACK = 0;
-            generate_imgui_texture_frame(PROCESSED_FRAME);
-          }
-        }
-      }
     }
   }
 
@@ -1799,21 +1765,79 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
     }
   }
 
-  // Only try to process frames when a haldoff is complete and 
+  // ---------------------------------------------------------------------------------------
+
+  // Only try to process frames when a handoff is complete and 
   //  the texture is created.
   if (BUFFER_FRAME_HANDOFF_READY && WORKING_FRAME_FULLY_PROCESSED)
   {
+    // Do not start thread if already running.
     if (THREAD_IMAGE_PROCESSING.check_to_run_routine_on_thread(Frame_Time)) 
     {
       BUFFER_FRAME_HANDOFF_READY = false;
       WORKING_FRAME_FULLY_PROCESSED = false;
 
-      if (Camera_Being_Viewed)
+      if (CAMERA_BEING_VIEWED)
       {
         // Start the camera update on a separate thread.
         // This call is non-blocking, so the main loop can continue immediately.
         THREAD_IMAGE_PROCESSING.start_render_thread([&]() 
                   {  process_enhancements_frame();  });
+      }
+    }
+  }
+
+  // ---------------------------------------------------------------------------------------
+
+  if (CAMERA_BEING_VIEWED == false)
+  {
+    if (GENERATE_BLANK_IMAGE)
+    {
+      FRAME_TO_TEXTURE_TRACK = 0;
+      GENERATE_BLANK_IMAGE = false;
+      generate_imgui_texture_frame(FRAME_BUFFER_EMPTY);
+      WORKING_FRAME_FULLY_PROCESSED = true;
+    }
+    else
+    {
+      FRAME_TO_TEXTURE_TRACK = 0;
+      WORKING_FRAME_FULLY_PROCESSED = true;
+    }
+  }
+  else if (FRAME_TO_TEXTURE_TRACK != 0)
+  {
+    if (PROPS.ENH_FAKE_FRAMES == false)
+    {      
+                  //cout << "0 " <<Frame_Time - TIME_TEST  << endl;
+                  //TIME_TEST = Frame_Time;
+
+      FRAME_TO_TEXTURE_TRACK = 0;
+      generate_imgui_texture_frame(PROCESSED_FRAME);
+      WORKING_FRAME_FULLY_PROCESSED = true;
+    }
+    else  // PROPS.ENH_FAKE_FRAMES == true
+    {
+      if (FRAME_TO_TEXTURE_TRACK == 1)
+      {
+                  //cout << "1 " <<Frame_Time - TIME_TEST  << endl;
+                  //TIME_TEST = Frame_Time;
+
+        FRAME_TO_TEXTURE_TRACK = 2;
+        FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_MAX_FPS_DELAY / 2);
+        generate_imgui_texture_frame(FRAME_BUFFER_FAKE);
+        //WORKING_FRAME_FULLY_PROCESSED = true;
+      }
+      else if (FRAME_TO_TEXTURE_TRACK == 2)
+      {
+        if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
+        {
+                  //cout << "2 " << Frame_Time - TIME_TEST  << endl;
+                  //TIME_TEST = Frame_Time;
+
+          FRAME_TO_TEXTURE_TRACK = 0;
+          generate_imgui_texture_frame(PROCESSED_FRAME);
+          WORKING_FRAME_FULLY_PROCESSED = true;
+        }
       }
     }
   }

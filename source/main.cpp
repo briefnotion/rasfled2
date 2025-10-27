@@ -251,6 +251,7 @@ int loop_2(bool TTY_Only)
                                           //  serial comms.
   TIMED_IS_READY  compass_timer;          // Delay for communicating with compass
                                           // serial comms.
+  TIMED_IS_READY  camera_timer;           // Delay for processing camera.
 
   TIMED_IS_READY  save_running_state_timer;          // Delay for communicating with compass
                                           // serial comms.
@@ -413,6 +414,9 @@ int loop_2(bool TTY_Only)
   
   // Assign Camera C0ordinator
   CAMERA_SYSTEM_COORDINATOR CAMERA_COORDINATOR;
+
+  // Set Camera Timer
+  camera_timer.set(5);
 
   // Assign Properties and Controls
 
@@ -840,9 +844,14 @@ int loop_2(bool TTY_Only)
 
     // ---------------------------------------------------------------------------------------
 
-    sdSystem.CAMERA_BACKUP.process(sdSystem.SCREEN_COMMS, sdSystem.PROGRAM_TIME.current_frame_time(), 
+    // Call camera process if timer says check or thread should be ready.
+    if (camera_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true ||
+        sdSystem.PROGRAM_TIME.current_frame_time() > sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.get_ready_time())
+    {
+      sdSystem.CAMERA_BACKUP.process(sdSystem.SCREEN_COMMS, sdSystem.PROGRAM_TIME.current_frame_time(), 
                                     sdSystem.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM ||
                                     sdSystem.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE);
+    }
 
     // ---------------------------------------------------------------------------------------
 
@@ -1405,6 +1414,7 @@ int loop_2(bool TTY_Only)
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_switches.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.THREAD_RENDER.get_ready_time());
     //sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_CAMERA.get_ready_time());  manages its own sleep time.
+    sdSystem.PROGRAM_TIME.request_ready_time(camera_timer.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_user.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(display.get_ready_time());

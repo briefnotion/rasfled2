@@ -1,3 +1,8 @@
+2.344_251027
+  - Corrected problem with camera not restarting after
+      being paused.
+  - Frame pacing is still off with frame gen.
+
 2.343_251023
   - Added Frame Generation, aka Frame Interpolation, 
       aka Fake Frames, to the camera, to see if it would 

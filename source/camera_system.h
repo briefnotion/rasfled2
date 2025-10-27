@@ -201,10 +201,6 @@ class CAMERA_PROPERTIES
   // Draws a circle around a curved object. Use case not found.
   bool ENH_HOUGH          = false;
 
-  // Temp test
-  // Disable CAMERA_BEING_VIEWED variable
-  bool DISABLE_CAMERA_BEING_VIEWED = false;
-
   // ---------------------------------------------------------------------------------------
   
   // Adjustments for the backup camera
@@ -312,6 +308,35 @@ class CAMERA
 
   // ---------------------------------------------------------------------------------------
   //Multithreaded routines and vaiables. Access with caution.
+
+  /*
+
+  process
+
+  update_frame
+    // Trigger buffer 0 or 1 ready
+    BUFFER_FRAME_HANDOFF_READY
+
+  if (BUFFER_FRAME_HANDOFF_READY && WORKING_FRAME_FULLY_PROCESSED)
+  process_enhancements_frame
+    // clear trigger
+    BUFFER_FRAME_HANDOFF_READY = false
+    // Lock enhancements from starting
+    WORKING_FRAME_FULLY_PROCESSED = false
+
+      Completes with
+      FRAME_TO_TEXTURE_TRACK = 1
+  
+
+  if (FRAME_TO_TEXTURE_TRACK > 0)
+  generate_imgui_texture_frame
+    // Relese process_enhancements_frame
+    WORKING_FRAME_FULLY_PROCESSED = true
+
+        FRAME_TO_TEXTURE_TRACK = 0 || 2
+        FRAME_TO_TEXTURE_TRACK = 0
+
+  */
   
   // All Threads
   vector<std::string>    PRINTW_QUEUE;
@@ -388,6 +413,8 @@ class CAMERA
   // Converts PROCESSED_FRAME into ImGui Texture to be rendered
   //  into program display.
   // Copies PROCESSED_FRAME to LIVE_FRAME for thread safe access.
+
+  int TIME_TEST = 0;
 
   public:
 
