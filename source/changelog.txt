@@ -1,3 +1,7 @@
+2.345_251028
+  - Added a simple frame buffer to the live displayed 
+      camera frames to improve timings.
+
 2.344_251027
   - Corrected problem with camera not restarting after
       being paused.

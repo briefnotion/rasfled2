@@ -192,7 +192,7 @@ class CAMERA_PROPERTIES
   // Experimental Enhancements
 
   // Frame Generation, aka Frame Interpolation, aka Fake Frames
-  bool ENH_FAKE_FRAMES    = false;
+  bool ENH_FAKE_FRAMES    = true;
 
   // May or not work. Never had a full car on screen to 
   //  see.
@@ -238,8 +238,6 @@ class CAMERA
   cv::Mat FRAME_DUMMY;
   cv::Mat FRAME_DUMMY2; // for testing double buffer
   bool    FRAME_DUMMY_MULTI_FRAME_TEST = false;
-
-  cv::Mat LIVE_FRAME;
 
   bool NEW_FRAME_AVAILABLE = false; // Delete?
 
@@ -358,6 +356,10 @@ class CAMERA
   cv::Mat FRAME_BUFFER_1;
   cv::Mat FRAME_BUFFER_FAKE;
 
+  cv::Mat LIVE_FRAME;
+  cv::Mat LIVE_FRAME_0; // Intermediate Frame
+  cv::Mat LIVE_FRAME_1; // Frame
+
   FAKE_FRAME FAKE_FRAME_GENERATOR;
   
   int             FRAME_TO_TEXTURE_TRACK = 0;
@@ -413,8 +415,6 @@ class CAMERA
   // Converts PROCESSED_FRAME into ImGui Texture to be rendered
   //  into program display.
   // Copies PROCESSED_FRAME to LIVE_FRAME for thread safe access.
-
-  int TIME_TEST = 0;
 
   public:
 

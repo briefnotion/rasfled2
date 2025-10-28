@@ -1745,6 +1745,16 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
     {
       NEW_FRAME_AVAILABLE = false;
       FRAME_TO_TEXTURE_TRACK = 1;
+
+      if (PROPS.ENH_FAKE_FRAMES == false)
+      {
+        PROCESSED_FRAME.copyTo(LIVE_FRAME_1);
+      }
+      else
+      {
+        FRAME_BUFFER_FAKE.copyTo(LIVE_FRAME_0);
+        PROCESSED_FRAME.copyTo(LIVE_FRAME_1);
+      }
     }
   }
 
@@ -1807,36 +1817,27 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   else if (FRAME_TO_TEXTURE_TRACK != 0)
   {
     if (PROPS.ENH_FAKE_FRAMES == false)
-    {      
-                  //cout << "0 " <<Frame_Time - TIME_TEST  << endl;
-                  //TIME_TEST = Frame_Time;
-
+    {
       FRAME_TO_TEXTURE_TRACK = 0;
-      generate_imgui_texture_frame(PROCESSED_FRAME);
+      generate_imgui_texture_frame(LIVE_FRAME_1);
       WORKING_FRAME_FULLY_PROCESSED = true;
     }
     else  // PROPS.ENH_FAKE_FRAMES == true
     {
       if (FRAME_TO_TEXTURE_TRACK == 1)
       {
-                  //cout << "1 " <<Frame_Time - TIME_TEST  << endl;
-                  //TIME_TEST = Frame_Time;
-
         FRAME_TO_TEXTURE_TRACK = 2;
         FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_MAX_FPS_DELAY / 2);
-        generate_imgui_texture_frame(FRAME_BUFFER_FAKE);
-        //WORKING_FRAME_FULLY_PROCESSED = true;
+        generate_imgui_texture_frame(LIVE_FRAME_0);
+        WORKING_FRAME_FULLY_PROCESSED = true;
       }
       else if (FRAME_TO_TEXTURE_TRACK == 2)
       {
         if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
         {
-                  //cout << "2 " << Frame_Time - TIME_TEST  << endl;
-                  //TIME_TEST = Frame_Time;
-
           FRAME_TO_TEXTURE_TRACK = 0;
-          generate_imgui_texture_frame(PROCESSED_FRAME);
-          WORKING_FRAME_FULLY_PROCESSED = true;
+          generate_imgui_texture_frame(LIVE_FRAME_1);
+          //WORKING_FRAME_FULLY_PROCESSED = true;
         }
       }
     }
