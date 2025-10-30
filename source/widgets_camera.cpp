@@ -336,6 +336,14 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
     {
       sdSysData.CAMERA_BACKUP.PROPS.ENH_FAKE_FRAMES = !sdSysData.CAMERA_BACKUP.PROPS.ENH_FAKE_FRAMES;
     }
+
+    // Display Fake Frame
+    if (BC_ENH_DOUBLE_MASK.button_toggle_color(sdSysData, "DOUBLE\nMASKS", "DOUBLE\nMASKS", 
+                                              sdSysData.CAMERA_BACKUP.PROPS.ENH_DOUBLE_MASK, 
+                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.CAMERA_BACKUP.PROPS.ENH_DOUBLE_MASK = !sdSysData.CAMERA_BACKUP.PROPS.ENH_DOUBLE_MASK;
+    }
   }
   ImGui::EndChild();
 
@@ -452,12 +460,17 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
   }
   //else
   {
-    ImGui::Text("%2.1f fps", sdSysData.CAMERA_BACKUP.TIME_MAX_FPS);
-    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_MAX_FPS_DELAY);
-    ImGui::Text("Grab:");
-    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL);
-    ImGui::Text("Prc Tme:");
-    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_FRAME_PROCESSING);
+    //ImGui::Text("%2.1f fps", sdSysData.CAMERA_BACKUP.TIME_MAX_FPS);
+    //ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_MAX_FPS_DELAY);
+    ImGui::Text("%2.1f fps", sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FPS);
+    if (sdSysData.CAMERA_BACKUP.FRAME_GEN)
+    {
+      ImGui::Text("* %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FRAME_TIME);
+    }
+    else
+    {
+      ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FRAME_TIME);
+    }
   }
 
   // Open Settings Screen
@@ -515,6 +528,17 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
       }
       ImGui::End();
     }
+  }
+
+  // Display statistics
+  {
+    ImGui::Text("Camera:");
+    ImGui::Text("  %2.1f fps", sdSysData.CAMERA_BACKUP.TIME_CAMERA_FPS);
+    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_CAMERA_FRAME_TIME);
+    ImGui::Text("Grab:");
+    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL);
+    ImGui::Text("Prc Tme:");
+    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_FRAME_PROCESSING);
   }
 
 }

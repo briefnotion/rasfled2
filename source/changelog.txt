@@ -1,3 +1,9 @@
+2.346_251029
+  - Testing a simple camera enhancement that repeats the 
+      previous frames image mask.
+  - Frame gen will render if on, but will not be displayed 
+      if frame rate is too low.
+
 2.345_251028
   - Added a simple frame buffer to the live displayed 
       camera frames to improve timings.

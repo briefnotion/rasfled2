@@ -189,10 +189,13 @@ class CAMERA_PROPERTIES
   // Works better than ENH_OVERLAY_LINES
   bool ENH_CANNY_MASK     = true;
 
-  // Experimental Enhancements
-
   // Frame Generation, aka Frame Interpolation, aka Fake Frames
   bool ENH_FAKE_FRAMES    = true;
+
+  // Experimental Enhancements
+
+  // Repeats the previous frames camera mask.
+  bool ENH_DOUBLE_MASK    = true;
 
   // May or not work. Never had a full car on screen to 
   //  see.
@@ -247,9 +250,12 @@ class CAMERA
   bool CAR_CASCADE_LOADED = false;
   cv::CascadeClassifier CAR_CASCADE;
 
-  MEASURE_TIME_START_END TIME_SE_MAX_FPS;
+  MEASURE_TIME_START_END TIME_SE_CAMERA_FPS;
   MEASURE_TIME_START_END TIME_SE_FRAME_RETRIEVAL;
   MEASURE_TIME_START_END TIME_SE_FRAME_PROCESSING;
+  MEASURE_TIME_START_END TIME_SE_DISPLAYED_FRAME_RATE;
+
+  bool INTERPOLATION_DISPLAY = true;
 
   bool SAVE_IMAGE_BUFFER_FRAME = false;
   bool SAVE_IMAGE_PROCESSED_FRAME = false;
@@ -270,8 +276,13 @@ class CAMERA
   cv::Mat PROCESSED_FRAME_CANNY;
 
   //cv::Mat MASK_FRAME_OVERLAY_LINES;
-  cv::Mat MASK_FRAME_GLARE;
-  cv::Mat MASK_FRAME_CANNY;
+  int DOUBLE_MASK_LATEST = 0;
+
+  cv::Mat MASK_FRAME_GLARE_0;
+  cv::Mat MASK_FRAME_GLARE_1;
+
+  cv::Mat MASK_FRAME_CANNY_0;
+  cv::Mat MASK_FRAME_CANNY_1;
   
   // Class wide enhancement settings
   const int BLUR_KSIZE = 7;         // Gaussian blur kernel size for noise reduction  (5)
@@ -395,7 +406,10 @@ class CAMERA
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
-  void apply_masks();
+  void apply_masks_to_processed_frame(cv::Mat &Mask_0, cv::Mat &Mask_1);
+  // A simple helper routine to apply double or single frame mask.
+
+  void apply_all_masks();
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
@@ -422,10 +436,14 @@ class CAMERA
   
   std::string INFORMATION_COMMAND_LIST = "Not Available";
 
-  double TIME_MAX_FPS;
-  double TIME_MAX_FPS_DELAY;
+  double TIME_CAMERA_FPS;
+  double TIME_CAMERA_FRAME_TIME;
   double TIME_FRAME_RETRIEVAL;
   double TIME_FRAME_PROCESSING;
+  double TIME_ACTUAL_FPS;
+  double TIME_ACTUAL_FRAME_TIME;
+
+  bool FRAME_GEN = false;
 
   TIMED_IS_READY  FORCED_FRAME_LIMIT;
   

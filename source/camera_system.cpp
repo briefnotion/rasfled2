@@ -1081,15 +1081,8 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
     // First Level of enhancements and preprocessing
     // Generate Processing Frames for enhancements.
     {
-      // Boost or reduce all color brightness
-      if (PROPS.ENH_COLOR)
-      {
-        apply_min_max_contrast(PROCESSED_FRAME);
-      }
 
-      // If still low light after boost, grey scale and increase contrast.
-      // Put in both PROCESSED_FRAME and PROCESSED_FRAME_GRAY
-      if (PROPS.ENH_LOW_LIGHT && is_low_light(PROCESSED_FRAME_GRAY, 50))
+      if (PROPS.ENH_LOW_LIGHT && is_low_light(PROCESSED_FRAME_GRAY, 25))
       {
         cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
         gray_enhance(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
@@ -1098,6 +1091,12 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
       else
       {
         cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
+      }
+
+      // Boost or reduce all color brightness
+      if (PROPS.ENH_COLOR)
+      {
+        apply_min_max_contrast(PROCESSED_FRAME);
       }
 
       //cv::resize(PROCESSED_FRAME, PROCESSED_FRAME_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
@@ -1113,10 +1112,29 @@ void CAMERA::apply_ehancements()
 {
   if (!PROCESSED_FRAME.empty())
   {
+    if (PROPS.ENH_DOUBLE_MASK)
+    {
+      if (DOUBLE_MASK_LATEST == 0)
+      {
+        DOUBLE_MASK_LATEST = 1;
+      }
+      else
+      {
+        DOUBLE_MASK_LATEST = 0;
+      }
+    }
+
     // Canny Mask
     if (PROPS.ENH_CANNY_MASK)
     {
-      MASK_FRAME_CANNY = canny_mask(PROCESSED_FRAME_CANNY);
+      if (DOUBLE_MASK_LATEST == 0)
+      {
+        MASK_FRAME_CANNY_0 = canny_mask(PROCESSED_FRAME_CANNY);
+      }
+      else
+      {
+        MASK_FRAME_CANNY_1 = canny_mask(PROCESSED_FRAME_CANNY);
+      }
     }
 
     /*
@@ -1132,8 +1150,14 @@ void CAMERA::apply_ehancements()
     // Glare Mask
     if (PROPS.ENH_GLARE_MASK)
     {
-      //MASK_FRAME_GLARE = suppress_glare_mask(PROCESSED_FRAME_DOWNSIZED);
-      MASK_FRAME_GLARE = suppress_glare_mask(PROCESSED_FRAME);
+      if (DOUBLE_MASK_LATEST == 0)
+      {
+        MASK_FRAME_GLARE_0 = suppress_glare_mask(PROCESSED_FRAME);
+      }
+      else
+      {
+        MASK_FRAME_GLARE_1 = suppress_glare_mask(PROCESSED_FRAME);
+      }
     }
 
     //---
@@ -1185,13 +1209,45 @@ void CAMERA::apply_ehancements()
   }
 }
 
-void CAMERA::apply_masks()
+void CAMERA::apply_masks_to_processed_frame(cv::Mat &Mask_0, cv::Mat &Mask_1)
+{
+  if (PROPS.ENH_DOUBLE_MASK)
+  {
+    if (!Mask_0.empty())
+    {
+      PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), Mask_0);
+    }
+    if (!Mask_1.empty())
+    {
+      PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), Mask_1);
+    }
+  }
+  else
+  {
+    if (DOUBLE_MASK_LATEST == 0)
+    {
+      if (!Mask_0.empty())
+      {
+        PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), Mask_0);
+      }
+    }
+    else
+    {
+      if (!Mask_1.empty())
+      {
+        PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), Mask_1);
+      }
+    }
+  }
+}
+
+void CAMERA::apply_all_masks()
 {
   if (!PROCESSED_FRAME.empty())
   {
     if (PROPS.ENH_CANNY_MASK)
     {
-      PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_CANNY);
+      apply_masks_to_processed_frame(MASK_FRAME_CANNY_0, MASK_FRAME_CANNY_1);
     }
 
     /*
@@ -1204,8 +1260,7 @@ void CAMERA::apply_masks()
 
     if (PROPS.ENH_GLARE_MASK)
     {
-      cv::resize(MASK_FRAME_GLARE, MASK_FRAME_GLARE, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
-      PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_GLARE);
+      apply_masks_to_processed_frame(MASK_FRAME_GLARE_0, MASK_FRAME_GLARE_1);
     }
   }
 }
@@ -1361,10 +1416,10 @@ void CAMERA::update_frame()
       FORCED_FRAME_LIMIT.set(CAMERA_READ_THREAD_TIME.current_frame_time(), PROPS.FORCED_FRAME_LIMIT_MS); 
 
       // Grab start to loop times to compute fps.
-      TIME_SE_MAX_FPS.end_clock();
-      TIME_MAX_FPS = TIME_SE_MAX_FPS.duration_fps();
-      TIME_MAX_FPS_DELAY = TIME_SE_MAX_FPS.duration_ms();
-      TIME_SE_MAX_FPS.start_clock();
+      TIME_SE_CAMERA_FPS.end_clock();
+      TIME_CAMERA_FPS = TIME_SE_CAMERA_FPS.duration_fps();
+      TIME_CAMERA_FRAME_TIME = TIME_SE_CAMERA_FPS.duration_ms();
+      TIME_SE_CAMERA_FPS.start_clock();
       
       // Save image to disk and get captured frame from camera.
       check_for_save_image_buffer_frame();
@@ -1517,7 +1572,7 @@ void CAMERA::process_enhancements_frame()
     // No longer dependant on Buffer frame.  Release.
     BEING_PROCESSED_FRAME = -1;
     apply_ehancements();
-    apply_masks();
+    apply_all_masks();
   }
   else
   if (BEING_PROCESSED_FRAME == 1)
@@ -1526,11 +1581,20 @@ void CAMERA::process_enhancements_frame()
     // No longer dependant on Buffer frame.  Release.
     BEING_PROCESSED_FRAME = -1;
     apply_ehancements();
-    apply_masks();
+    apply_all_masks();
   }
 
   if (PROPS.ENH_FAKE_FRAMES)
   {
+    if (TIME_FRAME_PROCESSING < TIME_CAMERA_FRAME_TIME)
+    {
+      INTERPOLATION_DISPLAY = true;
+    }
+    else
+    {
+      INTERPOLATION_DISPLAY = false;
+    }
+
     FRAME_BUFFER_FAKE = FAKE_FRAME_GENERATOR.interpolateFrame(PROCESSED_FRAME);
   }
   
@@ -1542,6 +1606,12 @@ void CAMERA::process_enhancements_frame()
 
 void CAMERA::generate_imgui_texture_frame(cv::Mat& Frame)
 {
+  // Get Acual Frame Rate
+  TIME_SE_DISPLAYED_FRAME_RATE.end_clock();
+  TIME_ACTUAL_FPS         = TIME_SE_DISPLAYED_FRAME_RATE.duration_fps();
+  TIME_ACTUAL_FRAME_TIME  = TIME_SE_DISPLAYED_FRAME_RATE.duration_ms();
+  TIME_SE_DISPLAYED_FRAME_RATE.start_clock();
+
   if (!PROCESSED_FRAME.empty())
   {
     // Convert the frame to an OpenGL texture.
@@ -1816,18 +1886,22 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   }
   else if (FRAME_TO_TEXTURE_TRACK != 0)
   {
-    if (PROPS.ENH_FAKE_FRAMES == false)
+    if (PROPS.ENH_FAKE_FRAMES == false || INTERPOLATION_DISPLAY == false)
     {
+      FRAME_GEN = false;
+
       FRAME_TO_TEXTURE_TRACK = 0;
       generate_imgui_texture_frame(LIVE_FRAME_1);
       WORKING_FRAME_FULLY_PROCESSED = true;
     }
     else  // PROPS.ENH_FAKE_FRAMES == true
     {
+      FRAME_GEN = true;
+
       if (FRAME_TO_TEXTURE_TRACK == 1)
       {
         FRAME_TO_TEXTURE_TRACK = 2;
-        FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_MAX_FPS_DELAY / 2);
+        FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_CAMERA_FRAME_TIME / 2);
         generate_imgui_texture_frame(LIVE_FRAME_0);
         WORKING_FRAME_FULLY_PROCESSED = true;
       }
