@@ -200,7 +200,7 @@ void  CAMERA::gray_enhance(cv::Mat& processed_frame, const cv::Mat& Grey_Image_F
 {
   // --- Step 2A: Low-Light Contrast Enhancement (CLAHE) ---
   // Grayscale conversion is required to isolate the luminance channel for CLAHE.
-  cv::cvtColor(processed_frame, Grey_Image_Full_Size, cv::COLOR_BGR2GRAY);
+  //cv::cvtColor(processed_frame, Grey_Image_Full_Size, cv::COLOR_BGR2GRAY);
 
   // CLAHE settings: Clip Limit 2.0, Tile Size 8x8
   cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
@@ -1081,16 +1081,11 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
     // First Level of enhancements and preprocessing
     // Generate Processing Frames for enhancements.
     {
+      cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
 
       if (PROPS.ENH_LOW_LIGHT && is_low_light(PROCESSED_FRAME_GRAY, 25))
       {
-        cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
         gray_enhance(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
-        cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
-      }
-      else
-      {
-        cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
       }
 
       // Boost or reduce all color brightness
@@ -1296,9 +1291,6 @@ void CAMERA::open_camera()
       std::cout << "Car cascade loaded successfully." << std::endl;
     }
 
-    // Create an empty frame.
-    FRAME_BUFFER_EMPTY = generate_empty_frame(PROPS.WIDTH, PROPS.HEIGHT);
-
     // Start the camera 
     if (PROPS.TEST == false)
     {
@@ -1404,6 +1396,8 @@ void CAMERA::update_frame()
 
   // during while, set error to trigger CAMERA_READ_THREAD_STOP
   bool error = false;
+
+  CAMERA_ONLINE = true;
 
   while (CAMERA_READ_THREAD_STOP == false)
   {
@@ -1549,6 +1543,8 @@ void CAMERA::update_frame()
     CAMERA_READ_THREAD_TIME.request_ready_time(FORCED_FRAME_LIMIT.get_ready_time());
     CAMERA_READ_THREAD_TIME.sleep_till_next_frame();
   }
+
+  CAMERA_ONLINE = false;
 
   // Close Camera if thread stops.
   CAMERA_CAPTURE.release();
@@ -1790,7 +1786,26 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   if (CAMERA_BEING_VIEWED != Camera_Being_Viewed)
   {
     CAMERA_BEING_VIEWED = Camera_Being_Viewed;
-    GENERATE_BLANK_IMAGE = true;
+
+    if (CAMERA_BEING_VIEWED == false)
+    {
+      FRAME_BUFFER_0.release();
+      FRAME_BUFFER_1.release();
+      FRAME_BUFFER_FAKE.release();
+      LIVE_FRAME.release();
+      LIVE_FRAME_1.release();
+
+      PROCESSED_FRAME.release();
+      PROCESSED_FRAME_GRAY.release();
+      PROCESSED_FRAME_GAUSSIAN.release();
+      PROCESSED_FRAME_CANNY.release();
+
+      MASK_FRAME_GLARE_0.release();
+      MASK_FRAME_GLARE_1.release();
+
+      MASK_FRAME_CANNY_0.release();
+      MASK_FRAME_CANNY_1.release();
+    }
   }
   
   // ---------------------------------------------------------------------------------------
@@ -1871,18 +1886,8 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
 
   if (CAMERA_BEING_VIEWED == false)
   {
-    if (GENERATE_BLANK_IMAGE)
-    {
-      FRAME_TO_TEXTURE_TRACK = 0;
-      GENERATE_BLANK_IMAGE = false;
-      generate_imgui_texture_frame(FRAME_BUFFER_EMPTY);
-      WORKING_FRAME_FULLY_PROCESSED = true;
-    }
-    else
-    {
-      FRAME_TO_TEXTURE_TRACK = 0;
-      WORKING_FRAME_FULLY_PROCESSED = true;
-    }
+    FRAME_TO_TEXTURE_TRACK = 0;
+    WORKING_FRAME_FULLY_PROCESSED = true;
   }
   else if (FRAME_TO_TEXTURE_TRACK != 0)
   {
@@ -1956,9 +1961,9 @@ void CAMERA::camera_stop()
   }
 }
 
-bool CAMERA::camera_avalable()
+bool CAMERA::camera_online()
 {
-  return !CAMERA_READ_THREAD_STOP;
+  return CAMERA_ONLINE;
 }
 
 // ---------------------------------------------------------------------------------------

@@ -1,3 +1,7 @@
+2.347_251030
+  - Small changes.
+  - Repaired the low light routine.
+
 2.346_251029
   - Testing a simple camera enhancement that repeats the 
       previous frames image mask.

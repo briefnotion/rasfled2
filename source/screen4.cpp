@@ -799,7 +799,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 }
                 else
                 {
-                  CAMERA.update_tf(sdSysData.CAMERA_BACKUP.camera_avalable());
+                  CAMERA.update_tf(sdSysData.CAMERA_BACKUP.camera_online());
                   CAMERA.draw(sdSysData);
                 }
               }
@@ -944,7 +944,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - (48 * DEF_SCREEN_SIZE_Y_MULTIPLIER)), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
             // Is Camera On
-            if (sdSysData.CAMERA_BACKUP.camera_avalable() &&
+            if (sdSysData.CAMERA_BACKUP.camera_online() &&
                     ( sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM ||
                       sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE))
             {
@@ -1432,9 +1432,9 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               DISPLAY_RUNNING_COLOR = !DISPLAY_RUNNING_COLOR;
             }
 
-            if (BTC_CAMERA_START_STOP.button_toggle_color(sdSysData, "CAMERA\nSTOP", "CAMERA\nSTART", sdSysData.CAMERA_BACKUP.camera_avalable(), RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
+            if (BTC_CAMERA_START_STOP.button_toggle_color(sdSysData, "CAMERA\nSTOP", "CAMERA\nSTART", sdSysData.CAMERA_BACKUP.camera_online(), RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON))
             {
-              if (sdSysData.CAMERA_BACKUP.camera_avalable())
+              if (sdSysData.CAMERA_BACKUP.camera_online())
               {
                 sdSysData.SCREEN_COMMS.command_text_set(" camf");
               }

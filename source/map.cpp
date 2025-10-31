@@ -741,7 +741,8 @@ void MAP::generate_displayed_track(double Resolution)
         // Z = x size
         // W = y size
 
-        float grace_working_area = 20.0f;
+        float grace_working_area = 50.0f; // Size of pixels area outside viewing 
+                                          //  area, to render.
 
         if (true) // normal 
         {

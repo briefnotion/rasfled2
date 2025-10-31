@@ -365,7 +365,7 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
 void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
 {
   // Check if the camera and video are available.
-  if (sdSysData.CAMERA_BACKUP.camera_avalable())
+  if (sdSysData.CAMERA_BACKUP.camera_online())
   {
     ANGLE = Angle;
 
@@ -453,7 +453,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
 
   //ImGui::InvisibleButton("camera_no_show", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
   // Notification
-  if (sdSysData.CAMERA_BACKUP.camera_avalable() == false)
+  if (sdSysData.CAMERA_BACKUP.camera_online() == false)
   {
     ImGui::Text("Camera");
     ImGui::Text("  Offline");

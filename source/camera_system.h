@@ -266,24 +266,7 @@ class CAMERA
   //  later.
 
   // ---------------------------------------------------------------------------------------
-  
-  // Thread process_enhancements_frames
-  cv::Mat PROCESSED_FRAME;
-  cv::Mat PROCESSED_FRAME_GRAY;
-  //cv::Mat PROCESSED_FRAME_DOWNSIZED;
-  //cv::Mat PROCESSED_FRAME_GRAY_DOWNSIZED;
-  cv::Mat PROCESSED_FRAME_GAUSSIAN;
-  cv::Mat PROCESSED_FRAME_CANNY;
-
-  //cv::Mat MASK_FRAME_OVERLAY_LINES;
-  int DOUBLE_MASK_LATEST = 0;
-
-  cv::Mat MASK_FRAME_GLARE_0;
-  cv::Mat MASK_FRAME_GLARE_1;
-
-  cv::Mat MASK_FRAME_CANNY_0;
-  cv::Mat MASK_FRAME_CANNY_1;
-  
+    
   // Class wide enhancement settings
   const int BLUR_KSIZE = 7;         // Gaussian blur kernel size for noise reduction  (5)
   const int CANNY_THRESH_LOW = 10;  // Lower threshold for edge detection (50)
@@ -352,24 +335,45 @@ class CAMERA
 
   // Thread Update
   
-  FLED_TIME         CAMERA_READ_THREAD_TIME;              // Thread gets its own Time 
-                                                          // Variable.
-  bool              CAMERA_READ_THREAD_STOP     = true;  // Keep reading camera in thread 
-                                                          // until told to stop
+  FLED_TIME         CAMERA_READ_THREAD_TIME;            // Thread gets its own Time 
+                                                        // Variable.
+  bool              CAMERA_READ_THREAD_STOP   = true;   // Keep reading camera in thread 
+                                                        // until told to stop
+  bool              CAMERA_ONLINE             = false;  // Reports to outside camera running. 
+
   cv::VideoCapture  CAMERA_CAPTURE;
   int               FRAME_TO_BUFFER = 0;
 
   bool CAM_AVAILABLE = false;
 
   // Thread Update and process_enhancements_frame
-  cv::Mat FRAME_BUFFER_EMPTY;
   cv::Mat FRAME_BUFFER_0;
   cv::Mat FRAME_BUFFER_1;
   cv::Mat FRAME_BUFFER_FAKE;
 
-  cv::Mat LIVE_FRAME;
-  cv::Mat LIVE_FRAME_0; // Intermediate Frame
-  cv::Mat LIVE_FRAME_1; // Frame
+  // Thread process_enhancements_frames
+  cv::Mat PROCESSED_FRAME;
+  cv::Mat PROCESSED_FRAME_GRAY;
+  //cv::Mat PROCESSED_FRAME_DOWNSIZED;
+  //cv::Mat PROCESSED_FRAME_GRAY_DOWNSIZED;
+  cv::Mat PROCESSED_FRAME_GAUSSIAN;
+  cv::Mat PROCESSED_FRAME_CANNY;
+
+  //cv::Mat MASK_FRAME_OVERLAY_LINES;
+
+  // Mask frames and doubles for rotation
+  cv::Mat MASK_FRAME_GLARE_0;
+  cv::Mat MASK_FRAME_GLARE_1;
+
+  cv::Mat MASK_FRAME_CANNY_0;
+  cv::Mat MASK_FRAME_CANNY_1;
+
+  int DOUBLE_MASK_LATEST = 0;
+
+  // Display Frames
+  cv::Mat LIVE_FRAME;   // Frame tied to Texture for display
+  cv::Mat LIVE_FRAME_0; // Live frame buffer to LIVE_FRAME.
+  cv::Mat LIVE_FRAME_1; // Live frame buffer to LIVE_FRAME.
 
   FAKE_FRAME FAKE_FRAME_GENERATOR;
   
@@ -384,7 +388,6 @@ class CAMERA
   bool    WORKING_FRAME_FULLY_PROCESSED = true; // Needs Lock
 
   bool    CAMERA_BEING_VIEWED       = false;
-  bool    GENERATE_BLANK_IMAGE      = false;
   
   // Load and Save settings
   void save_settings();
@@ -476,7 +479,7 @@ class CAMERA
   void camera_stop();
 
   // Report if camera is opened.
-  bool camera_avalable();
+  bool camera_online();
 };
 
 
