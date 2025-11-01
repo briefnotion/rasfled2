@@ -1,3 +1,29 @@
+2.348_251031
+  - The dreaded hmc5883l has reared its ugly head again. I 
+      really want to be done with this. Backstory, either 
+      the z sensor has kicked it or the ic houseing has 
+      been maginitized. Debugging has revealed a flaw in 
+      fit_ellipse_and_get_calibration_matrix_2D and 
+      perform_hard_soft_iron_calibration whereas if 
+      the values of raw xyz is negative, the calibration 
+      fails. 
+        Temporary solution:
+          Delete the compass settings json
+          Allow it to rebuild (10 min later)
+          Modify its "force_xyz_offset" for values of 
+            raw xyz to be positive.
+          "force_zero_z_axis" necessary for me because 
+            of the magnization, but may help. 
+          Calibration will be very difficult.
+        Pending solution:
+          First AI rewrite failed, but only because 
+            I ran out of time. I've other ideas to 
+            work with.
+  - Corrected settings in compass load settings not working.
+  - Changed some values in the hmc5883l create routine. 
+  - Added display of compass raw xyz to Nova.
+  - No changes made to camera.
+
 2.347_251030
   - Small changes.
   - Repaired the low light routine.

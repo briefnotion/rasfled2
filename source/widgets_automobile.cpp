@@ -1027,6 +1027,12 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
     ImGui::NewLine();
     ImGui::Text("          Compass");
     {
+      NOVA_2_COMPASS_RAW_XYZ.update_value(sdSysData, 
+                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_XYZ.X) + " " +
+                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_XYZ.Y) + " " +
+                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_XYZ.Z)         );
+      NOVA_2_COMPASS_RAW_XYZ.draw(draw_list_nova, sdSysData);
+
       NOVA_2_COMPASS_INFORMATION.update_value(sdSysData, sdSysData.COMMS_COMPASS.INFORMATION);
       NOVA_2_COMPASS_INFORMATION.draw(draw_list_nova, sdSysData);
 
@@ -2193,6 +2199,10 @@ void AUTOMOBILE_SCREEN::create(system_data &sdSysData)
     NOVA_2_TIMESTAMP_DIFFERENCE.PROPS = tmp_defalt_props;
     NOVA_2_TIMESTAMP_DIFFERENCE.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "TIME DIFF ");
     NOVA_2_TIMESTAMP_DIFFERENCE.create(sdSysData);
+
+    NOVA_2_COMPASS_RAW_XYZ.PROPS = tmp_defalt_props;
+    NOVA_2_COMPASS_RAW_XYZ.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "RAW XYZ ");
+    NOVA_2_COMPASS_RAW_XYZ.create(sdSysData);
 
     NOVA_2_COMPASS_INFORMATION.PROPS = tmp_defalt_props;
     NOVA_2_COMPASS_INFORMATION.PROPS.LABEL = right_justify(tmp_defalt_props.LABEL_TEXT_SIZE, "INFO ");

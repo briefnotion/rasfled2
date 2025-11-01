@@ -58,9 +58,13 @@ FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fak
   // we swap the sine and cosine components to match the expected rotation.
 
   const float magnitude_xy = 250.0f; // Scale factor for X and Y components
-  const float x_bias_offset = 600.0f;   // Fixed offset for X
-  const float y_bias_offset = 400.0f;  // Fixed offset for Y
-  const float z_constant_offset = 10.0f; // Fixed offset for Z (e.g., vertical component)
+  const float x_bias_offset = 000.0f;   // Fixed offset for X
+  const float y_bias_offset = 000.0f;  // Fixed offset for Y
+  const float z_constant_offset = 000.0f; // Fixed offset for Z (e.g., vertical component)
+  //const float x_bias_offset = 200.0f;   // Fixed offset for X
+  //const float y_bias_offset = 200.0f;  // Fixed offset for Y
+  //const float z_constant_offset = 10.0f; // Fixed offset for Z (e.g., vertical component)
+
 
   // Convert True_Fake_Bearing from degrees to radians for std::sin and std::cos
   float True_Fake_Bearing_Rad = True_Fake_Bearing * (M_PI / 180.0f);
@@ -806,30 +810,36 @@ void HMC5883L::load_history_and_settings()
         // load settings
         if (configuration_json.ROOT.DATA[root].label() == "settings")
         {
-          float mount_offset =  0.0f;
-          bool mount_offset_loaded = false;
-
-          float declination =   0.0f;
-          bool declination_loaded = false;
+          STRING_FLOAT mount_offset;
+          STRING_FLOAT declination;
+          STRING_FLOAT force_xyz_offset;
+          STRING_BOOL force_zero_z_axis;
 
           for (int settings = 0; 
               settings < (int)configuration_json.ROOT.DATA[root].DATA.size(); settings++)
           {
-            mount_offset_loaded = configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("mount offset", mount_offset);
-            declination_loaded =  configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("declination", declination);
+            if (configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("mount offset", mount_offset))
+            {
+              PROPS.CALIBRATION_MOUNT_OFFSET = mount_offset.get_float_value();
+            }
+            
+            if (configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("declination", declination))
+            {
+              PROPS.CALIBRATION_LOCATION_DECLINATION = declination.get_float_value();
+            }
+
+            if (configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("force_xyz_offset", force_xyz_offset))
+            {
+              PROPS.FORCE_XYZ_OFFSET = force_xyz_offset.get_float_value();
+            }
+
+            if (configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("force_zero_z_axis", force_zero_z_axis))
+            {
+              PROPS.FORCE_ZERO_Z_AXIS = force_zero_z_axis.get_bool_value();
+            }
           }
 
-          // store as props but only if found
-          if (mount_offset_loaded)
-          {
-            PROPS.CALIBRATION_MOUNT_OFFSET = mount_offset;
-          }
-          if (declination_loaded)
-          {
-            PROPS.CALIBRATION_LOCATION_DECLINATION = declination;
-          }
         }
-
         // load configuration points
         if (configuration_json.ROOT.DATA[root].label() == "calibration points")
         {
@@ -875,8 +885,10 @@ void HMC5883L::save_history_and_settings()
 
   // Create base settings in JSON
   JSON_ENTRY settings;
-  settings.create_label_value(quotify("mount offset"), quotify("-180.0"));
-  settings.create_label_value(quotify("declination"), quotify("0.0"));
+  settings.create_label_value(quotify("mount offset"), quotify(to_string(PROPS.CALIBRATION_MOUNT_OFFSET)));
+  settings.create_label_value(quotify("declination"), quotify(to_string(PROPS.CALIBRATION_LOCATION_DECLINATION)));
+  settings.create_label_value(quotify("force_xyz_offset"), quotify(to_string(PROPS.FORCE_XYZ_OFFSET)));
+  settings.create_label_value(quotify("force_zero_z_axis"), quotify(to_string(PROPS.FORCE_ZERO_Z_AXIS)));
   configuration_json.ROOT.put_json_in_set(quotify("settings"), settings);
 
   // Create Point history in JSON
@@ -922,6 +934,23 @@ bool HMC5883L::register_write(char Register, char Value)
   return ret_write_success;
 }
 
+bool HMC5883L::register_read(uint8_t Register, uint8_t &Value)
+{
+  bool ret_read_success = false;
+
+  // Set register pointer
+  if (write(DEVICE, &Register, 1) == 1)
+  {
+    // Read one byte from the register
+    if (read(DEVICE, &Value, 1) == 1)
+    {
+      ret_read_success = true;
+    }
+  }
+
+  return ret_read_success;
+}
+
 bool HMC5883L::create()
 {
   bool ret_success = false;
@@ -947,27 +976,145 @@ bool HMC5883L::create()
   {
     if (ioctl(DEVICE, I2C_SLAVE, PROPS.I2C_ID) >= 0)
     {
-      FALSE_CATCH write_success;
-
-      //register_write(0x00, 0x20); // Register A
-      //                            // Sample of 1  (default)
-      //                            // Output rate of 15 Hz  (default)
-      //                            // Normal Measurtement configuration  (default)
-
-      write_success.catch_false(register_write(0x01, 0x20));   // Register B  (00100000)
-                                    // 1090 Gauss  (default)
-
-      write_success.catch_false(register_write(0x02, 0x00));   // Mode Register
-                                    // Continuous Measurement Mode
-
-      if (write_success.has_false())
+      /*
       {
-        // Errored
-        //exit(0);
+        FALSE_CATCH write_success;
+
+        //register_write(0x00, 0x20); // Register A
+        //                            // Sample of 1  (default)
+        //                            // Output rate of 15 Hz  (default)
+        //                            // Normal Measurtement configuration  (default)
+
+        write_success.catch_false(register_write(0x01, 0x20));   // Register B  (00100000)
+                                      // 1090 Gauss  (default)
+
+        write_success.catch_false(register_write(0x02, 0x00));   // Mode Register
+                                      // Continuous Measurement Mode
+
+        if (write_success.has_false())
+        {
+          // Errored
+          //exit(0);
+        }
+        
+        ret_success = true;
+        CONNECTED = true;
       }
-      
-      ret_success = true;
-      CONNECTED = true;
+      */
+
+      // Simple Setup
+      {
+        register_write(0x00, 0x10); // Configuration Register A
+        // 1 sample average, 15 Hz data rate, normal measurement mode
+
+        register_write(0x01, 0x00); // Configuration Register B
+        // Gain
+        
+        /*
+        Gain Settings via register_write(0x01, value)
+          |  |  |  |  | 
+          0  | register_write(0x01, 0x00); |  |  | (Max Range)
+          1  | register_write(0x01, 0x20); |  |  | (Default)
+          2  | register_write(0x01, 0x40); |  |  | 
+          3  | register_write(0x01, 0x60); |  |  | 
+          4  | register_write(0x01, 0x80); |  |  | 
+          5  | register_write(0x01, 0xA0); |  |  | 
+          6  | register_write(0x01, 0xC0); |  |  | 
+          7  | register_write(0x01, 0xE0); |  |  | (Max sensitivity)
+
+          Gain 2 = 1.3 Gauss (default), 1090 LSB/Gauss
+        */
+
+        register_write(0x02, 0x00); // Mode Register
+        // Continuous measurement mode
+
+        ret_success = true;
+        CONNECTED = true;
+      }
+
+      /*
+      // Alt Test
+      {
+        // Try Gain settings 5, 6, 7
+        for (int gain = 5; gain <= 7; ++gain)
+        {
+            uint8_t crb_val = (gain << 5); // Gain bits are in bits 7:5
+
+            // Step 1: CRA = 0x71 → 8-average, 15Hz, positive bias
+            if (!register_write(0x00, 0x71)) {
+                std::cerr << "Failed to write CRA\n";
+                return 1;
+            }
+
+            // Step 2: CRB = gain setting
+            if (!register_write(0x01, crb_val)) {
+                std::cerr << "Failed to write CRB\n";
+                return 1;
+            }
+
+            // Step 3: Mode = 0x00 → Continuous mode
+            if (!register_write(0x02, 0x00)) {
+                std::cerr << "Failed to write Mode\n";
+                return 1;
+            }
+
+            // Step 4: Wait 6 ms
+            usleep(6000);
+
+            // Step 5: Read 6 bytes from data registers
+            uint8_t reg = 0x03;
+            if (write(DEVICE, &reg, 1) != 1) {
+                std::cerr << "Failed to set register pointer\n";
+                return 1;
+            }
+
+            uint8_t buffer[6];
+            if (read(DEVICE, buffer, 6) != 6) {
+                std::cerr << "Failed to read data\n";
+                return 1;
+            }
+
+            int16_t x = (int16_t)((buffer[0] << 8) | buffer[1]);
+            int16_t z = (int16_t)((buffer[2] << 8) | buffer[3]);
+            int16_t y = (int16_t)((buffer[4] << 8) | buffer[5]);
+
+            std::cout << "\nGain = " << gain << " (CRB = 0x" << std::hex << (int)crb_val << std::dec << ")\n";
+            std::cout << "Self-test readings: X=" << x << " Y=" << y << " Z=" << z << "\n";
+
+            // Step 6: Calculate limits based on gain
+            int ref_gain = 390; // Gain 5 reference
+            int actual_gain = (gain == 5) ? 390 : (gain == 6 ? 330 : 230);
+            int low = (243 * actual_gain) / ref_gain;
+            int high = (575 * actual_gain) / ref_gain;
+
+            std::cout << "Expected range: " << low << " to " << high << "\n";
+
+            bool x_ok = (x >= low && x <= high);
+            bool y_ok = (y >= low && y <= high);
+            bool z_ok = (z >= low && z <= high);
+
+            // Step 7: Exit self-test mode
+            register_write(0x00, 0x70); // Normal measurement mode
+
+            if (x_ok && y_ok && z_ok) {
+                std::cout << "✅ Self-test PASSED at Gain " << gain << "\n";
+                return 0;
+            } else {
+                std::cerr << "❌ Self-test FAILED at Gain " << gain << "\n";
+                if (!x_ok) std::cerr << "X out of range\n";
+                if (!y_ok) std::cerr << "Y out of range\n";
+                if (!z_ok) std::cerr << "Z out of range\n";
+            }
+
+            // Wait before next attempt
+            usleep(10000);
+        }
+
+        std::cerr << "\n❌ Self-test FAILED at all gain levels (5–7)\n";
+        exit(0);
+      }
+      */
+
     }
   }
   else
@@ -1222,7 +1369,14 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
 
       // Set initial calibration save routine to wait 10 minutes 
       //  to allow it time before it potentially overwrites good data.
-      CALIBRATION_DATA_SAVE.set(tmeFrame_Time, 10 * 60 * 1000);
+      if (ENABLE_TEST_COMPASS == false)
+      {
+        CALIBRATION_DATA_SAVE.set(tmeFrame_Time, 10 * 60 * 1000);
+      }
+      else
+      {
+        CALIBRATION_DATA_SAVE.set(tmeFrame_Time, 10 * 1000);
+      }
 
       //  Open a new connection at current baud rate.
       //  Don't prepare check baud rate if autoconnect if not on
@@ -1294,9 +1448,9 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
         y = (BUFFER[4] << 8) | BUFFER[5];
         z = (BUFFER[2] << 8) | BUFFER[3];
 
-        RAW_XYZ.X = y;
-        RAW_XYZ.Y = x;
-        RAW_XYZ.Z = z;
+        RAW_XYZ.X = (float)y;
+        RAW_XYZ.Y = (float)x;
+        RAW_XYZ.Z = (float)z;
 
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
 
@@ -1310,6 +1464,20 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
                                 PROPS.CALIBRATION_LOCATION_DECLINATION - 
                                 KNOWN_DEVICE_DEGREE_OFFSET); // Adjust to match original code's convention
           LEVEL_3.TRUE_FAKE_BEARING_FROM_UPPER = TRUE_FAKE_BEARING;
+        }
+
+        // Force offsets
+        if (PROPS.FORCE_XYZ_OFFSET != 0.0f)
+        {
+          RAW_XYZ.X += PROPS.FORCE_XYZ_OFFSET;
+          RAW_XYZ.Y += PROPS.FORCE_XYZ_OFFSET;
+          RAW_XYZ.Z += PROPS.FORCE_XYZ_OFFSET;
+        }
+
+        // Force 0 on z axis.
+        if (PROPS.FORCE_ZERO_Z_AXIS)
+        {
+          RAW_XYZ.Z = 0;
         }
 
         // Process

@@ -382,6 +382,11 @@ class HMC5883L_PROPERTIES
   bool GPS_ASSIST_HEADING = true;
 
   bool ENABLE_FAKE_COMPASS = ENABLE_TEST_COMPASS;
+
+  float FORCE_XYZ_OFFSET  = 120.0f;
+
+  bool FORCE_ZERO_Z_AXIS = true;
+
 };
 
 class PRESERVE_ANGLE_CALC
@@ -587,6 +592,7 @@ class HMC5883L
   // Comms Routines
   bool register_write(char Register, char Value);
     // Internal: Change chip settings.
+  bool register_read(uint8_t Register, uint8_t &Value);
 
   bool create();      // Internal: Opens port for access.
 
