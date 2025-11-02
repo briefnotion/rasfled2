@@ -31,14 +31,14 @@ using namespace std;
  * This value can be used for comparison after calibration.
  * @return FLOAT_XYZ_MATRIX A matrix containing simulated X, Y, and Z sensor readings.
  */
-FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fake_Bearing)
+DOUBLE_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, double &True_Fake_Bearing)
 {
-  FLOAT_XYZ_MATRIX ret_point;
+  DOUBLE_XYZ_MATRIX ret_point;
 
-  const float rotation_speed_deg_per_ms = 0.0573f * 1.0f; // Adjusted for degrees (approx 0.0010 rad/ms * 180/PI)
+  const double rotation_speed_deg_per_ms = 0.0573f * 1.0f; // Adjusted for degrees (approx 0.0010 rad/ms * 180/PI)
 
   bool skew = true;
-  float skew_factor = 0.10f; // Added 'f' suffix for float literal
+  double skew_factor = 0.20f; // Added 'f' suffix for float literal
 
   // --- 1. Calculate the TRUE_FAKE_BEARING ahead of time ---
   // This simulates a continuous rotation.
@@ -57,17 +57,17 @@ FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fak
   // Based on your provided raw data mapping (RAW_XYZ.X = y; RAW_XYZ.Y = x;),
   // we swap the sine and cosine components to match the expected rotation.
 
-  const float magnitude_xy = 250.0f; // Scale factor for X and Y components
-  const float x_bias_offset = 000.0f;   // Fixed offset for X
-  const float y_bias_offset = 000.0f;  // Fixed offset for Y
-  const float z_constant_offset = 000.0f; // Fixed offset for Z (e.g., vertical component)
-  //const float x_bias_offset = 200.0f;   // Fixed offset for X
-  //const float y_bias_offset = 200.0f;  // Fixed offset for Y
-  //const float z_constant_offset = 10.0f; // Fixed offset for Z (e.g., vertical component)
+  const double magnitude_xy = 250.0f; // Scale factor for X and Y components
+  const double x_bias_offset = 000.0f;   // Fixed offset for X
+  const double y_bias_offset = 000.0f;  // Fixed offset for Y
+  const double z_constant_offset = 000.0f; // Fixed offset for Z (e.g., vertical component)
+  //const double x_bias_offset = 200.0f;   // Fixed offset for X
+  //const double y_bias_offset = 200.0f;  // Fixed offset for Y
+  //const double z_constant_offset = 10.0f; // Fixed offset for Z (e.g., vertical component)
 
 
   // Convert True_Fake_Bearing from degrees to radians for std::sin and std::cos
-  float True_Fake_Bearing_Rad = True_Fake_Bearing * (M_PI / 180.0f);
+  double True_Fake_Bearing_Rad = True_Fake_Bearing * (M_PI / 180.0f);
 
   // Swapped sin and cos for X and Y to match the RAW_XYZ.X = y, RAW_XYZ.Y = x mapping
   ret_point.X = (magnitude_xy * std::cos(True_Fake_Bearing_Rad)) + x_bias_offset; // X corresponds to original 'y'
@@ -78,8 +78,8 @@ FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fak
   if (skew)
   {
     // Store original values before skewing to avoid compounding effects
-    float original_X = ret_point.X;
-    float original_Y = ret_point.Y;
+    double original_X = ret_point.X;
+    double original_Y = ret_point.Y;
 
     // Skew the x and y components.
     // This simulates cross-axis interference or non-orthogonality.
@@ -95,12 +95,12 @@ FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fak
 
 // -------------------------------------------------------------------------------------
 
-bool CAL_LEVEL_3::xyz_equal(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B)
+bool CAL_LEVEL_3::xyz_equal(DOUBLE_XYZ_MATRIX &A, DOUBLE_XYZ_MATRIX &B)
 {
   return (A.X == B.X) && (A.Y == B.Y) && (A.Z == B.Z);
 }
 
-float CAL_LEVEL_3::dist_xyz(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B)
+double CAL_LEVEL_3::dist_xyz(DOUBLE_XYZ_MATRIX &A, DOUBLE_XYZ_MATRIX &B)
 {
   return sqrtf(powf(A.X - B.X, 2) + powf(A.Y - B.Y, 2) + powf(A.Z - B.Z, 2));
 }
@@ -110,7 +110,7 @@ void CAL_LEVEL_3::clear_all_flags()
   INFORMATION_CALIBRATION = "";
 }
 
-bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
+bool CAL_LEVEL_3::add_point(DOUBLE_XYZ_MATRIX &Raw_XYZ)
 {
 
   bool ret_pass_filter = false;
@@ -121,8 +121,8 @@ bool CAL_LEVEL_3::add_point(FLOAT_XYZ_MATRIX &Raw_XYZ)
   
   if (ret_pass_filter)
   {
-    float dist_newpoint_anyother = 0.0f;
-    float dist_newpoint_anyother_farthest = 9999.9f;
+    double dist_newpoint_anyother = 0.0f;
+    double dist_newpoint_anyother_farthest = 9999.9f;
 
     for (size_t pos = 0; pos < COMPASS_HISTORY.size(); pos++)
     {
@@ -178,8 +178,8 @@ void CAL_LEVEL_3::preservation_of_data()
       }
       else
       {
-        float dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
-        float dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
+        double dx = COMPASS_HISTORY[pos].POINT.X - COMPASS_CENTER.X;
+        double dy = COMPASS_HISTORY[pos].POINT.Y - COMPASS_CENTER.Y;
 
         // Calculate angle using atan2, which handles all quadrants.
         // The angle is in radians, typically from -PI to PI.
@@ -292,7 +292,7 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
   {
     INFORMATION_CALIBRATION += "Error: Not enough data points for ellipsoid \n\tfitting. Need at least " +
                     to_string(MIN_POINTS) + ", got " + to_string(active_points.size()) + ".\n";
-    params.hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0); // Use params
+    params.hard_iron_offset = DOUBLE_XYZ_MATRIX(0,0,0); // Use params
     params.soft_iron_matrix = Matrix3x3(); // Use params
     params.average_field_magnitude = 0.0f; // Initialize
     return false;
@@ -312,9 +312,9 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
 
   for (const auto& p : active_points)
   {
-    float x = p.X;
-    float y = p.Y;
-    float z = p.Z;
+    double x = p.X;
+    double y = p.Y;
+    double z = p.Z;
 
     // Features for the design matrix X
     // [x^2, y^2, z^2, xy, xz, yz, x, y, z]
@@ -330,7 +330,7 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
     features_buffer.push_back(z);
 
     // b vector (right-hand side) is -1 (assuming Q_10 = 1)
-    float b_val = -1.0f;
+    double b_val = -1.0f;
 
     for (int i = 0; i < 9; ++i)
     {
@@ -343,12 +343,12 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
   }
 
   // --- Original Hard Iron Correction using Min/Max ---
-  float min_x = std::numeric_limits<float>::max();
-  float max_x = std::numeric_limits<float>::min();
-  float min_y = std::numeric_limits<float>::max();
-  float max_y = std::numeric_limits<float>::min();
-  float min_z = std::numeric_limits<float>::max();
-  float max_z = std::numeric_limits<float>::min();
+  double min_x = std::numeric_limits<double>::max();
+  double max_x = std::numeric_limits<double>::min();
+  double min_y = std::numeric_limits<double>::max();
+  double max_y = std::numeric_limits<double>::min();
+  double min_z = std::numeric_limits<double>::max();
+  double max_z = std::numeric_limits<double>::min();
 
   for (const auto& p : active_points)
   {
@@ -366,9 +366,9 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
 
   // --- Simplified Soft Iron with 3D focus ---
   // This part remains the same as it calculates scaling factors.
-  float range_x = max_x - min_x;
-  float range_y = max_y - min_y;
-  float range_z = max_z - min_z;
+  double range_x = max_x - min_x;
+  double range_y = max_y - min_y;
+  double range_z = max_z - min_z;
 
   if (range_x == 0.0f || range_y == 0.0f || range_z == 0.0f)
   {
@@ -379,7 +379,7 @@ bool CAL_LEVEL_3::fit_ellipsoid_and_get_calibration_matrix(
   }
 
   // Calculate average range.
-  float average_range = (range_x + range_y + range_z) / 3.0f;
+  double average_range = (range_x + range_y + range_z) / 3.0f;
 
   // Store the average range in CalibrationParameters for use in preservation_of_data
   params.average_field_magnitude = average_range; // Storing average range
@@ -424,21 +424,21 @@ bool CAL_LEVEL_3::fit_ellipse_and_get_calibration_matrix_2D(
   {
     INFORMATION_CALIBRATION += "Error: Not enough data points for 2D ellipse \n\tfitting. Need at least " +
                                 to_string(MIN_POINTS) + ", got " + to_string(active_points.size()) + ".\n";
-    params.hard_iron_offset = FLOAT_XYZ_MATRIX(0,0,0);
+    params.hard_iron_offset = DOUBLE_XYZ_MATRIX(0,0,0);
     params.soft_iron_matrix = Matrix3x3();
     params.average_field_magnitude = 0.0f;
     return false;
   }
 
   // --- Reset for each calculation ---
-  A_transpose_A_2D.assign(5, std::vector<float>(5, 0.0f));
+  A_transpose_A_2D.assign(5, std::vector<double>(5, 0.0f));
   A_transpose_b_2D.assign(5, 0.0f);
   features_buffer_2D.assign(5, 0.0f);
 
   for (const auto& p : active_points)
   {
-    float x = p.X;
-    float y = p.Y;
+    double x = p.X;
+    double y = p.Y;
 
     // Features for the design matrix A
     // [x^2, xy, y^2, x, y]
@@ -449,7 +449,7 @@ bool CAL_LEVEL_3::fit_ellipse_and_get_calibration_matrix_2D(
     features_buffer_2D[4] = y;
 
     // Right-hand side vector for the least-squares problem is -1
-    float b_val = -1.0f;
+    double b_val = -1.0f;
 
     // Populate A_transpose_A and A_transpose_b
     for (int i = 0; i < 5; ++i)
@@ -463,10 +463,10 @@ bool CAL_LEVEL_3::fit_ellipse_and_get_calibration_matrix_2D(
   }
 
   // --- Solve the linear system ---
-  std::vector<std::vector<float>> A_transpose_A_inv = invert5x5(A_transpose_A_2D);
+  std::vector<std::vector<double>> A_transpose_A_inv = invert5x5(A_transpose_A_2D);
 
   // Q_coeffs = (A^T * A)^-1 * (A^T * b)
-  std::vector<float> Q_coeffs(5, 0.0f);
+  std::vector<double> Q_coeffs(5, 0.0f);
   for (int i = 0; i < 5; ++i)
   {
     for (int j = 0; j < 5; ++j)
@@ -477,16 +477,16 @@ bool CAL_LEVEL_3::fit_ellipse_and_get_calibration_matrix_2D(
 
   // --- Extract calibration parameters from the ellipse coefficients ---
   // General equation: Ax^2 + Bxy + Cy^2 + Dx + Ey + F = 0
-  float A = Q_coeffs[0];
-  float B = Q_coeffs[1];
-  float C = Q_coeffs[2];
-  float D = Q_coeffs[3];
-  float E = Q_coeffs[4];
+  double A = Q_coeffs[0];
+  double B = Q_coeffs[1];
+  double C = Q_coeffs[2];
+  double D = Q_coeffs[3];
+  double E = Q_coeffs[4];
 
   // --- Calculate Hard Iron Offset (Center of Ellipse) ---
-  float h_x = (B*E - 2.0f*C*D) / (4.0f*A*C - B*B);
-  float h_y = (B*D - 2.0f*A*E) / (4.0f*A*C - B*B);
-  params.hard_iron_offset = FLOAT_XYZ_MATRIX(h_x, h_y, 0.0f);
+  double h_x = (B*E - 2.0f*C*D) / (4.0f*A*C - B*B);
+  double h_y = (B*D - 2.0f*A*E) / (4.0f*A*C - B*B);
+  params.hard_iron_offset = DOUBLE_XYZ_MATRIX(h_x, h_y, 0.0f);
 
   // --- Calculate Soft Iron Matrix (2D) ---
   // The soft iron matrix M corrects the shape of the ellipse.
@@ -494,8 +494,8 @@ bool CAL_LEVEL_3::fit_ellipse_and_get_calibration_matrix_2D(
   // We can use the Cholesky decomposition of the quadratic part of the ellipse matrix to get the correction matrix.
   
   // We'll calculate a 2x2 matrix for the quadratic part
-  float det_Q = (4.0f * A * C - B * B) / 4.0f;
-  float scale_factor = std::sqrt(std::abs(1.0f / det_Q));
+  double det_Q = (4.0f * A * C - B * B) / 4.0f;
+  double scale_factor = std::sqrt(std::abs(1.0f / det_Q));
   
   // This is a simplified approach, but should be a good starting point.
   // The correct soft iron matrix involves a Cholesky decomposition of the quadratic part
@@ -508,10 +508,10 @@ bool CAL_LEVEL_3::fit_ellipse_and_get_calibration_matrix_2D(
   params.soft_iron_matrix = params.soft_iron_matrix * scale_factor;
 
   // We can also calculate the average field magnitude in the XY plane.
-  float avg_mag = 0.0f;
+  double avg_mag = 0.0f;
   for (const auto& p : active_points)
   {
-    FLOAT_XYZ_MATRIX corrected_p = p - params.hard_iron_offset;
+    DOUBLE_XYZ_MATRIX corrected_p = p - params.hard_iron_offset;
     corrected_p = params.soft_iron_matrix * corrected_p;
     avg_mag += std::sqrt(corrected_p.X*corrected_p.X + corrected_p.Y*corrected_p.Y);
   }
@@ -530,48 +530,46 @@ CalibrationParameters CAL_LEVEL_3::perform_hard_soft_iron_calibration(const VECT
 {
   CalibrationParameters params; // Will hold the results
 
-  /*
-  if (!fit_ellipsoid_and_get_calibration_matrix(history, params)) 
-  { // Changed call
-    INFORMATION_CALIBRATION += "Calibration failed or insufficient data. \n\tUsing default parameters.\n";
-    // params already initialized to defaults (0 offset, identity matrix)
-  }
-  */
-
   if (!fit_ellipse_and_get_calibration_matrix_2D(history, params)) 
   {
     INFORMATION_CALIBRATION += "2D Calibration failed or insufficient data. \n\tUsing default parameters.\n";
     // params already initialized to defaults (0 offset, identity matrix)
+
+    COMPASS_CENTER_PSUDO_ACTIVE = true;
+  }
+  else
+  {
+    COMPASS_CENTER_PSUDO_ACTIVE = false;
   }
     
   return params;
 }
 
 // This function calculates the calibrated heading using a dampened soft-iron correction.
-void CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params) 
+void CAL_LEVEL_3::calculate_calibrated_heading(const DOUBLE_XYZ_MATRIX& raw_point, const CalibrationParameters& params) 
 {
   // Apply hard-iron offset to the raw magnetic data.
   // This removes the constant bias caused by the sensor's internal components.
-  FLOAT_XYZ_MATRIX hard_iron_corrected_point = raw_point - params.hard_iron_offset;
+  DOUBLE_XYZ_MATRIX hard_iron_corrected_point = raw_point - params.hard_iron_offset;
 
   // --- Calculate the heading with full soft-iron correction ---
   // This uses the soft-iron matrix to scale the magnetic field,
   // making the data more spherical and accurate for heading calculation.
-  FLOAT_XYZ_MATRIX full_corrected_point = params.soft_iron_matrix * hard_iron_corrected_point;
-  float full_corrected_heading_rad = std::atan2(full_corrected_point.Y, full_corrected_point.X);
-  float full_corrected_heading_deg = wrap_degrees(full_corrected_heading_rad * 180.0f / M_PI);
+  DOUBLE_XYZ_MATRIX full_corrected_point = params.soft_iron_matrix * hard_iron_corrected_point;
+  double full_corrected_heading_rad = std::atan2(full_corrected_point.Y, full_corrected_point.X);
+  double full_corrected_heading_deg = wrap_degrees(full_corrected_heading_rad * 180.0f / M_PI);
 
   // --- Calculate the heading with only hard-iron correction ---
   // This is the baseline heading, which is less precise but more stable.
-  float hard_iron_heading_rad = std::atan2(hard_iron_corrected_point.Y, hard_iron_corrected_point.X);
-  float hard_iron_heading_deg = wrap_degrees(hard_iron_heading_rad * 180.0f / M_PI);
+  double hard_iron_heading_rad = std::atan2(hard_iron_corrected_point.Y, hard_iron_corrected_point.X);
+  double hard_iron_heading_deg = wrap_degrees(hard_iron_heading_rad * 180.0f / M_PI);
 
   // --- Dampen the correction ---
   // The difference between the two headings is the correction provided by the soft-iron matrix.
   // We only apply a portion of this correction to the hard-iron heading to prevent
   // "overcorrection" and maintain a smoother, more stable result.
-  float soft_iron_correction_deg = signed_angular_error(hard_iron_heading_deg, full_corrected_heading_deg);
-  float dampened_heading = wrap_degrees(hard_iron_heading_deg - (soft_iron_correction_deg / 2.0f));
+  double soft_iron_correction_deg = signed_angular_error(hard_iron_heading_deg, full_corrected_heading_deg);
+  double dampened_heading = wrap_degrees(hard_iron_heading_deg - (soft_iron_correction_deg / 2.0f));
 
   // Store the results in the class's report variables.
   HEADING_DEGREES_REPORT = dampened_heading;
@@ -583,7 +581,7 @@ void CAL_LEVEL_3::calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point
  * Now uses the globally stored calibration parameters.
  * @param Raw_XYZ The current raw compass reading.
  */
-void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ)
+void CAL_LEVEL_3::set_heading_degrees_report(const DOUBLE_XYZ_MATRIX& Raw_XYZ)
 {
   calculate_calibrated_heading(Raw_XYZ, current_calibration_params);
 
@@ -622,8 +620,10 @@ void CAL_LEVEL_3::set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ)
 void CAL_LEVEL_3::clear()
 {
   COMPASS_HISTORY.set_size(COMPASS_HISTORY_SIZE);
+  active_points.clear();
   active_points.reserve(COMPASS_CALIBRATION_HISTORY_SIZE);
-  COMPASS_CALIBRATION_HISTORY.set_size(COMPASS_CALIBRATION_HISTORY_SIZE);
+  //COMPASS_CALIBRATION_HISTORY.set_size(COMPASS_CALIBRATION_HISTORY_SIZE);
+  COMPASS_CALIBRATION_HISTORY.clear(COMPASS_CALIBRATION_HISTORY_SIZE);
 
   // Initial sizing and zeroing. This happens once per object creation.
   A_transpose_A.resize(9);
@@ -638,7 +638,7 @@ void CAL_LEVEL_3::clear()
   features_buffer.reserve(9);
 }
 
-void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, bool Enable_Calibration_Routines)
+void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, DOUBLE_XYZ_MATRIX &Raw_XYZ, bool Enable_Calibration_Routines)
 {
   // Add point to history.  
   // Includes a simple noise filter.
@@ -677,7 +677,33 @@ void CAL_LEVEL_3::calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MAT
       }
     }
 
-    COMPASS_CENTER = current_calibration_params.hard_iron_offset;
+    if (COMPASS_CENTER_PSUDO_ACTIVE)
+    {
+      if(PSUDO_CENTER_CLEAR_TIMER.is_ready(tmeFrame_Time))
+      {
+        // Clear the PSUDO_CENTER every so often if not working.
+        PSUDO_CENTER_CLEAR_TIMER.set(tmeFrame_Time, 5 * 60 * 1000);
+        PSUDO_CENTER_X.clear(tmeFrame_Time);
+        PSUDO_CENTER_Y.clear(tmeFrame_Time);
+        PSUDO_CENTER_Z.clear(tmeFrame_Time);
+      }
+
+      // Store values of XYZ
+      PSUDO_CENTER_X.store_value(Raw_XYZ.X);
+      PSUDO_CENTER_Y.store_value(Raw_XYZ.Y);
+      PSUDO_CENTER_Z.store_value(Raw_XYZ.Z);
+
+      // Calculate a center based on the means.
+      COMPASS_CENTER.X = PSUDO_CENTER_X.mean();
+      COMPASS_CENTER.Y = PSUDO_CENTER_Y.mean();
+      COMPASS_CENTER.Z = PSUDO_CENTER_Z.mean();
+    }
+    else
+    {
+      // Real center found.  Set from Hard Iron Offset.
+      COMPASS_CENTER = current_calibration_params.hard_iron_offset;
+    }
+
     preservation_of_data();
   }
   
@@ -692,13 +718,13 @@ int PRESERVE_ANGLE_CALC::count()
   return COUNT;
 }
 
-void PRESERVE_ANGLE_CALC::add(FLOAT_XYZ_MATRIX Add_Point)
+void PRESERVE_ANGLE_CALC::add(DOUBLE_XYZ_MATRIX Add_Point)
 {
   POINT_SUM = POINT_SUM + Add_Point;
   COUNT++;
 }
 
-FLOAT_XYZ_MATRIX PRESERVE_ANGLE_CALC::average()
+DOUBLE_XYZ_MATRIX PRESERVE_ANGLE_CALC::average()
 {
   return POINT_SUM / COUNT;
 }
@@ -717,18 +743,18 @@ void PRESERVE_ANGLE_CALC::clear()
  * @param matrix The 5x5 matrix to invert.
  * @return The inverted 5x5 matrix.
  */
-std::vector<std::vector<float>> invert5x5(const std::vector<std::vector<float>>& matrix) 
+std::vector<std::vector<double>> invert5x5(const std::vector<std::vector<double>>& matrix) 
 {
   if (matrix.size() != 5 || matrix[0].size() != 5) 
   {
     std::cerr << "Error: Invalid matrix dimensions for 5x5 inversion." << std::endl;
-    std::vector<std::vector<float>> identity(5, std::vector<float>(5, 0.0f));
+    std::vector<std::vector<double>> identity(5, std::vector<double>(5, 0.0f));
     for (int i = 0; i < 5; ++i) identity[i][i] = 1.0f;
     return identity;
   }
 
-  std::vector<std::vector<float>> A = matrix;
-  std::vector<std::vector<float>> invA(5, std::vector<float>(5, 0.0f));
+  std::vector<std::vector<double>> A = matrix;
+  std::vector<std::vector<double>> invA(5, std::vector<double>(5, 0.0f));
 
   // Initialize inverse matrix as an identity matrix
   for (int i = 0; i < 5; ++i) 
@@ -740,7 +766,7 @@ std::vector<std::vector<float>> invert5x5(const std::vector<std::vector<float>>&
   for (int i = 0; i < 5; ++i) 
   {
     // Find pivot for the current column
-    float pivot_val = A[i][i];
+    double pivot_val = A[i][i];
     int pivot_row = i;
     for (int k = i + 1; k < 5; ++k) 
     {
@@ -759,11 +785,11 @@ std::vector<std::vector<float>> invert5x5(const std::vector<std::vector<float>>&
     }
     
     // Normalize the pivot row
-    float div = A[i][i];
-    if (std::abs(div) < std::numeric_limits<float>::epsilon()) 
+    double div = A[i][i];
+    if (std::abs(div) < std::numeric_limits<double>::epsilon()) 
     {
       std::cerr << "Error: Matrix is singular. Cannot invert." << std::endl;
-      std::vector<std::vector<float>> identity(5, std::vector<float>(5, 0.0f));
+      std::vector<std::vector<double>> identity(5, std::vector<double>(5, 0.0f));
       for (int j = 0; j < 5; ++j) identity[j][j] = 1.0f;
       return identity;
     }
@@ -779,7 +805,7 @@ std::vector<std::vector<float>> invert5x5(const std::vector<std::vector<float>>&
     {
       if (k != i) 
       {
-        float factor = A[k][i];
+        double factor = A[k][i];
         for (int j = 0; j < 5; ++j) 
         {
           A[k][j] -= factor * A[i][j];
@@ -812,7 +838,7 @@ void HMC5883L::load_history_and_settings()
         {
           STRING_FLOAT mount_offset;
           STRING_FLOAT declination;
-          STRING_FLOAT force_xyz_offset;
+          STRING_INT force_xyz_center_offset;
           STRING_BOOL force_zero_z_axis;
 
           for (int settings = 0; 
@@ -828,9 +854,9 @@ void HMC5883L::load_history_and_settings()
               PROPS.CALIBRATION_LOCATION_DECLINATION = declination.get_float_value();
             }
 
-            if (configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("force_xyz_offset", force_xyz_offset))
+            if (configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("force_xyz_center_offset", force_xyz_center_offset))
             {
-              PROPS.FORCE_XYZ_OFFSET = force_xyz_offset.get_float_value();
+              PROPS.FORCE_XYZ_CENTER_OFFSET = (double)force_xyz_center_offset.get_int_value();
             }
 
             if (configuration_json.ROOT.DATA[root].DATA[settings].get_if_is("force_zero_z_axis", force_zero_z_axis))
@@ -887,7 +913,7 @@ void HMC5883L::save_history_and_settings()
   JSON_ENTRY settings;
   settings.create_label_value(quotify("mount offset"), quotify(to_string(PROPS.CALIBRATION_MOUNT_OFFSET)));
   settings.create_label_value(quotify("declination"), quotify(to_string(PROPS.CALIBRATION_LOCATION_DECLINATION)));
-  settings.create_label_value(quotify("force_xyz_offset"), quotify(to_string(PROPS.FORCE_XYZ_OFFSET)));
+  settings.create_label_value(quotify("force_xyz_center_offset"), quotify(to_string((int)PROPS.FORCE_XYZ_CENTER_OFFSET)));
   settings.create_label_value(quotify("force_zero_z_axis"), quotify(to_string(PROPS.FORCE_ZERO_Z_AXIS)));
   configuration_json.ROOT.put_json_in_set(quotify("settings"), settings);
 
@@ -1140,7 +1166,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 
   // Adjust bearing for offsets and declination
   // Prepare for Jitter and normalize.
-  float bearing = RAW_BEARING + 
+  double bearing = RAW_BEARING + 
                   PROPS.CALIBRATION_MOUNT_OFFSET + 
                   PROPS.CALIBRATION_LOCATION_DECLINATION - 
                   KNOWN_DEVICE_DEGREE_OFFSET; // Adjust to match original code's convention
@@ -1163,11 +1189,11 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   // Determine Jitter
   if (CALIBRATED_BEARINGS.size() > 0)
   {
-    float bearing_start_value = CALIBRATED_BEARINGS[0];
+    double bearing_start_value = CALIBRATED_BEARINGS[0];
 
-    float bearing_value = 0.0f;
-    float bearing_min = CALIBRATED_BEARINGS[0];
-    float bearing_max = CALIBRATED_BEARINGS[0];
+    double bearing_value = 0.0f;
+    double bearing_min = CALIBRATED_BEARINGS[0];
+    double bearing_max = CALIBRATED_BEARINGS[0];
 
     for (int pos = 1; pos < (int)CALIBRATED_BEARINGS.size(); pos++)
     {
@@ -1209,7 +1235,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
   if (GPS_System.active(tmeFrame_Time) && GPS_System.CURRENT_POSITION.TRUE_HEADING.VALID) // Enable
   {
     // save error to error mean variable
-    float error_current = signed_angular_error(bearing, GPS_System.CURRENT_POSITION.TRUE_HEADING.VALUE);
+    double error_current = signed_angular_error(bearing, GPS_System.CURRENT_POSITION.TRUE_HEADING.VALUE);
     
     // Reset the GPS_ERROR_MEAN every 30 minutes
     //  Rotation over 3 would be better, but this will work for now.
@@ -1218,7 +1244,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
       GPS_ERROR_MEAN_RESET_TIMER.set(tmeFrame_Time, 30 * 60 * 1000);
       if (GPS_ERROR_MEAN.samples() > 0)
       {
-        float tmp_prv_value = GPS_ERROR_MEAN.mean();
+        double tmp_prv_value = GPS_ERROR_MEAN.mean();
         GPS_ERROR_MEAN.clear(tmeFrame_Time);
         GPS_ERROR_MEAN.store_value(tmp_prv_value);
       }
@@ -1250,7 +1276,7 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
 
   if (CALIBRATE)
   {
-    float calibration_correction = signed_angular_error(bearing_calibrated(), bearing_non_calibrated());
+    double calibration_correction = signed_angular_error(bearing_calibrated(), bearing_non_calibrated());
 
     INFORMATION = "";
 
@@ -1262,8 +1288,8 @@ void HMC5883L::process(NMEA &GPS_System, unsigned long tmeFrame_Time)
     }
     else
     {
-      float error_non_cali  = signed_angular_error(TRUE_FAKE_BEARING, bearing_non_calibrated());
-      float error_cali      = signed_angular_error(TRUE_FAKE_BEARING, bearing_calibrated());
+      double error_non_cali  = signed_angular_error(TRUE_FAKE_BEARING, bearing_non_calibrated());
+      double error_cali      = signed_angular_error(TRUE_FAKE_BEARING, bearing_calibrated());
       INFORMATION += "        BEARING FAKE: " + to_string_round_to_nth(bearing_non_true_fake(), 1) + "\n";
       INFORMATION += "      NON_CALIBRATED: " + to_string_round_to_nth(bearing_non_calibrated(), 1) + "\n";
       INFORMATION += "  BEARING CALIBRATED: " + to_string_round_to_nth(bearing_calibrated(), 1) + "\n";
@@ -1448,9 +1474,13 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
         y = (BUFFER[4] << 8) | BUFFER[5];
         z = (BUFFER[2] << 8) | BUFFER[3];
 
-        RAW_XYZ.X = (float)y;
-        RAW_XYZ.Y = (float)x;
-        RAW_XYZ.Z = (float)z;
+        RAW_DEVICE_X = x;
+        RAW_DEVICE_Y = y;
+        RAW_DEVICE_Z = z;
+
+        RAW_XYZ.X = (double)y;
+        RAW_XYZ.Y = (double)x;
+        RAW_XYZ.Z = (double)z;
 
         DATA_RECIEVED_TIMER.ping_up(tmeFrame_Time, 5000);   // Looking for live data
 
@@ -1467,12 +1497,9 @@ bool HMC5883L::cycle(NMEA &GPS_System, unsigned long tmeFrame_Time)
         }
 
         // Force offsets
-        if (PROPS.FORCE_XYZ_OFFSET != 0.0f)
-        {
-          RAW_XYZ.X += PROPS.FORCE_XYZ_OFFSET;
-          RAW_XYZ.Y += PROPS.FORCE_XYZ_OFFSET;
-          RAW_XYZ.Z += PROPS.FORCE_XYZ_OFFSET;
-        }
+        RAW_XYZ.X += PROPS.FORCE_XYZ_CENTER_OFFSET;
+        RAW_XYZ.Y += PROPS.FORCE_XYZ_CENTER_OFFSET;
+        RAW_XYZ.Z += PROPS.FORCE_XYZ_CENTER_OFFSET;
 
         // Force 0 on z axis.
         if (PROPS.FORCE_ZERO_Z_AXIS)
@@ -1526,37 +1553,37 @@ void HMC5883L::bearing_known_offset_clear()
   GPS_ERROR_MEAN.clear(0);
 }
 
-float HMC5883L::bearing_known_offset()
+double HMC5883L::bearing_known_offset()
 {
   return KNOWN_DEVICE_DEGREE_OFFSET;
 }
 
-float HMC5883L::accumulated_gps_to_compass_bearing_error()
+double HMC5883L::accumulated_gps_to_compass_bearing_error()
 {
   return GPS_ERROR_MEAN.mean();
 }
 
-float HMC5883L::bearing_calibrated()
+double HMC5883L::bearing_calibrated()
 {
   return wrap_degrees(BEARING);
 }
 
-float HMC5883L::bearing_non_calibrated()
+double HMC5883L::bearing_non_calibrated()
 {
   return wrap_degrees(BEARING_NON_CALIBRATED);
 }
 
-float HMC5883L::bearing_non_true_fake()
+double HMC5883L::bearing_non_true_fake()
 {
   return wrap_degrees(TRUE_FAKE_BEARING);
 }
         
-float HMC5883L::bearing_jitter_min()
+double HMC5883L::bearing_jitter_min()
 {
   return wrap_degrees(BEARING_JITTER_MIN);
 }
 
-float HMC5883L::bearing_jitter_max()
+double HMC5883L::bearing_jitter_max()
 {
   return wrap_degrees(BEARING_JITTER_MAX);
 }

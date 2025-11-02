@@ -138,61 +138,61 @@ using namespace std;
 
 // -------------------------------------------------------------------------------------
 
-class FLOAT_XYZ_MATRIX
+class DOUBLE_XYZ_MATRIX
 {
   public:
-  float X = 0.0f;
-  float Y = 0.0f;
-  float Z = 0.0f;
+  double X = 0.0f;
+  double Y = 0.0f;
+  double Z = 0.0f;
 
   // Default constructor
-  FLOAT_XYZ_MATRIX() : X(0.0f), Y(0.0f), Z(0.0f) {}
+  DOUBLE_XYZ_MATRIX() : X(0.0f), Y(0.0f), Z(0.0f) {}
 
   // Parameterized constructor
-  FLOAT_XYZ_MATRIX(float x, float y, float z) : X(x), Y(y), Z(z) {}
+  DOUBLE_XYZ_MATRIX(double x, double y, double z) : X(x), Y(y), Z(z) {}
 
   // Overload for addition
-  FLOAT_XYZ_MATRIX operator+(const FLOAT_XYZ_MATRIX& other) const 
+  DOUBLE_XYZ_MATRIX operator+(const DOUBLE_XYZ_MATRIX& other) const 
   {
-    return FLOAT_XYZ_MATRIX(X + other.X, Y + other.Y, Z + other.Z);
+    return DOUBLE_XYZ_MATRIX(X + other.X, Y + other.Y, Z + other.Z);
   }
 
   // Overload for subtraction
-  FLOAT_XYZ_MATRIX operator-(const FLOAT_XYZ_MATRIX& other) const 
+  DOUBLE_XYZ_MATRIX operator-(const DOUBLE_XYZ_MATRIX& other) const 
   {
-    return FLOAT_XYZ_MATRIX(X - other.X, Y - other.Y, Z - other.Z);
+    return DOUBLE_XYZ_MATRIX(X - other.X, Y - other.Y, Z - other.Z);
   }
 
   // Overload for scalar multiplication
-  FLOAT_XYZ_MATRIX operator*(float scalar) const 
+  DOUBLE_XYZ_MATRIX operator*(double scalar) const 
   {
-    return FLOAT_XYZ_MATRIX(X * scalar, Y * scalar, Z * scalar);
+    return DOUBLE_XYZ_MATRIX(X * scalar, Y * scalar, Z * scalar);
   }
 
   // Overload for scalar division
-  FLOAT_XYZ_MATRIX operator/(float scalar) const 
+  DOUBLE_XYZ_MATRIX operator/(double scalar) const 
   {
     if (scalar != 0.0f) 
     {
-      return FLOAT_XYZ_MATRIX(X / scalar, Y / scalar, Z / scalar);
+      return DOUBLE_XYZ_MATRIX(X / scalar, Y / scalar, Z / scalar);
     }
     return *this; // Avoid division by zero, return current state
   }
 
   // Dot product
-  float dot(const FLOAT_XYZ_MATRIX& other) const 
+  double dot(const DOUBLE_XYZ_MATRIX& other) const 
   {
     return X * other.X + Y * other.Y + Z * other.Z;
   }
 
   // Magnitude squared
-  float magSq() const 
+  double magSq() const 
   {
     return X*X + Y*Y + Z*Z;
   }
 
   // Magnitude
-  float mag() const 
+  double mag() const 
   {
     return std::sqrt(magSq());
   }
@@ -207,7 +207,7 @@ class FLOAT_XYZ_MATRIX
 class Matrix3x3 
 {
   public:
-  float m[3][3];
+  double m[3][3];
 
   // Default constructor (identity matrix)
   Matrix3x3() 
@@ -218,9 +218,9 @@ class Matrix3x3
   }
 
   // Constructor from values
-  Matrix3x3(float m00, float m01, float m02,
-            float m10, float m11, float m12,
-            float m20, float m21, float m22) 
+  Matrix3x3(double m00, double m01, double m02,
+            double m10, double m11, double m12,
+            double m20, double m21, double m22) 
   {
     m[0][0] = m00; m[0][1] = m01; m[0][2] = m02;
     m[1][0] = m10; m[1][1] = m11; m[1][2] = m12;
@@ -228,9 +228,9 @@ class Matrix3x3
   }
 
   // Matrix-Vector multiplication (M * V)
-  FLOAT_XYZ_MATRIX operator*(const FLOAT_XYZ_MATRIX& v) const 
+  DOUBLE_XYZ_MATRIX operator*(const DOUBLE_XYZ_MATRIX& v) const 
   {
-    return FLOAT_XYZ_MATRIX(
+    return DOUBLE_XYZ_MATRIX(
       m[0][0] * v.X + m[0][1] * v.Y + m[0][2] * v.Z,
       m[1][0] * v.X + m[1][1] * v.Y + m[1][2] * v.Z,
       m[2][0] * v.X + m[2][1] * v.Y + m[2][2] * v.Z
@@ -266,7 +266,7 @@ class Matrix3x3
   }
 
   // Determinant of the matrix
-  float determinant() const 
+  double determinant() const 
   {
     return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1]) -
             m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0]) +
@@ -276,8 +276,8 @@ class Matrix3x3
   // Inverse of the matrix (using adjugate method for 3x3)
   Matrix3x3 inverse() const 
   {
-    float det = determinant();
-    if (std::abs(det) < std::numeric_limits<float>::epsilon()) 
+    double det = determinant();
+    if (std::abs(det) < std::numeric_limits<double>::epsilon()) 
     {
       std::cerr << "Warning: Matrix is singular, cannot invert. Returning identity." << std::endl;
       return Matrix3x3(); // Return identity or handle error appropriately
@@ -297,7 +297,7 @@ class Matrix3x3
   }
 
   // Scalar multiplication
-  Matrix3x3 operator*(float scalar) const 
+  Matrix3x3 operator*(double scalar) const 
   {
     Matrix3x3 result;
     for (int i = 0; i < 3; ++i) 
@@ -316,13 +316,13 @@ class Matrix3x3
 class COMPASS_POINT
 {
   public:
-  FLOAT_XYZ_MATRIX  POINT;          // The actual XYZ coordinates of the compass reading
+  DOUBLE_XYZ_MATRIX  POINT;          // The actual XYZ coordinates of the compass reading
   bool              TAG = false;
 
   // Default constructor to initialize POINT
   COMPASS_POINT() : POINT() {}
   // Constructor to initialize POINT with XYZ values
-  COMPASS_POINT(float x, float y, float z) : POINT(x, y, z) {}
+  COMPASS_POINT(double x, double y, double z) : POINT(x, y, z) {}
 };
  
 // -------------------------------------------------------------------------------------
@@ -330,7 +330,7 @@ class COMPASS_POINT
 // Structure to hold point index and its angle for sorting.
 struct PointAngle 
 {
-  float angle;
+  double angle;
   size_t original_index;
 };
  
@@ -343,15 +343,15 @@ struct PointAngle
  */
 struct CalibrationParameters 
 {
-  FLOAT_XYZ_MATRIX hard_iron_offset;
+  DOUBLE_XYZ_MATRIX hard_iron_offset;
   Matrix3x3 soft_iron_matrix;
-  float average_field_magnitude; // Added back for dynamic range
+  double average_field_magnitude; // Added back for dynamic range
   CalibrationParameters() : hard_iron_offset(0,0,0), soft_iron_matrix(), average_field_magnitude(0.0f) {} // Initialize new member
 };
 
 // -------------------------------------------------------------------------------------
 
-FLOAT_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, float &True_Fake_Bearing);
+DOUBLE_XYZ_MATRIX fake_compass_input(unsigned long tmeFrame_Time, double &True_Fake_Bearing);
 // Generates a fake compass input for testing purposes.
 
 // -------------------------------------------------------------------------------------
@@ -377,13 +377,17 @@ class HMC5883L_PROPERTIES
 
   string OFFSET_HISTORY_FILE_NAME = "";
 
-  float CALIBRATION_MOUNT_OFFSET = -180.0f;
-  float CALIBRATION_LOCATION_DECLINATION = 0.0f;
+  double CALIBRATION_MOUNT_OFFSET = -180.0f;
+  double CALIBRATION_LOCATION_DECLINATION = 0.0f;
   bool GPS_ASSIST_HEADING = true;
 
   bool ENABLE_FAKE_COMPASS = ENABLE_TEST_COMPASS;
 
-  float FORCE_XYZ_OFFSET  = 120.0f;
+  double FORCE_XYZ_CENTER_OFFSET  = 2048.0f;
+  // Because the hard iron matrix calculations has trouble
+  //  with negative values, FORCE_XYZ_CENTER_OFFSET will be 
+  //  added to the RAW XYZ values read from the chip, resulting 
+  //  in a range of 0 to 4096, instead of -2048 to 2048.
 
   bool FORCE_ZERO_Z_AXIS = true;
 
@@ -393,12 +397,12 @@ class PRESERVE_ANGLE_CALC
 {
   private:
   int               COUNT = 0;
-  FLOAT_XYZ_MATRIX  POINT_SUM;
+  DOUBLE_XYZ_MATRIX  POINT_SUM;
 
   public:
   int count();
-  void add(FLOAT_XYZ_MATRIX Add_Point);
-  FLOAT_XYZ_MATRIX average();
+  void add(DOUBLE_XYZ_MATRIX Add_Point);
+  DOUBLE_XYZ_MATRIX average();
   void clear();
 };
 
@@ -410,7 +414,7 @@ class PRESERVE_ANGLE_CALC
  * @param matrix The 5x5 matrix to invert.
  * @return The inverted 5x5 matrix.
  */
-std::vector<std::vector<float>> invert5x5(const std::vector<std::vector<float>>& matrix);
+std::vector<std::vector<double>> invert5x5(const std::vector<std::vector<double>>& matrix);
 
 // -------------------------------------------------------------------------------------
 
@@ -421,15 +425,15 @@ class CAL_LEVEL_3
   void save_history_and_settings(HMC5883L_PROPERTIES &Props);
   // Save history and settings
 
-  bool xyz_equal(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B);
+  bool xyz_equal(DOUBLE_XYZ_MATRIX &A, DOUBLE_XYZ_MATRIX &B);
   // Checks if two FLOAT_XYZ points are equal.
 
-  float dist_xyz(FLOAT_XYZ_MATRIX &A, FLOAT_XYZ_MATRIX &B);
+  double dist_xyz(DOUBLE_XYZ_MATRIX &A, DOUBLE_XYZ_MATRIX &B);
   // Calculates the distance between two points in 3D space.
 
   // Functions to analyze the points in the history.
   void clear_all_flags();
-  bool add_point(FLOAT_XYZ_MATRIX &Raw_XYZ);
+  bool add_point(DOUBLE_XYZ_MATRIX &Raw_XYZ);
 
   PRESERVE_ANGLE_CALC preserved_angle_buffer[360];
   void                preservation_of_data();
@@ -439,8 +443,8 @@ class CAL_LEVEL_3
   int COMPASS_CALIBRATION_HISTORY_SIZE  = 360;
 
   // Constants for noise filtering
-  float CLOSEST_ALLOWED = 3.0f;
-  float NOISE_FILTER_DISTANCE = 40.0f;
+  double CLOSEST_ALLOWED = 3.0f;
+  double NOISE_FILTER_DISTANCE = 40.0f;
 
   // Amount of time that is waited before the compass runs the calibration routines.
   TIMED_IS_READY  CALIBRATION_TIMER;
@@ -457,16 +461,16 @@ class CAL_LEVEL_3
   // These are pre-allocated class members to minimize dynamic memory operations.
 
   // Buffer for filtered magnetic points used in ellipsoid fitting.
-  std::vector<FLOAT_XYZ_MATRIX> active_points;
+  std::vector<DOUBLE_XYZ_MATRIX> active_points;
 
   // Left-hand side matrix (A^T * A) for the least-squares ellipsoid fit.
-  std::vector<std::vector<float>> A_transpose_A;
+  std::vector<std::vector<double>> A_transpose_A;
 
   // Right-hand side vector (A^T * b) for the least-squares ellipsoid fit.
-  std::vector<float> A_transpose_b;
+  std::vector<double> A_transpose_b;
 
   // Temporary buffer for a single point's features during ellipsoid fitting.
-  std::vector<float> features_buffer; 
+  std::vector<double> features_buffer; 
 
   // --- Calibration Core Functions ---
 
@@ -476,9 +480,9 @@ class CAL_LEVEL_3
     const VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT>& history,
     CalibrationParameters& params);
 
-  std::vector<std::vector<float>> A_transpose_A_2D;
-  std::vector<float> A_transpose_b_2D;
-  std::vector<float> features_buffer_2D;
+  std::vector<std::vector<double>> A_transpose_A_2D;
+  std::vector<double> A_transpose_b_2D;
+  std::vector<double> features_buffer_2D;
   // other private members from original code
     
   bool fit_ellipse_and_get_calibration_matrix_2D(
@@ -491,17 +495,17 @@ class CAL_LEVEL_3
   // --- Heading Calculation and Reporting Functions ---
 
   // Calculates calibrated heading from raw magnetic data using current parameters (no tilt compensation).
-  void calculate_calibrated_heading(const FLOAT_XYZ_MATRIX& raw_point, const CalibrationParameters& params);
+  void calculate_calibrated_heading(const DOUBLE_XYZ_MATRIX& raw_point, const CalibrationParameters& params);
 
   // Prepares and formats the calibrated heading for external reporting or display.
-  void set_heading_degrees_report(const FLOAT_XYZ_MATRIX& Raw_XYZ);
+  void set_heading_degrees_report(const DOUBLE_XYZ_MATRIX& Raw_XYZ);
 
   // ---
   
   public:
   string INFORMATION_CALIBRATION = "";
 
-  float TRUE_FAKE_BEARING_FROM_UPPER = 0.0f;
+  double TRUE_FAKE_BEARING_FROM_UPPER = 0.0f;
 
   VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_HISTORY;
   // Stores a history of compass points, using a non-sequential vector deque.
@@ -509,18 +513,27 @@ class CAL_LEVEL_3
   VECTOR_DEQUE_NON_SEQUENTIAL<COMPASS_POINT> COMPASS_CALIBRATION_HISTORY;
   // Stores the Average of the points, by radial, from the COMPASS_HISTORY.
 
-  FLOAT_XYZ_MATRIX COMPASS_CENTER;
+  DOUBLE_XYZ_MATRIX COMPASS_CENTER;
   // The center of the compass, calculated
 
-  float HEADING_DEGREES_REPORT                = 0.0f;
-  float HEADING_DEGREES_REPORT_NON_CALIBRATED = 0.0f;
+  // When
+  DOUBLE_XYZ_MATRIX COMPASS_CENTER_PSUDO;
+  bool COMPASS_CENTER_PSUDO_ACTIVE = false;
+  
+  MIN_MAX_TIME_SLICE  PSUDO_CENTER_X;
+  MIN_MAX_TIME_SLICE  PSUDO_CENTER_Y;
+  MIN_MAX_TIME_SLICE  PSUDO_CENTER_Z;
+  TIMED_IS_READY      PSUDO_CENTER_CLEAR_TIMER;
+
+  double HEADING_DEGREES_REPORT                = 0.0f;
+  double HEADING_DEGREES_REPORT_NON_CALIBRATED = 0.0f;
   // The heading degrees report, calculated based on the compass center and points.
   
   void clear();
   //float variance();
   //bool simple_calibration();
 
-  void calibration_level_3(unsigned long tmeFrame_Time, FLOAT_XYZ_MATRIX &Raw_XYZ, bool Enable_Calibration_Routines);
+  void calibration_level_3(unsigned long tmeFrame_Time, DOUBLE_XYZ_MATRIX &Raw_XYZ, bool Enable_Calibration_Routines);
   // Run Level 2 cal routines.
 };
 
@@ -537,16 +550,16 @@ class HMC5883L
   int CALIBRATED_BEARINGS_SIZE = 31;  // Calculated by: COMMS_COMPASS_HISTORY_TIME_SPAN_MS / 
                                       //                COMMS_COMPASS_POLLING_RATE_MS
 
-  vector<float> CALIBRATED_BEARINGS;  // History of calculated bearings
+  vector<double> CALIBRATED_BEARINGS;  // History of calculated bearings
 
-  float RAW_BEARING             = 0;  // Recent Bearing
-  float BEARING                 = 0;
-  float BEARING_NON_CALIBRATED  = 0;
-  float BEARING_JITTER_MIN      = 0;
-  float BEARING_JITTER_MAX      = 0;
+  double RAW_BEARING             = 0;  // Recent Bearing
+  double BEARING                 = 0;
+  double BEARING_NON_CALIBRATED  = 0;
+  double BEARING_JITTER_MIN      = 0;
+  double BEARING_JITTER_MAX      = 0;
 
   // Calibration
-  void add_point(FLOAT_XYZ_MATRIX Point);
+  void add_point(DOUBLE_XYZ_MATRIX Point);
   bool CALIBRATE = false;
   int CURRENT_CALIBRATION_LEVEL = 0;
 
@@ -560,8 +573,8 @@ class HMC5883L
 
   int CYCLE_CHANGE = 99;  // Internal: for controling start stop and autostart.
 
-  float KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD = 0.0f;
-  float KNOWN_DEVICE_DEGREE_OFFSET = 0.0f;   // If device is mounted offset to  
+  double KNOWN_DEVICE_DEGREE_OFFSET_PRELOAD = 0.0f;
+  double KNOWN_DEVICE_DEGREE_OFFSET = 0.0f;   // If device is mounted offset to  
                                               //  true forward facing, adjust compass 
                                               //  bearing to reflect
 
@@ -579,8 +592,8 @@ class HMC5883L
   bool CONNECTED = false;                     // Set to true if connected.
 
   // Tracks the ongoing error mean. i.e magnetic north deviation
-  TIMED_IS_READY     GPS_ERROR_MEAN_RESET_TIMER;
-  MIN_MAX_TIME_SLICE GPS_ERROR_MEAN;
+  TIMED_IS_READY            GPS_ERROR_MEAN_RESET_TIMER;
+  MIN_MAX_TIME_SLICE_DOUBLE GPS_ERROR_MEAN;
 
   public:
 
@@ -604,13 +617,17 @@ class HMC5883L
   // Internal: Processes most recent received data. 
   // Performs Calibration Routines
 
-  FLOAT_XYZ_MATRIX RAW_XYZ_PREVIOUS_VALUE;
+  DOUBLE_XYZ_MATRIX RAW_XYZ_PREVIOUS_VALUE;
   
-  float TRUE_FAKE_BEARING;
+  double TRUE_FAKE_BEARING;
 
   public:
 
-  FLOAT_XYZ_MATRIX RAW_XYZ;
+  short RAW_DEVICE_X = 0;
+  short RAW_DEVICE_Y = 0;
+  short RAW_DEVICE_Z = 0;
+
+  DOUBLE_XYZ_MATRIX RAW_XYZ;
   // Most Recent XYZ coords from compass.  
   // Useful for drawing on 2d plane.
 
@@ -662,17 +679,17 @@ class HMC5883L
 
   void bearing_known_offset_calibration_to_gps();
   void bearing_known_offset_clear();
-  float bearing_known_offset();
+  double bearing_known_offset();
 
-  float accumulated_gps_to_compass_bearing_error();
+  double accumulated_gps_to_compass_bearing_error();
 
-  float bearing_calibrated();
-  float bearing_non_calibrated();
-  float bearing_non_true_fake();
+  double bearing_calibrated();
+  double bearing_non_calibrated();
+  double bearing_non_true_fake();
   // Direction Facing.
 
-  float bearing_jitter_min();
-  float bearing_jitter_max();
+  double bearing_jitter_min();
+  double bearing_jitter_max();
 };
 
 

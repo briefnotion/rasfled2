@@ -1028,9 +1028,12 @@ void AUTOMOBILE_SCREEN::nova_1(system_data &sdSysData)
     ImGui::Text("          Compass");
     {
       NOVA_2_COMPASS_RAW_XYZ.update_value(sdSysData, 
-                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_XYZ.X) + " " +
-                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_XYZ.Y) + " " +
-                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_XYZ.Z)         );
+                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_DEVICE_X) + " (" +
+                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_XYZ.X) + ") " +
+                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_DEVICE_Y) + " (" +
+                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_XYZ.Y) + ") " +
+                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_DEVICE_Z) + " (" +
+                                          to_string((int)sdSysData.COMMS_COMPASS.RAW_XYZ.Z) + ")"      );
       NOVA_2_COMPASS_RAW_XYZ.draw(draw_list_nova, sdSysData);
 
       NOVA_2_COMPASS_INFORMATION.update_value(sdSysData, sdSysData.COMMS_COMPASS.INFORMATION);

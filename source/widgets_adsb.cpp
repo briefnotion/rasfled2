@@ -1080,6 +1080,14 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
 {
   ImVec2 center = point_position_center(WORKING_AREA);
   
+  ImVec2 compass_center;
+  compass_center.x = sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.X;
+  compass_center.y = sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.Y;
+
+  ImVec2 compass_offset;
+  compass_offset.x = center.x - (compass_center.x / 4.0f);
+  compass_offset.y = center.y - (compass_center.y / 4.0f);
+
   ImVec2 p1;
   ImVec2 p2;
   ImVec2 p3;
@@ -1190,14 +1198,13 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
 
         //if (color != RAS_GREY)
         {
-          c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].POINT.X / 4.0f), 
-                        center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].POINT.Y / 4.0f));
+          c1 = ImVec2(compass_offset.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].POINT.X / 4.0f), 
+                        compass_offset.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_HISTORY[pos].POINT.Y / 4.0f));
           draw_marker_filled(Draw_List, sdSysData, c1, color);
         }
       }
     }
 
-    
     for (size_t pos = 0; pos < sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY.size(); pos++)
     {
       if (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY.FLAGS[pos].HAS_DATA)
@@ -1211,17 +1218,16 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
 
         //if (color != RAS_GREY)
         {
-          c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY[pos].POINT.X / 4.0f), 
-                        center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY[pos].POINT.Y / 4.0f));
+          c1 = ImVec2(compass_offset.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY[pos].POINT.X / 4.0f), 
+                        compass_offset.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CALIBRATION_HISTORY[pos].POINT.Y / 4.0f));
           draw_marker_filled(Draw_List, sdSysData, c1, color);
         }
       }
     }
 
-
     // Draw Center
-    c1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.X / 4.0f), 
-                  center.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.Y / 4.0f));
+    c1 = ImVec2(compass_offset.x + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.X / 4.0f), 
+                  compass_offset.y + (sdSysData.COMMS_COMPASS.LEVEL_3.COMPASS_CENTER.Y / 4.0f));
     draw_marker_filled(Draw_List, sdSysData, c1, RAS_WHITE);
 
     /*
@@ -1245,8 +1251,8 @@ void ADSB_MAP::screen_draw_calibration(ImDrawList *Draw_List, system_data &sdSys
     draw_line(Draw_List, sdSysData, c1, p4, RAS_YELLOW, 2.0f);
     */
 
-    p1 = ImVec2(center.x + (sdSysData.COMMS_COMPASS.RAW_XYZ.X/ 4.0f), 
-              center.y + (sdSysData.COMMS_COMPASS.RAW_XYZ.Y / 4.0f));
+    p1 = ImVec2(compass_offset.x + (sdSysData.COMMS_COMPASS.RAW_XYZ.X/ 4.0f), 
+              compass_offset.y + (sdSysData.COMMS_COMPASS.RAW_XYZ.Y / 4.0f));
 
     draw_line(Draw_List, sdSysData, c1, p1, RAS_WHITE, 4.0f);
   }

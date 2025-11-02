@@ -106,6 +106,16 @@ float wrap_degrees(float angle)
   return result;
 }
 
+double wrap_degrees(double angle)
+{
+  float result = fmod(angle, 360.0f);
+  if (result < 0.0f)
+  {
+    result += 360.0f;
+  }
+  return result;
+}
+
 void rotate_point(ImVec2 Center, float Angle_In_Rads, ImVec2 &Point) 
 {
   float s = sin(Angle_In_Rads);

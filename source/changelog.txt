@@ -1,3 +1,27 @@
+2.349_251101
+  - Modified hmc5883l
+      Added Property of FORCE_XYZ_CENTER_OFFSET = 2048 to 
+      the compass.  
+        // Because the hard iron matrix calculations has trouble
+        //  with negative values, FORCE_XYZ_CENTER_OFFSET will be 
+        //  added to the RAW XYZ values read from the chip, resulting 
+        //  in a range of 0 to 4096, instead of -2048 to 2048.
+      Added "force_xyz_center_offset" item to the JSON settings. 
+        It should create itself and need no changes. 
+      Because the offset of 2048 was too much for the float 
+        matrix to handle with very small calculations, nearly 
+        everything in the hmc588l system was converted to 
+        double precision.
+      Added a few changes to find a psudo center, if the 
+        hard iron calculations were not made and a true 
+        center wasnt found, allowing initial calibration to 
+        be much quicker. 
+      Changed Nova to show Raw XYZ from device and with offsets. 
+      Compass calibration screen on map will now position calibration 
+        points with precieved center of compass to center of 
+        screen.
+      Modified Cali Clear routines, but still things linger. 
+
 2.348_251031
   - The dreaded hmc5883l has reared its ugly head again. I 
       really want to be done with this. Backstory, either 

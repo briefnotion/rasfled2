@@ -934,6 +934,13 @@ public:
     COUNT = 0;
   }
 
+  void clear(int New_Capacity)
+  {
+    DATA.clear();
+    FLAGS.clear();
+    set_size(New_Capacity);
+  }
+
   /**
    * @brief Returns the number of active (HAS_DATA) elements in the deque.
    * @return The count of active elements.

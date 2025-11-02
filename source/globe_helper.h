@@ -55,6 +55,7 @@ float signed_angular_error(float Compass_Bearing, float GPS_Bearing);
 //  bearings—ensuring the result is in the range of –180° to +180°.
 
 float wrap_degrees(float angle);
+double wrap_degrees(double angle);
 // Ensures that any input angle is converted into the standard compass range of 
 //  0° to less than 360°, regardless of whether it's positive, 
 //  negative, or beyond a full rotation.
