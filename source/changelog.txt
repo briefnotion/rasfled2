@@ -1,3 +1,6 @@
+2.350_251104
+  - Put a little work into the terminal.
+
 2.349_251101
   - Modified hmc5883l
       Added Property of FORCE_XYZ_CENTER_OFFSET = 2048 to 

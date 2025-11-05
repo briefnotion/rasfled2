@@ -12,6 +12,8 @@
 #ifndef TERMINAL_H
 #define TTERMINAL_H
 
+#include <iostream>
+
 #include <string>
 #include <vector>
 #include <mutex>
@@ -43,14 +45,26 @@ class TERMINAL
   std::string strip_ansi(const std::string &input);
 
   public:
+
+  // Constants for screen dimensions
+  static const int ROWS = 19;
+  static const int COLS = 80;
+
+  // Buffer containing the terminal screen
+  char SCREEN[ROWS][COLS];
+  int CURRENT_ROW;
+  int CURRENT_COL;
+
   pid_t PID;
   std::thread T;
 
   int MASTER_FD = -1;
-  std::vector<std::string> TERM_BUF;
+  
   std::mutex BUF_MUTEX;
 
   void start_shell();
+  void scroll_up();
+  void process_output(const std::string& text);
   void reader_thread();
   void create();
   void send_command(const std::string& cmd);
