@@ -1245,7 +1245,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             ImGui::SameLine();
 
             // Only show terminal button if terminal is active
-            if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6)
+            //if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6)
             {
               if (BTC_TAB_TERMINAL.button_toggle_color(sdSysData, "TERMINAL", "TERMINAL", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
               {

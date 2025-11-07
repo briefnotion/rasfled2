@@ -45,6 +45,9 @@ class TERMINAL_SCREEN
   
   char input[256];
 
+  TIMED_IS_READY  CURSOR_BLINK;
+  bool            CURSOR_ON = false;
+  
   public:  
   
   void display(system_data &sdSysData);

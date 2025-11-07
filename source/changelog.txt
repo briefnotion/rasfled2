@@ -1,3 +1,24 @@
+2.351_251105
+  - Put more work into the terminal.
+    At the time, its very limited, but, it does have some 
+      vt terminal functionality.  There is limited methods
+      that have not been implemented and/or bugged.
+
+      What it can't do:
+        It it strictly black and white plain text.
+        It cannot handle text attribs, such as bold, 
+          italic, blink, double sized, highlight, color 
+          and so on.
+        It cannot accept mouse input of any kind.
+      
+      What it can do:
+        Run a bash shell and call other programs.
+        Run "htop" (This was my min goal)
+        Run "micro" text editor with some glitches.
+          Not nano, things are not working right.
+        Probabably other things as well, but thats all 
+          I tested. 
+
 2.350_251104
   - Put a little work into the terminal.
 
