@@ -214,7 +214,7 @@ void ALERT_WIDGET::draw(system_data &sdSysData, ALERT_SYSTEM_2 &Alerts_List)
         ImGui::PushStyleColor(ImGuiCol_TitleBgActive, ImU32(BACKGROUND_COLOR));
         ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
 
-        title +=  "(" + to_string(alert_num) + ") : " + Alerts_List.gen_alert_title(alert_num);
+        title +=  std::string("(") + to_string(alert_num) + std::string(") : ") + Alerts_List.gen_alert_title(alert_num);
         
         if (ImGui::Begin(title.c_str(), nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {

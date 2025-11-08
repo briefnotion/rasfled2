@@ -31,24 +31,30 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
     // Use the public access method from the class (or BUF_MUTEX if you made it public)
     std::lock_guard<std::mutex> lock(sdSysData.TERMINAL_THREAD.BUF_MUTEX);
 
+    ImGui::PushFont(sdSysData.PANEL_CONTROL.FONT_CONSOLE);
     for (int row = 0; row < TERMINAL::ROWS; row++)
     {
       // 1. Construct the string directly from the char array slice.
       // This is much faster as it avoids the concatenation loop.
-      std::string line(sdSysData.TERMINAL_THREAD.SCREEN[row], TERMINAL::COLS);
+      //std::string line(sdSysData.TERMINAL_THREAD.SCREEN[row], TERMINAL::COLS);
+
+      std::string line = sdSysData.TERMINAL_THREAD.get_line_text(row);
 
       if (CURSOR_ON)
       {
         if (row == sdSysData.TERMINAL_THREAD.CURRENT_ROW)
         {
           // limited cursor selection.
-          line[sdSysData.TERMINAL_THREAD.CURRENT_COL] = '_';
+          //line[sdSysData.TERMINAL_THREAD.CURRENT_COL] = '_';  // This works
 
           //line[sdSysData.TERMINAL_THREAD.CURRENT_COL] = '■'; // U+25A0
 
           //line[sdSysData.TERMINAL_THREAD.CURRENT_COL] = static_cast<char>(219); // ASCII full block █
 
-          //line.replace(sdSysData.TERMINAL_THREAD.CURRENT_COL, 1, u8"■");
+          // These both work.
+          line.replace(sdSysData.TERMINAL_THREAD.CURRENT_COL, 1, std::string(reinterpret_cast<const char*>("\xE2\x96\x88")));
+          //  or
+          //line.replace(sdSysData.TERMINAL_THREAD.CURRENT_COL, 1, std::string(reinterpret_cast<const char*>(u8"█")));
 
           //line[sdSysData.TERMINAL_THREAD.CURRENT_COL] = static_cast<char>(164); // ¤
           //line[sdSysData.TERMINAL_THREAD.CURRENT_COL] = '¤';
@@ -56,7 +62,13 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
       }
 
       ImGui::TextUnformatted(line.c_str());
+      
+      // Font test:
+      //ImGui::TextUnformatted("- (─, │, ┌, ┐, etc.), block fills (█, ▓, ░");
+      //ImGui::TextUnformatted("Symbols: [ ] { } █ ▓ ░ ┌ ┐ └ ┘ ─ │");
+
     }
+    ImGui::PopFont();
   }
   ImGui::EndChild();
 
@@ -116,24 +128,24 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
     else if (ImGui::IsKeyPressed(ImGuiKey_Enter, false))
     {
       // Send Carriage Return (\r), standard input for execution
-      command_to_send = "\r";
+      command_to_send = std::string("\r");
     }
     // Backspace
     else if (ImGui::IsKeyPressed(ImGuiKey_Backspace, false))
     {
       // Send ASCII 127 (DEL), which acts as a backspace in a shell
-      command_to_send = "\x7F";
+      command_to_send = std::string("\x7F");
     }
     // Delete (sends Ctrl+D/EOF, which is common behavior)
     else if (ImGui::IsKeyPressed(ImGuiKey_Delete, false))
     {
       // Send Ctrl+D (EOF/Delete)
-      command_to_send = "\x04";
+      command_to_send = std::string("\x04");
     }
     // ESCAPE KEY (Sends single byte \x1B)
     else if (ImGui::IsKeyPressed(ImGuiKey_Escape, false))
     {
-      command_to_send = "\x1B";
+      command_to_send = std::string("\x1B");
     }
 
     // --- Navigation/Editing Keys (CSI P ~) (Prioritized 3) ---

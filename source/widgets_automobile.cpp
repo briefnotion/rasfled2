@@ -358,7 +358,7 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
     // draw list
     ImDrawList* draw_list_large_number = ImGui::GetWindowDrawList();
 
-    ImGuiIO &io = ImGui::GetIO();
+    //ImGuiIO &io = ImGui::GetIO();
 
     MARKER.draw(draw_list_large_number, sdSysData, start_position, DISPLAY_SIZE, true);
 
@@ -383,11 +383,11 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
     // Draw Large Display
     if (PROPS.VERY_LARGE)
     {
-      ImGui::PushFont(io.Fonts->Fonts.Data[3]);
+      ImGui::PushFont(sdSysData.PANEL_CONTROL.FONT_100);
     }
     else
     {
-      ImGui::PushFont(io.Fonts->Fonts.Data[1]);
+      ImGui::PushFont(sdSysData.PANEL_CONTROL.FONT_57);
     }
 
     if (CHANGED)
@@ -460,7 +460,7 @@ bool T_LARGE_NUMBER_DISPLAY::draw(system_data &sdSysData, bool Draw, float Y_Hei
     {
       if (PROPS.VERY_LARGE)
       {
-        ImGui::PushFont(io.Fonts->Fonts.Data[1]);
+        ImGui::PushFont(sdSysData.PANEL_CONTROL.FONT_57);
       }
 
       if (ACTIVE_WITHIN == true)

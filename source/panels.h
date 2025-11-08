@@ -12,6 +12,8 @@
 #ifndef PANELS_H
 #define PANELS_H
 
+#include "../../imgui/imgui.h"
+
 #include "fled_time.h"
 #include "stringthings.h"
 #include "screen4_helper.h"
@@ -35,8 +37,6 @@ class SCREEN4_PANELS
   //  5 - Dot Dot Dot
   //  6 - Terminal
 
-
-
   // Automobile
   bool AUTOMOBILE_DISPLAY_NOVA = false;
   bool AUTOMOBILE_DISPLAY_NOVA_SCREEN = true;
@@ -50,7 +50,6 @@ class SCREEN4_PANELS
   // 3 - Engine
   // 4 - Other
 
-
   int AUTOMOBILE_DISPLAY_MID_TOP = 0;
   // 0 - Speed slow degen
   // 1 - Power Curve
@@ -60,8 +59,6 @@ class SCREEN4_PANELS
   // 1 - Unused
   // 2 - Temp Graph
   // 3 - Power Graph
-
-
 
   // ADSB
   bool ADSB_DISPLAY_TABLE = false;
@@ -144,6 +141,13 @@ class SCREEN4_PANEL_CONTROL
   // 10     = reboot
   // 20     = shutdown
   // >= 100 = main loop exit
+
+  // Fonts
+  ImFont* FONT_18;
+  ImFont* FONT_57;
+  ImFont* FONT_28;
+  ImFont* FONT_100;
+  ImFont* FONT_CONSOLE;
 
   // Colors
   COLOR_COMBOS    COLOR_SELECT;     // All Working Colors

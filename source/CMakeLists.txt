@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.18.0)
+set(CMAKE_CXX_STANDARD 20)
 
 set(OpenGL_GL_PREFERENCE GLVND)
 set(CMAKE_POLICY_DEFAULT_CMP0072 NEW)
@@ -109,7 +110,7 @@ target_link_libraries(rasfled
 
 # Strict
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
-  target_compile_options(rasfled PRIVATE -Wall -Wextra -Werror)
+  target_compile_options(rasfled PRIVATE -Wall -Wextra -Werror -Wno-volatile)
 elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  target_compile_options(rasfled PRIVATE -Weverything -Werror)
+  target_compile_options(rasfled PRIVATE -Weverything -Werror -Wno-volatile)
 endif()

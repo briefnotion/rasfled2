@@ -1,3 +1,28 @@
+2.352_251107
+  - Fonts are now being called by named variable in 
+      PANEL_CONTROL.
+  - Put more work into the terminal.
+      The font size of the terminal was reduced from bold 
+        and reduced in size.  The terminal screen is 
+        now 118 columns and 24 rows. Minumum for btop.
+      Added line "set(CMAKE_CXX_STANDARD 20)" to the 
+        CMakeLists.txt file to support unicode strings.
+      Converted the schreen from char array to unicode 
+        array to support attribibutes, and color. They 
+        are all still unprintable, but makes managing 
+        debugging the escape sequences simpler.
+      Some special unicode characters are now printable. 
+        Including Boxes and frames. 
+      Serious errors still exist with cursor placement 
+        and unhandled and mismanaged escape sequences. 
+        The program btop looks like a mess on the screen. 
+      Extra font characters are planned in the future. 
+      At this time, the code is not fit for reading. 
+        It is full of debug code and horribly formated. 
+        Truely, in a scratch phase. However, it runs 
+        better than what I had yesterday, so I'm sending 
+        it to github and testing it tomorrow.
+        
 2.351_251105
   - Put more work into the terminal.
     At the time, its very limited, but, it does have some 

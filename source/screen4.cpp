@@ -345,16 +345,28 @@ int SCREEN4::create(system_data &sdSysData)
     const char* glsl_version = "#version 300 es"; // For OpenGL ES 3.0+
     ImGui_ImplOpenGL3_Init(glsl_version);
 
+    ImFontConfig config;
+    config.MergeMode = false; // Set to true if merging with another font
+    static const ImWchar glyph_ranges[] = 
+    {
+      0x0020, 0x00FF,       // Basic Latin
+      0x2500, 0x257F,       // Box Drawing
+      0x2580, 0x259F,       // Block Elements
+      0x2190, 0x21FF,       // Arrows
+      0,
+    };
+
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 100.0f);
 
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 57.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 28.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
-    io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 100.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
-    // Will track as "io.Fonts->Fonts.Data[1]" manually, for now.
+    sdSysData.PANEL_CONTROL.FONT_18 =       io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
+    sdSysData.PANEL_CONTROL.FONT_57 =       io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 57.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
+    sdSysData.PANEL_CONTROL.FONT_28 =       io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 28.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
+    sdSysData.PANEL_CONTROL.FONT_100 =      io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 100.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
+
+    sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
 
     // Start the Dear ImGui frame
     //ImGui_ImplOpenGL2_NewFrame();
@@ -701,7 +713,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           draw_list->AddLine(line_start_1, line_end_1, sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_RED).STANDARD, 50.0f);
           draw_list->AddLine(line_start_2, line_end_2, sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_RED).STANDARD, 50.0f);
 
-          ImGui::PushFont(io.Fonts->Fonts.Data[2]);
+          ImGui::PushFont(sdSysData.PANEL_CONTROL.FONT_28);
           ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.pure_color(RAS_RED).STANDARD));
 
           ImGui::SetCursorScreenPos(ImVec2(working_area.x + 50.0f, working_area.y + 150.0f));
@@ -760,7 +772,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               }
 
               ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_WHITE)));
-              ImGui::PushFont(io.Fonts->Fonts.Data[2]);
+              ImGui::PushFont(sdSysData.PANEL_CONTROL.FONT_28);
               ImGui::Text("CMD:");
 
               ImGui::SameLine();
@@ -1261,7 +1273,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               ImDrawList* draw_list_info_bar = ImGui::GetWindowDrawList();
               
               ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREEN)));
-              ImGui::PushFont(io.Fonts->Fonts.Data[2]);
+              ImGui::PushFont(sdSysData.PANEL_CONTROL.FONT_28);
 
               // Display the Autononomous State or Street Legal Mode
               if (sdSysData.PANEL_CONTROL.autonomous_state() == 2)
