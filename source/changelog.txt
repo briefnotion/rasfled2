@@ -1,3 +1,8 @@
+2.353_251108
+  - Improved terminal screen. Although, still not 
+      reliable.
+  - Terminal screen can now print reverse text.
+
 2.352_251107
   - Fonts are now being called by named variable in 
       PANEL_CONTROL.

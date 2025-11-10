@@ -345,16 +345,7 @@ int SCREEN4::create(system_data &sdSysData)
     const char* glsl_version = "#version 300 es"; // For OpenGL ES 3.0+
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    ImFontConfig config;
-    config.MergeMode = false; // Set to true if merging with another font
-    static const ImWchar glyph_ranges[] = 
-    {
-      0x0020, 0x00FF,       // Basic Latin
-      0x2500, 0x257F,       // Box Drawing
-      0x2580, 0x259F,       // Block Elements
-      0x2190, 0x21FF,       // Arrows
-      0,
-    };
+    
 
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
@@ -366,7 +357,27 @@ int SCREEN4::create(system_data &sdSysData)
     sdSysData.PANEL_CONTROL.FONT_28 =       io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 28.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
     sdSysData.PANEL_CONTROL.FONT_100 =      io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 100.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
 
-    sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
+    // Console Font
+    
+    ImFontConfig config;
+
+    static const ImWchar glyph_ranges[] = 
+    {
+        0x0020, 0x00FF,       // Basic Latin
+        0x2190, 0x21FF,       // Arrows
+        0x2500, 0x257F,       // Box Drawing
+        0x2580, 0x259F,       // Block Elements
+        0x2800, 0x28FF,       // Braille Patterns (U+2800 to U+28FF)
+        0,
+    };
+
+
+    sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
+    //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
+    //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/unifont/unifont.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
+    //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
+
+
 
     // Start the Dear ImGui frame
     //ImGui_ImplOpenGL2_NewFrame();
