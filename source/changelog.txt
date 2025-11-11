@@ -1,3 +1,13 @@
+2.354_251110
+  - VT terminal is improved again and working much 
+      better, but still needs improvements.
+      "btop" is ledgable now.
+      "vttest" still fails horribly. Primarily, a 
+        segmentation fault on vt100 test. Specifically 
+        on 11th screen that says "Test of 'Delete 
+        Character'. The top line should be 'AB'. 
+        Push <RETURN>"
+
 2.353_251108
   - Improved terminal screen. Although, still not 
       reliable.

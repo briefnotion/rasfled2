@@ -730,9 +730,9 @@ void CAMERA::init(stringstream &Print_Stream)
 {
   // Initial Camera Setup
   // disable continuous autofocus
-  set_camera_control(PROPS.CTRL_FOCUS_AUTO, 0);
+  // set_camera_control(PROPS.CTRL_FOCUS_AUTO, 0);
   // set manual focus value (depends on your camera’s supported range)
-  set_camera_control(PROPS.CTRL_FOCUS_ABSOLUTE, 0);
+  // set_camera_control(PROPS.CTRL_FOCUS_ABSOLUTE, 0);
 
   // Verify settings
   Print_Stream << "               Auto Focus: " << get_camera_control_value(PROPS.CTRL_FOCUS_AUTO) << endl;

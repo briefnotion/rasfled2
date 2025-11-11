@@ -27,6 +27,43 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
+// ANSI escape codes start with 0x1B (ESC).
+const char ESC = 0x1B;
+// Control Sequence Introducer (CSI) is ESC followed by [
+const std::string CSI = "\033[";
+
+/**
+ * @brief Tracks the state of ANSI escape sequence parsing in a buffer.
+ * * This is necessary to ensure we only process a buffer chunk that does not
+ * end in the middle of a control sequence (e.g., ESC[32;1).
+ */
+class AnsiStateTracker 
+{
+public:
+  enum State 
+  {
+    NORMAL,           // Not in an escape sequence.
+    IN_ESC_SEQUENCE,  // Received ESC (0x1B), expecting [ or other code.
+    IN_CSI_SEQUENCE   // Received ESC[, expecting parameters and a final character.
+  };
+
+private:
+  State current_state_ = NORMAL;
+
+public:
+  AnsiStateTracker() = default;
+
+  bool parse_and_check_completion(const std::string& data);
+  
+  // Getter for debugging
+  State get_state() const 
+  {
+    return current_state_;
+  }
+};
+
+// ---------------------------------------------------------------------------------------
+
 // --- ASSUMED STRUCTS/ENUMS FROM TERMINAL.H (Necessary for SGR logic) ---
 enum Color 
 {
@@ -134,8 +171,6 @@ class TERMINAL
   void clear_row_range_full_line(int row);
   void scroll_up(int count);
   void scroll_down(int count);
-  void insert_line(int count);
-  void delete_line(int count);
 
   bool process_csi_cursor_movement(char final_char, const std::vector<int>& params);
   bool process_csi_erase_and_edit(char final_char, const std::vector<int>& params);

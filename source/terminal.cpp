@@ -16,6 +16,59 @@
 
 // ---------------------------------------------------------------------------------------
 
+/**
+ * @brief Parses a chunk of data and updates the internal state.
+ * * @param data The new chunk of data to parse.
+ * @return true if the buffer *ends* in a NORMAL state (i.e., no
+ * unterminated escape sequence).
+ */
+bool AnsiStateTracker::parse_and_check_completion(const std::string& data) 
+{
+  for (char c : data) 
+  {
+    switch (current_state_) 
+    {
+      case NORMAL:
+        if (c == ESC) 
+        {
+          current_state_ = IN_ESC_SEQUENCE;
+        }
+        break;
+      
+      case IN_ESC_SEQUENCE:
+        if (c == '[') 
+        {
+          current_state_ = IN_CSI_SEQUENCE;
+        } 
+        else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) 
+        {
+          // Single-character ESC sequences (like ESC c for reset)
+          current_state_ = NORMAL; 
+        } 
+        else 
+        {
+          // Unrecognized or complex ESC sequence starter, reset or stay
+          // For simplicity, we assume any final byte ends it if not '['.
+          // A more robust implementation handles intermediate bytes 0x30-0x3F.
+          current_state_ = NORMAL;
+        }
+        break;
+    
+      case IN_CSI_SEQUENCE:
+        // CSI sequences end when a character from 0x40 to 0x7E is received.
+        if (c >= '@' && c <= '~') 
+        {
+          current_state_ = NORMAL;
+        }
+        // Intermediate bytes (0x30-0x3F) are consumed but do not change state.
+        break;
+    }
+  }
+  return current_state_ == NORMAL;
+}
+
+// ---------------------------------------------------------------------------------------
+
 // ---------------------------------------------------------------------
 // --- UTF-8 DECODING IMPLEMENTATION (ROBUST, consumes 1 byte on early error) ---
 // ---------------------------------------------------------------------
@@ -134,29 +187,41 @@ Cell CURRENT_ATTRS = DEFAULT_CELL;
 // Spawn shell inside PTY
 void TERMINAL::start_shell() 
 {
-	// Define the terminal window size structure based on our assumed ROWS and COLS
-	struct winsize ws;
-	ws.ws_row = ROWS; 
-	ws.ws_col = COLS;
-	ws.ws_xpixel = 0;
-	ws.ws_ypixel = 0;
+  // Define the terminal window size structure based on our assumed ROWS and COLS
+  struct winsize ws;
+  ws.ws_row = ROWS; 
+  ws.ws_col = COLS;
+  ws.ws_xpixel = 0;
+  ws.ws_ypixel = 0;
 
-	// Use forkpty, passing the winsize structure pointer as the fourth argument.
-	PID = forkpty(&MASTER_FD, nullptr, nullptr, &ws); 
+  // Use forkpty, passing the winsize structure pointer as the fourth argument.
+  // MASTER_FD is populated with the master side FD (for the parent/emulator).
+  PID = forkpty(&MASTER_FD, nullptr, nullptr, &ws); 
 
-	if (PID == 0) 
-	{
-		// Child process: Execute the shell
-		execl("/bin/bash", "bash", nullptr);
-	} 
-	else if (PID > 0) 
-	{
-		// Parent process: Immediately explicitly set the terminal size again 
-		// using ioctl. This is a robust practice to ensure the PTY driver 
-		// has the correct size before the shell starts executing and running 
-		// programs like btop which rely on TIOCGWINSZ.
-		ioctl(MASTER_FD, TIOCSWINSZ, &ws);
-	}
+  if (PID == 0) 
+  {
+    // ------------------------------------------------------------------
+    // CHILD PROCESS: CRITICAL FIX FOR GLIBC/STDIO HANDLE ERROR
+    // The child process inherits a copy of the MASTER_FD. 
+    // It must close this descriptor before exec() to prevent I/O conflicts.
+    if (MASTER_FD > 0) {
+        close(MASTER_FD);
+    }
+    // ------------------------------------------------------------------
+    
+    // Child process: Execute the shell
+    execl("/bin/bash", "bash", nullptr);
+    
+    // This line should only be reached if execl fails
+    perror("execl failed");
+    exit(1); 
+  } 
+  else if (PID > 0) 
+  {
+    // Parent process: Immediately explicitly set the terminal size again 
+    // using ioctl. (This is correct in the parent.)
+    ioctl(MASTER_FD, TIOCSWINSZ, &ws);
+  }
 }
 
 /**
@@ -238,65 +303,6 @@ void TERMINAL::scroll_down(int count)
   for (int r = SCROLL_TOP; r < SCROLL_TOP + count; ++r) 
   {
     this->clear_row_range_full_line(r);
-  }
-}
-
-/**
- * @brief Inserts 'count' blank lines starting at CURRENT_ROW, shifting existing lines down.
- * Insertion only happens within the scrolling region [SCROLL_TOP, SCROLL_BOTTOM].
- * @param count The number of lines to insert.
- */
-void TERMINAL::insert_line(int count)
-{
-  if (count <= 0 || CURRENT_ROW < SCROLL_TOP || CURRENT_ROW > SCROLL_BOTTOM) 
-  {
-    return;
-  }
-
-  int scroll_height = SCROLL_BOTTOM - SCROLL_TOP + 1;
-  int actual_shift = std::min(count, scroll_height);
-  int shift_start = CURRENT_ROW;
-
-  // 1. Shift lines down, starting from the bottom of the scroll region
-  // Stop shifting when we reach the insertion point (shift_start)
-  for (int i = SCROLL_BOTTOM; i >= shift_start + actual_shift; --i) 
-  {
-    // Row i - actual_shift moves to row i
-    std::copy(SCREEN[i - actual_shift], SCREEN[i - actual_shift] + COLS, SCREEN[i]);
-  }
-  
-  // 2. Clear the newly inserted lines
-  for (int i = shift_start; i < shift_start + actual_shift; ++i) 
-  {
-    std::fill(SCREEN[i], SCREEN[i] + COLS, DEFAULT_CELL);
-  }
-}
-
-/**
- * @brief Deletes 'count' lines starting at CURRENT_ROW, shifting lines up to fill the gap.
- * Deletion only happens within the scrolling region [SCROLL_TOP, SCROLL_BOTTOM].
- * @param count The number of lines to delete.
- */
-void TERMINAL::delete_line(int count)
-{
-  if (count <= 0 || CURRENT_ROW < SCROLL_TOP || CURRENT_ROW > SCROLL_BOTTOM) return;
-  
-  int scroll_height = SCROLL_BOTTOM - SCROLL_TOP + 1;
-  // Calculate the maximum number of lines we can shift up from the current cursor position to the scroll bottom
-  int actual_shift = std::min(count, scroll_height - (CURRENT_ROW - SCROLL_TOP));
-  
-  // 1. Shift lines up
-  // Move rows from CURRENT_ROW + actual_shift up to CURRENT_ROW
-  for (int i = CURRENT_ROW; i <= SCROLL_BOTTOM - actual_shift; ++i) 
-  {
-    // Row i + actual_shift moves to row i
-    std::copy(SCREEN[i + actual_shift], SCREEN[i + actual_shift] + COLS, SCREEN[i]);
-  }
-  
-  // 2. Clear the newly exposed lines at the bottom of the scrolling region
-  for (int i = SCROLL_BOTTOM - actual_shift + 1; i <= SCROLL_BOTTOM; ++i) 
-  {
-    std::fill(SCREEN[i], SCREEN[i] + COLS, DEFAULT_CELL);
   }
 }
 
@@ -433,17 +439,26 @@ bool TERMINAL::process_csi_erase_and_edit(char final_char, const std::vector<int
       int count = param;
       if (CURRENT_COL < COLS) 
       {
-        // 1. Shift characters right to make space.
-        // The shift stops at COLS - 1 (the last valid column).
-        int shift_limit = std::min(COLS, CURRENT_COL + count);
+        // Source Start (A): Where characters begin (CURRENT_COL)
+        auto src_start = SCREEN[CURRENT_ROW] + CURRENT_COL;
         
-        // Move characters from COLS - 1 down to shift_limit to their new location (right by `count`)
-        std::copy_backward(SCREEN[CURRENT_ROW] + CURRENT_COL, // Start of source
-                            SCREEN[CURRENT_ROW] + COLS - count, // End of source (one block before the end)
-                            SCREEN[CURRENT_ROW] + COLS); // Destination end (one past the last element)
+        // Source End (B): The character before the ones that fall off the end.
+        // Fix: Use std::min to ensure B >= A (Source End >= Source Start), preventing the invalid range.
+        auto src_end = std::min(SCREEN[CURRENT_ROW] + COLS, SCREEN[CURRENT_ROW] + COLS - count);
+        
+        // Destination End (C): One past the last column.
+        auto dst_end = SCREEN[CURRENT_ROW] + COLS;
 
+        // 1. Shift characters right to make space.
+        // This copy is only executed if src_start < src_end (i.e., if there is room to shift).
+        if (src_start < src_end) 
+        {
+            std::copy_backward(src_start, src_end, dst_end); 
+        }
+        
         // 2. Fill the newly inserted space with DEFAULT_CELL
-        clear_row_range(CURRENT_COL, shift_limit);
+        int fill_limit = std::min(COLS, CURRENT_COL + count);
+        clear_row_range(CURRENT_COL, fill_limit);
       }
       break;
     }
@@ -932,7 +947,7 @@ void TERMINAL::process_output(const std::string& raw_text)
           }
           else 
           {
-            // Abort: Found an unexpected character. Reset pointer to ESC.
+            // Abort: Found an unexpected character. Reset pointer to ESC to ensure it is consumed as an unhandled ESC.
             i = csi_start_i; 
             goto continue_next_char; 
           }
@@ -970,9 +985,9 @@ void TERMINAL::process_output(const std::string& raw_text)
             goto continue_next_char;
           }
         } 
+        
         // If the sequence was aborted or incomplete, we fall through.
-        // i is left pointing at the character that broke the sequence (to be processed in the main loop).
-        goto continue_next_char; // Sequence was handled or aborted, continue main loop iteration.
+        goto continue_next_char; 
       }
       
       // --- Generic Escape Sequence Handler (Non-CSI) ---
@@ -1183,7 +1198,8 @@ void TERMINAL::process_output(const std::string& raw_text)
     // --- CONTROL CHARACTER HANDLING ---
     else if (c == '\0') 
     { 
-      i++; goto continue_next_char; 
+      i++; 
+      goto continue_next_char; 
     } // NUL (Ignore)
     else if (c == '\r') 
     { 
@@ -1197,7 +1213,8 @@ void TERMINAL::process_output(const std::string& raw_text)
         { 
           CURRENT_COL--; 
         }
-        i++; goto continue_next_char;
+        i++; 
+      goto continue_next_char; 
     }
     else if (c == '\t') 
     { 
@@ -1205,7 +1222,8 @@ void TERMINAL::process_output(const std::string& raw_text)
         // Move to next 8-column tab stop (or end of line)
         int new_col = (CURRENT_COL / 8 + 1) * 8;
         CURRENT_COL = (new_col < COLS) ? new_col : COLS - 1; 
-        i++; goto continue_next_char;
+        i++; 
+      goto continue_next_char; 
     }
     else if (c == '\n' || c == '\v' || c == '\f') 
     { 
@@ -1213,10 +1231,9 @@ void TERMINAL::process_output(const std::string& raw_text)
         CURRENT_COL = 0; 
         CURRENT_ROW++; 
         i++; 
+      goto continue_next_char; // <-- CRITICAL FIX: Ensures it skips printable char logic
     } 
-    
-    // --- UTF-8 DECODING AND PRINTABLE CHARACTER HANDLING ---
-    else 
+    else // --- UTF-8 DECODING AND PRINTABLE CHARACTER HANDLING (The only place left) ---
     {
       // 1. Decode the next Unicode character (code point)
       size_t start_i = i;
@@ -1264,7 +1281,7 @@ void TERMINAL::process_output(const std::string& raw_text)
         SCREEN[CURRENT_ROW][CURRENT_COL].is_reverse = CURRENT_ATTRS.is_reverse;
       }
       
-      // Advance cursor
+      // 5. Advance cursor
       if (CURRENT_COL < COLS - 1 || AUTO_WRAP_MODE) 
       {
         CURRENT_COL++;
@@ -1482,25 +1499,70 @@ std::string TERMINAL::get_line_text_reverse(int row) const
   return result;
 }
 
-// Read output from shell continuously
+/**
+ * @brief Continuously reads output from the shell's master file descriptor.
+ * * Buffers data until a complete block, free of unterminated ANSI escape sequences,
+ * is received. This prevents display corruption from partial escape codes.
+ */
 void TERMINAL::reader_thread()
 {
-	char buf[512];
-	while (MASTER_FD > 0) // Check if the master FD is valid
-	{
-		ssize_t n = read(MASTER_FD, buf, sizeof(buf) - 1);
-		if (n <= 0) 
-    {
-      break; // Shell closed or error
-    }
-		
-		// 1. Pass RAW output to process_output, as it now handles escape sequences.
-		std::string raw_output(buf, n); // Use 'n' to ensure we only capture valid bytes
+  std::string raw_text = "";
+  AnsiStateTracker state_tracker; // Tracks if the current buffer ends mid-escape sequence
 
-		// 2. Lock the shared resource and process the output
-		std::lock_guard<std::mutex> lock(BUF_MUTEX);
-		process_output(raw_output);
-	}
+  char buf[4096];
+  
+  // Loop until the master file descriptor becomes invalid or an error occurs
+  while (MASTER_FD > 0)
+  {
+    // Try to read up to 511 bytes (leaving 1 for null terminator, although not strictly needed here)
+    ssize_t n = read(MASTER_FD, buf, sizeof(buf) - 1);
+    
+    if (n < 0) 
+    {
+      // Error reading (e.g., ECONNRESET, EIO). Check errno for details.
+      // A non-blocking read returning EAGAIN is not necessarily an error if handled.
+      if (errno != EINTR) { 
+          // Handle read error appropriately (e.g., log and break)
+          //std::cerr << "Read error: " << (errno) << std::endl;
+      }
+      break; 
+    }
+    
+    if (n == 0) 
+    {
+      // End-of-file (shell process exited)
+      break;
+    }
+    
+    // Convert read bytes to a C++ string
+    std::string raw_output(buf, n); 
+    raw_text += raw_output;
+
+    // Use the state tracker to determine if the *entire* accumulated buffer 
+    // (raw_output) is currently in a NORMAL state (i.e., no incomplete escape sequence).
+    // The tracker maintains its internal state across calls.
+    bool is_complete = state_tracker.parse_and_check_completion(raw_output);
+
+    if (is_complete)
+    {
+      // The shell has sent a complete chunk of data (likely a prompt or command output)
+      // that doesn't end mid-sequence. It is safe to process.
+      std::lock_guard<std::mutex> lock(BUF_MUTEX);
+      process_output(raw_text);
+      
+      // Clear the buffer after successful processing
+      raw_text = "";
+    }
+  }
+  
+  // After the loop breaks, if there's any remaining text, process it as a final chunk.
+  if (!raw_text.empty()) 
+  {
+    std::lock_guard<std::mutex> lock(BUF_MUTEX);
+    process_output(raw_text);
+  }
+
+  std::cerr << "TERMINAL reader_thread finished." << std::endl;
 }
 
 void TERMINAL::create()
