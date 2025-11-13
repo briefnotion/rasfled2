@@ -1358,29 +1358,70 @@ std::mutex& TERMINAL::get_mutex()
 // --- NEW: TEXT EXTRACTION METHOD ---
 // ---------------------------------------------------------------------
 
-/**
- * @brief Extracts the raw character text from a screen row and encodes it to UTF-8.
- * * @param row The 0-based row index to extract.
- * @return std::string UTF-8 encoded text content of the line.
- */
-std::string TERMINAL::get_line_text(int row) const
+void TERMINAL::get_line_text(int row, bool cursor_on, 
+                              string &line, 
+                              string &line_reverse, 
+                              string &line_reverse_map)
 {
+  line = "";
+  line_reverse = "";
+  line_reverse_map = "";
+
   if (row < 0 || row >= ROWS) 
   {
-    return ""; // Return empty string for out-of-bounds row
+    return; // Return empty string for out-of-bounds row
   }
 
-  std::string result;
-  result.reserve(COLS); // Optimization: Reserve capacity based on maximum ASCII size
+  line.reserve(COLS); // Optimization: Reserve capacity based on maximum ASCII size
+  line_reverse.reserve(COLS); // Optimization: Reserve capacity based on maximum ASCII size
+  line_reverse_map.reserve(COLS); // Optimization: Reserve capacity based on maximum ASCII size
+
+  bool revers_reverse = false;
 
   // Iterate through all cells in the specified row
   for (int col = 0; col < COLS; ++col)
   {
     char32_t code_point = SCREEN[row][col].character;
 
-    if (SCREEN[row][col].is_reverse || SCREEN[row][col].background_color != DEFAULT_BG_COLOR)
+    revers_reverse = SCREEN[row][col].is_reverse;
+    if (CURRENT_COL == col && CURRENT_ROW == row && cursor_on)
     {
-      result += ' ';
+      revers_reverse = !revers_reverse;
+    }
+
+    if (revers_reverse || SCREEN[row][col].background_color != DEFAULT_BG_COLOR)
+    {
+            // Manually encode char32_t (Unicode code point) to UTF-8 bytes
+      if (code_point <= 0x7F) 
+      {
+          // 1-byte sequence (ASCII)
+          line_reverse += (char)code_point;
+      } 
+      else if (code_point <= 0x7FF) 
+      {
+          // 2-byte sequence
+          line_reverse += (char)(0xC0 | (code_point >> 6));
+          line_reverse += (char)(0x80 | (code_point & 0x3F));
+      } 
+      else if (code_point <= 0xFFFF) 
+      {
+          // 3-byte sequence (most common non-BMP characters)
+          line_reverse += (char)(0xE0 | (code_point >> 12));
+          line_reverse += (char)(0x80 | ((code_point >> 6) & 0x3F));
+          line_reverse += (char)(0x80 | (code_point & 0x3F));
+      } 
+      else if (code_point <= 0x10FFFF) 
+      {
+          // 4-byte sequence (supplementary characters)
+          line_reverse += (char)(0xF0 | (code_point >> 18));
+          line_reverse += (char)(0x80 | ((code_point >> 12) & 0x3F));
+          line_reverse += (char)(0x80 | ((code_point >> 6) & 0x3F));
+          line_reverse += (char)(0x80 | (code_point & 0x3F));
+      }
+      // Invalid or unhandled code points are skipped
+
+      line += ' ';
+      line_reverse_map += reinterpret_cast<const char*>("\xE2\x96\x88");
     }
     else
     {
@@ -1388,115 +1429,35 @@ std::string TERMINAL::get_line_text(int row) const
       if (code_point <= 0x7F) 
       {
           // 1-byte sequence (ASCII)
-          result += (char)code_point;
+          line += (char)code_point;
       } 
       else if (code_point <= 0x7FF) 
       {
           // 2-byte sequence
-          result += (char)(0xC0 | (code_point >> 6));
-          result += (char)(0x80 | (code_point & 0x3F));
+          line += (char)(0xC0 | (code_point >> 6));
+          line += (char)(0x80 | (code_point & 0x3F));
       } 
       else if (code_point <= 0xFFFF) 
       {
           // 3-byte sequence (most common non-BMP characters)
-          result += (char)(0xE0 | (code_point >> 12));
-          result += (char)(0x80 | ((code_point >> 6) & 0x3F));
-          result += (char)(0x80 | (code_point & 0x3F));
+          line += (char)(0xE0 | (code_point >> 12));
+          line += (char)(0x80 | ((code_point >> 6) & 0x3F));
+          line += (char)(0x80 | (code_point & 0x3F));
       } 
       else if (code_point <= 0x10FFFF) 
       {
           // 4-byte sequence (supplementary characters)
-          result += (char)(0xF0 | (code_point >> 18));
-          result += (char)(0x80 | ((code_point >> 12) & 0x3F));
-          result += (char)(0x80 | ((code_point >> 6) & 0x3F));
-          result += (char)(0x80 | (code_point & 0x3F));
+          line += (char)(0xF0 | (code_point >> 18));
+          line += (char)(0x80 | ((code_point >> 12) & 0x3F));
+          line += (char)(0x80 | ((code_point >> 6) & 0x3F));
+          line += (char)(0x80 | (code_point & 0x3F));
       }
       // Invalid or unhandled code points are skipped
+
+      line_reverse += ' ';
+      line_reverse_map += ' ';
     }
   }
-  
-  return result;
-}
-
-std::string TERMINAL::get_line_text_reverse_map(int row) const
-{
-  if (row < 0 || row >= ROWS) 
-  {
-    return ""; // Return empty string for out-of-bounds row
-  }
-
-  std::string result;
-  result.reserve(COLS); // Optimization: Reserve capacity based on maximum ASCII size
-
-  // Iterate through all cells in the specified row
-  for (int col = 0; col < COLS; ++col)
-  {
-    if (SCREEN[row][col].is_reverse || SCREEN[row][col].background_color != DEFAULT_BG_COLOR)
-    {
-      result += reinterpret_cast<const char*>("\xE2\x96\x88");
-    }
-    else
-    {
-      result += ' ';
-    }
-  }
-  
-  return result;
-}
-
-std::string TERMINAL::get_line_text_reverse(int row) const
-{
-  if (row < 0 || row >= ROWS) 
-  {
-    return ""; // Return empty string for out-of-bounds row
-  }
-
-  std::string result;
-  result.reserve(COLS); // Optimization: Reserve capacity based on maximum ASCII size
-
-  // Iterate through all cells in the specified row
-  for (int col = 0; col < COLS; ++col)
-  {
-    char32_t code_point = SCREEN[row][col].character;
-
-    if (!(SCREEN[row][col].is_reverse || SCREEN[row][col].background_color != DEFAULT_BG_COLOR))
-    {
-      result += ' ';
-    }
-    else
-    {
-      // Manually encode char32_t (Unicode code point) to UTF-8 bytes
-      if (code_point <= 0x7F) 
-      {
-        // 1-byte sequence (ASCII)
-        result += (char)code_point;
-      } 
-      else if (code_point <= 0x7FF) 
-      {
-        // 2-byte sequence
-        result += (char)(0xC0 | (code_point >> 6));
-        result += (char)(0x80 | (code_point & 0x3F));
-      } 
-      else if (code_point <= 0xFFFF) 
-      {
-        // 3-byte sequence (most common non-BMP characters)
-        result += (char)(0xE0 | (code_point >> 12));
-        result += (char)(0x80 | ((code_point >> 6) & 0x3F));
-        result += (char)(0x80 | (code_point & 0x3F));
-      } 
-      else if (code_point <= 0x10FFFF) 
-      {
-        // 4-byte sequence (supplementary characters)
-        result += (char)(0xF0 | (code_point >> 18));
-        result += (char)(0x80 | ((code_point >> 12) & 0x3F));
-        result += (char)(0x80 | ((code_point >> 6) & 0x3F));
-        result += (char)(0x80 | (code_point & 0x3F));
-      }
-      // Invalid or unhandled code points are skipped
-    }
-  }
-  
-  return result;
 }
 
 /**

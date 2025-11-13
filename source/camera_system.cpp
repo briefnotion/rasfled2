@@ -198,16 +198,61 @@ bool CAMERA::is_low_light(const cv::Mat& Grey_Image_Full_Size, int threshold)
 
 void  CAMERA::gray_enhance(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size)
 {
-  // --- Step 2A: Low-Light Contrast Enhancement (CLAHE) ---
-  // Grayscale conversion is required to isolate the luminance channel for CLAHE.
-  //cv::cvtColor(processed_frame, Grey_Image_Full_Size, cv::COLOR_BGR2GRAY);
-
   // CLAHE settings: Clip Limit 2.0, Tile Size 8x8
   cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(2.0, cv::Size(8, 8));
   clahe->apply(Grey_Image_Full_Size, Grey_Image_Full_Size); 
 
   // Apply enhanced luminance back to the color frame (making it grayscale enhanced)
   cv::cvtColor(Grey_Image_Full_Size, processed_frame, cv::COLOR_GRAY2BGR);
+}
+
+/**
+ * @brief Applies aggressive contrast enhancement (CLAHE) and Gamma Correction 
+ * to the Luminance channel of a color image to simulate a powerful low-light filter.
+ * * @param processed_frame The BGR image to be modified (input and output).
+ * @param Grey_Image_Full_Size (Ignored for this color approach, included for signature compatibility).
+ */
+void CAMERA::low_light_filter(cv::Mat& processed_frame)
+{
+  // --- Configuration ---
+  const double CLAHE_CLIP_LIMIT = 4.0; // Increased limit for stronger local contrast
+  const double GAMMA_VALUE = 0.1;      // Gamma < 1.0 brightens shadows significantly
+
+  // 1. Convert BGR frame to YUV color space
+  cv::Mat yuv_image;
+  // We work on the existing 'processed_frame' (which should be the BGR input)
+  cv::cvtColor(processed_frame, yuv_image, cv::COLOR_BGR2YUV); 
+
+  // 2. Split the YUV image into its component channels
+  std::vector<cv::Mat> yuv_channels;
+  cv::split(yuv_image, yuv_channels);
+  
+  cv::Mat& luminance_channel = yuv_channels[0]; // Reference to the Y (Luminance) channel
+
+  // 3. Apply Aggressive CLAHE (Contrast Limited Adaptive Histogram Equalization)
+  cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE(CLAHE_CLIP_LIMIT, cv::Size(8, 8));
+  clahe->apply(luminance_channel, luminance_channel); 
+
+  // 4. Apply GAMMA CORRECTION for overall brightness boost (focused on dark areas)
+  
+  // Create a lookup table (LUT) for the gamma transformation (Y_out = Y_in ^ gamma)
+  cv::Mat lookup_table(1, 256, CV_8U);
+  uchar* p = lookup_table.data;
+  
+  for (int i = 0; i < 256; ++i) 
+  {
+    // Compute new value: (i / 255.0) ^ gamma * 255.0
+    p[i] = cv::saturate_cast<uchar>(pow(i / 255.0, GAMMA_VALUE) * 255.0);
+  }
+  
+  // Apply the gamma correction to the already CLAHE-enhanced luminance channel
+  cv::LUT(luminance_channel, lookup_table, luminance_channel);
+
+  // 5. Merge the enhanced Y channel back with the original U and V channels
+  cv::merge(yuv_channels, yuv_image);
+  
+  // 6. Convert the enhanced YUV image back to BGR and overwrite the output frame
+  cv::cvtColor(yuv_image, processed_frame, cv::COLOR_YUV2BGR);
 }
 
 // Rewritten function to perform Min-Max Contrast Stretching (Low Light Boost)
@@ -618,6 +663,94 @@ cv::Mat CAMERA::generateDummyFrame_2(int width, int height, int frame_index)
 }
 
 /**
+ * @brief Generates a dummy color frame simulating a very low-light environment with a moving object.
+ * * The background is set to a very dark gray/blue. A small, bright white circle moves 
+ * horizontally across the frame, cycling back every 300 frames.
+ * * @param width The desired width of the frame.
+ * @param height The desired height of the frame.
+ * @param frame_index A counter used to calculate the moving object's position.
+ * @return cv::Mat The generated 3-channel BGR image.
+ */
+cv::Mat CAMERA::generateDummyLowLightFrame(int width, int height, int frame_index) 
+{
+  // 1. Create a 3-channel (BGR) Mat for the output frame
+  cv::Mat frame(height, width, CV_8UC3);
+  
+  // 2. Set the background to a very dark color (simulating low light)
+  // BGR values, e.g., (10, 10, 15) - a very dark, slightly bluish/purple hue
+  // Max pixel value is 255. A value of 10 is very dim.
+  //cv::Scalar low_light_color(10, 10, 15); 
+  cv::Scalar low_light_color(0, 0, 0); 
+  frame.setTo(low_light_color); 
+
+  // 3. Define the moving object properties
+  const int cycle_duration = 300; // Number of frames for the object to cross the screen
+  const int object_radius = 25;
+  const cv::Scalar object_color_1(1, 0, 0); 
+  const cv::Scalar object_color_2(2, 0, 2); 
+  const cv::Scalar object_color_3(0, 5, 0); 
+  const cv::Scalar object_color_4(10, 10, 10); 
+  const cv::Scalar object_color_bright(250, 250, 250); // Bright White (Visible!)
+  
+  // Calculate the object's horizontal position based on the frame index
+  // The position cycles from 0 to width, normalized by the cycle duration
+  int current_frame = frame_index % cycle_duration;
+  
+  // Linear interpolation for X position: (current_frame / cycle_duration) * width
+  int center_x = static_cast<int>((static_cast<float>(current_frame) / cycle_duration) * width);
+  
+  // Y position (fixed in the center)
+  int center_y = height / 2;
+  
+  // 4. Draw the moving object (a circle)
+  cv::circle(
+      frame,                          // Image to draw on
+      cv::Point(center_x, center_y -200.0f),  // Center coordinates
+      object_radius,                  // Radius
+      object_color_1,                   // Color
+      -1                              // Thickness: -1 means filled circle
+  );
+  cv::circle(
+      frame,                          // Image to draw on
+      cv::Point(center_x, center_y -100.0f),  // Center coordinates
+      object_radius,                  // Radius
+      object_color_2,                   // Color
+      -1                              // Thickness: -1 means filled circle
+  );
+  cv::circle(
+      frame,                          // Image to draw on
+      cv::Point(center_x, center_y),  // Center coordinates
+      object_radius,                  // Radius
+      object_color_3,                   // Color
+      -1                              // Thickness: -1 means filled circle
+  );
+  cv::circle(
+      frame,                          // Image to draw on
+      cv::Point(center_x, center_y +100.0f),  // Center coordinates
+      object_radius,                  // Radius
+      object_color_4,                   // Color
+      -1                              // Thickness: -1 means filled circle
+  );
+
+  // Single bright point
+  cv::circle(
+      frame,                          // Image to draw on
+      cv::Point(200.0f, 200.0f),      // Center coordinates
+      5.0f,                           // Radius
+      object_color_bright,            // Color
+      -1                              // Thickness: -1 means filled circle
+  );
+  
+  // 5. Add a small patch of slightly elevated light in the corner to test CLAHE locally
+  cv::Rect bright_patch(width - 100, height - 100, 80, 80);
+  cv::Mat patch = frame(bright_patch);
+  // A slightly elevated dark gray color (40, 40, 40)
+  patch.setTo(cv::Scalar(40, 40, 40)); 
+  
+  return frame;
+}
+
+/**
  * @brief Converts an OpenCV Mat object to an OpenGL texture ID.
  *
  * This function handles the creation of a new OpenGL texture or updates an
@@ -764,6 +897,13 @@ void CAMERA::save_settings()
   camera_settings.create_label_value(quotify("TEST_IMAGE"), quotify(to_string(PROPS.TEST_IMAGE)));
   camera_settings.create_label_value(quotify("TEST_MULTI_FRAME"), quotify(to_string(PROPS.TEST_MULTI_FRAME)));
 
+  camera_settings.create_label_value(quotify("ENH_LOW_LIGHT"), quotify(to_string(PROPS.ENH_LOW_LIGHT)));
+  camera_settings.create_label_value(quotify("ENH_GLARE_MASK"), quotify(to_string(PROPS.ENH_GLARE_MASK)));
+  camera_settings.create_label_value(quotify("ENH_COLOR"), quotify(to_string(PROPS.ENH_COLOR)));
+  camera_settings.create_label_value(quotify("ENH_CANNY_MASK"), quotify(to_string(PROPS.ENH_CANNY_MASK)));
+  camera_settings.create_label_value(quotify("ENH_FAKE_FRAMES"), quotify(to_string(PROPS.ENH_FAKE_FRAMES)));
+  camera_settings.create_label_value(quotify("ENH_DOUBLE_MASK"), quotify(to_string(PROPS.ENH_DOUBLE_MASK)));
+
   // Backup Camera Settings
   backup_camera_settings.create_label_value(quotify("SHOW_PATH"), quotify(to_string(PROPS.SHOW_PATH)));
   backup_camera_settings.create_label_value(quotify("ANGLE_MULTIPLIER"), quotify(to_string(PROPS.ANGLE_MULTIPLIER)));
@@ -823,6 +963,13 @@ void CAMERA::load_settings_json()
           STRING_BOOL   sb_test_image;
           STRING_BOOL   sb_test_multi_frame;
 
+          STRING_BOOL   sb_enh_low_light;
+          STRING_BOOL   sb_enh_grare_mask;
+          STRING_BOOL   sb_enh_color;
+          STRING_BOOL   sb_enh_canny_mask;
+          STRING_BOOL   sb_enh_fake_frames;
+          STRING_BOOL   sb_enh_double_mask;
+
           STRING_BOOL   sb_show_path;
           STRING_FLOAT  sb_angle_multiplier;
 
@@ -854,6 +1001,13 @@ void CAMERA::load_settings_json()
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("TEST_IMAGE", sb_test_image);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("TEST_MULTI_FRAME", sb_test_multi_frame);
 
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_LOW_LIGHT", sb_enh_low_light);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_GLARE_MASK", sb_enh_grare_mask);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_COLOR", sb_enh_color);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_CANNY_MASK", sb_enh_canny_mask);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_FAKE_FRAMES", sb_enh_fake_frames);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_DOUBLE_MASK", sb_enh_double_mask);
+
             if (settings.ROOT.DATA[root].DATA[entry_list].label() == "backup camera settings")
             {
               for (size_t backup_cam_entry_list = 0;                                        //root/marker_list
@@ -884,41 +1038,61 @@ void CAMERA::load_settings_json()
             if (si_width.conversion_success())
             {
               PROPS.WIDTH = si_width.get_int_value();
-            }
-            
+            }            
             if (si_height.conversion_success())
             {
               PROPS.HEIGHT = si_height.get_int_value();
-            }
-            
+            }            
             if (sb_flip_horizontal.conversion_success())
             {
               PROPS.FLIP_HORIZONTAL = sb_flip_horizontal.get_bool_value();
-            }
-            
+            }            
             if (sb_flip_vertical.conversion_success())
             {
               PROPS.FLIP_VERTICAL = sb_flip_vertical.get_bool_value();
-            }
-            
+            }            
             if (si_forced_frame_limit.conversion_success())
             {
               PROPS.FORCED_FRAME_LIMIT_MS = si_forced_frame_limit.get_int_value();
-            }
-            
+            }            
             if (sb_test.conversion_success())
             {
               PROPS.TEST = sb_test.get_bool_value();
-            }
-            
+            }            
             if (sb_test_image.conversion_success())
             {
               PROPS.TEST_IMAGE = sb_test_image.get_bool_value();
-            }
-            
+            }            
             if (sb_test_multi_frame.conversion_success())
             {
               PROPS.TEST_MULTI_FRAME = sb_test_multi_frame.get_bool_value();
+            }
+
+            // ---
+
+            if (sb_enh_low_light.conversion_success())
+            {
+              PROPS.ENH_LOW_LIGHT = sb_enh_low_light.get_bool_value();
+            }
+            if (sb_enh_grare_mask.conversion_success())
+            {
+              PROPS.ENH_GLARE_MASK = sb_enh_grare_mask.get_bool_value();
+            }            
+            if (sb_enh_color.conversion_success())
+            {
+              PROPS.ENH_COLOR = sb_enh_color.get_bool_value();
+            }            
+            if (sb_enh_canny_mask.conversion_success())
+            {
+              PROPS.ENH_CANNY_MASK = sb_enh_canny_mask.get_bool_value();
+            }            
+            if (sb_enh_fake_frames.conversion_success())
+            {
+              PROPS.ENH_FAKE_FRAMES = sb_enh_fake_frames.get_bool_value();
+            }            
+            if (sb_enh_double_mask.conversion_success())
+            {
+              PROPS.ENH_DOUBLE_MASK = sb_enh_double_mask.get_bool_value();
             }
 
             // ---
@@ -926,8 +1100,7 @@ void CAMERA::load_settings_json()
             if (sb_show_path.conversion_success())
             {
               PROPS.SHOW_PATH = sb_show_path.get_bool_value();
-            }
-            
+            }            
             if (sb_angle_multiplier.conversion_success())
             {
               PROPS.ANGLE_MULTIPLIER = sb_angle_multiplier.get_float_value();
@@ -1064,6 +1237,7 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
   // The entire processing block is now conditional on the user controls.
   if (!PROCESSED_FRAME.empty())
   {
+    /*
     // Always Apply Routines
     {
       // --- Stronger Denoising with Median Blur (5x5 kernel) ---
@@ -1077,15 +1251,24 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
           0, -1, 0);
       cv::filter2D(PROCESSED_FRAME, PROCESSED_FRAME, -1, kernel);
     }
+    */
 
     // First Level of enhancements and preprocessing
     // Generate Processing Frames for enhancements.
     {
       cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
 
-      if (PROPS.ENH_LOW_LIGHT && is_low_light(PROCESSED_FRAME_GRAY, 25))
+      if (PROPS.ENH_LOW_LIGHT)
       {
-        gray_enhance(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
+        if (is_low_light(PROCESSED_FRAME_GRAY, 25))
+        {
+          IS_LOW_LIGHT = true;
+          low_light_filter(PROCESSED_FRAME);
+        }
+      }
+      else
+      {
+        IS_LOW_LIGHT = false;
       }
 
       // Boost or reduce all color brightness
@@ -1094,10 +1277,10 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
         apply_min_max_contrast(PROCESSED_FRAME);
       }
 
-      //cv::resize(PROCESSED_FRAME, PROCESSED_FRAME_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
-      //cv::resize(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_GRAY_DOWNSIZED, cv::Size(), 1.0 / DOWN_SCALE_FACTOR, 1.0 / DOWN_SCALE_FACTOR, cv::INTER_LINEAR);
-      cv::GaussianBlur(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_GAUSSIAN, cv::Size(BLUR_KSIZE, BLUR_KSIZE), 0);
-      cv::Canny(PROCESSED_FRAME_GAUSSIAN, PROCESSED_FRAME_CANNY, CANNY_THRESH_LOW, CANNY_THRESH_HIGH, CANNY_APERTURE);
+      //cv::GaussianBlur(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_GAUSSIAN, cv::Size(BLUR_KSIZE, BLUR_KSIZE), 0);
+      //cv::Canny(PROCESSED_FRAME_GAUSSIAN, PROCESSED_FRAME_CANNY, CANNY_THRESH_LOW, CANNY_THRESH_HIGH, CANNY_APERTURE);
+
+      cv::Canny(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_CANNY, CANNY_THRESH_LOW, CANNY_THRESH_HIGH, CANNY_APERTURE);
     }
   }
 }
@@ -1124,11 +1307,17 @@ void CAMERA::apply_ehancements()
     {
       if (DOUBLE_MASK_LATEST == 0)
       {
-        MASK_FRAME_CANNY_0 = canny_mask(PROCESSED_FRAME_CANNY);
+        if (IS_LOW_LIGHT == false)
+        {
+          MASK_FRAME_CANNY_0 = canny_mask(PROCESSED_FRAME_CANNY);
+        }
       }
       else
       {
-        MASK_FRAME_CANNY_1 = canny_mask(PROCESSED_FRAME_CANNY);
+        if (IS_LOW_LIGHT == false)
+        {
+          MASK_FRAME_CANNY_1 = canny_mask(PROCESSED_FRAME_CANNY);
+        }
       }
     }
 
@@ -1147,11 +1336,17 @@ void CAMERA::apply_ehancements()
     {
       if (DOUBLE_MASK_LATEST == 0)
       {
-        MASK_FRAME_GLARE_0 = suppress_glare_mask(PROCESSED_FRAME);
+        if (IS_LOW_LIGHT == false)
+        {
+          MASK_FRAME_GLARE_0 = suppress_glare_mask(PROCESSED_FRAME);
+        }
       }
       else
       {
-        MASK_FRAME_GLARE_1 = suppress_glare_mask(PROCESSED_FRAME);
+        if (IS_LOW_LIGHT == false)
+        {
+          MASK_FRAME_GLARE_1 = suppress_glare_mask(PROCESSED_FRAME);
+        }
       }
     }
 
@@ -1159,7 +1354,8 @@ void CAMERA::apply_ehancements()
 
     if (PROPS.ENH_HOUGH)
     {
-      detect_hough_circles(PROCESSED_FRAME, PROCESSED_FRAME_GAUSSIAN);
+      //detect_hough_circles(PROCESSED_FRAME, PROCESSED_FRAME_GAUSSIAN);
+      detect_hough_circles(PROCESSED_FRAME, PROCESSED_FRAME_GRAY);
     }
 
     //---
@@ -1460,7 +1656,8 @@ void CAMERA::update_frame()
             }
             else
             {
-              FRAME_BUFFER_0 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+              //FRAME_BUFFER_0 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+              FRAME_BUFFER_0 = generateDummyLowLightFrame(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
             }
             
             LATEST_READY_FRAME = 0;
@@ -1479,7 +1676,8 @@ void CAMERA::update_frame()
             }
             else
             {
-              FRAME_BUFFER_1 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+              //FRAME_BUFFER_1 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+              FRAME_BUFFER_1 = generateDummyLowLightFrame(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
             }
 
             LATEST_READY_FRAME = 1;
@@ -1797,7 +1995,7 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
 
       PROCESSED_FRAME.release();
       PROCESSED_FRAME_GRAY.release();
-      PROCESSED_FRAME_GAUSSIAN.release();
+      //PROCESSED_FRAME_GAUSSIAN.release();
       PROCESSED_FRAME_CANNY.release();
 
       MASK_FRAME_GLARE_0.release();

@@ -208,9 +208,10 @@ class TERMINAL
 
   std::mutex& get_mutex();
 
-  std::string get_line_text(int row) const;
-  std::string get_line_text_reverse_map(int row) const;
-  std::string get_line_text_reverse(int row) const;
+  void get_line_text(int row, bool cursor_on, 
+                      string &line, 
+                      string &line_reverse, 
+                      string &line_reverse_map);
 
   void reader_thread();
   void create();

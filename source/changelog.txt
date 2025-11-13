@@ -1,3 +1,18 @@
+2.355_251112
+  - Tested btop in terminal. Ran without issues 
+      for over 6hrs.  btop ran with Force TTY on, 
+      because i still cant find a font with braille.
+  - Made some minor improvement to the fonts and 
+      cursor.
+  - Minor changes the camera system.
+      Testing a different low light filter.
+
+  - Another kernal update intefere with. Possible 
+      correction with:
+        cd rpi_ws281x/
+        make
+        sudo make install
+
 2.354_251110
   - VT terminal is improved again and working much 
       better, but still needs improvements.

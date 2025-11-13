@@ -219,20 +219,10 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
 
         for (int row = 0; row < TERMINAL::ROWS; row++)
         {
-          line = sdSysData.TERMINAL_THREAD.get_line_text(row);
-          line_reverse_map = sdSysData.TERMINAL_THREAD.get_line_text_reverse_map(row);
-          line_reverse = sdSysData.TERMINAL_THREAD.get_line_text_reverse(row);
-
+          sdSysData.TERMINAL_THREAD.get_line_text(row, CURSOR_ON, line, line_reverse, line_reverse_map);
 
           // Text
           ImGui::SetCursorPos(position);
-          if (CURSOR_ON)
-          {
-            if (row == sdSysData.TERMINAL_THREAD.CURRENT_ROW)
-            {
-              line.replace(sdSysData.TERMINAL_THREAD.CURRENT_COL, 1, std::string(reinterpret_cast<const char*>("\xE2\x96\x88")));
-            }
-          }
           ImGui::TextUnformatted(line.c_str());
 
           // Reverse Map

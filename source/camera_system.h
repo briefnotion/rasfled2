@@ -276,6 +276,7 @@ class CAMERA
   // Camera CV Helper
   bool is_low_light(const cv::Mat& Grey_Image_Full_Size, int threshold);
   void gray_enhance(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
+  void low_light_filter(cv::Mat& processed_frame);
   void apply_min_max_contrast(cv::Mat& processed_frame);
   void detect_hough_circles(cv::Mat& processed_frame, const cv::Mat& Processed_Frame_Gaussian);
   cv::Mat canny_mask(cv::Mat& Processed_Frame_Canny);
@@ -289,6 +290,7 @@ class CAMERA
   cv::Mat generate_empty_frame(int width, int height);
   cv::Mat generateDummyFrame(int width, int height);
   cv::Mat generateDummyFrame_2(int width, int height, int frame_index);
+  cv::Mat generateDummyLowLightFrame(int width, int height, int frame_index);
   GLuint matToTexture(const cv::Mat& frame, GLuint textureID);
 
   void prepare();
@@ -351,12 +353,14 @@ class CAMERA
   cv::Mat FRAME_BUFFER_1;
   cv::Mat FRAME_BUFFER_FAKE;
 
+  bool IS_LOW_LIGHT = false;
+
   // Thread process_enhancements_frames
   cv::Mat PROCESSED_FRAME;
   cv::Mat PROCESSED_FRAME_GRAY;
   //cv::Mat PROCESSED_FRAME_DOWNSIZED;
   //cv::Mat PROCESSED_FRAME_GRAY_DOWNSIZED;
-  cv::Mat PROCESSED_FRAME_GAUSSIAN;
+  //cv::Mat PROCESSED_FRAME_GAUSSIAN;
   cv::Mat PROCESSED_FRAME_CANNY;
 
   //cv::Mat MASK_FRAME_OVERLAY_LINES;

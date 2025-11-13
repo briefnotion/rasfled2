@@ -345,8 +345,6 @@ int SCREEN4::create(system_data &sdSysData)
     const char* glsl_version = "#version 300 es"; // For OpenGL ES 3.0+
     ImGui_ImplOpenGL3_Init(glsl_version);
 
-    
-
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 18.0f);
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 57.0f);
     //io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28.0f);
@@ -363,24 +361,22 @@ int SCREEN4::create(system_data &sdSysData)
 
     static const ImWchar glyph_ranges[] = 
     {
-        0x0020, 0x00FF,       // Basic Latin
-        0x2190, 0x21FF,       // Arrows
-        0x2500, 0x257F,       // Box Drawing
-        0x2580, 0x259F,       // Block Elements
-        0x2800, 0x28FF,       // Braille Patterns (U+2800 to U+28FF)
-        0,
+        0x0020, 0x00FF,       // Basic Latin (ASCII + Latin-1 Supplement)
+        0x2000, 0x206F,       // General Punctuation 
+        0x2190, 0x21FF,       // Arrows 
+        0x2500, 0x257F,       // Box Drawing 
+        0x2580, 0x25FF,       // Block Elements + Geometric Shapes 
+        0x2800, 0x28FF,       // Braille Patterns 
+        0x2B00, 0x2BFF,       // Miscellaneous Symbols and Arrows 
+        0,                    // End of list
     };
-
 
     sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
     //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
     //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/unifont/unifont.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
     //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
 
-
-
     // Start the Dear ImGui frame
-    //ImGui_ImplOpenGL2_NewFrame();
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -1260,7 +1256,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::SameLine();
 
-            if (BTC_TAB_DOTDOTDOT.button_toggle_color(sdSysData, "...", "...", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 5, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_DOTDOTDOT.button_toggle_color(sdSysData, ".", ".", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 5, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
             {
               sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 5;
             }
@@ -1270,7 +1266,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
             // Only show terminal button if terminal is active
             //if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6)
             {
-              if (BTC_TAB_TERMINAL.button_toggle_color(sdSysData, "TERMINAL", "TERMINAL", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+              if (BTC_TAB_TERMINAL.button_toggle_color(sdSysData, "[]", "[]", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
               {
                 sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 6;
               }
