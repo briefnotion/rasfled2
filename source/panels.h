@@ -177,6 +177,7 @@ class SCREEN4_PANEL_CONTROL
   // AUTO
   bool            AUTO_HAZARDS = false;   // Are exta anims running.
   int     AUTO_DOOR_OPEN_COUNT = 0;       // Amount of doors open.
+  bool         SIGNAL_LIGHT_ON = false;   // Signal light on
 
   // OPEN WINDOWS
   bool DISPLAY_SPEED_WINDOW = false;

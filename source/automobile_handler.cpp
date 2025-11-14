@@ -532,11 +532,13 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     {
       if (SIGNAL_LEFT)
       {
+        sdSysData.PANEL_CONTROL.SIGNAL_LIGHT_ON = true;
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_On", 0);
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_On", 1);
       }
       else
       {
+        sdSysData.PANEL_CONTROL.SIGNAL_LIGHT_ON = false;
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Left_Off");
         SIGNAL_OFF_REDUNDANCY.ping_up(tmeCurrentTime, 2000);
       }
@@ -547,11 +549,13 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
     {
       if (SIGNAL_RIGHT)
       {
+        sdSysData.PANEL_CONTROL.SIGNAL_LIGHT_ON = true;
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_On", 2);
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_On", 3);
       }
       else
       {
+        sdSysData.PANEL_CONTROL.SIGNAL_LIGHT_ON = false;
         Animations.call_animation(sdSysData, tmeCurrentTime, "Car", "Automobile - Signal_Right_Off");
         SIGNAL_OFF_REDUNDANCY.ping_up(tmeCurrentTime, 2000);
       }

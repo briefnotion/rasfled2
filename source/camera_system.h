@@ -173,7 +173,9 @@ class CAMERA_PROPERTIES
 
   // When low light triggered, turns on grayscale image 
   //  and booste brightness
-  bool ENH_LOW_LIGHT      = false;
+  bool    ENH_LOW_LIGHT      = false;
+  int     ENH_LOW_LIGHT_THRESHOLD  = 15;
+  double  ENH_LOW_LIGHT_GAMMA      = 0.5; // Gamma < 1.0 brightens shadows significantly
 
   // Finds contrast image lines and draws mask.
   //bool ENH_OVERLAY_LINES  = false;
@@ -274,7 +276,7 @@ class CAMERA
   const int CANNY_APERTURE = 3;     // Aperture size for Sobel operator   (3) 3 5 or 7
 
   // Camera CV Helper
-  bool is_low_light(const cv::Mat& Grey_Image_Full_Size, int threshold);
+  int  is_low_light(const cv::Mat& Grey_Image_Full_Size);
   void gray_enhance(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size);
   void low_light_filter(cv::Mat& processed_frame);
   void apply_min_max_contrast(cv::Mat& processed_frame);
@@ -352,8 +354,6 @@ class CAMERA
   cv::Mat FRAME_BUFFER_0;
   cv::Mat FRAME_BUFFER_1;
   cv::Mat FRAME_BUFFER_FAKE;
-
-  bool IS_LOW_LIGHT = false;
 
   // Thread process_enhancements_frames
   cv::Mat PROCESSED_FRAME;
@@ -443,12 +443,14 @@ class CAMERA
   
   std::string INFORMATION_COMMAND_LIST = "Not Available";
 
-  double TIME_CAMERA_FPS;
-  double TIME_CAMERA_FRAME_TIME;
-  double TIME_FRAME_RETRIEVAL;
-  double TIME_FRAME_PROCESSING;
-  double TIME_ACTUAL_FPS;
-  double TIME_ACTUAL_FRAME_TIME;
+  double  TIME_CAMERA_FPS;
+  double  TIME_CAMERA_FRAME_TIME;
+  double  TIME_FRAME_RETRIEVAL;
+  double  TIME_FRAME_PROCESSING;
+  double  TIME_ACTUAL_FPS;
+  double  TIME_ACTUAL_FRAME_TIME;
+  bool    IS_LOW_LIGHT = false;
+  int     LOW_LIGHT_VALUE = 0;
 
   bool FRAME_GEN = false;
 

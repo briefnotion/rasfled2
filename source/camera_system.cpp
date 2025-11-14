@@ -189,11 +189,11 @@ cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame)
 // ---------------------------------------------------------------------------------------
 
 // Helper function implementation: checks the mean brightness of the frame
-bool CAMERA::is_low_light(const cv::Mat& Grey_Image_Full_Size, int threshold) 
+int CAMERA::is_low_light(const cv::Mat& Grey_Image_Full_Size) 
 {
   // Calculate the mean intensity (0-255). If it's below the threshold, it's dark.
   cv::Scalar mean_intensity = cv::mean(Grey_Image_Full_Size);
-  return mean_intensity[0] < threshold;
+  return (int)mean_intensity[0];
 }
 
 void  CAMERA::gray_enhance(cv::Mat& processed_frame, const cv::Mat& Grey_Image_Full_Size)
@@ -216,7 +216,6 @@ void CAMERA::low_light_filter(cv::Mat& processed_frame)
 {
   // --- Configuration ---
   const double CLAHE_CLIP_LIMIT = 4.0; // Increased limit for stronger local contrast
-  const double GAMMA_VALUE = 0.1;      // Gamma < 1.0 brightens shadows significantly
 
   // 1. Convert BGR frame to YUV color space
   cv::Mat yuv_image;
@@ -242,7 +241,7 @@ void CAMERA::low_light_filter(cv::Mat& processed_frame)
   for (int i = 0; i < 256; ++i) 
   {
     // Compute new value: (i / 255.0) ^ gamma * 255.0
-    p[i] = cv::saturate_cast<uchar>(pow(i / 255.0, GAMMA_VALUE) * 255.0);
+    p[i] = cv::saturate_cast<uchar>(pow(i / 255.0, PROPS.ENH_LOW_LIGHT_GAMMA) * 255.0);
   }
   
   // Apply the gamma correction to the already CLAHE-enhanced luminance channel
@@ -898,6 +897,8 @@ void CAMERA::save_settings()
   camera_settings.create_label_value(quotify("TEST_MULTI_FRAME"), quotify(to_string(PROPS.TEST_MULTI_FRAME)));
 
   camera_settings.create_label_value(quotify("ENH_LOW_LIGHT"), quotify(to_string(PROPS.ENH_LOW_LIGHT)));
+  camera_settings.create_label_value(quotify("ENH_LOW_LIGHT_THRESHOLD"), quotify(to_string(PROPS.ENH_LOW_LIGHT_THRESHOLD)));
+  camera_settings.create_label_value(quotify("ENH_LOW_LIGHT_GAMMA"), quotify(to_string(PROPS.ENH_LOW_LIGHT_GAMMA)));
   camera_settings.create_label_value(quotify("ENH_GLARE_MASK"), quotify(to_string(PROPS.ENH_GLARE_MASK)));
   camera_settings.create_label_value(quotify("ENH_COLOR"), quotify(to_string(PROPS.ENH_COLOR)));
   camera_settings.create_label_value(quotify("ENH_CANNY_MASK"), quotify(to_string(PROPS.ENH_CANNY_MASK)));
@@ -964,6 +965,8 @@ void CAMERA::load_settings_json()
           STRING_BOOL   sb_test_multi_frame;
 
           STRING_BOOL   sb_enh_low_light;
+          STRING_INT    si_enh_low_light_threshold;
+          STRING_DOUBLE sd_enh_low_light_gamma;
           STRING_BOOL   sb_enh_grare_mask;
           STRING_BOOL   sb_enh_color;
           STRING_BOOL   sb_enh_canny_mask;
@@ -1002,6 +1005,8 @@ void CAMERA::load_settings_json()
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("TEST_MULTI_FRAME", sb_test_multi_frame);
 
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_LOW_LIGHT", sb_enh_low_light);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_LOW_LIGHT_THRESHOLD", si_enh_low_light_threshold);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_LOW_LIGHT_GAMMA", sd_enh_low_light_gamma);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_GLARE_MASK", sb_enh_grare_mask);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_COLOR", sb_enh_color);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_CANNY_MASK", sb_enh_canny_mask);
@@ -1073,6 +1078,14 @@ void CAMERA::load_settings_json()
             if (sb_enh_low_light.conversion_success())
             {
               PROPS.ENH_LOW_LIGHT = sb_enh_low_light.get_bool_value();
+            }
+            if (si_enh_low_light_threshold.conversion_success())
+            {
+              PROPS.ENH_LOW_LIGHT_THRESHOLD = si_enh_low_light_threshold.get_int_value();
+            }
+            if (sd_enh_low_light_gamma.conversion_success())
+            {
+              PROPS.ENH_LOW_LIGHT_GAMMA = sd_enh_low_light_gamma.get_double_value();
             }
             if (sb_enh_grare_mask.conversion_success())
             {
@@ -1260,15 +1273,16 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
 
       if (PROPS.ENH_LOW_LIGHT)
       {
-        if (is_low_light(PROCESSED_FRAME_GRAY, 25))
+        LOW_LIGHT_VALUE = is_low_light(PROCESSED_FRAME_GRAY);
+        if (LOW_LIGHT_VALUE < PROPS.ENH_LOW_LIGHT_THRESHOLD)
         {
           IS_LOW_LIGHT = true;
           low_light_filter(PROCESSED_FRAME);
         }
-      }
-      else
-      {
-        IS_LOW_LIGHT = false;
+        else
+        {
+          IS_LOW_LIGHT = false;
+        }
       }
 
       // Boost or reduce all color brightness
@@ -1307,17 +1321,11 @@ void CAMERA::apply_ehancements()
     {
       if (DOUBLE_MASK_LATEST == 0)
       {
-        if (IS_LOW_LIGHT == false)
-        {
-          MASK_FRAME_CANNY_0 = canny_mask(PROCESSED_FRAME_CANNY);
-        }
+        MASK_FRAME_CANNY_0 = canny_mask(PROCESSED_FRAME_CANNY);
       }
       else
       {
-        if (IS_LOW_LIGHT == false)
-        {
-          MASK_FRAME_CANNY_1 = canny_mask(PROCESSED_FRAME_CANNY);
-        }
+        MASK_FRAME_CANNY_1 = canny_mask(PROCESSED_FRAME_CANNY);
       }
     }
 
@@ -1336,17 +1344,11 @@ void CAMERA::apply_ehancements()
     {
       if (DOUBLE_MASK_LATEST == 0)
       {
-        if (IS_LOW_LIGHT == false)
-        {
-          MASK_FRAME_GLARE_0 = suppress_glare_mask(PROCESSED_FRAME);
-        }
+        MASK_FRAME_GLARE_0 = suppress_glare_mask(PROCESSED_FRAME);
       }
       else
       {
-        if (IS_LOW_LIGHT == false)
-        {
-          MASK_FRAME_GLARE_1 = suppress_glare_mask(PROCESSED_FRAME);
-        }
+        MASK_FRAME_GLARE_1 = suppress_glare_mask(PROCESSED_FRAME);
       }
     }
 

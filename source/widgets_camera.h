@@ -40,6 +40,9 @@ class CAMERA_WIDGET
 {
   private:
 
+  bool SHOW_BUTTONS = false;
+  TIMED_IS_READY SHOW_BUTTONS_TIMER;
+
   bool DISPLAY_CAMERA_SETTINGS = false;
   bool DISPLAY_ADJUSTMENTS = false;
   bool DISPLAY_ENHANCEMENTS = false;
@@ -124,6 +127,8 @@ class CAMERA_WIDGET
   void display_camera_adjustments_window(system_data &sdSysData);
   void display_camera_enhancements_window(system_data &sdSysData);
 
+  void display_camera_stats(system_data &sdSysData);
+  
   public:
 
   void display(system_data &sdSysData, float Angle);

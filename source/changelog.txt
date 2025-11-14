@@ -1,3 +1,18 @@
+2.356_251113
+  - Camera screen decluttered, with options and 
+      statistics available when tapped. 
+  - Camera statistics will show status of enhancement 
+      filters.
+  - Made some changes to the Low Light Filter.
+      Properties for Gamma and Threshold available 
+        in the ADJ panel of the camera to allow 
+        tuning.
+      Low Light filter adjustments saved as part of 
+        camera settings.
+  - Backup Camera will now turn on with signal light 
+      to possibly provide (blind spot) 
+      assistance or awareness when changing lanes. 
+      
 2.355_251112
   - Tested btop in terminal. Ran without issues 
       for over 6hrs.  btop ran with Force TTY on, 

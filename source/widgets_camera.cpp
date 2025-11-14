@@ -219,8 +219,14 @@ void CAMERA_WIDGET::display_camera_adjustments_window(system_data &sdSysData)
   {
     // Temporary for path calibration
     {
+      // Adjust the Low Light Threshold and Gama.
+      ImGui::InputInt("LL_THR", &sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT_THRESHOLD);
+      ImGui::InputDouble("LL_GAM", &sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT_GAMMA);
+
+      // Adjust the multiplier for steering wheel.
       ImGui::InputFloat("AMLT", &sdSysData.CAMERA_BACKUP.PROPS.ANGLE_MULTIPLIER);
 
+      // Adjust the positions of the paths.
       //ImGui::Text("Path Points:");
       ImGui::InputFloat("Y0", &sdSysData.CAMERA_BACKUP.PROPS.Y0);
       ImGui::InputFloat("XL0", &sdSysData.CAMERA_BACKUP.PROPS.XL0);
@@ -362,14 +368,85 @@ void CAMERA_WIDGET::display_camera_enhancements_window(system_data &sdSysData)
 
 }
 
+void CAMERA_WIDGET::display_camera_stats(system_data &sdSysData)
+{
+  if (sdSysData.CAMERA_BACKUP.camera_online() == false)
+  {
+    ImGui::Text("Camera Offline");
+  }
+  else 
+  {
+    std::string frame_gen = "  ";
+    std::string frame_gen_on = "  ";
+    std::string enh_low_light = "  ";
+    std::string enh_low_light_on = "  ";
+    std::string enh_color = "   ";
+    std::string enh_glare_mask = "   ";
+    std::string enh_canny_mask = "   ";
+    std::string enh_double_mask = "   ";
+    
+
+    if (sdSysData.CAMERA_BACKUP.PROPS.ENH_FAKE_FRAMES)
+    {
+      frame_gen = "FG";
+    }
+    
+    if (sdSysData.CAMERA_BACKUP.FRAME_GEN)
+    {
+      frame_gen_on = " *";
+    }
+
+    if (sdSysData.CAMERA_BACKUP.PROPS.ENH_LOW_LIGHT)
+    {
+      enh_low_light = "LL";
+    }
+
+    if (sdSysData.CAMERA_BACKUP.IS_LOW_LIGHT)
+    {
+      enh_low_light_on = " *";
+    }
+
+    if (sdSysData.CAMERA_BACKUP.PROPS.ENH_COLOR)
+    {
+      enh_color = "COL";
+    }
+
+    if (sdSysData.CAMERA_BACKUP.PROPS.ENH_GLARE_MASK)
+    {
+      enh_glare_mask = "GLM";
+    }
+
+    if (sdSysData.CAMERA_BACKUP.PROPS.ENH_CANNY_MASK)
+    {
+      enh_canny_mask = "CAM";
+    }
+    if (sdSysData.CAMERA_BACKUP.PROPS.ENH_DOUBLE_MASK)
+    {
+      enh_double_mask = "DFM";
+    }
+
+    ImGui::Text("%s%s Rend: %2.1f fps %2.1f ms  Camera: %2.1f fps %2.1f ms  Grab: %2.1f ms  Proc Tme: %2.1f ms  LL: %d", 
+                  frame_gen_on.c_str(), frame_gen.c_str(), 
+                  sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FPS, sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FRAME_TIME, 
+                  sdSysData.CAMERA_BACKUP.TIME_CAMERA_FPS, sdSysData.CAMERA_BACKUP.TIME_CAMERA_FRAME_TIME,
+                  sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL,
+                  sdSysData.CAMERA_BACKUP.TIME_FRAME_PROCESSING,
+                  sdSysData.CAMERA_BACKUP.LOW_LIGHT_VALUE);
+
+
+    ImGui::Text("%s%s %s %s %s %s", 
+                  enh_low_light_on.c_str(), enh_low_light.c_str(), enh_color.c_str(), enh_glare_mask.c_str(), enh_canny_mask.c_str(), enh_double_mask.c_str());
+  }
+}
+
 void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
 {
+  WORKING_AREA = get_working_area();
+
   // Check if the camera and video are available.
   if (sdSysData.CAMERA_BACKUP.camera_online())
   {
     ANGLE = Angle;
-
-    WORKING_AREA = get_working_area();
     // X = x starting pos (position of left most window, if no write)
     // Y = y starting pos (position of top most window, if no write)
     // Z = x size
@@ -442,105 +519,106 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
     ImGui::Text("Waiting for camera feed...");
   }
 
-  // Show Display Camera Setting Button
   ImGui::SetCursorPos(ImVec2(0,0));
-
-  // Take a photo
-  if (BC_SNAPSHOT.button_color(sdSysData, "SNAP\nSHOT", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  if (SHOW_BUTTONS == false)
   {
-    sdSysData.CAMERA_BACKUP.take_snapshot();
-  }
-
-  //ImGui::InvisibleButton("camera_no_show", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
-  // Notification
-  if (sdSysData.CAMERA_BACKUP.camera_online() == false)
-  {
-    ImGui::Text("Camera");
-    ImGui::Text("  Offline");
-  }
-  //else
-  {
-    //ImGui::Text("%2.1f fps", sdSysData.CAMERA_BACKUP.TIME_MAX_FPS);
-    //ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_MAX_FPS_DELAY);
-    ImGui::Text("%2.1f fps", sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FPS);
-    if (sdSysData.CAMERA_BACKUP.FRAME_GEN)
+    if (ImGui::InvisibleButton("Hide Buttons", ImVec2(WORKING_AREA.z, WORKING_AREA.w)))
     {
-      ImGui::Text("* %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FRAME_TIME);
+      SHOW_BUTTONS = true;
+      SHOW_BUTTONS_TIMER.set(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
     }
-    else
+  }
+  else
+  {
+    if (SHOW_BUTTONS_TIMER.is_ready(sdSysData.PROGRAM_TIME.current_frame_time()))
     {
-      ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FRAME_TIME);
+      SHOW_BUTTONS = false;
     }
   }
 
-  // Open Settings Screen
-  if (BC_DISPLAY_SETTINGS.button_toggle_color(sdSysData, "CAM##Display Camera Settings", "CAM##Display Camera Settings", 
-                                              DISPLAY_CAMERA_SETTINGS, 
-                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+  if (SHOW_BUTTONS)
   {
-    DISPLAY_CAMERA_SETTINGS = !DISPLAY_CAMERA_SETTINGS;
-  }
+    //ImGui::InvisibleButton("camera_no_show", sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM);
+    // Notification
 
-  // Open Adjustments Screen
-  if (BC_DISPLAY_ADJUSTMENTS.button_toggle_color(sdSysData, "ADJ##Display Camera Adjustments", "ADJ##Display Camera Adjustments", 
-                                              DISPLAY_ADJUSTMENTS, 
-                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-  {
-    DISPLAY_ADJUSTMENTS = !DISPLAY_ADJUSTMENTS;
-  }
+    ImGui::SetCursorPos(ImVec2(4,4));
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
+    display_camera_stats(sdSysData);
+    ImGui::PopStyleColor();
 
-  // Open Enhancements Screen
-  if (BC_DISPLAY_ENHANCEMENTS.button_toggle_color(sdSysData, "ENH##Display Camera Enhancements", "ENH##Display Camera Enhancements",
-                                              DISPLAY_ENHANCEMENTS, 
-                                              RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-  {
-    DISPLAY_ENHANCEMENTS = !DISPLAY_ENHANCEMENTS;
-  }
+    ImGui::SetCursorPos(ImVec2(0,0));
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 0, 0, 255));
+    display_camera_stats(sdSysData);
+    ImGui::PopStyleColor();
 
-  // Draw Camera Controls
-  {
-    if (DISPLAY_CAMERA_SETTINGS)
+    ImGui::SetCursorPos(ImVec2(2,2));
+    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 255, 255, 255));
+    display_camera_stats(sdSysData);
+    ImGui::PopStyleColor();
+
+    // Take a photo
+    if (BC_SNAPSHOT.button_color(sdSysData, "SNAP\nSHOT", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
-      ImGui::SetNextWindowSize(ImVec2(290.0f, 475.0f));
-      if (ImGui::Begin("CAMERA SETTINGS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+      sdSysData.CAMERA_BACKUP.take_snapshot();
+    }
+
+    // Open Settings Screen
+    if (BC_DISPLAY_SETTINGS.button_toggle_color(sdSysData, "CAM##Display Camera Settings", "CAM##Display Camera Settings", 
+                                                DISPLAY_CAMERA_SETTINGS, 
+                                                RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      DISPLAY_CAMERA_SETTINGS = !DISPLAY_CAMERA_SETTINGS;
+    }
+
+    // Open Adjustments Screen
+    if (BC_DISPLAY_ADJUSTMENTS.button_toggle_color(sdSysData, "ADJ##Display Camera Adjustments", "ADJ##Display Camera Adjustments", 
+                                                DISPLAY_ADJUSTMENTS, 
+                                                RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      DISPLAY_ADJUSTMENTS = !DISPLAY_ADJUSTMENTS;
+    }
+
+    // Open Enhancements Screen
+    if (BC_DISPLAY_ENHANCEMENTS.button_toggle_color(sdSysData, "ENH##Display Camera Enhancements", "ENH##Display Camera Enhancements",
+                                                DISPLAY_ENHANCEMENTS, 
+                                                RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      DISPLAY_ENHANCEMENTS = !DISPLAY_ENHANCEMENTS;
+    }
+
+    // Draw Camera Controls
+    {
+      if (DISPLAY_CAMERA_SETTINGS)
       {
-        display_camera_settings_window(sdSysData);
+        ImGui::SetNextWindowSize(ImVec2(290.0f, 475.0f));
+        if (ImGui::Begin("CAMERA SETTINGS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+        {
+          display_camera_settings_window(sdSysData);
+        }
+        ImGui::End();
       }
-      ImGui::End();
-    }
 
-    if (DISPLAY_ADJUSTMENTS)
-    {
-      ImGui::SetNextWindowSize(ImVec2(290.0f, 475.0f));
-      if (ImGui::Begin("CAMERA ADJUSTMENTS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+      if (DISPLAY_ADJUSTMENTS)
       {
-        display_camera_adjustments_window(sdSysData);
+        ImGui::SetNextWindowSize(ImVec2(290.0f, 475.0f));
+        if (ImGui::Begin("CAMERA ADJUSTMENTS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+        {
+          display_camera_adjustments_window(sdSysData);
+        }
+        ImGui::End();
       }
-      ImGui::End();
-    }
-    
-    if (DISPLAY_ENHANCEMENTS)
-    {
-      ImGui::SetNextWindowSize(ImVec2(290.0f, 475.0f));
-      if (ImGui::Begin("CAMERA ENHANCEMENTS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+      
+      if (DISPLAY_ENHANCEMENTS)
       {
-        display_camera_enhancements_window(sdSysData);
+        ImGui::SetNextWindowSize(ImVec2(290.0f, 475.0f));
+        if (ImGui::Begin("CAMERA ENHANCEMENTS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
+        {
+          display_camera_enhancements_window(sdSysData);
+        }
+        ImGui::End();
       }
-      ImGui::End();
     }
   }
-
-  // Display statistics
-  {
-    ImGui::Text("Camera:");
-    ImGui::Text("  %2.1f fps", sdSysData.CAMERA_BACKUP.TIME_CAMERA_FPS);
-    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_CAMERA_FRAME_TIME);
-    ImGui::Text("Grab:");
-    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL);
-    ImGui::Text("Prc Tme:");
-    ImGui::Text("  %2.1f ms", sdSysData.CAMERA_BACKUP.TIME_FRAME_PROCESSING);
-  }
-
 }
 
 // ---------------------------------------------------------------------------------------

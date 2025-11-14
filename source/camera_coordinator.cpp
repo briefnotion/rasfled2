@@ -32,6 +32,11 @@ void CAMERA_SYSTEM_COORDINATOR::check(system_data &sdSysData)
   }
   else if (sdSysData.PANEL_CONTROL.AUTO_DOOR_OPEN_COUNT > 0)
   {
+    // If a signal light is on
+    sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM = true;
+  }
+  else if (sdSysData.PANEL_CONTROL.SIGNAL_LIGHT_ON)
+  {
     // If a door is open
     sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM = true;
   }
