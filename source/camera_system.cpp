@@ -802,6 +802,7 @@ GLuint CAMERA::matToTexture(const cv::Mat& frame, GLuint textureID)
 
 void CAMERA::prepare()
 {
+  // My Random Camera
   PROPS.CTRL_FOCUS_AUTO.ADDRESS = 0x009a090c;
   PROPS.CTRL_FOCUS_AUTO.MINIMUM = 0;
   PROPS.CTRL_FOCUS_AUTO.MAXIMUM = 1;
@@ -867,6 +868,11 @@ void CAMERA::init(stringstream &Print_Stream)
   // set_camera_control(PROPS.CTRL_FOCUS_ABSOLUTE, 0);
 
   // Verify settings
+
+  Print_Stream << "Common camera controls not coded." << endl;
+
+  // When CAMERA_SETTING is matured (vectorized, tested) enable for common control set.
+  /*
   Print_Stream << "               Auto Focus: " << get_camera_control_value(PROPS.CTRL_FOCUS_AUTO) << endl;
   Print_Stream << "          Abslolute Focus: " << get_camera_control_value(PROPS.CTRL_FOCUS_ABSOLUTE) << endl;
   Print_Stream << "            Exposure Auto: " << get_camera_control_value(PROPS.CTRL_EXPOSURE_AUTO) << endl;
@@ -878,6 +884,7 @@ void CAMERA::init(stringstream &Print_Stream)
   Print_Stream << "                     Gama: " << get_camera_control_value(PROPS.CTRL_GAMA) << endl;
   Print_Stream << "                      Hue: " << get_camera_control_value(PROPS.CTRL_HUE) << endl;
   Print_Stream << "                Sharpness: " << get_camera_control_value(PROPS.CTRL_SHARPNESS) << endl;
+  */
 }
 
 void CAMERA::save_settings()
@@ -1222,7 +1229,7 @@ void CAMERA::check_for_save_image_buffer_processed()
 }
 
 // Be careful with this function. It is ran in its own thread.
-void CAMERA::run_preprocessing(cv::Mat &Frame)
+void CAMERA::run_preprocessing(cv::Mat &Frame, unsigned long Frame_Time)
 {
   if (!Frame.empty())
   {
@@ -1271,19 +1278,50 @@ void CAMERA::run_preprocessing(cv::Mat &Frame)
     {
       cv::cvtColor(PROCESSED_FRAME, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
 
+      // Manage Low Light Filter
       if (PROPS.ENH_LOW_LIGHT)
       {
+        // Get Low Light Value
         LOW_LIGHT_VALUE = is_low_light(PROCESSED_FRAME_GRAY);
-        if (LOW_LIGHT_VALUE < PROPS.ENH_LOW_LIGHT_THRESHOLD)
+
+        // Check timer, if expired flip IS_LOW_LIGHT
+        if (LOW_LIGHT_DEBOUNCE_TIMER_LL.is_ready(Frame_Time))
         {
-          IS_LOW_LIGHT = true;
+          IS_LOW_LIGHT = !IS_LOW_LIGHT;
+          if (IS_LOW_LIGHT)
+          {
+            LOW_LIGHT_DEBOUNCE_TIMER_LL.set(Frame_Time, 5000);
+          }
+          else
+          {
+            LOW_LIGHT_DEBOUNCE_TIMER_LL.set(Frame_Time, 1000);
+          }
+        }
+        else  // Timer not expired, reset timer if still applies.
+        {
+          if (IS_LOW_LIGHT) // Low Light On
+          {
+            if (LOW_LIGHT_VALUE < PROPS.ENH_LOW_LIGHT_THRESHOLD)
+            {
+              LOW_LIGHT_DEBOUNCE_TIMER_LL.set(Frame_Time, 5000);
+            }
+          }
+          else              // Low Light Off
+          {
+            if (LOW_LIGHT_VALUE >= PROPS.ENH_LOW_LIGHT_THRESHOLD)
+            {
+              LOW_LIGHT_DEBOUNCE_TIMER_LL.set(Frame_Time, 1000);
+            }
+          }
+        }
+
+        // Turn low light filter on or off
+        if (IS_LOW_LIGHT)
+        {
           low_light_filter(PROCESSED_FRAME);
         }
-        else
-        {
-          IS_LOW_LIGHT = false;
-        }
       }
+
 
       // Boost or reduce all color brightness
       if (PROPS.ENH_COLOR)
@@ -1764,7 +1802,7 @@ void CAMERA::process_enhancements_frame()
 
   if (BEING_PROCESSED_FRAME == 0)
   {
-    run_preprocessing(FRAME_BUFFER_0);
+    run_preprocessing(FRAME_BUFFER_0, PROCESS_ENHANCEMENTS_FRAME_TIME);
     // No longer dependant on Buffer frame.  Release.
     BEING_PROCESSED_FRAME = -1;
     apply_ehancements();
@@ -1773,7 +1811,7 @@ void CAMERA::process_enhancements_frame()
   else
   if (BEING_PROCESSED_FRAME == 1)
   {
-    run_preprocessing(FRAME_BUFFER_1);
+    run_preprocessing(FRAME_BUFFER_1, PROCESS_ENHANCEMENTS_FRAME_TIME);
     // No longer dependant on Buffer frame.  Release.
     BEING_PROCESSED_FRAME = -1;
     apply_ehancements();
@@ -1856,7 +1894,7 @@ int CAMERA::get_camera_control_value(CAMERA_SETTING &Setting)
 {
   int ret_value = -1;
 
-  if (CAM_AVAILABLE)
+  if (CAM_AVAILABLE && Setting.ENABLED)
   {
     ret_value = get_control(Setting.ADDRESS);
     if (ret_value != -1)
@@ -2074,6 +2112,10 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
 
       if (CAMERA_BEING_VIEWED)
       {
+        //  In Place here because weird process_enhancements_frame didnt safely
+        //    accept an argument.
+        PROCESS_ENHANCEMENTS_FRAME_TIME = Frame_Time;
+
         // Start the camera update on a separate thread.
         // This call is non-blocking, so the main loop can continue immediately.
         THREAD_IMAGE_PROCESSING.start_render_thread([&]() 

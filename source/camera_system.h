@@ -117,6 +117,8 @@ private:
 class CAMERA_SETTING
 {
   public:
+  bool      ENABLED = false;
+  string    NAME = "";
   uint32_t  ADDRESS = 0x0;
   int       MINIMUM = 0;
   int       MAXIMUM = 0;
@@ -149,6 +151,14 @@ class CAMERA_PROPERTIES
   bool TEST_MULTI_FRAME = false;
 
   // Controls:
+  //  Needs to be vectorized and loaded from a json
+  CAMERA_SETTING CTRL_BRIGHTNESS;
+  CAMERA_SETTING CTRL_CONTRAST;
+  CAMERA_SETTING CTRL_SATURATION;
+  CAMERA_SETTING CTRL_GAIN;
+  CAMERA_SETTING CTRL_GAMA;
+  CAMERA_SETTING CTRL_HUE;
+  CAMERA_SETTING CTRL_SHARPNESS;
 
   CAMERA_SETTING CTRL_FOCUS_AUTO;
   CAMERA_SETTING CTRL_FOCUS_ABSOLUTE;
@@ -161,11 +171,12 @@ class CAMERA_PROPERTIES
   CAMERA_SETTING CTRL_WHITE_BALANCE_AUTOMATIC;
   CAMERA_SETTING CTRL_WHITE_BALANCE_TEMP;
 
-  CAMERA_SETTING CTRL_GAIN;
-  CAMERA_SETTING CTRL_GAMA;
-  CAMERA_SETTING CTRL_HUE;
-  CAMERA_SETTING CTRL_SHARPNESS;
+  CAMERA_SETTING POWER_LINE_FREQUENCY;
 
+  CAMERA_SETTING CTRL_CAMERA_CONTROLS;
+
+  CAMERA_SETTING CTRL_EXPOSURE_DYNAMIC_FRAMERATE;
+  
   // ---
   // Camera Enhancements
 
@@ -403,7 +414,7 @@ class CAMERA
   void check_for_save_image_buffer_processed();
   // check to see if current buffer should be saved to disk.
 
-  void run_preprocessing(cv::Mat &Frame);
+  void run_preprocessing(cv::Mat &Frame, unsigned long Frame_Time);
   // Apply orientation (flip logic)
   // Apply Denoising
   // Apply Sharpening
@@ -427,6 +438,7 @@ class CAMERA
   void update_frame();
   // Pull in latest frame from camera in a non thread-safe manner.
 
+  unsigned long PROCESS_ENHANCEMENTS_FRAME_TIME = 0;
   void process_enhancements_frame();
   // Process all enhancements to working frame in a non thread-safe manner.
   
@@ -449,7 +461,9 @@ class CAMERA
   double  TIME_FRAME_PROCESSING;
   double  TIME_ACTUAL_FPS;
   double  TIME_ACTUAL_FRAME_TIME;
-  bool    IS_LOW_LIGHT = false;
+
+  TIMED_IS_READY LOW_LIGHT_DEBOUNCE_TIMER_LL;
+  bool    IS_LOW_LIGHT = true;
   int     LOW_LIGHT_VALUE = 0;
 
   bool FRAME_GEN = false;

@@ -1,3 +1,8 @@
+2.357_251114
+  - Debouncer added to the low light filter.
+  - Added a few, always on, things to the screen, 
+      when displayed.
+
 2.356_251113
   - Camera screen decluttered, with options and 
       statistics available when tapped. 

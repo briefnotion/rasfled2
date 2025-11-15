@@ -444,9 +444,9 @@ int loop_2(bool TTY_Only)
 
   sdSystem.CAMERA_BACKUP.PROPS.FORCED_FRAME_LIMIT_MS = 30;
   
-  // Flip horizontal and vertical
-  sdSystem.CAMERA_BACKUP.PROPS.FLIP_HORIZONTAL  = true;
-  sdSystem.CAMERA_BACKUP.PROPS.FLIP_VERTICAL    = false;
+  // Backwards facing cam, not flipped.
+  sdSystem.CAMERA_BACKUP.PROPS.FLIP_HORIZONTAL  = false;
+  sdSystem.CAMERA_BACKUP.PROPS.FLIP_VERTICAL    = true;
   
   sdSystem.CAMERA_BACKUP.PROPS.SHOW_PATH = true;
 

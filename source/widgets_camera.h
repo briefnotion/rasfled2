@@ -127,7 +127,8 @@ class CAMERA_WIDGET
   void display_camera_adjustments_window(system_data &sdSysData);
   void display_camera_enhancements_window(system_data &sdSysData);
 
-  void display_camera_stats(system_data &sdSysData);
+  void display_camera_stats_enhancements(system_data &sdSysData);
+  void display_camera_stats_times(system_data &sdSysData);
   
   public:
 
