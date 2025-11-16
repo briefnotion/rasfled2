@@ -1329,21 +1329,40 @@ TERMINAL::TERMINAL() :
 
 /**
  * @brief Destructor: Cleans up the PTY and joins the reader thread.
+ * * CRITICAL ORDERING: The child process and file descriptor must be closed/killed 
+ * BEFORE joining the thread, otherwise the thread may block indefinitely on read().
  */
 TERMINAL::~TERMINAL() 
 {
-  if (MASTER_FD > 0) 
-	{
-		close(MASTER_FD);
-  }
-  if (T.joinable()) 
-	{
-		T.join();
-  }
+  std::cout << "TERMINAL destructor called." << std::endl;
+
+  // 1. Terminate the child process (the shell) first.
   if (PID > 0) 
-	{
-		kill(PID, SIGKILL); // Ensure the child process is terminated
+  {
+    std::cout << "Terminating child process (PID: " << PID << ")..." << std::endl;
+    kill(PID, SIGKILL); // Ensure the shell is forcefully terminated
   }
+  
+  // 2. Close the master file descriptor.
+  // This action should unblock the reader thread if it was blocked on read().
+  // We check for > 0, as 0, 1, 2 are stdin, stdout, stderr.
+  if (MASTER_FD > 0) 
+  {
+    std::cout << "Closing MASTER_FD (" << MASTER_FD << ")..." << std::endl;
+    close(MASTER_FD);
+    // Note: Resetting to -1 is good practice after closing
+    MASTER_FD = -1; 
+  }
+
+  // 3. Join the thread.
+  // Since the thread should now be unblocked, join() will complete quickly.
+  if (T.joinable()) 
+  {
+    std::cout << "Joining terminal reader thread..." << std::endl;
+    T.join();
+  }
+  
+  std::cout << "TERMINAL object destruction complete." << std::endl;
 }
 
 /**

@@ -798,7 +798,12 @@ int loop_2(bool TTY_Only)
   // -------------------------------------------------------------------------------------
 
   // Create Terminal Thread
-  sdSystem.TERMINAL_THREAD.create();
+  for (int terms_to_create = 0; terms_to_create < 1; terms_to_create++)
+  {
+    auto new_terminal_ptr = std::make_unique<TERMINAL>();
+    sdSystem.TERMINAL_THREADS.push_back(std::move(new_terminal_ptr));
+    sdSystem.TERMINAL_THREADS[terms_to_create]->create();
+  }
 
   // ---------------------------------------------------------------------------------------
   //  Repeating Sleeping Loop until eXit is triggered.

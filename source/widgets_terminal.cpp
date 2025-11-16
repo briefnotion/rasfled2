@@ -16,7 +16,7 @@
 
 // ---------------------------------------------------------------------------------------
 
-void TERMINAL_SCREEN::display(system_data &sdSysData)
+void TERMINAL_SCREEN::display_terminal(system_data &sdSysData, TERMINAL &Term)
 {
   ImVec4 working_area = get_working_area();
 
@@ -45,7 +45,7 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
       std::string command_to_send;
 
       // Determine the current cursor key mode to send the correct sequence
-      bool app_cursor_mode = sdSysData.TERMINAL_THREAD.APP_CURSOR_MODE;
+      bool app_cursor_mode = Term.APP_CURSOR_MODE;
 
       // Sequences (Normal: CSI, Application: SS3)
       const char* up_seq    = app_cursor_mode ? "\x1BOA" : "\x1B[A";
@@ -167,7 +167,7 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
       // --- Send Command ---
       if (!command_to_send.empty())
       {
-        sdSysData.TERMINAL_THREAD.send_command(command_to_send);
+        Term.send_command(command_to_send);
       }
 
       // 2. Handle Printable Characters (Letters, Numbers, Symbols) - Text Input
@@ -177,13 +177,13 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
       {
         // Lock the terminal's mutex before sending characters to ensure thread safety
         // if the terminal state relies on input order.
-        std::lock_guard<std::mutex> lock(sdSysData.TERMINAL_THREAD.get_mutex()); 
+        std::lock_guard<std::mutex> lock(Term.get_mutex()); 
 
         for (char c : io.InputQueueCharacters)
         {
           // Send the exact character that ImGui resolved from the keyboard state
           std::string char_to_send(1, c);
-          sdSysData.TERMINAL_THREAD.send_command(char_to_send);
+          Term.send_command(char_to_send);
         }
 
         // Clear the queue for the next frame
@@ -204,7 +204,7 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
     // Draw Terminal Screen
     {
       // Use the public access method from the class (or BUF_MUTEX if you made it public)
-      std::lock_guard<std::mutex> lock(sdSysData.TERMINAL_THREAD.BUF_MUTEX);
+      std::lock_guard<std::mutex> lock(Term.BUF_MUTEX);
 
       {
         ImVec2 start_position = ImVec2(0.0f,0.0f);
@@ -219,7 +219,7 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
 
         for (int row = 0; row < TERMINAL::ROWS; row++)
         {
-          sdSysData.TERMINAL_THREAD.get_line_text(row, CURSOR_ON, line, line_reverse, line_reverse_map);
+          Term.get_line_text(row, CURSOR_ON, line, line_reverse, line_reverse_map);
 
           // Text
           ImGui::SetCursorPos(position);
@@ -271,6 +271,11 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
       //ImGui::TextUnformatted("Symbols: [ ] { } █ ▓ ░ ┌ ┐ └ ┘ ─ │ ⠁ ⠃ ⠇ ⠿");
   */
 
+}
+
+void TERMINAL_SCREEN::display(system_data &sdSysData)
+{
+  display_terminal(sdSysData, *sdSysData.TERMINAL_THREADS[0]);
 }
 
 // ---------------------------------------------------------------------------------------

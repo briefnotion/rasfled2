@@ -1288,12 +1288,15 @@ void CAMERA::run_preprocessing(cv::Mat &Frame, unsigned long Frame_Time)
         if (LOW_LIGHT_DEBOUNCE_TIMER_LL.is_ready(Frame_Time))
         {
           IS_LOW_LIGHT = !IS_LOW_LIGHT;
-          if (IS_LOW_LIGHT)
+
+          if (LOW_LIGHT_VALUE < PROPS.ENH_LOW_LIGHT_THRESHOLD)
           {
+            IS_LOW_LIGHT = true;
             LOW_LIGHT_DEBOUNCE_TIMER_LL.set(Frame_Time, 5000);
           }
           else
           {
+            IS_LOW_LIGHT = false;
             LOW_LIGHT_DEBOUNCE_TIMER_LL.set(Frame_Time, 1000);
           }
         }

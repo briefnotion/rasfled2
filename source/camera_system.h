@@ -118,7 +118,7 @@ class CAMERA_SETTING
 {
   public:
   bool      ENABLED = false;
-  string    NAME = "";
+  std::string    NAME = "";
   uint32_t  ADDRESS = 0x0;
   int       MINIMUM = 0;
   int       MAXIMUM = 0;
@@ -463,7 +463,7 @@ class CAMERA
   double  TIME_ACTUAL_FRAME_TIME;
 
   TIMED_IS_READY LOW_LIGHT_DEBOUNCE_TIMER_LL;
-  bool    IS_LOW_LIGHT = true;
+  bool    IS_LOW_LIGHT = false;
   int     LOW_LIGHT_VALUE = 0;
 
   bool FRAME_GEN = false;

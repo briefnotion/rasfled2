@@ -36,6 +36,11 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
+void add_line_mod_v(ImDrawList *Draw_List, ImVec2 &Point1, ImVec2 &Point2, ImColor &Color, float Thickness);
+void add_line_mod_h(ImDrawList *Draw_List, ImVec2 &Point1, ImVec2 &Point2, ImColor &Color, float Thickness);
+
+// ---------------------------------------------------------------------------------------
+
 class CAMERA_WIDGET
 {
   private:
@@ -101,14 +106,14 @@ class CAMERA_WIDGET
   // These coordinates create the three connected trapezoids.
 
   // Line Thickness
-  float THICKNESS_1_A = 16.0f;
+  float THICKNESS_1_A = 45.0f;
   float THICKNESS_1_B = 10.0f;
-  float THICKNESS_2_A = 13.0f;
+  float THICKNESS_2_A = 30.0f;
   float THICKNESS_2_B = 7.0f;
-  float THICKNESS_3_A = 11.0f;
+  float THICKNESS_3_A = 10.0f;
   float THICKNESS_3_B = 5.0f;
 
-  const ImU32 COLOR_BLK = IM_COL32(0, 0, 0, 255);   // 5ft
+  ImColor COLOR_BLK = ImColor(0, 0, 0, 64);   // 5ft
 
   // Some working class variables
   // Variables for image size and centering, declared here to be accessible in class scopes.

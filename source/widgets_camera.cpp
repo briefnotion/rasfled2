@@ -15,6 +15,29 @@
 #include "widgets_camera.h"
 
 using namespace std;
+
+// ---------------------------------------------------------------------------------------
+
+void add_line_mod_v(ImDrawList *Draw_List, ImVec2 &Point1, ImVec2 &Point2, ImColor &Color, float Thickness)
+{
+  ImVec2 y_top_l = ImVec2(Point1.x - (Thickness / 2.0f), Point1.y);
+  ImVec2 y_top_r = ImVec2(Point1.x + (Thickness / 2.0f), Point1.y);
+  ImVec2 y_bot_r = ImVec2(Point2.x + (Thickness / 2.0f), Point2.y);
+  ImVec2 y_bot_l = ImVec2(Point2.x - (Thickness / 2.0f), Point2.y);
+
+  Draw_List->AddQuadFilled(y_top_l, y_top_r, y_bot_r, y_bot_l, Color);
+}
+
+void add_line_mod_h(ImDrawList *Draw_List, ImVec2 &Point1, ImVec2 &Point2, ImColor &Color, float Thickness)
+{
+  ImVec2 y_top_l = ImVec2(Point1.x + (Thickness / 2.0f), Point1.y - (Thickness / 2.0f));
+  ImVec2 y_top_r = ImVec2(Point2.x - (Thickness / 2.0f), Point2.y - (Thickness / 2.0f));
+  ImVec2 y_bot_r = ImVec2(Point2.x + (Thickness / 2.0f), Point2.y + (Thickness / 2.0f));
+  ImVec2 y_bot_l = ImVec2(Point1.x - (Thickness / 2.0f), Point1.y + (Thickness / 2.0f));
+
+  Draw_List->AddQuadFilled(y_top_l, y_top_r, y_bot_r, y_bot_l, Color);
+}
+
 // ---------------------------------------------------------------------------------------
 
 // Helper to convert normalized (X, Y) to absolute screen coordinates (ImVec2)
@@ -57,46 +80,51 @@ void CAMERA_WIDGET::display_path(system_data &sdSysData)
   {
     // --- Draw Segment 1: Green Path (Y0 to Y1) ---
     // Draw Left, Right, and Top (Y1)
-    draw_list->AddLine(P0L, P1L, COLOR_BLK, THICKNESS_1_A); // Left Line
-    draw_list->AddLine(P0R, P1R, COLOR_BLK, THICKNESS_1_A); // Right Line
-    draw_list->AddLine(P1L, P1R, COLOR_BLK, THICKNESS_1_A); // Top Line (Green boundary)
+    add_line_mod_v(draw_list, P0L, P1L, COLOR_BLK, THICKNESS_1_A + 6.0f); // Left Line
+    add_line_mod_v(draw_list, P0R, P1R, COLOR_BLK, THICKNESS_1_A + 6.0f); // Right Line
+    add_line_mod_h(draw_list, P1L, P1R, COLOR_BLK, THICKNESS_1_B + 6.0f); // Top Line (Green boundary)
 
     // --- Draw Segment 2: Yellow Path (Y1 to Y2) ---
     // Draw Left, Right, and Top (Y2). The bottom is already connected by P1L/P1R.
-    draw_list->AddLine(P1L, P2L, COLOR_BLK, THICKNESS_2_A); // Left Line
-    draw_list->AddLine(P1R, P2R, COLOR_BLK, THICKNESS_2_A); // Right Line
-    draw_list->AddLine(P2L, P2R, COLOR_BLK, THICKNESS_2_A); // Top Line (Yellow boundary)
+    add_line_mod_v(draw_list, P1L, P2L, COLOR_BLK, THICKNESS_2_A + 6.0f); // Left Line
+    add_line_mod_v(draw_list, P1R, P2R, COLOR_BLK, THICKNESS_2_A + 6.0f); // Right Line
+    add_line_mod_h(draw_list, P2L, P2R, COLOR_BLK, THICKNESS_2_B + 6.0f); // Top Line (Yellow boundary)
 
     // --- Draw Segment 3: Red Path (Y2 to Y3) ---
     // Draw Left, Right, and Top (Y3). The bottom is already connected by P2L/P2R.
-    draw_list->AddLine(P2L, P3L, COLOR_BLK, THICKNESS_3_A); // Left Line
-    draw_list->AddLine(P2R, P3R, COLOR_BLK, THICKNESS_3_A); // Right Line
-    draw_list->AddLine(P3L, P3R, COLOR_BLK, THICKNESS_3_A); // Top Line (Farthest boundary)
+    add_line_mod_v(draw_list, P2L, P3L, COLOR_BLK, THICKNESS_3_A + 6.0f); // Left Line
+    add_line_mod_v(draw_list, P2R, P3R, COLOR_BLK, THICKNESS_3_A + 6.0f); // Right Line
+    add_line_mod_h(draw_list, P3L, P3R, COLOR_BLK, THICKNESS_3_B + 6.0f); // Top Line (Farthest boundary)
   }
   
   // Color Lines
   {
-    ImU32 COLOR_GRN = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_GREEN);   // 5ft
-    ImU32 COLOR_YLW = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_YELLOW);  // 10ft 
-    ImU32 COLOR_RED = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_RED);     // 15ft
+    ImColor COLOR_GRN = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_GREEN);   // 5ft
+    ImColor COLOR_YLW = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_YELLOW);  // 10ft 
+    ImColor COLOR_RED = sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_STANDARD(RAS_RED);     // 15ft
+
+    COLOR_GRN.Value.w = 0.25f;
+    COLOR_YLW.Value.w = 0.25f;
+    COLOR_RED.Value.w = 0.25f;
 
     // --- Draw Segment 1: Green Path (Y0 to Y1) ---
     // Draw Left, Right, and Top (Y1)
-    draw_list->AddLine(P0L, P1L, COLOR_GRN, THICKNESS_1_B); // Left Line
-    draw_list->AddLine(P0R, P1R, COLOR_GRN, THICKNESS_1_B); // Right Line
-    draw_list->AddLine(P1L, P1R, COLOR_GRN, THICKNESS_1_B); // Top Line (Green boundary)
+    add_line_mod_v(draw_list, P0L, P1L, COLOR_GRN, THICKNESS_1_A); // Left Line
+    add_line_mod_v(draw_list, P0R, P1R, COLOR_GRN, THICKNESS_1_A); // Right Line
+    add_line_mod_h(draw_list, P1L, P1R, COLOR_GRN, THICKNESS_1_B); // Top Line (Green boundary)
 
     // --- Draw Segment 2: Yellow Path (Y1 to Y2) ---
     // Draw Left, Right, and Top (Y2). The bottom is already connected by P1L/P1R.
-    draw_list->AddLine(P1L, P2L, COLOR_YLW, THICKNESS_2_B); // Left Line
-    draw_list->AddLine(P1R, P2R, COLOR_YLW, THICKNESS_2_B); // Right Line
-    draw_list->AddLine(P2L, P2R, COLOR_YLW, THICKNESS_2_B); // Top Line (Yellow boundary)
-
+    
+    add_line_mod_v(draw_list, P1L, P2L, COLOR_YLW, THICKNESS_2_A); // Left Line
+    add_line_mod_v(draw_list, P1R, P2R, COLOR_YLW, THICKNESS_2_A); // Right Line
+    add_line_mod_h(draw_list, P2L, P2R, COLOR_YLW, THICKNESS_2_B); // Top Line (Yellow boundary)
+    
     // --- Draw Segment 3: Red Path (Y2 to Y3) ---
     // Draw Left, Right, and Top (Y3). The bottom is already connected by P2L/P2R.
-    draw_list->AddLine(P2L, P3L, COLOR_RED, THICKNESS_3_B); // Left Line
-    draw_list->AddLine(P2R, P3R, COLOR_RED, THICKNESS_3_B); // Right Line
-    draw_list->AddLine(P3L, P3R, COLOR_RED, THICKNESS_3_B); // Top Line (Farthest boundary)
+    add_line_mod_v(draw_list, P2L, P3L, COLOR_RED, THICKNESS_3_A); // Left Line
+    add_line_mod_v(draw_list, P2R, P3R, COLOR_RED, THICKNESS_3_A); // Right Line
+    add_line_mod_h(draw_list, P3L, P3R, COLOR_RED, THICKNESS_3_B); // Top Line (Farthest boundary)
   }
 }
 
@@ -537,7 +565,9 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
   }
   else
   {
-    if (SHOW_BUTTONS_TIMER.is_ready(sdSysData.PROGRAM_TIME.current_frame_time()))
+    if (SHOW_BUTTONS_TIMER.is_ready(sdSysData.PROGRAM_TIME.current_frame_time()) && 
+        DISPLAY_ADJUSTMENTS == false && 
+        DISPLAY_CAMERA_SETTINGS == false)
     {
       SHOW_BUTTONS = false;
     }

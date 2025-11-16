@@ -217,8 +217,8 @@ class system_data
 
   COMMAND_THREAD  COMMAND_THREADS;
 
-  // Terminal
-  TERMINAL        TERMINAL_THREAD;
+  // Terminal Threads
+  std::deque<std::unique_ptr<TERMINAL>> TERMINAL_THREADS;
 
   // Radio Variables
   AIRCRAFT_COORDINATOR AIRCRAFT_COORD;

@@ -47,12 +47,13 @@ class TERMINAL_SCREEN
 
   TIMED_IS_READY  CURSOR_BLINK;
   bool            CURSOR_ON = false;
-  
+
+  void display_terminal(system_data &sdSysData, TERMINAL &Term);
+
   public:  
-  
-  void display(system_data &sdSysData);
+
   // Draw all changes to Panel.
-  // Returns true if panel was redrawn.
+  void display(system_data &sdSysData);
 
 };
 // ---------------------------------------------------------------------------------------
