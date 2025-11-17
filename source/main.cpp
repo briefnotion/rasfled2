@@ -798,7 +798,7 @@ int loop_2(bool TTY_Only)
   // -------------------------------------------------------------------------------------
 
   // Create Terminal Thread
-  for (int terms_to_create = 0; terms_to_create < 1; terms_to_create++)
+  for (int terms_to_create = 0; terms_to_create < 3; terms_to_create++)
   {
     auto new_terminal_ptr = std::make_unique<TERMINAL>();
     sdSystem.TERMINAL_THREADS.push_back(std::move(new_terminal_ptr));
@@ -1070,8 +1070,27 @@ int loop_2(bool TTY_Only)
     //  Never comment this out or the system will never sleep
     if (input_from_user.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
+      // ---------------------------------------------------------------------------------------
+      
+      //  Check terminal thereads for closed terminals
+      for (int terminal_thread_pos = (int)sdSystem.TERMINAL_THREADS.size() -1; terminal_thread_pos >= 0; terminal_thread_pos--)
+      {
+        if (sdSystem.TERMINAL_THREADS[terminal_thread_pos]->SHELL_EXITED)
+        {
+          sdSystem.TERMINAL_THREADS.erase(sdSystem.TERMINAL_THREADS.begin() + terminal_thread_pos);
+          if (sdSystem.PANEL_CONTROL.PANELS.TERMINAL_SELECTED > (int)sdSystem.TERMINAL_THREADS.size() -1)
+          {
+            sdSystem.PANEL_CONTROL.PANELS.TERMINAL_SELECTED = (int)sdSystem.TERMINAL_THREADS.size()- 1;
+          }
+        }
+      }
+
+      // ---------------------------------------------------------------------------------------
+
       // Read Hardware Status before printing to screen.
       sdSystem.read_hardware_status(1000);
+
+      // ---------------------------------------------------------------------------------------
 
       // Read System log files
       while (watcher_daemon_log.line_avail() == true)
@@ -1079,6 +1098,8 @@ int loop_2(bool TTY_Only)
         //cons.Screen.Log_Screen_TEXT_BOX.add_line(sdSystem.PROGRAM_TIME.current_frame_time(), watcher_daemon_log.get_next_line());
         cons_2.update_daemon_log(sdSystem, watcher_daemon_log.get_next_line() + "\n");
       }
+
+      // ---------------------------------------------------------------------------------------
 
       // Read ADS-B Aircraft JSON
       if (watcher_aircraft_json.changed() == true)
@@ -1089,8 +1110,12 @@ int loop_2(bool TTY_Only)
                                                           sdSystem.GPS_SYSTEM.CURRENT_POSITION.LATITUDE, sdSystem.GPS_SYSTEM.CURRENT_POSITION.LONGITUDE);
       }
 
+      // ---------------------------------------------------------------------------------------
+
       processcommandlineinput(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
       extraanimationdoorcheck2(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations);
+
+      // ---------------------------------------------------------------------------------------
 
       // Also delayed, File maintenance.
       //if (sdSystem.booRunning_State_File_Dirty == true)

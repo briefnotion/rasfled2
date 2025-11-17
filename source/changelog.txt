@@ -1,3 +1,11 @@
+2.359_251117
+  - Corrected a few terminal bugs. 
+      vttest will run now without crashing rasfled.
+      However, top will terminate rasfled when the 
+      program exits.  
+  - Multiple terminals are availble.  Soft limited 
+      to 9.
+
 2.358_251116
   - Changed the way the drive paths in the camera 
       looks.

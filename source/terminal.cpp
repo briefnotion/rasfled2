@@ -407,55 +407,79 @@ bool TERMINAL::process_csi_erase_and_edit(char final_char, const std::vector<int
   // Helper lambda to clear a line range with DEFAULT_CELL
   auto clear_row_range = [&](int start_col, int end_col) 
   {
-    std::fill(SCREEN[CURRENT_ROW] + start_col, 
-              SCREEN[CURRENT_ROW] + end_col, 
-              DEFAULT_CELL);
+    // DEFENSIVE FIX: Check CURRENT_ROW bounds before accessing SCREEN
+    if (CURRENT_ROW >= 0 && CURRENT_ROW < ROWS) {
+      std::fill(SCREEN[CURRENT_ROW] + start_col, 
+            SCREEN[CURRENT_ROW] + end_col, 
+            DEFAULT_CELL);
+    }
   };
 
   switch (final_char)
   {
     case 'P': // Delete Character (DCH): ESC [ P P
     {
-      int count = param;
+      // DEFENSIVE FIX: Ensure count is non-negative. This prevents pointer underflow 
+      // if 'param' is unexpectedly negative.
+      int count = std::max(0, param); 
+      
       if (CURRENT_COL < COLS) 
       {
-        // Calculate the number of cells to shift. Don't shift past the end.
-        int shift_len = std::max(0, COLS - (CURRENT_COL + count));
+        // Calculate the column where the shift operation starts taking data from.
+        int src_start_col = CURRENT_COL + count;
+        
+        // --- CRITICAL FIX START: Ensuring std::copy works with valid ranges ---
+        
+        // 1. Calculate the actual number of cells that can be shifted from the right.
+        // This is the number of columns on screen to the right of the shift source.
+        // If src_start_col is >= COLS, this will correctly be 0.
+        int shift_cells = std::max(0, COLS - src_start_col);
         
         // Shift the remaining characters left (overwriting the deleted ones)
-        std::copy(SCREEN[CURRENT_ROW] + CURRENT_COL + count, 
-                  SCREEN[CURRENT_ROW] + COLS, 
-                  SCREEN[CURRENT_ROW] + CURRENT_COL);
+        if (shift_cells > 0)
+        {
+          // Source Range: [src_start_col] to [COLS]
+          // Destination Range: [CURRENT_COL] to [CURRENT_COL + shift_cells]
+          // The source end pointer is SCREEN[CURRENT_ROW] + COLS (the correct boundary).
+          std::copy(SCREEN[CURRENT_ROW] + src_start_col, 
+                    SCREEN[CURRENT_ROW] + COLS, 
+                    SCREEN[CURRENT_ROW] + CURRENT_COL);
+        }
         
-        // Fill the freed space at the end with DEFAULT_CELL
-        int fill_start_col = CURRENT_COL + shift_len;
+        // 2. Fill the freed space at the end with DEFAULT_CELL
+        // The fill always starts at CURRENT_COL + shift_cells
+        int fill_start_col = CURRENT_COL + shift_cells;
         clear_row_range(fill_start_col, COLS);
+        
+        // --- CRITICAL FIX END ---
       }
       break;
     }
 
     case '@': // Insert Character (ICH): ESC [ P @
     {
-      int count = param;
+      int count = std::max(0, param); // DEFENSIVE FIX
       if (CURRENT_COL < COLS) 
       {
-        // Source Start (A): Where characters begin (CURRENT_COL)
         auto src_start = SCREEN[CURRENT_ROW] + CURRENT_COL;
         
-        // Source End (B): The character before the ones that fall off the end.
-        // Fix: Use std::min to ensure B >= A (Source End >= Source Start), preventing the invalid range.
-        auto src_end = std::min(SCREEN[CURRENT_ROW] + COLS, SCREEN[CURRENT_ROW] + COLS - count);
+        // The number of cells that will fit after shifting
+        int cells_to_shift = COLS - CURRENT_COL - count;
         
-        // Destination End (C): One past the last column.
-        auto dst_end = SCREEN[CURRENT_ROW] + COLS;
-
-        // 1. Shift characters right to make space.
-        // This copy is only executed if src_start < src_end (i.e., if there is room to shift).
-        if (src_start < src_end) 
+        if (cells_to_shift > 0)
         {
-            std::copy_backward(src_start, src_end, dst_end); 
+          // Source range to shift right: from CURRENT_COL up to COLS - count
+          auto actual_src_end = src_start + cells_to_shift; 
+          
+          // Destination range starts at CURRENT_COL + count
+          auto dst_start = src_start + count;
+          
+          // Shift characters right using copy_backward (required for overlapping ranges where destination is ahead of source)
+          std::copy_backward(actual_src_end - cells_to_shift, // Start of source range (CURRENT_COL)
+                             actual_src_end, // End of source range (COLS - count)
+                             dst_start + cells_to_shift); // End of destination range (COLS)
         }
-        
+
         // 2. Fill the newly inserted space with DEFAULT_CELL
         int fill_limit = std::min(COLS, CURRENT_COL + count);
         clear_row_range(CURRENT_COL, fill_limit);
@@ -465,7 +489,7 @@ bool TERMINAL::process_csi_erase_and_edit(char final_char, const std::vector<int
 
     case 'X': // Erase Character (ECH): ESC [ P X
     {
-      int count = param;
+      int count = std::max(0, param); // DEFENSIVE FIX
       int end_col = std::min(COLS, CURRENT_COL + count);
       clear_row_range(CURRENT_COL, end_col);
       break;
@@ -499,6 +523,8 @@ bool TERMINAL::process_csi_erase_and_edit(char final_char, const std::vector<int
       // Default param for J is 0, not 1, so we must re-evaluate.
       int param_j = get_param(params, 0, 0); 
       
+      // NOTE: This function relies on this->clear_row_range_full_line(row), which must be guaranteed to be safe.
+      
       if (param_j == 2) 
       { 
         // Clear entire screen (within ROW boundaries) and home cursor
@@ -528,23 +554,18 @@ bool TERMINAL::process_csi_erase_and_edit(char final_char, const std::vector<int
         clear_row_range(0, CURRENT_COL + 1); // Clear up to cursor on current line
       }
 
-      // NOTE: Full-screen clear (param 2) should respect SCROLL_TOP/SCROLL_BOTTOM limits
-      // if the erase is supposed to only apply to the scroll region, but typically J2 means the whole screen.
-      // I'll assume J2 means full screen (0 to ROWS-1) unless specified otherwise.
       break;
     }
 
     case 'L': // Insert Line (IL): ESC [ P L
     { 
       // Insert param lines at CURRENT_ROW, shifting lines down within the scroll region.
-      int count = param;
+      int count = std::max(0, param); // DEFENSIVE FIX
       
       // Clamp count to prevent shifting past the scroll boundaries
       int effective_count = std::min(count, SCROLL_BOTTOM - CURRENT_ROW + 1);
 
       // 1. Move lines down: Iterate backward from the bottom of the scroll region.
-      // Range to move: [CURRENT_ROW, SCROLL_BOTTOM - effective_count]
-      // Destination: [CURRENT_ROW + effective_count, SCROLL_BOTTOM]
       for (int r = SCROLL_BOTTOM; r >= CURRENT_ROW + effective_count; --r) 
       {
         // Copy the row from 'effective_count' positions above
@@ -562,14 +583,12 @@ bool TERMINAL::process_csi_erase_and_edit(char final_char, const std::vector<int
     case 'M': // Delete Line (DL): ESC [ P M
     { 
       // Delete param lines at CURRENT_ROW, shifting lines up within the scroll region.
-      int count = param;
+      int count = std::max(0, param); // DEFENSIVE FIX
       
       // Clamp count to prevent shifting past the scroll boundaries
       int effective_count = std::min(count, SCROLL_BOTTOM - CURRENT_ROW + 1);
 
       // 1. Move lines up: Iterate forward from the deletion point (CURRENT_ROW).
-      // Source: [CURRENT_ROW + effective_count, SCROLL_BOTTOM]
-      // Destination: [CURRENT_ROW, SCROLL_BOTTOM - effective_count]
       for (int r = CURRENT_ROW; r <= SCROLL_BOTTOM - effective_count; ++r) 
       {
         // Copy the row from 'effective_count' positions below
@@ -579,7 +598,6 @@ bool TERMINAL::process_csi_erase_and_edit(char final_char, const std::vector<int
       }
 
       // 2. Clear the lines freed at the bottom of the scroll region.
-      // Lines to clear: [SCROLL_BOTTOM - effective_count + 1, SCROLL_BOTTOM]
       for (int r = SCROLL_BOTTOM - effective_count + 1; r <= SCROLL_BOTTOM; ++r) 
       {
         this->clear_row_range_full_line(r);
@@ -907,12 +925,11 @@ void TERMINAL::process_output(const std::string& raw_text)
       if (i + 1 < raw_text.size() && raw_text[i + 1] == '[') 
       {
         // This is a CSI sequence: ESC [
-        const size_t csi_start_i = i;
         i += 2; // Consume ESC and [
         
         // --- 0. Check for optional DEC Private Mode Indicator ('?' or '>') ---
         bool is_dec_private = false;
-        if (i + 1 < raw_text.size() && (raw_text[i] == '?' || raw_text[i] == '>')) 
+        if (i < raw_text.size() && (raw_text[i] == '?' || raw_text[i] == '>')) 
         {
           if (raw_text[i] == '?') 
           {
@@ -924,6 +941,7 @@ void TERMINAL::process_output(const std::string& raw_text)
         // --- 1. Extract optional numerical parameters (P1;P2;...) ---
         std::vector<int> params;
         std::string current_param_str;
+        bool abort_csi = false; // Flag to indicate premature termination
 
         while (i < raw_text.size()) 
         {
@@ -947,17 +965,28 @@ void TERMINAL::process_output(const std::string& raw_text)
           }
           else 
           {
-            // Abort: Found an unexpected character. Reset pointer to ESC to ensure it is consumed as an unhandled ESC.
-            i = csi_start_i; 
-            goto continue_next_char; 
+            // Abort: Found an unexpected character.
+            abort_csi = true;
+            break; 
           }
           i++;
         }
-
-        // Push the final collected parameter (or default 0)
-        int p_last = current_param_str.empty() ? 0 : std::stoi(current_param_str);
-        params.push_back(p_last);
-
+        
+        // Push the final collected parameter (or default 0) if not aborted
+        if (!abort_csi)
+        {
+          int p_last = current_param_str.empty() ? 0 : std::stoi(current_param_str);
+          params.push_back(p_last);
+        }
+        
+        // --- Handle Aborted Sequence ---
+        if (abort_csi)
+        {
+          // If aborted, consume all characters used so far in the sequence 
+          // plus the unexpected character to prevent reprocessing.
+          i++; 
+          goto continue_next_char; 
+        }
 
         // --- 2. Check for optional intermediate bytes (0x20-0x2F) and consume them ---
         // The intermediate character is consumed here, but its value is not currently used by the processing functions.
@@ -986,8 +1015,41 @@ void TERMINAL::process_output(const std::string& raw_text)
           }
         } 
         
-        // If the sequence was aborted or incomplete, we fall through.
-        goto continue_next_char; 
+        // --- CRITICAL FIX START: Handle Incomplete CSI Sequence ---
+        // If we reach here, the sequence was either terminated with an unexpected char
+        // (handled above) OR the input ended before the final char (incomplete).
+        // Since we consumed ESC and [ at the start, we need to advance i at least
+        // to prevent reprocessing the ESC. However, the parser state has already
+        // consumed all valid parts up to the end of the buffer. We rely on the 
+        // increment from the parameter/intermediate loops to have progressed 'i'.
+        // If the entire buffer was processed and 'i' stopped at raw_text.size(), 
+        // the main loop should naturally increment and exit. If it was an incomplete
+        // sequence, the main loop must break without incrementing 'i' to re-process 
+        // the remaining partial data when the next chunk arrives (handled by reader_thread). 
+        // Since the reader_thread buffers and sends only complete sequences, 
+        // an incomplete sequence here means we hit end of buffer, and we rely 
+        // on the next loop iteration check (i < raw_text.size()) to be false.
+        
+        // In the context of a single loop iteration, if we didn't consume a final char,
+        // we must make sure we don't jump to the loop end without advancing 'i' 
+        // (which would cause the infinite loop if i didn't progress).
+        
+        // Since the outer loop will handle the progression if it didn't jump to 
+        // 'continue_next_char' and we rely on the reader_thread to send complete chunks,
+        // we should simply break out of the processing if the command was incomplete 
+        // here to ensure 'i' is not incremented and the main loop terminates naturally 
+        // (which the loop structure already does).
+        
+        // The critical flaw was the goto at line 83, which is removed now.
+        // We rely on the natural progression of the 'i' pointer up to the point 
+        // of failure/end of buffer.
+        
+        // --- CRITICAL FIX END ---
+        
+        // If sequence was incomplete or unhandled, we fall through here, 
+        // allowing the main 'for' loop to check i < raw_text.size() and terminate 
+        // the processing block if necessary.
+        goto continue_next_char;
       }
       
       // --- Generic Escape Sequence Handler (Non-CSI) ---
@@ -1025,7 +1087,8 @@ void TERMINAL::process_output(const std::string& raw_text)
           } 
           else 
           {
-            i += 2; // Incomplete sequence: Consume ESC and #
+            // Incomplete sequence: Consume ESC and # only
+            i += 2; 
             handled_esc = true;
           }
         }
@@ -1191,7 +1254,7 @@ void TERMINAL::process_output(const std::string& raw_text)
       }
         
       // If ESC wasn't followed by a recognized sequence or if the string ended right after ESC
-      i++; 
+      i++; // Always consume the ESC character itself
       goto continue_next_char;
     } 
     
@@ -1494,24 +1557,25 @@ void TERMINAL::reader_thread()
   // Loop until the master file descriptor becomes invalid or an error occurs
   while (MASTER_FD > 0)
   {
-    // Try to read up to 511 bytes (leaving 1 for null terminator, although not strictly needed here)
+    // We are assuming MASTER_FD is a blocking file descriptor here.
     ssize_t n = read(MASTER_FD, buf, sizeof(buf) - 1);
     
     if (n < 0) 
     {
       // Error reading (e.g., ECONNRESET, EIO). Check errno for details.
-      // A non-blocking read returning EAGAIN is not necessarily an error if handled.
-      if (errno != EINTR) { 
-          // Handle read error appropriately (e.g., log and break)
-          //std::cerr << "Read error: " << (errno) << std::endl;
+      // If the FD was closed by another thread, this will fire an error.
+      if (errno != EINTR) 
+      { 
+        std::cerr << "TERMINAL reader_thread: Read error. Code: " << errno << std::endl;
       }
       break; 
     }
     
     if (n == 0) 
     {
-      // End-of-file (shell process exited)
-      break;
+      // End-of-file (shell process exited and pipe/pty slave end closed)
+      std::cerr << "TERMINAL reader_thread: EOF detected (Shell exited)." << std::endl;
+      break; 
     }
     
     // Convert read bytes to a C++ string
@@ -1519,14 +1583,12 @@ void TERMINAL::reader_thread()
     raw_text += raw_output;
 
     // Use the state tracker to determine if the *entire* accumulated buffer 
-    // (raw_output) is currently in a NORMAL state (i.e., no incomplete escape sequence).
-    // The tracker maintains its internal state across calls.
+    // is currently in a NORMAL state.
     bool is_complete = state_tracker.parse_and_check_completion(raw_output);
 
     if (is_complete)
     {
-      // The shell has sent a complete chunk of data (likely a prompt or command output)
-      // that doesn't end mid-sequence. It is safe to process.
+      // The shell has sent a complete chunk of data. It is safe to process.
       std::lock_guard<std::mutex> lock(BUF_MUTEX);
       process_output(raw_text);
       
@@ -1542,7 +1604,25 @@ void TERMINAL::reader_thread()
     process_output(raw_text);
   }
 
-  std::cerr << "TERMINAL reader_thread finished." << std::endl;
+  std::cerr << "TERMINAL reader_thread exiting." << std::endl;
+
+  // --- CRITICAL STEP: CLEANUP CHILD PROCESS (Zombie Prevention) ---
+  // The shell process (PID) is guaranteed to have exited if we hit EOF (n=0).
+  int status;
+  // We use WNOHANG just in case, but after EOF, waitpid should generally return the status immediately.
+  if (PID > 0 && waitpid(PID, &status, WNOHANG) > 0) \
+  {
+    std::cerr << "TERMINAL reader_thread: Successfully collected exit status for PID " << PID << "." << std::endl;
+  } 
+  else if (PID > 0) 
+  {
+    // If waitpid fails, it might mean the process was already waited for, or the 
+    // process hasn't fully cleaned up yet (less likely after EOF).
+    std::cerr << "TERMINAL reader_thread: Warning: waitpid did not return status for PID " << PID << "." << std::endl;
+  }
+
+  // Set the flag for the main application to clean up this TERMINAL object.
+  SHELL_EXITED = true;
 }
 
 void TERMINAL::create()

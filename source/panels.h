@@ -89,6 +89,8 @@ class SCREEN4_PANELS
   // Last Known Good Position
   DOUBLE_VEC2 LAST_KNOWN_GOOD_POSITION;
   bool MAP_CENTER_TO_LAST_KNOWN_POSITION = false;
+
+  int TERMINAL_SELECTED = 0;
 };
 
 

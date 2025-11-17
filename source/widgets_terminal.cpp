@@ -18,7 +18,7 @@
 
 void TERMINAL_SCREEN::display_terminal(system_data &sdSysData, TERMINAL &Term)
 {
-  ImVec4 working_area = get_working_area();
+  //ImVec4 working_area = get_working_area();
 
   // Gather keyboard input
   {
@@ -193,7 +193,7 @@ void TERMINAL_SCREEN::display_terminal(system_data &sdSysData, TERMINAL &Term)
   }
 
   // Create terminal screen window
-  ImGui::BeginChild("Terminal", ImVec2(working_area.z, working_area.w), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+  //ImGui::BeginChild("Terminal", ImVec2(working_area.z, working_area.w), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
     if (CURSOR_BLINK.is_ready(sdSysData.PROGRAM_TIME.current_frame_time()))
     {
@@ -243,7 +243,7 @@ void TERMINAL_SCREEN::display_terminal(system_data &sdSysData, TERMINAL &Term)
 
       }
     }
-    ImGui::EndChild();
+    //ImGui::EndChild();
   }
 
   /*
@@ -275,7 +275,72 @@ void TERMINAL_SCREEN::display_terminal(system_data &sdSysData, TERMINAL &Term)
 
 void TERMINAL_SCREEN::display(system_data &sdSysData)
 {
-  display_terminal(sdSysData, *sdSysData.TERMINAL_THREADS[0]);
+  ImVec4 working_area = get_working_area();
+  ImGui::BeginChild("Terminal", ImVec2(working_area.z, working_area.w), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+  {
+    ImGui::SetCursorPos(ImVec2(0,0));
+    if (SHOW_BUTTONS == false)
+    {
+      if (ImGui::InvisibleButton("Hide Buttons", ImVec2(working_area.z, working_area.w)))
+      {
+        SHOW_BUTTONS = true;
+        SHOW_BUTTONS_TIMER.set(sdSysData.PROGRAM_TIME.current_frame_time(), 30000);
+      }
+    }
+    else
+    {
+      if (SHOW_BUTTONS_TIMER.is_ready(sdSysData.PROGRAM_TIME.current_frame_time()))
+      {
+        SHOW_BUTTONS = false;
+      }
+    }
+
+    if (SHOW_BUTTONS)
+    {
+      while (BC_TERMINAL_SELECT_BUTTONS.size() > sdSysData.TERMINAL_THREADS.size() + 1)
+      {
+        BC_TERMINAL_SELECT_BUTTONS.pop_back();
+      }
+
+      while (BC_TERMINAL_SELECT_BUTTONS.size() < sdSysData.TERMINAL_THREADS.size() + 1)
+      {
+        BUTTON_TOGGLE_COLOR tmp_terminal_button;
+        BC_TERMINAL_SELECT_BUTTONS.push_back(tmp_terminal_button);
+      }
+
+      ImGui::SetCursorPos(ImVec2(0.0f, 0.0f));
+      for (int pos = 0; pos < (int)sdSysData.TERMINAL_THREADS.size(); pos++)
+      {
+        if (BC_TERMINAL_SELECT_BUTTONS[pos].button_toggle_color(sdSysData, to_string(pos + 1), to_string(pos + 1), 
+                                                    sdSysData.PANEL_CONTROL.PANELS.TERMINAL_SELECTED == pos, 
+                                                    RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.PANEL_CONTROL.PANELS.TERMINAL_SELECTED = pos;
+        }
+        ImGui::SameLine();
+      }
+      
+      if (sdSysData.TERMINAL_THREADS.size() < 9)
+      {
+        if (BC_TERMINAL_SELECT_BUTTONS[sdSysData.TERMINAL_THREADS.size()].button_toggle_color(sdSysData, "+", "+", 
+                                          false, 
+                                          RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          auto new_terminal_ptr = std::make_unique<TERMINAL>();
+          new_terminal_ptr->create();
+          sdSysData.TERMINAL_THREADS.push_back(std::move(new_terminal_ptr));
+          sdSysData.PANEL_CONTROL.PANELS.TERMINAL_SELECTED = sdSysData.TERMINAL_THREADS.size() - 1;
+        }
+      }
+    }
+
+    if (sdSysData.TERMINAL_THREADS.size() > 0)
+    {
+      display_terminal(sdSysData, *sdSysData.TERMINAL_THREADS[sdSysData.PANEL_CONTROL.PANELS.TERMINAL_SELECTED]);
+    }
+
+    ImGui::EndChild();
+  }
 }
 
 // ---------------------------------------------------------------------------------------

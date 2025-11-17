@@ -19,21 +19,15 @@
 #include <unistd.h>
 #include <pty.h>
 #include <thread>
+#include <vector>
 
 // Rasfled Includes
 #include "system.h"
-//#include "LEDstuff.h"
 #include "screen4_helper.h"
 #include "widgets.h"
-//#include "widgets_drawing.h"
-//#include "animations_handler.h"
-
-//#include "stringthings.h"
-//#include "fled_time.h"
 
 // IMGui Includes
 #include "../../imgui/imgui.h"
-//#include "../../imgui/misc/cpp/imgui_stdlib.h"
 
 using namespace std;
 
@@ -47,6 +41,11 @@ class TERMINAL_SCREEN
 
   TIMED_IS_READY  CURSOR_BLINK;
   bool            CURSOR_ON = false;
+
+  // Buttons
+  TIMED_IS_READY SHOW_BUTTONS_TIMER;
+  bool SHOW_BUTTONS = false;
+  vector<BUTTON_TOGGLE_COLOR> BC_TERMINAL_SELECT_BUTTONS;
 
   void display_terminal(system_data &sdSysData, TERMINAL &Term);
 

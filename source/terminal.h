@@ -22,6 +22,7 @@
 #include <thread>
 #include <regex>
 #include <signal.h>   // For SIGKILL and other signal constants
+#include <sys/wait.h> // For waitpid
 
 using namespace std;
 
@@ -202,6 +203,8 @@ class TERMINAL
   bool IS_GRAPHICS_MODE;
 
   std::mutex BUF_MUTEX;
+
+  bool SHELL_EXITED = false;
 
   TERMINAL();
   ~TERMINAL();
