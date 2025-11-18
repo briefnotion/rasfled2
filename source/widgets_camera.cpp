@@ -130,12 +130,10 @@ void CAMERA_WIDGET::display_path(system_data &sdSysData)
 
 void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
 {
-  ImVec4 working_area_col = get_working_area();
-
-  float column_count = 2.0f;
+  //ImVec4 working_area_col = get_working_area();
 
   // Divide sub window into 3
-  ImGui::BeginChild("Col1", ImVec2((working_area_col.z) / column_count, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+  ImGui::BeginChild("Controls", ImVec2(ImGui::GetContentRegionAvail().x, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
     // Connect to camera
     if (BC_CONNECT.button_color(sdSysData, "CONNECT##Connect to camera", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -149,80 +147,90 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
     {
       sdSysData.CAMERA_BACKUP.camera_stop();
     }
+
+    ImGui:: SameLine();
+    // Disconnect from camera
+    if (BC_DEFAULT.button_color(sdSysData, "DEFAULTS", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.CAMERA_BACKUP.APPLY_DEFAULTS = true;
+    }
+
+    ImGui:: SameLine();
+    // Disconnect from camera
+    if (BC_APPLY.button_color(sdSysData, "APPLY", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    {
+      sdSysData.CAMERA_BACKUP.APPLY_CHANGES = true;
+    }
   }
   ImGui::EndChild();
 
-  ImGui:: SameLine();
-  ImGui::BeginChild("Col 2", ImVec2((working_area_col.z) / column_count, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+  //ImGui:: SameLine();
+  ImGui::BeginChild("Settings", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
-    // Auto Focus
-    ImGui::Text("Auto Focus:");
-    ImGui::Text("%d", sdSysData.CAMERA_BACKUP.PROPS.CTRL_FOCUS_AUTO.SET_VALUE);
+    float y_height = ImGui::GetTextLineHeightWithSpacing() + 4.0f;
+    float x_start_for_name = 500.0f;
 
-    if (BC_AUTO_FOCUS_MINUS.button_color(sdSysData, "-##Auto_Focus", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    float y_pos = ImGui::GetCursorPosY();
+    for (size_t pos = 0; pos < sdSysData.CAMERA_BACKUP.SETTINGS.size(); pos++)
     {
-      sdSysData.CAMERA_BACKUP.set_camera_control(sdSysData.CAMERA_BACKUP.PROPS.CTRL_FOCUS_AUTO, 
-                                            sdSysData.CAMERA_BACKUP.PROPS.CTRL_FOCUS_AUTO.SET_VALUE - 1);
-    }
+      ImGui::SetCursorPosY(y_pos);
+      ImGui::Text("0x%08X ", sdSysData.CAMERA_BACKUP.SETTINGS[pos].ADDRESS);
+      ImGui::SameLine();
 
-    ImGui::SameLine();
-    if (BC_AUTO_FOCUS_PLUS.button_color(sdSysData, "+##Auto_Focus", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      sdSysData.CAMERA_BACKUP.set_camera_control(sdSysData.CAMERA_BACKUP.PROPS.CTRL_FOCUS_AUTO, 
-                                            sdSysData.CAMERA_BACKUP.PROPS.CTRL_FOCUS_AUTO.SET_VALUE + 1);
-    }
+      ImGui::Text("dft(%4d) min(%4d) max(%4d)", 
+                    sdSysData.CAMERA_BACKUP.SETTINGS[pos].DEFAULT, 
+                    sdSysData.CAMERA_BACKUP.SETTINGS[pos].MINIMUM, 
+                    sdSysData.CAMERA_BACKUP.SETTINGS[pos].MAXIMUM
+                  );
 
-    // Focus Absolute
-    ImGui::Text("Absl Focus:");
-    ImGui::Text("%d", sdSysData.CAMERA_BACKUP.PROPS.CTRL_FOCUS_ABSOLUTE.SET_VALUE);
+      ImGui::SameLine();
 
-    if (BC_ABSL_FOCUS_MINUS.button_color(sdSysData, "-##Absl_Focus", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      sdSysData.CAMERA_BACKUP.set_camera_control(sdSysData.CAMERA_BACKUP.PROPS.CTRL_FOCUS_ABSOLUTE, 
-                                            sdSysData.CAMERA_BACKUP.PROPS.CTRL_FOCUS_ABSOLUTE.SET_VALUE - 1);
-    }
+      if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 0)
+      {
+        ImGui::Text("%d", sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE);
+        ImGui::SameLine();
+        ImGui::Text(" --- ");
+        ImGui::SameLine();
+      }
+      else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 1)
+      {
+        ImGui::PushItemWidth(100);
+        std::string label = "##";
+        label +=  sdSysData.CAMERA_BACKUP.SETTINGS[pos].NAME;
+        ImGui::InputInt(label.c_str(), &sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE, sdSysData.CAMERA_BACKUP.SETTINGS[pos].STEP);
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+      }
+      else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 2)
+      {
+        bool checked = sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE;
+        std::string label = "##";
+        label +=  sdSysData.CAMERA_BACKUP.SETTINGS[pos].NAME;
+        if (ImGui::Checkbox(label.c_str(), &checked))
+        {
+          sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE = checked;
+        }
+        ImGui::SameLine();
+      }
+      else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 3)
+      {
+        ImGui::Text("%d", sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE);
+        ImGui::SameLine();
+        ImGui::Text("menu ");
+        ImGui::SameLine();
+      }
+      else //if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 4)
+      {
+        ImGui::Text("%d", sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE);
+        ImGui::SameLine();
+        ImGui::Text("unkn ");
+        ImGui::SameLine();
+      }
 
-    ImGui::SameLine();
-    if (BC_ABSL_FOCUS_PLUS.button_color(sdSysData, "+##Absl_Focus", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      sdSysData.CAMERA_BACKUP.set_camera_control(sdSysData.CAMERA_BACKUP.PROPS.CTRL_FOCUS_ABSOLUTE, 
-                                            sdSysData.CAMERA_BACKUP.PROPS.CTRL_FOCUS_ABSOLUTE.SET_VALUE + 1);
-    }
+      ImGui::SetCursorPosX(x_start_for_name);
+      ImGui::Text("%s ", sdSysData.CAMERA_BACKUP.SETTINGS[pos].NAME.c_str());
 
-    /*  Not able to set until researched.
-    // Auto Exposure (menu)
-    ImGui::Text("Auto Exp:");
-    ImGui::Text("%d", sdSysData.CAMERA_BACKUP.PROPS.CTRL_EXPOSURE_AUTO.SET_VALUE);
-
-    if (BC_AUTO_EXPOSURE_PLUS.button_color(sdSysData, "-##Auto_Exposure", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      sdSysData.CAMERA_BACKUP.set_camera_control(sdSysData.CAMERA_BACKUP.PROPS.CTRL_EXPOSURE_AUTO, 
-                                            sdSysData.CAMERA_BACKUP.PROPS.CTRL_EXPOSURE_AUTO.SET_VALUE - 1);
-    }
-    */
-
-    ImGui::SameLine();
-    if (BC_AUTO_EXPOSURE_MINUS.button_color(sdSysData, "+##Auto_Exposure", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      sdSysData.CAMERA_BACKUP.set_camera_control(sdSysData.CAMERA_BACKUP.PROPS.CTRL_EXPOSURE_AUTO, 
-                                            sdSysData.CAMERA_BACKUP.PROPS.CTRL_EXPOSURE_AUTO.SET_VALUE + 1);
-    }
-
-    // Backlight Compensation
-    ImGui::Text("Backlight Comp:");
-    ImGui::Text("%d", sdSysData.CAMERA_BACKUP.PROPS.CTRL_BACKLIGHT_COMPENSATION.SET_VALUE);
-
-    if (BC_BACKLIGHT_COMP_PLUS.button_color(sdSysData, "-##Backlight_Comp", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      sdSysData.CAMERA_BACKUP.set_camera_control(sdSysData.CAMERA_BACKUP.PROPS.CTRL_BACKLIGHT_COMPENSATION, 
-                                            sdSysData.CAMERA_BACKUP.PROPS.CTRL_BACKLIGHT_COMPENSATION.SET_VALUE - 1);
-    }
-
-    ImGui::SameLine();
-    if (BC_BACKLIGHT_COMP_MINUS.button_color(sdSysData, "+##Backlight_Comp", RAS_YELLOW, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
-    {
-      sdSysData.CAMERA_BACKUP.set_camera_control(sdSysData.CAMERA_BACKUP.PROPS.CTRL_BACKLIGHT_COMPENSATION, 
-                                            sdSysData.CAMERA_BACKUP.PROPS.CTRL_BACKLIGHT_COMPENSATION.SET_VALUE + 1);
+      y_pos += y_height;
     }
   }
 
@@ -634,7 +642,12 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
     {
       if (DISPLAY_CAMERA_SETTINGS)
       {
-        ImGui::SetNextWindowSize(ImVec2(290.0f, 475.0f));
+        ImGuiStyle& style = ImGui::GetStyle();
+        float titleHeight = ImGui::GetFontSize() + style.FramePadding.y * 2;
+        float y_height = ImGui::GetTextLineHeightWithSpacing() + 4.0f;
+        ImVec2 window_size = ImVec2(800.0f, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + ImGui::GetFontSize() + titleHeight +
+                                            (sdSysData.CAMERA_BACKUP.SETTINGS.size() * y_height));
+        ImGui::SetNextWindowSize(window_size);
         if (ImGui::Begin("CAMERA SETTINGS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           display_camera_settings_window(sdSysData);

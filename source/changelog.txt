@@ -1,3 +1,14 @@
+2.360_251118
+  - Developed a very crude way of adjusting the 
+      camera settings
+      Should work with all cameras with exposed 
+        controls variables.
+      Settings are not saved, so defaults will 
+        return on power down.
+      Settings are not active. If camera is not 
+        at default, the settings panel will 
+        not know.
+
 2.359_251117
   - Corrected a few terminal bugs. 
       vttest will run now without crashing rasfled.

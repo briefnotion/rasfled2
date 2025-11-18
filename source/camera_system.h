@@ -118,11 +118,14 @@ class CAMERA_SETTING
 {
   public:
   bool      ENABLED = false;
-  std::string    NAME = "";
+  std::string  NAME = "";
   uint32_t  ADDRESS = 0x0;
+  int      VAR_TYPE = 0;  // 1 - int, 2 - bool, 3 - menu, 4 - unknown
   int       MINIMUM = 0;
   int       MAXIMUM = 0;
   int       DEFAULT = 0;
+  int          STEP = 0;
+  int         VALUE = -1;
   int     SET_VALUE = -1;
 };
 
@@ -152,6 +155,7 @@ class CAMERA_PROPERTIES
 
   // Controls:
   //  Needs to be vectorized and loaded from a json
+  /*
   CAMERA_SETTING CTRL_BRIGHTNESS;
   CAMERA_SETTING CTRL_CONTRAST;
   CAMERA_SETTING CTRL_SATURATION;
@@ -176,6 +180,7 @@ class CAMERA_PROPERTIES
   CAMERA_SETTING CTRL_CAMERA_CONTROLS;
 
   CAMERA_SETTING CTRL_EXPOSURE_DYNAMIC_FRAMERATE;
+  */
   
   // ---
   // Camera Enhancements
@@ -449,6 +454,11 @@ class CAMERA
   //  into program display.
   // Copies PROCESSED_FRAME to LIVE_FRAME for thread safe access.
 
+  bool set_camera_control(CAMERA_SETTING &Setting);
+  int get_camera_control_value(CAMERA_SETTING &Setting);
+  void apply_camera_control_changes();
+  void apply_camera_control_defaults();
+
   public:
 
   GLuint TEXTURE_ID = 0;
@@ -474,9 +484,10 @@ class CAMERA
   THREADING_INFO  THREAD_IMAGE_PROCESSING;
 
   CAMERA_PROPERTIES PROPS;
-  
-  bool set_camera_control(CAMERA_SETTING &Setting, int Value);
-  int get_camera_control_value(CAMERA_SETTING &Setting);
+  deque<CAMERA_SETTING> SETTINGS;
+
+  bool APPLY_DEFAULTS = false;
+  bool APPLY_CHANGES = false;
   
   void list_controls(CONSOLE_COMMUNICATION &cons);
 

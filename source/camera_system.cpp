@@ -444,7 +444,6 @@ bool CAMERA::set_control(uint32_t id, int32_t value)
     if (ioctl(fd, VIDIOC_S_CTRL, &control) != -1)
     {
       ret_success = true;
-
     }
     close(fd);
   }
@@ -802,6 +801,7 @@ GLuint CAMERA::matToTexture(const cv::Mat& frame, GLuint textureID)
 
 void CAMERA::prepare()
 {
+  /*
   // My Random Camera
   PROPS.CTRL_FOCUS_AUTO.ADDRESS = 0x009a090c;
   PROPS.CTRL_FOCUS_AUTO.MINIMUM = 0;
@@ -857,6 +857,7 @@ void CAMERA::prepare()
   PROPS.CTRL_HUE.MINIMUM = 10;
   PROPS.CTRL_HUE.MAXIMUM = 10;
   PROPS.CTRL_HUE.DEFAULT = 10;
+  */
 }
 
 void CAMERA::init(stringstream &Print_Stream)
@@ -1858,36 +1859,27 @@ void CAMERA::generate_imgui_texture_frame(cv::Mat& Frame)
   }
 }
 
-bool CAMERA::set_camera_control(CAMERA_SETTING &Setting, int Value)
+bool CAMERA::set_camera_control(CAMERA_SETTING &Setting)
 {
   bool ret_success = false;
 
-  if (CAM_AVAILABLE && Value != Setting.SET_VALUE)
+  if (CAM_AVAILABLE && Setting.SET_VALUE != Setting.VALUE)
   {
-    if (Value < Setting.MINIMUM)
+    if (Setting.SET_VALUE < Setting.MINIMUM)
     {
-      if (set_control(Setting.ADDRESS, (int32_t)Setting.MINIMUM))
-      {
-        Setting.SET_VALUE = Setting.MINIMUM;
-        ret_success = true;
-      }
+      Setting.SET_VALUE = Setting.MINIMUM;
     }
-    else if (Value > Setting.MAXIMUM)
+    else if (Setting.SET_VALUE > Setting.MAXIMUM)
     {
-      if (set_control(Setting.ADDRESS, (int32_t)Setting.MAXIMUM))
-      {
-        Setting.SET_VALUE = Setting.MAXIMUM;
-        ret_success = true;
-      }
+      Setting.SET_VALUE = Setting.MAXIMUM;
     }
-    else 
-    {
-      if (set_control(Setting.ADDRESS, (int32_t)Value))
-      {
-        Setting.SET_VALUE = Value;
-        ret_success = true;
-      }
-    }
+
+    ret_success = set_control((int32_t)Setting.ADDRESS, (int32_t)Setting.SET_VALUE);
+    Setting.VALUE = Setting.SET_VALUE;
+  }
+  else
+  {
+    ret_success = false;
   }
 
   return ret_success;
@@ -1909,6 +1901,28 @@ int CAMERA::get_camera_control_value(CAMERA_SETTING &Setting)
   return ret_value;
 }
 
+void CAMERA::apply_camera_control_changes()
+{
+  for (size_t pos = 0; pos < SETTINGS.size(); pos++)
+  {
+    if (SETTINGS[pos].SET_VALUE != SETTINGS[pos].VALUE)
+    {
+      set_camera_control(SETTINGS[pos]);
+    }
+  }
+}
+
+void CAMERA::apply_camera_control_defaults()
+{
+  for (size_t pos = 0; pos < SETTINGS.size(); pos++)
+  {
+    if (SETTINGS[pos].DEFAULT != SETTINGS[pos].VALUE)
+    {
+      SETTINGS[pos].SET_VALUE = SETTINGS[pos].DEFAULT;
+      set_camera_control(SETTINGS[pos]);
+    }
+  }
+}
 
 // Assuming CAMERA is a class and PROPS/INFORMATION_COMMAND_LIST are members
 void CAMERA::list_controls(CONSOLE_COMMUNICATION &cons)
@@ -1946,6 +1960,7 @@ void CAMERA::list_controls(CONSOLE_COMMUNICATION &cons)
     // 3. Skip disabled controls
     if (!(queryctrl.flags & V4L2_CTRL_FLAG_DISABLED)) 
     {
+      CAMERA_SETTING tmp_camera_setting;
       std::stringstream print_stream;
       
       // Start row and set alignment to left
@@ -1953,14 +1968,17 @@ void CAMERA::list_controls(CONSOLE_COMMUNICATION &cons)
 
       // ID (Hex) - 8 chars for hex, plus "0x" prefix
       print_stream << "0x" << std::hex << std::uppercase << std::setw(8) << std::setfill(' ') << queryctrl.id << std::dec << " | ";
-      
+      tmp_camera_setting.ADDRESS = queryctrl.id;
+
       // Reset fill/case and use appropriate widths for text/decimal
       print_stream << std::setfill(' ') << std::left;
 
       // Control Name - max 32 chars
       print_stream << std::setw(30) << queryctrl.name << " |";
+      tmp_camera_setting.NAME = reinterpret_cast<char*>(queryctrl.name);
       
       // Type
+      tmp_camera_setting.VAR_TYPE = queryctrl.type;
       if (queryctrl.type == 1)
       {
         print_stream << std::setw(6) << "int" << "|";
@@ -1980,12 +1998,25 @@ void CAMERA::list_controls(CONSOLE_COMMUNICATION &cons)
 
       // Min, Max, Default, Step - right aligned numbers
       print_stream << std::right;
+      
       print_stream << std::setw(5) << queryctrl.minimum << "|";
+      tmp_camera_setting.MINIMUM = queryctrl.minimum;
+
       print_stream << std::setw(5) << queryctrl.maximum << "|";
+      tmp_camera_setting.MAXIMUM = queryctrl.maximum;
+
       print_stream << std::setw(5) << queryctrl.default_value << "|";
+      tmp_camera_setting.DEFAULT = queryctrl.default_value;
+      // for now, assume value and set value is default value
+      tmp_camera_setting.VALUE = queryctrl.default_value;
+      tmp_camera_setting.SET_VALUE = queryctrl.default_value;
+
       print_stream << std::setw(5) << queryctrl.step << "|\n"; // End of row
+      tmp_camera_setting.STEP = queryctrl.step;
 
       INFORMATION_COMMAND_LIST += print_stream.str();
+
+      SETTINGS.push_back(tmp_camera_setting);
     }
 
     // 4. Set the flag to query the *next* control. This is the V4L2 iteration pattern.
@@ -2023,6 +2054,19 @@ void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
 
 void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool Camera_Being_Viewed)
 {
+  if (APPLY_DEFAULTS)
+  {
+    apply_camera_control_defaults();
+    APPLY_DEFAULTS = false;
+    APPLY_CHANGES = false;
+  }
+  else if (APPLY_CHANGES)
+  {
+    apply_camera_control_changes();
+    APPLY_DEFAULTS = false;
+    APPLY_CHANGES = false;
+  }
+
   // Check and set Camera Being Viewed
   if (CAMERA_BEING_VIEWED != Camera_Being_Viewed)
   {
