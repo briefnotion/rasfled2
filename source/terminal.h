@@ -204,6 +204,7 @@ class TERMINAL
 
   std::mutex BUF_MUTEX;
 
+  //deque<std::string> MESSAGES;
   bool SHELL_EXITED = false;
 
   TERMINAL();
@@ -212,9 +213,9 @@ class TERMINAL
   std::mutex& get_mutex();
 
   void get_line_text(int row, bool cursor_on, 
-                      string &line, 
-                      string &line_reverse, 
-                      string &line_reverse_map);
+                      std::string &line, 
+                      std::string &line_reverse, 
+                      std::string &line_reverse_map);
 
   void reader_thread();
   void create();

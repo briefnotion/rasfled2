@@ -1565,8 +1565,11 @@ void TERMINAL::reader_thread()
       // Error reading (e.g., ECONNRESET, EIO). Check errno for details.
       // If the FD was closed by another thread, this will fire an error.
       if (errno != EINTR) 
-      { 
+      {
+        //std::stringstream ss; 
+        //ss << "TERMINAL reader_thread: Read error. Code: " << errno << std::endl;
         std::cerr << "TERMINAL reader_thread: Read error. Code: " << errno << std::endl;
+        //MESSAGES.push_back(ss.str());
       }
       break; 
     }
@@ -1574,7 +1577,11 @@ void TERMINAL::reader_thread()
     if (n == 0) 
     {
       // End-of-file (shell process exited and pipe/pty slave end closed)
+      
+      //std::stringstream ss; 
+      //ss << "TERMINAL reader_thread: EOF detected (Shell exited)." << std::endl;
       std::cerr << "TERMINAL reader_thread: EOF detected (Shell exited)." << std::endl;
+      //MESSAGES.push_back(ss.str());
       break; 
     }
     
@@ -1604,7 +1611,10 @@ void TERMINAL::reader_thread()
     process_output(raw_text);
   }
 
+  //std::stringstream ss; 
+  //ss << "TERMINAL reader_thread exiting." << std::endl;
   std::cerr << "TERMINAL reader_thread exiting." << std::endl;
+  //MESSAGES.push_back(ss.str());
 
   // --- CRITICAL STEP: CLEANUP CHILD PROCESS (Zombie Prevention) ---
   // The shell process (PID) is guaranteed to have exited if we hit EOF (n=0).
@@ -1612,13 +1622,19 @@ void TERMINAL::reader_thread()
   // We use WNOHANG just in case, but after EOF, waitpid should generally return the status immediately.
   if (PID > 0 && waitpid(PID, &status, WNOHANG) > 0) \
   {
+    //std::stringstream ss; 
+    //ss << "TERMINAL reader_thread: Successfully collected exit status for PID " << PID << "." << std::endl;
     std::cerr << "TERMINAL reader_thread: Successfully collected exit status for PID " << PID << "." << std::endl;
+    //MESSAGES.push_back(ss.str());
   } 
   else if (PID > 0) 
   {
     // If waitpid fails, it might mean the process was already waited for, or the 
     // process hasn't fully cleaned up yet (less likely after EOF).
+    //std::stringstream ss; 
+    //ss << "TERMINAL reader_thread: Warning: waitpid did not return status for PID " << PID << "." << std::endl;
     std::cerr << "TERMINAL reader_thread: Warning: waitpid did not return status for PID " << PID << "." << std::endl;
+    //MESSAGES.push_back(ss.str());
   }
 
   // Set the flag for the main application to clean up this TERMINAL object.

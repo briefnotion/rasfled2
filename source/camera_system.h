@@ -113,6 +113,12 @@ private:
 };
 
 // ---------------------------------------------------------------------------------------
+class CAMERA_SETTING_MENU_ITEM
+{
+  public:
+  std::string  NAME = "";
+  int            ID = 0;
+};
 
 class CAMERA_SETTING
 {
@@ -120,13 +126,14 @@ class CAMERA_SETTING
   bool      ENABLED = false;
   std::string  NAME = "";
   uint32_t  ADDRESS = 0x0;
-  int      VAR_TYPE = 0;  // 1 - int, 2 - bool, 3 - menu, 4 - unknown
+  int      VAR_TYPE = 0;  // 1 - int, 2 - bool, 3 - menu, 6 - class, else unknown
   int       MINIMUM = 0;
   int       MAXIMUM = 0;
   int       DEFAULT = 0;
   int          STEP = 0;
   int         VALUE = -1;
   int     SET_VALUE = -1;
+  vector<CAMERA_SETTING_MENU_ITEM> MENU_LIST;
 };
 
 class CAMERA_PROPERTIES

@@ -18,8 +18,6 @@
 
 void TERMINAL_SCREEN::display_terminal(system_data &sdSysData, TERMINAL &Term)
 {
-  //ImVec4 working_area = get_working_area();
-
   // Gather keyboard input
   {
     static const int FKEY_PARAMS[] = 
@@ -275,6 +273,23 @@ void TERMINAL_SCREEN::display_terminal(system_data &sdSysData, TERMINAL &Term)
 
 void TERMINAL_SCREEN::display(system_data &sdSysData)
 {
+  /*
+  Darn - this is pointless
+  // Print Messages (placed here because terminals have no process points.  maybe add later)
+  for (size_t term_num = 0; term_num < sdSysData.TERMINAL_THREADS.size(); term_num++)
+  {
+    if (sdSysData.TERMINAL_THREADS[term_num] -> MESSAGES.size() > 0)
+    {
+      for (size_t message = 0; message < sdSysData.TERMINAL_THREADS[term_num] -> MESSAGES.size(); message++)
+      {
+        sdSysData.SCREEN_COMMS.printw(sdSysData.TERMINAL_THREADS[term_num] -> MESSAGES[message]);
+      }
+      sdSysData.TERMINAL_THREADS[term_num] -> MESSAGES.clear();
+    }
+  }
+  */
+
+  // Screen
   ImVec4 working_area = get_working_area();
   ImGui::BeginChild("Terminal", ImVec2(working_area.z, working_area.w), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {

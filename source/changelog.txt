@@ -1,3 +1,6 @@
+2.361_251119
+  - Made some refinements to the camera controls.
+
 2.360_251118
   - Developed a very crude way of adjusting the 
       camera settings

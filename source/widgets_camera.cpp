@@ -133,7 +133,7 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
   //ImVec4 working_area_col = get_working_area();
 
   // Divide sub window into 3
-  ImGui::BeginChild("Controls", ImVec2(ImGui::GetContentRegionAvail().x, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+  ImGui::BeginChild("Controls", ImVec2(sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
     // Connect to camera
     if (BC_CONNECT.button_color(sdSysData, "CONNECT##Connect to camera", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
@@ -141,96 +141,140 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.camera_start();
     }
 
-    ImGui:: SameLine();
+    //ImGui:: SameLine();
     // Disconnect from camera
     if (BC_DISCONNECT.button_color(sdSysData, "CLOSE##Disconnect from camera", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       sdSysData.CAMERA_BACKUP.camera_stop();
     }
 
-    ImGui:: SameLine();
+    //ImGui:: SameLine();
     // Disconnect from camera
     if (BC_DEFAULT.button_color(sdSysData, "DEFAULTS", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       sdSysData.CAMERA_BACKUP.APPLY_DEFAULTS = true;
     }
 
-    ImGui:: SameLine();
+    //ImGui:: SameLine();
     // Disconnect from camera
+    /*
     if (BC_APPLY.button_color(sdSysData, "APPLY", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
       sdSysData.CAMERA_BACKUP.APPLY_CHANGES = true;
     }
+    */
   }
   ImGui::EndChild();
 
-  //ImGui:: SameLine();
+  ImGui:: SameLine();
+
   ImGui::BeginChild("Settings", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
     float y_height = ImGui::GetTextLineHeightWithSpacing() + 4.0f;
-    float x_start_for_name = 500.0f;
+    float x_start_for_name = 385.0f;
 
     float y_pos = ImGui::GetCursorPosY();
     for (size_t pos = 0; pos < sdSysData.CAMERA_BACKUP.SETTINGS.size(); pos++)
     {
-      ImGui::SetCursorPosY(y_pos);
-      ImGui::Text("0x%08X ", sdSysData.CAMERA_BACKUP.SETTINGS[pos].ADDRESS);
-      ImGui::SameLine();
-
-      ImGui::Text("dft(%4d) min(%4d) max(%4d)", 
-                    sdSysData.CAMERA_BACKUP.SETTINGS[pos].DEFAULT, 
-                    sdSysData.CAMERA_BACKUP.SETTINGS[pos].MINIMUM, 
-                    sdSysData.CAMERA_BACKUP.SETTINGS[pos].MAXIMUM
-                  );
-
-      ImGui::SameLine();
-
-      if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 0)
+      if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 6)
       {
-        ImGui::Text("%d", sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE);
-        ImGui::SameLine();
-        ImGui::Text(" --- ");
-        ImGui::SameLine();
+        // Skip class type
       }
-      else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 1)
+      else
       {
-        ImGui::PushItemWidth(100);
-        std::string label = "##";
-        label +=  sdSysData.CAMERA_BACKUP.SETTINGS[pos].NAME;
-        ImGui::InputInt(label.c_str(), &sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE, sdSysData.CAMERA_BACKUP.SETTINGS[pos].STEP);
-        ImGui::PopItemWidth();
+        ImGui::SetCursorPosY(y_pos);
+        //ImGui::Text("0x%08X ", sdSysData.CAMERA_BACKUP.SETTINGS[pos].ADDRESS);
+        //ImGui::SameLine();
+
+        ImGui::Text("dft(%4d) min(%4d) max(%4d)", 
+                      sdSysData.CAMERA_BACKUP.SETTINGS[pos].DEFAULT, 
+                      sdSysData.CAMERA_BACKUP.SETTINGS[pos].MINIMUM, 
+                      sdSysData.CAMERA_BACKUP.SETTINGS[pos].MAXIMUM
+                    );
+
         ImGui::SameLine();
-      }
-      else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 2)
-      {
-        bool checked = sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE;
-        std::string label = "##";
-        label +=  sdSysData.CAMERA_BACKUP.SETTINGS[pos].NAME;
-        if (ImGui::Checkbox(label.c_str(), &checked))
+
+        if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 0)
         {
-          sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE = checked;
+          ImGui::Text("%d", sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE);
+          ImGui::SameLine();
+          ImGui::Text(" --- ");
+          ImGui::SameLine();
         }
-        ImGui::SameLine();
-      }
-      else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 3)
-      {
-        ImGui::Text("%d", sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE);
-        ImGui::SameLine();
-        ImGui::Text("menu ");
-        ImGui::SameLine();
-      }
-      else //if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 4)
-      {
-        ImGui::Text("%d", sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE);
-        ImGui::SameLine();
-        ImGui::Text("unkn ");
-        ImGui::SameLine();
-      }
+        else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 1)
+        {
+          // type int
+          ImGui::PushItemWidth(100);
+          std::string label = "##";
+          label +=  sdSysData.CAMERA_BACKUP.SETTINGS[pos].NAME;
+          if (ImGui::InputInt(label.c_str(), &sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE, sdSysData.CAMERA_BACKUP.SETTINGS[pos].STEP))
+          {
+            sdSysData.CAMERA_BACKUP.APPLY_CHANGES = true;
+          }
+          ImGui::PopItemWidth();
+          ImGui::SameLine();
+        }
+        else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 2)
+        {
+          // type bool
+          bool checked = sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE;
+          std::string label = "##";
+          label +=  sdSysData.CAMERA_BACKUP.SETTINGS[pos].NAME;
+          if (ImGui::Checkbox(label.c_str(), &checked))
+          {
+            sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE = checked;
+            sdSysData.CAMERA_BACKUP.APPLY_CHANGES = true;
+          }
+          ImGui::SameLine();
+        }
+        else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 3)
+        {
+          // type menu
+          ImGui::PushItemWidth(100);
+          std::string label = "##";
+          label +=  sdSysData.CAMERA_BACKUP.SETTINGS[pos].NAME;
+          if (ImGui::InputInt(label.c_str(), &sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE))
+          {
+            sdSysData.CAMERA_BACKUP.APPLY_CHANGES = true;
+          }
+          ImGui::PopItemWidth();
+          ImGui::SameLine();
+        }
+        else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 6)
+        {
+          // type class
+          ImGui::Text("%d", sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE);
+          ImGui::SameLine();
+          ImGui::Text("clas ");
+          ImGui::SameLine();
+        }
+        else //if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 4)
+        {
+          // type not coded
+          ImGui::Text("%d", sdSysData.CAMERA_BACKUP.SETTINGS[pos].SET_VALUE);
+          ImGui::SameLine();
+          ImGui::Text("unkn ");
+          ImGui::SameLine();
+        }
 
-      ImGui::SetCursorPosX(x_start_for_name);
-      ImGui::Text("%s ", sdSysData.CAMERA_BACKUP.SETTINGS[pos].NAME.c_str());
+        ImGui::SetCursorPosX(x_start_for_name);
+        ImGui::Text("%s ", sdSysData.CAMERA_BACKUP.SETTINGS[pos].NAME.c_str());
 
-      y_pos += y_height;
+        // more lines
+        if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 3)
+        {
+          for (size_t menu_item = 0; menu_item < sdSysData.CAMERA_BACKUP.SETTINGS[pos].MENU_LIST.size(); menu_item++)
+          {
+            y_pos += y_height;
+            ImGui::SetCursorPosY(y_pos);
+            ImGui::SetCursorPosX(x_start_for_name + 10.0f);
+            ImGui::Text("%2d %s", sdSysData.CAMERA_BACKUP.SETTINGS[pos].MENU_LIST[menu_item].ID,
+                                  sdSysData.CAMERA_BACKUP.SETTINGS[pos].MENU_LIST[menu_item].NAME.c_str());
+          }
+        }
+
+        y_pos += y_height;
+      }
     }
   }
 
@@ -645,8 +689,23 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
         ImGuiStyle& style = ImGui::GetStyle();
         float titleHeight = ImGui::GetFontSize() + style.FramePadding.y * 2;
         float y_height = ImGui::GetTextLineHeightWithSpacing() + 4.0f;
-        ImVec2 window_size = ImVec2(800.0f, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y + ImGui::GetFontSize() + titleHeight +
-                                            (sdSysData.CAMERA_BACKUP.SETTINGS.size() * y_height));
+
+        int lines = sdSysData.CAMERA_BACKUP.SETTINGS.size();
+        // Count Lines
+        for (size_t pos = 0; pos < sdSysData.CAMERA_BACKUP.SETTINGS.size(); pos++)
+        {
+          if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 3)
+          {
+            lines += sdSysData.CAMERA_BACKUP.SETTINGS[pos].MENU_LIST.size();
+          }
+          else if (sdSysData.CAMERA_BACKUP.SETTINGS[pos].VAR_TYPE == 6)
+          {
+            lines -= 1;
+          }
+        }
+
+        ImVec2 window_size = ImVec2(800.0f, ImGui::GetFontSize() + titleHeight +
+                                            (lines * y_height));
         ImGui::SetNextWindowSize(window_size);
         if (ImGui::Begin("CAMERA SETTINGS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {

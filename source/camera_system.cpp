@@ -1863,7 +1863,7 @@ bool CAMERA::set_camera_control(CAMERA_SETTING &Setting)
 {
   bool ret_success = false;
 
-  if (CAM_AVAILABLE && Setting.SET_VALUE != Setting.VALUE)
+  //if (CAM_AVAILABLE && Setting.SET_VALUE != Setting.VALUE)
   {
     if (Setting.SET_VALUE < Setting.MINIMUM)
     {
@@ -1877,10 +1877,10 @@ bool CAMERA::set_camera_control(CAMERA_SETTING &Setting)
     ret_success = set_control((int32_t)Setting.ADDRESS, (int32_t)Setting.SET_VALUE);
     Setting.VALUE = Setting.SET_VALUE;
   }
-  else
-  {
-    ret_success = false;
-  }
+  //else
+  //{
+  //  ret_success = false;
+  //}
 
   return ret_success;
 }
@@ -1916,11 +1916,8 @@ void CAMERA::apply_camera_control_defaults()
 {
   for (size_t pos = 0; pos < SETTINGS.size(); pos++)
   {
-    if (SETTINGS[pos].DEFAULT != SETTINGS[pos].VALUE)
-    {
-      SETTINGS[pos].SET_VALUE = SETTINGS[pos].DEFAULT;
-      set_camera_control(SETTINGS[pos]);
-    }
+    SETTINGS[pos].SET_VALUE = SETTINGS[pos].DEFAULT;
+    set_camera_control(SETTINGS[pos]);
   }
 }
 
@@ -1979,17 +1976,21 @@ void CAMERA::list_controls(CONSOLE_COMMUNICATION &cons)
       
       // Type
       tmp_camera_setting.VAR_TYPE = queryctrl.type;
-      if (queryctrl.type == 1)
+      if (queryctrl.type == V4L2_CTRL_TYPE_INTEGER)
       {
         print_stream << std::setw(6) << "int" << "|";
       }
-      else if (queryctrl.type == 2)
+      else if (queryctrl.type == V4L2_CTRL_TYPE_BOOLEAN)
       {
         print_stream << std::setw(6) << "bool" << "|";
       }
-      else if (queryctrl.type == 3)
+      else if (queryctrl.type == V4L2_CTRL_TYPE_MENU)
       {
         print_stream << std::setw(6) << "menu" << "|";
+      }
+      else if (queryctrl.type == V4L2_CTRL_TYPE_CTRL_CLASS)
+      {
+        print_stream << std::setw(6) << "clas" << "|";
       }
       else 
       {
@@ -2015,6 +2016,39 @@ void CAMERA::list_controls(CONSOLE_COMMUNICATION &cons)
       tmp_camera_setting.STEP = queryctrl.step;
 
       INFORMATION_COMMAND_LIST += print_stream.str();
+
+      // Extra Lines
+      if (queryctrl.type == V4L2_CTRL_TYPE_MENU) 
+      {
+        struct v4l2_querymenu querymenu;
+        std::memset(&querymenu, 0, sizeof(querymenu));
+        
+        querymenu.id = queryctrl.id;
+
+        // Loop from minimum index to maximum index to query the label for each option
+        for (querymenu.index = queryctrl.minimum; 
+            querymenu.index <= (unsigned int)queryctrl.maximum; 
+            querymenu.index++) 
+        {
+          // Call VIDIOC_QUERYMENU for each index
+          if (ioctl(device_fd, VIDIOC_QUERYMENU, &querymenu) == 0) 
+          {
+            const char* menu_name = reinterpret_cast<char*>(querymenu.name);
+
+            // Append the menu item to the command list, indented for clarity
+            std::stringstream menu_stream;
+            menu_stream << "|            |                                | " << querymenu.index
+                        << ": " << std::left << std::setw(26) << menu_name << "|" << "\n";
+            INFORMATION_COMMAND_LIST += menu_stream.str();
+
+            // Store menu item
+            CAMERA_SETTING_MENU_ITEM tmp_menu_item;
+            tmp_menu_item.NAME = menu_name; // Safely assigned
+            tmp_menu_item.ID = querymenu.index;
+            tmp_camera_setting.MENU_LIST.push_back(tmp_menu_item);
+          }
+        }
+      }
 
       SETTINGS.push_back(tmp_camera_setting);
     }
