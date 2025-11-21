@@ -20,6 +20,7 @@
 #include <string>
 #include <iostream>
 #include <vector>
+#include <thread>
 
 #include <GLFW/glfw3.h>
 
@@ -113,6 +114,13 @@ private:
 };
 
 // ---------------------------------------------------------------------------------------
+class CAMERA_CONTROL_SETTING_LOADED
+{
+  public:
+  std::string  NAME = "";
+  int         VALUE = 0;
+};
+
 class CAMERA_SETTING_MENU_ITEM
 {
   public:
@@ -154,41 +162,12 @@ class CAMERA_PROPERTIES
   bool FLIP_HORIZONTAL = false; // (horizontal flip, around Y-axis)
   bool FLIP_VERTICAL = false;   // (vertical flip, around X-axis)
 
-  int FORCED_FRAME_LIMIT_MS  = 30;
+  int FORCED_FRAME_LIMIT_MS  = 0;
 
   bool TEST             = false;
   bool TEST_IMAGE       = false;
   bool TEST_MULTI_FRAME = false;
 
-  // Controls:
-  //  Needs to be vectorized and loaded from a json
-  /*
-  CAMERA_SETTING CTRL_BRIGHTNESS;
-  CAMERA_SETTING CTRL_CONTRAST;
-  CAMERA_SETTING CTRL_SATURATION;
-  CAMERA_SETTING CTRL_GAIN;
-  CAMERA_SETTING CTRL_GAMA;
-  CAMERA_SETTING CTRL_HUE;
-  CAMERA_SETTING CTRL_SHARPNESS;
-
-  CAMERA_SETTING CTRL_FOCUS_AUTO;
-  CAMERA_SETTING CTRL_FOCUS_ABSOLUTE;
-
-  CAMERA_SETTING CTRL_EXPOSURE_AUTO;
-  CAMERA_SETTING CTRL_EXPOSURE_TIME_ABSOLUTE;
-  
-  CAMERA_SETTING CTRL_BACKLIGHT_COMPENSATION;
-
-  CAMERA_SETTING CTRL_WHITE_BALANCE_AUTOMATIC;
-  CAMERA_SETTING CTRL_WHITE_BALANCE_TEMP;
-
-  CAMERA_SETTING POWER_LINE_FREQUENCY;
-
-  CAMERA_SETTING CTRL_CAMERA_CONTROLS;
-
-  CAMERA_SETTING CTRL_EXPOSURE_DYNAMIC_FRAMERATE;
-  */
-  
   // ---
   // Camera Enhancements
 
@@ -260,6 +239,8 @@ class CAMERA_PROPERTIES
 
 };
 
+// ---------------------------------------------------------------------------------------
+
 class CAMERA
 {
   private:
@@ -294,8 +275,8 @@ class CAMERA
     
   // Class wide enhancement settings
   const int BLUR_KSIZE = 7;         // Gaussian blur kernel size for noise reduction  (5)
-  const int CANNY_THRESH_LOW = 10;  // Lower threshold for edge detection (50)
-  const int CANNY_THRESH_HIGH = 100;// Upper threshold for edge detection (150)
+  const int CANNY_THRESH_LOW = 100;  // Lower threshold for edge detection (50)
+  const int CANNY_THRESH_HIGH = 200;// Upper threshold for edge detection (150)
   const int CANNY_APERTURE = 3;     // Aperture size for Sobel operator   (3) 3 5 or 7
 
   // Camera CV Helper
@@ -317,9 +298,6 @@ class CAMERA
   cv::Mat generateDummyFrame_2(int width, int height, int frame_index);
   cv::Mat generateDummyLowLightFrame(int width, int height, int frame_index);
   GLuint matToTexture(const cv::Mat& frame, GLuint textureID);
-
-  void prepare();
-  // Until a load from json is created, manually keyt this routine up.
 
   void init(stringstream &Print_Stream);
   // Until camera properties are in a vector, manually set and get each control
@@ -418,7 +396,7 @@ class CAMERA
   
   // Load and Save settings
   void save_settings();
-  void load_settings_json();
+  void load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Control);
 
   void check_for_save_image_buffer_frame();
   // check to see if current buffer should be saved to disk.
@@ -465,7 +443,10 @@ class CAMERA
   int get_camera_control_value(CAMERA_SETTING &Setting);
   void apply_camera_control_changes();
   void apply_camera_control_defaults();
-
+  
+  void list_controls(CONSOLE_COMMUNICATION &cons);
+  void apply_loaded_camera_controls(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Control, 
+                                    deque<CAMERA_SETTING> &Settings);
   public:
 
   GLuint TEXTURE_ID = 0;
@@ -495,8 +476,6 @@ class CAMERA
 
   bool APPLY_DEFAULTS = false;
   bool APPLY_CHANGES = false;
-  
-  void list_controls(CONSOLE_COMMUNICATION &cons);
 
   // Manually print output stream
   void print_stream(CONSOLE_COMMUNICATION &cons);
@@ -509,7 +488,7 @@ class CAMERA
   void take_snapshot();
 
   // Load all camera settings
-  void load_settings();
+  void load(CONSOLE_COMMUNICATION &cons);
 
   // Public method to start and stop the camera capture by 
   //  truning off and on the thread.

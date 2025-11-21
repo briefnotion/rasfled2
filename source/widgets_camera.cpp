@@ -506,9 +506,9 @@ void CAMERA_WIDGET::display_camera_stats_enhancements(system_data &sdSysData)
     }
 
     
-    ImGui::Text("%s %s %s %s %s%s %s%s(%3d)", 
+    ImGui::Text("%s %s %s %s %s%s(%2d) %s%s(%3d)", 
                   enh_color.c_str(), enh_glare_mask.c_str(), enh_canny_mask.c_str(), enh_double_mask.c_str(),
-                  frame_gen_on.c_str(), frame_gen.c_str(), 
+                  frame_gen_on.c_str(), frame_gen.c_str(), (int)sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FPS, 
                   enh_low_light_on.c_str(), enh_low_light.c_str(), sdSysData.CAMERA_BACKUP.LOW_LIGHT_VALUE);
   }
 

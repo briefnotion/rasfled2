@@ -1,3 +1,13 @@
+2.362_251120
+  - Camera control settings are saved to the 
+      camera settings json, and loaded when 
+      the camera starts.
+  - Camera now opens at correct resolution and 
+      as MJPEG stream, instead of max resolution 
+      with YUYV stream.
+  - Improved the video capture routine to be 
+      more error resilient.
+
 2.361_251119
   - Made some refinements to the camera controls.
 

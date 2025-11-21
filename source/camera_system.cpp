@@ -799,67 +799,6 @@ GLuint CAMERA::matToTexture(const cv::Mat& frame, GLuint textureID)
   return textureID;
 }
 
-void CAMERA::prepare()
-{
-  /*
-  // My Random Camera
-  PROPS.CTRL_FOCUS_AUTO.ADDRESS = 0x009a090c;
-  PROPS.CTRL_FOCUS_AUTO.MINIMUM = 0;
-  PROPS.CTRL_FOCUS_AUTO.MAXIMUM = 1;
-  PROPS.CTRL_FOCUS_AUTO.DEFAULT = 1;
-
-  PROPS.CTRL_FOCUS_ABSOLUTE.ADDRESS = 0x009a090a;
-  PROPS.CTRL_FOCUS_ABSOLUTE.MINIMUM = 0;
-  PROPS.CTRL_FOCUS_ABSOLUTE.MAXIMUM = 21;
-  PROPS.CTRL_FOCUS_ABSOLUTE.DEFAULT = 16;
-
-  PROPS.CTRL_EXPOSURE_AUTO.ADDRESS = 0x009a0901;
-  PROPS.CTRL_EXPOSURE_AUTO.MINIMUM = 0;
-  PROPS.CTRL_EXPOSURE_AUTO.MAXIMUM = 3;
-  PROPS.CTRL_EXPOSURE_AUTO.DEFAULT = 3;
-
-  PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.ADDRESS = 0x009a0902;
-  PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.MINIMUM = 4;
-  PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.MAXIMUM = 5000;
-  PROPS.CTRL_EXPOSURE_TIME_ABSOLUTE.DEFAULT = 625;
-
-  PROPS.CTRL_BACKLIGHT_COMPENSATION.ADDRESS = 0x0098091c;
-  PROPS.CTRL_BACKLIGHT_COMPENSATION.MINIMUM = 0;
-  PROPS.CTRL_BACKLIGHT_COMPENSATION.MAXIMUM = 1;
-  PROPS.CTRL_BACKLIGHT_COMPENSATION.DEFAULT = 1;
-
-  PROPS.CTRL_SHARPNESS.ADDRESS = 0x0098091b;
-  PROPS.CTRL_SHARPNESS.MINIMUM = 0;
-  PROPS.CTRL_SHARPNESS.MAXIMUM = 15;
-  PROPS.CTRL_SHARPNESS.DEFAULT = 6;
-
-  PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.ADDRESS = 0x0098090c;
-  PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.MINIMUM = 0;
-  PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.MAXIMUM = 1;
-  PROPS.CTRL_WHITE_BALANCE_AUTOMATIC.DEFAULT = 1;
-
-  PROPS.CTRL_WHITE_BALANCE_TEMP.ADDRESS = 0x0098091a;
-  PROPS.CTRL_WHITE_BALANCE_TEMP.MINIMUM = 2800;
-  PROPS.CTRL_WHITE_BALANCE_TEMP.MAXIMUM = 6500;
-  PROPS.CTRL_WHITE_BALANCE_TEMP.DEFAULT = 2800;
-
-  PROPS.CTRL_GAIN.ADDRESS = 0x00980913;
-  PROPS.CTRL_GAIN.MINIMUM = 0;
-  PROPS.CTRL_GAIN.MAXIMUM = 0;
-  PROPS.CTRL_GAIN.DEFAULT = 0;
-
-  PROPS.CTRL_GAMA.ADDRESS = 0x00980910;
-  PROPS.CTRL_GAMA.MINIMUM = 1;
-  PROPS.CTRL_GAMA.MAXIMUM = 10;
-  PROPS.CTRL_GAMA.DEFAULT = 7;
-
-  PROPS.CTRL_HUE.ADDRESS = 0x00980903;
-  PROPS.CTRL_HUE.MINIMUM = 10;
-  PROPS.CTRL_HUE.MAXIMUM = 10;
-  PROPS.CTRL_HUE.DEFAULT = 10;
-  */
-}
-
 void CAMERA::init(stringstream &Print_Stream)
 {
   // Initial Camera Setup
@@ -870,7 +809,7 @@ void CAMERA::init(stringstream &Print_Stream)
 
   // Verify settings
 
-  Print_Stream << "Common camera controls not coded." << endl;
+  Print_Stream << "Init not yet coded." << endl;
 
   // When CAMERA_SETTING is matured (vectorized, tested) enable for common control set.
   /*
@@ -891,10 +830,11 @@ void CAMERA::init(stringstream &Print_Stream)
 void CAMERA::save_settings()
 {
   JSON_INTERFACE settings;
-  JSON_ENTRY camera_settings;
-  JSON_ENTRY backup_camera_settings;
+    JSON_ENTRY camera_settings;
+      JSON_ENTRY backup_camera_settings;
+      JSON_ENTRY camera_control_settings;
 
-  // Standar Settings
+  // Standard Settings
   camera_settings.create_label_value(quotify("WIDTH"), quotify(to_string(PROPS.WIDTH)));
   camera_settings.create_label_value(quotify("HEIGHT"), quotify(to_string(PROPS.HEIGHT)));
   camera_settings.create_label_value(quotify("FLIP_HORIZONTAL"), quotify(to_string(PROPS.FLIP_HORIZONTAL)));
@@ -931,15 +871,30 @@ void CAMERA::save_settings()
   backup_camera_settings.create_label_value(quotify("XR3"), quotify(to_string(PROPS.XR3)));
 
   camera_settings.put_json_in_set(quotify("backup camera settings"), backup_camera_settings);
+
+  // Camera Control Settings
+  for (size_t setting = 0; setting < SETTINGS.size(); setting++)
+  {
+    if (SETTINGS[setting].VAR_TYPE ==  1 || SETTINGS[setting].VAR_TYPE ==  2 || SETTINGS[setting].VAR_TYPE ==  3)
+    {
+      camera_control_settings.create_label_value(quotify(SETTINGS[setting].NAME), quotify(to_string(SETTINGS[setting].VALUE)));
+    }
+  }
+
+  camera_settings.put_json_in_set(quotify("camera control settings"), camera_control_settings);
+
+  // All Settings
   settings.ROOT.put_json_in_set(quotify("camera settings"), camera_settings);
 
+
+  // Save to disk
   deque<std::string> camera_settings_json_deque;
   settings.json_print_build_to_string_deque(camera_settings_json_deque);
 
   threaded_deque_string_to_file(PROPS.CAMERA_SETTINGS_DIR + PROPS.CAMERA_NAME + "_camera_settings.json", camera_settings_json_deque);
 }
 
-void CAMERA::load_settings_json()
+void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Control)
 {
   bool tmp_success = false;
 
@@ -959,7 +914,8 @@ void CAMERA::load_settings_json()
 
     if (tmp_success)
     {
-      for(size_t root = 0; root < settings.ROOT.DATA.size(); root++)        //root
+      // root
+      for(size_t root = 0; root < settings.ROOT.DATA.size(); root++)
       {
         if (settings.ROOT.DATA[root].label() == "camera settings")
         {
@@ -981,26 +937,8 @@ void CAMERA::load_settings_json()
           STRING_BOOL   sb_enh_fake_frames;
           STRING_BOOL   sb_enh_double_mask;
 
-          STRING_BOOL   sb_show_path;
-          STRING_FLOAT  sb_angle_multiplier;
-
-          STRING_FLOAT  sf_y0;
-          STRING_FLOAT  sf_xl0;
-          STRING_FLOAT  sf_rl0;
-
-          STRING_FLOAT  sf_y1;
-          STRING_FLOAT  sf_xl1;
-          STRING_FLOAT  sf_rl1;
-
-          STRING_FLOAT  sf_y2;
-          STRING_FLOAT  sf_xl2;
-          STRING_FLOAT  sf_rl2;
-
-          STRING_FLOAT  sf_y3;
-          STRING_FLOAT  sf_xl3;
-          STRING_FLOAT  sf_rl3;
-
-          for (size_t entry_list = 0;                                        //root/marker_list
+          //root/camera settings
+          for (size_t entry_list = 0;
                       entry_list < settings.ROOT.DATA[root].DATA.size(); entry_list++)
           {
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("WIDTH", si_width);
@@ -1021,9 +959,30 @@ void CAMERA::load_settings_json()
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_FAKE_FRAMES", sb_enh_fake_frames);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_DOUBLE_MASK", sb_enh_double_mask);
 
+            // Backup Camera Settings
             if (settings.ROOT.DATA[root].DATA[entry_list].label() == "backup camera settings")
             {
-              for (size_t backup_cam_entry_list = 0;                                        //root/marker_list
+              STRING_BOOL   sb_show_path;
+              STRING_FLOAT  sb_angle_multiplier;
+
+              STRING_FLOAT  sf_y0;
+              STRING_FLOAT  sf_xl0;
+              STRING_FLOAT  sf_rl0;
+
+              STRING_FLOAT  sf_y1;
+              STRING_FLOAT  sf_xl1;
+              STRING_FLOAT  sf_rl1;
+
+              STRING_FLOAT  sf_y2;
+              STRING_FLOAT  sf_xl2;
+              STRING_FLOAT  sf_rl2;
+
+              STRING_FLOAT  sf_y3;
+              STRING_FLOAT  sf_xl3;
+              STRING_FLOAT  sf_rl3;
+
+              //root/camera settings/backup camera settings
+              for (size_t backup_cam_entry_list = 0;
               backup_cam_entry_list < settings.ROOT.DATA[root].DATA[entry_list].DATA.size(); backup_cam_entry_list++)
               {
                 settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("SHOW_PATH", sb_show_path);
@@ -1044,6 +1003,88 @@ void CAMERA::load_settings_json()
                 settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("Y3", sf_y3);
                 settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XL3", sf_xl3);
                 settings.ROOT.DATA[root].DATA[entry_list].DATA[backup_cam_entry_list].get_if_is("XR3", sf_rl3);
+              }
+
+              if (sb_show_path.conversion_success())
+              {
+                PROPS.SHOW_PATH = sb_show_path.get_bool_value();
+              }            
+              if (sb_angle_multiplier.conversion_success())
+              {
+                PROPS.ANGLE_MULTIPLIER = sb_angle_multiplier.get_float_value();
+              }
+
+              if (sf_y0.conversion_success())
+              {
+                PROPS.Y0 = sf_y0.get_float_value();
+              }
+              if (sf_xl0.conversion_success())
+              {
+                PROPS.XL0 = sf_xl0.get_float_value();
+              }
+              if (sf_rl0.conversion_success())
+              {
+                PROPS.XR0 = sf_rl0.get_float_value();
+              }
+
+              if (sf_y1.conversion_success())
+              {
+                PROPS.Y1 = sf_y1.get_float_value();
+              }
+              if (sf_xl1.conversion_success())
+              {
+                PROPS.XL1 = sf_xl1.get_float_value();
+              }
+              if (sf_rl1.conversion_success())
+              {
+                PROPS.XR1 = sf_rl1.get_float_value();
+              }
+
+              if (sf_y2.conversion_success())
+              {
+                PROPS.Y2 = sf_y2.get_float_value();
+              }
+              if (sf_xl2.conversion_success())
+              {
+                PROPS.XL2 = sf_xl2.get_float_value();
+              }
+              if (sf_rl2.conversion_success())
+              {
+                PROPS.XR2 = sf_rl2.get_float_value();
+              }
+
+              if (sf_y3.conversion_success())
+              {
+                PROPS.Y3 = sf_y3.get_float_value();
+              }
+              if (sf_xl3.conversion_success())
+              {
+                PROPS.XL3 = sf_xl3.get_float_value();
+              }
+              if (sf_rl3.conversion_success())
+              {
+                PROPS.XR3 = sf_rl3.get_float_value();
+              }
+            }
+
+            // Camera Control Settings
+            if (settings.ROOT.DATA[root].DATA[entry_list].label() == "camera control settings")
+            {
+              //root/camera settings/camera control settings
+              for (size_t setting = 0;
+              setting < settings.ROOT.DATA[root].DATA[entry_list].DATA.size(); setting++)
+              {
+                STRING_INT tmp_value;
+                CAMERA_CONTROL_SETTING_LOADED tmp_control_setting;
+                
+                tmp_control_setting.NAME = settings.ROOT.DATA[root].DATA[entry_list].DATA[setting].label();
+                tmp_value.store(settings.ROOT.DATA[root].DATA[entry_list].DATA[setting].value());
+
+                if (tmp_value.conversion_success())
+                {
+                  tmp_control_setting.VALUE = tmp_value.get_int_value();
+                  Camera_Control.push_back(tmp_control_setting);
+                }
               }
             }
 
@@ -1118,66 +1159,6 @@ void CAMERA::load_settings_json()
 
             // ---
             
-            if (sb_show_path.conversion_success())
-            {
-              PROPS.SHOW_PATH = sb_show_path.get_bool_value();
-            }            
-            if (sb_angle_multiplier.conversion_success())
-            {
-              PROPS.ANGLE_MULTIPLIER = sb_angle_multiplier.get_float_value();
-            }
-
-            if (sf_y0.conversion_success())
-            {
-              PROPS.Y0 = sf_y0.get_float_value();
-            }
-            if (sf_xl0.conversion_success())
-            {
-              PROPS.XL0 = sf_xl0.get_float_value();
-            }
-            if (sf_rl0.conversion_success())
-            {
-              PROPS.XR0 = sf_rl0.get_float_value();
-            }
-
-            if (sf_y1.conversion_success())
-            {
-              PROPS.Y1 = sf_y1.get_float_value();
-            }
-            if (sf_xl1.conversion_success())
-            {
-              PROPS.XL1 = sf_xl1.get_float_value();
-            }
-            if (sf_rl1.conversion_success())
-            {
-              PROPS.XR1 = sf_rl1.get_float_value();
-            }
-
-            if (sf_y2.conversion_success())
-            {
-              PROPS.Y2 = sf_y2.get_float_value();
-            }
-            if (sf_xl2.conversion_success())
-            {
-              PROPS.XL2 = sf_xl2.get_float_value();
-            }
-            if (sf_rl2.conversion_success())
-            {
-              PROPS.XR2 = sf_rl2.get_float_value();
-            }
-
-            if (sf_y3.conversion_success())
-            {
-              PROPS.Y3 = sf_y3.get_float_value();
-            }
-            if (sf_xl3.conversion_success())
-            {
-              PROPS.XL3 = sf_xl3.get_float_value();
-            }
-            if (sf_rl3.conversion_success())
-            {
-              PROPS.XR3 = sf_rl3.get_float_value();
-            }
           }
         }
       }
@@ -1534,30 +1515,36 @@ void CAMERA::open_camera()
     // Start the camera 
     if (PROPS.TEST == false)
     {
-      // Set up all camera properties.
-      prepare();
-      
-      // Attempt to open the default camera (index 0).
-      CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID);
-
-      // Check if the camera was successfully opened.
+      CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID, cv::CAP_V4L2);
       CAM_AVAILABLE = CAMERA_CAPTURE.isOpened();
-      if (CAM_AVAILABLE)
+
+      if (CAMERA_CAPTURE.isOpened()) 
       {
-        // If the camera is opened, set its frame width and height.
+        // Set MJPEG immediately
+        CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+        
+        // Set Resolution
         CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
         CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
+          
+        // VERIFICATION
+        double fourcc = CAMERA_CAPTURE.get(cv::CAP_PROP_FOURCC);
+        double w = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
+        double h = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
+        int fourcc_int = (int)fourcc;
 
-        print_stream << "Camera successfully opened and properties set." << std::endl;
-
-        // Now, probe the camera for its actual capabilities and print them.
-        double actual_width = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
-        double actual_height = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
-        double actual_fps = CAMERA_CAPTURE.get(cv::CAP_PROP_FPS);
-
-        // Show some of the cv settings
-        print_stream << "Actual camera resolution: " << actual_width << "x" << actual_height << std::endl;
-        print_stream << "Actual camera FPS: " << actual_fps << std::endl;
+        // Print Raw Value for debugging
+        print_stream << "Camera Stats:" << std::endl;
+        print_stream << "  > Resolution: " << w << "x" << h << " (Requested: " << PROPS.WIDTH << "x" << PROPS.HEIGHT << ")" << std::endl;
+        print_stream << "  > Codec RAW:  " << fourcc_int << std::endl; // If this is 0, the property get failed
+        
+        // Manual Decode attempt
+        char c1 = (char)(fourcc_int & 0xFF);
+        char c2 = (char)((fourcc_int >> 8) & 0xFF);
+        char c3 = (char)((fourcc_int >> 16) & 0xFF);
+        char c4 = (char)((fourcc_int >> 24) & 0xFF);
+        
+        print_stream << "  > Codec Str:  " << c1 << c2 << c3 << c4 << std::endl;
 
         // Initialize camera via backend.  First set normal operation mode, then gather all properties.
         init(print_stream);
@@ -1613,8 +1600,6 @@ void CAMERA::open_camera()
 
 
 // Be careful with this function. It is ran in its own thread.
-void CAMERA::update_frame()
-{
   // The THREAD_CAMERA should manage itself, similare to the main.cpp main loop.
   //  Its sleep time should either be limited to the FORCED_FRAME_LIMIT_MS or the 
   //  hardware io limits of the camera read.
@@ -1627,15 +1612,18 @@ void CAMERA::update_frame()
   // FRAME_BUFFER_0, FRAME_BUFFER_1, BUFFER_FRAME_HANDOFF_READY, LATEST_READY_FRAME
   //  and BEING_PROCESSED_FRAME should be MUTEXed (mutex) to prevent data races, 
   //  but as is, the variables are playing nicely in their respective threads. 
+void CAMERA::update_frame()
+{
+  // --- CONFIGURATION FOR ROBUSTNESS ---
+  const int max_consecutive_errors = 50; // Allow 50 bad frames/loops before giving up
+  int consecutive_connection_error_count = 0;
+  int consecutive_frame_error_count = 0;
 
   // Create Process Time
   CAMERA_READ_THREAD_TIME.create();
 
   // Start the camera
   open_camera();
-
-  // during while, set error to trigger CAMERA_READ_THREAD_STOP
-  bool error = false;
 
   CAMERA_ONLINE = true;
 
@@ -1660,126 +1648,133 @@ void CAMERA::update_frame()
 
       if (CAMERA_BEING_VIEWED)
       {
-        // Determine which buffer to put frame in.
-        if (BEING_PROCESSED_FRAME == -1)
+        // Camera Open Error Checking.  Reconnect if possible.
+        if (PROPS.TEST == false && CAMERA_CAPTURE.isOpened() == false)
         {
-          if (FRAME_TO_BUFFER == 0)
+          consecutive_connection_error_count++;
+          PRINTW_QUEUE.push_back("Camera signal lost. Attempting reconnect...");
+          CAMERA_CAPTURE.release(); // Ensure old handle is gone
+
+          bool not_connected = true;
+          while (consecutive_connection_error_count <= max_consecutive_errors && not_connected)
           {
-            FRAME_TO_BUFFER = 1;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            open_camera(); // Try to reopen
+            consecutive_connection_error_count++;
+            not_connected = !CAMERA_CAPTURE.isOpened();
           }
-          else
-          if (FRAME_TO_BUFFER == 1)
-          {
-            FRAME_TO_BUFFER = 0;
-          }
+        }
+
+        // Stop Thread if too many errors
+        if (consecutive_connection_error_count + consecutive_frame_error_count > max_consecutive_errors)
+        {
+          CAMERA_READ_THREAD_STOP = true;
+          PRINTW_QUEUE.push_back("Camera Error");
+          PRINTW_QUEUE.push_back("  Connection Error Count: " + to_string(consecutive_connection_error_count));
+          PRINTW_QUEUE.push_back("  Frame Error Count: = " + to_string(consecutive_frame_error_count));
         }
         else
         {
-          if (BEING_PROCESSED_FRAME == 0)
-          {
-            FRAME_TO_BUFFER = 1;
-          }
-          else
-          if (BEING_PROCESSED_FRAME == 1)
+          // Determine which buffer to put frame in.
+          if (BEING_PROCESSED_FRAME == -1)
           {
             FRAME_TO_BUFFER = 0;
           }
-        }
-
-        // Measure the time to run the routine.
-        TIME_SE_FRAME_RETRIEVAL.start_clock();
-
-        // Capture the camera frame.
-        if (PROPS.TEST)
-        {
-          if (FRAME_TO_BUFFER == 0)
+          else
           {
-            if (PROPS.TEST_IMAGE)
+            if (BEING_PROCESSED_FRAME == 0)
             {
-              FRAME_DUMMY.copyTo(FRAME_BUFFER_0);
+              FRAME_TO_BUFFER = 1;
             }
             else
+            if (BEING_PROCESSED_FRAME == 1)
             {
-              //FRAME_BUFFER_0 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
-              FRAME_BUFFER_0 = generateDummyLowLightFrame(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
-            }
-            
-            LATEST_READY_FRAME = 0;
-            
-            // Check for errors.  close camera if empty frame or not connected.
-            if (FRAME_BUFFER_0.empty())
-            {
-              error = true;
+              FRAME_TO_BUFFER = 0;
             }
           }
-          else if (FRAME_TO_BUFFER == 1)
-          {
-            if (PROPS.TEST_IMAGE)
-            {
-              FRAME_DUMMY2.copyTo(FRAME_BUFFER_1);
-            }
-            else
-            {
-              //FRAME_BUFFER_1 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
-              FRAME_BUFFER_1 = generateDummyLowLightFrame(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
-            }
 
-            LATEST_READY_FRAME = 1;
-            
-            // Check for errors.  close camera if empty frame or not connected.
-            if (FRAME_BUFFER_1.empty())
-            {
-              error = true;
-            }
-          }
-        }
-        else
-        {
-          if (FRAME_TO_BUFFER == 0)
-          {
-            CAMERA_CAPTURE >> FRAME_BUFFER_0;
-            LATEST_READY_FRAME = 0;
-            
-            // Check for errors.  close camera if empty frame or not connected.
-            if (FRAME_BUFFER_0.empty())
-            {
-              error = true;
-            }
-          }
-          else if (FRAME_TO_BUFFER == 1)
-          {
-            CAMERA_CAPTURE >> FRAME_BUFFER_1;
-            LATEST_READY_FRAME = 1;
-            
-            // Check for errors.  close camera if empty frame or not connected.
-            if (FRAME_BUFFER_1.empty())
-            {
-              error = true;
-            }
-          }
-        }
+          // Measure the time to run the routine.
+          TIME_SE_FRAME_RETRIEVAL.start_clock();
 
-        // Save the amout of time it took to read the frame.
-        TIME_SE_FRAME_RETRIEVAL.end_clock();
-        TIME_FRAME_RETRIEVAL = TIME_SE_FRAME_RETRIEVAL.duration_ms();
+          // Capture the camera frame.
+          if (PROPS.TEST)
+          {
+            if (FRAME_TO_BUFFER == 0)
+            {
+              if (PROPS.TEST_IMAGE)
+              {
+                FRAME_DUMMY.copyTo(FRAME_BUFFER_0);
+              }
+              else
+              {
+                //FRAME_BUFFER_0 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+                FRAME_BUFFER_0 = generateDummyLowLightFrame(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+              }
+              LATEST_READY_FRAME = 0;
+              BUFFER_FRAME_HANDOFF_READY = true;
+            }
+            else if (FRAME_TO_BUFFER == 1)
+            {
+              if (PROPS.TEST_IMAGE)
+              {
+                FRAME_DUMMY2.copyTo(FRAME_BUFFER_1);
+              }
+              else
+              {
+                //FRAME_BUFFER_1 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+                FRAME_BUFFER_1 = generateDummyLowLightFrame(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+              }
+              LATEST_READY_FRAME = 1;
+              BUFFER_FRAME_HANDOFF_READY = true;
+            }
+          }
+          else
+          {
+            if (FRAME_TO_BUFFER == 0)
+            {
+              CAMERA_CAPTURE >> FRAME_BUFFER_0;
+              if (FRAME_BUFFER_0.empty())
+              {
+                consecutive_frame_error_count++;
+              }
+              else
+              {
+                LATEST_READY_FRAME = 0;
+                consecutive_frame_error_count = 0;
+                // Signal the enhancement processor that a new frame is available
+                BUFFER_FRAME_HANDOFF_READY = true;
+              }
+            }
+            else if (FRAME_TO_BUFFER == 1)
+            {
+              CAMERA_CAPTURE >> FRAME_BUFFER_1;
+              if (FRAME_BUFFER_1.empty())
+              {
+                consecutive_frame_error_count++;
+              }
+              else
+              {
+                LATEST_READY_FRAME = 1;
+                consecutive_frame_error_count = 0;
+                // Signal the enhancement processor that a new frame is available
+                BUFFER_FRAME_HANDOFF_READY = true;
+              }
+            }
+          }
         
-        // Signal the enhancement processor that a new frame is available
-        BUFFER_FRAME_HANDOFF_READY = true;
+          // Save the amout of time it took to read the frame.
+          TIME_SE_FRAME_RETRIEVAL.end_clock();
+          TIME_FRAME_RETRIEVAL = TIME_SE_FRAME_RETRIEVAL.duration_ms();
+          
+        }
+
+      } // Cam Being Viewed
+      else
+      {
+        // camera not being viewed. sleep theread on next pass
+        FORCED_FRAME_LIMIT.set(CAMERA_READ_THREAD_TIME.current_frame_time(), 100);
       }
-    }
-
-    if (PROPS.TEST == false && CAMERA_CAPTURE.isOpened() == false)
-    {
-      error = true;
-    }
-
-    if (error)
-    {
-      CAMERA_READ_THREAD_STOP = true;
-      PRINTW_QUEUE.push_back("Camera Error");
-      PRINTW_QUEUE.push_back("Is opened = " + to_string(CAMERA_CAPTURE.isOpened()) +
-                              " Frame Buffer Empty = " + to_string(FRAME_BUFFER_1.empty()));
-    }
+    } // Frame Limit Cap
 
     // Thread will need to sleep, governed by the FORCED_FRAME_LIMIT.
     CAMERA_READ_THREAD_TIME.request_ready_time(FORCED_FRAME_LIMIT.get_ready_time());
@@ -2072,6 +2067,21 @@ void CAMERA::list_controls(CONSOLE_COMMUNICATION &cons)
   // The file descriptor is automatically closed by FdCloser destructor here.
 }
 
+void CAMERA::apply_loaded_camera_controls(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Control, 
+                                          deque<CAMERA_SETTING> &Settings)
+{
+  for (size_t cam_con = 0; cam_con < Camera_Control.size(); cam_con++)
+  {
+    for (size_t setting = 0; setting < Settings.size(); setting++)
+    {
+      if (Camera_Control[cam_con].NAME == Settings[setting].NAME)
+      {
+        Settings[setting].SET_VALUE = Camera_Control[cam_con].VALUE;
+      }
+    }
+  }
+}
+
 void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
 {
   if (PRINTW_QUEUE.size() > 0)
@@ -2261,9 +2271,13 @@ void CAMERA::take_snapshot()
   SAVE_IMAGE_PROCESSED_FRAME = true;
 }
 
-void CAMERA::load_settings()
+void CAMERA::load(CONSOLE_COMMUNICATION &cons)
 {
-  load_settings_json();
+  vector<CAMERA_CONTROL_SETTING_LOADED> loaded_camera_control;
+  load_settings_json(loaded_camera_control);
+  list_controls(cons);
+  apply_loaded_camera_controls(loaded_camera_control, SETTINGS);
+  APPLY_CHANGES = true;
 }
 
 void CAMERA::camera_start()
