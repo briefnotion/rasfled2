@@ -95,6 +95,35 @@ void ALERT_SYSTEM_COORDINATOR::check_for_alerts(system_data &sdSysData, AUTOMOBI
 
     // Autonomous
 
+    // Camera
+    if (sdSysData.CAMERA_BACKUP.camera_online())
+    {
+      // Camera Gear
+      if (sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_neutral() ||
+      sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_reverse())
+      {
+        sdSysData.PANEL_CONTROL.CAMERA_BACKUP.request(sdSysData.PROGRAM_TIME.current_frame_time(), 2000, "GEAR ");
+      }
+
+      // Camera Hazards
+      if (sdSysData.PANEL_CONTROL.AUTO_HAZARDS)
+      {
+        sdSysData.PANEL_CONTROL.CAMERA_BACKUP.request(sdSysData.PROGRAM_TIME.current_frame_time(), 2000, "HAZ ");
+      }
+
+      // Camera Door Open
+      if (sdSysData.PANEL_CONTROL.AUTO_DOOR_OPEN_COUNT > 0)
+      {
+        sdSysData.PANEL_CONTROL.CAMERA_BACKUP.request(sdSysData.PROGRAM_TIME.current_frame_time(), 2000, "DOOR ");
+      }
+
+      // Camer Blinker
+      if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left() || sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
+      {
+        sdSysData.PANEL_CONTROL.CAMERA_BACKUP.request(sdSysData.PROGRAM_TIME.current_frame_time(), 2000, "TURN ");
+      }
+    }
+
     // Temperature Screen
     if ((sdSysData.CAR_INFO.STATUS.TEMPS.AIR_INTAKE_0f.val_c() > sdSysData.CAR_INFO.STATUS.TEMPS.AMBIANT_AIR_46.val_c() + 25.0f) ||
           (sdSysData.CAR_INFO.STATUS.TEMPS.COOLANT_05.val_c() > 110.0f) ||
@@ -120,6 +149,17 @@ void ALERT_SYSTEM_COORDINATOR::check_for_alerts(system_data &sdSysData, AUTOMOBI
     if (sdSysData.PANEL_CONTROL.FLAG_AUTO_ACCELERATION_DECELERATION)
     {
       sdSysData.PANEL_CONTROL.AUTO_ACCELERATION.request(sdSysData.PROGRAM_TIME.current_frame_time(), 5000, "ACC ");
+    }
+  }
+
+  // Camera Timer
+    // Camera
+  if (sdSysData.CAMERA_BACKUP.camera_online())
+  {
+    // Camera Timer
+    if (sdSysData.cdTIMER.is_active())
+    {
+      sdSysData.PANEL_CONTROL.CAMERA_BACKUP.request(sdSysData.PROGRAM_TIME.current_frame_time(), 2000, "TIMER ");
     }
   }
 

@@ -412,9 +412,6 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
   // Initialize Camera
   
-  // Assign Camera C0ordinator
-  CAMERA_SYSTEM_COORDINATOR CAMERA_COORDINATOR;
-
   // Set Camera Timer
   camera_timer.set(5);
 
@@ -853,8 +850,7 @@ int loop_2(bool TTY_Only)
         sdSystem.PROGRAM_TIME.current_frame_time() > sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.get_ready_time())
     {
       sdSystem.CAMERA_BACKUP.process(sdSystem.SCREEN_COMMS, sdSystem.PROGRAM_TIME.current_frame_time(), 
-                                    sdSystem.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM ||
-                                    sdSystem.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE);
+                                    sdSystem.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 7);
     }
 
     // ---------------------------------------------------------------------------------------
@@ -1299,9 +1295,6 @@ int loop_2(bool TTY_Only)
         // Automobile - Update all automobile Reference Data
         sdSystem.CAR_INFO.translate(sdSystem.DNFWTS, sdSystem.PROGRAM_TIME.current_frame_time());
         cons_2.update_automobile_gadgets(sdSystem);
-
-        // Check camera handler to see if camera should be on.
-        CAMERA_COORDINATOR.check(sdSystem);
 
         // Check DNFWTS
         if (sdSystem.DNFWTS.check_for_change())

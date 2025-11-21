@@ -77,6 +77,11 @@ void SCREEN4_PANEL_CONTROL::set_auto_acceleration()
   PANELS.AUTOMOBILE_DISPLAY_MID_TOP = 1;
 }
 
+void SCREEN4_PANEL_CONTROL::set_backup_camera()
+{
+  PANELS.MAIN_DISPLAY_SCREEN = 7;
+}
+
 /*
 void SCREEN4_PANEL_CONTROL::set_adsb_map()
 {
@@ -182,6 +187,8 @@ void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
     AUTO_PRESSURE.requested(Time, panel_requested);
     AUTO_ACCELERATION.requested(Time, panel_requested);
 
+    CAMERA_BACKUP.requested(Time, panel_requested);
+
     //ADSB_MAP.requested(Time, panel_requested);
     ADSB_MAP_MIN_DISTANCE.requested(Time, panel_requested);
     ADSB_MAP_MAX_DISTANCE.requested(Time, panel_requested);
@@ -246,6 +253,12 @@ void SCREEN4_PANEL_CONTROL::activate(unsigned long Time)
       {
         set_auto_malfunction();
         EXTRA = AUTO_MALFUNCTION.EXTRA.value() + EXTRA;
+      }
+
+      if (CAMERA_BACKUP.display())
+      {
+        set_backup_camera();
+        EXTRA = CAMERA_BACKUP.EXTRA.value() + EXTRA;
       }
 
     }

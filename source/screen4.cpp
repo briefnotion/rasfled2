@@ -962,79 +962,20 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::BeginChild("DISPLAY_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y - (48 * DEF_SCREEN_SIZE_Y_MULTIPLIER)), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
-            // Is Camera On
-            if (sdSysData.CAMERA_BACKUP.camera_online() &&
-                    ( sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_SYSTEM ||
-                      sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE))
+            if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 0)
             {
-              // Backup Camera
+              if (sdSysData.CAR_INFO.active())
               {
-                if (sdSysData.CAR_INFO.active())
-                {
-                  ImGui::BeginChild("Backup Camera", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                    BACKUP_CAMERA.display(sdSysData, degrees_to_radians(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle() / 12.0f));
-                    ImGui::PopStyleColor();
-                  }
-                  ImGui::EndChild();
-
-                  ImGui::SameLine();
-
-                  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                  ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
-                  }
-                  ImGui::EndChild();
-                  ImGui::PopStyleColor();
-                }
-                else
-                {
-                  BACKUP_CAMERA.display(sdSysData, degrees_to_radians(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle() / 12.0f));
-                }
-              }
-            }
-            else
-            {
-              if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 0)
-              {
-                if (sdSysData.CAR_INFO.active())
-                {
-                  ImGui::BeginChild("CONSOLE_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
-                    ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-                    
-                    CONSOLE.display(sdSysData, "CONSOLE", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
-                      
-                  }
-                  ImGui::EndChild();
-
-                  ImGui::SameLine();
-
-                  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                  ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
-                  }
-                  ImGui::EndChild();
-                  ImGui::PopStyleColor();
-                }
-                else
+                ImGui::BeginChild("CONSOLE_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
                 {
                   ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
                   ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+                  
                   CONSOLE.display(sdSysData, "CONSOLE", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+                    
                 }
-              }
+                ImGui::EndChild();
 
-              else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 1)
-              {
-                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                AUTOMOBILE.display(sdSysData, DISPLAY_CONFIRM);
-                ImGui::PopStyleColor();
-                
                 ImGui::SameLine();
 
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
@@ -1045,166 +986,219 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                 ImGui::EndChild();
                 ImGui::PopStyleColor();
               }
-
-              else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 2)
+              else
               {
-                if (sdSysData.CAR_INFO.active())
-                {
-                  ImGui::BeginChild("ADSB_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                    ADSB.display(sdSysData);
-                    ImGui::PopStyleColor();
-                  }
-                  ImGui::EndChild();
-
-                  ImGui::SameLine();
-
-                  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                  ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
-                  }
-                  ImGui::EndChild();
-                  ImGui::PopStyleColor();
-                }
-                else
-                {
-                  ADSB.display(sdSysData);
-                }
+                ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
+                ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+                CONSOLE.display(sdSysData, "CONSOLE", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
               }
+            }
 
-              /*
-              else if (DISPLAY_SCREEN == 3)
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 1)
+            {
+              ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+              AUTOMOBILE.display(sdSysData, DISPLAY_CONFIRM);
+              ImGui::PopStyleColor();
+              
+              ImGui::SameLine();
+
+              ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+              ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
               {
-                if (sdSysData.CAR_INFO.active())
+                AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
+              }
+              ImGui::EndChild();
+              ImGui::PopStyleColor();
+            }
+
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 2)
+            {
+              if (sdSysData.CAR_INFO.active())
+              {
+                ImGui::BeginChild("ADSB_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
                 {
-                  ImGui::BeginChild("GPS_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
-                    ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-                    GPS_CONSOLE.display(sdSysData, "GPS Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
-                }
-                  ImGui::EndChild();
-
-                  ImGui::SameLine();
-
                   ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                  ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
-                  }
-                  ImGui::EndChild();
+                  ADSB.display(sdSysData);
                   ImGui::PopStyleColor();
                 }
-                else
+                ImGui::EndChild();
+
+                ImGui::SameLine();
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
+              }
+              else
+              {
+                ADSB.display(sdSysData);
+              }
+            }
+
+            /*
+            else if (DISPLAY_SCREEN == 3)
+            {
+              if (sdSysData.CAR_INFO.active())
+              {
+                ImGui::BeginChild("GPS_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - 106.0f, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
                 {
                   ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
                   ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
                   GPS_CONSOLE.display(sdSysData, "GPS Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
-                }
               }
-              */
+                ImGui::EndChild();
 
-              else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 4)
-              {
-                if (sdSysData.CAR_INFO.active())
+                ImGui::SameLine();
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
                 {
-                  ImGui::BeginChild("LOGS_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
-                    ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-
-                    DAEMON_LOG.display(sdSysData, "System Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
-                  }
-                  ImGui::EndChild();
-
-                  ImGui::SameLine();
-
-                  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                  ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
-                  }
-                  ImGui::EndChild();
-                  ImGui::PopStyleColor();
+                  AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
                 }
-                else
-                {
-                  ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
-                  ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-                  DAEMON_LOG.display(sdSysData, "System Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
-                }
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
               }
-
-              else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 5)
-              {
-                if (sdSysData.CAR_INFO.active())
-                {
-                  ImGui::BeginChild("...", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                    DOT_DOT_DOT.display(sdSysData, Animations);
-                    ImGui::PopStyleColor();
-                  }
-                  ImGui::EndChild();
-
-                  ImGui::SameLine();
-
-                  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                  ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
-                  }
-                  ImGui::EndChild();
-                  ImGui::PopStyleColor();
-                }
-                else
-                {
-                  DOT_DOT_DOT.display(sdSysData, Animations);
-                }
-              }
-
-              else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6)
-              {
-                if (sdSysData.CAR_INFO.active())
-                {
-                  ImGui::BeginChild("TERMINAL", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
-                    ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-
-                    TERMINAL.display(sdSysData);
-                  }
-                  ImGui::EndChild();
-
-                  ImGui::SameLine();
-
-                  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
-                  ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
-                  {
-                    AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
-                  }
-                  ImGui::EndChild();
-                  ImGui::PopStyleColor();
-                }
-                else
-                {
-                  ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
-                  ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
-                  TERMINAL.display(sdSysData);
-                }
-              }
-
               else
               {
-                ImGui::Begin(" ", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
-                {
-                  // Show set screen to console.
-                  sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 0;
-                }
-                ImGui::End();
+                ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
+                ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+                GPS_CONSOLE.display(sdSysData, "GPS Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
               }
+            }
+            */
+
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 4)
+            {
+              if (sdSysData.CAR_INFO.active())
+              {
+                ImGui::BeginChild("LOGS_SCREEN", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
+                  ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+
+                  DAEMON_LOG.display(sdSysData, "System Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+                }
+                ImGui::EndChild();
+
+                ImGui::SameLine();
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
+              }
+              else
+              {
+                ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
+                ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+                DAEMON_LOG.display(sdSysData, "System Logs", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+              }
+            }
+
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 5)
+            {
+              if (sdSysData.CAR_INFO.active())
+              {
+                ImGui::BeginChild("...", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                  DOT_DOT_DOT.display(sdSysData, Animations);
+                  ImGui::PopStyleColor();
+                }
+                ImGui::EndChild();
+
+                ImGui::SameLine();
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
+              }
+              else
+              {
+                DOT_DOT_DOT.display(sdSysData, Animations);
+              }
+            }
+
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6)
+            {
+              if (sdSysData.CAR_INFO.active())
+              {
+                ImGui::BeginChild("TERMINAL", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
+                  ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+
+                  TERMINAL.display(sdSysData);
+                }
+                ImGui::EndChild();
+
+                ImGui::SameLine();
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
+              }
+              else
+              {
+                ImGui::SetNextWindowPos(ImGui::GetItemRectMin());
+                ImGui::SetNextWindowSize(ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y));
+                TERMINAL.display(sdSysData);
+              }
+            }
+
+
+
+            else if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 7)
+            {
+              if (sdSysData.CAR_INFO.active())
+              {
+                ImGui::BeginChild("Backup Camera", ImVec2(ImGui::GetContentRegionAvail().x - (106.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                  BACKUP_CAMERA.display(sdSysData, degrees_to_radians(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle() / 12.0f));
+                  ImGui::PopStyleColor();
+                }
+                ImGui::EndChild();
+
+                ImGui::SameLine();
+
+                ImGui::PushStyleColor(ImGuiCol_ChildBg, ImVec4(0.0f, 0.0f, 0.0f, 1.0f));
+                ImGui::BeginChild("Automobile Sidebar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), true, sdSysData.SCREEN_DEFAULTS.flags_c);
+                {
+                  AUTOMOBILE.display_sidebar(sdSysData, false, RESTACK_WINDOWS);
+                }
+                ImGui::EndChild();
+                ImGui::PopStyleColor();
+              }
+              else
+              {
+                BACKUP_CAMERA.display(sdSysData, degrees_to_radians(sdSysData.CAR_INFO.STATUS.STEERING.val_steering_wheel_angle() / 12.0f));
+              }
+            }
+
+            else
+            {
+              ImGui::Begin(" ", NULL, sdSysData.SCREEN_DEFAULTS.flags_w);
+              {
+                // Show set screen to console.
+                sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 0;
+              }
+              ImGui::End();
             }
           }
           ImGui::EndChild();
@@ -1263,21 +1257,22 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::SameLine();
 
-            // Only show terminal button if terminal is active
-            //if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6)
+            if (BTC_TAB_TERMINAL.button_toggle_color(sdSysData, "[]", "[]", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
             {
-              if (BTC_TAB_TERMINAL.button_toggle_color(sdSysData, "[]", "[]", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
-              {
-                sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 6;
-              }
+              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 6;
+            }
+
+            ImGui::SameLine();
+
+            if (BTC_TAB_CAMERA.button_toggle_color(sdSysData, "O", "O", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 7, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+            {
+              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 7;
             }
 
             ImGui::SameLine();
 
             ImGui::BeginChild("Info Bar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
             {
-              ImVec4 working_area_info_bar = get_working_area();
-              ImDrawList* draw_list_info_bar = ImGui::GetWindowDrawList();
               
               ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREEN)));
               ImGui::PushFont(sdSysData.PANEL_CONTROL.FONT_28);
@@ -1303,14 +1298,6 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
               ImGui::PopFont();
               ImGui::PopStyleColor();
-
-              // PLACEHOLDER BUTTON
-              if (BACKUP_CAMERA_ACTIVATE.button_flash_color(draw_list_info_bar, sdSysData, "CAMERA_HIDDEN", RAS_RED, 
-                                                          ImVec2(working_area_info_bar.x, working_area_info_bar.y), 
-                                                          ImVec2(working_area_info_bar.z, working_area_info_bar.w)))
-              {
-                sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE = !sdSysData.PANEL_CONTROL.CAMERA_BACKUP_ON_TOGGLE;
-              }
             }
             ImGui::EndChild();
 

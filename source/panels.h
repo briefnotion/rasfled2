@@ -36,6 +36,7 @@ class SCREEN4_PANELS
   //  4 - Logs
   //  5 - Dot Dot Dot
   //  6 - Terminal
+  //  7 - Camera
 
   // Automobile
   bool AUTOMOBILE_DISPLAY_NOVA = false;
@@ -132,6 +133,9 @@ class SCREEN4_PANEL_CONTROL
   void set_auto_malfunction();
   void set_auto_pressure();
   void set_auto_acceleration();
+
+  void set_backup_camera();
+  
   //void set_adsb_map();
   void set_adsb_map_min_distance();
   void set_adsb_map_max_distance();
@@ -167,19 +171,20 @@ class SCREEN4_PANEL_CONTROL
   PANEL AUTO_MALFUNCTION;
   PANEL AUTO_PRESSURE;
   PANEL AUTO_ACCELERATION;
+  
+  PANEL CAMERA_BACKUP;
 
   //PANEL ADSB_MAP;
   PANEL ADSB_MAP_MIN_DISTANCE;
   PANEL ADSB_MAP_MAX_DISTANCE;
 
   // CAMERA 
-  bool CAMERA_BACKUP_ON_SYSTEM = false;
-  bool CAMERA_BACKUP_ON_TOGGLE = false;
+  //bool CAMERA_BACKUP_ON_SYSTEM = false;
+  //bool CAMERA_BACKUP_ON_TOGGLE = false;
 
   // AUTO
   bool            AUTO_HAZARDS = false;   // Are exta anims running.
   int     AUTO_DOOR_OPEN_COUNT = 0;       // Amount of doors open.
-  bool         SIGNAL_LIGHT_ON = false;   // Signal light on
 
   // OPEN WINDOWS
   bool DISPLAY_SPEED_WINDOW = false;

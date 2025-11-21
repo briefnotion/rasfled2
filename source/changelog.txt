@@ -1,3 +1,13 @@
+2.363_251121
+  - The camera display screen has its own tab 
+      and no longer has its own display control 
+      system.  Displaying the image is activated  
+      via the tab or through the autonomouse system 
+      via conditions of turn, timer, gear, hazard 
+      and door.  If AUTON is turned off, the 
+      camera display will not show during the 
+      conditions. 
+
 2.362_251120
   - Camera control settings are saved to the 
       camera settings json, and loaded when 
