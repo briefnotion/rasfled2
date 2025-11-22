@@ -837,6 +837,7 @@ void CAMERA::save_settings()
   // Standard Settings
   camera_settings.create_label_value(quotify("WIDTH"), quotify(to_string(PROPS.WIDTH)));
   camera_settings.create_label_value(quotify("HEIGHT"), quotify(to_string(PROPS.HEIGHT)));
+  camera_settings.create_label_value(quotify("POST_PROCESS_SCALE"), quotify(to_string(PROPS.POST_PROCESS_SCALE)));
   camera_settings.create_label_value(quotify("FLIP_HORIZONTAL"), quotify(to_string(PROPS.FLIP_HORIZONTAL)));
   camera_settings.create_label_value(quotify("FLIP_VERTICAL"), quotify(to_string(PROPS.FLIP_VERTICAL)));
   camera_settings.create_label_value(quotify("FORCED_FRAME_LIMIT_MS"), quotify(to_string(PROPS.FORCED_FRAME_LIMIT_MS)));
@@ -921,6 +922,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
         {
           STRING_INT    si_width;
           STRING_INT    si_height;
+          STRING_FLOAT  sf_post_process_scale;
           STRING_BOOL   sb_flip_horizontal;
           STRING_BOOL   sb_flip_vertical;
           STRING_INT    si_forced_frame_limit;
@@ -943,6 +945,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
           {
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("WIDTH", si_width);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("HEIGHT", si_height);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("POST_PROCESS_SCALE", sf_post_process_scale);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_HORIZONTAL", sb_flip_horizontal);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_VERTICAL", sb_flip_vertical);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FORCED_FRAME_LIMIT_MS", si_forced_frame_limit);
@@ -1096,7 +1099,11 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
             if (si_height.conversion_success())
             {
               PROPS.HEIGHT = si_height.get_int_value();
-            }            
+            }           
+            if (sf_post_process_scale.conversion_success())
+            {
+              PROPS.POST_PROCESS_SCALE = sf_post_process_scale.get_int_value();
+            }      
             if (sb_flip_horizontal.conversion_success())
             {
               PROPS.FLIP_HORIZONTAL = sb_flip_horizontal.get_bool_value();
@@ -1215,24 +1222,55 @@ void CAMERA::run_preprocessing(cv::Mat &Frame, unsigned long Frame_Time)
 {
   if (!Frame.empty())
   {
-    // 1. Initial Frame Preparation (Flip logic)
-    if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
+    if (PROPS.POST_PROCESS_SCALE == 1.0f)
     {
-      cv::flip(Frame, PROCESSED_FRAME, -1);
-    }
-    else if (PROPS.FLIP_HORIZONTAL)
-    {
-      cv::flip(Frame, PROCESSED_FRAME, 1);
-    }
-    else if (PROPS.FLIP_VERTICAL)
-    {
-      cv::flip(Frame, PROCESSED_FRAME, 0);
+      // 1. Initial Frame Preparation (Flip logic)
+      if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
+      {
+        cv::flip(Frame, PROCESSED_FRAME, -1);
+      }
+      else if (PROPS.FLIP_HORIZONTAL)
+      {
+        cv::flip(Frame, PROCESSED_FRAME, 1);
+      }
+      else if (PROPS.FLIP_VERTICAL)
+      {
+        cv::flip(Frame, PROCESSED_FRAME, 0);
+      }
+      else
+      {
+        // Use clone to prevent FRAME from being modified by subsequent operations on PROCESSED_FRAME
+        PROCESSED_FRAME = Frame.clone(); 
+      }
     }
     else
     {
-      // Use clone to prevent FRAME from being modified by subsequent operations on PROCESSED_FRAME
-      PROCESSED_FRAME = Frame.clone(); 
+      
+
+
+      // 1. Initial Frame Preparation (Flip logic)
+      if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
+      {
+        cv::resize(Frame, FRAME_BUFFER_RESIZE, POST_PROCESS_SIZE);
+        cv::flip(Frame, PROCESSED_FRAME, -1);
+      }
+      else if (PROPS.FLIP_HORIZONTAL)
+      {
+        cv::resize(Frame, FRAME_BUFFER_RESIZE, POST_PROCESS_SIZE);
+        cv::flip(Frame, PROCESSED_FRAME, 1);
+      }
+      else if (PROPS.FLIP_VERTICAL)
+      {
+        cv::resize(Frame, FRAME_BUFFER_RESIZE, POST_PROCESS_SIZE);
+        cv::flip(Frame, PROCESSED_FRAME, 0);
+      }
+      else
+      {
+        cv::resize(Frame, PROCESSED_FRAME, POST_PROCESS_SIZE);
+      }
+
     }
+
   }
 
   // CV Code Here: Conditional and Controllable Image Enhancement Pipeline
@@ -1306,7 +1344,6 @@ void CAMERA::run_preprocessing(cv::Mat &Frame, unsigned long Frame_Time)
           low_light_filter(PROCESSED_FRAME);
         }
       }
-
 
       // Boost or reduce all color brightness
       if (PROPS.ENH_COLOR)
@@ -1546,6 +1583,13 @@ void CAMERA::open_camera()
         
         print_stream << "  > Codec Str:  " << c1 << c2 << c3 << c4 << std::endl;
 
+        // Set Post Processing Size
+        POST_PROCESS_SIZE = {(int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.WIDTH), 
+                                        (int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.HEIGHT)};
+
+        print_stream << "Post Process:" << std::endl;
+        print_stream << "  > Resolution: " << POST_PROCESS_SIZE.width << "x" << POST_PROCESS_SIZE.height << std::endl;
+
         // Initialize camera via backend.  First set normal operation mode, then gather all properties.
         init(print_stream);
         
@@ -1669,7 +1713,7 @@ void CAMERA::update_frame()
         if (consecutive_connection_error_count + consecutive_frame_error_count > max_consecutive_errors)
         {
           CAMERA_READ_THREAD_STOP = true;
-          PRINTW_QUEUE.push_back("Camera Error");
+          PRINTW_QUEUE.push_back("Camera Error - Connection Glitch");
           PRINTW_QUEUE.push_back("  Connection Error Count: " + to_string(consecutive_connection_error_count));
           PRINTW_QUEUE.push_back("  Frame Error Count: = " + to_string(consecutive_frame_error_count));
         }
@@ -1707,8 +1751,8 @@ void CAMERA::update_frame()
               }
               else
               {
-                //FRAME_BUFFER_0 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
-                FRAME_BUFFER_0 = generateDummyLowLightFrame(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+                //FRAME_BUFFER_0_PRE = generateDummyFrame_2(POST_PROCESS_SIZE.width, POST_PROCESS_SIZE.height, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+                FRAME_BUFFER_0 = generateDummyLowLightFrame(POST_PROCESS_SIZE.width, POST_PROCESS_SIZE.height, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
               }
               LATEST_READY_FRAME = 0;
               BUFFER_FRAME_HANDOFF_READY = true;
@@ -1721,8 +1765,8 @@ void CAMERA::update_frame()
               }
               else
               {
-                //FRAME_BUFFER_1 = generateDummyFrame_2(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
-                FRAME_BUFFER_1 = generateDummyLowLightFrame(PROPS.WIDTH, PROPS.HEIGHT, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+                //FRAME_BUFFER_1_PRE = generateDummyFrame_2(POST_PROCESS_SIZE.width, POST_PROCESS_SIZE.height, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+                FRAME_BUFFER_1 = generateDummyLowLightFrame(POST_PROCESS_SIZE.width, POST_PROCESS_SIZE.height, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
               }
               LATEST_READY_FRAME = 1;
               BUFFER_FRAME_HANDOFF_READY = true;
@@ -1760,6 +1804,43 @@ void CAMERA::update_frame()
                 BUFFER_FRAME_HANDOFF_READY = true;
               }
             }
+
+            // Verification output
+            if (FIRST_RUN == true) 
+            {
+              if (consecutive_frame_error_count == 0 && consecutive_connection_error_count == 0)
+              {
+                FIRST_RUN = false;
+
+                size_t expected_step;
+                size_t current_step;
+                if (FRAME_TO_BUFFER == 0)
+                {
+                  expected_step = FRAME_BUFFER_0.cols * FRAME_BUFFER_0.channels() * FRAME_BUFFER_0.elemSize1();
+                  current_step = FRAME_BUFFER_0.step[0];
+                }
+                else
+                {
+                  expected_step = FRAME_BUFFER_1.cols * FRAME_BUFFER_1.channels() * FRAME_BUFFER_0.elemSize1();
+                  current_step = FRAME_BUFFER_1.step[0];
+                }
+
+                if (expected_step != current_step)
+                {
+                  PRINTW_QUEUE.push_back("Camera Error - Stride Mismatch");
+                  PRINTW_QUEUE.push_back("   Current Mat Step : " + to_string(current_step));
+                  PRINTW_QUEUE.push_back("  Expected Mat Step : = " + to_string(expected_step));
+                }
+                else
+                {
+                  PRINTW_QUEUE.push_back("Camera Stride Test Passed.");
+                }
+
+              }
+              
+            }
+
+
           }
         
           // Save the amout of time it took to read the frame.

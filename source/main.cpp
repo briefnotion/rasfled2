@@ -1329,15 +1329,19 @@ int loop_2(bool TTY_Only)
     {
       if (shutdown_procedure_delay.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()))
       {
+        //Amount of time between each step
         shutdown_procedure_delay.set(sdSystem.PROGRAM_TIME.current_frame_time(), 1000);
 
         //sdSystem.SCREEN_COMMS.printw("Shutdown Step " + to_string(sdSystem.PANEL_CONTROL.shutdown_procedure_step));
 
+        // Step 0 - Window closed or uncontrolled, jump to step 2
         if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 0)
         {
           // Panel close called in gui
           sdSystem.PANEL_CONTROL.shutdown_procedure_step = 2;
         }
+
+        // Step 1 - Likely 'X' or 'EXIT' command, start window close.
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 1 ||
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 11|| 
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 21)
@@ -1346,6 +1350,18 @@ int loop_2(bool TTY_Only)
           sdSystem.SCREEN_COMMS.WINDOW_CLOSE = true;
           sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
         }
+
+        // Step 2 - Switch to console
+        //          
+        //          Close as much stuff as possible.  Likely hits system, 
+        //            So spacing may be wise in future.
+        //            - Start saving maps, possibly big.
+        //            - Camera
+        //            - Compass
+        //            - Gps
+        //            - Auto
+        //            - Adsb
+        //            - 
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 2 ||
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 12|| 
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 22)
@@ -1353,9 +1369,48 @@ int loop_2(bool TTY_Only)
           // Change to console
           sdSystem.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 0;
           sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
+
           // Save any pending maps
           sdSystem.MAP_SYSTEM.close(sdSystem.SCREEN_COMMS);
+
+          // Close camera here to avoid half written file.
+          if (sdSystem.CAMERA_BACKUP.camera_online())
+          {
+            sdSystem.CAMERA_BACKUP.camera_stop();
+          }
+
+          // Close Compass
+          if (sdSystem.COMMS_COMPASS.connected())
+          {
+            sdSystem.COMMS_COMPASS.close_port();
+          }
+
+          // Close GPS
+          if (sdSystem.GPS_SYSTEM.active(sdSystem.PROGRAM_TIME.current_frame_time()))
+          {
+            // I never wrote a shutdown procedure
+            //sdSystem.GPS_SYSTEM.
+            sdSystem.COMMS_GPS.close_port();
+          }
+
+          // Close AUTO, cam bus.
+          if (sdSystem.CAR_INFO.active())
+          {
+            // I never wrote a shutdown procedure for this either.
+            //sdSystem.CAR_INFO
+            sdSystem.COMMS_AUTO.close_port();
+          }
+
+          if (sdSystem.AIRCRAFT_COORD.is_active())
+          {
+            // Or this.
+          }
+
+          // Needs step through each terminal and send an exit.
+
         }
+
+        // Step 3 - Show power down animation lights before system is too far gone.
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 3 ||
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 13 || 
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 23)
@@ -1364,6 +1419,8 @@ int loop_2(bool TTY_Only)
           process_power_animation(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations, CRGB(25, 0, 0));
           sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
         }
+
+        // Step 4 - Just wait a while.
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 4 ||
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 14 || 
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 24)
@@ -1371,6 +1428,8 @@ int loop_2(bool TTY_Only)
           // Doing Nothing
           sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
         }
+
+        // Step 5 - Turn off the lights.
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 5 ||
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 15 || 
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 25)
@@ -1379,18 +1438,25 @@ int loop_2(bool TTY_Only)
           sdSystem.SCREEN_COMMS.command_text_set(" lightsoff");
           sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
         }
+
+        //Step 6 - Goto shutdown by exiting main while loop
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 6)
         {
           // Set Progrgam Exit
           sdSystem.PANEL_CONTROL.shutdown_procedure_step = 100;
         }
 
+        // ---
+
         // Rasfled Reboot Called
+        // Step 0, Alt 10 - Reboot Called
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 10)
         {
           // Start Shutdown
           sdSystem.PANEL_CONTROL.shutdown_procedure_step = 12;
         }
+
+        // Step 6, Alt 10 - reboot command instead of do nothing
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 16)
         {
           // Call Shutdown command.
@@ -1400,11 +1466,16 @@ int loop_2(bool TTY_Only)
           sdSystem.PANEL_CONTROL.shutdown_procedure_step = 100;
         }
 
+        // --- 
+
         // Rasfled Shutdown Called
+        // Step 0, Alt 20 - System Shutdown called
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 20)
         {
           sdSystem.PANEL_CONTROL.shutdown_procedure_step = 22;
         }
+
+        // Step 6, Alt 20 - Call shutdown command instead of do nothing
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 26)
         {
           // Call Reboot command.
@@ -1450,12 +1521,6 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   // If we are here, then we are closing the program.
-  cout << endl;
-
-  cout << "Closing CAMERA_BACKUP" << endl;
-  sdSystem.CAMERA_BACKUP.camera_stop();
-
-  cout << endl;
 
   // Wait for threads to end before continuing to shutdown.
   cout << "THREAD_RENDER" << endl;

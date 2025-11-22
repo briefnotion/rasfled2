@@ -529,6 +529,7 @@ void CAMERA_WIDGET::display_camera_stats_times(system_data &sdSysData)
 void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
 {
   WORKING_AREA = get_working_area();
+  // likely working size without auto is x923 y472
 
   // Check if the camera and video are available.
   if (sdSysData.CAMERA_BACKUP.camera_online())
@@ -586,6 +587,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
     } 
     else 
     {
+      /*
       // Display a more specific error based on the failure condition.
       if (textureID == 0) 
       {
@@ -599,6 +601,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
       {
         ImGui::Text("Error: Could not display camera feed.");
       }
+      */
     }
   }
   else

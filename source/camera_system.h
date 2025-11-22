@@ -158,6 +158,7 @@ class CAMERA_PROPERTIES
 
   int WIDTH = 640;
   int HEIGHT = 480;
+  float POST_PROCESS_SCALE = 1.0f;
 
   bool FLIP_HORIZONTAL = false; // (horizontal flip, around Y-axis)
   bool FLIP_VERTICAL = false;   // (vertical flip, around X-axis)
@@ -349,12 +350,18 @@ class CAMERA
   cv::VideoCapture  CAMERA_CAPTURE;
   int               FRAME_TO_BUFFER = 0;
 
+  bool FIRST_RUN = true;
   bool CAM_AVAILABLE = false;
 
   // Thread Update and process_enhancements_frame
   cv::Mat FRAME_BUFFER_0;
   cv::Mat FRAME_BUFFER_1;
+  cv::Mat FRAME_BUFFER_RESIZE;
   cv::Mat FRAME_BUFFER_FAKE;
+
+  //int WIDTH_POST_PROCESS = 640;
+  //int HEIGHT_POST_PROCESS = 480;
+  cv::Size POST_PROCESS_SIZE;
 
   // Thread process_enhancements_frames
   cv::Mat PROCESSED_FRAME;

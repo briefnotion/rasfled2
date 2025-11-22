@@ -1,3 +1,12 @@
+2.364_251122
+  - Added an ability to downscale the camera image 
+      before enhancements are applied. Doesn't work 
+      well though because the cost in clock cycles 
+      is more than just working with the large 
+      image.  Cameras just work well with 1080p.
+  - Changed the shutdown procedure to actively 
+      close more things. 
+
 2.363_251121
   - The camera display screen has its own tab 
       and no longer has its own display control 
