@@ -751,52 +751,92 @@ cv::Mat CAMERA::generateDummyLowLightFrame(int width, int height, int frame_inde
 /**
  * @brief Converts an OpenCV Mat object to an OpenGL texture ID.
  *
- * This function handles the creation of a new OpenGL texture or updates an
- * existing one, then uploads the pixel data from the OpenCV Mat object.
+ * This function creates a new OpenGL texture or updates an existing one, 
+ * uploading the pixel data from the OpenCV Mat object. It is designed to be 
+ * robust against changes in the frame's resolution. The texture ID is passed 
+ * and updated by reference.
  *
- * @param frame The OpenCV Mat object with image data.
- * @param textureID The existing OpenGL texture ID to update, or 0 to create a new one.
- * @return The OpenGL texture ID (GLuint).
+ * NOTE: This implementation assumes a 3-channel (color) image and uses 
+ * glTexImage2D for both initial creation and updates to safely handle 
+ * potential resolution changes.
+ *
+ * @param frame The OpenCV Mat object with image data (assumed to be BGR 8-bit).
+ * @param textureID The existing OpenGL texture ID to update, or 0 to create a 
+ * new one. Passed by reference (&), so it is modified directly.
  */
-GLuint CAMERA::matToTexture(const cv::Mat& frame, GLuint textureID)
+void CAMERA::matToTexture(const cv::Mat& frame, GLuint &textureID)
 {
-  // Check if the frame is empty. If it is, return 0 (an invalid texture ID).
+  // 1. Error Check
   if (frame.empty())
   {
     std::cerr << "Error: The OpenCV Mat is empty." << std::endl;
-    return 0;
+    return; // Return type is void now, so we just return.
   }
 
-  // Convert the image to RGB format.
-  // The GL_RGB format expects the channels in R-G-B order,
-  // but OpenCV loads them in B-G-R order by default.
+  // 2. Color Space Conversion (BGR to RGB)
+  // OpenCV Mat is BGR by default; OpenGL texture format will be GL_RGB.
   cv::Mat rgbFrame;
-  cv::cvtColor(frame, rgbFrame, cv::COLOR_BGR2RGB);
-
-  // If the texture hasn't been created yet, create it.
-  if (textureID == 0) 
+  if (frame.channels() == 3) 
   {
-    glGenTextures(1, &textureID);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-    // Set texture parameters for the first time.
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Upload the pixel data from the OpenCV Mat to the OpenGL texture.
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, rgbFrame.cols, rgbFrame.rows, 0, GL_RGB, GL_UNSIGNED_BYTE, rgbFrame.data);
+    cv::cvtColor(frame, rgbFrame, cv::COLOR_BGR2RGB);
+  } 
+  else if (frame.channels() == 1) 
+  {
+    // Handle grayscale: Convert to a 3-channel BGR for consistency, then RGB.
+    cv::cvtColor(frame, rgbFrame, cv::COLOR_GRAY2RGB);
   } 
   else 
-  {
-    // If the texture already exists, just update its data.
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, rgbFrame.cols, rgbFrame.rows, GL_RGB, GL_UNSIGNED_BYTE, rgbFrame.data);
+{
+    std::cerr << "Error: Unsupported number of channels in Mat: " << frame.channels() << std::endl;
+    return;
   }
 
-  // Unbind the texture to prevent accidental modifications.
+  // 3. Texture Binding and Creation/Update Logic
+  if (textureID == 0) 
+  {
+    // Generate a new texture ID and store it directly in the referenced variable
+    glGenTextures(1, &textureID);
+  } 
+  
+  // Bind the texture (necessary for all operations)
+  // The bind operation uses the ID that was either passed in or just generated.
+  glBindTexture(GL_TEXTURE_2D, textureID);
+
+  // Set parameters (these only need to be set once, but it's harmless to repeat)
+  // We only set them if a valid ID was found/created.
+  if (textureID != 0) 
+  {
+    // Set texture parameters for rendering
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  }
+
+  // 4. Upload/Reallocate Pixel Data
+  // We use glTexImage2D for reallocation, which is safer when resolution 
+  // changes and avoids the memory issue associated with glTexSubImage2D 
+  // if the size changes.
+  
+  // InternalFormat: GL_RGB (3 components)
+  // Format: GL_RGB (3 components in data buffer)
+  // Type: GL_UNSIGNED_BYTE (8-bit per channel)
+  glTexImage2D(
+      GL_TEXTURE_2D, 
+      0,                 // Mipmap level
+      GL_RGB,            // Internal format
+      rgbFrame.cols,     // Width
+      rgbFrame.rows,     // Height
+      0,                 // Border (must be 0)
+      GL_RGB,            // Format of the pixel data
+      GL_UNSIGNED_BYTE,  // Data type of the pixel data
+      rgbFrame.data      // Pointer to the image data
+  );
+
+  // 5. Unbind the texture
   glBindTexture(GL_TEXTURE_2D, 0);
 
-  return textureID;
+  // No return statement needed, as the ID was updated via reference.
 }
 
 void CAMERA::init(stringstream &Print_Stream)
@@ -837,7 +877,7 @@ void CAMERA::save_settings()
   // Standard Settings
   camera_settings.create_label_value(quotify("WIDTH"), quotify(to_string(PROPS.WIDTH)));
   camera_settings.create_label_value(quotify("HEIGHT"), quotify(to_string(PROPS.HEIGHT)));
-  camera_settings.create_label_value(quotify("POST_PROCESS_SCALE"), quotify(to_string(PROPS.POST_PROCESS_SCALE)));
+  camera_settings.create_label_value(quotify("COMPRESSION"), quotify(to_string(PROPS.COMPRESSION)));
   camera_settings.create_label_value(quotify("FLIP_HORIZONTAL"), quotify(to_string(PROPS.FLIP_HORIZONTAL)));
   camera_settings.create_label_value(quotify("FLIP_VERTICAL"), quotify(to_string(PROPS.FLIP_VERTICAL)));
   camera_settings.create_label_value(quotify("FORCED_FRAME_LIMIT_MS"), quotify(to_string(PROPS.FORCED_FRAME_LIMIT_MS)));
@@ -922,6 +962,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
         {
           STRING_INT    si_width;
           STRING_INT    si_height;
+          STRING_INT    si_compression;
           STRING_FLOAT  sf_post_process_scale;
           STRING_BOOL   sb_flip_horizontal;
           STRING_BOOL   sb_flip_vertical;
@@ -945,6 +986,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
           {
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("WIDTH", si_width);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("HEIGHT", si_height);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("COMPRESSION", si_compression);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("POST_PROCESS_SCALE", sf_post_process_scale);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_HORIZONTAL", sb_flip_horizontal);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_VERTICAL", sb_flip_vertical);
@@ -1099,7 +1141,11 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
             if (si_height.conversion_success())
             {
               PROPS.HEIGHT = si_height.get_int_value();
-            }           
+            }            
+            if (si_compression.conversion_success())
+            {
+              PROPS.COMPRESSION = si_compression.get_int_value();
+            }          
             if (sf_post_process_scale.conversion_success())
             {
               PROPS.POST_PROCESS_SCALE = sf_post_process_scale.get_int_value();
@@ -1558,7 +1604,14 @@ void CAMERA::open_camera()
       if (CAMERA_CAPTURE.isOpened()) 
       {
         // Set MJPEG immediately
-        CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+        if (PROPS.COMPRESSION == 0)
+        {
+          CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+        }
+        else
+        {
+          CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('Y', 'U', 'Y', '2'));
+        }
         
         // Set Resolution
         CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
@@ -1926,11 +1979,11 @@ void CAMERA::generate_imgui_texture_frame(cv::Mat& Frame)
   TIME_ACTUAL_FRAME_TIME  = TIME_SE_DISPLAYED_FRAME_RATE.duration_ms();
   TIME_SE_DISPLAYED_FRAME_RATE.start_clock();
 
-  if (!PROCESSED_FRAME.empty())
+  if (!Frame.empty())
   {
     // Convert the frame to an OpenGL texture.
     // We pass the member variable to reuse the same texture.
-    TEXTURE_ID = matToTexture(Frame, TEXTURE_ID);
+    matToTexture(Frame, TEXTURE_ID);
     Frame.copyTo(LIVE_FRAME);
   }
 }

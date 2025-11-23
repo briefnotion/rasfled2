@@ -155,6 +155,19 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.APPLY_DEFAULTS = true;
     }
 
+    // Display Resolution
+    ImGui::Text(" %d", sdSysData.CAMERA_BACKUP.PROPS.WIDTH);
+    ImGui::Text("  x");
+    ImGui::Text(" %d ", sdSysData.CAMERA_BACKUP.PROPS.HEIGHT);
+    if (sdSysData.CAMERA_BACKUP.PROPS.COMPRESSION == 0)
+    {
+      ImGui::Text("  MJPG");
+    }
+    else
+    {
+      ImGui::Text("  YUYV");
+    }
+
     //ImGui:: SameLine();
     // Disconnect from camera
     /*
@@ -526,33 +539,26 @@ void CAMERA_WIDGET::display_camera_stats_times(system_data &sdSysData)
   }
 }
 
-void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
+void CAMERA_WIDGET::display_camera_frame(system_data &sdSysData)
 {
-  WORKING_AREA = get_working_area();
-  // likely working size without auto is x923 y472
+  // likely working size without automobile display is x923 y472
 
-  // Check if the camera and video are available.
-  if (sdSysData.CAMERA_BACKUP.camera_online())
+  // X = x starting pos (position of left most window, if no write)
+  // Y = y starting pos (position of top most window, if no write)
+  // Z = x size
+  // W = y size
+
+  // Check if the texture ID and frame are valid before displaying.
+  if (sdSysData.CAMERA_BACKUP.TEXTURE_ID != 0)
   {
-    ANGLE = Angle;
-    // X = x starting pos (position of left most window, if no write)
-    // Y = y starting pos (position of top most window, if no write)
-    // Z = x size
-    // W = y size
-
-    // Get the current texture ID from the camera system.
-    GLuint textureID = sdSysData.CAMERA_BACKUP.TEXTURE_ID;
-    
-    // Get a thread-safe copy of the frame to get its dimensions.
-    cv::Mat currentFrame = sdSysData.CAMERA_BACKUP.get_current_frame();
-
-    // Check if the texture ID and frame are valid before displaying.
-    if (textureID != 0 && !currentFrame.empty()) 
+    // Draw video frame
     {
-      // Draw video frame
+      float frame_aspect = (float)sdSysData.CAMERA_BACKUP.PROPS.WIDTH / (float)sdSysData.CAMERA_BACKUP.PROPS.HEIGHT;
+      float region_aspect = WORKING_AREA.z / WORKING_AREA.w;
+
+      if (FULL_FRAME_STYLE == 0)
       {
-        float frame_aspect = (float)currentFrame.cols / (float)currentFrame.rows;
-        float region_aspect = WORKING_AREA.z / WORKING_AREA.w;
+        //Full, Frame Center (Aspect Fit / Contain)
 
         if (region_aspect > frame_aspect)
         {
@@ -566,46 +572,104 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
           FINAL_SIZE.x = WORKING_AREA.z;
           FINAL_SIZE.y = WORKING_AREA.z / frame_aspect;
         }
-        
-        // 2. Center the image horizontally.
+
+        // 2. Center the image.
         // Calculate the padding needed to center the image.
         PADDING.x = (WORKING_AREA.z - FINAL_SIZE.x) * 0.5f;
         PADDING.y = (WORKING_AREA.w - FINAL_SIZE.y) * 0.5f;
 
-        // Use Dummy to create the centering space.
-        ImGui::SetCursorPos(PADDING);
-        
-        // 3. Display the image with the calculated size.
-        ImGui::Image((ImTextureID)textureID, FINAL_SIZE);
-      }
+        // ----------------------------------------------------------------------
+        // FIX: Convert the desired screen position back to a local cursor position.
+        //
+        // 1. Calculate the final screen position where the image should start:
+        //    (WORKING_AREA.x + PADDING.x, WORKING_AREA.y + PADDING.y)
+        // 2. Subtract the current window's screen position (ImGui::GetWindowPos())
+        //    to get the required local position for ImGui::SetCursorPos().
+        // ----------------------------------------------------------------------
+        ImVec2 window_screen_pos = ImGui::GetWindowPos();
 
-      // Draw Path Lines
-      if (sdSysData.CAMERA_BACKUP.PROPS.SHOW_PATH)
-      {
-        display_path(sdSysData);
+        ImGui::SetCursorPos(
+          ImVec2(
+            (WORKING_AREA.x + PADDING.x) - window_screen_pos.x,
+            (WORKING_AREA.y + PADDING.y) - window_screen_pos.y
+          )
+        );
+
+        // 3. Display the image with the calculated size.
+        // ImGui::Image will ensure the texture is drawn at FINAL_SIZE.
+        ImGui::Image((ImTextureID)sdSysData.CAMERA_BACKUP.TEXTURE_ID, FINAL_SIZE);
       }
-    } 
-    else 
-    {
-      /*
-      // Display a more specific error based on the failure condition.
-      if (textureID == 0) 
-      {
-        ImGui::Text("Error: Could not display camera feed. (Texture ID is 0)");
-      } 
-      else if (currentFrame.empty()) 
-      {
-        ImGui::Text("Error: Could not display camera feed. (Frame is empty)");
-      } 
       else 
       {
-        ImGui::Text("Error: Could not display camera feed.");
+        // Full Horizontal Frame, Center (Aspect Fill / Cover)
+        // The image is scaled to fully cover the WORKING_AREA, clipping any excess.
+
+        if (region_aspect > frame_aspect)
+        {
+          // The available region is WIDER than the frame (e.g., 16:9 area, 4:3 frame).
+          // To cover the width, we must scale by the region's WIDTH. 
+          // This makes the height hang over (vertical crop).
+          FINAL_SIZE.x = WORKING_AREA.z;
+          FINAL_SIZE.y = WORKING_AREA.z / frame_aspect; 
+        }
+        else
+        {
+          // The available region is TALLER or has the same aspect ratio as the frame.
+          // To cover the height, we must scale by the region's HEIGHT.
+          // This makes the width hang over (horizontal crop).
+          FINAL_SIZE.y = WORKING_AREA.w;
+          FINAL_SIZE.x = WORKING_AREA.w * frame_aspect;
+        }
+
+        // 2. Center the oversized image within the WORKING_AREA.
+        // PADDING will be negative or zero, effectively offsetting the image start position 
+        // to handle the part that is being clipped outside the drawing area.
+        PADDING.x = (WORKING_AREA.z - FINAL_SIZE.x) * 0.5f;
+        PADDING.y = (WORKING_AREA.w - FINAL_SIZE.y) * 0.5f;
+
+        // ----------------------------------------------------------------------
+        // Set the cursor position using the calculated negative padding.
+        // ----------------------------------------------------------------------
+        ImVec2 window_screen_pos = ImGui::GetWindowPos();
+
+        ImGui::SetCursorPos(
+          ImVec2(
+            (WORKING_AREA.x + PADDING.x) - window_screen_pos.x,
+            (WORKING_AREA.y + PADDING.y) - window_screen_pos.y
+          )
+        );
+
+        // 3. Display the oversized image. ImGui will draw it, and the ImGui window's clipping 
+        // will naturally crop the parts that fall outside the WORKING_AREA.
+        ImGui::Image((ImTextureID)sdSysData.CAMERA_BACKUP.TEXTURE_ID, FINAL_SIZE);
       }
-      */
     }
+
+    // Draw Path Lines
+    if (sdSysData.CAMERA_BACKUP.PROPS.SHOW_PATH)
+    {
+      display_path(sdSysData);
+    }
+  } 
+  else 
+  {
+    // additional info if needed.
+  }
+}
+
+void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
+{  
+  WORKING_AREA = get_working_area();
+
+  // Check if the camera and video are available.
+  if (sdSysData.CAMERA_BACKUP.camera_online())
+  {
+    ANGLE = Angle;
+    display_camera_frame(sdSysData);
   }
   else
   {
+    ImGui::SetCursorPos(ImVec2(5.0f, WORKING_AREA.w / 2.0f));
     ImGui::Text("Waiting for camera feed...");
   }
 
@@ -739,6 +803,34 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
     }
   }
 }
+
+// ---------------------------------------------------------------------------------------
+
+      /*
+      // Debug::
+      ImVec2 texture_size = texture_dimensions(sdSysData.CAMERA_BACKUP.TEXTURE_ID);
+      ImGui::SetCursorPos(ImVec2(10, 100));
+      ImGui::Text("res");
+      ImGui::Text("  frame: %d x %d ", currentFrame.cols, currentFrame.rows);
+      //ImGui::Text("Texture ID: %u", sdSysData.CAMERA_BACKUP.TEXTURE_ID);
+      ImGui::Text("  textu: %d x %d ", (int)texture_size.x, (int)texture_size.y);
+      */
+
+    /*
+    // Display a more specific error based on the failure condition.
+    if (textureID == 0) 
+    {
+      ImGui::Text("Error: Could not display camera feed. (Texture ID is 0)");
+    } 
+    else if (currentFrame.empty()) 
+    {
+      ImGui::Text("Error: Could not display camera feed. (Frame is empty)");
+    } 
+    else 
+    {
+      ImGui::Text("Error: Could not display camera feed.");
+    }
+    */
 
 // ---------------------------------------------------------------------------------------
 

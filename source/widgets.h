@@ -29,6 +29,18 @@ using namespace std;
 
 // ---------------------------------------------------------------------------------------
 
+
+/**
+ * @brief Utility function to query and print the actual dimensions of an OpenGL texture.
+ * * This is useful for debugging to confirm the resolution stored on the GPU matches 
+ * the input frame size.
+ *
+ * @param textureID The OpenGL texture ID to query.
+ */
+ImVec2 texture_dimensions(GLuint &textureID);
+
+// ---------------------------------------------------------------------------------------
+
 ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigned long Duration, 
                       ImColor Start_Color, ImColor End_Color);
 

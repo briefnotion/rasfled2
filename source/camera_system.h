@@ -158,6 +158,11 @@ class CAMERA_PROPERTIES
 
   int WIDTH = 640;
   int HEIGHT = 480;
+
+  int COMPRESSION = 0;
+  // 0 - MJPG
+  // 1 - YUYV
+
   float POST_PROCESS_SCALE = 1.0f;
 
   bool FLIP_HORIZONTAL = false; // (horizontal flip, around Y-axis)
@@ -298,7 +303,7 @@ class CAMERA
   cv::Mat generateDummyFrame(int width, int height);
   cv::Mat generateDummyFrame_2(int width, int height, int frame_index);
   cv::Mat generateDummyLowLightFrame(int width, int height, int frame_index);
-  GLuint matToTexture(const cv::Mat& frame, GLuint textureID);
+  void matToTexture(const cv::Mat& frame, GLuint &textureID);
 
   void init(stringstream &Print_Stream);
   // Until camera properties are in a vector, manually set and get each control

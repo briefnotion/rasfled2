@@ -16,6 +16,45 @@
 
 // ---------------------------------------------------------------------------------------
 
+ImVec2 texture_dimensions(GLuint &textureID)
+{
+  ImVec2 ret_size;
+
+  if (textureID == 0) 
+  {
+    return ImVec2(0.0f, 0.0f);
+  }
+
+  // Bind the texture so OpenGL knows which one to query
+  glBindTexture(GL_TEXTURE_2D, textureID);
+
+  GLint width = 0;
+  GLint height = 0;
+
+  // Query the width of mipmap level 0 (the base image)
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width);
+  // Query the height of mipmap level 0 (the base image)
+  glGetTexLevelParameteriv(GL_TEXTURE_2D, 0, GL_TEXTURE_HEIGHT, &height);
+
+  // Unbind the texture
+  glBindTexture(GL_TEXTURE_2D, 0);
+
+  if (width > 0 && height > 0) 
+  {
+    ret_size.x = (float)width;
+    ret_size.y = (float)height;
+  } 
+  else 
+  {
+    ret_size.x = -1.0f;
+    ret_size.y = -1.0f;
+  }
+
+  return ret_size;
+}
+
+// ---------------------------------------------------------------------------------------
+
 ImColor gradiant_color(system_data &sdSysData, unsigned long Start_time, unsigned long Duration, 
                       ImColor Start_Color, ImColor End_Color)
 {

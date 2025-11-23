@@ -1330,13 +1330,14 @@ int loop_2(bool TTY_Only)
       if (shutdown_procedure_delay.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()))
       {
         //Amount of time between each step
-        shutdown_procedure_delay.set(sdSystem.PROGRAM_TIME.current_frame_time(), 1000);
+        shutdown_procedure_delay.set(sdSystem.PROGRAM_TIME.current_frame_time(), 2000);
 
         //sdSystem.SCREEN_COMMS.printw("Shutdown Step " + to_string(sdSystem.PANEL_CONTROL.shutdown_procedure_step));
 
         // Step 0 - Window closed or uncontrolled, jump to step 2
         if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 0)
         {
+          sdSystem.SCREEN_COMMS.printw("Shuting Down (via unknown)...");
           // Panel close called in gui
           sdSystem.PANEL_CONTROL.shutdown_procedure_step = 2;
         }
@@ -1346,6 +1347,18 @@ int loop_2(bool TTY_Only)
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 11|| 
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 21)
         {
+          if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 1)
+          {
+            sdSystem.SCREEN_COMMS.printw("Shuting Down (via EXIT call)...");
+          }
+          else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 11)
+          {
+            sdSystem.SCREEN_COMMS.printw("Shuting Down (via REBOOT call)...");
+          }
+          else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 21)
+          {
+            sdSystem.SCREEN_COMMS.printw("Shuting Down (via SHUTDOWN call)...");
+          }
           // Panel close called in interface
           sdSystem.SCREEN_COMMS.WINDOW_CLOSE = true;
           sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
@@ -1366,6 +1379,7 @@ int loop_2(bool TTY_Only)
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 12|| 
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 22)
         {
+          sdSystem.SCREEN_COMMS.printw("  Closing Communications and Attatchments ...");
           // Change to console
           sdSystem.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 0;
           sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
@@ -1415,6 +1429,7 @@ int loop_2(bool TTY_Only)
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 13 || 
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 23)
         {
+          sdSystem.SCREEN_COMMS.printw("  .");
           // Start Power Down Animation
           process_power_animation(sdSystem, sdSystem.PROGRAM_TIME.current_frame_time(), animations, CRGB(25, 0, 0));
           sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
@@ -1425,6 +1440,7 @@ int loop_2(bool TTY_Only)
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 14 || 
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 24)
         {
+          sdSystem.SCREEN_COMMS.printw("  |");
           // Doing Nothing
           sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
         }
@@ -1434,14 +1450,15 @@ int loop_2(bool TTY_Only)
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 15 || 
                   sdSystem.PANEL_CONTROL.shutdown_procedure_step == 25)
         {
+          sdSystem.SCREEN_COMMS.printw("  V");
           // Turn off the lights
-          sdSystem.SCREEN_COMMS.command_text_set(" lightsoff");
           sdSystem.PANEL_CONTROL.shutdown_procedure_step++;
         }
 
         //Step 6 - Goto shutdown by exiting main while loop
         else if (sdSystem.PANEL_CONTROL.shutdown_procedure_step == 6)
         {
+          sdSystem.SCREEN_COMMS.printw("  Ending Program Loop ...");
           // Set Progrgam Exit
           sdSystem.PANEL_CONTROL.shutdown_procedure_step = 100;
         }

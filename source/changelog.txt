@@ -1,3 +1,17 @@
+2.365_251123
+  - Still working through what just maybe a 
+      hardware bug in the camera.
+  - Changed the way the image is drawn. 
+      Image will be fill screen, and crop 
+      top and bottom to have full horizontal 
+      display. Its a property accesible at 
+      compile time only.
+  - Textures are generated and retrieved via 
+      reference, to reduce overhead. 
+      Possibly other optimizations made. 
+  - Slowed down the speed of the main program 
+      shutdown sequence.
+
 2.364_251122
   - Added an ability to downscale the camera image 
       before enhancements are applied. Doesn't work 

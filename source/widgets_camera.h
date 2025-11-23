@@ -99,6 +99,11 @@ class CAMERA_WIDGET
   ImVec2 FINAL_SIZE = {0, 0};
   ImVec2 PADDING;
 
+  // TESTING
+  bool FULL_FRAME_STYLE = 1;
+  // 0 - Full Frame Center
+  // 1 - Full Horizontal, Center
+
   ImVec2 norm_to_screen(float &Nx, float &Ny, float &Slide, 
                         ImVec2 &Image_Start_Position, 
                         ImVec2 &Final_Size);
@@ -111,6 +116,8 @@ class CAMERA_WIDGET
 
   void display_camera_stats_enhancements(system_data &sdSysData);
   void display_camera_stats_times(system_data &sdSysData);
+
+  void display_camera_frame(system_data &sdSysData);
   
   public:
 
