@@ -132,6 +132,9 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
 {
   //ImVec4 working_area_col = get_working_area();
 
+  // Disable main program terminal input:
+  sdSysData.PANEL_CONTROL.console_disable();
+
   // Divide sub window into 3
   ImGui::BeginChild("Controls", ImVec2(sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
@@ -155,27 +158,50 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
       sdSysData.CAMERA_BACKUP.APPLY_DEFAULTS = true;
     }
 
-    // Display Resolution
-    ImGui::Text(" %d", sdSysData.CAMERA_BACKUP.PROPS.WIDTH);
-    ImGui::Text("  x");
-    ImGui::Text(" %d ", sdSysData.CAMERA_BACKUP.PROPS.HEIGHT);
-    if (sdSysData.CAMERA_BACKUP.PROPS.COMPRESSION == 0)
+    // Change Display Style
     {
-      ImGui::Text("  MJPG");
-    }
-    else
-    {
-      ImGui::Text("  YUYV");
+      bool checked = sdSysData.CAMERA_BACKUP.PROPS.FULL_FRAME_STYLE;
+      if (ImGui::Checkbox("Stl", &checked))
+      {
+        sdSysData.CAMERA_BACKUP.PROPS.FULL_FRAME_STYLE = checked;
+      }
     }
 
-    //ImGui:: SameLine();
-    // Disconnect from camera
-    /*
-    if (BC_APPLY.button_color(sdSysData, "APPLY", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+    // Change Resolution
     {
-      sdSysData.CAMERA_BACKUP.APPLY_CHANGES = true;
+      ImGui::PushItemWidth(sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x);
+      ImGui::InputScalar("##RestartWidth", ImGuiDataType_S32, &sdSysData.CAMERA_BACKUP.RESTART_WIDTH, nullptr, nullptr, nullptr);
+      ImGui::Text("  x");
+      ImGui::InputScalar("##RestartHeight", ImGuiDataType_S32, &sdSysData.CAMERA_BACKUP.RESTART_HEIGHT, nullptr, nullptr, nullptr);
+      ImGui::PopItemWidth();
+
+      if (sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION == 0)
+      {
+        ImGui::Text("YUYV");
+      }
+      else
+      {
+        ImGui::Text("MJPG");
+      }
+        {
+          bool checked = sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION;
+          if (ImGui::Checkbox("Cmp", &checked))
+          {
+            sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION = checked;
+          }
+        }
+
+      if (  sdSysData.CAMERA_BACKUP.PROPS.WIDTH != sdSysData.CAMERA_BACKUP.RESTART_WIDTH || 
+            sdSysData.CAMERA_BACKUP.PROPS.HEIGHT != sdSysData.CAMERA_BACKUP.RESTART_HEIGHT ||
+            sdSysData.CAMERA_BACKUP.PROPS.COMPRESSION != sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION)
+      {
+        if (BC_DISCONNECT.button_color(sdSysData, "APPLY##Apply_Resolution_Change", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+        {
+          sdSysData.CAMERA_BACKUP.APPLY_RESTART = true;
+        }
+      }
     }
-    */
+
   }
   ImGui::EndChild();
 
@@ -531,11 +557,13 @@ void CAMERA_WIDGET::display_camera_stats_times(system_data &sdSysData)
 {
   if (sdSysData.CAMERA_BACKUP.camera_online())
   {
-    ImGui::Text("Rend: %5.1ffps (%5.1fms)  Camera: %5.1ffps (%5.1fms)  Grab: (%5.1fms)  Proc Tme: (%5.1fms)", 
-                  sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FPS, sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FRAME_TIME, 
+    ImGui::Text("Camera: %5.1ffps (%5.1fms)  Rend: %5.1ffps (%5.1fms)  Grab: (%5.1fms)  Proc Tme: (%5.1fms)", 
                   sdSysData.CAMERA_BACKUP.TIME_CAMERA_FPS, sdSysData.CAMERA_BACKUP.TIME_CAMERA_FRAME_TIME,
+                  sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FPS, sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FRAME_TIME, 
                   sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL,
                   sdSysData.CAMERA_BACKUP.TIME_FRAME_PROCESSING);
+    ImGui::Text("%dx%d", 
+                  sdSysData.CAMERA_BACKUP.PROPS.WIDTH, sdSysData.CAMERA_BACKUP.PROPS.HEIGHT);
   }
 }
 
@@ -556,7 +584,7 @@ void CAMERA_WIDGET::display_camera_frame(system_data &sdSysData)
       float frame_aspect = (float)sdSysData.CAMERA_BACKUP.PROPS.WIDTH / (float)sdSysData.CAMERA_BACKUP.PROPS.HEIGHT;
       float region_aspect = WORKING_AREA.z / WORKING_AREA.w;
 
-      if (FULL_FRAME_STYLE == 0)
+      if (sdSysData.CAMERA_BACKUP.PROPS.FULL_FRAME_STYLE == 0)
       {
         //Full, Frame Center (Aspect Fit / Contain)
 
@@ -669,7 +697,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
   }
   else
   {
-    ImGui::SetCursorPos(ImVec2(5.0f, WORKING_AREA.w / 2.0f));
+    ImGui::SetCursorPos(ImVec2(5.0f, WORKING_AREA.w *0.10f));
     ImGui::Text("Waiting for camera feed...");
   }
 

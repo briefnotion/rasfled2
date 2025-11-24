@@ -1269,57 +1269,61 @@ void ADSB_MAP::screen_text(system_data &sdSysData)
 
   ImGui::PushStyleColor(ImGuiCol_Text, ImU32(sdSysData.PANEL_CONTROL.COLOR_SELECT.neo_color_TEXT(RAS_GREY)));
   {
-    ImGui::Text("TIME: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TIME_OF_SIGNAL.c_str());
-    ImGui::Text("COUNT: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_COUNT.c_str());
-    ImGui::Text("  POS: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_AIRCRAFT.c_str());
-
-    // Maps and Other Information
-    RANGE_INDICATOR.draw_info(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
-
-    // GPS Information
-    if (ACTIVE_GPS)
+    if (SHOW_BUTTONS)
     {
-      ImGui::NewLine();
+      ImGui::Text("TIME: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.TIME_OF_SIGNAL.c_str());
+      ImGui::Text("COUNT: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_COUNT.c_str());
+      ImGui::Text("  POS: %s", sdSysData.AIRCRAFT_COORD.AIRCRAFTS_MAP.POSITIONED_AIRCRAFT.c_str());
+    
+      // Maps and Other Information
+      RANGE_INDICATOR.draw_info(sdSysData.PANEL_CONTROL.PANELS.ADSB_MAP_LOCATION_FOCUS);
 
-      ImGui::Text("GPS POSITION");
-      ImGui::Text("   SPEED: %.1f", sdSysData.GPS_SYSTEM.CURRENT_POSITION.SPEED.val_mph());
-      ImGui::Text("ALTITUDE: %.1f", sdSysData.GPS_SYSTEM.CURRENT_POSITION.ALTITUDE.feet_val());
-      ImGui::Text(" HEADING: %.1f°", sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALUE);
-      ImGui::Text("%3.0f%%  P:%2.1f \nH:%2.1f V:%2.1f", sdSysData.GPS_SYSTEM.CURRENT_POSITION.ACCURACY_SCORE * 100.0f,
-                                                        sdSysData.GPS_SYSTEM.CURRENT_POSITION.PDOP,  
-                                                        sdSysData.GPS_SYSTEM.CURRENT_POSITION.HDOP, 
-                                                        sdSysData.GPS_SYSTEM.CURRENT_POSITION.VDOP);
-    }
-    ImGui::Text("DSP TRK SZ: %.ld", sdSysData.MAP_SYSTEM.DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size());
-    ImGui::Text("RESZE FCTR: %1.1f", sdSysData.MAP_SYSTEM.MAX_TRACK_RESOLUTION_RESIZE_FACTOR);
-    //ImGui::Text("Zoom Level: %d", sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
-
-    // Compass Information
-    if (ACTIVE_COMPASS)
-    {
-      ImGui::NewLine();
-
-      ImGui::Text("COMPASS");
-
-      ImGui::Text("BEARING:  %5.1f° ", sdSysData.COMMS_COMPASS.bearing_calibrated());
-
-      if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time())) // Enable
+      // GPS Information
+      if (ACTIVE_GPS)
       {
-        ImGui::Text("(%5.1f°) (%5.1f°)", sdSysData.COMMS_COMPASS.accumulated_gps_to_compass_bearing_error(),
-                                  signed_angular_error(sdSysData.COMMS_COMPASS.bearing_calibrated(),
-                                                        sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALUE));
-        ImGui::Text("         (%5.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset());
-      }
+        ImGui::NewLine();
 
-      // Print calibration data if calibration is on
-      if (sdSysData.COMMS_COMPASS.calibrate_on())
+        ImGui::Text("GPS POSITION");
+        ImGui::Text("   SPEED: %.1f", sdSysData.GPS_SYSTEM.CURRENT_POSITION.SPEED.val_mph());
+        ImGui::Text("ALTITUDE: %.1f", sdSysData.GPS_SYSTEM.CURRENT_POSITION.ALTITUDE.feet_val());
+        ImGui::Text(" HEADING: %.1f°", sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALUE);
+        ImGui::Text("%3.0f%%  P:%2.1f \nH:%2.1f V:%2.1f", sdSysData.GPS_SYSTEM.CURRENT_POSITION.ACCURACY_SCORE * 100.0f,
+                                                          sdSysData.GPS_SYSTEM.CURRENT_POSITION.PDOP,  
+                                                          sdSysData.GPS_SYSTEM.CURRENT_POSITION.HDOP, 
+                                                          sdSysData.GPS_SYSTEM.CURRENT_POSITION.VDOP);
+      }
+      ImGui::Text("DSP TRK SZ: %.ld", sdSysData.MAP_SYSTEM.DISPLAYED_TRACK.TRACK_POINTS_DETAILED.size());
+      ImGui::Text("RESZE FCTR: %1.1f", sdSysData.MAP_SYSTEM.MAX_TRACK_RESOLUTION_RESIZE_FACTOR);
+      //ImGui::Text("Zoom Level: %d", sdSysData.PANEL_CONTROL.PANELS.ADSB_ZOOM_LEVEL);
+
+      // Compass Information
+      if (ACTIVE_COMPASS)
       {
-        //ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + (WORKING_AREA.z * 0.25f), WORKING_AREA.y + (WORKING_AREA.w * 0.55f)));
-        ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + (WORKING_AREA.z * 0.52f), WORKING_AREA.y + sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y));
-        string info = sdSysData.COMMS_COMPASS.INFORMATION + "\n" + sdSysData.COMMS_COMPASS.LEVEL_3.INFORMATION_CALIBRATION;
-        ImGui::Text("%s", info.c_str());
+        ImGui::NewLine();
+
+        ImGui::Text("COMPASS");
+
+        ImGui::Text("BEARING:  %5.1f° ", sdSysData.COMMS_COMPASS.bearing_calibrated());
+
+        if (sdSysData.GPS_SYSTEM.active(sdSysData.PROGRAM_TIME.current_frame_time())) // Enable
+        {
+          ImGui::Text("(%5.1f°) (%5.1f°)", sdSysData.COMMS_COMPASS.accumulated_gps_to_compass_bearing_error(),
+                                    signed_angular_error(sdSysData.COMMS_COMPASS.bearing_calibrated(),
+                                                          sdSysData.GPS_SYSTEM.CURRENT_POSITION.TRUE_HEADING.VALUE));
+          ImGui::Text("         (%5.1f°)", sdSysData.COMMS_COMPASS.bearing_known_offset());
+        }
+
+        // Print calibration data if calibration is on
+        if (sdSysData.COMMS_COMPASS.calibrate_on())
+        {
+          //ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + (WORKING_AREA.z * 0.25f), WORKING_AREA.y + (WORKING_AREA.w * 0.55f)));
+          ImGui::SetCursorScreenPos(ImVec2(WORKING_AREA.x + (WORKING_AREA.z * 0.52f), WORKING_AREA.y + sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.y));
+          string info = sdSysData.COMMS_COMPASS.INFORMATION + "\n" + sdSysData.COMMS_COMPASS.LEVEL_3.INFORMATION_CALIBRATION;
+          ImGui::Text("%s", info.c_str());
+        }
       }
     }
+
   }
   ImGui::PopStyleColor();
 }

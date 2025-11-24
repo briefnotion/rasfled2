@@ -603,7 +603,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
     // Check for keybaord input
     // Disable if on terminal screen
-    if (sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN != 6)
+    if (sdSysData.PANEL_CONTROL.console_enabled(current_frame_time))
     {
       int character_pressed = 0;
       bool shift_pressed = false;
@@ -1284,6 +1284,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
               }
               else
               {
+                /*
                 if (sdSysData.CAR_INFO.STREET_LEGAL_MODE == true)
                 {
                   //ImGui::Text("%s", mask_string("Street_Legal_Md=ON", 3).c_str());
@@ -1294,6 +1295,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
                   //ImGui::Text("%s", mask_string("Street_Legal_Md=OFF", 3).c_str());
                   ImGui::Text("%s", "Street_Legal_Md=OFF");
                 }
+                */
               }
 
               ImGui::PopFont();

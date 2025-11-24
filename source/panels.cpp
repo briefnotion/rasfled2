@@ -110,6 +110,35 @@ void SCREEN4_PANEL_CONTROL::set_adsb_map_max_distance()
 }
 
 // ---
+
+bool SCREEN4_PANEL_CONTROL::console_enabled(unsigned long Time)
+{
+  if (CONSOLE_DISABLE_SET_ON)
+  {
+    CONSOLE_DISABLE_SET_ON = false;
+    DISABLE_CONSOLE_INPUT.set(Time, 500);
+    CONSOLE_ENABLED = false;
+    return false;
+  }
+  else if (CONSOLE_ENABLED)
+  {
+    return true;
+  }
+  else 
+  {
+    if (DISABLE_CONSOLE_INPUT.is_ready(Time))
+    {
+      CONSOLE_ENABLED = true;
+    }
+    return CONSOLE_ENABLED;
+  }
+}
+
+void SCREEN4_PANEL_CONTROL::console_disable()
+{
+  CONSOLE_DISABLE_SET_ON = true;
+}
+
 void SCREEN4_PANEL_CONTROL::color_start(unsigned long Time)
 {
   COLOR_SELECT.init_and_set_intensity(Time, INTENSITY.value());

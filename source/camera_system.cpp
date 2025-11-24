@@ -849,7 +849,7 @@ void CAMERA::init(stringstream &Print_Stream)
 
   // Verify settings
 
-  Print_Stream << "Init not yet coded." << endl;
+  Print_Stream << "Init not yet coded.";
 
   // When CAMERA_SETTING is matured (vectorized, tested) enable for common control set.
   /*
@@ -878,6 +878,7 @@ void CAMERA::save_settings()
   camera_settings.create_label_value(quotify("WIDTH"), quotify(to_string(PROPS.WIDTH)));
   camera_settings.create_label_value(quotify("HEIGHT"), quotify(to_string(PROPS.HEIGHT)));
   camera_settings.create_label_value(quotify("COMPRESSION"), quotify(to_string(PROPS.COMPRESSION)));
+  camera_settings.create_label_value(quotify("FULL_FRAME_STYLE"), quotify(to_string(PROPS.FULL_FRAME_STYLE)));
   camera_settings.create_label_value(quotify("FLIP_HORIZONTAL"), quotify(to_string(PROPS.FLIP_HORIZONTAL)));
   camera_settings.create_label_value(quotify("FLIP_VERTICAL"), quotify(to_string(PROPS.FLIP_VERTICAL)));
   camera_settings.create_label_value(quotify("FORCED_FRAME_LIMIT_MS"), quotify(to_string(PROPS.FORCED_FRAME_LIMIT_MS)));
@@ -963,6 +964,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
           STRING_INT    si_width;
           STRING_INT    si_height;
           STRING_INT    si_compression;
+          STRING_INT    si_full_frame_style;
           STRING_FLOAT  sf_post_process_scale;
           STRING_BOOL   sb_flip_horizontal;
           STRING_BOOL   sb_flip_vertical;
@@ -987,6 +989,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("WIDTH", si_width);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("HEIGHT", si_height);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("COMPRESSION", si_compression);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FULL_FRAME_STYLE", si_full_frame_style);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("POST_PROCESS_SCALE", sf_post_process_scale);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_HORIZONTAL", sb_flip_horizontal);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_VERTICAL", sb_flip_vertical);
@@ -1145,7 +1148,11 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
             if (si_compression.conversion_success())
             {
               PROPS.COMPRESSION = si_compression.get_int_value();
-            }          
+            }               
+            if (si_full_frame_style.conversion_success())
+            {
+              PROPS.FULL_FRAME_STYLE = si_full_frame_style.get_int_value();
+            }         
             if (sf_post_process_scale.conversion_success())
             {
               PROPS.POST_PROCESS_SCALE = sf_post_process_scale.get_int_value();
@@ -1564,9 +1571,32 @@ void CAMERA::apply_all_masks()
   }
 }
 
+void CAMERA::close_camera()
+{
+  std::stringstream print_stream;
+
+  // 1. Check if the camera capture object is open and release it
+  if (CAMERA_CAPTURE.isOpened())
+  {
+    CAMERA_CAPTURE.release();
+    print_stream << "Camera capture released.";
+  }
+  else
+  {
+    print_stream << "Camera close call when not open.";
+  }
+
+  PRINTW_QUEUE.push_back(print_stream.str());
+}
+
 void CAMERA::open_camera()
 {
   std::stringstream print_stream;
+
+  // Set Restart Variables
+  RESTART_WIDTH = PROPS.WIDTH;
+  RESTART_HEIGHT = PROPS.HEIGHT;
+  RESTART_COMPRESSION = PROPS.COMPRESSION;
 
   if (CAMERA_CAPTURE.isOpened())
   {
@@ -1603,8 +1633,12 @@ void CAMERA::open_camera()
 
       if (CAMERA_CAPTURE.isOpened()) 
       {
-        // Set MJPEG immediately
-        if (PROPS.COMPRESSION == 0)
+        // Set Resolution
+        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
+        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
+
+        // Set Compression
+        if (PROPS.COMPRESSION == 1)
         {
           CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
         }
@@ -1612,10 +1646,9 @@ void CAMERA::open_camera()
         {
           CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('Y', 'U', 'Y', '2'));
         }
-        
-        // Set Resolution
-        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
-        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
+
+        // Set Frame Rate
+        //CAMERA_CAPTURE.set(cv::CAP_PROP_FPS, PROPS.FPS);
           
         // VERIFICATION
         double fourcc = CAMERA_CAPTURE.get(cv::CAP_PROP_FOURCC);
@@ -1743,6 +1776,17 @@ void CAMERA::update_frame()
       // Save image to disk and get captured frame from camera.
       check_for_save_image_buffer_frame();
 
+      // Check for restart
+      if (APPLY_RESTART)
+      {
+        APPLY_RESTART = false;
+        close_camera();
+        PROPS.WIDTH = RESTART_WIDTH;
+        PROPS.HEIGHT = RESTART_HEIGHT;
+        PROPS.COMPRESSION = RESTART_COMPRESSION;
+        open_camera();
+      }
+
       if (CAMERA_BEING_VIEWED)
       {
         // Camera Open Error Checking.  Reconnect if possible.
@@ -1750,7 +1794,7 @@ void CAMERA::update_frame()
         {
           consecutive_connection_error_count++;
           PRINTW_QUEUE.push_back("Camera signal lost. Attempting reconnect...");
-          CAMERA_CAPTURE.release(); // Ensure old handle is gone
+          close_camera(); // Ensure old handle is gone
 
           bool not_connected = true;
           while (consecutive_connection_error_count <= max_consecutive_errors && not_connected)
@@ -1918,7 +1962,7 @@ void CAMERA::update_frame()
   CAMERA_ONLINE = false;
 
   // Close Camera if thread stops.
-  CAMERA_CAPTURE.release();
+  close_camera();
   CAM_AVAILABLE = false;
 
   save_settings();

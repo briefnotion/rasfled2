@@ -128,6 +128,10 @@ class SCREEN4_PANEL_CONTROL
   // 1 - On
   // 2 - Active
 
+  TIMED_IS_READY DISABLE_CONSOLE_INPUT;
+  bool CONSOLE_ENABLED = true;
+  bool CONSOLE_DISABLE_SET_ON = false;
+  
   // Set Panels
   void set_auto_temperature();
   void set_auto_malfunction();
@@ -189,9 +193,15 @@ class SCREEN4_PANEL_CONTROL
   // OPEN WINDOWS
   bool DISPLAY_SPEED_WINDOW = false;
   bool DISPLAY_COMPASS_WINDOW = false;
-  
+
+
   // Notation 
   string EXTRA;
+
+  // Methods to enable or disable console input in case another 
+  //  text input is necessary
+  bool console_enabled(unsigned long Time);
+  void console_disable();
 
   // Color Intensity
   void color_start(unsigned long Time);

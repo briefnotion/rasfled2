@@ -159,9 +159,13 @@ class CAMERA_PROPERTIES
   int WIDTH = 640;
   int HEIGHT = 480;
 
-  int COMPRESSION = 0;
-  // 0 - MJPG
+  int COMPRESSION = 1;
   // 1 - YUYV
+  // 0 - MJPG
+
+  bool FULL_FRAME_STYLE = 1;
+  // 0 - Full Frame Center
+  // 1 - Full Horizontal, Center
 
   float POST_PROCESS_SCALE = 1.0f;
 
@@ -433,9 +437,9 @@ class CAMERA
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
-  // Public method to create the camera capture.
+  void close_camera();
   void open_camera();
-  // Step through the process of starting the camera.
+  // Mmethod to close or create the camera capture.
 
   void update_frame();
   // Pull in latest frame from camera in a non thread-safe manner.
@@ -462,7 +466,7 @@ class CAMERA
   public:
 
   GLuint TEXTURE_ID = 0;
-  
+
   std::string INFORMATION_COMMAND_LIST = "Not Available";
 
   double  TIME_CAMERA_FPS;
@@ -486,8 +490,14 @@ class CAMERA
   CAMERA_PROPERTIES PROPS;
   deque<CAMERA_SETTING> SETTINGS;
 
+  // Changes that need to restart the camera
   bool APPLY_DEFAULTS = false;
   bool APPLY_CHANGES = false;
+  bool APPLY_RESTART = false;
+  
+  int RESTART_WIDTH = 640;
+  int RESTART_HEIGHT = 480;
+  int RESTART_COMPRESSION = 1;
 
   // Manually print output stream
   void print_stream(CONSOLE_COMMUNICATION &cons);

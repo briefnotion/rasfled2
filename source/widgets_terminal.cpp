@@ -18,6 +18,9 @@
 
 void TERMINAL_SCREEN::display_terminal(system_data &sdSysData, TERMINAL &Term)
 {
+  // Disable main program terminal input:
+  sdSysData.PANEL_CONTROL.console_disable();
+
   // Gather keyboard input
   {
     static const int FKEY_PARAMS[] = 
@@ -291,6 +294,10 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
 
   // Screen
   ImVec4 working_area = get_working_area();
+  
+  // Disable other buttons from getting accidentally clicked.
+  ImGui::PushAllowKeyboardFocus(false);
+
   ImGui::BeginChild("Terminal", ImVec2(working_area.z, working_area.w), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
     ImGui::SetCursorPos(ImVec2(0,0));
@@ -356,6 +363,9 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
 
     ImGui::EndChild();
   }
+
+  ImGui::PopAllowKeyboardFocus();
+
 }
 
 // ---------------------------------------------------------------------------------------
