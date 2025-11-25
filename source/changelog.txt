@@ -1,3 +1,6 @@
+2.367_251125
+  - More camera debugging.
+
 2.366_251124
   - Camera resolotion can be changed without 
       restarting the program.

@@ -336,6 +336,9 @@ void CAMERA_WIDGET::display_camera_adjustments_window(system_data &sdSysData)
   // Divide sub window into 3
   ImGui::BeginChild("Col1", ImVec2((working_area_col.z) / column_count, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
+    // Disable main program terminal input:
+    sdSysData.PANEL_CONTROL.console_disable();
+
     // Temporary for path calibration
     {
       // Adjust the Low Light Threshold and Gama.

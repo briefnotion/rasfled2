@@ -1628,7 +1628,7 @@ void CAMERA::open_camera()
     // Start the camera 
     if (PROPS.TEST == false)
     {
-      CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_ID, cv::CAP_V4L2);
+      CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_NAME, cv::CAP_V4L2);
       CAM_AVAILABLE = CAMERA_CAPTURE.isOpened();
 
       if (CAMERA_CAPTURE.isOpened()) 
@@ -1646,35 +1646,33 @@ void CAMERA::open_camera()
         {
           CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('Y', 'U', 'Y', '2'));
         }
-
-        // Set Frame Rate
-        //CAMERA_CAPTURE.set(cv::CAP_PROP_FPS, PROPS.FPS);
           
         // VERIFICATION
-        double fourcc = CAMERA_CAPTURE.get(cv::CAP_PROP_FOURCC);
+        print_stream << "Camera Stats:" << std::endl;
+
         double w = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
         double h = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
-        int fourcc_int = (int)fourcc;
-
-        // Print Raw Value for debugging
-        print_stream << "Camera Stats:" << std::endl;
         print_stream << "  > Resolution: " << w << "x" << h << " (Requested: " << PROPS.WIDTH << "x" << PROPS.HEIGHT << ")" << std::endl;
-        print_stream << "  > Codec RAW:  " << fourcc_int << std::endl; // If this is 0, the property get failed
-        
-        // Manual Decode attempt
-        char c1 = (char)(fourcc_int & 0xFF);
-        char c2 = (char)((fourcc_int >> 8) & 0xFF);
-        char c3 = (char)((fourcc_int >> 16) & 0xFF);
-        char c4 = (char)((fourcc_int >> 24) & 0xFF);
-        
-        print_stream << "  > Codec Str:  " << c1 << c2 << c3 << c4 << std::endl;
+
+        // Manual Decode stream method
+        double fourcc = CAMERA_CAPTURE.get(cv::CAP_PROP_FOURCC);
+        {
+          uint32_t f = (uint32_t)fourcc;
+          char codec[] = 
+          {
+            (char)(f & 0xFF),
+            (char)((f >> 8) & 0xFF),
+            (char)((f >> 16) & 0xFF),
+            (char)((f >> 24) & 0xFF),
+            0
+          };
+          std::cout << "Codec: " << codec << std::endl;
+          print_stream << "  > Codec Str:  " << codec << std::endl;  
+        }
 
         // Set Post Processing Size
         POST_PROCESS_SIZE = {(int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.WIDTH), 
                                         (int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.HEIGHT)};
-
-        print_stream << "Post Process:" << std::endl;
-        print_stream << "  > Resolution: " << POST_PROCESS_SIZE.width << "x" << POST_PROCESS_SIZE.height << std::endl;
 
         // Initialize camera via backend.  First set normal operation mode, then gather all properties.
         init(print_stream);
