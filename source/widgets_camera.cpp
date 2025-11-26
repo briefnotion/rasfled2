@@ -175,21 +175,30 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
       ImGui::InputScalar("##RestartHeight", ImGuiDataType_S32, &sdSysData.CAMERA_BACKUP.RESTART_HEIGHT, nullptr, nullptr, nullptr);
       ImGui::PopItemWidth();
 
-      if (sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION == 0)
-      {
-        ImGui::Text("YUYV");
-      }
-      else
+      if (sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION == 1)
       {
         ImGui::Text("MJPG");
       }
+      else if (sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION == 2)
+      {
+        ImGui::Text("AVC1");
+      }
+      else //if (sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION == 0)
+      {
+        ImGui::Text("YUYV");
+      }
+
+      ImGui::PushItemWidth(sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x);
+      ImGui::InputScalar("##Compression", ImGuiDataType_S32, &sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION, nullptr, nullptr, nullptr);
+      ImGui::PopItemWidth();
+
+      {
+        bool checked = sdSysData.CAMERA_BACKUP.PROPS.FORCE_V4L2_CONFIG;
+        if (ImGui::Checkbox("ALTLOAD", &checked))
         {
-          bool checked = sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION;
-          if (ImGui::Checkbox("Cmp", &checked))
-          {
-            sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION = checked;
-          }
+          sdSysData.CAMERA_BACKUP.PROPS.FORCE_V4L2_CONFIG = checked;
         }
+      }
 
       if (  sdSysData.CAMERA_BACKUP.PROPS.WIDTH != sdSysData.CAMERA_BACKUP.RESTART_WIDTH || 
             sdSysData.CAMERA_BACKUP.PROPS.HEIGHT != sdSysData.CAMERA_BACKUP.RESTART_HEIGHT ||
@@ -756,6 +765,8 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
       sdSysData.CAMERA_BACKUP.take_snapshot();
     }
 
+    ImGui::SameLine();
+
     // Open Settings Screen
     if (BC_DISPLAY_SETTINGS.button_toggle_color(sdSysData, "CAM##Display Camera Settings", "CAM##Display Camera Settings", 
                                                 DISPLAY_CAMERA_SETTINGS, 
@@ -771,6 +782,8 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
     {
       DISPLAY_ADJUSTMENTS = !DISPLAY_ADJUSTMENTS;
     }
+
+    ImGui::SameLine();
 
     // Open Enhancements Screen
     if (BC_DISPLAY_ENHANCEMENTS.button_toggle_color(sdSysData, "ENH##Display Camera Enhancements", "ENH##Display Camera Enhancements",

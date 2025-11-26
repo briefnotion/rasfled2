@@ -335,7 +335,7 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
       {
         if (BC_TERMINAL_SELECT_BUTTONS[pos].button_toggle_color(sdSysData, to_string(pos + 1), to_string(pos + 1), 
                                                     sdSysData.PANEL_CONTROL.PANELS.TERMINAL_SELECTED == pos, 
-                                                    RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+                                                    RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
         {
           sdSysData.PANEL_CONTROL.PANELS.TERMINAL_SELECTED = pos;
         }
@@ -346,7 +346,7 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
       {
         if (BC_TERMINAL_SELECT_BUTTONS[sdSysData.TERMINAL_THREADS.size()].button_toggle_color(sdSysData, "+", "+", 
                                           false, 
-                                          RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
+                                          RAS_RED, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
         {
           auto new_terminal_ptr = std::make_unique<TERMINAL>();
           new_terminal_ptr->create();

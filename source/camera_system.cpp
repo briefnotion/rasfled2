@@ -1571,6 +1571,144 @@ void CAMERA::apply_all_masks()
   }
 }
 
+
+
+/**
+ * @brief Configures the V4L2 device directly using ioctl. This explicit, raw setup 
+ * is used to force the driver to read the full sensor field-of-view (FOV) and 
+ * ensures the Codec is set before the Resolution.
+ * This function attempts all settings and only returns false if the critical format 
+ * (codec) setting fails.
+ * @param print_stream Stream to log messages to.
+ * @return True on successful configuration, false otherwise.
+ */
+bool CAMERA::configure_v4l2_roi_and_format(std::stringstream& print_stream)
+{
+    // --- 1. MANUALLY OPEN THE DEVICE WITH POSIX ---
+    int fd = open(PROPS.CAMERA_DEVICE_NAME.c_str(), O_RDWR);
+    if (fd < 0) {
+        print_stream << "ERROR: Cannot open " << PROPS.CAMERA_DEVICE_NAME << " for raw V4L2 configuration." << std::endl;
+        return false;
+    }
+
+    // Flag to track the most critical step: whether the requested codec was actually set.
+    bool format_set_successfully = true; 
+
+    // --- 2. DETERMINE PIXEL FORMAT ---
+    __u32 pixelformat;
+    std::string requested_format_name;
+    if (PROPS.COMPRESSION == 1) {
+        pixelformat = V4L2_PIX_FMT_MJPEG;
+        requested_format_name = "MJPG";
+    } else if (PROPS.COMPRESSION == 2) {
+        pixelformat = V4L2_PIX_FMT_H264;
+        requested_format_name = "H264";
+    } else {
+        pixelformat = V4L2_PIX_FMT_YUYV; // V4L2 uses YUYV for YUY2
+        requested_format_name = "YUYV";
+    }
+    
+    __u32 requested_pixelformat = pixelformat; // Store the requested format for validation
+    
+    // --- 3. RESET ROI / CROP TO FULL SENSOR (CRITICAL FIX) ---
+    // The IMX291 has a maximum resolution of 1920x1080. We force the ROI to the full sensor at (0,0).
+    struct v4l2_selection sel {};
+    sel.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    sel.target = V4L2_SEL_TGT_CROP;
+    sel.r.left = 0;
+    sel.r.top = 0;
+    sel.r.width  = 1920; 
+    sel.r.height = 1080;
+
+    if (ioctl(fd, VIDIOC_S_SELECTION, &sel) < 0) {
+        print_stream << "WARNING: VIDIOC_S_SELECTION failed. Driver may not support explicit ROI reset." << std::endl;
+        // Continue, as this is a non-critical setting for stream operation
+    } else {
+        print_stream << " > Successfully set V4L2 full sensor ROI to 1920x1080 at (0,0)." << std::endl;
+    }
+
+
+    // --- 4. FIRST PASS: SET FULL RESOLUTION + CODEC (To initialize compression correctly) ---
+    struct v4l2_format fmt_full {};
+    fmt_full.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    fmt_full.fmt.pix.pixelformat = pixelformat;
+    fmt_full.fmt.pix.width  = 1920;
+    fmt_full.fmt.pix.height = 1080;
+
+    if (ioctl(fd, VIDIOC_S_FMT, &fmt_full) < 0) {
+        print_stream << "ERROR: Could not set full-sensor format/resolution (VIDIOC_S_FMT 1920x1080) - IOCTL failed in first pass." << std::endl;
+        format_set_successfully = false; // CRITICAL: Mark failure but CONTINUE to second pass
+    } else {
+        print_stream << " > First pass: Set full-res (" << requested_format_name << " 1920x1080)." << std::endl;
+    }
+    
+    
+    // --- 5. SECOND PASS: SET ACTUAL DESIRED RESOLUTION ---
+    struct v4l2_format fmt_actual {};
+    fmt_actual.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    fmt_actual.fmt.pix.pixelformat = pixelformat; // Keep the requested format
+    fmt_actual.fmt.pix.width  = PROPS.WIDTH;
+    fmt_actual.fmt.pix.height = PROPS.HEIGHT;
+    
+    if (ioctl(fd, VIDIOC_S_FMT, &fmt_actual) < 0) {
+        print_stream << "ERROR: Could not set actual resolution (VIDIOC_S_FMT " 
+                     << PROPS.WIDTH << "x" << PROPS.HEIGHT << ") - IOCTL failed in second pass." << std::endl;
+        format_set_successfully = false; // Mark failure but CONTINUE
+    } else {
+        // --- Validation Check: Did the driver accept the requested format on the second pass? ---
+        if (fmt_actual.fmt.pix.pixelformat != requested_pixelformat) {
+            // Decode the actual coerced format for reporting
+            uint32_t actual_f = fmt_actual.fmt.pix.pixelformat;
+            char actual_codec[] = {(char)(actual_f & 0xFF), (char)((actual_f >> 8) & 0xFF), (char)((actual_f >> 16) & 0xFF), (char)((actual_f >> 24) & 0xFF), 0};
+            
+            print_stream << "ERROR: Requested format (" << requested_format_name 
+                         << ") rejected after second pass. Driver coerced to " << actual_codec << "." << std::endl;
+            format_set_successfully = false; // CRITICAL FAILURE: Mark failure but CONTINUE
+        }
+
+        // Check if the requested resolution was actually set
+        bool resolution_coerced = false;
+        if (fmt_actual.fmt.pix.width != (__u32)PROPS.WIDTH || fmt_actual.fmt.pix.height != (__u32)PROPS.HEIGHT) {
+            print_stream << "WARNING: Driver coerced final resolution to " << fmt_actual.fmt.pix.width << "x" << fmt_actual.fmt.pix.height << std::endl;
+            resolution_coerced = true; // This is a WARNING, not a CRITICAL FAILURE
+        }
+        
+        // Log final success summary
+        if (format_set_successfully && !resolution_coerced) {
+            print_stream << " > Successfully set final V4L2 format and resolution." << std::endl;
+        } else if (format_set_successfully) {
+            print_stream << " > Format set successfully, but resolution was coerced." << std::endl;
+        }
+    }
+
+
+    // --- 6. SET FPS ---
+    struct v4l2_streamparm parm {};
+    parm.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+    parm.parm.capture.timeperframe.numerator = 1;
+    parm.parm.capture.timeperframe.denominator = (__u32)PROPS.FPS;
+
+    if (ioctl(fd, VIDIOC_S_PARM, &parm) < 0) {
+        print_stream << "WARNING: Could not set FPS (VIDIOC_S_PARM). Driver may ignore this or use a default." << std::endl;
+        // Continue, as this is a non-critical setting for stream operation
+    } else {
+         print_stream << " > Successfully set V4L2 target FPS to " << PROPS.FPS << "." << std::endl;
+    }
+    
+    // Close the raw file descriptor. OpenCV will re-open and attach.
+    close(fd); 
+    
+    // Final check: Only return true if the codec (the primary goal) was set successfully.
+    if (!format_set_successfully) {
+        print_stream << "CRITICAL FAILURE: V4L2 configuration failed to set required codec/format." << std::endl;
+        return false;
+    }
+
+    return true;
+}
+
+
+
 void CAMERA::close_camera()
 {
   std::stringstream print_stream;
@@ -1628,31 +1766,58 @@ void CAMERA::open_camera()
     // Start the camera 
     if (PROPS.TEST == false)
     {
+      // --- STEP A: Optionally Perform Raw V4L2 Configuration ---
+      if (PROPS.FORCE_V4L2_CONFIG) { // Controlled by the new flag
+          print_stream << "Attempting raw V4L2 configuration..." << std::endl;
+          configure_v4l2_roi_and_format(print_stream);
+      } else {
+            print_stream << "Using standard OpenCV configuration sequence." << std::endl;
+            // NOTE: If FORCE_V4L2_CONFIG is false, you might want to add 
+            // the original OpenCV 'set' calls back here if you still want
+            // to attempt configuration without the raw ioctls.
+            // For now, we assume raw V4L2 is the primary fix path.
+      }
+
       CAMERA_CAPTURE.open(PROPS.CAMERA_DEVICE_NAME, cv::CAP_V4L2);
       CAM_AVAILABLE = CAMERA_CAPTURE.isOpened();
 
       if (CAMERA_CAPTURE.isOpened()) 
       {
-        // Set Resolution
-        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
-        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
+        if (PROPS.FORCE_V4L2_CONFIG == false)
+        {
+          // Set Compression
+          if (PROPS.COMPRESSION == 1)
+          {
+            CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+            print_stream << " > Requesting Codec to MJPG" << std::endl;
+          }
+          else if (PROPS.COMPRESSION == 2)
+          {
+            // Some drivers use AVC1 for H.264
+            CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('A', 'V', 'C', '1'));
+            print_stream << " > Requesting Codec to AVC1 (H.264 alternative)." << std::endl;
+          }
+          else
+          {
+            CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('Y', 'U', 'Y', '2'));
+            print_stream << " > Requesting Codec to YUY2." << std::endl;
+          }
 
-        // Set Compression
-        if (PROPS.COMPRESSION == 1)
-        {
-          CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('M', 'J', 'P', 'G'));
+          // Set Resolution
+          CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
+          CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
         }
-        else
-        {
-          CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('Y', 'U', 'Y', '2'));
-        }
-          
+        
         // VERIFICATION
-        print_stream << "Camera Stats:" << std::endl;
+        print_stream << "Camera Results:" << std::endl;
 
         double w = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_WIDTH);
         double h = CAMERA_CAPTURE.get(cv::CAP_PROP_FRAME_HEIGHT);
+
         print_stream << "  > Resolution: " << w << "x" << h << " (Requested: " << PROPS.WIDTH << "x" << PROPS.HEIGHT << ")" << std::endl;
+
+        PROPS.WIDTH = (int)w;
+        PROPS.HEIGHT = (int)h;
 
         // Manual Decode stream method
         double fourcc = CAMERA_CAPTURE.get(cv::CAP_PROP_FOURCC);

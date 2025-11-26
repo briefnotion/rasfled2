@@ -114,6 +114,9 @@ private:
 };
 
 // ---------------------------------------------------------------------------------------
+
+
+// ---------------------------------------------------------------------------------------
 class CAMERA_CONTROL_SETTING_LOADED
 {
   public:
@@ -172,7 +175,19 @@ class CAMERA_PROPERTIES
   bool FLIP_HORIZONTAL = false; // (horizontal flip, around Y-axis)
   bool FLIP_VERTICAL = false;   // (vertical flip, around X-axis)
 
-  int FORCED_FRAME_LIMIT_MS  = 0;
+  int FORCED_FRAME_LIMIT_MS  = 0; 
+  // Does not set frame rate of camera. Instead sets the minimum 
+  //  speed of the while loop for the camera read, a delay.
+  //  0 means that the next read will be attempte imediately, 
+  //  30 means that the camera read will only be attempted 
+  //  30 ms after the previous.
+  
+  bool FORCE_V4L2_CONFIG = false;
+  float FPS = 30.0f; 
+  // When FORCE_V4L2_CONFIG == true, an additional test funcion 
+  //  "configure_v4l2_roi_and_format" will be called before the
+  //  camera is opened.
+  // Suposively it will the ROI to "HARD CODED" (0,0)(1920,1080)
 
   bool TEST             = false;
   bool TEST_IMAGE       = false;
@@ -437,9 +452,14 @@ class CAMERA
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
+  bool configure_v4l2_roi_and_format(std::stringstream& print_stream);
+  // Alternative open_camera to force settings before openining.
+
   void close_camera();
   void open_camera();
   // Mmethod to close or create the camera capture.
+  // Only to be called by the "update_frame" function, 
+  //  within its own thread.
 
   void update_frame();
   // Pull in latest frame from camera in a non thread-safe manner.
@@ -463,6 +483,7 @@ class CAMERA
   void list_controls(CONSOLE_COMMUNICATION &cons);
   void apply_loaded_camera_controls(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Control, 
                                     deque<CAMERA_SETTING> &Settings);
+                                    
   public:
 
   GLuint TEXTURE_ID = 0;

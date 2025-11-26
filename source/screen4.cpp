@@ -1264,7 +1264,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
             ImGui::SameLine();
 
-            if (BTC_TAB_CAMERA.button_toggle_color(sdSysData, "O", "O", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 7, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+            if (BTC_TAB_CAMERA.button_toggle_color(sdSysData, "V", "V", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 7, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
             {
               sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 7;
             }

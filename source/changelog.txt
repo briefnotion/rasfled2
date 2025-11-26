@@ -1,3 +1,6 @@
+2.368_251126
+- Testing an alternative open camera function.
+
 2.367_251125
   - More camera debugging.
 
