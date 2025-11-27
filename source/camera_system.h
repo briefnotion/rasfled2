@@ -182,13 +182,6 @@ class CAMERA_PROPERTIES
   //  30 means that the camera read will only be attempted 
   //  30 ms after the previous.
   
-  bool FORCE_V4L2_CONFIG = false;
-  float FPS = 30.0f; 
-  // When FORCE_V4L2_CONFIG == true, an additional test funcion 
-  //  "configure_v4l2_roi_and_format" will be called before the
-  //  camera is opened.
-  // Suposively it will the ROI to "HARD CODED" (0,0)(1920,1080)
-
   bool TEST             = false;
   bool TEST_IMAGE       = false;
   bool TEST_MULTI_FRAME = false;
@@ -374,7 +367,6 @@ class CAMERA
   cv::VideoCapture  CAMERA_CAPTURE;
   int               FRAME_TO_BUFFER = 0;
 
-  bool FIRST_RUN = true;
   bool CAM_AVAILABLE = false;
 
   // Thread Update and process_enhancements_frame
@@ -383,8 +375,6 @@ class CAMERA
   cv::Mat FRAME_BUFFER_RESIZE;
   cv::Mat FRAME_BUFFER_FAKE;
 
-  //int WIDTH_POST_PROCESS = 640;
-  //int HEIGHT_POST_PROCESS = 480;
   cv::Size POST_PROCESS_SIZE;
 
   // Thread process_enhancements_frames
@@ -435,11 +425,20 @@ class CAMERA
   void check_for_save_image_buffer_processed();
   // check to see if current buffer should be saved to disk.
 
-  void run_preprocessing(cv::Mat &Frame, unsigned long Frame_Time);
+  void run_preprocessing_inner(cv::Mat &Frame, cv::Mat &Frame_Output);
   // Apply orientation (flip logic)
+  // Create Downsized image
+
+  void run_preprocessing_outer(cv::Mat &Frame, unsigned long Frame_Time);
   // Apply Denoising
   // Apply Sharpening
-  // Create Downsized image
+  // Frames and Vars not passed in parameter:
+  //  PROCESSED_FRAME_GRAY
+  //  PROCESSED_FRAME_CANNY
+  //  CANNY_THRESH_LOW
+  //  CANNY_THRESH_HIGH
+  //  CANNY_APERTURE
+
 
   void apply_ehancements();
   // Apply all prop enable enhancements.
@@ -483,7 +482,9 @@ class CAMERA
   void list_controls(CONSOLE_COMMUNICATION &cons);
   void apply_loaded_camera_controls(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Control, 
                                     deque<CAMERA_SETTING> &Settings);
-                                    
+
+  void release_all_frames();
+  
   public:
 
   GLuint TEXTURE_ID = 0;
@@ -519,6 +520,7 @@ class CAMERA
   int RESTART_WIDTH = 640;
   int RESTART_HEIGHT = 480;
   int RESTART_COMPRESSION = 1;
+  float RESTART_POST_PROCESS_SCALE = 1.0f;
 
   // Manually print output stream
   void print_stream(CONSOLE_COMMUNICATION &cons);

@@ -1,3 +1,20 @@
+2.369_251127
+  - Was unable to track down error concerning 
+      wrong roi after camera open. AI thinks 
+      its a firmware bug, where the incorrect 
+      image sensore is being define as the 
+      wrong area. Yet, opening the camera 
+      stream via VLC displays a perfectly 
+      proportioned and size display, suggesting 
+      my code is wrong. As a result:
+  - Deleted a bunch of debug code. 
+  - Added POST_PROCESS_SCALE property, to 
+      change resolution of post_processing 
+      image. 
+  - Somehow, introduced a new bug causing 
+      Fake Frames and Low Light filters to 
+      act wonky, when both are on. 
+
 2.368_251126
 - Testing an alternative open camera function.
 

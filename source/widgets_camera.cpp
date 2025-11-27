@@ -167,7 +167,7 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
       }
     }
 
-    // Change Resolution
+    // Change Resolution and Scale
     {
       ImGui::PushItemWidth(sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x);
       ImGui::InputScalar("##RestartWidth", ImGuiDataType_S32, &sdSysData.CAMERA_BACKUP.RESTART_WIDTH, nullptr, nullptr, nullptr);
@@ -190,19 +190,17 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
 
       ImGui::PushItemWidth(sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM.x);
       ImGui::InputScalar("##Compression", ImGuiDataType_S32, &sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION, nullptr, nullptr, nullptr);
-      ImGui::PopItemWidth();
 
-      {
-        bool checked = sdSysData.CAMERA_BACKUP.PROPS.FORCE_V4L2_CONFIG;
-        if (ImGui::Checkbox("ALTLOAD", &checked))
-        {
-          sdSysData.CAMERA_BACKUP.PROPS.FORCE_V4L2_CONFIG = checked;
-        }
-      }
+      ImGui::NewLine();
+
+      ImGui::Text("SCALE");
+      ImGui::InputFloat("##Scale", &sdSysData.CAMERA_BACKUP.RESTART_POST_PROCESS_SCALE);
+      ImGui::PopItemWidth();
 
       if (  sdSysData.CAMERA_BACKUP.PROPS.WIDTH != sdSysData.CAMERA_BACKUP.RESTART_WIDTH || 
             sdSysData.CAMERA_BACKUP.PROPS.HEIGHT != sdSysData.CAMERA_BACKUP.RESTART_HEIGHT ||
-            sdSysData.CAMERA_BACKUP.PROPS.COMPRESSION != sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION)
+            sdSysData.CAMERA_BACKUP.PROPS.COMPRESSION != sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION || 
+            sdSysData.CAMERA_BACKUP.PROPS.POST_PROCESS_SCALE != sdSysData.CAMERA_BACKUP.RESTART_POST_PROCESS_SCALE)
       {
         if (BC_DISCONNECT.button_color(sdSysData, "APPLY##Apply_Resolution_Change", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {
@@ -555,23 +553,22 @@ void CAMERA_WIDGET::display_camera_stats_enhancements(system_data &sdSysData)
     {
       enh_double_mask = "DFM";
     }
-
     
-    ImGui::Text("%s %s %s %s %s%s(%2d) %s%s(%3d)", 
-                  enh_color.c_str(), enh_glare_mask.c_str(), enh_canny_mask.c_str(), enh_double_mask.c_str(),
+    ImGui::Text("%s%s(%2d) %s %s %s %s %s%s(%3d)", 
                   frame_gen_on.c_str(), frame_gen.c_str(), (int)sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FPS, 
+                  enh_color.c_str(), enh_glare_mask.c_str(), enh_canny_mask.c_str(), enh_double_mask.c_str(),
                   enh_low_light_on.c_str(), enh_low_light.c_str(), sdSysData.CAMERA_BACKUP.LOW_LIGHT_VALUE);
   }
-
 }
 
 void CAMERA_WIDGET::display_camera_stats_times(system_data &sdSysData)
 {
   if (sdSysData.CAMERA_BACKUP.camera_online())
   {
-    ImGui::Text("Camera: %5.1ffps (%5.1fms)  Rend: %5.1ffps (%5.1fms)  Grab: (%5.1fms)  Proc Tme: (%5.1fms)", 
+    ImGui::Text("Camera: %5.1ffps (%5.1fms)  Rend: %5.1ffps (%5.1fms)", 
                   sdSysData.CAMERA_BACKUP.TIME_CAMERA_FPS, sdSysData.CAMERA_BACKUP.TIME_CAMERA_FRAME_TIME,
-                  sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FPS, sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FRAME_TIME, 
+                  sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FPS, sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FRAME_TIME);
+    ImGui::Text("  Grab: (%5.1fms)        Prc Tme: (%5.1fms)", 
                   sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL,
                   sdSysData.CAMERA_BACKUP.TIME_FRAME_PROCESSING);
     ImGui::Text("%dx%d", 
