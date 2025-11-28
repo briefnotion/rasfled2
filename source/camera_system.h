@@ -266,7 +266,7 @@ class CAMERA
   cv::Mat FRAME_DUMMY2; // for testing double buffer
   bool    FRAME_DUMMY_MULTI_FRAME_TEST = false;
 
-  bool NEW_FRAME_AVAILABLE = false; // Delete?
+  int NEW_FRAME_AVAILABLE = -1;
 
   double DOWN_SCALE_FACTOR = 2.0;
 
@@ -326,30 +326,16 @@ class CAMERA
 
   /*
 
-  process
+  BUFFER_FRAME_HANDOFF_READY ... WORKING_FRAME_FULLY_PROCESSED ... LIVE_FRAME
 
-  update_frame
-    // Trigger buffer 0 or 1 ready
-    BUFFER_FRAME_HANDOFF_READY
-
-  if (BUFFER_FRAME_HANDOFF_READY && WORKING_FRAME_FULLY_PROCESSED)
-  process_enhancements_frame
-    // clear trigger
-    BUFFER_FRAME_HANDOFF_READY = false
-    // Lock enhancements from starting
-    WORKING_FRAME_FULLY_PROCESSED = false
-
-      Completes with
-      FRAME_TO_TEXTURE_TRACK = 1
-  
-
-  if (FRAME_TO_TEXTURE_TRACK > 0)
-  generate_imgui_texture_frame
-    // Relese process_enhancements_frame
-    WORKING_FRAME_FULLY_PROCESSED = true
-
-        FRAME_TO_TEXTURE_TRACK = 0 || 2
-        FRAME_TO_TEXTURE_TRACK = 0
+  ------------------------process(--------------------------
+  update_frame().............process_enhancements_frame().....generate_imgui_texture_frame()
+  FRAME_BUFFER[3]      PROCESSED_FRAME[2]                 LIVE_FRAME[2]
+          FRAME_BUFFER_RESIZE[3]
+                      V                                       V
+  LATEST_READY_FRAME  BUFFER_FRAME_HANDOFF_READY = #       NEW_FRAME_AVAILABLE = # 
+  FRAME_TO_BUFFER = #           BEING_PROCESSED_FRAME = #
+                              WORKING_FRAME_FULLY_PROCESSED = false   WORKING_FRAME_FULLY_PROCESSED = true
 
   */
   
@@ -370,19 +356,18 @@ class CAMERA
   bool CAM_AVAILABLE = false;
 
   // Thread Update and process_enhancements_frame
-  cv::Mat FRAME_BUFFER_0;
-  cv::Mat FRAME_BUFFER_1;
-  cv::Mat FRAME_BUFFER_RESIZE;
+  cv::Mat FRAME_BUFFER[3];
+  cv::Mat FRAME_BUFFER_RESIZE[3];  // tmp
+  cv::Mat PROCESSED_FRAME[2];
+
+  // Single line post process
   cv::Mat FRAME_BUFFER_FAKE;
 
   cv::Size POST_PROCESS_SIZE;
 
   // Thread process_enhancements_frames
-  cv::Mat PROCESSED_FRAME;
+
   cv::Mat PROCESSED_FRAME_GRAY;
-  //cv::Mat PROCESSED_FRAME_DOWNSIZED;
-  //cv::Mat PROCESSED_FRAME_GRAY_DOWNSIZED;
-  //cv::Mat PROCESSED_FRAME_GAUSSIAN;
   cv::Mat PROCESSED_FRAME_CANNY;
 
   //cv::Mat MASK_FRAME_OVERLAY_LINES;
@@ -403,12 +388,12 @@ class CAMERA
 
   FAKE_FRAME FAKE_FRAME_GENERATOR;
   
-  int             FRAME_TO_TEXTURE_TRACK = 0;
   TIMED_IS_READY  FRAME_TO_TEXTURE_TIMER;
+  bool            FRAME_TO_TEXTURE_TIMER_CHECK = false;
 
-  bool    BUFFER_FRAME_HANDOFF_READY = false;  // Needs Lock
-  int     LATEST_READY_FRAME         = -1;
-  int     BEING_PROCESSED_FRAME      = -1;
+  int    BUFFER_FRAME_HANDOFF_READY = -1;
+  int     LATEST_READY_FRAME        = -1;
+  int     BEING_PROCESSED_FRAME     = -1;
 
   // Thread process_enhancements_frame and generate_imgui_texture_frame
   bool    WORKING_FRAME_FULLY_PROCESSED = true; // Needs Lock
@@ -419,10 +404,10 @@ class CAMERA
   void save_settings();
   void load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Control);
 
-  void check_for_save_image_buffer_frame();
+  void check_for_save_image_buffer_frame(cv::Mat &Frame);
   // check to see if current buffer should be saved to disk.
 
-  void check_for_save_image_buffer_processed();
+  void check_for_save_image_buffer_processed(cv::Mat &Frame);
   // check to see if current buffer should be saved to disk.
 
   void run_preprocessing_inner(cv::Mat &Frame, cv::Mat &Frame_Output);
@@ -440,14 +425,14 @@ class CAMERA
   //  CANNY_APERTURE
 
 
-  void apply_ehancements();
+  void apply_ehancements(cv::Mat &Frame);
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
-  void apply_masks_to_processed_frame(cv::Mat &Mask_0, cv::Mat &Mask_1);
+  void apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv::Mat &Mask_1);
   // A simple helper routine to apply double or single frame mask.
 
-  void apply_all_masks();
+  void apply_all_masks(cv::Mat &Frame);
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
@@ -502,8 +487,6 @@ class CAMERA
   bool    IS_LOW_LIGHT = false;
   int     LOW_LIGHT_VALUE = 0;
 
-  bool FRAME_GEN = false;
-
   TIMED_IS_READY  FORCED_FRAME_LIMIT;
   
   THREADING_INFO  THREAD_CAMERA;
@@ -521,6 +504,8 @@ class CAMERA
   int RESTART_HEIGHT = 480;
   int RESTART_COMPRESSION = 1;
   float RESTART_POST_PROCESS_SCALE = 1.0f;
+  
+  bool       FRAME_GEN = false;
 
   // Manually print output stream
   void print_stream(CONSOLE_COMMUNICATION &cons);

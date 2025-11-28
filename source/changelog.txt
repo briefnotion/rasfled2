@@ -1,3 +1,9 @@
+2.370_251128
+  - Changed some of the logic in the camera 
+      processing threads. Corrected previous
+      version from freezing the camera when 
+      not viewed.
+
 2.369_251127
   - Was unable to track down error concerning 
       wrong roi after camera open. AI thinks 
