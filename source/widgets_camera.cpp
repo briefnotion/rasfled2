@@ -194,13 +194,12 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
       ImGui::NewLine();
 
       ImGui::Text("SCALE");
-      ImGui::InputFloat("##Scale", &sdSysData.CAMERA_BACKUP.RESTART_POST_PROCESS_SCALE);
+      ImGui::InputFloat("##Scale", &sdSysData.CAMERA_BACKUP.PROPS.POST_PROCESS_SCALE);
       ImGui::PopItemWidth();
 
       if (  sdSysData.CAMERA_BACKUP.PROPS.WIDTH != sdSysData.CAMERA_BACKUP.RESTART_WIDTH || 
             sdSysData.CAMERA_BACKUP.PROPS.HEIGHT != sdSysData.CAMERA_BACKUP.RESTART_HEIGHT ||
-            sdSysData.CAMERA_BACKUP.PROPS.COMPRESSION != sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION || 
-            sdSysData.CAMERA_BACKUP.PROPS.POST_PROCESS_SCALE != sdSysData.CAMERA_BACKUP.RESTART_POST_PROCESS_SCALE)
+            sdSysData.CAMERA_BACKUP.PROPS.COMPRESSION != sdSysData.CAMERA_BACKUP.RESTART_COMPRESSION)
       {
         if (BC_DISCONNECT.button_color(sdSysData, "APPLY##Apply_Resolution_Change", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
         {

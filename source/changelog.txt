@@ -1,3 +1,23 @@
+2.371_251129
+  - Camera failed every few hours while testing.
+  - Simplified and refined the process frame 
+      path. The changes use more memory for 3 
+      seperate buffers. I'm trying to eliminate 
+      the chance that frames are drawing on 
+      currently changing frames. 
+  - The frames are fast, but known problems 
+      still exist. Dynamic resize can still 
+      break the feed. Fake frames arent coded 
+      yet for dynamic resize. A frame ready 
+      while a frame enhance is in progress 
+      is still jumping ahead, noticable when 
+      low light is bordering.
+  - Dynamic resize with weird numbers, like 
+      mag 0.04 and .99999 is either crashing 
+      the thread or producing images that 
+      look like the horizontal hold is out 
+      of wack.
+
 2.370_251128
   - Changed some of the logic in the camera 
       processing threads. Corrected previous

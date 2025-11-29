@@ -295,10 +295,9 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
   // Screen
   ImVec4 working_area = get_working_area();
   
-  // Disable other buttons from getting accidentally clicked.
-  ImGui::PushAllowKeyboardFocus(false);
+  ImGui::BeginChild("Terminal", ImVec2(working_area.z, working_area.w), false,
+                  ImGuiWindowFlags_NoNavInputs | ImGuiWindowFlags_NoNavFocus | sdSysData.SCREEN_DEFAULTS.flags_c);
 
-  ImGui::BeginChild("Terminal", ImVec2(working_area.z, working_area.w), true, sdSysData.SCREEN_DEFAULTS.flags_c);
   {
     ImGui::SetCursorPos(ImVec2(0,0));
     if (SHOW_BUTTONS == false)
@@ -363,8 +362,6 @@ void TERMINAL_SCREEN::display(system_data &sdSysData)
 
     ImGui::EndChild();
   }
-
-  ImGui::PopAllowKeyboardFocus();
 
 }
 

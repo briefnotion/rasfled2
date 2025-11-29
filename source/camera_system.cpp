@@ -1227,6 +1227,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
   }
 }
 
+/*
 // Be careful with this function. It is ran in its own thread.
 void CAMERA::check_for_save_image_buffer_frame(cv::Mat &Frame)
 {
@@ -1255,7 +1256,9 @@ void CAMERA::check_for_save_image_buffer_frame(cv::Mat &Frame)
     }
   }
 }
+*/
 
+/*
 // Be careful with this function. It is ran in its own thread.
 void CAMERA::check_for_save_image_buffer_processed(cv::Mat &Frame)
 {
@@ -1270,7 +1273,7 @@ void CAMERA::check_for_save_image_buffer_processed(cv::Mat &Frame)
     }
   }
 }
-
+*/
 
 void CAMERA::run_preprocessing_inner(cv::Mat &Frame, cv::Mat &Frame_Output)
 {
@@ -1301,11 +1304,11 @@ void CAMERA::run_preprocessing_inner(cv::Mat &Frame, cv::Mat &Frame_Output)
 
 
 // Be careful with this function. It is ran in its own thread.
-void CAMERA::run_preprocessing_outer(cv::Mat &Frame, unsigned long Frame_Time)
+void CAMERA::run_preprocessing_outer(FRAME_SUITE &Suite, unsigned long Frame_Time)
 {
   // CV Code Here: Conditional and Controllable Image Enhancement Pipeline
   // The entire processing block is now conditional on the user controls.
-  if (!Frame.empty())
+  if (!Suite.PROCESSED_FRAME.empty())
   {
     /*
     // Always Apply Routines
@@ -1326,13 +1329,13 @@ void CAMERA::run_preprocessing_outer(cv::Mat &Frame, unsigned long Frame_Time)
     // First Level of enhancements and preprocessing
     // Generate Processing Frames for enhancements.
     {
-      cv::cvtColor(Frame, PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
+      cv::cvtColor(Suite.PROCESSED_FRAME, Suite.PROCESSED_FRAME_GRAY, cv::COLOR_BGR2GRAY);
 
       // Manage Low Light Filter
       if (PROPS.ENH_LOW_LIGHT)
       {
         // Get Low Light Value
-        LOW_LIGHT_VALUE = is_low_light(PROCESSED_FRAME_GRAY);
+        LOW_LIGHT_VALUE = is_low_light(Suite.PROCESSED_FRAME_GRAY);
 
         // Check timer, if expired flip IS_LOW_LIGHT
         if (LOW_LIGHT_DEBOUNCE_TIMER_LL.is_ready(Frame_Time))
@@ -1371,28 +1374,28 @@ void CAMERA::run_preprocessing_outer(cv::Mat &Frame, unsigned long Frame_Time)
         // Turn low light filter on or off
         if (IS_LOW_LIGHT)
         {
-          low_light_filter(Frame);
+          low_light_filter(Suite.PROCESSED_FRAME);
         }
       }
 
       // Boost or reduce all color brightness
       if (PROPS.ENH_COLOR)
       {
-        apply_min_max_contrast(Frame);
+        apply_min_max_contrast(Suite.PROCESSED_FRAME);
       }
 
       //cv::GaussianBlur(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_GAUSSIAN, cv::Size(BLUR_KSIZE, BLUR_KSIZE), 0);
       //cv::Canny(PROCESSED_FRAME_GAUSSIAN, PROCESSED_FRAME_CANNY, CANNY_THRESH_LOW, CANNY_THRESH_HIGH, CANNY_APERTURE);
 
-      cv::Canny(PROCESSED_FRAME_GRAY, PROCESSED_FRAME_CANNY, CANNY_THRESH_LOW, CANNY_THRESH_HIGH, CANNY_APERTURE);
+      cv::Canny(Suite.PROCESSED_FRAME_GRAY, Suite.PROCESSED_FRAME_CANNY, CANNY_THRESH_LOW, CANNY_THRESH_HIGH, CANNY_APERTURE);
     }
   }
 }
 
 // Be careful with this function. It is ran in its own thread.
-void CAMERA::apply_ehancements(cv::Mat &Frame)
+void CAMERA::apply_ehancements(FRAME_SUITE &Suite)
 {
-  if (!Frame.empty())
+  if (!Suite.PROCESSED_FRAME.empty())
   {
     if (PROPS.ENH_DOUBLE_MASK)
     {
@@ -1411,11 +1414,11 @@ void CAMERA::apply_ehancements(cv::Mat &Frame)
     {
       if (DOUBLE_MASK_LATEST == 0)
       {
-        MASK_FRAME_CANNY_0 = canny_mask(PROCESSED_FRAME_CANNY);
+        Suite.MASK_FRAME_CANNY_0 = canny_mask(Suite.PROCESSED_FRAME_CANNY);
       }
       else
       {
-        MASK_FRAME_CANNY_1 = canny_mask(PROCESSED_FRAME_CANNY);
+        Suite.MASK_FRAME_CANNY_1 = canny_mask(Suite.PROCESSED_FRAME_CANNY);
       }
     }
 
@@ -1434,11 +1437,11 @@ void CAMERA::apply_ehancements(cv::Mat &Frame)
     {
       if (DOUBLE_MASK_LATEST == 0)
       {
-        MASK_FRAME_GLARE_0 = suppress_glare_mask(Frame);
+        Suite.MASK_FRAME_GLARE_0 = suppress_glare_mask(Suite.PROCESSED_FRAME);
       }
       else
       {
-        MASK_FRAME_GLARE_1 = suppress_glare_mask(Frame);
+        Suite.MASK_FRAME_GLARE_1 = suppress_glare_mask(Suite.PROCESSED_FRAME);
       }
     }
 
@@ -1447,7 +1450,7 @@ void CAMERA::apply_ehancements(cv::Mat &Frame)
     if (PROPS.ENH_HOUGH)
     {
       //detect_hough_circles(PROCESSED_FRAME, PROCESSED_FRAME_GAUSSIAN);
-      detect_hough_circles(Frame, PROCESSED_FRAME_GRAY);
+      detect_hough_circles(Suite.PROCESSED_FRAME, Suite.PROCESSED_FRAME_GRAY);
     }
 
     //---
@@ -1457,7 +1460,7 @@ void CAMERA::apply_ehancements(cv::Mat &Frame)
     {
       // Cascade classifiers are faster on smaller images and grayscale.
       cv::Mat gray_for_detection;
-      cv::cvtColor(Frame, gray_for_detection, cv::COLOR_BGR2GRAY);
+      cv::cvtColor(Suite.PROCESSED_FRAME, gray_for_detection, cv::COLOR_BGR2GRAY);
       
       // Reduce the size of the frame before detection to significantly boost speed.
       cv::Mat small_frame;
@@ -1484,8 +1487,8 @@ void CAMERA::apply_ehancements(cv::Mat &Frame)
         );
         
         // Draw a red rectangle (BGR: 0, 0, 255)
-        cv::rectangle(Frame, original_rect, cv::Scalar(0, 0, 255), 2);
-        cv::putText(Frame, "CAR", cv::Point(original_rect.x, original_rect.y - 10), 
+        cv::rectangle(Suite.PROCESSED_FRAME, original_rect, cv::Scalar(0, 0, 255), 2);
+        cv::putText(Suite.PROCESSED_FRAME, "CAR", cv::Point(original_rect.x, original_rect.y - 10), 
                     cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(0, 0, 255), 2);
       }
     }
@@ -1524,13 +1527,13 @@ void CAMERA::apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv:
   }
 }
 
-void CAMERA::apply_all_masks(cv::Mat &Frame)
+void CAMERA::apply_all_masks(FRAME_SUITE &Suite)
 {
-  if (!Frame.empty())
+  if (!Suite.PROCESSED_FRAME.empty())
   {
     if (PROPS.ENH_CANNY_MASK)
     {
-      apply_masks_to_processed_frame(Frame, MASK_FRAME_CANNY_0, MASK_FRAME_CANNY_1);
+      apply_masks_to_processed_frame(Suite.PROCESSED_FRAME, Suite.MASK_FRAME_CANNY_0, Suite.MASK_FRAME_CANNY_1);
     }
 
     /*
@@ -1543,7 +1546,7 @@ void CAMERA::apply_all_masks(cv::Mat &Frame)
 
     if (PROPS.ENH_GLARE_MASK)
     {
-      apply_masks_to_processed_frame(Frame, MASK_FRAME_GLARE_0, MASK_FRAME_GLARE_1);
+      apply_masks_to_processed_frame(Suite.PROCESSED_FRAME, Suite.MASK_FRAME_GLARE_0, Suite.MASK_FRAME_GLARE_1);
     }
   }
 }
@@ -1553,6 +1556,8 @@ void CAMERA::close_camera()
 {
   std::stringstream print_stream;
 
+  save_settings();
+
   // 1. Check if the camera capture object is open and release it
   if (CAMERA_CAPTURE.isOpened())
   {
@@ -1561,7 +1566,6 @@ void CAMERA::close_camera()
     PROPS.WIDTH = RESTART_WIDTH;
     PROPS.HEIGHT = RESTART_HEIGHT;
     PROPS.COMPRESSION = RESTART_COMPRESSION;
-    PROPS.POST_PROCESS_SCALE = RESTART_POST_PROCESS_SCALE;
 
     print_stream << "Camera capture released.";
   }
@@ -1581,13 +1585,6 @@ void CAMERA::open_camera()
   RESTART_WIDTH = PROPS.WIDTH;
   RESTART_HEIGHT = PROPS.HEIGHT;
   RESTART_COMPRESSION = PROPS.COMPRESSION;
-  RESTART_POST_PROCESS_SCALE = PROPS.POST_PROCESS_SCALE;
-
-  // Set Post Processing Size
-  POST_PROCESS_SIZE = {(int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.WIDTH), 
-                                  (int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.HEIGHT)};
-
-  release_all_frames();
 
   if (CAMERA_CAPTURE.isOpened())
   {
@@ -1595,6 +1592,8 @@ void CAMERA::open_camera()
   }
   else
   {
+    release_all_frames();
+
     // Create Thread (safe to recreate if already created)
     THREAD_CAMERA.create(5);           // Longest wait im main process
     THREAD_IMAGE_PROCESSING.create(5); // Longest wait im main process
@@ -1744,10 +1743,14 @@ void CAMERA::open_camera()
   //  but as is, the variables are playing nicely in their respective threads. 
 void CAMERA::update_frame()
 {
+  PRINTW_QUEUE.push_back("Starting Camera Read Thread");
   // --- CONFIGURATION FOR ROBUSTNESS ---
   const int max_consecutive_errors = 50; // Allow 50 bad frames/loops before giving up
   int consecutive_connection_error_count = 0;
   int consecutive_frame_error_count = 0;
+  bool error = false;
+  int current_buffer_frame_pos = -1;
+  int frame_to_buffer = -1;
 
   // Create Process Time
   CAMERA_READ_THREAD_TIME.create();
@@ -1771,14 +1774,12 @@ void CAMERA::update_frame()
       TIME_CAMERA_FRAME_TIME = TIME_SE_CAMERA_FPS.duration_ms();
       TIME_SE_CAMERA_FPS.start_clock();
 
-      // Save image to disk and get captured frame from camera.
-      check_for_save_image_buffer_frame(FRAME_BUFFER[LATEST_READY_FRAME]);
-
       // Check for restart
       if (APPLY_RESTART)
       {
         APPLY_RESTART = false;
         close_camera();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
         open_camera();
       }
 
@@ -1795,7 +1796,10 @@ void CAMERA::update_frame()
           while (consecutive_connection_error_count <= max_consecutive_errors && not_connected)
           {
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            open_camera(); // Try to reopen
+            if (!CAMERA_CAPTURE.isOpened())
+            {
+              open_camera(); // Try to reopen
+            }
             consecutive_connection_error_count++;
             not_connected = !CAMERA_CAPTURE.isOpened();
           }
@@ -1811,35 +1815,32 @@ void CAMERA::update_frame()
         }
         else
         {
-          // Inline error check.
-          bool error = false;
+          // Inline error check. pos select, reset ftb.
+          error = false;
+          current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
 
-          // Determine which buffer to put frame in.
-          if (BEING_PROCESSED_FRAME == 0)
+          // Determine next new frame position
+          for (int pos = 0; pos < 3 && frame_to_buffer < 0; pos++)
           {
-            if (LATEST_READY_FRAME != 1)
+            if (pos != current_buffer_frame_pos)
             {
-              FRAME_TO_BUFFER = 1;
-            }
-            else if (LATEST_READY_FRAME != 2)
-            {
-              FRAME_TO_BUFFER = 2;
+              for (int pos_lat = 0; pos_lat < 3; pos_lat++)
+              {
+                if (pos_lat != frame_to_buffer)
+                {
+                  frame_to_buffer = pos_lat;
+                }
+              }
             }
           }
-          else if (BEING_PROCESSED_FRAME == 1)
+
+          // Set Post Processing Size
+          if (is_within(PROPS.POST_PROCESS_SCALE, 0.0f, 1.0f))
           {
-            if (LATEST_READY_FRAME != 0)
-            {
-              FRAME_TO_BUFFER = 0;
-            }
-            else if (LATEST_READY_FRAME != 2)
-            {
-              FRAME_TO_BUFFER = 2;
-            }
-          }
-          else
-          {
-            FRAME_TO_BUFFER = 0;
+            PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE = cv::Size(
+                                                                (int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.WIDTH),
+                                                                (int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.HEIGHT)
+                                                                              );
           }
 
           // Capture the camera frame.
@@ -1847,25 +1848,19 @@ void CAMERA::update_frame()
           {
             if (PROPS.TEST_IMAGE)
             {
-              FRAME_DUMMY.copyTo(FRAME_BUFFER[FRAME_TO_BUFFER]);
+              FRAME_DUMMY.copyTo(PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER);
             }
             else
             {
-              //FRAME_BUFFER_0_PRE = generateDummyFrame_2(POST_PROCESS_SIZE.width, POST_PROCESS_SIZE.height, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
-              FRAME_BUFFER[FRAME_TO_BUFFER] = generateDummyLowLightFrame(POST_PROCESS_SIZE.width, POST_PROCESS_SIZE.height, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+              PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER = generateDummyLowLightFrame(PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE.width, PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE.height, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
             }
-            LATEST_READY_FRAME = FRAME_TO_BUFFER;
           }
           else
           {
-            CAMERA_CAPTURE >> FRAME_BUFFER[FRAME_TO_BUFFER];
-            if (FRAME_BUFFER[FRAME_TO_BUFFER].empty())
+            CAMERA_CAPTURE >> PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER;
+            if (PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER.empty())
             {
               error = true;
-            }
-            else
-            {
-              LATEST_READY_FRAME = FRAME_TO_BUFFER;
             }
           }
 
@@ -1876,45 +1871,27 @@ void CAMERA::update_frame()
           }
           else
           {
+            // Save image to disk and get captured frame from camera.
+            //check_for_save_image_buffer_frame(PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER);
+
             // Measure the time to run the routine.
             TIME_SE_FRAME_RETRIEVAL.start_clock();
 
             consecutive_frame_error_count = 0;
 
             // Start generating PROCESSED_FRAME
-            // Pref PROCESSED_FRAME[0]
-            if (BEING_PROCESSED_FRAME == -1 ||
-                BEING_PROCESSED_FRAME == 1)
+            if (PROPS.POST_PROCESS_SCALE == 1.0f)
             {
-              if (PROPS.POST_PROCESS_SCALE == 1.0f)
-              {
-                run_preprocessing_inner(FRAME_BUFFER[FRAME_TO_BUFFER], PROCESSED_FRAME[0]);
-              }
-              else
-              {
-                cv::resize(FRAME_BUFFER[FRAME_TO_BUFFER], FRAME_BUFFER_RESIZE[FRAME_TO_BUFFER], POST_PROCESS_SIZE);
-                run_preprocessing_inner(FRAME_BUFFER_RESIZE[FRAME_TO_BUFFER], PROCESSED_FRAME[0]);
-              }
-              // Signal the enhancement processor that a new frame is available
-              BUFFER_FRAME_HANDOFF_READY = 0;
+              run_preprocessing_inner(PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER, PROCESS_FRAMES_ARRAY[frame_to_buffer].PROCESSED_FRAME);
+            }
+            else
+            {
+              cv::resize(PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER, PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER_RESIZE, PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE);
+              run_preprocessing_inner(PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER_RESIZE, PROCESS_FRAMES_ARRAY[frame_to_buffer].PROCESSED_FRAME);
             }
 
-            // Pref PROCESSED_FRAME[1]
-            else if (BEING_PROCESSED_FRAME == -1 ||
-                BEING_PROCESSED_FRAME == 0)
-            {
-              if (PROPS.POST_PROCESS_SCALE == 1.0f)
-              {
-                run_preprocessing_inner(FRAME_BUFFER[FRAME_TO_BUFFER], PROCESSED_FRAME[1]);
-              }
-              else
-              {
-                cv::resize(FRAME_BUFFER[FRAME_TO_BUFFER], FRAME_BUFFER_RESIZE[FRAME_TO_BUFFER], POST_PROCESS_SIZE);
-                run_preprocessing_inner(FRAME_BUFFER_RESIZE[FRAME_TO_BUFFER], PROCESSED_FRAME[1]);
-              }
-              // Signal the enhancement processor that a new frame is available
-              BUFFER_FRAME_HANDOFF_READY = 1;
-            }
+            // Signal the enhancement processor that a new frame is available
+            LATEST_FRAME_READY = frame_to_buffer;
 
             // Save the amout of time it took to read the frame.
             TIME_SE_FRAME_RETRIEVAL.end_clock();
@@ -1926,7 +1903,7 @@ void CAMERA::update_frame()
       else
       {
         // camera not being viewed. sleep theread on next pass
-        FORCED_FRAME_LIMIT.set(CAMERA_READ_THREAD_TIME.current_frame_time(), 100);
+        FORCED_FRAME_LIMIT.set(CAMERA_READ_THREAD_TIME.current_frame_time(), 30);
       }
     } // Frame Limit Cap
 
@@ -1939,39 +1916,32 @@ void CAMERA::update_frame()
 
   CAMERA_ONLINE = false;
 
-  BUFFER_FRAME_HANDOFF_READY = -1;
+  LATEST_FRAME_READY = -1;
 
   // Close Camera if thread stops.
   close_camera();
   CAM_AVAILABLE = false;
 
-  save_settings();
-  PRINTW_QUEUE.push_back("Camera Closed");
+  PRINTW_QUEUE.push_back("Ending Camera Read Thread");
 }
 
 void CAMERA::process_enhancements_frame()
 { 
-  WORKING_FRAME_FULLY_PROCESSED = false;
-
   // Establish latest frame and lock
-  int frame_number = BUFFER_FRAME_HANDOFF_READY;
-
-  // hold BEING_PROCESSED_FRAME in scope in case something else resets it
-  BEING_PROCESSED_FRAME = frame_number;
-
-  // reset handoff so new frame can start generating
-  BUFFER_FRAME_HANDOFF_READY = -1;
+  int frame_number = LATEST_FRAME_READY;
+  LATEST_FRAME_READY = -1;
+  BUFFER_FRAME_HANDOFF_POSITION = frame_number;
 
   TIME_SE_FRAME_PROCESSING.start_clock();
 
   //
-  check_for_save_image_buffer_processed(PROCESSED_FRAME[frame_number]);
+  //check_for_save_image_buffer_processed(PROCESSED_FRAME[frame_number]);
 
   // Run enancements processing.  Store data back in itself.
-  run_preprocessing_outer(PROCESSED_FRAME[frame_number], PROCESS_ENHANCEMENTS_FRAME_TIME);
+  run_preprocessing_outer(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_ENHANCEMENTS_FRAME_TIME);
   
-  apply_ehancements(PROCESSED_FRAME[frame_number]);
-  apply_all_masks(PROCESSED_FRAME[frame_number]);
+  apply_ehancements(PROCESS_FRAMES_ARRAY[frame_number]);
+  apply_all_masks(PROCESS_FRAMES_ARRAY[frame_number]);
 
   if (PROPS.ENH_FAKE_FRAMES)
   {
@@ -1984,13 +1954,13 @@ void CAMERA::process_enhancements_frame()
       INTERPOLATION_DISPLAY = false;
     }
 
-    FRAME_BUFFER_FAKE = FAKE_FRAME_GENERATOR.interpolateFrame(PROCESSED_FRAME[frame_number]);
+    PROCESS_FRAMES_ARRAY[frame_number].FRAME_BUFFER_FAKE = FAKE_FRAME_GENERATOR.interpolateFrame(PROCESS_FRAMES_ARRAY[frame_number].PROCESSED_FRAME);
   }
   
   TIME_SE_FRAME_PROCESSING.end_clock();
   TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
 
-  NEW_FRAME_AVAILABLE = frame_number;
+  BUFFER_FRAME_HANDOFF_POSITION = frame_number + 3;
 }
 
 void CAMERA::generate_imgui_texture_frame(cv::Mat& Frame)
@@ -2006,11 +1976,6 @@ void CAMERA::generate_imgui_texture_frame(cv::Mat& Frame)
     // Convert the frame to an OpenGL texture.
     // We pass the member variable to reuse the same texture.
     matToTexture(Frame, TEXTURE_ID);
-
-
-    Frame.copyTo(LIVE_FRAME);
-
-
   }
 }
 
@@ -2018,7 +1983,7 @@ bool CAMERA::set_camera_control(CAMERA_SETTING &Setting)
 {
   bool ret_success = false;
 
-  //if (CAM_AVAILABLE && Setting.SET_VALUE != Setting.VALUE)
+  if (CAM_AVAILABLE && Setting.SET_VALUE != Setting.VALUE)
   {
     if (Setting.SET_VALUE < Setting.MINIMUM)
     {
@@ -2032,10 +1997,10 @@ bool CAMERA::set_camera_control(CAMERA_SETTING &Setting)
     ret_success = set_control((int32_t)Setting.ADDRESS, (int32_t)Setting.SET_VALUE);
     Setting.VALUE = Setting.SET_VALUE;
   }
-  //else
-  //{
-  //  ret_success = false;
-  //}
+  else
+  {
+    ret_success = false;
+  }
 
   return ret_success;
 }
@@ -2244,33 +2209,30 @@ void CAMERA::apply_loaded_camera_controls(vector<CAMERA_CONTROL_SETTING_LOADED> 
 
 void CAMERA::release_all_frames()
 {
-  FRAME_BUFFER[0].release();
-  FRAME_BUFFER[1].release();
-  FRAME_BUFFER[2].release();
+  for (int pos = 0; pos < 3; pos++)
+  {
+    PROCESS_FRAMES_ARRAY[pos].FRAME_BUFFER.release();
 
-  FRAME_BUFFER_RESIZE[0].release();
-  FRAME_BUFFER_RESIZE[1].release();
-  FRAME_BUFFER_RESIZE[2].release();
-  FRAME_BUFFER_FAKE.release();
+    PROCESS_FRAMES_ARRAY[pos].FRAME_BUFFER_RESIZE.release();
+    PROCESS_FRAMES_ARRAY[pos].FRAME_BUFFER_FAKE.release();
 
-  PROCESSED_FRAME[0].release();
-  PROCESSED_FRAME[1].release();
-  PROCESSED_FRAME_GRAY.release();
-  //PROCESSED_FRAME_GAUSSIAN.release();
-  PROCESSED_FRAME_CANNY.release();
+    PROCESS_FRAMES_ARRAY[pos].PROCESSED_FRAME.release();
+    PROCESS_FRAMES_ARRAY[pos].PROCESSED_FRAME_GRAY.release();
+    //PROCESSED_FRAME_GAUSSIAN.release();
+    PROCESS_FRAMES_ARRAY[pos].PROCESSED_FRAME_CANNY.release();
 
-  MASK_FRAME_GLARE_0.release();
-  MASK_FRAME_GLARE_1.release();
+    PROCESS_FRAMES_ARRAY[pos].MASK_FRAME_GLARE_0.release();
+    PROCESS_FRAMES_ARRAY[pos].MASK_FRAME_GLARE_1.release();
 
-  MASK_FRAME_CANNY_0.release();
-  MASK_FRAME_CANNY_1.release();
+    PROCESS_FRAMES_ARRAY[pos].MASK_FRAME_CANNY_0.release();
+    PROCESS_FRAMES_ARRAY[pos].MASK_FRAME_CANNY_1.release();
 
-  LIVE_FRAME.release();
-  LIVE_FRAME_0.release();
-  LIVE_FRAME_1.release();
+    PROCESS_FRAMES_ARRAY[pos].LIVE_FRAME_0.release();
+    PROCESS_FRAMES_ARRAY[pos].LIVE_FRAME_1.release();
 
-  FRAME_DUMMY.release();
-  FRAME_DUMMY2.release();
+    FRAME_DUMMY.release();
+    FRAME_DUMMY2.release();
+  }
 }
 
 void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
@@ -2322,43 +2284,52 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   // ---------------------------------------------------------------------------------------
   // Check Thread Completions
   
-  if (CAMERA_ONLINE && NEW_FRAME_AVAILABLE != -1)
+  //if (CAMERA_ONLINE && 
+  //    CAMERA_BEING_VIEWED && 
+  //    BUFFER_FRAME_HANDOFF_POSITION >= 3 && 
+  //    BUFFER_FRAME_HANDOFF_POSITION <= 5)
   {
     // When the working frame has been fully process, render the 
     //  texture to be drawn in opengl.
     if (THREAD_IMAGE_PROCESSING.check_for_completition())
     {
-      // Converts PROCESSED_FRAME into ImGui Texture to be rendered
-      //  into program display.
-      // Copies PROCESSED_FRAME to LIVE_FRAME for thread safe access.
-
-      // Only proceed if the frame is not empty.
-
-      if (PROPS.ENH_FAKE_FRAMES == false)
+      if (CAMERA_ONLINE && 
+          CAMERA_BEING_VIEWED && 
+          BUFFER_FRAME_HANDOFF_POSITION >= 3 && 
+          BUFFER_FRAME_HANDOFF_POSITION <= 5)
       {
-        PROCESSED_FRAME[NEW_FRAME_AVAILABLE].copyTo(LIVE_FRAME_1);
-      }
-      else
-      {
-        FRAME_BUFFER_FAKE.copyTo(LIVE_FRAME_0);
-        PROCESSED_FRAME[NEW_FRAME_AVAILABLE].copyTo(LIVE_FRAME_1);
+        int current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
+        
+        // Converts PROCESSED_FRAME into ImGui Texture to be rendered
+        //  into program display.
+        // Copies PROCESSED_FRAME to LIVE_FRAME for thread safe access.
+
+        // Only proceed if the frame is not empty.
+
+        if (PROPS.ENH_FAKE_FRAMES)
+        {
+          PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].FRAME_BUFFER_FAKE.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
+        }
+        PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].PROCESSED_FRAME.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
+
+        if (PROPS.ENH_FAKE_FRAMES == false)
+        {
+          FRAME_GEN = false;
+          generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
+        }
+        else
+        {
+          FRAME_GEN = true;
+          FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_CAMERA_FRAME_TIME / 2);
+          generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
+          FRAME_TO_TEXTURE_TIMER_CHECK = true;
+        }
+
+        VIEWING_FRAME_POS = current_buffer_frame_pos;
       }
 
-      if (PROPS.ENH_FAKE_FRAMES == false)
-      {
-        FRAME_GEN = false;
-        generate_imgui_texture_frame(LIVE_FRAME_1);
-      }
-      else
-      {
-        FRAME_GEN = true;
-        FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_CAMERA_FRAME_TIME / 2);
-        generate_imgui_texture_frame(LIVE_FRAME_0);
-        FRAME_TO_TEXTURE_TIMER_CHECK = true;
-      }
+      BUFFER_FRAME_HANDOFF_POSITION = -1;
 
-      WORKING_FRAME_FULLY_PROCESSED = true;
-      NEW_FRAME_AVAILABLE  = -1;
     }
   }
 
@@ -2366,8 +2337,12 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   {
     if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
     {
+      
       FRAME_TO_TEXTURE_TIMER_CHECK = false;
-      generate_imgui_texture_frame(LIVE_FRAME_1);
+      if (CAMERA_ONLINE && CAMERA_BEING_VIEWED)
+      {
+        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].LIVE_FRAME_1);
+      }
     }
   }
 
@@ -2393,34 +2368,29 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   // Only try to process frames when a handoff is complete and 
   //  the texture is created.
 
-  if (CAMERA_ONLINE && CAMERA_BEING_VIEWED && BUFFER_FRAME_HANDOFF_READY != -1)
+  if (CAMERA_ONLINE && 
+      CAMERA_BEING_VIEWED && 
+      LATEST_FRAME_READY != -1 && 
+      BUFFER_FRAME_HANDOFF_POSITION == -1)
   {
     // Do not start thread if already running.
-    //BUFFER_FRAME_HANDOFF_READY = false;
-    //WORKING_FRAME_FULLY_PROCESSED = false;
     if (THREAD_IMAGE_PROCESSING.check_to_run_routine_on_thread(Frame_Time)) 
     {
-    //  In Place here because weird process_enhancements_frame didnt safely
-    //    accept an argument.
-    PROCESS_ENHANCEMENTS_FRAME_TIME = Frame_Time;
+      //  In Place here because weird process_enhancements_frame didnt safely
+      //    accept an argument.
+      PROCESS_ENHANCEMENTS_FRAME_TIME = Frame_Time;
 
-    // Start the camera update on a separate thread.
-    // This call is non-blocking, so the main loop can continue immediately.
-    THREAD_IMAGE_PROCESSING.start_render_thread([&]() 
-              {  process_enhancements_frame();  });
+      // Start the camera update on a separate thread.
+      // This call is non-blocking, so the main loop can continue immediately.
+      THREAD_IMAGE_PROCESSING.start_render_thread([&]() 
+                {  process_enhancements_frame();  });
+    }
   }
-}
 
   // ---------------------------------------------------------------------------------------
 
   // Print whatever is in the console print_wait queue.
   print_stream(cons);
-}
-
-cv::Mat CAMERA::get_current_frame()
-{
-  // Return a copy of the FRAME to the caller.
-  return LIVE_FRAME;
 }
 
 void CAMERA::take_snapshot()

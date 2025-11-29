@@ -21,6 +21,7 @@
 #include <iostream>
 #include <vector>
 #include <thread>
+#include <algorithm>  // for std::max
 
 #include <GLFW/glfw3.h>
 
@@ -259,14 +260,46 @@ class CAMERA_PROPERTIES
 
 // ---------------------------------------------------------------------------------------
 
+class FRAME_SUITE
+{
+  public:
+
+  cv::Size POST_PROCESS_SIZE;
+
+  // Thread Update and process_enhancements_frame
+  cv::Mat FRAME_BUFFER;
+  cv::Mat FRAME_BUFFER_RESIZE;  // tmp
+  cv::Mat PROCESSED_FRAME;
+
+  // Single line post process
+  cv::Mat FRAME_BUFFER_FAKE;
+
+  // Thread process_enhancements_frames
+
+  cv::Mat PROCESSED_FRAME_GRAY;
+  cv::Mat PROCESSED_FRAME_CANNY;
+
+  //cv::Mat MASK_FRAME_OVERLAY_LINES;
+
+  // Mask frames and doubles for rotation
+  cv::Mat MASK_FRAME_GLARE_0;
+  cv::Mat MASK_FRAME_GLARE_1;
+
+  cv::Mat MASK_FRAME_CANNY_0;
+  cv::Mat MASK_FRAME_CANNY_1;
+
+  // Display Frames
+  cv::Mat LIVE_FRAME_0; // Live frame buffer to LIVE_FRAME.
+  cv::Mat LIVE_FRAME_1; // Live frame buffer to LIVE_FRAME.
+
+};
+
 class CAMERA
 {
   private:
   cv::Mat FRAME_DUMMY;
   cv::Mat FRAME_DUMMY2; // for testing double buffer
   bool    FRAME_DUMMY_MULTI_FRAME_TEST = false;
-
-  int NEW_FRAME_AVAILABLE = -1;
 
   double DOWN_SCALE_FACTOR = 2.0;
 
@@ -333,7 +366,7 @@ class CAMERA
   FRAME_BUFFER[3]      PROCESSED_FRAME[2]                 LIVE_FRAME[2]
           FRAME_BUFFER_RESIZE[3]
                       V                                       V
-  LATEST_READY_FRAME  BUFFER_FRAME_HANDOFF_READY = #       NEW_FRAME_AVAILABLE = # 
+  LATEST_READY_FRAME  BUFFER_FRAME_HANDOFF_READY = # 
   FRAME_TO_BUFFER = #           BEING_PROCESSED_FRAME = #
                               WORKING_FRAME_FULLY_PROCESSED = false   WORKING_FRAME_FULLY_PROCESSED = true
 
@@ -351,52 +384,24 @@ class CAMERA
   bool              CAMERA_ONLINE             = false;  // Reports to outside camera running. 
 
   cv::VideoCapture  CAMERA_CAPTURE;
-  int               FRAME_TO_BUFFER = 0;
 
   bool CAM_AVAILABLE = false;
-
-  // Thread Update and process_enhancements_frame
-  cv::Mat FRAME_BUFFER[3];
-  cv::Mat FRAME_BUFFER_RESIZE[3];  // tmp
-  cv::Mat PROCESSED_FRAME[2];
-
-  // Single line post process
-  cv::Mat FRAME_BUFFER_FAKE;
-
-  cv::Size POST_PROCESS_SIZE;
-
-  // Thread process_enhancements_frames
-
-  cv::Mat PROCESSED_FRAME_GRAY;
-  cv::Mat PROCESSED_FRAME_CANNY;
-
-  //cv::Mat MASK_FRAME_OVERLAY_LINES;
-
-  // Mask frames and doubles for rotation
-  cv::Mat MASK_FRAME_GLARE_0;
-  cv::Mat MASK_FRAME_GLARE_1;
-
-  cv::Mat MASK_FRAME_CANNY_0;
-  cv::Mat MASK_FRAME_CANNY_1;
-
-  int DOUBLE_MASK_LATEST = 0;
-
-  // Display Frames
-  cv::Mat LIVE_FRAME;   // Frame tied to Texture for display
-  cv::Mat LIVE_FRAME_0; // Live frame buffer to LIVE_FRAME.
-  cv::Mat LIVE_FRAME_1; // Live frame buffer to LIVE_FRAME.
 
   FAKE_FRAME FAKE_FRAME_GENERATOR;
   
   TIMED_IS_READY  FRAME_TO_TEXTURE_TIMER;
   bool            FRAME_TO_TEXTURE_TIMER_CHECK = false;
 
-  int    BUFFER_FRAME_HANDOFF_READY = -1;
-  int     LATEST_READY_FRAME        = -1;
-  int     BEING_PROCESSED_FRAME     = -1;
+  int LATEST_FRAME_READY = -1;
+  FRAME_SUITE PROCESS_FRAMES_ARRAY[3];
+  int BUFFER_FRAME_HANDOFF_POSITION  = -1;
+
+  // ---
+  TIMED_IS_READY LOW_LIGHT_DEBOUNCE_TIMER_LL;
+  int DOUBLE_MASK_LATEST = 0;
+  int VIEWING_FRAME_POS = -1;
 
   // Thread process_enhancements_frame and generate_imgui_texture_frame
-  bool    WORKING_FRAME_FULLY_PROCESSED = true; // Needs Lock
 
   bool    CAMERA_BEING_VIEWED       = false;
   
@@ -404,17 +409,17 @@ class CAMERA
   void save_settings();
   void load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Control);
 
-  void check_for_save_image_buffer_frame(cv::Mat &Frame);
+  //void check_for_save_image_buffer_frame(cv::Mat &Frame);
   // check to see if current buffer should be saved to disk.
 
-  void check_for_save_image_buffer_processed(cv::Mat &Frame);
+  //void check_for_save_image_buffer_processed(cv::Mat &Frame);
   // check to see if current buffer should be saved to disk.
 
   void run_preprocessing_inner(cv::Mat &Frame, cv::Mat &Frame_Output);
   // Apply orientation (flip logic)
   // Create Downsized image
 
-  void run_preprocessing_outer(cv::Mat &Frame, unsigned long Frame_Time);
+  void run_preprocessing_outer(FRAME_SUITE &Suite, unsigned long Frame_Time);
   // Apply Denoising
   // Apply Sharpening
   // Frames and Vars not passed in parameter:
@@ -424,15 +429,14 @@ class CAMERA
   //  CANNY_THRESH_HIGH
   //  CANNY_APERTURE
 
-
-  void apply_ehancements(cv::Mat &Frame);
+  void apply_ehancements(FRAME_SUITE &Suite);
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
   void apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv::Mat &Mask_1);
   // A simple helper routine to apply double or single frame mask.
 
-  void apply_all_masks(cv::Mat &Frame);
+  void apply_all_masks(FRAME_SUITE &Suite);
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
@@ -482,8 +486,6 @@ class CAMERA
   double  TIME_FRAME_PROCESSING;
   double  TIME_ACTUAL_FPS;
   double  TIME_ACTUAL_FRAME_TIME;
-
-  TIMED_IS_READY LOW_LIGHT_DEBOUNCE_TIMER_LL;
   bool    IS_LOW_LIGHT = false;
   int     LOW_LIGHT_VALUE = 0;
 
@@ -503,7 +505,6 @@ class CAMERA
   int RESTART_WIDTH = 640;
   int RESTART_HEIGHT = 480;
   int RESTART_COMPRESSION = 1;
-  float RESTART_POST_PROCESS_SCALE = 1.0f;
   
   bool       FRAME_GEN = false;
 
@@ -511,9 +512,6 @@ class CAMERA
   void print_stream(CONSOLE_COMMUNICATION &cons);
 
   void process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool Camera_Being_Viewed);
-
-  // Public method to get a thread-safe copy of the current frame.
-  cv::Mat get_current_frame();
 
   void take_snapshot();
 
