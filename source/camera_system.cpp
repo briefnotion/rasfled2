@@ -65,6 +65,32 @@ FAKE_FRAME::FAKE_FRAME()
   // is_initialized_ is default-initialized to false
 }
 
+void FAKE_FRAME::re_int_vars(const cv::Mat& frame)
+{
+  PROCESS_WIDTH = frame.cols;
+  PROCESS_HEIGHT = frame.rows;
+  
+  // Set flow size to 1/4th of process size (e.g., 640/4 = 160)
+  FLOW_CALC_WIDTH = PROCESS_WIDTH / 4; 
+  FLOW_CALC_HEIGHT = PROCESS_HEIGHT / 4; 
+
+  cv::Size process_size(PROCESS_WIDTH, PROCESS_HEIGHT);
+  cv::Size flow_calc_size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT);
+
+  cv::resize(current_gray_, current_gray_, process_size);
+  cv::resize(prev_gray_, prev_gray_, process_size);
+  cv::resize(small_prev_gray_, small_prev_gray_, flow_calc_size);
+  cv::resize(small_current_gray_, small_current_gray_, flow_calc_size);
+
+  cv::resize(flow_small_, flow_small_, flow_calc_size);
+  cv::resize(flow_upsampled_, flow_upsampled_, process_size);
+  cv::resize(map_x_, map_x_, process_size);
+  cv::resize(map_y_, map_y_, process_size);
+
+  // 3. Pre-calculate the coordinate mesh grids
+  createMeshGrid(PROCESS_HEIGHT, PROCESS_WIDTH, coords_x_, coords_y_);
+}
+
 // --- Dynamic Initialization and Preprocessing ---
 // This method now handles configuration (setting sizes) and pre-allocation, 
 // ensuring it only runs once with the dimensions of the initial_frame.
@@ -136,14 +162,10 @@ cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame)
     // Note: Subsequent frames MUST match the size of the first frame (PROCESS_WIDTH/HEIGHT)
     if (current_frame.cols != PROCESS_WIDTH || current_frame.rows != PROCESS_HEIGHT) 
     {
-      // Resize BGR frame if necessary
-      cv::resize(current_frame, processed_current_frame, cv::Size(PROCESS_WIDTH, PROCESS_HEIGHT));
+      re_int_vars(current_frame);
     } 
-    else 
-    {
-      // Use a reference/shallow copy if sizes match to avoid BGR copy
-      processed_current_frame = current_frame; 
-    }
+
+    processed_current_frame = current_frame; 
 
     // Convert the new frame to gray
     cv::cvtColor(processed_current_frame, current_gray_, cv::COLOR_BGR2GRAY);
@@ -183,6 +205,20 @@ cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame)
     processed_current_frame.copyTo(prev_frame_); 
     
     return interpolated_frame;
+  }
+}
+
+// ---------------------------------------------------------------------------------------
+
+void FRAME_SUITE_EXTRA::advance_latest()
+{
+  if (LATEST_POS == 0)
+  {
+    LATEST_POS = 1;
+  }
+  else
+  {
+    LATEST_POS = 0;
   }
 }
 
@@ -1294,8 +1330,7 @@ void CAMERA::run_preprocessing_inner(cv::Mat &Frame, cv::Mat &Frame_Output)
       }
       else
       {
-        // Use clone to prevent FRAME from being modified by subsequent operations on PROCESSED_FRAME
-        Frame_Output = Frame.clone(); 
+        Frame.copyTo(Frame_Output); 
       }
   } 
 }
@@ -1393,33 +1428,16 @@ void CAMERA::run_preprocessing_outer(FRAME_SUITE &Suite, unsigned long Frame_Tim
 }
 
 // Be careful with this function. It is ran in its own thread.
-void CAMERA::apply_ehancements(FRAME_SUITE &Suite)
+void CAMERA::apply_ehancements(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
 {
   if (!Suite.PROCESSED_FRAME.empty())
   {
-    if (PROPS.ENH_DOUBLE_MASK)
-    {
-      if (DOUBLE_MASK_LATEST == 0)
-      {
-        DOUBLE_MASK_LATEST = 1;
-      }
-      else
-      {
-        DOUBLE_MASK_LATEST = 0;
-      }
-    }
+    Extra.advance_latest();
 
     // Canny Mask
     if (PROPS.ENH_CANNY_MASK)
     {
-      if (DOUBLE_MASK_LATEST == 0)
-      {
-        Suite.MASK_FRAME_CANNY_0 = canny_mask(Suite.PROCESSED_FRAME_CANNY);
-      }
-      else
-      {
-        Suite.MASK_FRAME_CANNY_1 = canny_mask(Suite.PROCESSED_FRAME_CANNY);
-      }
+      Extra.MASK_FRAME_CANNY[Extra.LATEST_POS] = canny_mask(Suite.PROCESSED_FRAME_CANNY);
     }
 
     /*
@@ -1435,14 +1453,7 @@ void CAMERA::apply_ehancements(FRAME_SUITE &Suite)
     // Glare Mask
     if (PROPS.ENH_GLARE_MASK)
     {
-      if (DOUBLE_MASK_LATEST == 0)
-      {
-        Suite.MASK_FRAME_GLARE_0 = suppress_glare_mask(Suite.PROCESSED_FRAME);
-      }
-      else
-      {
-        Suite.MASK_FRAME_GLARE_1 = suppress_glare_mask(Suite.PROCESSED_FRAME);
-      }
+      Extra.MASK_FRAME_GLARE[Extra.LATEST_POS] = suppress_glare_mask(Suite.PROCESSED_FRAME);
     }
 
     //---
@@ -1495,7 +1506,7 @@ void CAMERA::apply_ehancements(FRAME_SUITE &Suite)
   }
 }
 
-void CAMERA::apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv::Mat &Mask_1)
+void CAMERA::apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv::Mat &Mask_1, int Latest)
 {
   if (PROPS.ENH_DOUBLE_MASK)
   {
@@ -1510,7 +1521,7 @@ void CAMERA::apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv:
   }
   else
   {
-    if (DOUBLE_MASK_LATEST == 0)
+    if (Latest == 0)
     {
       if (!Mask_0.empty())
       {
@@ -1527,13 +1538,13 @@ void CAMERA::apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv:
   }
 }
 
-void CAMERA::apply_all_masks(FRAME_SUITE &Suite)
+void CAMERA::apply_all_masks(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
 {
   if (!Suite.PROCESSED_FRAME.empty())
   {
     if (PROPS.ENH_CANNY_MASK)
     {
-      apply_masks_to_processed_frame(Suite.PROCESSED_FRAME, Suite.MASK_FRAME_CANNY_0, Suite.MASK_FRAME_CANNY_1);
+      apply_masks_to_processed_frame(Suite.PROCESSED_FRAME, Extra.MASK_FRAME_CANNY[0], Extra.MASK_FRAME_CANNY[1], Extra.LATEST_POS);
     }
 
     /*
@@ -1546,7 +1557,7 @@ void CAMERA::apply_all_masks(FRAME_SUITE &Suite)
 
     if (PROPS.ENH_GLARE_MASK)
     {
-      apply_masks_to_processed_frame(Suite.PROCESSED_FRAME, Suite.MASK_FRAME_GLARE_0, Suite.MASK_FRAME_GLARE_1);
+      apply_masks_to_processed_frame(Suite.PROCESSED_FRAME, Extra.MASK_FRAME_GLARE[0], Extra.MASK_FRAME_GLARE[1], Extra.LATEST_POS);
     }
   }
 }
@@ -1585,6 +1596,10 @@ void CAMERA::open_camera()
   RESTART_WIDTH = PROPS.WIDTH;
   RESTART_HEIGHT = PROPS.HEIGHT;
   RESTART_COMPRESSION = PROPS.COMPRESSION;
+
+  LATEST_FRAME_READY = -1;
+  BUFFER_FRAME_HANDOFF_POSITION  = -1;
+  VIEWING_FRAME_POS = -1;
 
   if (CAMERA_CAPTURE.isOpened())
   {
@@ -1749,6 +1764,7 @@ void CAMERA::update_frame()
   int consecutive_connection_error_count = 0;
   int consecutive_frame_error_count = 0;
   bool error = false;
+  int new_frame_pos = -1;
   int current_buffer_frame_pos = -1;
   int frame_to_buffer = -1;
 
@@ -1817,22 +1833,18 @@ void CAMERA::update_frame()
         {
           // Inline error check. pos select, reset ftb.
           error = false;
+          new_frame_pos = -1;
           current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
 
           // Determine next new frame position
-          for (int pos = 0; pos < 3 && frame_to_buffer < 0; pos++)
+          for (int pos = 0; pos < 3 && new_frame_pos < 0; pos++)
           {
-            if (pos != current_buffer_frame_pos)
+            if (pos != current_buffer_frame_pos && pos != frame_to_buffer)
             {
-              for (int pos_lat = 0; pos_lat < 3; pos_lat++)
-              {
-                if (pos_lat != frame_to_buffer)
-                {
-                  frame_to_buffer = pos_lat;
-                }
-              }
+              new_frame_pos = pos;
             }
           }
+          frame_to_buffer = new_frame_pos;
 
           // Set Post Processing Size
           if (is_within(PROPS.POST_PROCESS_SCALE, 0.0f, 1.0f))
@@ -1940,8 +1952,8 @@ void CAMERA::process_enhancements_frame()
   // Run enancements processing.  Store data back in itself.
   run_preprocessing_outer(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_ENHANCEMENTS_FRAME_TIME);
   
-  apply_ehancements(PROCESS_FRAMES_ARRAY[frame_number]);
-  apply_all_masks(PROCESS_FRAMES_ARRAY[frame_number]);
+  apply_ehancements(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
+  apply_all_masks(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
 
   if (PROPS.ENH_FAKE_FRAMES)
   {
@@ -2221,18 +2233,28 @@ void CAMERA::release_all_frames()
     //PROCESSED_FRAME_GAUSSIAN.release();
     PROCESS_FRAMES_ARRAY[pos].PROCESSED_FRAME_CANNY.release();
 
-    PROCESS_FRAMES_ARRAY[pos].MASK_FRAME_GLARE_0.release();
-    PROCESS_FRAMES_ARRAY[pos].MASK_FRAME_GLARE_1.release();
-
-    PROCESS_FRAMES_ARRAY[pos].MASK_FRAME_CANNY_0.release();
-    PROCESS_FRAMES_ARRAY[pos].MASK_FRAME_CANNY_1.release();
-
     PROCESS_FRAMES_ARRAY[pos].LIVE_FRAME_0.release();
     PROCESS_FRAMES_ARRAY[pos].LIVE_FRAME_1.release();
 
     FRAME_DUMMY.release();
     FRAME_DUMMY2.release();
   }
+
+  for (int pos = 0; pos < 3; pos++)
+  {    
+    PROCESS_FRAMES_EXTRA.MASK_FRAME_GLARE[pos].release();
+    PROCESS_FRAMES_EXTRA.MASK_FRAME_CANNY[pos].release();
+  }
+}
+
+int CAMERA::post_process_height()
+{
+  return PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].POST_PROCESS_SIZE.height;
+}
+
+int CAMERA::post_process_width()
+{
+  return PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].POST_PROCESS_SIZE.width;
 }
 
 void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
@@ -2300,29 +2322,27 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
       {
         int current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
         
-        // Converts PROCESSED_FRAME into ImGui Texture to be rendered
-        //  into program display.
-        // Copies PROCESSED_FRAME to LIVE_FRAME for thread safe access.
-
-        // Only proceed if the frame is not empty.
-
+        // Generate Fake and Real
         if (PROPS.ENH_FAKE_FRAMES)
         {
           PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].FRAME_BUFFER_FAKE.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
         }
         PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].PROCESSED_FRAME.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
 
+        // Place real or fake frame live.
         if (PROPS.ENH_FAKE_FRAMES == false)
         {
           FRAME_GEN = false;
           generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
+          AVERAGE_FRAME_RATE_COUNTER++;
         }
         else
         {
-          FRAME_GEN = true;
+          FRAME_GEN = false;
           FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_CAMERA_FRAME_TIME / 2);
           generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
           FRAME_TO_TEXTURE_TIMER_CHECK = true;
+          AVERAGE_FRAME_RATE_COUNTER++;
         }
 
         VIEWING_FRAME_POS = current_buffer_frame_pos;
@@ -2337,13 +2357,22 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   {
     if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
     {
-      
       FRAME_TO_TEXTURE_TIMER_CHECK = false;
       if (CAMERA_ONLINE && CAMERA_BEING_VIEWED)
       {
+        FRAME_GEN = true;
         generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].LIVE_FRAME_1);
+        AVERAGE_FRAME_RATE_COUNTER++;
       }
     }
+  }
+
+  // Calculate average frame time
+  if (AVERAGE_FRAME_RATE_TIMER.is_ready(Frame_Time))
+  {
+    AVERAGE_FRAME_RATE_TIMER.set(Frame_Time, 1000);
+    TIME_AVERAGE_FPS = AVERAGE_FRAME_RATE_COUNTER;
+    AVERAGE_FRAME_RATE_COUNTER = 0;
   }
 
   // ---------------------------------------------------------------------------------------

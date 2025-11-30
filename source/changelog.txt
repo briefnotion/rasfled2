@@ -1,3 +1,7 @@
+2.372_251130
+  - Corrected problem with camera buffere 
+      being loaded into the wrong array. 
+
 2.371_251129
   - Camera failed every few hours while testing.
   - Simplified and refined the process frame 

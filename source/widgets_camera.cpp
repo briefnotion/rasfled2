@@ -554,7 +554,7 @@ void CAMERA_WIDGET::display_camera_stats_enhancements(system_data &sdSysData)
     }
     
     ImGui::Text("%s%s(%2d) %s %s %s %s %s%s(%3d)", 
-                  frame_gen_on.c_str(), frame_gen.c_str(), (int)sdSysData.CAMERA_BACKUP.TIME_ACTUAL_FPS, 
+                  frame_gen_on.c_str(), frame_gen.c_str(), (int)sdSysData.CAMERA_BACKUP.TIME_AVERAGE_FPS, 
                   enh_color.c_str(), enh_glare_mask.c_str(), enh_canny_mask.c_str(), enh_double_mask.c_str(),
                   enh_low_light_on.c_str(), enh_low_light.c_str(), sdSysData.CAMERA_BACKUP.LOW_LIGHT_VALUE);
   }
@@ -570,8 +570,9 @@ void CAMERA_WIDGET::display_camera_stats_times(system_data &sdSysData)
     ImGui::Text("  Grab: (%5.1fms)        Prc Tme: (%5.1fms)", 
                   sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL,
                   sdSysData.CAMERA_BACKUP.TIME_FRAME_PROCESSING);
-    ImGui::Text("%dx%d", 
-                  sdSysData.CAMERA_BACKUP.PROPS.WIDTH, sdSysData.CAMERA_BACKUP.PROPS.HEIGHT);
+    ImGui::Text("%dx%d %dx%d", 
+                  sdSysData.CAMERA_BACKUP.PROPS.WIDTH, sdSysData.CAMERA_BACKUP.PROPS.HEIGHT,
+                  sdSysData.CAMERA_BACKUP.post_process_width() , sdSysData.CAMERA_BACKUP.post_process_height());
   }
 }
 

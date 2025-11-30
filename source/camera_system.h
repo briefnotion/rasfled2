@@ -76,6 +76,9 @@ public:
   cv::Mat interpolateFrame(const cv::Mat& current_frame);
 
 private:
+
+  void re_int_vars(const cv::Mat& frame);
+
   // Called by interpolateFrame with the very first input frame. 
   // This method now performs configuration, buffer allocation, and initial state setup.
   void preprocess_initial_frame(const cv::Mat& initial_frame);
@@ -260,6 +263,19 @@ class CAMERA_PROPERTIES
 
 // ---------------------------------------------------------------------------------------
 
+class FRAME_SUITE_EXTRA
+{
+  public:
+
+  int LATEST_POS = 0;
+
+  // Mask frames and doubles for rotation
+  cv::Mat MASK_FRAME_CANNY[2];
+  cv::Mat MASK_FRAME_GLARE[2];
+
+  void advance_latest();
+};
+
 class FRAME_SUITE
 {
   public:
@@ -281,17 +297,9 @@ class FRAME_SUITE
 
   //cv::Mat MASK_FRAME_OVERLAY_LINES;
 
-  // Mask frames and doubles for rotation
-  cv::Mat MASK_FRAME_GLARE_0;
-  cv::Mat MASK_FRAME_GLARE_1;
-
-  cv::Mat MASK_FRAME_CANNY_0;
-  cv::Mat MASK_FRAME_CANNY_1;
-
   // Display Frames
   cv::Mat LIVE_FRAME_0; // Live frame buffer to LIVE_FRAME.
   cv::Mat LIVE_FRAME_1; // Live frame buffer to LIVE_FRAME.
-
 };
 
 class CAMERA
@@ -364,11 +372,11 @@ class CAMERA
   ------------------------process(--------------------------
   update_frame().............process_enhancements_frame().....generate_imgui_texture_frame()
   FRAME_BUFFER[3]      PROCESSED_FRAME[2]                 LIVE_FRAME[2]
-          FRAME_BUFFER_RESIZE[3]
+          FRAME_BUFFER_RESIZE[3]                              
                       V                                       V
-  LATEST_READY_FRAME  BUFFER_FRAME_HANDOFF_READY = # 
-  FRAME_TO_BUFFER = #           BEING_PROCESSED_FRAME = #
-                              WORKING_FRAME_FULLY_PROCESSED = false   WORKING_FRAME_FULLY_PROCESSED = true
+  FRAME_TO_BUFFER = #
+  LATEST_READY_FRAME  BUFFER_FRAME_HANDOFF_READY = +3         VIEWING_FRAME_POS +3 -- -1
+
 
   */
   
@@ -396,9 +404,10 @@ class CAMERA
   FRAME_SUITE PROCESS_FRAMES_ARRAY[3];
   int BUFFER_FRAME_HANDOFF_POSITION  = -1;
 
+  FRAME_SUITE_EXTRA PROCESS_FRAMES_EXTRA;
+
   // ---
   TIMED_IS_READY LOW_LIGHT_DEBOUNCE_TIMER_LL;
-  int DOUBLE_MASK_LATEST = 0;
   int VIEWING_FRAME_POS = -1;
 
   // Thread process_enhancements_frame and generate_imgui_texture_frame
@@ -429,14 +438,14 @@ class CAMERA
   //  CANNY_THRESH_HIGH
   //  CANNY_APERTURE
 
-  void apply_ehancements(FRAME_SUITE &Suite);
+  void apply_ehancements(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra);
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
-  void apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv::Mat &Mask_1);
+  void apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv::Mat &Mask_1, int Latest);
   // A simple helper routine to apply double or single frame mask.
 
-  void apply_all_masks(FRAME_SUITE &Suite);
+  void apply_all_masks(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra);
   // Apply all prop enable enhancements.
   // PROCESSED_FRAME created upon completion.
 
@@ -485,11 +494,14 @@ class CAMERA
   double  TIME_FRAME_RETRIEVAL;
   double  TIME_FRAME_PROCESSING;
   double  TIME_ACTUAL_FPS;
+  int  TIME_AVERAGE_FPS;
   double  TIME_ACTUAL_FRAME_TIME;
   bool    IS_LOW_LIGHT = false;
   int     LOW_LIGHT_VALUE = 0;
 
   TIMED_IS_READY  FORCED_FRAME_LIMIT;
+  TIMED_IS_READY  AVERAGE_FRAME_RATE_TIMER;
+  int             AVERAGE_FRAME_RATE_COUNTER = 0;
   
   THREADING_INFO  THREAD_CAMERA;
   THREADING_INFO  THREAD_IMAGE_PROCESSING;
@@ -507,6 +519,9 @@ class CAMERA
   int RESTART_COMPRESSION = 1;
   
   bool       FRAME_GEN = false;
+
+  int post_process_height();
+  int post_process_width();
 
   // Manually print output stream
   void print_stream(CONSOLE_COMMUNICATION &cons);
