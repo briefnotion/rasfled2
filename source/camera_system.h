@@ -179,7 +179,6 @@ class CAMERA_PROPERTIES
   bool FLIP_HORIZONTAL = false; // (horizontal flip, around Y-axis)
   bool FLIP_VERTICAL = false;   // (vertical flip, around X-axis)
 
-  int FORCED_FRAME_LIMIT_MS  = 0; 
   // Does not set frame rate of camera. Instead sets the minimum 
   //  speed of the while loop for the camera read, a delay.
   //  0 means that the next read will be attempte imediately, 
@@ -315,9 +314,6 @@ class CAMERA
   bool CAR_CASCADE_LOADED = false;
   cv::CascadeClassifier CAR_CASCADE;
 
-  MEASURE_TIME_START_END TIME_SE_CAMERA_FPS;
-  MEASURE_TIME_START_END TIME_SE_FRAME_RETRIEVAL;
-  MEASURE_TIME_START_END TIME_SE_FRAME_PROCESSING;
   MEASURE_TIME_START_END TIME_SE_DISPLAYED_FRAME_RATE;
 
   bool INTERPOLATION_DISPLAY = true;
@@ -370,7 +366,7 @@ class CAMERA
   BUFFER_FRAME_HANDOFF_READY ... WORKING_FRAME_FULLY_PROCESSED ... LIVE_FRAME
 
   ------------------------process(--------------------------
-  update_frame().............process_enhancements_frame().....generate_imgui_texture_frame()
+  update_frame_thread().............process_enhancements_frame().....generate_imgui_texture_frame()
   FRAME_BUFFER[3]      PROCESSED_FRAME[2]                 LIVE_FRAME[2]
           FRAME_BUFFER_RESIZE[3]                              
                       V                                       V
@@ -385,10 +381,6 @@ class CAMERA
 
   // Thread Update
   
-  FLED_TIME         CAMERA_READ_THREAD_TIME;            // Thread gets its own Time 
-                                                        // Variable.
-  bool              CAMERA_READ_THREAD_STOP   = true;   // Keep reading camera in thread 
-                                                        // until told to stop
   bool              CAMERA_ONLINE             = false;  // Reports to outside camera running. 
 
   cv::VideoCapture  CAMERA_CAPTURE;
@@ -458,12 +450,11 @@ class CAMERA
   // Only to be called by the "update_frame" function, 
   //  within its own thread.
 
-  void update_frame();
+  void update_frame_thread();
   // Pull in latest frame from camera in a non thread-safe manner.
 
-  unsigned long PROCESS_ENHANCEMENTS_FRAME_TIME = 0;
-  void process_enhancements_frame();
-  // Process all enhancements to working frame in a non thread-safe manner.
+  void process_enhancements_thread();
+  // Process enhancements on images as they arrive.
   
   // ---------------------------------------------------------------------------------------
 
@@ -498,12 +489,18 @@ class CAMERA
   double  TIME_ACTUAL_FRAME_TIME;
   bool    IS_LOW_LIGHT = false;
   int     LOW_LIGHT_VALUE = 0;
-
-  TIMED_IS_READY  FORCED_FRAME_LIMIT;
-  TIMED_IS_READY  AVERAGE_FRAME_RATE_TIMER;
-  int             AVERAGE_FRAME_RATE_COUNTER = 0;
   
   THREADING_INFO  THREAD_CAMERA;
+  bool CAMERA_READ_THREAD_STOP   = true;            // Keep reading camera in thread 
+                                                    // until told to stop 
+
+  TIMED_IS_READY  AVERAGE_FRAME_RATE_TIMER;
+  int             AVERAGE_FRAME_RATE_COUNTER = 0;
+                                                    // Variable.
+
+  THREADING_INFO  THREAD_PROCESSING;
+  bool CAMERA_PROCESSING_THREAD_STOP   = true;      // Keep processing images in thread 
+                                                    // until told to stop
   THREADING_INFO  THREAD_IMAGE_PROCESSING;
 
   CAMERA_PROPERTIES PROPS;

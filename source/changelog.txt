@@ -1,3 +1,13 @@
+2.373_251201
+  - Camera system now runs in 3 continuously
+      running threads. Read camera thread for 
+      getting the image, resizing and flipping. 
+      Processing thread to apply changes to 
+      the image. And the main thread, handling 
+      converting the image to a texture and 
+      displaying the image.
+  - Bug fixes and code corrections. 
+
 2.372_251130
   - Corrected problem with camera buffere 
       being loaded into the wrong array. 

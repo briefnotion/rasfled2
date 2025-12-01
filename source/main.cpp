@@ -438,8 +438,6 @@ int loop_2(bool TTY_Only)
   
   //sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 800;
   //sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 600;
-
-  sdSystem.CAMERA_BACKUP.PROPS.FORCED_FRAME_LIMIT_MS = 30;
   
   // Backwards facing cam, not flipped.
   sdSystem.CAMERA_BACKUP.PROPS.FLIP_HORIZONTAL  = false;

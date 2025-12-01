@@ -918,7 +918,6 @@ void CAMERA::save_settings()
   camera_settings.create_label_value(quotify("POST_PROCESS_SCALE"), quotify(to_string(PROPS.POST_PROCESS_SCALE)));
   camera_settings.create_label_value(quotify("FLIP_HORIZONTAL"), quotify(to_string(PROPS.FLIP_HORIZONTAL)));
   camera_settings.create_label_value(quotify("FLIP_VERTICAL"), quotify(to_string(PROPS.FLIP_VERTICAL)));
-  camera_settings.create_label_value(quotify("FORCED_FRAME_LIMIT_MS"), quotify(to_string(PROPS.FORCED_FRAME_LIMIT_MS)));
   camera_settings.create_label_value(quotify("TEST"), quotify(to_string(PROPS.TEST)));
   camera_settings.create_label_value(quotify("TEST_IMAGE"), quotify(to_string(PROPS.TEST_IMAGE)));
   camera_settings.create_label_value(quotify("TEST_MULTI_FRAME"), quotify(to_string(PROPS.TEST_MULTI_FRAME)));
@@ -1005,7 +1004,6 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
           STRING_FLOAT  sf_post_process_scale;
           STRING_BOOL   sb_flip_horizontal;
           STRING_BOOL   sb_flip_vertical;
-          STRING_INT    si_forced_frame_limit;
           STRING_BOOL   sb_test;
           STRING_BOOL   sb_test_image;
           STRING_BOOL   sb_test_multi_frame;
@@ -1030,7 +1028,6 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("POST_PROCESS_SCALE", sf_post_process_scale);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_HORIZONTAL", sb_flip_horizontal);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FLIP_VERTICAL", sb_flip_vertical);
-            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("FORCED_FRAME_LIMIT_MS", si_forced_frame_limit);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("TEST", sb_test);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("TEST_IMAGE", sb_test_image);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("TEST_MULTI_FRAME", sb_test_multi_frame);
@@ -1202,10 +1199,6 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
             {
               PROPS.FLIP_VERTICAL = sb_flip_vertical.get_bool_value();
             }            
-            if (si_forced_frame_limit.conversion_success())
-            {
-              PROPS.FORCED_FRAME_LIMIT_MS = si_forced_frame_limit.get_int_value();
-            }            
             if (sb_test.conversion_success())
             {
               PROPS.TEST = sb_test.get_bool_value();
@@ -1315,28 +1308,25 @@ void CAMERA::run_preprocessing_inner(cv::Mat &Frame, cv::Mat &Frame_Output)
 {
   if (!Frame.empty())
   {
-      // 1. Initial Frame Preparation (Flip logic)
-      if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
-      {
-        cv::flip(Frame, Frame_Output, -1);
-      }
-      else if (PROPS.FLIP_HORIZONTAL)
-      {
-        cv::flip(Frame, Frame_Output, 1);
-      }
-      else if (PROPS.FLIP_VERTICAL)
-      {
-        cv::flip(Frame, Frame_Output, 0);
-      }
-      else
-      {
-        Frame.copyTo(Frame_Output); 
-      }
+    // 1. Initial Frame Preparation (Flip logic)
+    if (PROPS.FLIP_HORIZONTAL && PROPS.FLIP_VERTICAL)
+    {
+      cv::flip(Frame, Frame_Output, -1);
+    }
+    else if (PROPS.FLIP_HORIZONTAL)
+    {
+      cv::flip(Frame, Frame_Output, 1);
+    }
+    else if (PROPS.FLIP_VERTICAL)
+    {
+      cv::flip(Frame, Frame_Output, 0);
+    }
+    else
+    {
+      Frame.copyTo(Frame_Output); 
+    }
   } 
 }
-
-
-
 
 // Be careful with this function. It is ran in its own thread.
 void CAMERA::run_preprocessing_outer(FRAME_SUITE &Suite, unsigned long Frame_Time)
@@ -1745,8 +1735,6 @@ void CAMERA::open_camera()
 
 // Be careful with this function. It is ran in its own thread.
   // The THREAD_CAMERA should manage itself, similare to the main.cpp main loop.
-  //  Its sleep time should either be limited to the FORCED_FRAME_LIMIT_MS or the 
-  //  hardware io limits of the camera read.
   // BUFFER_FRAME_HANDOFF_READY will signal to enhancement proccessing when 
   //  a new frame is ready, then continue the loop.
   // BEING_PROCESSED_FRAME is checked to ensure the new frame isnt placed in a 
@@ -1756,9 +1744,15 @@ void CAMERA::open_camera()
   // FRAME_BUFFER_0, FRAME_BUFFER_1, BUFFER_FRAME_HANDOFF_READY, LATEST_READY_FRAME
   //  and BEING_PROCESSED_FRAME should be MUTEXed (mutex) to prevent data races, 
   //  but as is, the variables are playing nicely in their respective threads. 
-void CAMERA::update_frame()
+void CAMERA::update_frame_thread()
 {
   PRINTW_QUEUE.push_back("Starting Camera Read Thread");
+
+  FLED_TIME thread_time;        // Thread gets its own Time 
+  TIMED_IS_READY  forced_frame_limit;
+  MEASURE_TIME_START_END time_se_frame_retrieval;
+  MEASURE_TIME_START_END time_se_camera_fps;
+
   // --- CONFIGURATION FOR ROBUSTNESS ---
   const int max_consecutive_errors = 50; // Allow 50 bad frames/loops before giving up
   int consecutive_connection_error_count = 0;
@@ -1769,7 +1763,7 @@ void CAMERA::update_frame()
   int frame_to_buffer = -1;
 
   // Create Process Time
-  CAMERA_READ_THREAD_TIME.create();
+  thread_time.create();
 
   // Start the camera
   open_camera();
@@ -1777,18 +1771,26 @@ void CAMERA::update_frame()
   while (CAMERA_READ_THREAD_STOP == false)
   {
     //  Get current time.  This will be our timeframe to work in.
-    CAMERA_READ_THREAD_TIME.setframetime();
+    thread_time.setframetime();
 
     // Enforce hard frame limit time.
-    if (FORCED_FRAME_LIMIT.is_ready(CAMERA_READ_THREAD_TIME.current_frame_time()))
+    if (forced_frame_limit.is_ready(thread_time.current_frame_time()))
     {
-      FORCED_FRAME_LIMIT.set(CAMERA_READ_THREAD_TIME.current_frame_time(), PROPS.FORCED_FRAME_LIMIT_MS); 
+      // Set wait times
+      if (CAMERA_BEING_VIEWED)
+      {
+        forced_frame_limit.set(thread_time.current_frame_time(), 1); 
+      }
+      else
+      {
+        forced_frame_limit.set(thread_time.current_frame_time(), 100); 
+      }
 
       // Grab start to loop times to compute fps.
-      TIME_SE_CAMERA_FPS.end_clock();
-      TIME_CAMERA_FPS = TIME_SE_CAMERA_FPS.duration_fps();
-      TIME_CAMERA_FRAME_TIME = TIME_SE_CAMERA_FPS.duration_ms();
-      TIME_SE_CAMERA_FPS.start_clock();
+      time_se_camera_fps.end_clock();
+      TIME_CAMERA_FPS = time_se_camera_fps.duration_fps();
+      TIME_CAMERA_FRAME_TIME = time_se_camera_fps.duration_ms();
+      time_se_camera_fps.start_clock();
 
       // Check for restart
       if (APPLY_RESTART)
@@ -1836,6 +1838,9 @@ void CAMERA::update_frame()
           new_frame_pos = -1;
           current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
 
+cout << current_buffer_frame_pos << ":";
+cout << frame_to_buffer << ":";
+
           // Determine next new frame position
           for (int pos = 0; pos < 3 && new_frame_pos < 0; pos++)
           {
@@ -1845,6 +1850,7 @@ void CAMERA::update_frame()
             }
           }
           frame_to_buffer = new_frame_pos;
+cout << frame_to_buffer << "   " << flush;
 
           // Set Post Processing Size
           if (is_within(PROPS.POST_PROCESS_SCALE, 0.0f, 1.0f))
@@ -1864,7 +1870,7 @@ void CAMERA::update_frame()
             }
             else
             {
-              PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER = generateDummyLowLightFrame(PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE.width, PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE.height, (int)CAMERA_READ_THREAD_TIME.current_frame_time() / 100);
+              PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER = generateDummyLowLightFrame(PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE.width, PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE.height, (int)thread_time.current_frame_time() / 100);
             }
           }
           else
@@ -1887,7 +1893,7 @@ void CAMERA::update_frame()
             //check_for_save_image_buffer_frame(PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER);
 
             // Measure the time to run the routine.
-            TIME_SE_FRAME_RETRIEVAL.start_clock();
+            time_se_frame_retrieval.start_clock();
 
             consecutive_frame_error_count = 0;
 
@@ -1906,22 +1912,17 @@ void CAMERA::update_frame()
             LATEST_FRAME_READY = frame_to_buffer;
 
             // Save the amout of time it took to read the frame.
-            TIME_SE_FRAME_RETRIEVAL.end_clock();
-            TIME_FRAME_RETRIEVAL = TIME_SE_FRAME_RETRIEVAL.duration_ms();
+            time_se_frame_retrieval.end_clock();
+            TIME_FRAME_RETRIEVAL = time_se_frame_retrieval.duration_ms();
           }
         }
 
       } // Cam Being Viewed
-      else
-      {
-        // camera not being viewed. sleep theread on next pass
-        FORCED_FRAME_LIMIT.set(CAMERA_READ_THREAD_TIME.current_frame_time(), 30);
-      }
-    } // Frame Limit Cap
+    } 
 
     // Thread will need to sleep, governed by the FORCED_FRAME_LIMIT.
-    CAMERA_READ_THREAD_TIME.request_ready_time(FORCED_FRAME_LIMIT.get_ready_time());
-    CAMERA_READ_THREAD_TIME.sleep_till_next_frame();
+    thread_time.request_ready_time(forced_frame_limit.get_ready_time());
+    thread_time.sleep_till_next_frame();
 
     CAMERA_ONLINE = true;
   }
@@ -1937,42 +1938,86 @@ void CAMERA::update_frame()
   PRINTW_QUEUE.push_back("Ending Camera Read Thread");
 }
 
-void CAMERA::process_enhancements_frame()
-{ 
-  // Establish latest frame and lock
-  int frame_number = LATEST_FRAME_READY;
-  LATEST_FRAME_READY = -1;
-  BUFFER_FRAME_HANDOFF_POSITION = frame_number;
+void CAMERA::process_enhancements_thread()
+{
+  PRINTW_QUEUE.push_back("Starting Image Process Thread");
 
-  TIME_SE_FRAME_PROCESSING.start_clock();
+  FLED_TIME thread_time;        // Thread gets its own Time 
+  TIMED_IS_READY  forced_frame_limit;
+  MEASURE_TIME_START_END time_se_frame_processing;
 
-  //
-  //check_for_save_image_buffer_processed(PROCESSED_FRAME[frame_number]);
+  // --- CONFIGURATION FOR ROBUSTNESS --- 
+  int frame_number = -1;
 
-  // Run enancements processing.  Store data back in itself.
-  run_preprocessing_outer(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_ENHANCEMENTS_FRAME_TIME);
-  
-  apply_ehancements(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
-  apply_all_masks(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
+  // Create Process Time
+  thread_time.create();
 
-  if (PROPS.ENH_FAKE_FRAMES)
+  while (CAMERA_PROCESSING_THREAD_STOP == false)
   {
-    if (TIME_FRAME_PROCESSING < TIME_CAMERA_FRAME_TIME)
-    {
-      INTERPOLATION_DISPLAY = true;
-    }
-    else
-    {
-      INTERPOLATION_DISPLAY = false;
-    }
+    //  Get current time.  This will be our timeframe to work in.
+    thread_time.setframetime();
 
-    PROCESS_FRAMES_ARRAY[frame_number].FRAME_BUFFER_FAKE = FAKE_FRAME_GENERATOR.interpolateFrame(PROCESS_FRAMES_ARRAY[frame_number].PROCESSED_FRAME);
+    // Enforce hard frame limit time.
+    if (forced_frame_limit.is_ready(thread_time.current_frame_time()))
+    {
+      // Set wait times
+      if (CAMERA_BEING_VIEWED)
+      {
+        forced_frame_limit.set(thread_time.current_frame_time(), 1); 
+      }
+      else
+      {
+        forced_frame_limit.set(thread_time.current_frame_time(), 100); 
+      }
+
+      // Process enhancements if frame ready
+      if (LATEST_FRAME_READY != -1 &&  BUFFER_FRAME_HANDOFF_POSITION == -1)
+      {
+        // Establish latest frame and lock
+        frame_number = LATEST_FRAME_READY;
+        LATEST_FRAME_READY = -1;
+        BUFFER_FRAME_HANDOFF_POSITION = frame_number;
+
+        // Start measuring how long it takes to procecc the enhancements
+        time_se_frame_processing.start_clock();
+
+        // Run enancements processing.  Store data back in itself.
+        run_preprocessing_outer(PROCESS_FRAMES_ARRAY[frame_number], thread_time.current_frame_time());
+        
+        apply_ehancements(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
+        apply_all_masks(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
+
+        if (PROPS.ENH_FAKE_FRAMES)
+        {
+          if (TIME_FRAME_PROCESSING < TIME_CAMERA_FRAME_TIME)
+          {
+            INTERPOLATION_DISPLAY = true;
+          }
+          else
+          {
+            INTERPOLATION_DISPLAY = false;
+          }
+
+          PROCESS_FRAMES_ARRAY[frame_number].FRAME_BUFFER_FAKE = FAKE_FRAME_GENERATOR.interpolateFrame(PROCESS_FRAMES_ARRAY[frame_number].PROCESSED_FRAME);
+        }
+
+        // Store times
+        time_se_frame_processing.end_clock();
+        TIME_FRAME_PROCESSING = time_se_frame_processing.duration_ms();
+
+        // Advance Buffer
+        BUFFER_FRAME_HANDOFF_POSITION = frame_number + 3;
+      }
+    } // Frame Limit Cap
+
+    // Thread will need to sleep, governed by the FORCED_FRAME_LIMIT.
+    thread_time.request_ready_time(forced_frame_limit.get_ready_time());
+    thread_time.sleep_till_next_frame();
+
+    CAMERA_ONLINE = true;
   }
-  
-  TIME_SE_FRAME_PROCESSING.end_clock();
-  TIME_FRAME_PROCESSING = TIME_SE_FRAME_PROCESSING.duration_ms();
 
-  BUFFER_FRAME_HANDOFF_POSITION = frame_number + 3;
+  PRINTW_QUEUE.push_back("Ending Image Process Thread");
 }
 
 void CAMERA::generate_imgui_texture_frame(cv::Mat& Frame)
@@ -2224,23 +2269,17 @@ void CAMERA::release_all_frames()
   for (int pos = 0; pos < 3; pos++)
   {
     PROCESS_FRAMES_ARRAY[pos].FRAME_BUFFER.release();
-
     PROCESS_FRAMES_ARRAY[pos].FRAME_BUFFER_RESIZE.release();
     PROCESS_FRAMES_ARRAY[pos].FRAME_BUFFER_FAKE.release();
-
     PROCESS_FRAMES_ARRAY[pos].PROCESSED_FRAME.release();
     PROCESS_FRAMES_ARRAY[pos].PROCESSED_FRAME_GRAY.release();
-    //PROCESSED_FRAME_GAUSSIAN.release();
     PROCESS_FRAMES_ARRAY[pos].PROCESSED_FRAME_CANNY.release();
-
     PROCESS_FRAMES_ARRAY[pos].LIVE_FRAME_0.release();
     PROCESS_FRAMES_ARRAY[pos].LIVE_FRAME_1.release();
-
     FRAME_DUMMY.release();
     FRAME_DUMMY2.release();
   }
-
-  for (int pos = 0; pos < 3; pos++)
+  for (int pos = 0; pos < 2; pos++)
   {    
     PROCESS_FRAMES_EXTRA.MASK_FRAME_GLARE[pos].release();
     PROCESS_FRAMES_EXTRA.MASK_FRAME_CANNY[pos].release();
@@ -2302,70 +2341,10 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   
   // Check to see if THREAD_CAMERA has stopped for any reason. 
   THREAD_CAMERA.check_for_completition();
+  THREAD_PROCESSING.check_for_completition();
 
   // ---------------------------------------------------------------------------------------
   // Check Thread Completions
-  
-  //if (CAMERA_ONLINE && 
-  //    CAMERA_BEING_VIEWED && 
-  //    BUFFER_FRAME_HANDOFF_POSITION >= 3 && 
-  //    BUFFER_FRAME_HANDOFF_POSITION <= 5)
-  {
-    // When the working frame has been fully process, render the 
-    //  texture to be drawn in opengl.
-    if (THREAD_IMAGE_PROCESSING.check_for_completition())
-    {
-      if (CAMERA_ONLINE && 
-          CAMERA_BEING_VIEWED && 
-          BUFFER_FRAME_HANDOFF_POSITION >= 3 && 
-          BUFFER_FRAME_HANDOFF_POSITION <= 5)
-      {
-        int current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
-        
-        // Generate Fake and Real
-        if (PROPS.ENH_FAKE_FRAMES)
-        {
-          PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].FRAME_BUFFER_FAKE.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
-        }
-        PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].PROCESSED_FRAME.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
-
-        // Place real or fake frame live.
-        if (PROPS.ENH_FAKE_FRAMES == false)
-        {
-          FRAME_GEN = false;
-          generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
-          AVERAGE_FRAME_RATE_COUNTER++;
-        }
-        else
-        {
-          FRAME_GEN = false;
-          FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_CAMERA_FRAME_TIME / 2);
-          generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
-          FRAME_TO_TEXTURE_TIMER_CHECK = true;
-          AVERAGE_FRAME_RATE_COUNTER++;
-        }
-
-        VIEWING_FRAME_POS = current_buffer_frame_pos;
-      }
-
-      BUFFER_FRAME_HANDOFF_POSITION = -1;
-
-    }
-  }
-
-  if (FRAME_TO_TEXTURE_TIMER_CHECK)
-  {
-    if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
-    {
-      FRAME_TO_TEXTURE_TIMER_CHECK = false;
-      if (CAMERA_ONLINE && CAMERA_BEING_VIEWED)
-      {
-        FRAME_GEN = true;
-        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].LIVE_FRAME_1);
-        AVERAGE_FRAME_RATE_COUNTER++;
-      }
-    }
-  }
 
   // Calculate average frame time
   if (AVERAGE_FRAME_RATE_TIMER.is_ready(Frame_Time))
@@ -2387,32 +2366,79 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
         // Start the camera update on a separate thread.
         // This call is non-blocking, so the main loop can continue immediately.
         THREAD_CAMERA.start_render_thread([&]() 
-                  {  update_frame();  });
+                  {  update_frame_thread();  });
+      }
+    }
+  }
+  
+  // ---------------------------------------------------------------------------------------
+
+  // Starts the THREAD_ENHANCMENTS unless CAMERA_PROCESSING_THREAD_STOP is true. 
+  //  THREAD_CAMERA will continue running until the camera is closed.
+  {
+    if (CAMERA_PROCESSING_THREAD_STOP == false)
+    {
+      if (THREAD_PROCESSING.check_to_run_routine_on_thread(Frame_Time)) 
+      {
+        // Start the camera update on a separate thread.
+        // This call is non-blocking, so the main loop can continue immediately.
+        THREAD_PROCESSING.start_render_thread([&]() 
+                  {  process_enhancements_thread();  });
       }
     }
   }
 
   // ---------------------------------------------------------------------------------------
 
-  // Only try to process frames when a handoff is complete and 
-  //  the texture is created.
-
-  if (CAMERA_ONLINE && 
-      CAMERA_BEING_VIEWED && 
-      LATEST_FRAME_READY != -1 && 
-      BUFFER_FRAME_HANDOFF_POSITION == -1)
+  // When the working frame has been fully process, render the 
+  //  texture to be drawn in opengl.
+  // Governed by the proccess call of the main program
   {
-    // Do not start thread if already running.
-    if (THREAD_IMAGE_PROCESSING.check_to_run_routine_on_thread(Frame_Time)) 
+    if (BUFFER_FRAME_HANDOFF_POSITION >= 3 && 
+        BUFFER_FRAME_HANDOFF_POSITION <= 5)
     {
-      //  In Place here because weird process_enhancements_frame didnt safely
-      //    accept an argument.
-      PROCESS_ENHANCEMENTS_FRAME_TIME = Frame_Time;
+      int current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
+      
+      // Generate Fake and Real
+      if (PROPS.ENH_FAKE_FRAMES)
+      {
+        PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].FRAME_BUFFER_FAKE.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
+      }
+      PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].PROCESSED_FRAME.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
 
-      // Start the camera update on a separate thread.
-      // This call is non-blocking, so the main loop can continue immediately.
-      THREAD_IMAGE_PROCESSING.start_render_thread([&]() 
-                {  process_enhancements_frame();  });
+      // Place real or fake frame live.
+      if (PROPS.ENH_FAKE_FRAMES == false)
+      {
+        FRAME_GEN = false;
+        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
+        AVERAGE_FRAME_RATE_COUNTER++;
+      }
+      else
+      {
+        FRAME_GEN = false;
+        FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_CAMERA_FRAME_TIME / 2);
+        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
+        FRAME_TO_TEXTURE_TIMER_CHECK = true;
+        AVERAGE_FRAME_RATE_COUNTER++;
+      }
+
+      VIEWING_FRAME_POS = current_buffer_frame_pos;
+    }
+
+    BUFFER_FRAME_HANDOFF_POSITION = -1;
+  }
+
+  if (FRAME_TO_TEXTURE_TIMER_CHECK)
+  {
+    if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
+    {
+      FRAME_TO_TEXTURE_TIMER_CHECK = false;
+      if (CAMERA_ONLINE && CAMERA_BEING_VIEWED)
+      {
+        FRAME_GEN = true;
+        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].LIVE_FRAME_1);
+        AVERAGE_FRAME_RATE_COUNTER++;
+      }
     }
   }
 
@@ -2439,20 +2465,14 @@ void CAMERA::load(CONSOLE_COMMUNICATION &cons)
 
 void CAMERA::camera_start()
 {
-  if (CAMERA_READ_THREAD_STOP == true)
-  {
-    // Signal stop thread.
-    CAMERA_READ_THREAD_STOP = false;
-  }
+  CAMERA_READ_THREAD_STOP = false;
+  CAMERA_PROCESSING_THREAD_STOP = false;
 }
 
 void CAMERA::camera_stop()
 {
-  if (CAMERA_READ_THREAD_STOP == false)
-  {
-    // Signal stop thread.
-    CAMERA_READ_THREAD_STOP = true;
-  }
+  CAMERA_READ_THREAD_STOP = true;
+  CAMERA_PROCESSING_THREAD_STOP = true;
 }
 
 bool CAMERA::camera_online()
