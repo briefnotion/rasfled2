@@ -417,13 +417,10 @@ int loop_2(bool TTY_Only)
 
   // Assign Properties and Controls
 
-  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_NAME            = "backup";
+  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_NAME            = "backup";  
   sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DEVICE_NAME     = sdSystem.FILE_NAMES.CAMERA_BACKUP;
-  sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DEVICE_ID       = sdSystem.FILE_NAMES.CAMERA_BACKUP_ID;
-
   sdSystem.CAMERA_BACKUP.PROPS.CAMERA_DIRECTORY       = sdSystem.FILE_NAMES.CAMERA_DIR;
   sdSystem.CAMERA_BACKUP.PROPS.CAMERA_SETTINGS_DIR    = sdSystem.FILE_NAMES.CAMERA_SETTINGS_DIR;
-
   sdSystem.CAMERA_BACKUP.PROPS.CAMERA_TEST_FILE_NAME  = sdSystem.FILE_NAMES.CAMERA_TEST_IMAGE_FILENAME;
   
   // ---
@@ -432,12 +429,6 @@ int loop_2(bool TTY_Only)
   // Set Camera Screen Properties
   sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 640;
   sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 480;
-
-  //sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 1280;
-  //sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 720;
-  
-  //sdSystem.CAMERA_BACKUP.PROPS.WIDTH = 800;
-  //sdSystem.CAMERA_BACKUP.PROPS.HEIGHT = 600;
   
   // Backwards facing cam, not flipped.
   sdSystem.CAMERA_BACKUP.PROPS.FLIP_HORIZONTAL  = false;

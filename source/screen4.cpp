@@ -361,12 +361,17 @@ int SCREEN4::create(system_data &sdSysData)
 
     static const ImWchar glyph_ranges[] = 
     {
-        0x0020, 0x00FF,       // Basic Latin (ASCII + Latin-1 Supplement)
+        0x0020, 0x00FF,       // Basic Latin
         0x2000, 0x206F,       // General Punctuation 
+        //0x2070, 0x218F,
         0x2190, 0x21FF,       // Arrows 
+        0x2200, 0x22FF,       // Mathematical Operators
+        //0x2300, 0x24FF,
         0x2500, 0x257F,       // Box Drawing 
         0x2580, 0x25FF,       // Block Elements + Geometric Shapes 
+        //0x2600, 0x27FF,
         0x2800, 0x28FF,       // Braille Patterns 
+        //0x2900, 0x2AFF,
         0x2B00, 0x2BFF,       // Miscellaneous Symbols and Arrows 
         0,                    // End of list
     };
@@ -375,6 +380,36 @@ int SCREEN4::create(system_data &sdSysData)
     //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
     //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/unifont/unifont.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
     //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
+
+    // Under Consideration
+    /*
+    ImGuiIO& io = ImGui::GetIO();
+
+    // Load your primary font
+    ImFont* font_console = io.Fonts->AddFontFromFileTTF(
+        "font1.ttf",
+        18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER,
+        nullptr,
+        glyph_ranges_1
+    );
+
+    // Configure merge mode
+    ImFontConfig config;
+    config.MergeMode = true;
+    config.PixelSnapH = true;
+
+    // Merge a second font into the same atlas
+    io.Fonts->AddFontFromFileTTF(
+        "font2.ttf",
+        18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER,
+        &config,
+        glyph_ranges_2
+    );
+
+    // Now FONT_CONSOLE includes glyphs from both fonts
+    sdSysData.PANEL_CONTROL.FONT_CONSOLE = font_console;
+    */
+
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();

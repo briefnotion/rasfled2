@@ -39,6 +39,14 @@ Notes:
 */
 // ---------------------------------------------------------------------------------------
 
+void resize_if_not_same_size(cv::Mat& Main_Frame, cv::Mat& Resize_Frame)
+{
+  if (Main_Frame.cols != Resize_Frame.cols || Main_Frame.rows != Resize_Frame.rows)
+  {
+    resize(Resize_Frame, Resize_Frame, cv::Size(Main_Frame.cols, Main_Frame.rows));
+  }
+}
+
 // Helper function to create the mesh grid (x and y coordinates)
 // This is called once when the first frame is processed.
 void createMeshGrid(int rows, int cols, cv::Mat& x_coords, cv::Mat& y_coords) 
@@ -911,6 +919,7 @@ void CAMERA::save_settings()
       JSON_ENTRY camera_control_settings;
 
   // Standard Settings
+  camera_settings.create_label_value(quotify("CAMERA_DEVICE_NAME"), quotify(PROPS.CAMERA_DEVICE_NAME));
   camera_settings.create_label_value(quotify("WIDTH"), quotify(to_string(PROPS.WIDTH)));
   camera_settings.create_label_value(quotify("HEIGHT"), quotify(to_string(PROPS.HEIGHT)));
   camera_settings.create_label_value(quotify("COMPRESSION"), quotify(to_string(PROPS.COMPRESSION)));
@@ -997,6 +1006,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
       {
         if (settings.ROOT.DATA[root].label() == "camera settings")
         {
+          STRING_STRING ss_camera_device_name;
           STRING_INT    si_width;
           STRING_INT    si_height;
           STRING_INT    si_compression;
@@ -1021,6 +1031,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
           for (size_t entry_list = 0;
                       entry_list < settings.ROOT.DATA[root].DATA.size(); entry_list++)
           {
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("CAMERA_DEVICE_NAME", ss_camera_device_name);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("WIDTH", si_width);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("HEIGHT", si_height);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("COMPRESSION", si_compression);
@@ -1171,6 +1182,10 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
             }
 
             // ---
+            if (ss_camera_device_name.conversion_success())
+            {
+              PROPS.CAMERA_DEVICE_NAME = ss_camera_device_name.get_str_value();
+            }
             if (si_width.conversion_success())
             {
               PROPS.WIDTH = si_width.get_int_value();
@@ -1502,10 +1517,12 @@ void CAMERA::apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv:
   {
     if (!Mask_0.empty())
     {
+      resize_if_not_same_size(Frame, Mask_0);
       Frame.setTo(cv::Scalar(0, 0, 0), Mask_0);
     }
     if (!Mask_1.empty())
     {
+      resize_if_not_same_size(Frame, Mask_1);
       Frame.setTo(cv::Scalar(0, 0, 0), Mask_1);
     }
   }
@@ -1515,6 +1532,7 @@ void CAMERA::apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv:
     {
       if (!Mask_0.empty())
       {
+        resize_if_not_same_size(Frame, Mask_0);
         Frame.setTo(cv::Scalar(0, 0, 0), Mask_0);
       }
     }
@@ -1522,6 +1540,7 @@ void CAMERA::apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv:
     {
       if (!Mask_1.empty())
       {
+        resize_if_not_same_size(Frame, Mask_1);
         Frame.setTo(cv::Scalar(0, 0, 0), Mask_1);
       }
     }
@@ -1537,14 +1556,6 @@ void CAMERA::apply_all_masks(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
       apply_masks_to_processed_frame(Suite.PROCESSED_FRAME, Extra.MASK_FRAME_CANNY[0], Extra.MASK_FRAME_CANNY[1], Extra.LATEST_POS);
     }
 
-    /*
-    if (PROPS.ENH_OVERLAY_LINES)
-    {
-      cv::resize(MASK_FRAME_OVERLAY_LINES, MASK_FRAME_OVERLAY_LINES, PROCESSED_FRAME.size(), 0, 0, cv::INTER_NEAREST);
-      PROCESSED_FRAME.setTo(cv::Scalar(0, 0, 0), MASK_FRAME_OVERLAY_LINES);
-    }
-    */
-
     if (PROPS.ENH_GLARE_MASK)
     {
       apply_masks_to_processed_frame(Suite.PROCESSED_FRAME, Extra.MASK_FRAME_GLARE[0], Extra.MASK_FRAME_GLARE[1], Extra.LATEST_POS);
@@ -1555,8 +1566,9 @@ void CAMERA::apply_all_masks(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
 
 void CAMERA::close_camera()
 {
+  CAMERA_ONLINE = false;
+  
   std::stringstream print_stream;
-
   save_settings();
 
   // 1. Check if the camera capture object is open and release it
@@ -1684,6 +1696,7 @@ void CAMERA::open_camera()
         init(print_stream);
         
         CAM_AVAILABLE = true;
+
       }
       else
       {
@@ -1801,45 +1814,17 @@ void CAMERA::update_frame_thread()
         open_camera();
       }
 
-      if (CAMERA_BEING_VIEWED)
+      if (CAMERA_CAPTURE.isOpened() || PROPS.TEST == true)
       {
-        // Camera Open Error Checking.  Reconnect if possible.
-        if (PROPS.TEST == false && CAMERA_CAPTURE.isOpened() == false)
-        {
-          consecutive_connection_error_count++;
-          PRINTW_QUEUE.push_back("Camera signal lost. Attempting reconnect...");
-          close_camera(); // Ensure old handle is gone
+        // Camera is open
+        CAMERA_ONLINE = true;
 
-          bool not_connected = true;
-          while (consecutive_connection_error_count <= max_consecutive_errors && not_connected)
-          {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            if (!CAMERA_CAPTURE.isOpened())
-            {
-              open_camera(); // Try to reopen
-            }
-            consecutive_connection_error_count++;
-            not_connected = !CAMERA_CAPTURE.isOpened();
-          }
-        }
-
-        // Stop Thread if too many errors
-        if (consecutive_connection_error_count + consecutive_frame_error_count > max_consecutive_errors)
-        {
-          CAMERA_READ_THREAD_STOP = true;
-          PRINTW_QUEUE.push_back("Camera Error - Connection Glitch");
-          PRINTW_QUEUE.push_back("  Connection Error Count: " + to_string(consecutive_connection_error_count));
-          PRINTW_QUEUE.push_back("  Frame Error Count: = " + to_string(consecutive_frame_error_count));
-        }
-        else
+        if (CAMERA_BEING_VIEWED)
         {
           // Inline error check. pos select, reset ftb.
           error = false;
           new_frame_pos = -1;
           current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
-
-cout << current_buffer_frame_pos << ":";
-cout << frame_to_buffer << ":";
 
           // Determine next new frame position
           for (int pos = 0; pos < 3 && new_frame_pos < 0; pos++)
@@ -1850,15 +1835,14 @@ cout << frame_to_buffer << ":";
             }
           }
           frame_to_buffer = new_frame_pos;
-cout << frame_to_buffer << "   " << flush;
 
           // Set Post Processing Size
           if (is_within(PROPS.POST_PROCESS_SCALE, 0.0f, 1.0f))
           {
-            PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE = cv::Size(
-                                                                (int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.WIDTH),
-                                                                (int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.HEIGHT)
-                                                                              );
+            POST_PROCESS_SIZE = cv::Size(
+                          (int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.WIDTH),
+                          (int)(PROPS.POST_PROCESS_SCALE * (float)PROPS.HEIGHT)
+                                        );
           }
 
           // Capture the camera frame.
@@ -1870,7 +1854,7 @@ cout << frame_to_buffer << "   " << flush;
             }
             else
             {
-              PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER = generateDummyLowLightFrame(PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE.width, PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE.height, (int)thread_time.current_frame_time() / 100);
+              PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER = generateDummyLowLightFrame(POST_PROCESS_SIZE.width, POST_PROCESS_SIZE.height, (int)thread_time.current_frame_time() / 100);
             }
           }
           else
@@ -1904,7 +1888,7 @@ cout << frame_to_buffer << "   " << flush;
             }
             else
             {
-              cv::resize(PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER, PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER_RESIZE, PROCESS_FRAMES_ARRAY[frame_to_buffer].POST_PROCESS_SIZE);
+              cv::resize(PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER, PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER_RESIZE, POST_PROCESS_SIZE);
               run_preprocessing_inner(PROCESS_FRAMES_ARRAY[frame_to_buffer].FRAME_BUFFER_RESIZE, PROCESS_FRAMES_ARRAY[frame_to_buffer].PROCESSED_FRAME);
             }
 
@@ -1916,16 +1900,46 @@ cout << frame_to_buffer << "   " << flush;
             TIME_FRAME_RETRIEVAL = time_se_frame_retrieval.duration_ms();
           }
         }
+      }
+      else
+      {
+        // Camera is closed
+        CAMERA_ONLINE = false;
 
-      } // Cam Being Viewed
-    } 
+        // Attempt to reconnect
+        consecutive_connection_error_count++;
+        PRINTW_QUEUE.push_back("Camera signal lost. Attempting reconnect...");
+        close_camera(); // Ensure old handle is gone
+
+        bool not_connected = true;
+        while (consecutive_connection_error_count <= max_consecutive_errors && not_connected)
+        {
+          std::this_thread::sleep_for(std::chrono::milliseconds(100));
+          if (!CAMERA_CAPTURE.isOpened())
+          {
+            open_camera(); // Try to reopen
+          }
+          consecutive_connection_error_count++;
+          not_connected = !CAMERA_CAPTURE.isOpened();
+        }
+      }
+
+      // Stop Thread if too many errors
+      if (consecutive_connection_error_count + consecutive_frame_error_count > max_consecutive_errors)
+      {
+        CAMERA_READ_THREAD_STOP = true;
+        PRINTW_QUEUE.push_back("Camera Error - Connection Glitch");
+        PRINTW_QUEUE.push_back("  Connection Error Count: " + to_string(consecutive_connection_error_count));
+        PRINTW_QUEUE.push_back("  Frame Error Count: = " + to_string(consecutive_frame_error_count));
+      }
+
+    } //  Enforce hard frame limit time.
 
     // Thread will need to sleep, governed by the FORCED_FRAME_LIMIT.
     thread_time.request_ready_time(forced_frame_limit.get_ready_time());
     thread_time.sleep_till_next_frame();
-
-    CAMERA_ONLINE = true;
-  }
+  
+  } // Main While Loop
 
   CAMERA_ONLINE = false;
 
@@ -1974,9 +1988,9 @@ void CAMERA::process_enhancements_thread()
       if (LATEST_FRAME_READY != -1 &&  BUFFER_FRAME_HANDOFF_POSITION == -1)
       {
         // Establish latest frame and lock
+        BUFFER_FRAME_HANDOFF_POSITION = LATEST_FRAME_READY;
         frame_number = LATEST_FRAME_READY;
         LATEST_FRAME_READY = -1;
-        BUFFER_FRAME_HANDOFF_POSITION = frame_number;
 
         // Start measuring how long it takes to procecc the enhancements
         time_se_frame_processing.start_clock();
@@ -2288,12 +2302,12 @@ void CAMERA::release_all_frames()
 
 int CAMERA::post_process_height()
 {
-  return PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].POST_PROCESS_SIZE.height;
+  return POST_PROCESS_SIZE.height;
 }
 
 int CAMERA::post_process_width()
 {
-  return PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].POST_PROCESS_SIZE.width;
+  return POST_PROCESS_SIZE.width;
 }
 
 void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
@@ -2398,7 +2412,7 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
         BUFFER_FRAME_HANDOFF_POSITION <= 5)
     {
       int current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
-      
+
       // Generate Fake and Real
       if (PROPS.ENH_FAKE_FRAMES)
       {
@@ -2423,9 +2437,8 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
       }
 
       VIEWING_FRAME_POS = current_buffer_frame_pos;
+      BUFFER_FRAME_HANDOFF_POSITION = -1;
     }
-
-    BUFFER_FRAME_HANDOFF_POSITION = -1;
   }
 
   if (FRAME_TO_TEXTURE_TIMER_CHECK)

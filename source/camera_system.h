@@ -42,6 +42,12 @@
 using namespace std;
 
 // ---------------------------------------------------------------------------------------
+//  Helpers
+
+void resize_if_not_same_size(cv::Mat& Main_Frame, cv::Mat& Resize_Frame);
+void createMeshGrid(int rows, int cols, cv::Mat& x_coords, cv::Mat& y_coords);
+
+// ---------------------------------------------------------------------------------------
 
 // --- Helper class for RAII (Resource Acquisition Is Initialization) ---
 // This ensures the file descriptor is closed automatically when the function exits.
@@ -157,7 +163,6 @@ class CAMERA_PROPERTIES
   
   std::string CAMERA_NAME = "";
   std::string CAMERA_DEVICE_NAME = "";
-  int    CAMERA_DEVICE_ID   = -1;
 
   std::string CAMERA_DIRECTORY = "";     // e.g. .../rasfled-t/camera/
   std::string CAMERA_SETTINGS_DIR = "";  // e.g. .../rasfled-t/camera/settings/
@@ -279,8 +284,6 @@ class FRAME_SUITE
 {
   public:
 
-  cv::Size POST_PROCESS_SIZE;
-
   // Thread Update and process_enhancements_frame
   cv::Mat FRAME_BUFFER;
   cv::Mat FRAME_BUFFER_RESIZE;  // tmp
@@ -308,7 +311,7 @@ class CAMERA
   cv::Mat FRAME_DUMMY2; // for testing double buffer
   bool    FRAME_DUMMY_MULTI_FRAME_TEST = false;
 
-  double DOWN_SCALE_FACTOR = 2.0;
+  cv::Size POST_PROCESS_SIZE;
 
   // Object detection member
   bool CAR_CASCADE_LOADED = false;

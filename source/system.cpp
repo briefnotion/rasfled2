@@ -169,8 +169,7 @@ bool FILES::assign(CONSOLE_COMMUNICATION &cons)
     cons.printw("  " + COMPASS_DEVICE_FILE);
 
     CAMERA_BACKUP = (string)DEF_CAMERA_BACKUP;
-    CAMERA_BACKUP_ID = (int)DEF_CAMERA_BACKUP_ID;
-    cons.printw("  ID: " + to_string(CAMERA_BACKUP_ID) + " \t" + CAMERA_BACKUP);
+    cons.printw("  " + CAMERA_BACKUP);
 
     cons.printw("");
   }
