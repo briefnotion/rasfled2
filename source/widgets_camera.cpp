@@ -570,9 +570,10 @@ void CAMERA_WIDGET::display_camera_stats_times(system_data &sdSysData)
     ImGui::Text("  Grab: (%5.1fms)        Prc Tme: (%5.1fms)", 
                   sdSysData.CAMERA_BACKUP.TIME_FRAME_RETRIEVAL,
                   sdSysData.CAMERA_BACKUP.TIME_FRAME_PROCESSING);
-    ImGui::Text("%dx%d %dx%d", 
+    ImGui::Text("%dx%d %dx%d (%2d)", 
                   sdSysData.CAMERA_BACKUP.PROPS.WIDTH, sdSysData.CAMERA_BACKUP.PROPS.HEIGHT,
-                  sdSysData.CAMERA_BACKUP.post_process_width() , sdSysData.CAMERA_BACKUP.post_process_height());
+                  sdSysData.CAMERA_BACKUP.post_process_width() , sdSysData.CAMERA_BACKUP.post_process_height(), 
+                  sdSysData.CAMERA_BACKUP.bfhp());
   }
 }
 

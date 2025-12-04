@@ -98,6 +98,7 @@ void ALERT_SYSTEM_COORDINATOR::check_for_alerts(system_data &sdSysData, AUTOMOBI
     // Camera
     if (sdSysData.CAMERA_BACKUP.camera_online())
     {
+      /*
       // Camera Gear
       if (sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_neutral() ||
       sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_reverse())
@@ -121,6 +122,46 @@ void ALERT_SYSTEM_COORDINATOR::check_for_alerts(system_data &sdSysData, AUTOMOBI
       if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left() || sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
       {
         sdSysData.PANEL_CONTROL.CAMERA_BACKUP.request(sdSysData.PROGRAM_TIME.current_frame_time(), 2000, "TURN ");
+      }
+      */
+
+      // A little different
+      // Camera Gear
+
+      string message = "";
+      bool cam_alert = false;
+
+      if (sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_neutral() ||
+      sdSysData.CAR_INFO.STATUS.GEAR.gear_selection_reverse())
+      {
+        message += "GEAR ";
+        cam_alert = true;
+      }
+
+      // Camera Hazards
+      if (sdSysData.PANEL_CONTROL.AUTO_HAZARDS)
+      {
+        message += "HAZ ";
+        cam_alert = true;
+      }
+
+      // Camera Door Open
+      if (sdSysData.PANEL_CONTROL.AUTO_DOOR_OPEN_COUNT > 0)
+      {
+        message += "DOOR ";
+        cam_alert = true;
+      }
+
+      // Camer Blinker
+      if (sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_left() || sdSysData.CAR_INFO.STATUS.INDICATORS.val_sinal_right())
+      {
+        message += "TURN ";
+        cam_alert = true;
+      }
+
+      if (cam_alert)
+      {
+        sdSysData.PANEL_CONTROL.CAMERA_BACKUP.request(sdSysData.PROGRAM_TIME.current_frame_time(), 2000, message);
       }
     }
 

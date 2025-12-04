@@ -836,7 +836,7 @@ int loop_2(bool TTY_Only)
 
     // Call camera process if timer says check or thread should be ready.
     if (camera_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true ||
-        sdSystem.PROGRAM_TIME.current_frame_time() > sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.get_ready_time())
+        sdSystem.PROGRAM_TIME.current_frame_time() > sdSystem.CAMERA_BACKUP.THREAD_PROCESSING.get_ready_time())
     {
       sdSystem.CAMERA_BACKUP.process(sdSystem.SCREEN_COMMS, sdSystem.PROGRAM_TIME.current_frame_time(), 
                                     sdSystem.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 7);
@@ -1514,7 +1514,7 @@ int loop_2(bool TTY_Only)
     sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.THREAD_RENDER.get_ready_time());
     //sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_CAMERA.get_ready_time());  manages its own sleep time.
     sdSystem.PROGRAM_TIME.request_ready_time(camera_timer.get_ready_time());
-    sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_PROCESSING.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_user.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(display.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(comms_auto_timer.get_ready_time());
@@ -1536,7 +1536,7 @@ int loop_2(bool TTY_Only)
   sdSystem.CAMERA_BACKUP.THREAD_CAMERA.wait_for_thread_to_finish();
   
   cout << "THREAD_IMAGE_PROCESSING" << endl;
-  sdSystem.CAMERA_BACKUP.THREAD_IMAGE_PROCESSING.wait_for_thread_to_finish();
+  sdSystem.CAMERA_BACKUP.THREAD_PROCESSING.wait_for_thread_to_finish();
 
   // Shutdown RPI.
   if (sdSystem.WS2811_ENABLED)

@@ -85,15 +85,26 @@ void FAKE_FRAME::re_int_vars(const cv::Mat& frame)
   cv::Size process_size(PROCESS_WIDTH, PROCESS_HEIGHT);
   cv::Size flow_calc_size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT);
 
+  /*
   cv::resize(current_gray_, current_gray_, process_size);
   cv::resize(prev_gray_, prev_gray_, process_size);
   cv::resize(small_prev_gray_, small_prev_gray_, flow_calc_size);
   cv::resize(small_current_gray_, small_current_gray_, flow_calc_size);
-
   cv::resize(flow_small_, flow_small_, flow_calc_size);
   cv::resize(flow_upsampled_, flow_upsampled_, process_size);
   cv::resize(map_x_, map_x_, process_size);
   cv::resize(map_y_, map_y_, process_size);
+  */
+
+  current_gray_.create(process_size, CV_8UC1);
+  prev_gray_.create(process_size, CV_8UC1);
+  small_prev_gray_.create(flow_calc_size, CV_8UC1);
+  small_current_gray_.create(flow_calc_size, CV_8UC1);
+  flow_small_.create(flow_calc_size, CV_32FC2);
+  flow_upsampled_.create(process_size, CV_32FC2);
+  map_x_.create(process_size, CV_32FC1);
+  map_y_.create(process_size, CV_32FC1);
+  prev_frame_.create(process_size, frame.type());
 
   // 3. Pre-calculate the coordinate mesh grids
   createMeshGrid(PROCESS_HEIGHT, PROCESS_WIDTH, coords_x_, coords_y_);
@@ -146,7 +157,6 @@ void FAKE_FRAME::preprocess_initial_frame(const cv::Mat& initial_frame)
   // The very first frame is the previous frame for the next calculation
   current_gray_.copyTo(prev_gray_);
 }
-
 
 cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame) 
 {
@@ -1566,8 +1576,6 @@ void CAMERA::apply_all_masks(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
 
 void CAMERA::close_camera()
 {
-  CAMERA_ONLINE = false;
-  
   std::stringstream print_stream;
   save_settings();
 
@@ -1611,10 +1619,6 @@ void CAMERA::open_camera()
   {
     release_all_frames();
 
-    // Create Thread (safe to recreate if already created)
-    THREAD_CAMERA.create(5);           // Longest wait im main process
-    THREAD_IMAGE_PROCESSING.create(5); // Longest wait im main process
-
     // Load Cascades
     // --- Object Detection Setup ---
     // NOTE: In a real environment, you must have the XML file available 
@@ -1640,14 +1644,6 @@ void CAMERA::open_camera()
 
       if (CAMERA_CAPTURE.isOpened()) 
       {
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
-        // Set Resolution
-        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, PROPS.WIDTH);
-        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, PROPS.HEIGHT);
-
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-
         // Set Compression
         if (PROPS.COMPRESSION == 1)
         {
@@ -1665,6 +1661,10 @@ void CAMERA::open_camera()
           CAMERA_CAPTURE.set(cv::CAP_PROP_FOURCC, cv::VideoWriter::fourcc('Y', 'U', 'Y', '2'));
           print_stream << " > Requesting Codec to YUY2." << std::endl;
         }
+
+        // Set Resolution
+        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_WIDTH, (double)PROPS.WIDTH);
+        CAMERA_CAPTURE.set(cv::CAP_PROP_FRAME_HEIGHT, (double)PROPS.HEIGHT);
 
         // VERIFICATION
         print_stream << "Camera Results:" << std::endl;
@@ -1745,7 +1745,6 @@ void CAMERA::open_camera()
   PRINTW_QUEUE.push_back(print_stream.str());
 }
 
-
 // Be careful with this function. It is ran in its own thread.
   // The THREAD_CAMERA should manage itself, similare to the main.cpp main loop.
   // BUFFER_FRAME_HANDOFF_READY will signal to enhancement proccessing when 
@@ -1779,6 +1778,8 @@ void CAMERA::update_frame_thread()
   thread_time.create();
 
   // Start the camera
+  THREAD_PROCESSING_ACTIVE = true;
+  CAMERA_READ_THREAD_STOP = false;
   open_camera();
 
   while (CAMERA_READ_THREAD_STOP == false)
@@ -1808,17 +1809,26 @@ void CAMERA::update_frame_thread()
       // Check for restart
       if (APPLY_RESTART)
       {
+        PRINTW_QUEUE.push_back("Camera restarting ...");
         APPLY_RESTART = false;
+
+        // stop processing thread
+        CAMERA_PROCESSING_THREAD_STOP = true;
+        while (THREAD_PROCESSING_ACTIVE)
+        {
+          std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+
         close_camera();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+        // start processing thread
+        THREAD_PROCESSING_ACTIVE = true; 
+
         open_camera();
       }
 
       if (CAMERA_CAPTURE.isOpened() || PROPS.TEST == true)
       {
-        // Camera is open
-        CAMERA_ONLINE = true;
-
         if (CAMERA_BEING_VIEWED)
         {
           // Inline error check. pos select, reset ftb.
@@ -1903,25 +1913,7 @@ void CAMERA::update_frame_thread()
       }
       else
       {
-        // Camera is closed
-        CAMERA_ONLINE = false;
-
-        // Attempt to reconnect
         consecutive_connection_error_count++;
-        PRINTW_QUEUE.push_back("Camera signal lost. Attempting reconnect...");
-        close_camera(); // Ensure old handle is gone
-
-        bool not_connected = true;
-        while (consecutive_connection_error_count <= max_consecutive_errors && not_connected)
-        {
-          std::this_thread::sleep_for(std::chrono::milliseconds(100));
-          if (!CAMERA_CAPTURE.isOpened())
-          {
-            open_camera(); // Try to reopen
-          }
-          consecutive_connection_error_count++;
-          not_connected = !CAMERA_CAPTURE.isOpened();
-        }
       }
 
       // Stop Thread if too many errors
@@ -1941,8 +1933,7 @@ void CAMERA::update_frame_thread()
   
   } // Main While Loop
 
-  CAMERA_ONLINE = false;
-
+  THREAD_PROCESSING_ACTIVE = false;
   LATEST_FRAME_READY = -1;
 
   // Close Camera if thread stops.
@@ -1950,6 +1941,7 @@ void CAMERA::update_frame_thread()
   CAM_AVAILABLE = false;
 
   PRINTW_QUEUE.push_back("Ending Camera Read Thread");
+  THREAD_CAMERA_ACTIVE = false;
 }
 
 void CAMERA::process_enhancements_thread()
@@ -1966,6 +1958,7 @@ void CAMERA::process_enhancements_thread()
   // Create Process Time
   thread_time.create();
 
+  CAMERA_PROCESSING_THREAD_STOP = false;
   while (CAMERA_PROCESSING_THREAD_STOP == false)
   {
     //  Get current time.  This will be our timeframe to work in.
@@ -2022,16 +2015,20 @@ void CAMERA::process_enhancements_thread()
         // Advance Buffer
         BUFFER_FRAME_HANDOFF_POSITION = frame_number + 3;
       }
+      else if (BUFFER_FRAME_HANDOFF_POSITION >= 0 && BUFFER_FRAME_HANDOFF_POSITION <= 2)
+      {
+        // Something went wrong. Avoid lockout.
+        BUFFER_FRAME_HANDOFF_POSITION = -1;
+      }
     } // Frame Limit Cap
 
     // Thread will need to sleep, governed by the FORCED_FRAME_LIMIT.
     thread_time.request_ready_time(forced_frame_limit.get_ready_time());
     thread_time.sleep_till_next_frame();
-
-    CAMERA_ONLINE = true;
   }
 
   PRINTW_QUEUE.push_back("Ending Image Process Thread");
+  THREAD_PROCESSING_ACTIVE = false;
 }
 
 void CAMERA::generate_imgui_texture_frame(cv::Mat& Frame)
@@ -2310,6 +2307,11 @@ int CAMERA::post_process_width()
   return POST_PROCESS_SIZE.width;
 }
 
+int CAMERA::bfhp()
+{
+  return BUFFER_FRAME_HANDOFF_POSITION;
+}
+
 void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
 {
   if (PRINTW_QUEUE.size() > 0)
@@ -2340,7 +2342,7 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   }
 
   // Check and set Camera Being Viewed
-  if (CAMERA_BEING_VIEWED != Camera_Being_Viewed)
+  if (Camera_Being_Viewed != CAMERA_BEING_VIEWED)
   {
     CAMERA_BEING_VIEWED = Camera_Being_Viewed;
 
@@ -2373,10 +2375,11 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   // Starts the THREAD_CAMERA unless CAMERA_READ_THREAD_STOP is true. 
   //  THREAD_CAMERA will continue running until the camera is closed.
   {
-    if (CAMERA_READ_THREAD_STOP == false)
+    if (THREAD_CAMERA_ACTIVE)
     {
       if (THREAD_CAMERA.check_to_run_routine_on_thread(Frame_Time)) 
       {
+        THREAD_CAMERA.create(5);
         // Start the camera update on a separate thread.
         // This call is non-blocking, so the main loop can continue immediately.
         THREAD_CAMERA.start_render_thread([&]() 
@@ -2390,10 +2393,11 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
   // Starts the THREAD_ENHANCMENTS unless CAMERA_PROCESSING_THREAD_STOP is true. 
   //  THREAD_CAMERA will continue running until the camera is closed.
   {
-    if (CAMERA_PROCESSING_THREAD_STOP == false)
+    if (THREAD_PROCESSING_ACTIVE)
     {
       if (THREAD_PROCESSING.check_to_run_routine_on_thread(Frame_Time)) 
       {
+        THREAD_PROCESSING.create(5);
         // Start the camera update on a separate thread.
         // This call is non-blocking, so the main loop can continue immediately.
         THREAD_PROCESSING.start_render_thread([&]() 
@@ -2439,6 +2443,11 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
       VIEWING_FRAME_POS = current_buffer_frame_pos;
       BUFFER_FRAME_HANDOFF_POSITION = -1;
     }
+    else if (BUFFER_FRAME_HANDOFF_POSITION > 5 || BUFFER_FRAME_HANDOFF_POSITION < -1)
+    {
+      // Something went wrong. Avoid lockout.
+      BUFFER_FRAME_HANDOFF_POSITION = -1;
+    }
   }
 
   if (FRAME_TO_TEXTURE_TIMER_CHECK)
@@ -2446,7 +2455,7 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
     if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
     {
       FRAME_TO_TEXTURE_TIMER_CHECK = false;
-      if (CAMERA_ONLINE && CAMERA_BEING_VIEWED)
+      if (camera_online() && CAMERA_BEING_VIEWED)
       {
         FRAME_GEN = true;
         generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].LIVE_FRAME_1);
@@ -2478,8 +2487,7 @@ void CAMERA::load(CONSOLE_COMMUNICATION &cons)
 
 void CAMERA::camera_start()
 {
-  CAMERA_READ_THREAD_STOP = false;
-  CAMERA_PROCESSING_THREAD_STOP = false;
+  THREAD_CAMERA_ACTIVE = true;
 }
 
 void CAMERA::camera_stop()
@@ -2490,7 +2498,7 @@ void CAMERA::camera_stop()
 
 bool CAMERA::camera_online()
 {
-  return CAMERA_ONLINE;
+  return THREAD_PROCESSING_ACTIVE && THREAD_CAMERA_ACTIVE;
 }
 
 // ---------------------------------------------------------------------------------------

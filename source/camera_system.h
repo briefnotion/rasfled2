@@ -309,7 +309,6 @@ class CAMERA
   private:
   cv::Mat FRAME_DUMMY;
   cv::Mat FRAME_DUMMY2; // for testing double buffer
-  bool    FRAME_DUMMY_MULTI_FRAME_TEST = false;
 
   cv::Size POST_PROCESS_SIZE;
 
@@ -374,7 +373,7 @@ class CAMERA
           FRAME_BUFFER_RESIZE[3]                              
                       V                                       V
   FRAME_TO_BUFFER = #
-  LATEST_READY_FRAME  BUFFER_FRAME_HANDOFF_READY = +3         VIEWING_FRAME_POS +3 -- -1
+  LATEST_READY_FRAME  BUFFER_FRAME_HANDOFF_POSITION = +3         VIEWING_FRAME_POS +3 -- -1
 
 
   */
@@ -383,9 +382,6 @@ class CAMERA
   vector<std::string>    PRINTW_QUEUE;
 
   // Thread Update
-  
-  bool              CAMERA_ONLINE             = false;  // Reports to outside camera running. 
-
   cv::VideoCapture  CAMERA_CAPTURE;
 
   bool CAM_AVAILABLE = false;
@@ -404,8 +400,6 @@ class CAMERA
   // ---
   TIMED_IS_READY LOW_LIGHT_DEBOUNCE_TIMER_LL;
   int VIEWING_FRAME_POS = -1;
-
-  // Thread process_enhancements_frame and generate_imgui_texture_frame
 
   bool    CAMERA_BEING_VIEWED       = false;
   
@@ -493,18 +487,19 @@ class CAMERA
   bool    IS_LOW_LIGHT = false;
   int     LOW_LIGHT_VALUE = 0;
   
-  THREADING_INFO  THREAD_CAMERA;
+  THREADING_INFO  THREAD_CAMERA;  // Controls: update_frame_thread()
   bool CAMERA_READ_THREAD_STOP   = true;            // Keep reading camera in thread 
                                                     // until told to stop 
+  bool THREAD_CAMERA_ACTIVE = false;  
 
   TIMED_IS_READY  AVERAGE_FRAME_RATE_TIMER;
   int             AVERAGE_FRAME_RATE_COUNTER = 0;
                                                     // Variable.
 
-  THREADING_INFO  THREAD_PROCESSING;
+  THREADING_INFO  THREAD_PROCESSING;  // Controls: process_enhancements_thread()
   bool CAMERA_PROCESSING_THREAD_STOP   = true;      // Keep processing images in thread 
                                                     // until told to stop
-  THREADING_INFO  THREAD_IMAGE_PROCESSING;
+  bool THREAD_PROCESSING_ACTIVE = false;                                                     
 
   CAMERA_PROPERTIES PROPS;
   deque<CAMERA_SETTING> SETTINGS;
@@ -522,6 +517,7 @@ class CAMERA
 
   int post_process_height();
   int post_process_width();
+  int bfhp();
 
   // Manually print output stream
   void print_stream(CONSOLE_COMMUNICATION &cons);

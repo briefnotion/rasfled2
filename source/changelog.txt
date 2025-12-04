@@ -1,3 +1,6 @@
+2.375_251203
+  - Corrected a few problems. 
+
 2.374_251202
   - Corrected an error in the camera process 
       path.
