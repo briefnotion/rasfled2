@@ -1702,6 +1702,7 @@ void CAMERA::open_camera()
       {
         print_stream << "Could not open camera. Please check your camera connection." << std::endl;
         CAM_AVAILABLE = false;
+        ENABLED = false;
       }
     }
     else // TEST CAMERA = true
@@ -1758,6 +1759,7 @@ void CAMERA::open_camera()
   //  but as is, the variables are playing nicely in their respective threads. 
 void CAMERA::update_frame_thread()
 {
+  THREAD_CAMERA_ACTIVE = true;
   PRINTW_QUEUE.push_back("Starting Camera Read Thread");
 
   FLED_TIME thread_time;        // Thread gets its own Time 
@@ -1777,11 +1779,11 @@ void CAMERA::update_frame_thread()
   // Create Process Time
   thread_time.create();
 
-  // Start the camera
-  THREAD_PROCESSING_ACTIVE = true;
-  CAMERA_READ_THREAD_STOP = false;
+  load();
+
   open_camera();
 
+  CAMERA_READ_THREAD_STOP = false;
   while (CAMERA_READ_THREAD_STOP == false)
   {
     //  Get current time.  This will be our timeframe to work in.
@@ -1813,17 +1815,21 @@ void CAMERA::update_frame_thread()
         APPLY_RESTART = false;
 
         // stop processing thread
-        CAMERA_PROCESSING_THREAD_STOP = true;
-        while (THREAD_PROCESSING_ACTIVE)
+        int retry_counter = 0;
+        while (THREAD_PROCESSING_ACTIVE && retry_counter <= 10)
         {
+          ENABLED = false;
+          retry_counter++;
           std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
+        // Full Close
         close_camera();
 
-        // start processing thread
-        THREAD_PROCESSING_ACTIVE = true; 
+        // allow start processing thread 
+        ENABLED = true;
 
+        // Open again
         open_camera();
       }
 
@@ -1919,7 +1925,7 @@ void CAMERA::update_frame_thread()
       // Stop Thread if too many errors
       if (consecutive_connection_error_count + consecutive_frame_error_count > max_consecutive_errors)
       {
-        CAMERA_READ_THREAD_STOP = true;
+        ENABLED = false;
         PRINTW_QUEUE.push_back("Camera Error - Connection Glitch");
         PRINTW_QUEUE.push_back("  Connection Error Count: " + to_string(consecutive_connection_error_count));
         PRINTW_QUEUE.push_back("  Frame Error Count: = " + to_string(consecutive_frame_error_count));
@@ -1930,10 +1936,12 @@ void CAMERA::update_frame_thread()
     // Thread will need to sleep, governed by the FORCED_FRAME_LIMIT.
     thread_time.request_ready_time(forced_frame_limit.get_ready_time());
     thread_time.sleep_till_next_frame();
-  
+
+    // Only continue running if enabled
+    CAMERA_READ_THREAD_STOP = !ENABLED;
+    
   } // Main While Loop
 
-  THREAD_PROCESSING_ACTIVE = false;
   LATEST_FRAME_READY = -1;
 
   // Close Camera if thread stops.
@@ -1946,6 +1954,7 @@ void CAMERA::update_frame_thread()
 
 void CAMERA::process_enhancements_thread()
 {
+  THREAD_PROCESSING_ACTIVE = true;
   PRINTW_QUEUE.push_back("Starting Image Process Thread");
 
   FLED_TIME thread_time;        // Thread gets its own Time 
@@ -2025,6 +2034,9 @@ void CAMERA::process_enhancements_thread()
     // Thread will need to sleep, governed by the FORCED_FRAME_LIMIT.
     thread_time.request_ready_time(forced_frame_limit.get_ready_time());
     thread_time.sleep_till_next_frame();
+
+    // Only continue running if enabled
+    CAMERA_PROCESSING_THREAD_STOP = !ENABLED;
   }
 
   PRINTW_QUEUE.push_back("Ending Image Process Thread");
@@ -2110,7 +2122,7 @@ void CAMERA::apply_camera_control_defaults()
 }
 
 // Assuming CAMERA is a class and PROPS/INFORMATION_COMMAND_LIST are members
-void CAMERA::list_controls(CONSOLE_COMMUNICATION &cons)
+void CAMERA::list_controls(vector<std::string> &String_Vector)
 {
   // 1. Clear the output buffer
   INFORMATION_COMMAND_LIST = "";
@@ -2255,7 +2267,7 @@ void CAMERA::list_controls(CONSOLE_COMMUNICATION &cons)
     INFORMATION_COMMAND_LIST += error_msg;
   }
 
-  cons.printw(INFORMATION_COMMAND_LIST);
+  String_Vector.push_back(INFORMATION_COMMAND_LIST);
 
   // The file descriptor is automatically closed by FdCloser destructor here.
 }
@@ -2328,146 +2340,137 @@ void CAMERA::print_stream(CONSOLE_COMMUNICATION &cons)
 
 void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool Camera_Being_Viewed)
 {
-  if (APPLY_DEFAULTS)
+  if (ENABLED)
   {
-    apply_camera_control_defaults();
-    APPLY_DEFAULTS = false;
-    APPLY_CHANGES = false;
-  }
-  else if (APPLY_CHANGES)
-  {
-    apply_camera_control_changes();
-    APPLY_DEFAULTS = false;
-    APPLY_CHANGES = false;
-  }
-
-  // Check and set Camera Being Viewed
-  if (Camera_Being_Viewed != CAMERA_BEING_VIEWED)
-  {
-    CAMERA_BEING_VIEWED = Camera_Being_Viewed;
-
-    if (CAMERA_BEING_VIEWED == false)
+    if (APPLY_DEFAULTS)
     {
-      release_all_frames();
+      apply_camera_control_defaults();
+      APPLY_DEFAULTS = false;
+      APPLY_CHANGES = false;
     }
-  }
-  
-  // ---------------------------------------------------------------------------------------
-  // Check Thread Completions
-  
-  // Check to see if THREAD_CAMERA has stopped for any reason. 
-  THREAD_CAMERA.check_for_completition();
-  THREAD_PROCESSING.check_for_completition();
-
-  // ---------------------------------------------------------------------------------------
-  // Check Thread Completions
-
-  // Calculate average frame time
-  if (AVERAGE_FRAME_RATE_TIMER.is_ready(Frame_Time))
-  {
-    AVERAGE_FRAME_RATE_TIMER.set(Frame_Time, 1000);
-    TIME_AVERAGE_FPS = AVERAGE_FRAME_RATE_COUNTER;
-    AVERAGE_FRAME_RATE_COUNTER = 0;
-  }
-
-  // ---------------------------------------------------------------------------------------
-
-  // Starts the THREAD_CAMERA unless CAMERA_READ_THREAD_STOP is true. 
-  //  THREAD_CAMERA will continue running until the camera is closed.
-  {
-    if (THREAD_CAMERA_ACTIVE)
+    else if (APPLY_CHANGES)
     {
-      if (THREAD_CAMERA.check_to_run_routine_on_thread(Frame_Time)) 
+      apply_camera_control_changes();
+      APPLY_DEFAULTS = false;
+      APPLY_CHANGES = false;
+    }
+
+    // Check and set Camera Being Viewed
+    if (Camera_Being_Viewed != CAMERA_BEING_VIEWED)
+    {
+      CAMERA_BEING_VIEWED = Camera_Being_Viewed;
+
+      if (CAMERA_BEING_VIEWED == false)
       {
-        THREAD_CAMERA.create(5);
-        // Start the camera update on a separate thread.
-        // This call is non-blocking, so the main loop can continue immediately.
-        THREAD_CAMERA.start_render_thread([&]() 
-                  {  update_frame_thread();  });
+        release_all_frames();
       }
     }
-  }
-  
-  // ---------------------------------------------------------------------------------------
+    
+    // ---------------------------------------------------------------------------------------
+    // Check Thread Completions
+    
+    // Check to see if THREAD_CAMERA has stopped for any reason. 
+    THREAD_CAMERA.check_for_completition();
+    THREAD_PROCESSING.check_for_completition();
 
-  // Starts the THREAD_ENHANCMENTS unless CAMERA_PROCESSING_THREAD_STOP is true. 
-  //  THREAD_CAMERA will continue running until the camera is closed.
-  {
-    if (THREAD_PROCESSING_ACTIVE)
+    // ---------------------------------------------------------------------------------------
+    // Check Thread Completions
+
+    // Calculate average frame time
+    if (AVERAGE_FRAME_RATE_TIMER.is_ready(Frame_Time))
     {
-      if (THREAD_PROCESSING.check_to_run_routine_on_thread(Frame_Time)) 
+      AVERAGE_FRAME_RATE_TIMER.set(Frame_Time, 1000);
+      TIME_AVERAGE_FPS = AVERAGE_FRAME_RATE_COUNTER;
+      AVERAGE_FRAME_RATE_COUNTER = 0;
+    }
+
+    // ---------------------------------------------------------------------------------------
+
+    // Only attempt to start thread if camera is enabled
+    if (THREAD_CAMERA.check_to_run_routine_on_thread(Frame_Time)) 
+    {
+      THREAD_CAMERA.create(5);
+      // Start the camera update on a separate thread.
+      // This call is non-blocking, so the main loop can continue immediately.
+      THREAD_CAMERA.start_render_thread([&]() 
+                {  update_frame_thread();  });
+    }
+    
+    // ---------------------------------------------------------------------------------------
+
+    // Only attempt to start thread if camera is enabled
+    if (THREAD_PROCESSING.check_to_run_routine_on_thread(Frame_Time)) 
+    {
+      THREAD_PROCESSING.create(5);
+      // Start the camera update on a separate thread.
+      // This call is non-blocking, so the main loop can continue immediately.
+      THREAD_PROCESSING.start_render_thread([&]() 
+                {  process_enhancements_thread();  });
+    }
+
+    // ---------------------------------------------------------------------------------------
+
+    // When the working frame has been fully process, render the 
+    //  texture to be drawn in opengl.
+    // Governed by the proccess call of the main program
+    {
+      if (BUFFER_FRAME_HANDOFF_POSITION >= 3 && 
+          BUFFER_FRAME_HANDOFF_POSITION <= 5)
       {
-        THREAD_PROCESSING.create(5);
-        // Start the camera update on a separate thread.
-        // This call is non-blocking, so the main loop can continue immediately.
-        THREAD_PROCESSING.start_render_thread([&]() 
-                  {  process_enhancements_thread();  });
+        int current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
+
+        // Generate Fake and Real
+        if (PROPS.ENH_FAKE_FRAMES)
+        {
+          PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].FRAME_BUFFER_FAKE.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
+        }
+        PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].PROCESSED_FRAME.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
+
+        // Place real or fake frame live.
+        if (PROPS.ENH_FAKE_FRAMES == false)
+        {
+          FRAME_GEN = false;
+          generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
+          AVERAGE_FRAME_RATE_COUNTER++;
+        }
+        else
+        {
+          FRAME_GEN = false;
+          FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_CAMERA_FRAME_TIME / 2);
+          generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
+          FRAME_TO_TEXTURE_TIMER_CHECK = true;
+          AVERAGE_FRAME_RATE_COUNTER++;
+        }
+
+        VIEWING_FRAME_POS = current_buffer_frame_pos;
+        BUFFER_FRAME_HANDOFF_POSITION = -1;
+      }
+      else if (BUFFER_FRAME_HANDOFF_POSITION > 5 || BUFFER_FRAME_HANDOFF_POSITION < -1)
+      {
+        // Something went wrong. Avoid lockout.
+        BUFFER_FRAME_HANDOFF_POSITION = -1;
       }
     }
-  }
 
-  // ---------------------------------------------------------------------------------------
-
-  // When the working frame has been fully process, render the 
-  //  texture to be drawn in opengl.
-  // Governed by the proccess call of the main program
-  {
-    if (BUFFER_FRAME_HANDOFF_POSITION >= 3 && 
-        BUFFER_FRAME_HANDOFF_POSITION <= 5)
+    if (FRAME_TO_TEXTURE_TIMER_CHECK)
     {
-      int current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
-
-      // Generate Fake and Real
-      if (PROPS.ENH_FAKE_FRAMES)
+      if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
       {
-        PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].FRAME_BUFFER_FAKE.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
-      }
-      PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].PROCESSED_FRAME.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
-
-      // Place real or fake frame live.
-      if (PROPS.ENH_FAKE_FRAMES == false)
-      {
-        FRAME_GEN = false;
-        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
-        AVERAGE_FRAME_RATE_COUNTER++;
-      }
-      else
-      {
-        FRAME_GEN = false;
-        FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_CAMERA_FRAME_TIME / 2);
-        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
-        FRAME_TO_TEXTURE_TIMER_CHECK = true;
-        AVERAGE_FRAME_RATE_COUNTER++;
-      }
-
-      VIEWING_FRAME_POS = current_buffer_frame_pos;
-      BUFFER_FRAME_HANDOFF_POSITION = -1;
-    }
-    else if (BUFFER_FRAME_HANDOFF_POSITION > 5 || BUFFER_FRAME_HANDOFF_POSITION < -1)
-    {
-      // Something went wrong. Avoid lockout.
-      BUFFER_FRAME_HANDOFF_POSITION = -1;
-    }
-  }
-
-  if (FRAME_TO_TEXTURE_TIMER_CHECK)
-  {
-    if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
-    {
-      FRAME_TO_TEXTURE_TIMER_CHECK = false;
-      if (camera_online() && CAMERA_BEING_VIEWED)
-      {
-        FRAME_GEN = true;
-        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].LIVE_FRAME_1);
-        AVERAGE_FRAME_RATE_COUNTER++;
+        FRAME_TO_TEXTURE_TIMER_CHECK = false;
+        if (camera_online() && CAMERA_BEING_VIEWED)
+        {
+          FRAME_GEN = true;
+          generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].LIVE_FRAME_1);
+          AVERAGE_FRAME_RATE_COUNTER++;
+        }
       }
     }
+
+    // ---------------------------------------------------------------------------------------
+
+    // Print whatever is in the console print_wait queue.
+    print_stream(cons);
   }
-
-  // ---------------------------------------------------------------------------------------
-
-  // Print whatever is in the console print_wait queue.
-  print_stream(cons);
 }
 
 void CAMERA::take_snapshot()
@@ -2476,24 +2479,18 @@ void CAMERA::take_snapshot()
   SAVE_IMAGE_PROCESSED_FRAME = true;
 }
 
-void CAMERA::load(CONSOLE_COMMUNICATION &cons)
+void CAMERA::load()
 {
   vector<CAMERA_CONTROL_SETTING_LOADED> loaded_camera_control;
   load_settings_json(loaded_camera_control);
-  list_controls(cons);
+  list_controls(PRINTW_QUEUE);
   apply_loaded_camera_controls(loaded_camera_control, SETTINGS);
   APPLY_CHANGES = true;
 }
 
-void CAMERA::camera_start()
+void CAMERA::enable(bool Enable)
 {
-  THREAD_CAMERA_ACTIVE = true;
-}
-
-void CAMERA::camera_stop()
-{
-  CAMERA_READ_THREAD_STOP = true;
-  CAMERA_PROCESSING_THREAD_STOP = true;
+  ENABLED = Enable;
 }
 
 bool CAMERA::camera_online()

@@ -411,9 +411,6 @@ int loop_2(bool TTY_Only)
 
   // ---------------------------------------------------------------------------------------
   // Initialize Camera
-  
-  // Set Camera Timer
-  camera_timer.set(5);
 
   // Assign Properties and Controls
 
@@ -441,9 +438,8 @@ int loop_2(bool TTY_Only)
   // Get list of controls to print to screen.
   
   sdSystem.SCREEN_COMMS.printw("Initializing Camera ...");
-  sdSystem.CAMERA_BACKUP.load(sdSystem.SCREEN_COMMS);
 
-  sdSystem.CAMERA_BACKUP.camera_start();
+  sdSystem.CAMERA_BACKUP.enable(true);
   sdSystem.CAMERA_BACKUP.print_stream(sdSystem.SCREEN_COMMS);
 
   // ---------------------------------------------------------------------------------------
@@ -838,6 +834,7 @@ int loop_2(bool TTY_Only)
     if (camera_timer.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true ||
         sdSystem.PROGRAM_TIME.current_frame_time() > sdSystem.CAMERA_BACKUP.THREAD_PROCESSING.get_ready_time())
     {
+      camera_timer.set(sdSystem.PROGRAM_TIME.current_frame_time(), 3);
       sdSystem.CAMERA_BACKUP.process(sdSystem.SCREEN_COMMS, sdSystem.PROGRAM_TIME.current_frame_time(), 
                                     sdSystem.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 7);
     }
@@ -1379,7 +1376,7 @@ int loop_2(bool TTY_Only)
           // Close camera here to avoid half written file.
           if (sdSystem.CAMERA_BACKUP.camera_online())
           {
-            sdSystem.CAMERA_BACKUP.camera_stop();
+            sdSystem.CAMERA_BACKUP.enable(false);
           }
 
           // Close Compass

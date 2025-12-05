@@ -1,3 +1,20 @@
+2.376_251204
+  - Fixed several camera errors.
+      Should no longer hang on exit while camera 
+        is open.
+      Improved on off control, enable(true or false).
+      Camera settings json loaded when camera 
+        is turned on.  Allowing settings to 
+        be changed, without exiting the program, 
+        when camera is off.
+      Camera will not apear online at program 
+        start if it really isn't.
+      If camera failed to start, it will now 
+        disable itself. This should include 
+        self restarts. 
+      Camera should disable if too many errors 
+        are encountered. 
+
 2.375_251203
   - Corrected a few problems. 
 

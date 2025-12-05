@@ -454,13 +454,13 @@ void processcommandlineinput(system_data &sdSysData,
       // Start all cameras
       if (check_command(sdSysData.SCREEN_COMMS," camo", "Start All Cameras"))
       {
-        sdSysData.CAMERA_BACKUP.camera_start();
+        sdSysData.CAMERA_BACKUP.enable(true);
       }
 
       // Stop all cameras
       if (check_command(sdSysData.SCREEN_COMMS," camf", "Stop All Cameras"))
       {
-        sdSysData.CAMERA_BACKUP.camera_stop();
+        sdSysData.CAMERA_BACKUP.enable(false);
       }
 
       // Stop all cameras

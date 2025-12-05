@@ -141,14 +141,14 @@ void CAMERA_WIDGET::display_camera_settings_window(system_data &sdSysData)
     // Connect to camera
     if (BC_CONNECT.button_color(sdSysData, "CONNECT##Connect to camera", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
-      sdSysData.CAMERA_BACKUP.camera_start();
+      sdSysData.CAMERA_BACKUP.enable(true);
     }
 
     //ImGui:: SameLine();
     // Disconnect from camera
     if (BC_DISCONNECT.button_color(sdSysData, "CLOSE##Disconnect from camera", RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_MEDIUM))
     {
-      sdSysData.CAMERA_BACKUP.camera_stop();
+      sdSysData.CAMERA_BACKUP.enable(false);
     }
 
     //ImGui:: SameLine();

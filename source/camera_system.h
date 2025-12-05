@@ -401,7 +401,10 @@ class CAMERA
   TIMED_IS_READY LOW_LIGHT_DEBOUNCE_TIMER_LL;
   int VIEWING_FRAME_POS = -1;
 
-  bool    CAMERA_BEING_VIEWED       = false;
+  bool CAMERA_BEING_VIEWED = false;
+
+  // Turn on or off the camera
+  bool ENABLED = false;
   
   // Load and Save settings
   void save_settings();
@@ -465,7 +468,7 @@ class CAMERA
   void apply_camera_control_changes();
   void apply_camera_control_defaults();
   
-  void list_controls(CONSOLE_COMMUNICATION &cons);
+  void list_controls(vector<std::string> &String_Vector);
   void apply_loaded_camera_controls(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Control, 
                                     deque<CAMERA_SETTING> &Settings);
 
@@ -527,12 +530,10 @@ class CAMERA
   void take_snapshot();
 
   // Load all camera settings
-  void load(CONSOLE_COMMUNICATION &cons);
+  void load();
 
-  // Public method to start and stop the camera capture by 
-  //  truning off and on the thread.
-  void camera_start();
-  void camera_stop();
+  // Turn on or off the camera
+  void enable(bool Enable);
 
   // Report if camera is opened.
   bool camera_online();
