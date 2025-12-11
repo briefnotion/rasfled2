@@ -47,32 +47,24 @@ void resize_if_not_same_size(cv::Mat& Main_Frame, cv::Mat& Resize_Frame)
   }
 }
 
-// Helper function to create the mesh grid (x and y coordinates)
-// This is called once when the first frame is processed.
-void createMeshGrid(int rows, int cols, cv::Mat& x_coords, cv::Mat& y_coords) 
-{
-  x_coords.create(rows, cols, CV_32FC1);
-  y_coords.create(rows, cols, CV_32FC1);
+// ---------------------------------------------------------------------------------------
 
-  for (int y = 0; y < rows; y++) 
-  {
-    float* p_x = x_coords.ptr<float>(y);
-    float* p_y = y_coords.ptr<float>(y);
-    for (int x = 0; x < cols; x++) 
-    {
-      p_x[x] = (float)x;
-      p_y[x] = (float)y;
-    }
-  }
+// Helper function to create the coordinate mesh grid (unchanged from original intent)
+void FAKE_FRAME::createMeshGrid(int rows, int cols, cv::Mat& mesh_x, cv::Mat& mesh_y)
+{
+  // Create 1D coordinate vectors
+  cv::Mat x_coords = cv::Mat::zeros(1, cols, CV_32FC1);
+  for (int i = 0; i < cols; ++i) { x_coords.at<float>(0, i) = (float)i; }
+
+  cv::Mat y_coords = cv::Mat::zeros(rows, 1, CV_32FC1);
+  for (int i = 0; i < rows; ++i) { y_coords.at<float>(i, 0) = (float)i; }
+
+  // Expand to 2D mesh grids
+  cv::repeat(x_coords, rows, 1, mesh_x);
+  cv::repeat(y_coords, 1, cols, mesh_y);
 }
 
-// --- Constructor: Simple initialization, no pre-allocation yet ---
-// Dimensions and buffers are set when the first frame size is known.
-FAKE_FRAME::FAKE_FRAME()
-{
-  // is_initialized_ is default-initialized to false
-}
-
+// --- Initialization and Allocation (Slightly Cleaned, Functionally Same) ---
 void FAKE_FRAME::re_int_vars(const cv::Mat& frame)
 {
   PROCESS_WIDTH = frame.cols;
@@ -85,17 +77,7 @@ void FAKE_FRAME::re_int_vars(const cv::Mat& frame)
   cv::Size process_size(PROCESS_WIDTH, PROCESS_HEIGHT);
   cv::Size flow_calc_size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT);
 
-  /*
-  cv::resize(current_gray_, current_gray_, process_size);
-  cv::resize(prev_gray_, prev_gray_, process_size);
-  cv::resize(small_prev_gray_, small_prev_gray_, flow_calc_size);
-  cv::resize(small_current_gray_, small_current_gray_, flow_calc_size);
-  cv::resize(flow_small_, flow_small_, flow_calc_size);
-  cv::resize(flow_upsampled_, flow_upsampled_, process_size);
-  cv::resize(map_x_, map_x_, process_size);
-  cv::resize(map_y_, map_y_, process_size);
-  */
-
+  // Note: create() only re-allocates if size/type changes.
   current_gray_.create(process_size, CV_8UC1);
   prev_gray_.create(process_size, CV_8UC1);
   small_prev_gray_.create(flow_calc_size, CV_8UC1);
@@ -110,120 +92,98 @@ void FAKE_FRAME::re_int_vars(const cv::Mat& frame)
   createMeshGrid(PROCESS_HEIGHT, PROCESS_WIDTH, coords_x_, coords_y_);
 }
 
-// --- Dynamic Initialization and Preprocessing ---
-// This method now handles configuration (setting sizes) and pre-allocation, 
-// ensuring it only runs once with the dimensions of the initial_frame.
 void FAKE_FRAME::preprocess_initial_frame(const cv::Mat& initial_frame)
 {
   // Check the initialization flag
   if (!is_initialized_)
   {
-    // 1. Determine Dimensions and Constants based on the first frame's size
-    PROCESS_WIDTH = initial_frame.cols;
-    PROCESS_HEIGHT = initial_frame.rows;
+    // 1. Determine Dimensions, Allocate Buffers, and Create Mesh Grid
+    re_int_vars(initial_frame); // Reuse the re_int_vars logic
     
-    // Set flow size to 1/4th of process size (e.g., 640/4 = 160)
-    FLOW_CALC_WIDTH = PROCESS_WIDTH / 4; 
-    FLOW_CALC_HEIGHT = PROCESS_HEIGHT / 4; 
-    
-    cv::Size process_size(PROCESS_WIDTH, PROCESS_HEIGHT);
-    cv::Size flow_calc_size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT);
-
-    // 2. Pre-allocate all buffers
-    current_gray_.create(process_size, CV_8UC1);
-    prev_gray_.create(process_size, CV_8UC1);
-    small_prev_gray_.create(flow_calc_size, CV_8UC1);
-    small_current_gray_.create(flow_calc_size, CV_8UC1);
-    
-    flow_small_.create(flow_calc_size, CV_32FC2);
-    flow_upsampled_.create(process_size, CV_32FC2);
-    map_x_.create(process_size, CV_32FC1);
-    map_y_.create(process_size, CV_32FC1);
-
-    // 3. Pre-calculate the coordinate mesh grids
-    createMeshGrid(PROCESS_HEIGHT, PROCESS_WIDTH, coords_x_, coords_y_);
-
     // Mark as initialized
     is_initialized_ = true;
   }
   
   // 4. Handle initial BGR frame state
-  
-  // The initial_frame size matches the newly set PROCESS_WIDTH/HEIGHT
   initial_frame.copyTo(prev_frame_);
   
   // Convert the initial frame to gray for the 'current' gray state
   cv::cvtColor(prev_frame_, current_gray_, cv::COLOR_BGR2GRAY);
-  // The very first frame is the previous frame for the next calculation
-  current_gray_.copyTo(prev_gray_);
+  
+  // The very first frame is the previous frame for the next calculation.
+  // OPTIMIZATION: Use cv::swap to set prev_gray_ without data copy.
+  cv::swap(current_gray_, prev_gray_); 
 }
 
+// --- Optimized Interpolation Function ---
 cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame) 
 {
-  // If prev_frame_ is empty, it means this is the very first call.
-  // We run preprocess_initial_frame to initialize dimensions and buffers 
-  // based on current_frame's size, and set up the initial state.
-  if (prev_frame_.empty())
+  // Check if the frame size has changed unexpectedly.
+  if (current_frame.cols != PROCESS_WIDTH || current_frame.rows != PROCESS_HEIGHT) 
   {
-    // INITIALIZATION STEP: Set dimensions and allocate buffers based on current_frame
-    preprocess_initial_frame(current_frame);
-    // Return the current frame, as there is no previous frame to interpolate from.
-    return current_frame;
-  }
-  else
-  {
-    // 1. Update grayscale state: Current becomes previous
-    current_gray_.copyTo(prev_gray_);
-    
-    // 2. Process the new current BGR frame
-    cv::Mat processed_current_frame;
-    // Note: Subsequent frames MUST match the size of the first frame (PROCESS_WIDTH/HEIGHT)
-    if (current_frame.cols != PROCESS_WIDTH || current_frame.rows != PROCESS_HEIGHT) 
+    // Handle uninitialized case or size mismatch gracefully
+    if (!is_initialized_ || PROCESS_WIDTH == 0) 
     {
-      re_int_vars(current_frame);
+      preprocess_initial_frame(current_frame);
+      return current_frame;
     } 
-
-    processed_current_frame = current_frame; 
-
-    // Convert the new frame to gray
-    cv::cvtColor(processed_current_frame, current_gray_, cv::COLOR_BGR2GRAY);
-
-    // 3. Downsample for FAST Optical Flow Calculation
-    cv::resize(prev_gray_, small_prev_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT));
-    cv::resize(current_gray_, small_current_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT));
-
-    // 4. Calculate Optical Flow 
-    cv::calcOpticalFlowFarneback(small_prev_gray_, small_current_gray_, flow_small_, 0.5, 3, 10, 3, 5, 1.2, 0);
-    
-    // 5. Upsample the flow field
-    cv::resize(flow_small_, flow_upsampled_, cv::Size(PROCESS_WIDTH, PROCESS_HEIGHT), 0, 0, cv::INTER_NEAREST);
-
-    // 6. Apply Scaling to the flow vectors
-    const float scale_factor = (float)PROCESS_WIDTH / FLOW_CALC_WIDTH; 
-    cv::Mat flow_scaled = flow_upsampled_ * scale_factor;
-    
-    // --- OPTIMIZED REMAP MAP GENERATION (Vectorized) ---
-
-    // 7. Split the 2-channel scaled flow map into X and Y components
-    std::vector<cv::Mat> flow_channels;
-    cv::split(flow_scaled, flow_channels); // flow_channels[0] = dx, flow_channels[1] = dy
-    
-    // 8. Calculate map_x and map_y using vectorized subtraction
-    cv::Mat half_dx = flow_channels[0] * 0.5f;
-    cv::Mat half_dy = flow_channels[1] * 0.5f;
-
-    cv::subtract(coords_x_, half_dx, map_x_);
-    cv::subtract(coords_y_, half_dy, map_y_);
-
-    // 9. Perform the geometric transformation (Interpolation)
-    cv::Mat interpolated_frame = cv::Mat::zeros(prev_frame_.size(), prev_frame_.type());
-    cv::remap(prev_frame_, interpolated_frame, map_x_, map_y_, cv::INTER_LINEAR, cv::BORDER_REPLICATE);
-
-    // 10. Update class state for the next iteration
-    processed_current_frame.copyTo(prev_frame_); 
-    
-    return interpolated_frame;
+    else 
+    {
+      // Re-initialize all variables for the new size
+      re_int_vars(current_frame);
+    }
   }
+
+  // --- State Update OPTIMIZATION: Use cv::swap ---
+  // 1. Current becomes previous (Zero-copy swap)
+  // The data currently in current_gray_ (which was the previous frame's gray data) 
+  // is now in prev_gray_. This is much faster than copyTo.
+  cv::swap(prev_gray_, current_gray_);
+  
+  // 2. Process the new current BGR frame
+  // Convert the new frame to gray, overwriting the old data now in current_gray_
+  cv::cvtColor(current_frame, current_gray_, cv::COLOR_BGR2GRAY);
+
+  // 3. Downsample for FAST Optical Flow Calculation
+  // Ensure the interpolation method is explicitly set for downsampling for consistency.
+  cv::resize(prev_gray_, small_prev_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT), 0, 0, cv::INTER_AREA); // INTER_AREA is best for decimation
+  cv::resize(current_gray_, small_current_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT), 0, 0, cv::INTER_AREA);
+
+  // 4. Calculate Optical Flow (Most expensive step, kept on downsampled image)
+  //cv::calcOpticalFlowFarneback(small_prev_gray_, small_current_gray_, flow_small_, 0.5, 3, 10, 3, 5, 1.2, 0);
+  cv::calcOpticalFlowFarneback(small_prev_gray_, small_current_gray_, flow_small_, 0.5, 2, 10, 3, 5, 1.2, 0);
+  
+  // 5. Upsample the flow field
+  cv::resize(flow_small_, flow_upsampled_, cv::Size(PROCESS_WIDTH, PROCESS_HEIGHT), 0, 0, cv::INTER_NEAREST);
+
+  // 6. Define the combined scaling constant
+  // The flow needs to be scaled up by the ratio, and then halved for interpolation (dx/2)
+  const float scale_factor = (float)PROCESS_WIDTH / FLOW_CALC_WIDTH; 
+  const float scaling_constant = scale_factor * 0.5f; 
+  
+  // --- OPTIMIZATION: Vectorized Map Generation without intermediate Mats ---
+
+  // 7. Split the 2-channel upsampled flow map into X and Y components
+  std::vector<cv::Mat> flow_channels(2);
+  cv::split(flow_upsampled_, flow_channels); // flow_channels[0] = dx, flow_channels[1] = dy
+  
+  // 8. Calculate map_x and map_y using cv::addWeighted (Eliminates flow_scaled, half_dx, half_dy matrices)
+  // map_x = coords_x - dx * scaling_constant
+  // map_x_ = 1.0 * coords_x_ + (-scaling_constant) * flow_channels[0] + 0.0
+  cv::addWeighted(coords_x_, 1.0, flow_channels[0], -scaling_constant, 0.0, map_x_);
+  
+  // map_y = coords_y - dy * scaling_constant
+  // map_y_ = 1.0 * coords_y_ + (-scaling_constant) * flow_channels[1] + 0.0
+  cv::addWeighted(coords_y_, 1.0, flow_channels[1], -scaling_constant, 0.0, map_y_);
+
+  // 9. Perform the geometric transformation (Interpolation)
+  cv::Mat interpolated_frame = cv::Mat::zeros(prev_frame_.size(), prev_frame_.type());
+  cv::remap(prev_frame_, interpolated_frame, map_x_, map_y_, cv::INTER_LINEAR, cv::BORDER_REPLICATE);
+
+  // 10. Update the BGR class state for the next iteration
+  current_frame.copyTo(prev_frame_); 
+  
+  return interpolated_frame;
 }
 
 // ---------------------------------------------------------------------------------------
@@ -463,23 +423,88 @@ cv::Mat CAMERA::overlay_lines(cv::Mat& Processed_Frame_Gray_Downsized)
 // - cv::Mat: A 1-channel binary mask (CV_8UC1) where 255 represents a glare pixel.
 cv::Mat CAMERA::suppress_glare_mask(cv::Mat& processed_frame)
 {
-  // --- Glare Detection Parameter ---
-  // Pixels where all B, G, and R channels are above this threshold will be masked.
-  // 230 is a good starting point for bright white light (0-255 scale).
-  const int GLARE_THRESHOLD = 230;
-
   cv::Mat glare_mask;
   
   // Use cv::inRange to find pixels where the B, G, and R values are all 
   // within the range [GLARE_THRESHOLD, 255].
   cv::inRange(processed_frame, 
-              cv::Scalar(GLARE_THRESHOLD, GLARE_THRESHOLD, GLARE_THRESHOLD), 
+              cv::Scalar(PROPS.GLARE_THRESHOLD, PROPS.GLARE_THRESHOLD, PROPS.GLARE_THRESHOLD), 
               cv::Scalar(255, 255, 255), 
               glare_mask);
 
   // glare_mask is now a 1-channel mask where 255 indicates a glare pixel.
   return glare_mask;
 }
+
+  // Helper function 2: Extracts and returns ONLY the glare areas (3-channel BGR image).
+  // This function is for visualization/analysis, or for processing the glare area specifically.
+  //
+  // Arguments:
+  // - processed_frame: Input image (cv::Mat, read-write, though used as read-only here)
+  // Returns:
+  // - cv::Mat: A 3-channel BGR image containing only the masked glare pixels.
+  cv::Mat CAMERA::extract_glare_area(cv::Mat& processed_frame)
+  {
+    // 1. Generate the binary glare mask (0 or 255).
+    cv::Mat glare_mask;
+    cv::inRange(processed_frame, 
+                cv::Scalar(PROPS.GLARE_THRESHOLD, PROPS.GLARE_THRESHOLD, PROPS.GLARE_THRESHOLD), 
+                cv::Scalar(255, 255, 255), 
+                glare_mask);
+
+    // 2. Isolate glare pixels using copyTo. This initializes glare_only_image to black 
+    //    and copies pixels from processed_frame only where glare_mask is 255.
+    cv::Mat glare_only_image(processed_frame.size(), processed_frame.type(), cv::Scalar(0, 0, 0));
+    processed_frame.copyTo(glare_only_image, glare_mask);
+
+    // --- ENHANCEMENT: Min-Max Contrast Stretching (Low Light Boost) ---
+    
+    // Split BGR image into channels for per-channel dynamic stretching
+    std::vector<cv::Mat> bgr_channels;
+    cv::split(glare_only_image, bgr_channels);
+    
+    // Declare min/max variables outside the loop (minor optimization)
+    double min_val_ignored, max_val;
+    const double min_val = PROPS.GLARE_THRESHOLD; // Fixed minimum stretching threshold
+
+    // Process each channel independently (Min-Max Stretching)
+    for (size_t i = 0; i < bgr_channels.size(); ++i)
+    {
+      cv::Mat channel = bgr_channels[i];
+      
+      // Find the maximum pixel values in the current channel's glare area.
+      cv::minMaxLoc(channel, &min_val_ignored, &max_val);
+
+      // Critical: Check if the stretching range is valid. 
+      if (max_val <= min_val)
+      {
+        // If max is less than or equal to min, skip the enhancement.
+        continue; 
+      }
+      
+      // Calculate the scaling factor (alpha) and offset (beta) for the transformation:
+      // Output = alpha * Input + beta
+      double alpha = 255.0 / (max_val - min_val);
+      double beta = -min_val * alpha;
+      
+      // --- OPTIMIZATION: Use Lookup Table (LUT) for faster per-pixel application ---
+      cv::Mat lut(1, 256, CV_8UC1);
+      uchar* p = lut.data;
+      for (int j = 0; j < 256; ++j) 
+      {
+        // Apply the linear transformation O = alpha * I + beta
+        p[j] = cv::saturate_cast<uchar>(round(alpha * j + beta));
+      }
+      
+      // Apply the pre-calculated LUT to the entire channel image (in-place modification).
+      cv::LUT(channel, lut, channel);
+    }
+
+    // Merge channels back into the glare_only_image
+    cv::merge(bgr_channels, glare_only_image);
+    
+    return glare_only_image;
+  }
 
 // ---------------------------------------------------------------------------------------
   
@@ -1468,7 +1493,7 @@ void CAMERA::apply_ehancements(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
     // Glare Mask
     if (PROPS.ENH_GLARE_MASK)
     {
-      Extra.MASK_FRAME_GLARE[Extra.LATEST_POS] = suppress_glare_mask(Suite.PROCESSED_FRAME);
+      Extra.MASK_FRAME_GLARE[Extra.LATEST_POS] = extract_glare_area(Suite.PROCESSED_FRAME);
     }
 
     //---
@@ -1557,6 +1582,50 @@ void CAMERA::apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv:
   }
 }
 
+// Function to combine two isolated, processed 3-channel image sections (Reconstruction).
+// Frame is assumed to contain one component (e.g., non-glare part) and is patched
+// with the component specified by 'Latest' (e.g., the glare part).
+void CAMERA::apply_image_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv::Mat &Mask_1, int Latest)
+{
+  if (Latest == 0)
+  {
+    if (!Mask_0.empty())
+    {
+      resize_if_not_same_size(Frame, Mask_0);
+      
+      // 1. Convert the 3-channel Mask_0 (colored patch on black background) 
+      //    into a 1-channel non-black mask (CV_8UC1).
+      cv::Mat mask_1ch;
+      cv::cvtColor(Mask_0, mask_1ch, cv::COLOR_BGR2GRAY);
+      cv::threshold(mask_1ch, mask_1ch, 1, 255, cv::THRESH_BINARY);
+
+      // REPLACEMENT LOGIC: Use cv::copyTo.
+      // copyTo(src, mask, dst) copies data from src (Mask_0) to dst (Frame)
+      // ONLY where mask_1ch is non-zero (i.e., the colored area of the patch).
+      // This cleanly replaces the area in Frame with the content of Mask_0.
+      Mask_0.copyTo(Frame, mask_1ch);
+    }
+  }
+  else // Latest == 1
+  {
+    if (!Mask_1.empty())
+    {
+      resize_if_not_same_size(Frame, Mask_1);
+      
+      // 1. Convert the 3-channel Mask_1 (colored patch on black background) 
+      //    into a 1-channel non-black mask (CV_8UC1).
+      cv::Mat mask_1ch;
+      cv::cvtColor(Mask_1, mask_1ch, cv::COLOR_BGR2GRAY);
+      cv::threshold(mask_1ch, mask_1ch, 1, 255, cv::THRESH_BINARY);
+
+      // REPLACEMENT LOGIC: Use cv::copyTo.
+      // copyTo(src, mask, dst) copies data from src (Mask_1) to dst (Frame)
+      // ONLY where mask_1ch is non-zero (i.e., the colored area of the patch).
+      Mask_1.copyTo(Frame, mask_1ch);
+    }
+  }
+}
+
 void CAMERA::apply_all_masks(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
 {
   if (!Suite.PROCESSED_FRAME.empty())
@@ -1568,11 +1637,11 @@ void CAMERA::apply_all_masks(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
 
     if (PROPS.ENH_GLARE_MASK)
     {
-      apply_masks_to_processed_frame(Suite.PROCESSED_FRAME, Extra.MASK_FRAME_GLARE[0], Extra.MASK_FRAME_GLARE[1], Extra.LATEST_POS);
+      //apply_masks_to_processed_frame(Suite.PROCESSED_FRAME, Extra.MASK_FRAME_GLARE[0], Extra.MASK_FRAME_GLARE[1], Extra.LATEST_POS);
+      apply_image_masks_to_processed_frame(Suite.PROCESSED_FRAME, Extra.MASK_FRAME_GLARE[0], Extra.MASK_FRAME_GLARE[1], Extra.LATEST_POS);
     }
   }
 }
-
 
 void CAMERA::close_camera()
 {

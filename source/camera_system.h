@@ -72,59 +72,54 @@ class FdCloser
 
 // ---------------------------------------------------------------------------------------
 
+// Forward declaration of the class (assuming necessary headers are included)
 class FAKE_FRAME
 {
-public:
-  // Constructor is now default. Dimensions are set by the first frame in interpolateFrame.
-  FAKE_FRAME();
+  private:
 
-  // Generates the interpolated frame between the previously stored frame and current_frame
-  cv::Mat interpolateFrame(const cv::Mat& current_frame);
-
-private:
-
-  void re_int_vars(const cv::Mat& frame);
-
-  // Called by interpolateFrame with the very first input frame. 
-  // This method now performs configuration, buffer allocation, and initial state setup.
-  void preprocess_initial_frame(const cv::Mat& initial_frame);
-  
-  // --- Configuration Variables (No longer const, initialized when the first frame arrives) ---
+  // Dimensions
   int PROCESS_WIDTH = 0;
   int PROCESS_HEIGHT = 0;
   int FLOW_CALC_WIDTH = 0;
   int FLOW_CALC_HEIGHT = 0;
-  
-  // Flag to ensure configuration and buffer allocation only happens once
   bool is_initialized_ = false;
 
-  // --- State Variables ---
-  // Stores the previous BGR frame used for interpolation. This is the frame we will remap.
-  cv::Mat prev_frame_;
+  // Buffers for Grayscale Frames (Swapped)
+  cv::Mat current_gray_;
+  cv::Mat prev_gray_;
 
-  // --- Intermediate Reusable Buffers (Pre-allocated in preprocess_initial_frame) ---
-
-  // Gray frames for optical flow calculation (PROCESS_SIZE)
-  cv::Mat current_gray_, prev_gray_;
-
-  // Downsampled gray frames (FLOW_CALC_SIZE)
-  cv::Mat small_prev_gray_, small_current_gray_;
-
-  // Flow field at the small resolution (FLOW_CALC_SIZE, 2-channel float)
+  // Buffers for Optical Flow
+  cv::Mat small_prev_gray_;
+  cv::Mat small_current_gray_;
   cv::Mat flow_small_;
-
-  // Flow field upsampled back to the processing size (PROCESS_SIZE, 2-channel float)
   cv::Mat flow_upsampled_;
 
-  // Pre-calculated mesh grids for vectorized map generation (PROCESS_SIZE, 1-channel float)
-  cv::Mat coords_x_, coords_y_; 
+  // Buffers for Remap Maps
+  cv::Mat map_x_;
+  cv::Mat map_y_;
 
-  // Remapping matrices (PROCESS_SIZE, 1-channel float)
-  cv::Mat map_x_, map_y_;
+  // Pre-calculated Mesh Grid
+  cv::Mat coords_x_;
+  cv::Mat coords_y_;
+
+  // Previous Color Frame
+  cv::Mat prev_frame_;
+
+  // Helper function to create the coordinate mesh grid (unchanged from original intent)
+  void createMeshGrid(int rows, int cols, cv::Mat& mesh_x, cv::Mat& mesh_y);
+
+  public:
+
+  // Constructor (unchanged)
+  FAKE_FRAME() = default;
+
+  // Initialization methods
+  void re_int_vars(const cv::Mat& frame);
+  void preprocess_initial_frame(const cv::Mat& initial_frame);
+
+  // Optimized Core Function
+  cv::Mat interpolateFrame(const cv::Mat& current_frame);
 };
-
-// ---------------------------------------------------------------------------------------
-
 
 // ---------------------------------------------------------------------------------------
 class CAMERA_CONTROL_SETTING_LOADED
@@ -233,6 +228,11 @@ class CAMERA_PROPERTIES
 
   // Draws a circle around a curved object. Use case not found.
   bool ENH_HOUGH          = false;
+
+  // --- Glare Detection Parameter ---
+  // Pixels where all B, G, and R channels are above this threshold will be masked.
+  // 230 is a good starting point for bright white light (0-255 scale).
+  int GLARE_THRESHOLD = 224;
 
   // ---------------------------------------------------------------------------------------
   
@@ -345,6 +345,7 @@ class CAMERA
   cv::Mat canny_mask(cv::Mat& Processed_Frame_Canny);
   cv::Mat overlay_lines(cv::Mat& Processed_Frame_Gray_Downsized);
   cv::Mat suppress_glare_mask(cv::Mat& processed_frame);
+  cv::Mat extract_glare_area(cv::Mat& processed_frame);
 
   // Change Settings
   bool set_control(uint32_t id, int32_t value); // returns true on success
@@ -435,6 +436,9 @@ class CAMERA
   // PROCESSED_FRAME created upon completion.
 
   void apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv::Mat &Mask_1, int Latest);
+  // A simple helper routine to apply double or single frame mask.
+
+  void apply_image_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv::Mat &Mask_1, int Latest);
   // A simple helper routine to apply double or single frame mask.
 
   void apply_all_masks(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra);
