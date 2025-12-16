@@ -1246,64 +1246,25 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::BeginChild("Tabs", ImVec2(ImGui::GetContentRegionAvail().x - sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB.x - (15.0f * DEF_SCREEN_SIZE_X_MULTIPLIER), ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);
           {
-            if (BTC_TAB_CONSOLE.button_toggle_color(sdSysData, "CONSOLE", "CONSOLE", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 0, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_CONSOLE.button_toggle_color_value_set(sdSysData, "CONSOLE", "CONSOLE", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN, 0, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 0;
               RESTACK_WINDOWS = true;
             }
-
             ImGui::SameLine();
-
-            if (BTC_TAB_AUTOMOBILE.button_toggle_color(sdSysData, "AUTOMOBILE", "AUTOMOBILE", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 1, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
-            {
-              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 1;
-            }
-
+            BTC_TAB_AUTOMOBILE.button_toggle_color_value_set(sdSysData, "AUTOMOBILE", "AUTOMOBILE", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN, 1, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB);
             ImGui::SameLine();
-
-            if (BTC_TAB_ADSB.button_toggle_color(sdSysData, "MAP", "MAP", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 2, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
-            {
-              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 2;
-            }
-
+            BTC_TAB_ADSB.button_toggle_color_value_set(sdSysData, "MAP", "MAP", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN, 2, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB);
             ImGui::SameLine();
-
-            /*
-            if (button_toggle_color(sdSysData, "GPS", "GPS", DISPLAY_SCREEN == 3, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
+            if (BTC_TAB_LOGS.button_toggle_color_value_set(sdSysData, "LOGS", "LOGS", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN, 4, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
             {
-              DISPLAY_SCREEN = 3;
-            }
-
-            ImGui::SameLine();
-            */
-
-            if (BTC_TAB_LOGS.button_toggle_color(sdSysData, "LOGS", "LOGS", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 4, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_TAB))
-            {
-              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 4;
               RESTACK_WINDOWS = true;
             }
-
             ImGui::SameLine();
-
-            if (BTC_TAB_DOTDOTDOT.button_toggle_color(sdSysData, ".", ".", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 5, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
-            {
-              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 5;
-            }
-
+            BTC_TAB_DOTDOTDOT.button_toggle_color_value_set(sdSysData, ".", ".", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN, 5, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL);
             ImGui::SameLine();
-
-            if (BTC_TAB_TERMINAL.button_toggle_color(sdSysData, "[]", "[]", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 6, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
-            {
-              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 6;
-            }
-
+            BTC_TAB_TERMINAL.button_toggle_color_value_set(sdSysData, "[]", "[]", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN, 6, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL);
             ImGui::SameLine();
-
-            if (BTC_TAB_CAMERA.button_toggle_color(sdSysData, "V", "V", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN == 7, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
-            {
-              sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN = 7;
-            }
-
+            BTC_TAB_CAMERA.button_toggle_color_value_set(sdSysData, "V", "V", sdSysData.PANEL_CONTROL.PANELS.MAIN_DISPLAY_SCREEN, 7, RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL);
             ImGui::SameLine();
 
             ImGui::BeginChild("Info Bar", ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetContentRegionAvail().y), false, sdSysData.SCREEN_DEFAULTS.flags_c);

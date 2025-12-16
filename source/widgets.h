@@ -258,10 +258,20 @@ class BUTTON_TOGGLE_COLOR
   NEO_COLOR BUTTON_ACTIVE_COLOR;
   NEO_COLOR BUTTON_TEXT_COLOR;
 
+  int CURRENT_VALUE = 0;
+  int PREV_VALUE = 0;
+
   public:
 
   bool button_toggle_color(system_data &sdSysData, string True_Value_Text, string False_Value_Text, bool Toggle, 
                                 int True_Color, int False_Color, ImVec2 ImVec2_Size);
+
+  bool button_toggle_color_value_set(system_data &sdSysData, string True_Value_Text, string False_Value_Text, 
+                                      int &Value, int Value_If_Pressed, 
+                                      int True_Color, int False_Color, ImVec2 ImVec2_Size);
+  // Sets the value of Value with Value_If_Pressed
+  // If pressed when on, will revert to previous value.
+  // If no previous value, will set to 0;
 };
 
 // ---------------------------------------------------------------------------------------

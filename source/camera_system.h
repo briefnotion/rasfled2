@@ -206,6 +206,11 @@ class CAMERA_PROPERTIES
   // Finds max brightness area and mask them out.
   bool ENH_GLARE_MASK     = true;
 
+  // --- Glare Detection Parameter ---
+  // Pixels where all B, G, and R channels are above this threshold will be masked.
+  // 230 is a good starting point for bright white light (0-255 scale).
+  int GLARE_THRESHOLD = 224;
+
   // Boost all colors to min max.  Very noisy at 
   //  no light.
   bool ENH_COLOR          = true;
@@ -228,11 +233,6 @@ class CAMERA_PROPERTIES
 
   // Draws a circle around a curved object. Use case not found.
   bool ENH_HOUGH          = false;
-
-  // --- Glare Detection Parameter ---
-  // Pixels where all B, G, and R channels are above this threshold will be masked.
-  // 230 is a good starting point for bright white light (0-255 scale).
-  int GLARE_THRESHOLD = 224;
 
   // ---------------------------------------------------------------------------------------
   

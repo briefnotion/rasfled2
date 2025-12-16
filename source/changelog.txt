@@ -1,3 +1,6 @@
+2.378_251216
+  - Minor changes.
+
 2.377_251210
   - Slightly optiomized frame interpolation.
   - Changes made to glare mask.

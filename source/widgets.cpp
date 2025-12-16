@@ -588,6 +588,35 @@ bool BUTTON_TOGGLE_COLOR::button_toggle_color(system_data &sdSysData, string Tru
   return ret_value;
 }
 
+bool BUTTON_TOGGLE_COLOR::button_toggle_color_value_set(system_data &sdSysData, string True_Value_Text, string False_Value_Text, 
+                                                        int &Value, int Value_If_Pressed, 
+                                                        int True_Color, int False_Color, ImVec2 ImVec2_Size)
+{
+  bool ret_value = button_toggle_color(sdSysData, True_Value_Text, False_Value_Text, 
+                                      Value == Value_If_Pressed, 
+                                      True_Color, False_Color, ImVec2_Size);
+
+  if (ret_value)
+  {
+    if (Value != Value_If_Pressed)
+    {
+      PREV_VALUE = Value;
+      Value = Value_If_Pressed;
+    }
+    else
+    {
+      Value = PREV_VALUE;
+    }
+
+    return true;
+  }
+  else 
+  {
+    return false;
+  }
+
+}
+
 // ---------------------------------------------------------------------------------------
 
 bool CONFIRM_DIALOG::confirm_dialog(system_data &sdSysData, bool &Choice)

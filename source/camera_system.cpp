@@ -970,6 +970,7 @@ void CAMERA::save_settings()
   camera_settings.create_label_value(quotify("ENH_LOW_LIGHT_THRESHOLD"), quotify(to_string(PROPS.ENH_LOW_LIGHT_THRESHOLD)));
   camera_settings.create_label_value(quotify("ENH_LOW_LIGHT_GAMMA"), quotify(to_string(PROPS.ENH_LOW_LIGHT_GAMMA)));
   camera_settings.create_label_value(quotify("ENH_GLARE_MASK"), quotify(to_string(PROPS.ENH_GLARE_MASK)));
+  camera_settings.create_label_value(quotify("GLARE_THRESHOLD"), quotify(to_string(PROPS.GLARE_THRESHOLD)));
   camera_settings.create_label_value(quotify("ENH_COLOR"), quotify(to_string(PROPS.ENH_COLOR)));
   camera_settings.create_label_value(quotify("ENH_CANNY_MASK"), quotify(to_string(PROPS.ENH_CANNY_MASK)));
   camera_settings.create_label_value(quotify("ENH_FAKE_FRAMES"), quotify(to_string(PROPS.ENH_FAKE_FRAMES)));
@@ -1057,6 +1058,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
           STRING_INT    si_enh_low_light_threshold;
           STRING_DOUBLE sd_enh_low_light_gamma;
           STRING_BOOL   sb_enh_grare_mask;
+          STRING_INT    si_glare_threshold;
           STRING_BOOL   sb_enh_color;
           STRING_BOOL   sb_enh_canny_mask;
           STRING_BOOL   sb_enh_fake_frames;
@@ -1082,6 +1084,7 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_LOW_LIGHT_THRESHOLD", si_enh_low_light_threshold);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_LOW_LIGHT_GAMMA", sd_enh_low_light_gamma);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_GLARE_MASK", sb_enh_grare_mask);
+            settings.ROOT.DATA[root].DATA[entry_list].get_if_is("GLARE_THRESHOLD", si_glare_threshold);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_COLOR", sb_enh_color);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_CANNY_MASK", sb_enh_canny_mask);
             settings.ROOT.DATA[root].DATA[entry_list].get_if_is("ENH_FAKE_FRAMES", sb_enh_fake_frames);
@@ -1279,7 +1282,11 @@ void CAMERA::load_settings_json(vector<CAMERA_CONTROL_SETTING_LOADED> &Camera_Co
             if (sb_enh_grare_mask.conversion_success())
             {
               PROPS.ENH_GLARE_MASK = sb_enh_grare_mask.get_bool_value();
-            }            
+            }    
+            if (si_glare_threshold.conversion_success())
+            {
+              PROPS.GLARE_THRESHOLD = si_glare_threshold.get_int_value();
+            }          
             if (sb_enh_color.conversion_success())
             {
               PROPS.ENH_COLOR = sb_enh_color.get_bool_value();
