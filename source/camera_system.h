@@ -105,6 +105,11 @@ class FAKE_FRAME
   // Previous Color Frame
   cv::Mat prev_frame_;
 
+  // --- Configuration Constants for Raspberry Pi 5 Performance ---
+  const int FLOW_SIZE = 12; // Increased from 4/8 to 12 for 15ms target
+  const int FLOW_ITERATIONS = 3; // Reduced from 10 to 3 for massive speedup
+  const int FLOW_LEVELS = 1; // Reduced to 1 to minimize pyramid overhead
+
   // Helper function to create the coordinate mesh grid (unchanged from original intent)
   void createMeshGrid(int rows, int cols, cv::Mat& mesh_x, cv::Mat& mesh_y);
 

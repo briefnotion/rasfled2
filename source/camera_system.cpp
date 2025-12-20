@@ -49,35 +49,30 @@ void resize_if_not_same_size(cv::Mat& Main_Frame, cv::Mat& Resize_Frame)
 
 // ---------------------------------------------------------------------------------------
 
-// Helper function to create the coordinate mesh grid (unchanged from original intent)
 void FAKE_FRAME::createMeshGrid(int rows, int cols, cv::Mat& mesh_x, cv::Mat& mesh_y)
 {
-  // Create 1D coordinate vectors
   cv::Mat x_coords = cv::Mat::zeros(1, cols, CV_32FC1);
   for (int i = 0; i < cols; ++i) { x_coords.at<float>(0, i) = (float)i; }
 
   cv::Mat y_coords = cv::Mat::zeros(rows, 1, CV_32FC1);
   for (int i = 0; i < rows; ++i) { y_coords.at<float>(i, 0) = (float)i; }
 
-  // Expand to 2D mesh grids
   cv::repeat(x_coords, rows, 1, mesh_x);
   cv::repeat(y_coords, 1, cols, mesh_y);
 }
 
-// --- Initialization and Allocation (Slightly Cleaned, Functionally Same) ---
 void FAKE_FRAME::re_int_vars(const cv::Mat& frame)
 {
   PROCESS_WIDTH = frame.cols;
   PROCESS_HEIGHT = frame.rows;
   
-  // Set flow size to 1/4th of process size (e.g., 640/4 = 160)
-  FLOW_CALC_WIDTH = PROCESS_WIDTH / 4; 
-  FLOW_CALC_HEIGHT = PROCESS_HEIGHT / 4; 
+  // Using the new optimized divisor
+  FLOW_CALC_WIDTH = PROCESS_WIDTH / FLOW_SIZE; 
+  FLOW_CALC_HEIGHT = PROCESS_HEIGHT / FLOW_SIZE; 
 
   cv::Size process_size(PROCESS_WIDTH, PROCESS_HEIGHT);
   cv::Size flow_calc_size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT);
 
-  // Note: create() only re-allocates if size/type changes.
   current_gray_.create(process_size, CV_8UC1);
   prev_gray_.create(process_size, CV_8UC1);
   small_prev_gray_.create(flow_calc_size, CV_8UC1);
@@ -88,40 +83,25 @@ void FAKE_FRAME::re_int_vars(const cv::Mat& frame)
   map_y_.create(process_size, CV_32FC1);
   prev_frame_.create(process_size, frame.type());
 
-  // 3. Pre-calculate the coordinate mesh grids
   createMeshGrid(PROCESS_HEIGHT, PROCESS_WIDTH, coords_x_, coords_y_);
 }
 
 void FAKE_FRAME::preprocess_initial_frame(const cv::Mat& initial_frame)
 {
-  // Check the initialization flag
   if (!is_initialized_)
   {
-    // 1. Determine Dimensions, Allocate Buffers, and Create Mesh Grid
-    re_int_vars(initial_frame); // Reuse the re_int_vars logic
-    
-    // Mark as initialized
+    re_int_vars(initial_frame);
     is_initialized_ = true;
   }
-  
-  // 4. Handle initial BGR frame state
   initial_frame.copyTo(prev_frame_);
-  
-  // Convert the initial frame to gray for the 'current' gray state
   cv::cvtColor(prev_frame_, current_gray_, cv::COLOR_BGR2GRAY);
-  
-  // The very first frame is the previous frame for the next calculation.
-  // OPTIMIZATION: Use cv::swap to set prev_gray_ without data copy.
   cv::swap(current_gray_, prev_gray_); 
 }
 
-// --- Optimized Interpolation Function ---
 cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame) 
 {
-  // Check if the frame size has changed unexpectedly.
   if (current_frame.cols != PROCESS_WIDTH || current_frame.rows != PROCESS_HEIGHT) 
   {
-    // Handle uninitialized case or size mismatch gracefully
     if (!is_initialized_ || PROCESS_WIDTH == 0) 
     {
       preprocess_initial_frame(current_frame);
@@ -129,58 +109,51 @@ cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame)
     } 
     else 
     {
-      // Re-initialize all variables for the new size
       re_int_vars(current_frame);
     }
   }
 
-  // --- State Update OPTIMIZATION: Use cv::swap ---
-  // 1. Current becomes previous (Zero-copy swap)
-  // The data currently in current_gray_ (which was the previous frame's gray data) 
-  // is now in prev_gray_. This is much faster than copyTo.
+  // Zero-copy state update
   cv::swap(prev_gray_, current_gray_);
-  
-  // 2. Process the new current BGR frame
-  // Convert the new frame to gray, overwriting the old data now in current_gray_
   cv::cvtColor(current_frame, current_gray_, cv::COLOR_BGR2GRAY);
 
-  // 3. Downsample for FAST Optical Flow Calculation
-  // Ensure the interpolation method is explicitly set for downsampling for consistency.
-  cv::resize(prev_gray_, small_prev_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT), 0, 0, cv::INTER_AREA); // INTER_AREA is best for decimation
+  // Downsample for FAST Optical Flow
+  cv::resize(prev_gray_, small_prev_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT), 0, 0, cv::INTER_AREA);
   cv::resize(current_gray_, small_current_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT), 0, 0, cv::INTER_AREA);
 
-  // 4. Calculate Optical Flow (Most expensive step, kept on downsampled image)
-  //cv::calcOpticalFlowFarneback(small_prev_gray_, small_current_gray_, flow_small_, 0.5, 3, 10, 3, 5, 1.2, 0);
-  cv::calcOpticalFlowFarneback(small_prev_gray_, small_current_gray_, flow_small_, 0.5, 2, 10, 3, 5, 1.2, 0);
+  // --- HIGH SPEED OPTICAL FLOW ---
+  // Parameters optimized: levels=1, iterations=3, winsize=3, poly_n=5
+  cv::calcOpticalFlowFarneback(
+      small_prev_gray_, 
+      small_current_gray_, 
+      flow_small_, 
+      0.5,             // pyr_scale
+      FLOW_LEVELS,     // levels (1 for speed)
+      3,               // winsize (Small for low-res sharp vectors)
+      FLOW_ITERATIONS, // iterations (3 for Pi 5 real-time)
+      5,               // poly_n
+      1.1,             // poly_sigma
+      0                // flags
+  );
   
-  // 5. Upsample the flow field
+  // Upsample the flow field
   cv::resize(flow_small_, flow_upsampled_, cv::Size(PROCESS_WIDTH, PROCESS_HEIGHT), 0, 0, cv::INTER_NEAREST);
 
-  // 6. Define the combined scaling constant
-  // The flow needs to be scaled up by the ratio, and then halved for interpolation (dx/2)
+  // Calculate scaling constants
   const float scale_factor = (float)PROCESS_WIDTH / FLOW_CALC_WIDTH; 
   const float scaling_constant = scale_factor * 0.5f; 
   
-  // --- OPTIMIZATION: Vectorized Map Generation without intermediate Mats ---
-
-  // 7. Split the 2-channel upsampled flow map into X and Y components
+  // Vectorized Map Generation
   std::vector<cv::Mat> flow_channels(2);
-  cv::split(flow_upsampled_, flow_channels); // flow_channels[0] = dx, flow_channels[1] = dy
+  cv::split(flow_upsampled_, flow_channels); 
   
-  // 8. Calculate map_x and map_y using cv::addWeighted (Eliminates flow_scaled, half_dx, half_dy matrices)
-  // map_x = coords_x - dx * scaling_constant
-  // map_x_ = 1.0 * coords_x_ + (-scaling_constant) * flow_channels[0] + 0.0
   cv::addWeighted(coords_x_, 1.0, flow_channels[0], -scaling_constant, 0.0, map_x_);
-  
-  // map_y = coords_y - dy * scaling_constant
-  // map_y_ = 1.0 * coords_y_ + (-scaling_constant) * flow_channels[1] + 0.0
   cv::addWeighted(coords_y_, 1.0, flow_channels[1], -scaling_constant, 0.0, map_y_);
 
-  // 9. Perform the geometric transformation (Interpolation)
-  cv::Mat interpolated_frame = cv::Mat::zeros(prev_frame_.size(), prev_frame_.type());
+  // Final Geometric Transformation
+  cv::Mat interpolated_frame;
   cv::remap(prev_frame_, interpolated_frame, map_x_, map_y_, cv::INTER_LINEAR, cv::BORDER_REPLICATE);
 
-  // 10. Update the BGR class state for the next iteration
   current_frame.copyTo(prev_frame_); 
   
   return interpolated_frame;

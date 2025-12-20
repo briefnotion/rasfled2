@@ -1,3 +1,9 @@
+2.379_251219
+  - Added some Christmas animations.
+  - Atempted to save a few more ms out of interpolated 
+      frames. Target proc time is 15ms, with everything 
+      on.
+
 2.378_251216
   - Minor changes.
 
