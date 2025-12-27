@@ -1,3 +1,7 @@
+2.380_251226
+  - Restored the standard animations.json to default.
+  - Testing camera glare mask lights on dependency.
+
 2.379_251219
   - Added some Christmas animations.
   - Atempted to save a few more ms out of interpolated 

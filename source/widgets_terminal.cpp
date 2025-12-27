@@ -169,6 +169,7 @@ void TERMINAL_SCREEN::display_terminal(system_data &sdSysData, TERMINAL &Term)
       if (!command_to_send.empty())
       {
         Term.send_command(command_to_send);
+        ImGui::SetKeyboardFocusHere();
       }
 
       // 2. Handle Printable Characters (Letters, Numbers, Symbols) - Text Input

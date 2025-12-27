@@ -836,7 +836,7 @@ void CAMERA_WIDGET::display(system_data &sdSysData, float Angle)
       
       if (DISPLAY_ENHANCEMENTS)
       {
-        ImGui::SetNextWindowSize(ImVec2(290.0f, 475.0f));
+        ImGui::SetNextWindowSize(ImVec2(210.0f, 430.0f));
         if (ImGui::Begin("CAMERA ENHANCEMENTS", nullptr, sdSysData.SCREEN_DEFAULTS.flags_w_pop)) 
         {
           display_camera_enhancements_window(sdSysData);

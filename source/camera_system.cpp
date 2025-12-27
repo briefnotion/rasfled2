@@ -2010,8 +2010,11 @@ void CAMERA::process_enhancements_thread()
   TIMED_IS_READY  forced_frame_limit;
   MEASURE_TIME_START_END time_se_frame_processing;
 
-  // --- CONFIGURATION FOR ROBUSTNESS --- 
   int frame_number = -1;
+
+  // Fresh start, in case something went wrong and the thread restarted.
+  BUFFER_FRAME_HANDOFF_POSITION = -1;
+  LATEST_FRAME_READY = -1;
 
   // Create Process Time
   thread_time.create();
@@ -2036,11 +2039,15 @@ void CAMERA::process_enhancements_thread()
       }
 
       // Process enhancements if frame ready
-      if (LATEST_FRAME_READY != -1 &&  BUFFER_FRAME_HANDOFF_POSITION == -1)
+      if ((LATEST_FRAME_READY == 0 || LATEST_FRAME_READY == 1 || LATEST_FRAME_READY == 2) && 
+          (BUFFER_FRAME_HANDOFF_POSITION == -1 || 
+            BUFFER_FRAME_HANDOFF_POSITION == 0 || 
+            BUFFER_FRAME_HANDOFF_POSITION == 1 ||
+            BUFFER_FRAME_HANDOFF_POSITION == 2   ))
       {
         // Establish latest frame and lock
-        BUFFER_FRAME_HANDOFF_POSITION = LATEST_FRAME_READY;
         frame_number = LATEST_FRAME_READY;
+        BUFFER_FRAME_HANDOFF_POSITION = frame_number;
         LATEST_FRAME_READY = -1;
 
         // Start measuring how long it takes to procecc the enhancements
@@ -2072,11 +2079,6 @@ void CAMERA::process_enhancements_thread()
 
         // Advance Buffer
         BUFFER_FRAME_HANDOFF_POSITION = frame_number + 3;
-      }
-      else if (BUFFER_FRAME_HANDOFF_POSITION >= 0 && BUFFER_FRAME_HANDOFF_POSITION <= 2)
-      {
-        // Something went wrong. Avoid lockout.
-        BUFFER_FRAME_HANDOFF_POSITION = -1;
       }
     } // Frame Limit Cap
 
@@ -2463,8 +2465,9 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
     //  texture to be drawn in opengl.
     // Governed by the proccess call of the main program
     {
-      if (BUFFER_FRAME_HANDOFF_POSITION >= 3 && 
-          BUFFER_FRAME_HANDOFF_POSITION <= 5)
+      if (BUFFER_FRAME_HANDOFF_POSITION == 3 || 
+          BUFFER_FRAME_HANDOFF_POSITION == 4 || 
+          BUFFER_FRAME_HANDOFF_POSITION == 5    )
       {
         int current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
 
@@ -2498,6 +2501,7 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
       {
         // Something went wrong. Avoid lockout.
         BUFFER_FRAME_HANDOFF_POSITION = -1;
+        LATEST_FRAME_READY = -1;
       }
     }
 

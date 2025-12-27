@@ -392,11 +392,19 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
       // The screen brightness will be set to 100% immediately.
       if (set_bool_with_change_notify(sdSysData.CAR_INFO.STATUS.INDICATORS.val_lights_headlights_on(), LIGHTS_HEADLIGHTS) == true)
       {
-        // If lights are truned off, set screen brightness to 100%
+        // If lights are truned off
         if (LIGHTS_HEADLIGHTS == false)
         {
           // Set Screen brightness (automaticlly) to 100%.  Does not affect manual settings
           sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 1.00f);
+
+          // Testing turning on and off camera glare mask, depending on lights being on.
+          sdSysData.CAMERA_BACKUP.PROPS.ENH_GLARE_MASK = true;
+        }
+        else 
+        {
+          // Testing turning on and off camera glare mask, depending on lights being on.
+          sdSysData.CAMERA_BACKUP.PROPS.ENH_GLARE_MASK = false;
         }
       }
 
