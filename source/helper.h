@@ -781,6 +781,10 @@ double unix_epoch_nmea_time(int utc_date, float utc_time);
  * @return A double representing the Unix epoch timestamp, including fractional seconds.
  */
 
+void sleep_ms(int Sleep_Time);
+// Sleep the thread, in miliseconds.  
+//  Primarily here to remember the command.
+
 // ---------------------------------------------------------------------------------------
 
 

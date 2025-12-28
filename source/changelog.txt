@@ -1,3 +1,8 @@
+2.381_251227
+  - Made some changes to the camera. Made a few atttempts 
+      to harden it.
+  - Modded the animations slightly.
+
 2.380_251226
   - Restored the standard animations.json to default.
   - Testing camera glare mask lights on dependency.

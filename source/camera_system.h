@@ -124,6 +124,8 @@ class FAKE_FRAME
 
   // Optimized Core Function
   cv::Mat interpolateFrame(const cv::Mat& current_frame);
+
+  void clear();
 };
 
 // ---------------------------------------------------------------------------------------
@@ -362,7 +364,7 @@ class CAMERA
   cv::Mat generateDummyLowLightFrame(int width, int height, int frame_index);
   void matToTexture(const cv::Mat& frame, GLuint &textureID);
 
-  void init(stringstream &Print_Stream);
+  void init();
   // Until camera properties are in a vector, manually set and get each control
   //  as necessary for first run.
 
@@ -524,8 +526,13 @@ class CAMERA
   int RESTART_WIDTH = 640;
   int RESTART_HEIGHT = 480;
   int RESTART_COMPRESSION = 1;
+
+  int SOMETHING_WENT_HORRIBLY_WRONG = 0;
+  TIMED_IS_READY SOMETHING_WENT_HORRIBLY_WRONG_TIMER;
+  // One definite way to trigger this is if the view camera
+  //  button is spammed while frame gen is on.
   
-  bool       FRAME_GEN = false;
+  bool FRAME_GEN = false;
 
   int post_process_height();
   int post_process_width();

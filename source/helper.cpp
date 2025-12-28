@@ -1575,6 +1575,11 @@ double unix_epoch_nmea_time(int utc_date, float utc_time)
   return unix_timestamp;
 }
 
+void sleep_ms(int Sleep_Time)
+{
+  usleep ((1000 * Sleep_Time));
+}
+
 // ---------------------------------------------------------------------------------------
 
 void EMPERICAL::add_value(float Value)

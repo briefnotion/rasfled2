@@ -399,13 +399,15 @@ void AUTOMOBILE_HANDLER::update_events(system_data &sdSysData, ANIMATION_HANDLER
           sdSysData.PANEL_CONTROL.color_set_automatic_intensity(tmeCurrentTime, 1.00f);
 
           // Testing turning on and off camera glare mask, depending on lights being on.
-          sdSysData.CAMERA_BACKUP.PROPS.ENH_GLARE_MASK = true;
+          //  Works, but i dont like it.
+          //sdSysData.CAMERA_BACKUP.PROPS.ENH_GLARE_MASK = false;
         }
-        else 
-        {
+        //else 
+        //{
           // Testing turning on and off camera glare mask, depending on lights being on.
-          sdSysData.CAMERA_BACKUP.PROPS.ENH_GLARE_MASK = false;
-        }
+          //  Works, but i dont like it.
+          //sdSysData.CAMERA_BACKUP.PROPS.ENH_GLARE_MASK = true;
+        //}
       }
 
       // This portion is for when the lights are on.
