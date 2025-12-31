@@ -2103,49 +2103,55 @@ void CAMERA::process_enhancements_thread()
         forced_frame_limit.set(thread_time.current_frame_time(), 100); 
       }
 
-      if (LATEST_FRAME_READY == 0 || LATEST_FRAME_READY == 1 || LATEST_FRAME_READY == 2)
+      if (CAMERA_BEING_VIEWED && !PROCESS_FRAMES_ARRAY[LATEST_FRAME_READY].FRAME_BUFFER.empty())
       {
-        if (BUFFER_FRAME_HANDOFF_POSITION == -1)
+        if (LATEST_FRAME_READY == 0 || LATEST_FRAME_READY == 1 || LATEST_FRAME_READY == 2)
         {
-          // Dont start processing ready frame until previous image was converted 
-          //  to texture in main program
-
-          // Establish latest frame and lock
-          frame_number = LATEST_FRAME_READY;
-          new_buffer_frame_handoff_position = frame_number;
-          BUFFER_FRAME_HANDOFF_POSITION = frame_number;
-          LATEST_FRAME_READY = -1;
-
-          // Start measuring how long it takes to procecc the enhancements
-          time_se_frame_processing.start_clock();
-
-          // Run enancements processing.  Store data back in itself.
-          run_preprocessing_outer(PROCESS_FRAMES_ARRAY[frame_number], thread_time.current_frame_time());
-          
-          apply_ehancements(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
-          apply_all_masks(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
-
-          if (PROPS.ENH_FAKE_FRAMES)
+          if (BUFFER_FRAME_HANDOFF_POSITION == -1)
           {
-            if (TIME_FRAME_PROCESSING < TIME_CAMERA_FRAME_TIME)
+            // Dont start processing ready frame until previous image was converted 
+            //  to texture in main program
+
+            // Establish latest frame and lock
+            frame_number = LATEST_FRAME_READY;
+            new_buffer_frame_handoff_position = frame_number;
+            BUFFER_FRAME_HANDOFF_POSITION = frame_number;
+            LATEST_FRAME_READY = -1;
+
+            // Start measuring how long it takes to procecc the enhancements
+            time_se_frame_processing.start_clock();
+
+            // Run enancements processing.  Store data back in itself.
+            run_preprocessing_outer(PROCESS_FRAMES_ARRAY[frame_number], thread_time.current_frame_time());
+            
+            apply_ehancements(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
+            apply_all_masks(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
+
+            if (PROPS.ENH_FAKE_FRAMES)
             {
-              INTERPOLATION_DISPLAY = true;
-            }
-            else
-            {
-              INTERPOLATION_DISPLAY = false;
+              if (TIME_FRAME_PROCESSING < TIME_CAMERA_FRAME_TIME)
+              {
+                INTERPOLATION_DISPLAY = true;
+                PROCESS_FRAMES_ARRAY[frame_number].FRAME_BUFFER_FAKE = FAKE_FRAME_GENERATOR.interpolateFrame(PROCESS_FRAMES_ARRAY[frame_number].PROCESSED_FRAME);
+              }
+              else
+              {
+                INTERPOLATION_DISPLAY = false;
+              }
             }
 
-            PROCESS_FRAMES_ARRAY[frame_number].FRAME_BUFFER_FAKE = FAKE_FRAME_GENERATOR.interpolateFrame(PROCESS_FRAMES_ARRAY[frame_number].PROCESSED_FRAME);
+            // Store times
+            time_se_frame_processing.end_clock();
+            TIME_FRAME_PROCESSING = time_se_frame_processing.duration_ms();
+
+            // Advance Buffer
+            BUFFER_FRAME_HANDOFF_POSITION = new_buffer_frame_handoff_position + 3;
           }
-
-          // Store times
-          time_se_frame_processing.end_clock();
-          TIME_FRAME_PROCESSING = time_se_frame_processing.duration_ms();
-
-          // Advance Buffer
-          BUFFER_FRAME_HANDOFF_POSITION = new_buffer_frame_handoff_position + 3;
         }
+      }
+      else
+      {
+        LATEST_FRAME_READY = -1;
       }
     } // Frame Limit Cap
 
@@ -2575,28 +2581,24 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
       int current_buffer_frame_pos = BUFFER_FRAME_HANDOFF_POSITION % 3;
 
       // Generate Fake and Real
-      if (PROPS.ENH_FAKE_FRAMES)
+      if (PROPS.ENH_FAKE_FRAMES && INTERPOLATION_DISPLAY)
       {
         PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].FRAME_BUFFER_FAKE.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
-      }
-      PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].PROCESSED_FRAME.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
-
-      // Place real or fake frame live.
-      if (PROPS.ENH_FAKE_FRAMES == false)
-      {
-        FRAME_GEN = false;
-        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
-        AVERAGE_FRAME_RATE_COUNTER++;
-      }
-      else
-      {
-        FRAME_GEN = false;
+        PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].PROCESSED_FRAME.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
         FRAME_TO_TEXTURE_TIMER.set(Frame_Time, (int)TIME_CAMERA_FRAME_TIME / 2);
         generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_0);
         FRAME_TO_TEXTURE_TIMER_CHECK = true;
         AVERAGE_FRAME_RATE_COUNTER++;
+        FRAME_GEN = false;
       }
-
+      else
+      {
+        PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].PROCESSED_FRAME.copyTo(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
+        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[current_buffer_frame_pos].LIVE_FRAME_1);
+        AVERAGE_FRAME_RATE_COUNTER++;
+        FRAME_GEN = false;
+      }
+      
       VIEWING_FRAME_POS = current_buffer_frame_pos;
       BUFFER_FRAME_HANDOFF_POSITION = -1;
     }
@@ -2606,12 +2608,9 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
       if (FRAME_TO_TEXTURE_TIMER.is_ready(Frame_Time))
       {
         FRAME_TO_TEXTURE_TIMER_CHECK = false;
-        if (camera_online() && CAMERA_BEING_VIEWED)
-        {
-          FRAME_GEN = true;
-          generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].LIVE_FRAME_1);
-          AVERAGE_FRAME_RATE_COUNTER++;
-        }
+        generate_imgui_texture_frame(PROCESS_FRAMES_ARRAY[VIEWING_FRAME_POS].LIVE_FRAME_1);
+        AVERAGE_FRAME_RATE_COUNTER++;
+        FRAME_GEN = true;
       }
     }
 
