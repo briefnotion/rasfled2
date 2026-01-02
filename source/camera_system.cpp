@@ -98,31 +98,40 @@ void FAKE_FRAME::preprocess_initial_frame(const cv::Mat& initial_frame)
   cv::swap(current_gray_, prev_gray_); 
 }
 
-cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame) 
+cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame, int &Debug_Position) 
 {
+  Debug_Position = 14001;
+
   if (current_frame.cols != PROCESS_WIDTH || current_frame.rows != PROCESS_HEIGHT) 
   {
     if (!is_initialized_ || PROCESS_WIDTH == 0) 
     {
+      Debug_Position = 142;
       preprocess_initial_frame(current_frame);
       return current_frame;
     } 
     else 
     {
+      Debug_Position = 14003;
       re_int_vars(current_frame);
     }
   }
 
   // Zero-copy state update
+  Debug_Position = 14004;
   cv::swap(prev_gray_, current_gray_);
+  Debug_Position = 14005;
   cv::cvtColor(current_frame, current_gray_, cv::COLOR_BGR2GRAY);
 
   // Downsample for FAST Optical Flow
+  Debug_Position = 14006;
   cv::resize(prev_gray_, small_prev_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT), 0, 0, cv::INTER_AREA);
+  Debug_Position = 14007;
   cv::resize(current_gray_, small_current_gray_, cv::Size(FLOW_CALC_WIDTH, FLOW_CALC_HEIGHT), 0, 0, cv::INTER_AREA);
 
   // --- HIGH SPEED OPTICAL FLOW ---
   // Parameters optimized: levels=1, iterations=3, winsize=3, poly_n=5
+  Debug_Position = 14008;
   cv::calcOpticalFlowFarneback(
       small_prev_gray_, 
       small_current_gray_, 
@@ -137,25 +146,32 @@ cv::Mat FAKE_FRAME::interpolateFrame(const cv::Mat& current_frame)
   );
   
   // Upsample the flow field
+  
+  Debug_Position = 14009;
   cv::resize(flow_small_, flow_upsampled_, cv::Size(PROCESS_WIDTH, PROCESS_HEIGHT), 0, 0, cv::INTER_NEAREST);
 
   // Calculate scaling constants
+  Debug_Position = 14010;
   const float scale_factor = (float)PROCESS_WIDTH / FLOW_CALC_WIDTH; 
   const float scaling_constant = scale_factor * 0.5f; 
   
   // Vectorized Map Generation
   std::vector<cv::Mat> flow_channels(2);
+  Debug_Position = 14011;
   cv::split(flow_upsampled_, flow_channels); 
   
+  Debug_Position = 14012;
   cv::addWeighted(coords_x_, 1.0, flow_channels[0], -scaling_constant, 0.0, map_x_);
   cv::addWeighted(coords_y_, 1.0, flow_channels[1], -scaling_constant, 0.0, map_y_);
 
   // Final Geometric Transformation
+  Debug_Position = 14013;
   cv::Mat interpolated_frame;
   cv::remap(prev_frame_, interpolated_frame, map_x_, map_y_, cv::INTER_LINEAR, cv::BORDER_REPLICATE);
 
   current_frame.copyTo(prev_frame_); 
-  
+
+  Debug_Position = 14099;
   return interpolated_frame;
 }
 
@@ -1464,11 +1480,14 @@ void CAMERA::apply_ehancements(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
 {
   if (!Suite.PROCESSED_FRAME.empty())
   {
+    CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 121;
+    
     Extra.advance_latest();
 
     // Canny Mask
     if (PROPS.ENH_CANNY_MASK)
     {
+      CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 122;
       Extra.MASK_FRAME_CANNY[Extra.LATEST_POS] = canny_mask(Suite.PROCESSED_FRAME_CANNY);
     }
 
@@ -1485,6 +1504,7 @@ void CAMERA::apply_ehancements(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
     // Glare Mask
     if (PROPS.ENH_GLARE_MASK)
     {
+      CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 123;
       Extra.MASK_FRAME_GLARE[Extra.LATEST_POS] = extract_glare_area(Suite.PROCESSED_FRAME);
     }
 
@@ -1492,6 +1512,7 @@ void CAMERA::apply_ehancements(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
 
     if (PROPS.ENH_HOUGH)
     {
+      CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 124;
       //detect_hough_circles(PROCESSED_FRAME, PROCESSED_FRAME_GAUSSIAN);
       detect_hough_circles(Suite.PROCESSED_FRAME, Suite.PROCESSED_FRAME_GRAY);
     }
@@ -1501,6 +1522,7 @@ void CAMERA::apply_ehancements(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
     // Car Detection (Haar Cascade)
     if (PROPS.ENH_CAR_DETECTION && CAR_CASCADE_LOADED)
     {
+      CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 125;
       // Cascade classifiers are faster on smaller images and grayscale.
       cv::Mat gray_for_detection;
       cv::cvtColor(Suite.PROCESSED_FRAME, gray_for_detection, cv::COLOR_BGR2GRAY);
@@ -1536,6 +1558,7 @@ void CAMERA::apply_ehancements(FRAME_SUITE &Suite, FRAME_SUITE_EXTRA &Extra)
       }
     }
   }
+  CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 129;
 }
 
 void CAMERA::apply_masks_to_processed_frame(cv::Mat &Frame, cv::Mat &Mask_0, cv::Mat &Mask_1, int Latest)
@@ -2071,6 +2094,8 @@ void CAMERA::update_frame_thread()
 
 void CAMERA::process_enhancements_thread()
 {
+  CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 0;
+
   THREAD_PROCESSING_ACTIVE = true;
   PRINTW_QUEUE.push_back("Starting Image Process Thread");
 
@@ -2089,6 +2114,8 @@ void CAMERA::process_enhancements_thread()
   {
     //  Get current time.  This will be our timeframe to work in.
     thread_time.setframetime();
+
+    CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 1;
 
     // Enforce hard frame limit time.
     if (forced_frame_limit.is_ready(thread_time.current_frame_time()))
@@ -2109,6 +2136,8 @@ void CAMERA::process_enhancements_thread()
         {
           if (BUFFER_FRAME_HANDOFF_POSITION == -1)
           {
+            CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 100;
+
             // Dont start processing ready frame until previous image was converted 
             //  to texture in main program
 
@@ -2122,24 +2151,37 @@ void CAMERA::process_enhancements_thread()
             time_se_frame_processing.start_clock();
 
             // Run enancements processing.  Store data back in itself.
+            CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 110;
             run_preprocessing_outer(PROCESS_FRAMES_ARRAY[frame_number], thread_time.current_frame_time());
             
+            CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 120;
             apply_ehancements(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
+
+            CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 130;
             apply_all_masks(PROCESS_FRAMES_ARRAY[frame_number], PROCESS_FRAMES_EXTRA);
 
             if (PROPS.ENH_FAKE_FRAMES)
             {
               if (TIME_FRAME_PROCESSING < TIME_CAMERA_FRAME_TIME)
               {
+                CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 140;
                 INTERPOLATION_DISPLAY = true;
-                PROCESS_FRAMES_ARRAY[frame_number].FRAME_BUFFER_FAKE = FAKE_FRAME_GENERATOR.interpolateFrame(PROCESS_FRAMES_ARRAY[frame_number].PROCESSED_FRAME);
+                PROCESS_FRAMES_ARRAY[frame_number].FRAME_BUFFER_FAKE = 
+                                  FAKE_FRAME_GENERATOR.interpolateFrame(PROCESS_FRAMES_ARRAY[frame_number].PROCESSED_FRAME, 
+                                                                        CAMERA_PROCESSING_THREAD_POSITION_DEBUG);
               }
               else
               {
+                CAMERA_PROCESSING_THREAD_POSITION_DEBUG = -140;
                 INTERPOLATION_DISPLAY = false;
               }
             }
+            else
+            {
+              INTERPOLATION_DISPLAY = false;
+            }
 
+            CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 150;
             // Store times
             time_se_frame_processing.end_clock();
             TIME_FRAME_PROCESSING = time_se_frame_processing.duration_ms();
@@ -2152,6 +2194,7 @@ void CAMERA::process_enhancements_thread()
       else
       {
         LATEST_FRAME_READY = -1;
+        CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 160;
       }
     } // Frame Limit Cap
 
@@ -2161,10 +2204,12 @@ void CAMERA::process_enhancements_thread()
 
     // Only continue running if enabled
     CAMERA_PROCESSING_THREAD_STOP = !ENABLED;
+    CAMERA_PROCESSING_THREAD_POSITION_DEBUG = 170;
   }
 
   PRINTW_QUEUE.push_back("Ending Image Process Thread");
   THREAD_PROCESSING_ACTIVE = false;
+  CAMERA_PROCESSING_THREAD_POSITION_DEBUG = -1;
 }
 
 void CAMERA::generate_imgui_texture_frame(cv::Mat& Frame)
@@ -2537,7 +2582,7 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
     {
       if (CAMERA_READ_THREAD_STOP)
       {
-        THREAD_CAMERA.create(5);
+        THREAD_CAMERA.create(1000);
         // Start the camera update on a separate thread.
         // This call is non-blocking, so the main loop can continue immediately.
         THREAD_CAMERA.start_render_thread([&]() 
@@ -2545,6 +2590,8 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
       }
       else
       {
+        PRINTW_QUEUE.push_back("---\n");
+        PRINTW_QUEUE.push_back("THREAD_CAMERA has stopped when it should be running.\n");
         SOMETHING_WENT_HORRIBLY_WRONG = 1;
       }
     }
@@ -2557,7 +2604,7 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
       // Do not start if thread did not truely end sucessfully
       if (CAMERA_PROCESSING_THREAD_STOP)
       {
-        THREAD_PROCESSING.create(5);
+        THREAD_PROCESSING.create(1000);
         // Start the camera update on a separate thread.
         // This call is non-blocking, so the main loop can continue immediately.
         THREAD_PROCESSING.start_render_thread([&]() 
@@ -2565,6 +2612,8 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
       }
       else
       {
+        PRINTW_QUEUE.push_back("---\n");
+        PRINTW_QUEUE.push_back("THREAD_PROCESSING has stopped when it should be running.\n");
         SOMETHING_WENT_HORRIBLY_WRONG = 1;
       }
     }
@@ -2625,17 +2674,54 @@ void CAMERA::process(CONSOLE_COMMUNICATION &cons, unsigned long Frame_Time, bool
     {
       PRINTW_QUEUE.push_back("Something went wrong with the camera and I cant figure out what it is.");
       SOMETHING_WENT_HORRIBLY_WRONG = 2;
-      
-      enable(false);
 
+      PRINTW_QUEUE.push_back("");
+
+      // Put together a list of where things were
+      if (CAMERA_READ_THREAD_STOP)
+      {
+        PRINTW_QUEUE.push_back("CAMERA_READ_THREAD_STOP is TRUE");
+      }
+      else
+      {
+        PRINTW_QUEUE.push_back("  CAMERA_READ_THREAD_STOP is FALSE");
+      }
+
+      if (CAMERA_PROCESSING_THREAD_STOP)
+      {
+        PRINTW_QUEUE.push_back("CAMERA_PROCESSING_THREAD_STOP is TRUE");
+      }
+      else
+      {
+        PRINTW_QUEUE.push_back("  CAMERA_PROCESSING_THREAD_STOP is FALSE");
+      }
+
+      PRINTW_QUEUE.push_back("");
+
+      PRINTW_QUEUE.push_back("BUFFER_FRAME_HANDOFF_POSITION: " + to_string(BUFFER_FRAME_HANDOFF_POSITION));
+      PRINTW_QUEUE.push_back("           LATEST_FRAME_READY: " + to_string(LATEST_FRAME_READY));
+
+      PRINTW_QUEUE.push_back("");
+
+      PRINTW_QUEUE.push_back("Latest CAMERA_PROCESSING_THREAD_POSITION: " + to_string(CAMERA_PROCESSING_THREAD_POSITION_DEBUG));
+
+
+
+
+      PRINTW_QUEUE.push_back("\n---");
+      // Shut down the camera.
+      enable(false);      
       BUFFER_FRAME_HANDOFF_POSITION = -1;
       LATEST_FRAME_READY = -1;
+
+      // Prepare for restart in time.
       SOMETHING_WENT_HORRIBLY_WRONG_TIMER.set(Frame_Time, 500);
     }
     else
     {
       if (SOMETHING_WENT_HORRIBLY_WRONG_TIMER.is_ready(Frame_Time))
       {
+        // Restart the camera.
         PRINTW_QUEUE.push_back("Attempting to restart the camera.");
         SOMETHING_WENT_HORRIBLY_WRONG = 0;
 

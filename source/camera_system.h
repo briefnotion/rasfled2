@@ -123,7 +123,7 @@ class FAKE_FRAME
   void preprocess_initial_frame(const cv::Mat& initial_frame);
 
   // Optimized Core Function
-  cv::Mat interpolateFrame(const cv::Mat& current_frame);
+  cv::Mat interpolateFrame(const cv::Mat& current_frame, int &Debug_Position);
 
   void clear();
 };
@@ -513,7 +513,10 @@ class CAMERA
   THREADING_INFO  THREAD_PROCESSING;  // Controls: process_enhancements_thread()
   bool CAMERA_PROCESSING_THREAD_STOP   = true;      // Keep processing images in thread 
                                                     // until told to stop
-  bool THREAD_PROCESSING_ACTIVE = false;                                                     
+  bool THREAD_PROCESSING_ACTIVE = false;  
+
+  int CAMERA_PROCESSING_THREAD_POSITION_DEBUG = -1;
+  // for debugging:
 
   CAMERA_PROPERTIES PROPS;
   deque<CAMERA_SETTING> SETTINGS;

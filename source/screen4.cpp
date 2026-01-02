@@ -1566,14 +1566,14 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (BTC_DEBUG_2.button_toggle_color(sdSysData, "2", "2", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[1], RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+          if (BTC_DEBUG_2.button_toggle_color(sdSysData, "2##dbg", "2##dbg", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[1], RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
           {
             sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[1] = !sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[1];
           }
 
           ImGui::SameLine();
 
-          if (BTC_DEBUG_4.button_toggle_color(sdSysData, "4", "4", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[3], RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+          if (BTC_DEBUG_4.button_toggle_color(sdSysData, "4##dbg", "4##dbg", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[3], RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
           {
             sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[3] = !sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[3];
           }
@@ -1595,7 +1595,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
 
           ImGui::SameLine();
 
-          if (BTC_DEBUG_1.button_toggle_color(sdSysData, "1", "1", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[0], RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+          if (BTC_DEBUG_1.button_toggle_color(sdSysData, "1##dbg", "1##dbg", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[0], RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
           {
             sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[0] = !sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[0];
           }
@@ -1603,7 +1603,7 @@ void SCREEN4::draw(system_data &sdSysData, ANIMATION_HANDLER &Animations)
           ImGui::SameLine();
 
             ImGui::TableNextColumn();
-            if (BTC_DEBUG_3.button_toggle_color(sdSysData, "3", "3", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[2], RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
+            if (BTC_DEBUG_3.button_toggle_color(sdSysData, "3##dbg", "3##dbg", sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[2], RAS_WHITE, RAS_BLUE, sdSysData.SCREEN_DEFAULTS.SIZE_BUTTON_SMALL))
             {
               sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[2] = !sdSysData.SCREEN_COMMS.DEBUG_STATUS.DOOR[2];
             }

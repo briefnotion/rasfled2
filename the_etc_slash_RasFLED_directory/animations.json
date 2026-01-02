@@ -754,7 +754,7 @@
         },
         {
           "Label" : "TDCAOE",  
-          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Start_Delay_Time" : 10, "Duration_Of_Brighness" : 2000, 
           "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
           "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "TDOE"
         }
@@ -764,11 +764,22 @@
       [
         {
           "Comment_1" : "Labels: LDCE",
-          "Comment_2" : "Animation runs on all door exteriors, when all doors are closed, to remove all animations"
+          "Comment_2" : "Animation runs on all door exteriors, when all doors are closed, to remove all animations",
+          "Comment_3" : "Tripled up for reduncance"
+        },
+        {
+          "Label" : "LDCE", 
+          "Start_Delay_Time" : 10, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "LDCE"
         },
         {
           "Label" : "LDCE", 
           "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "LDCE"
+        },
+        {
+          "Label" : "LDCE", 
+          "Start_Delay_Time" : 350, "Animation_Walk_Type" : "AnEvSchedule",
           "String_Var_1" : "Pyrrhic", "String_Var_2" : "LDCE"
         }
       ],
@@ -1911,7 +1922,8 @@
         {
           "Label" : "TDOE", 
           "Start_Delay_Time" : 100, "Animation_Walk_Type" : "AnEvSchedule",
-          "String_Var_1" : "Pyrrhic", "String_Var_2" : "TDOE_2"
+          "String_Var_1" : "Pyrrhic", "String_Var_2" : "TDOE_2", 
+          "Clear_On_End" : true, "Off_During_Day" : false
         }
       ],
 
@@ -2060,13 +2072,13 @@
         },
         {
           "Label" : "TDOAOE",  
-          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Start_Delay_Time" : 10, "Duration_Of_Brighness" : 2000, 
           "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
           "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "TDOE"
         },
         {
           "Label" : "TDOAOE",  
-          "Start_Delay_Time" : 100, "Duration_Of_Brighness" : 2000, 
+          "Start_Delay_Time" : 10, "Duration_Of_Brighness" : 2000, 
           "Animation_Walk_Type" : "AnEvSetToEnd", "Dest_1" : "0,0,0",
           "Repeat" : true, "Clear_On_End" : true, "String_Var_1" : "ADOE"
         }
