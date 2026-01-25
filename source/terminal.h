@@ -181,6 +181,34 @@ class TERMINAL
   
   void process_output(const std::string& raw_text);
 
+// ---------------------------------------------------------------------
+
+  bool process_output_2_enable = false;
+
+  void screen_scoll();
+  void screen_clear();
+  
+  void cursor_check();
+  void cursor_advance();
+
+  void control_BS();
+  void control_HT();
+  void control_LF();
+  void control_CR();
+
+  void control_characters(uint8_t Character);
+
+  bool escape_characters(std::string Raw_Text, int &End_Position);
+
+  void write_to_screen(char32_t Character);
+
+  string PROCESS_OUTPUT_2_BUFFER = "";
+  void process_output_2(std::string& raw_text);
+
+
+// ---------------------------------------------------------------------
+
+
   public:
 
   // Constants for screen dimensions

@@ -1,3 +1,6 @@
+2.384_260125
+  - Started rewriting the terminal.
+
 2.383_260101
   - Added some debug code to the camera crash routine.
   - Modded the animations slightly.

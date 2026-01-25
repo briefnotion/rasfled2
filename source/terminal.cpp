@@ -903,6 +903,10 @@ char32_t TERMINAL::map_graphics_char(char32_t ascii_char) const
   }
 }
 
+
+
+
+
 // Note: This code assumes the existence of:
 // - Cell, DEFAULT_CELL, CURRENT_ATTRS structures/variables.
 // - ROWS, COLS, SCROLL_TOP, SCROLL_BOTTOM constants/variables.
@@ -1363,6 +1367,307 @@ void TERMINAL::process_output(const std::string& raw_text)
   }
 }
 
+
+
+
+// ---------------------------------------------------------------------
+// --- process_output_2 ---
+// ---------------------------------------------------------------------
+
+
+
+
+void TERMINAL::screen_scoll()
+{
+  for (int row_pos = 1; row_pos < ROWS; row_pos++)
+  {
+    for (int col_pos = 0; col_pos < COLS; col_pos++)
+    {
+      SCREEN[row_pos - 1][col_pos] = SCREEN[row_pos][col_pos];
+    }
+  }
+
+  Cell tmp_blank_cell;
+
+  for (int col_pos = 0; col_pos < COLS; col_pos++)
+  {
+    SCREEN[ROWS -1][col_pos] = tmp_blank_cell;
+  }
+}
+
+void TERMINAL::screen_clear()
+{
+  Cell tmp_blank_cell;
+  for (int row_pos = 0; row_pos < ROWS; row_pos++)
+  {
+    for (int col_pos = 0; col_pos < COLS; col_pos++)
+    {
+      SCREEN[row_pos][col_pos] = tmp_blank_cell;
+    }
+  }
+  CURRENT_ROW = 0;
+  CURRENT_COL = 0;
+}
+
+void TERMINAL::cursor_check()
+{
+  if (CURRENT_COL >= COLS)
+  {
+    CURRENT_COL = 0;
+    CURRENT_ROW++;
+  }
+
+  if (CURRENT_ROW >= ROWS)
+  {
+    screen_scoll();
+    CURRENT_ROW = ROWS -1;
+  }
+}
+
+void TERMINAL::cursor_advance()
+{
+  CURRENT_COL ++;
+}
+
+void TERMINAL::control_BS()
+{
+  CURRENT_COL --;
+  if (CURRENT_COL < 0)
+  {
+    CURRENT_COL = 0;
+  }
+}
+
+void TERMINAL::control_HT()
+{
+  // Calculate next multiple of 8
+  int tab_size = 8;
+  CURRENT_COL = CURRENT_COL + (tab_size - (CURRENT_COL % tab_size));
+
+  // Clamp to the right edge
+  if (CURRENT_COL >= COLS)
+  {
+    CURRENT_COL = COLS - 1;
+  }
+}
+
+void TERMINAL::control_LF()
+{
+  CURRENT_ROW ++;
+  if (CURRENT_ROW >= ROWS)
+  {
+    screen_scoll();
+    CURRENT_ROW = ROWS -1;
+  }
+}
+
+void TERMINAL::control_CR()
+{
+  CURRENT_COL = 0;
+}
+
+void TERMINAL::control_characters(uint8_t Character) 
+{
+  switch (Character) 
+  {
+    case 0x07: // Bell (BEL)
+      // Logic for terminal beep/visual flash
+      break;
+
+    case 0x08: // Backspace (BS)
+      control_BS();
+      break;
+
+    case 0x09: // Horizontal Tab (HT)
+      control_HT();
+      break;
+
+    case 0x0A: // Line Feed (LF)
+      control_LF();
+      break;
+
+    case 0x0D: // Carriage Return (CR)
+      control_CR();
+      break;
+
+    case 0x0C: // Form Feed (FF) 
+      screen_clear();
+      break;
+
+    case 0x0B: // Vertical Tab (VT)
+      // Not Coded
+      break;
+
+    case 0x00: // NUL
+      // Not Coded
+      break;
+    
+    case 0x0F: // Shift In (SI)
+      // Not Coded
+      break;
+
+    case 0x0E: // Shift Out (SO)
+      // Not Coded
+      break;
+
+    default:
+      // Ignore other control characters for now
+      break;
+  }
+}
+
+bool TERMINAL::escape_characters(std::string Raw_Text, int &End_Position) 
+{
+  if (Raw_Text.size() < 2) return false;
+
+  uint8_t next_byte = (uint8_t)Raw_Text[1];
+
+  if (next_byte == '[') 
+  {
+    const size_t MAX_SEQUENCE_LENGTH = 64;
+    size_t search_limit = (Raw_Text.size() > MAX_SEQUENCE_LENGTH) ? MAX_SEQUENCE_LENGTH : Raw_Text.size();
+
+    for (size_t j = 2; j < search_limit; j++) 
+    {
+      uint8_t c = (uint8_t)Raw_Text[j];
+      if (c >= 0x40 && c <= 0x7E) 
+      {
+        End_Position = (int)j;
+        return true;
+      }
+    }
+
+    if (Raw_Text.size() > MAX_SEQUENCE_LENGTH) 
+    {
+      End_Position = 0; 
+      return true; 
+    }
+
+    return false;
+  } 
+  else if (next_byte == '(' || next_byte == ')' || next_byte == '*' || next_byte == '+') 
+  {
+    // These are character set designations (e.g., ESC ( B)
+    // They are always 3 bytes total: ESC + introducer + designation-char
+    if (Raw_Text.size() < 3) return false;
+    End_Position = 2;
+    return true;
+  } 
+  else if (next_byte == '#') 
+  {
+    // These are DEC screen alignment or line-size sequences (e.g., ESC # 8)
+    if (Raw_Text.size() < 3) return false;
+    End_Position = 2;
+    return true;
+  } 
+  else 
+  {
+    // Simple 2-byte Escape Sequences
+    switch (next_byte) 
+    {
+      case 'D': // IND - Index
+          control_LF(); 
+          break;
+      case 'M': // RI - Reverse Index
+          CURRENT_ROW--;
+          if (CURRENT_ROW < 0) CURRENT_ROW = 0;
+          break;
+      case 'E': // NEL - Next Line
+          control_CR(); 
+          control_LF(); 
+          break;
+      case 'H': // HTS - Horizontal Tab Set
+          // In a full implementation, you'd mark this column in a tab-stop bitset
+          break;
+      case 'c': // RIS - Reset to Initial State
+          screen_clear();
+          break;
+      case '7': // DECSC - Save Cursor
+          SAVED_ROW = CURRENT_ROW;
+          SAVED_COL = CURRENT_COL;
+          break;
+      case '8': // DECRC - Restore Cursor
+          CURRENT_ROW = SAVED_ROW;
+          CURRENT_COL = SAVED_COL;
+          break;
+      case '=': // DECKPAM - Application Keypad
+          break;
+      case '>': // DECKPNM - Numeric Keypad
+          break;
+      default:
+          break;
+    }
+    End_Position = 1;
+    return true;
+  }
+}
+
+void TERMINAL::write_to_screen(char32_t Character)
+{
+  cursor_check();
+  SCREEN[CURRENT_ROW][CURRENT_COL].character = Character;
+  cursor_advance();
+}
+
+void TERMINAL::process_output_2(std::string& raw_text)
+{
+
+  PROCESS_OUTPUT_2_BUFFER += raw_text;
+  raw_text.clear();
+
+  size_t i = 0;
+
+  bool escape_sequence_complete = true;
+
+  while (i < PROCESS_OUTPUT_2_BUFFER.size() && escape_sequence_complete) 
+  {
+    uint8_t input_byte = (uint8_t)PROCESS_OUTPUT_2_BUFFER[i];
+
+    // ESC character
+    if (input_byte == 0x1B)
+    {
+      int escape_sequence_end_position = 0;
+      escape_sequence_complete = escape_characters(PROCESS_OUTPUT_2_BUFFER.substr(i), escape_sequence_end_position);
+      
+      if (escape_sequence_complete) 
+      {
+        i += escape_sequence_end_position + 1;
+      }
+    }
+
+    // Control Characters
+    else if (input_byte < 0x20)
+    {
+      // Do nothing for now
+      control_characters(input_byte);
+
+      i++;  // temp
+    }
+
+    // Standard Text (likely UTF-8 encoded)
+    else 
+    {
+      char32_t cp = decode_next_utf8_char(PROCESS_OUTPUT_2_BUFFER, i);
+      write_to_screen(cp);
+    }
+  }
+
+  // Remove only the processed bytes from the buffer
+  PROCESS_OUTPUT_2_BUFFER.erase(0, i);
+
+}
+
+
+
+
+
+
+// ---------------------------------------------------------------------
+
+
+
+
+
 /**
  * @brief Constructor: Initializes the screen buffer, cursor state, and redirects stderr for logging.
  */
@@ -1597,10 +1902,17 @@ void TERMINAL::reader_thread()
     {
       // The shell has sent a complete chunk of data. It is safe to process.
       std::lock_guard<std::mutex> lock(BUF_MUTEX);
-      process_output(raw_text);
       
-      // Clear the buffer after successful processing
-      raw_text = "";
+      if (process_output_2_enable)
+      {
+        process_output_2(raw_text);
+      }
+      else
+      {
+        process_output(raw_text);
+        // Clear the buffer after successful processing
+        raw_text = "";
+      }
     }
   }
   
@@ -1608,7 +1920,15 @@ void TERMINAL::reader_thread()
   if (!raw_text.empty()) 
   {
     std::lock_guard<std::mutex> lock(BUF_MUTEX);
-    process_output(raw_text);
+
+    if (process_output_2_enable)
+    {
+      process_output_2(raw_text);
+    }
+    else
+    {
+      process_output(raw_text);
+    }
   }
 
   //std::stringstream ss; 

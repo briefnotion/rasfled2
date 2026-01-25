@@ -111,6 +111,15 @@ Dont forget to run (as is not part of the instructions but necessary or Segmenta
 
 `sudo make install`
 
+Note:  
+If os update or upgrade breaks rpi_ws281x (on rpi5), a rebuild should correct the problem:
+```
+cd rpi_ws281x/rp1_ws281x_pwm
+make
+cd ..
+sudo make install
+```
+
 ## Clone stb repo to source dir
 STB is the source code needed to load .bmp images as textures for the adverts to be displayed  
 https://github.com/nothings/stb?form=MG0AV3
