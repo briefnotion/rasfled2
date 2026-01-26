@@ -147,6 +147,7 @@ struct Cell
   RgbColor foreground_color = DEFAULT_FG_COLOR;
   RgbColor background_color = DEFAULT_BG_COLOR;
   bool is_bold = false;
+  bool is_underline = false;
   bool is_reverse = false; // NEW REVERSE FLAG
   // Other attributes like underline, italic, etc. can be added here
 };
@@ -160,6 +161,7 @@ int get_param(const std::vector<int>& params, size_t index, int default_val);
 
 // -----------------------------------------------------
 
+/*
 class TERMINAL
 {
   private:
@@ -189,15 +191,12 @@ class TERMINAL
 
   void reset();
 
+  void screen_scoll_down();
   void screen_scoll_up();
-  void screen_scoll();
   void screen_clear();
   void screen_erase_to_end();
   void screen_erase_line_to_end();
   
-  void cursor_check();
-  
-  void cursor_advance();
   void cursor_up();
   void cursor_down();
   void cursor_left();
@@ -207,9 +206,18 @@ class TERMINAL
   void control_HT();
   void control_LF();
   void control_CR();
-
+  
   void control_RI();
   void control_HTS();
+
+  void bracket_device_attribute();
+  void bracket_cursor_home();
+  void bracket_erase_in_display(int mode);
+  void bracket_erase_in_line(int mode);
+  void bracket_delete_character(int count);
+  void bracket_set_reset_mode(std::string params, bool set);
+  void bracket_set_margins(std::string params);
+  void bracket_select_graphic_rendition(std::string params);
 
   void control_characters(uint8_t Character);
 
@@ -242,21 +250,28 @@ class TERMINAL
   int CURRENT_COL;
   int SCROLL_TOP;
   int SCROLL_BOTTOM;
-  int SAVED_ROW; 
-  int SAVED_COL;
   bool APP_CURSOR_MODE; 
   bool AUTO_WRAP_MODE;
   bool REVERSE_WRAP_MODE;
   bool APP_KEYPAD_MODE;
   bool IS_GRAPHICS_MODE;
   bool ANSI_MODE;
-  string ID_RESPONSE;
-
-  // ---- Needs work  ----
-  Cell DEFAULT_CELL; 
+  bool WRAP_PENDING = false;
+  bool BRACKETED_PASTE_MODE = false;
+  bool CURSOR_VISIBLE = true;
+  bool CURSOR_BLINK = true;
+  bool USE_ALT_SCREEN = false;
+  
+  int SAVED_ROW; 
+  int SAVED_COL;
+  bool SAVED_AUTO_WRAP_MODE;
+  Cell SAVED_CURRENT_ATTRS;
+  
+  const Cell DEFAULT_CELL; 
   // Global tracker for current cell attributes
   Cell CURRENT_ATTRS = DEFAULT_CELL;
-  // ---- Needs work  ----
+
+  string ID_RESPONSE;
 
   std::mutex BUF_MUTEX;
 
@@ -276,6 +291,144 @@ class TERMINAL
   void reader_thread();
   void create();
   void send_command(const std::string& charaters);
+};
+*/
+
+class TERMINAL 
+{
+private:
+    /** --- Shell & Process Management --- */
+    pid_t PID;                          // Process ID of the child shell (e.g., /bin/bash)
+    std::thread T;                      // Thread dedicated to reading from the master PTY
+    int MASTER_FD = -1;                 // File descriptor for the PTY master side
+
+    void start_shell();                 // Fork and exec the shell process
+
+    /** --- Internal Screen Manipulation --- */
+    void clear_row_range_full_line(int row);
+    void scroll_up(int count);          // General scroll up by N lines
+    void scroll_down(int count);        // General scroll down by N lines
+
+    /** --- CSI (Control Sequence Introducer) Specialized Parsers --- */
+    // Handles Cursor Position, Up, Down, Forward, Back (CSI A, B, C, D, H, f, G, d)
+    bool process_csi_cursor_movement(char final_char, const std::vector<int>& params);
+    
+    // Handles Erase in Display/Line, Delete, Insert (CSI J, K, P, L, M)
+    bool process_csi_erase_and_edit(char final_char, const std::vector<int>& params);
+    
+    // Handles DEC Private Modes, Reporting, and Cursor Visibility (CSI ?...h/l, CSI c, CSI n)
+    bool process_csi_reporting_and_mode(char final_char, const std::vector<int>& params, bool is_dec_private);
+    
+    // Handles Colors, Bold, Reverse, and specialized VT modes (CSI m, CSI q)
+    bool process_csi_sgr_and_misc(char final_char, const std::vector<int>& params);
+    
+    // Maps ASCII to DEC Special Graphics characters (for line drawing)
+    char32_t map_graphics_char(char32_t ascii_char) const;
+    
+    // Original output processor (v1)
+    void process_output(const std::string& raw_text);
+
+    /** --- Output Processor v2: Refined ANSI/VT100 Logic --- */
+    bool process_output_2_enable = false;
+
+    void reset();                       // Hard reset of terminal state
+
+    void screen_scoll_down();           // Single row scroll within margins (Reverse Index logic)
+    void screen_scoll_up();             // Single row scroll within margins (Line Feed logic)
+    void screen_clear();                // Clears entire buffer and resets cursor
+    void screen_erase_to_end();         // Clears from cursor to end of screen
+    void screen_erase_line_to_end();    // Clears from cursor to end of line
+    
+    void cursor_up();                   // Move cursor up 1 (capped)
+    void cursor_down();                 // Move cursor down 1 (capped)
+    void cursor_left();                 // Move cursor left 1 (capped)
+    void cursor_right();                // Move cursor right 1 (capped)
+
+    void control_BS();                  // Backspace (0x08)
+    void control_HT();                  // Horizontal Tab (0x09)
+    void control_LF();                  // Line Feed (0x0A) - handles scrolling
+    void control_CR();                  // Carriage Return (0x0D)
+    
+    void control_RI();                  // Reverse Index (ESC M)
+    void control_HTS();                 // Horizontal Tab Set (ESC H)
+
+    void bracket_device_attribute();    // CSI c (Terminal ID)
+    void bracket_cursor_home();         // CSI H (Reset to 0,0)
+    void bracket_erase_in_display(int mode); // CSI J
+    void bracket_erase_in_line(int mode);    // CSI K
+    void bracket_delete_character(int count); // CSI P
+    void bracket_set_reset_mode(std::string params, bool set); // CSI h/l
+    void bracket_set_margins(std::string params);              // CSI r
+    void bracket_select_graphic_rendition(std::string params); // CSI m (SGR)
+
+    void control_characters(uint8_t Character); // Handles C0 codes (0x00-0x1F)
+
+    void handle_simple_escape(uint8_t command); // ESC followed by 1 byte
+    void handle_bracket_escape(std::string sequence); // Full CSI sequence
+    void handle_parameterized_escape(std::string Raw_Text);
+
+    // High-level escape sequence identifying logic
+    bool escape_characters(std::string Raw_Text, int &End_Position);
+
+    void write_to_screen(char32_t Character); // The "Pen": writes data to buffer
+
+    std::string PROCESS_OUTPUT_2_BUFFER = ""; // Fragment buffer for ESC sequences
+    void process_output_2(std::string& raw_text); // v2 Entry point
+
+public:
+    static const int ROWS = 26;
+    static const int COLS = 87;
+
+    /** --- Terminal State & Buffers --- */
+    Cell SCREEN[ROWS][COLS];            // Primary grid of characters/attributes
+    bool TAB_STOPS[COLS];               // Column-indexed tab stop flags
+    int CURRENT_ROW;                    // Cursor Row (0 to ROWS-1)
+    int CURRENT_COL;                    // Cursor Column (0 to COLS-1)
+    int SCROLL_TOP;                     // Top margin for scrolling (usually 0)
+    int SCROLL_BOTTOM;                  // Bottom margin for scrolling (usually ROWS-1)
+    
+    /** --- DEC/ANSI Modes --- */
+    bool APP_CURSOR_MODE;               // Send specialized sequences for arrows
+    bool AUTO_WRAP_MODE;                // Wrap to next line at COLS
+    bool REVERSE_WRAP_MODE;             // Backspace wraps to previous line
+    bool APP_KEYPAD_MODE;               // Specialized keypad behavior
+    bool IS_GRAPHICS_MODE;              // Use line-drawing character set
+    bool ANSI_MODE;                     // VT100 (true) vs VT52 (false)
+    bool WRAP_PENDING = false;          // True if cursor is at edge waiting for next char
+    bool BRACKETED_PASTE_MODE = false;  // Wrap pasted text in start/end markers
+    bool CURSOR_VISIBLE = true;         // DECTCEM
+    bool CURSOR_BLINK = true;
+    bool USE_ALT_SCREEN = false;        // Main buffer vs Alternate buffer
+
+    /** --- Saved States (ESC 7 / ESC 8) --- */
+    int SAVED_ROW; 
+    int SAVED_COL;
+    bool SAVED_AUTO_WRAP_MODE;
+    Cell SAVED_CURRENT_ATTRS;
+    
+    const Cell DEFAULT_CELL;            // Baseline cell (empty, default colors)
+    Cell CURRENT_ATTRS = DEFAULT_CELL;  // Active pen attributes for new characters
+
+    std::string ID_RESPONSE;            // Terminal ID string to send back to shell
+
+    std::mutex BUF_MUTEX;               // Protects screen buffers during thread access
+    bool SHELL_EXITED = false;          // Flag for thread termination
+
+    TERMINAL();
+    ~TERMINAL();
+
+    /** --- External Interface for UI --- */
+    std::mutex& get_mutex();
+
+    // Extracts text and attribute maps for UI rendering
+    void get_line_text(int row, bool cursor_on, 
+                       std::string &line, 
+                       std::string &line_reverse, 
+                       std::string &line_reverse_map);
+
+    void reader_thread();               // Background process reading from PTY
+    void create();                      // Initialization and shell launch
+    void send_command(const std::string& characters); // Send user input to PTY
 };
 
 // ---------------------------------------------------------------------------------------

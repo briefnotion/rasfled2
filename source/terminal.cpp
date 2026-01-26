@@ -1376,6 +1376,8 @@ void TERMINAL::reset()
   CURRENT_COL = 0;
   SAVED_ROW = 0;
   SAVED_COL = 0;
+  SAVED_AUTO_WRAP_MODE = true;
+  SAVED_CURRENT_ATTRS = DEFAULT_CELL;
 
   // 2. Reset Scroll Margins to full screen
   SCROLL_TOP = 0;
@@ -1387,8 +1389,13 @@ void TERMINAL::reset()
   REVERSE_WRAP_MODE = false;
   APP_KEYPAD_MODE = false;
   IS_GRAPHICS_MODE = false;
-
   ANSI_MODE = true;
+  WRAP_PENDING = false;
+  BRACKETED_PASTE_MODE = false;
+  CURSOR_VISIBLE = true;
+  CURSOR_BLINK = true;
+  USE_ALT_SCREEN = false;
+  CURRENT_ATTRS = DEFAULT_CELL;
 
   // VT52 Identity response is traditionally fixed as ESC / Z
   // VT100 Identity (Device Attributes) response:
@@ -1408,7 +1415,7 @@ void TERMINAL::reset()
   }
 }
 
-void TERMINAL::screen_scoll_up()
+void TERMINAL::screen_scoll_down()
 {
   for (int row_pos = SCROLL_BOTTOM; row_pos > SCROLL_TOP; row_pos--)
   {
@@ -1424,7 +1431,7 @@ void TERMINAL::screen_scoll_up()
   }
 }
 
-void TERMINAL::screen_scoll()
+void TERMINAL::screen_scoll_up()
 {
   for (int row_pos = SCROLL_TOP + 1; row_pos <= SCROLL_BOTTOM; row_pos++)
   {
@@ -1475,32 +1482,13 @@ void TERMINAL::screen_erase_line_to_end()
   }
 }
 
-void TERMINAL::cursor_check()
-{
-  if (CURRENT_COL >= COLS)
-  {
-    CURRENT_COL = 0;
-    CURRENT_ROW++;
-  }
-
-  if (CURRENT_ROW >= ROWS)
-  {
-    screen_scoll();
-    CURRENT_ROW = ROWS -1;
-  }
-}
-
-void TERMINAL::cursor_advance()
-{
-  CURRENT_COL ++;
-}
-
 void TERMINAL::cursor_up()
 {
   if (CURRENT_ROW > 0)
   {
     CURRENT_ROW--;
   }
+  WRAP_PENDING = false;
 }
 
 void TERMINAL::cursor_down()
@@ -1509,6 +1497,7 @@ void TERMINAL::cursor_down()
   {
     CURRENT_ROW++;
   }
+  WRAP_PENDING = false;
 }
 
 void TERMINAL::cursor_left()
@@ -1517,6 +1506,7 @@ void TERMINAL::cursor_left()
   {
     CURRENT_COL--;
   }
+  WRAP_PENDING = false;
 }
 
 void TERMINAL::cursor_right()
@@ -1525,6 +1515,7 @@ void TERMINAL::cursor_right()
   {
     CURRENT_COL++;
   }
+  WRAP_PENDING = false;
 }
 
 void TERMINAL::control_BS()
@@ -1534,37 +1525,38 @@ void TERMINAL::control_BS()
   {
     CURRENT_COL = 0;
   }
+  WRAP_PENDING = false;
 }
 
-void TERMINAL::control_HT()
+void TERMINAL::control_HT() 
 {
-  // Scan forward from the current column to find the next set tab stop
-  bool found = false;
-  for (int col = CURRENT_COL + 1; col < COLS; col++)
+  WRAP_PENDING = false;
+
+  // Move to next tab stop
+  for (int i = CURRENT_COL + 1; i < COLS; i++) 
   {
-    if (TAB_STOPS[col])
+    if (TAB_STOPS[i]) 
     {
-      CURRENT_COL = col;
-      found = true;
-      break;
+      CURRENT_COL = i;
+      return;
     }
   }
-
-  // If no tab stop is found, move to the right edge (Standard VT behavior)
-  if (!found)
-  {
-    CURRENT_COL = COLS - 1;
-  }
+  // If no more tab stops, move to the last column
+  CURRENT_COL = COLS - 1;
 }
 
 void TERMINAL::control_LF()
 {
-  CURRENT_ROW ++;
-  if (CURRENT_ROW >= ROWS)
+  // Index: Move cursor down, scroll text UP if at bottom margin
+  if (CURRENT_ROW == SCROLL_BOTTOM) 
   {
-    screen_scoll();
-    CURRENT_ROW = ROWS -1;
+    screen_scoll_up(); 
+  } 
+  else if (CURRENT_ROW < ROWS - 1) 
+  {
+    CURRENT_ROW++;
   }
+  WRAP_PENDING = false;
 }
 
 void TERMINAL::control_CR()
@@ -1574,12 +1566,16 @@ void TERMINAL::control_CR()
 
 void TERMINAL::control_RI()
 {
-  CURRENT_ROW--;
-  if (CURRENT_ROW < 0) 
+  // Reverse Index: Move cursor up, scroll if at top margin
+  if (CURRENT_ROW == SCROLL_TOP) 
   {
-    screen_scoll_up();
-    CURRENT_ROW = 0;
+    screen_scoll_down();
+  } 
+  else if (CURRENT_ROW > 0) 
+  {
+    CURRENT_ROW--;
   }
+  WRAP_PENDING = false; // Manual movement clears pending wrap
 }
 
 void TERMINAL::control_HTS()
@@ -1589,6 +1585,36 @@ void TERMINAL::control_HTS()
     TAB_STOPS[CURRENT_COL] = true;
   }
 }
+
+
+
+
+
+
+
+
+
+void TERMINAL::bracket_device_attribute()
+{
+  std::cout << ID_RESPONSE << std::flush;
+}
+
+void TERMINAL::bracket_cursor_home()
+{
+  // Simple implementation for ESC [ H
+  // Future logic: parse params for ESC [ row ; col H
+  CURRENT_ROW = 0;
+  CURRENT_COL = 0;
+  WRAP_PENDING = false;
+}
+
+
+
+
+
+
+
+
 
 void TERMINAL::control_characters(uint8_t Character) 
 {
@@ -1658,9 +1684,14 @@ void TERMINAL::handle_simple_escape(uint8_t command)
       cursor_right();
       break;
     case 'D': // 0x0A - IND - Index  or Cursor Left(VT52 compatibility)
-      //cursor_left();
-      // or is it suposed to be
-      control_LF(); 
+      if (ANSI_MODE)
+      {
+        control_LF(); // Move down, scroll if at bottom
+      }
+      else
+      {
+        cursor_left();           // VT52 behavior
+      }
       break;
     case 'F': // 0x46 - Enter Graphics Mode (VT52)
       IS_GRAPHICS_MODE = true;
@@ -1700,10 +1731,15 @@ void TERMINAL::handle_simple_escape(uint8_t command)
     case '7': // 0x37 - DECSC - Save Cursor
         SAVED_ROW = CURRENT_ROW;
         SAVED_COL = CURRENT_COL;
+        SAVED_AUTO_WRAP_MODE = AUTO_WRAP_MODE;
+        SAVED_CURRENT_ATTRS = CURRENT_ATTRS;
         break;
     case '8': // 0x38 - DECRC - Restore Cursor
         CURRENT_ROW = SAVED_ROW;
         CURRENT_COL = SAVED_COL;
+        AUTO_WRAP_MODE = SAVED_AUTO_WRAP_MODE;
+        CURRENT_ATTRS = SAVED_CURRENT_ATTRS;
+        WRAP_PENDING = false;
         break;
     case '=': // DECKPAM - Application Keypad
         APP_KEYPAD_MODE = true;
@@ -1720,15 +1756,325 @@ void TERMINAL::handle_simple_escape(uint8_t command)
   }
 }
 
-void TERMINAL::handle_bracket_escape(std::string sequence)
+void TERMINAL::bracket_erase_in_display(int mode)
 {
-  // Check for Device Attributes (DA) request: ESC [ c or ESC [ 0 c
-  if (sequence == "\033[c" || sequence == "\033[0c")
+  // Mode 0: Erase from cursor to end of screen
+  // Mode 1: Erase from beginning of screen to cursor
+  // Mode 2: Erase entire screen (cursor does not move)
+  // Mode 3: Erase entire screen including scrollback buffer
+  
+  if (mode == 0) 
   {
-    std::cout << ID_RESPONSE << std::flush;
+    screen_erase_to_end();
+  } 
+  else if (mode == 1) 
+  {
+    // Erase from (0,0) to current cursor
+    for (int r = 0; r <= CURRENT_ROW; r++) 
+    {
+      int max_c = (r == CURRENT_ROW) ? CURRENT_COL : COLS - 1;
+      for (int c = 0; c <= max_c; c++) 
+      {
+        SCREEN[r][c] = DEFAULT_CELL;
+      }
+    }
+  } 
+  else if (mode == 2 || mode == 3) 
+  {
+    // Erase entire screen
+    for (int r = 0; r < ROWS; r++) 
+    {
+      for (int c = 0; c < COLS; c++) 
+      {
+        SCREEN[r][c] = DEFAULT_CELL;
+      }
+    }
+  }
+  WRAP_PENDING = false;
+}
+
+void TERMINAL::bracket_erase_in_line(int mode)
+{
+  // Mode 0: Erase from cursor to end of line
+  // Mode 1: Erase from beginning of line to cursor
+  // Mode 2: Erase entire line
+  if (mode == 0) 
+  {
+    for (int c = CURRENT_COL; c < COLS; c++) 
+    {
+      SCREEN[CURRENT_ROW][c] = DEFAULT_CELL;
+    }
+  } 
+  else if (mode == 1) 
+  {
+    for (int c = 0; c <= CURRENT_COL; c++) 
+    {
+      SCREEN[CURRENT_ROW][c] = DEFAULT_CELL;
+    }
+  } 
+  else if (mode == 2) 
+  {
+    for (int c = 0; c < COLS; c++) 
+    {
+      SCREEN[CURRENT_ROW][c] = DEFAULT_CELL;
+    }
+  }
+  WRAP_PENDING = false;
+}
+
+void TERMINAL::bracket_delete_character(int count)
+{
+  if (count < 1) count = 1;
+  int remaining_on_line = COLS - CURRENT_COL;
+  if (count > remaining_on_line) count = remaining_on_line;
+
+  // Shift characters to the left
+  for (int c = CURRENT_COL; c < COLS - count; c++) 
+  {
+    SCREEN[CURRENT_ROW][c] = SCREEN[CURRENT_ROW][c + count];
+  }
+  // Fill the end of the line with default cells
+  for (int c = COLS - count; c < COLS; c++) 
+  {
+    SCREEN[CURRENT_ROW][c] = DEFAULT_CELL;
+  }
+  WRAP_PENDING = false;
+}
+
+void TERMINAL::bracket_set_reset_mode(std::string params, bool set)
+{
+  if (!params.empty() && params[0] == '?')
+  {
+    std::stringstream ss(params.substr(1));
+    std::string segment;
+    while (std::getline(ss, segment, ';')) 
+    {
+      int mode = 0;
+      try { mode = std::stoi(segment); } catch(...) { continue; }
+
+      switch (mode)
+      {
+        case 1:    APP_CURSOR_MODE = set; break;
+        case 7:    AUTO_WRAP_MODE = set; break;
+        case 12:   CURSOR_BLINK = set; break;
+        case 25:   CURSOR_VISIBLE = set; break;
+        case 1049: USE_ALT_SCREEN = set; bracket_erase_in_display(2); break;
+        case 2004: BRACKETED_PASTE_MODE = set; break;
+        default:
+            std::cout << "[DEBUG] Mode " << (set ? "h" : "l") << ": " << mode << std::endl;
+            break;
+      }
+    }
+  }
+}
+
+void TERMINAL::bracket_set_margins(std::string params)
+{
+  int top = 1;
+  int bottom = ROWS;
+
+  if (!params.empty())
+  {
+    size_t sep = params.find(';');
+    try 
+    {
+      if (sep != std::string::npos) 
+      {
+        std::string t_str = params.substr(0, sep);
+        std::string b_str = params.substr(sep + 1);
+        if (!t_str.empty()) top = std::stoi(t_str);
+        if (!b_str.empty()) bottom = std::stoi(b_str);
+      } 
+      else 
+      {
+        top = std::stoi(params);
+      }
+    } 
+    catch (...) {}
+  }
+
+  // Standard terminal coordinates are 1-based
+  top -= 1;
+  bottom -= 1;
+
+  // Validation
+  if (top < 0) top = 0;
+  if (bottom >= ROWS) bottom = ROWS - 1;
+  if (top < bottom) 
+  {
+    SCROLL_TOP = top;
+    SCROLL_BOTTOM = bottom;
+  }
+
+  // Reset cursor to home when margins change
+  bracket_cursor_home();
+}
+
+void TERMINAL::bracket_select_graphic_rendition(std::string params)
+{
+  if (params.empty()) 
+  {
+    CURRENT_ATTRS = DEFAULT_CELL;
     return;
   }
-  
+
+  std::stringstream ss(params);
+  std::string segment;
+  while (std::getline(ss, segment, ';')) 
+  {
+    int val = 0;
+    try { val = std::stoi(segment); } catch (...) { continue; }
+
+    switch (val) 
+    {
+        case 0:  CURRENT_ATTRS = DEFAULT_CELL; break;
+        case 1:  CURRENT_ATTRS.is_bold = true; break;
+        case 4:  CURRENT_ATTRS.is_underline = true; break;
+        case 7:  CURRENT_ATTRS.is_reverse = true; break;
+        case 22: CURRENT_ATTRS.is_bold = false; break;
+        case 24: CURRENT_ATTRS.is_underline = false; break;
+        case 27: CURRENT_ATTRS.is_reverse = false; break;
+        // Add color support here in the future
+        default: break;
+    }
+  }
+}
+
+void TERMINAL::handle_bracket_escape(std::string sequence)
+{
+  // CSI is sequence[1] == '['
+  // Last character is the command
+  char command = sequence.back();
+
+  // Device Attributes (DA) request: ESC [ c or ESC [ 0 c
+  if (command == 'c')
+  {
+    if (sequence == "\033[c" || sequence == "\033[0c")
+    {
+      bracket_device_attribute();
+      return;
+    }
+  }
+
+  // Cursor Home (CUP) / Horizontal Vertical Position (HVP)
+  // ESC [ H  (Home to 1,1 which is 0,0 internally)
+  if (command == 'H' || command == 'f')
+  {
+    bracket_cursor_home();
+    return;
+  }
+
+  if (command == 'C')
+  {
+    int count = 1;
+    std::string params = sequence.substr(2, sequence.size() - 3);
+    if (!params.empty()) 
+    {
+      try { count = std::stoi(params); } catch (...) { count = 1; }
+    }
+    for (int i = 0; i < count; i++) cursor_right();
+    return;
+  }
+
+  if (command == 'G')
+  {
+    int col = 1;
+    std::string params = sequence.substr(2, sequence.size() - 3);
+    if (!params.empty()) 
+    {
+      try { col = std::stoi(params); } catch (...) { col = 1; }
+    }
+    // 1-based to 0-based
+    CURRENT_COL = std::clamp(col - 1, 0, COLS - 1);
+    WRAP_PENDING = false;
+    return;
+  }
+
+  if (command == 'd')
+  {
+    int row = 1;
+    std::string params = sequence.substr(2, sequence.size() - 3);
+    if (!params.empty()) 
+    {
+      try { row = std::stoi(params); } catch (...) { row = 1; }
+    }
+    // VPA: Vertical Line Position Absolute (1-based to 0-based)
+    CURRENT_ROW = std::clamp(row - 1, 0, ROWS - 1);
+    WRAP_PENDING = false;
+    return;
+  }
+
+  if (command == 't')
+  {
+    // XTerm Window Operations (like ESC[22;0;0t and ESC[23;0;0t)
+    // We'll acknowledge these sequences to prevent them from being treated as text.
+    // Some apps use these to save/restore the window title.
+    return;
+  }
+
+  // Erase in Display (ED)
+  if (command == 'J')
+  {
+    // Extract numeric parameter
+    int mode = 0;
+    std::string params = sequence.substr(2, sequence.size() - 3);
+    if (!params.empty()) 
+    {
+      try 
+      {
+          mode = std::stoi(params);
+      } catch (...) { mode = 0; }
+    }
+    bracket_erase_in_display(mode);
+    return;
+  }
+
+  if (command == 'K')
+  {
+    int mode = 0;
+    std::string params = sequence.substr(2, sequence.size() - 3);
+    if (!params.empty()) 
+    {
+      try { mode = std::stoi(params); } catch (...) { mode = 0; }
+    }
+    bracket_erase_in_line(mode);
+    return;
+  }
+
+  if (command == 'P')
+  {
+    int count = 1;
+    std::string params = sequence.substr(2, sequence.size() - 3);
+    if (!params.empty()) 
+    {
+      try { count = std::stoi(params); } catch (...) { count = 1; }
+    }
+    bracket_delete_character(count);
+    return;
+  }
+
+  // Set Mode (SM) or Reset Mode (RM)
+  if (command == 'h' || command == 'l')
+  {
+    std::string params = sequence.substr(2, sequence.size() - 3);
+    bracket_set_reset_mode(params, (command == 'h'));
+    return;
+  }
+
+  if (command == 'm')
+  {
+    std::string params = sequence.substr(2, sequence.size() - 3);
+    bracket_select_graphic_rendition(params);
+    return;
+  }
+
+  if (command == 'r')
+  {
+    std::string params = sequence.substr(2, sequence.size() - 3);
+    bracket_set_margins(params);
+    return;
+  }
+
   // Comprehensive output for unhandled sequences
   std::string printable_seq = "";
   for (unsigned char c : sequence)
@@ -1742,9 +2088,19 @@ void TERMINAL::handle_bracket_escape(std::string sequence)
     }
     else printable_seq += (char)c;
   }
-
   std::cout << "[DEBUG] Unhandled CSI sequence: " << printable_seq << std::endl;
 }
+
+
+
+
+
+
+
+
+
+
+
 
 // Handler for ESC + Char + Params (e.g., VT52 Direct Cursor Addressing)
 void TERMINAL::handle_parameterized_escape(std::string Raw_Text)
@@ -1761,98 +2117,6 @@ void TERMINAL::handle_parameterized_escape(std::string Raw_Text)
   }
 }
 
-/*
-bool TERMINAL::escape_characters(std::string Raw_Text, int &End_Position) 
-{
-  if (Raw_Text.size() < 2) return false;
-
-  uint8_t next_byte = (uint8_t)Raw_Text[1];
-
-  if (next_byte == '[') 
-  {
-    const size_t MAX_SEQUENCE_LENGTH = 64;
-    size_t search_limit = (Raw_Text.size() > MAX_SEQUENCE_LENGTH) ? MAX_SEQUENCE_LENGTH : Raw_Text.size();
-
-    for (size_t j = 2; j < search_limit; j++) 
-    {
-      uint8_t c = (uint8_t)Raw_Text[j];
-      if (c >= 0x40 && c <= 0x7E) 
-      {
-        End_Position = (int)j;
-        return true;
-      }
-    }
-
-    if (Raw_Text.size() > MAX_SEQUENCE_LENGTH) 
-    {
-      End_Position = 0; 
-      return true; 
-    }
-
-    return false;
-  } 
-  else if (next_byte == '(' || next_byte == ')' || next_byte == '*' || next_byte == '+') 
-  {
-    // These are character set designations (e.g., ESC ( B)
-    // They are always 3 bytes total: ESC + introducer + designation-char
-    if (Raw_Text.size() < 3) return false;
-    End_Position = 2;
-    return true;
-  } 
-  else if (next_byte == '#') 
-  {
-    // These are DEC screen alignment or line-size sequences (e.g., ESC # 8)
-    if (Raw_Text.size() < 3) return false;
-    End_Position = 2;
-    return true;
-  } 
-  else 
-  {
-    // Simple 2-byte Escape Sequences
-    switch (next_byte) 
-    {
-      case 'D': // 0x0A - IND - Index
-        control_LF(); 
-        break;
-      case 'M': // 0x4D - RI - Reverse Index
-        control_RI();
-        break;
-      case 'E': // 0x45 - NEL - Next Line
-        control_CR(); 
-        control_LF(); 
-        break;
-      case 'H': // 0x4B - HTS - Horizontal Tab Set
-        control_HTS();
-        break;
-      case 'c': // 0x63 -  RIS - Reset to Initial State
-        reset();
-        break;
-      case '7': // 0x37 - DECSC - Save Cursor
-          SAVED_ROW = CURRENT_ROW;
-          SAVED_COL = CURRENT_COL;
-          break;
-      case '8': // 0x38 - DECRC - Restore Cursor
-          CURRENT_ROW = SAVED_ROW;
-          CURRENT_COL = SAVED_COL;
-          break;
-      case '=': // DECKPAM - Application Keypad
-          APP_KEYPAD_MODE = true;
-          break;
-      case '>': // DECKPNM - Numeric Keypad
-          APP_KEYPAD_MODE = false;
-          break;
-      default:
-        // Log the hex code of the skipped control character for debugging
-        std::cout << "[DEBUG] Skipped Control Character: 0x" 
-          << std::hex << std::setw(2) << std::setfill('0') 
-          << (int)next_byte << std::dec << std::endl;
-          break;
-    }
-    End_Position = 1;
-    return true;
-  }
-}
-  */
 
 bool TERMINAL::escape_characters(std::string Raw_Text, int &End_Position) 
 {
@@ -1909,9 +2173,29 @@ bool TERMINAL::escape_characters(std::string Raw_Text, int &End_Position)
 
 void TERMINAL::write_to_screen(char32_t Character)
 {
-  cursor_check();
-  SCREEN[CURRENT_ROW][CURRENT_COL].character = Character;
-  cursor_advance();
+  if (WRAP_PENDING && AUTO_WRAP_MODE)
+  {
+    CURRENT_COL = 0;
+    control_LF(); // Move down or scroll
+    WRAP_PENDING = false;
+  }
+
+  Cell new_cell = CURRENT_ATTRS;
+  new_cell.character = Character;
+  SCREEN[CURRENT_ROW][CURRENT_COL] = new_cell;
+
+  // Advance logic
+  if (CURRENT_COL < COLS - 1) 
+  {
+    CURRENT_COL++;
+    WRAP_PENDING = false;
+  } 
+  else 
+  {
+    // We hit the last column. Don't move cursor yet.
+    // Set flag so the NEXT character triggers the wrap.
+    WRAP_PENDING = true;
+  }
 }
 
 void TERMINAL::process_output_2(std::string& raw_text)
