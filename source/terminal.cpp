@@ -177,11 +177,6 @@ int get_param(const std::vector<int>& params, size_t index, int default_val)
 	return index < params.size() ? params[index] : default_val;
 }
 
-// MANDATORY FIX: Define the constant default cell for use in std::fill
-static const Cell DEFAULT_CELL = {}; 
-// Global tracker for current cell attributes
-Cell CURRENT_ATTRS = DEFAULT_CELL;
-
 // ---------------------------------------------------------------------------------------
 
 // Spawn shell inside PTY
@@ -1374,12 +1369,64 @@ void TERMINAL::process_output(const std::string& raw_text)
 // --- process_output_2 ---
 // ---------------------------------------------------------------------
 
+void TERMINAL::reset()
+{
+  // 1. Reset Cursor Position
+  CURRENT_ROW = 0;
+  CURRENT_COL = 0;
+  SAVED_ROW = 0;
+  SAVED_COL = 0;
 
+  // 2. Reset Scroll Margins to full screen
+  SCROLL_TOP = 0;
+  SCROLL_BOTTOM = ROWS - 1;
 
+  // 3. Reset Modes to Power-on Defaults
+  APP_CURSOR_MODE = false;
+  AUTO_WRAP_MODE = true;
+  REVERSE_WRAP_MODE = false;
+  APP_KEYPAD_MODE = false;
+  IS_GRAPHICS_MODE = false;
+
+  ANSI_MODE = true;
+
+  // VT52 Identity response is traditionally fixed as ESC / Z
+  // VT100 Identity (Device Attributes) response:
+  // ESC [ ? 1 ; 2 c  indicates a VT100 with Advanced Video Option.
+  ID_RESPONSE = "\033[?1;2c";
+
+  // 4. Clear the screen buffer
+  for (int i = 0; i < ROWS; ++i) 
+  {
+      std::fill(SCREEN[i], SCREEN[i] + COLS, DEFAULT_CELL);
+  }
+
+  // 5. Initialize Tab Stops: Set a stop every 8th column starting at column 8
+  for (int j = 0; j < COLS; j++)
+  {
+      TAB_STOPS[j] = (j > 0 && j % 8 == 0);
+  }
+}
+
+void TERMINAL::screen_scoll_up()
+{
+  for (int row_pos = SCROLL_BOTTOM; row_pos > SCROLL_TOP; row_pos--)
+  {
+    for (int col_pos = 0; col_pos < COLS; col_pos++)
+    {
+      SCREEN[row_pos][col_pos] = SCREEN[row_pos -1][col_pos];
+    }
+  }
+
+  for (int col_pos = 0; col_pos < COLS; col_pos++)
+  {
+    SCREEN[SCROLL_TOP][col_pos] = CURRENT_ATTRS;
+  }
+}
 
 void TERMINAL::screen_scoll()
 {
-  for (int row_pos = 1; row_pos < ROWS; row_pos++)
+  for (int row_pos = SCROLL_TOP + 1; row_pos <= SCROLL_BOTTOM; row_pos++)
   {
     for (int col_pos = 0; col_pos < COLS; col_pos++)
     {
@@ -1387,11 +1434,9 @@ void TERMINAL::screen_scoll()
     }
   }
 
-  Cell tmp_blank_cell;
-
   for (int col_pos = 0; col_pos < COLS; col_pos++)
   {
-    SCREEN[ROWS -1][col_pos] = tmp_blank_cell;
+    SCREEN[SCROLL_BOTTOM][col_pos] = DEFAULT_CELL;
   }
 }
 
@@ -1407,6 +1452,27 @@ void TERMINAL::screen_clear()
   }
   CURRENT_ROW = 0;
   CURRENT_COL = 0;
+}
+
+void TERMINAL::screen_erase_to_end()
+{
+  for (int r = CURRENT_ROW; r < ROWS; r++) 
+  {
+    int start_c = (r == CURRENT_ROW) ? CURRENT_COL : 0;
+    for (int c = start_c; c < COLS; c++) 
+    {
+      SCREEN[r][c] = CURRENT_ATTRS;
+    }
+  }
+}
+
+void TERMINAL::screen_erase_line_to_end()
+{
+  // Clear only from the current column to the end of the current row
+  for (int c = CURRENT_COL; c < COLS; c++) 
+  {
+    SCREEN[CURRENT_ROW][c] = CURRENT_ATTRS;
+  }
 }
 
 void TERMINAL::cursor_check()
@@ -1429,6 +1495,38 @@ void TERMINAL::cursor_advance()
   CURRENT_COL ++;
 }
 
+void TERMINAL::cursor_up()
+{
+  if (CURRENT_ROW > 0)
+  {
+    CURRENT_ROW--;
+  }
+}
+
+void TERMINAL::cursor_down()
+{
+  if (CURRENT_ROW < ROWS - 1)
+  {
+    CURRENT_ROW++;
+  }
+}
+
+void TERMINAL::cursor_left()
+{
+  if (CURRENT_COL > 0)
+  {
+    CURRENT_COL--;
+  }
+}
+
+void TERMINAL::cursor_right()
+{
+  if (CURRENT_COL < COLS - 1)
+  {
+    CURRENT_COL++;
+  }
+}
+
 void TERMINAL::control_BS()
 {
   CURRENT_COL --;
@@ -1440,12 +1538,20 @@ void TERMINAL::control_BS()
 
 void TERMINAL::control_HT()
 {
-  // Calculate next multiple of 8
-  int tab_size = 8;
-  CURRENT_COL = CURRENT_COL + (tab_size - (CURRENT_COL % tab_size));
+  // Scan forward from the current column to find the next set tab stop
+  bool found = false;
+  for (int col = CURRENT_COL + 1; col < COLS; col++)
+  {
+    if (TAB_STOPS[col])
+    {
+      CURRENT_COL = col;
+      found = true;
+      break;
+    }
+  }
 
-  // Clamp to the right edge
-  if (CURRENT_COL >= COLS)
+  // If no tab stop is found, move to the right edge (Standard VT behavior)
+  if (!found)
   {
     CURRENT_COL = COLS - 1;
   }
@@ -1466,13 +1572,31 @@ void TERMINAL::control_CR()
   CURRENT_COL = 0;
 }
 
+void TERMINAL::control_RI()
+{
+  CURRENT_ROW--;
+  if (CURRENT_ROW < 0) 
+  {
+    screen_scoll_up();
+    CURRENT_ROW = 0;
+  }
+}
+
+void TERMINAL::control_HTS()
+{
+  if (CURRENT_COL < COLS) 
+  {
+    TAB_STOPS[CURRENT_COL] = true;
+  }
+}
+
 void TERMINAL::control_characters(uint8_t Character) 
 {
   switch (Character) 
   {
-    case 0x07: // Bell (BEL)
+    //case 0x07: // Bell (BEL)
       // Logic for terminal beep/visual flash
-      break;
+    //  break;
 
     case 0x08: // Backspace (BS)
       control_BS();
@@ -1494,28 +1618,150 @@ void TERMINAL::control_characters(uint8_t Character)
       screen_clear();
       break;
 
-    case 0x0B: // Vertical Tab (VT)
+    //case 0x0B: // Vertical Tab (VT)
       // Not Coded
-      break;
+    //  break;
 
-    case 0x00: // NUL
+    //case 0x00: // NUL
       // Not Coded
-      break;
+    //  break;
     
-    case 0x0F: // Shift In (SI)
+    //case 0x0F: // Shift In (SI)
       // Not Coded
-      break;
+    //  break;
 
-    case 0x0E: // Shift Out (SO)
+    //case 0x0E: // Shift Out (SO)
       // Not Coded
-      break;
+    //  break;
 
     default:
-      // Ignore other control characters for now
+      // Log the hex code of the skipped control character for debugging
+      std::cout << "[DEBUG] Skipped Control Character: 0x" 
+                << std::hex << std::setw(2) << std::setfill('0') 
+                << (int)Character << std::dec << std::endl;
       break;
   }
 }
 
+
+// Handler for ESC + Character (2-byte sequences)
+void TERMINAL::handle_simple_escape(uint8_t command)
+{
+  switch (command) 
+  {    case 'A': // Cursor Up (VT52 compatibility)
+      cursor_up();
+      break;
+    case 'B': // Cursor Down (VT52 compatibility)
+      cursor_down();
+      break;
+    case 'C': // Cursor Right (VT52 compatibility)
+      cursor_right();
+      break;
+    case 'D': // 0x0A - IND - Index  or Cursor Left(VT52 compatibility)
+      //cursor_left();
+      // or is it suposed to be
+      control_LF(); 
+      break;
+    case 'F': // 0x46 - Enter Graphics Mode (VT52)
+      IS_GRAPHICS_MODE = true;
+      break;
+    case 'G': // 0x47 - Exit Graphics Mode (VT52)
+      IS_GRAPHICS_MODE = false;
+      break;
+    case 'I': // 0x49 - Reverse Line Feed (VT52 compatibility)
+      control_RI();
+      break;
+    case 'J': // 0x4A - Erase to End of Screen (VT52 compatibility)
+      screen_erase_to_end();
+      break;
+    case 'K': // 0x4B - Erase to End of Line
+      screen_erase_line_to_end();
+      break;
+    case 'M': // 0x4D - RI - Reverse Index
+      control_RI();
+      break;
+    case 'E': // 0x45 - NEL - Next Line
+      control_CR(); 
+      control_LF(); 
+      break;
+    case 'H': // 0x4B - HTS - Horizontal Tab Set
+      control_HTS();
+      break;    
+    case 'Z': // 0x5A - Identify (VT52)
+      // Standard VT52 response is "ESC / Z"
+      // needs to respond with ID_RESPONSE
+      break;
+    case '<': // 0x3C - Enter ANSI Mode (VT52)
+      ANSI_MODE = true;
+      break;
+    case 'c': // 0x63 -  RIS - Reset to Initial State
+      reset();
+      break;
+    case '7': // 0x37 - DECSC - Save Cursor
+        SAVED_ROW = CURRENT_ROW;
+        SAVED_COL = CURRENT_COL;
+        break;
+    case '8': // 0x38 - DECRC - Restore Cursor
+        CURRENT_ROW = SAVED_ROW;
+        CURRENT_COL = SAVED_COL;
+        break;
+    case '=': // DECKPAM - Application Keypad
+        APP_KEYPAD_MODE = true;
+        break;
+    case '>': // DECKPNM - Numeric Keypad
+        APP_KEYPAD_MODE = false;
+        break;
+    default:
+      // Log the hex code of the skipped control character for debugging
+      std::cout << "[DEBUG] Skipped Control Character: 0x" 
+        << std::hex << std::setw(2) << std::setfill('0') 
+        << (int)command << std::dec << std::endl;
+        break;
+  }
+}
+
+void TERMINAL::handle_bracket_escape(std::string sequence)
+{
+  // Check for Device Attributes (DA) request: ESC [ c or ESC [ 0 c
+  if (sequence == "\033[c" || sequence == "\033[0c")
+  {
+    std::cout << ID_RESPONSE << std::flush;
+    return;
+  }
+  
+  // Comprehensive output for unhandled sequences
+  std::string printable_seq = "";
+  for (unsigned char c : sequence)
+  {
+    if (c == 0x1B) printable_seq += "ESC";
+    else if (c < 32 || c > 126) 
+    {
+      std::stringstream ss;
+      ss << "<0x" << std::hex << std::setw(2) << std::setfill('0') << (int)c << ">";
+      printable_seq += ss.str();
+    }
+    else printable_seq += (char)c;
+  }
+
+  std::cout << "[DEBUG] Unhandled CSI sequence: " << printable_seq << std::endl;
+}
+
+// Handler for ESC + Char + Params (e.g., VT52 Direct Cursor Addressing)
+void TERMINAL::handle_parameterized_escape(std::string Raw_Text)
+{
+  uint8_t command = (uint8_t)Raw_Text[1];
+  
+  if (command == 'Y') // VT52 Direct Cursor Addressing
+  {
+    int row = (uint8_t)Raw_Text[2] - 31;
+    int col = (uint8_t)Raw_Text[3] - 31;
+
+    if (row >= 0 && row < ROWS) CURRENT_ROW = row;
+    if (col >= 0 && col < COLS) CURRENT_COL = col;
+  }
+}
+
+/*
 bool TERMINAL::escape_characters(std::string Raw_Text, int &End_Position) 
 {
   if (Raw_Text.size() < 2) return false;
@@ -1565,41 +1811,100 @@ bool TERMINAL::escape_characters(std::string Raw_Text, int &End_Position)
     // Simple 2-byte Escape Sequences
     switch (next_byte) 
     {
-      case 'D': // IND - Index
-          control_LF(); 
-          break;
-      case 'M': // RI - Reverse Index
-          CURRENT_ROW--;
-          if (CURRENT_ROW < 0) CURRENT_ROW = 0;
-          break;
-      case 'E': // NEL - Next Line
-          control_CR(); 
-          control_LF(); 
-          break;
-      case 'H': // HTS - Horizontal Tab Set
-          // In a full implementation, you'd mark this column in a tab-stop bitset
-          break;
-      case 'c': // RIS - Reset to Initial State
-          screen_clear();
-          break;
-      case '7': // DECSC - Save Cursor
+      case 'D': // 0x0A - IND - Index
+        control_LF(); 
+        break;
+      case 'M': // 0x4D - RI - Reverse Index
+        control_RI();
+        break;
+      case 'E': // 0x45 - NEL - Next Line
+        control_CR(); 
+        control_LF(); 
+        break;
+      case 'H': // 0x4B - HTS - Horizontal Tab Set
+        control_HTS();
+        break;
+      case 'c': // 0x63 -  RIS - Reset to Initial State
+        reset();
+        break;
+      case '7': // 0x37 - DECSC - Save Cursor
           SAVED_ROW = CURRENT_ROW;
           SAVED_COL = CURRENT_COL;
           break;
-      case '8': // DECRC - Restore Cursor
+      case '8': // 0x38 - DECRC - Restore Cursor
           CURRENT_ROW = SAVED_ROW;
           CURRENT_COL = SAVED_COL;
           break;
       case '=': // DECKPAM - Application Keypad
+          APP_KEYPAD_MODE = true;
           break;
       case '>': // DECKPNM - Numeric Keypad
+          APP_KEYPAD_MODE = false;
           break;
       default:
+        // Log the hex code of the skipped control character for debugging
+        std::cout << "[DEBUG] Skipped Control Character: 0x" 
+          << std::hex << std::setw(2) << std::setfill('0') 
+          << (int)next_byte << std::dec << std::endl;
           break;
     }
     End_Position = 1;
     return true;
   }
+}
+  */
+
+bool TERMINAL::escape_characters(std::string Raw_Text, int &End_Position) 
+{
+  if (Raw_Text.size() < 2) return false;
+
+  uint8_t next_byte = (uint8_t)Raw_Text[1];
+
+  // 1. Check for ANSI Bracket Sequences (CSI)
+  if (next_byte == '[') 
+  {
+    for (size_t j = 2; j < Raw_Text.size(); j++) 
+    {
+      uint8_t c = (uint8_t)Raw_Text[j];
+      // End byte for CSI is usually 0x40 to 0x7E
+      if (c >= 0x40 && c <= 0x7E) 
+      {
+        handle_bracket_escape(Raw_Text.substr(0, j + 1));
+        End_Position = (int)j;
+        return true;
+      }
+    }
+    return false; // Incomplete
+  } 
+
+  // 2. Check for Character Set / Multi-byte VT52 sequences
+  if (next_byte == '(' || next_byte == ')' || next_byte == '*' || next_byte == '+') 
+  {
+    if (Raw_Text.size() < 3) return false;
+    End_Position = 2;
+    return true;
+  } 
+
+  if (next_byte == '#') 
+  {
+    if (Raw_Text.size() < 3) return false;
+    End_Position = 2;
+    return true;
+  } 
+
+  // 3. Special Case: VT52 Cursor Move (ESC Y Row Col) - 4 bytes total
+  if (next_byte == 'Y') 
+  {
+    if (Raw_Text.size() < 4) return false;
+    handle_parameterized_escape(Raw_Text.substr(0, 4));
+    End_Position = 3;
+    return true;
+  }
+
+  // 4. Default: Simple 2-byte escape sequences
+  handle_simple_escape(next_byte);
+  End_Position = 1;
+  return true;
 }
 
 void TERMINAL::write_to_screen(char32_t Character)
@@ -1671,28 +1976,10 @@ void TERMINAL::process_output_2(std::string& raw_text)
 /**
  * @brief Constructor: Initializes the screen buffer, cursor state, and redirects stderr for logging.
  */
-TERMINAL::TERMINAL() : 
-  CURRENT_ROW(0), 
-  CURRENT_COL(0),
-  SCROLL_TOP(0), // Default top scrolling boundary (0-based)
-  SCROLL_BOTTOM(ROWS - 1), // Default bottom scrolling boundary (0-based)
-  SAVED_ROW(0),
-  SAVED_COL(0),
-  APP_CURSOR_MODE(false), // Default state for Application Cursor Keys mode
-  // NEW: Text Wrapping is usually ON by default (DEC private mode 7)
-  AUTO_WRAP_MODE(true),
-  // NEW: Reverse Wrap Mode (DEC Private Mode 45) is OFF by default
-  REVERSE_WRAP_MODE(false),
-  // NEW: Application Keypad Mode (DEC Private Mode 2) is OFF by default
-  APP_KEYPAD_MODE(false),
-  // NEW: Graphics Mode (VT52 ESC F/G) is OFF by default
-  IS_GRAPHICS_MODE(false) // <--- ADDED Graphics Mode State
+TERMINAL::TERMINAL()
 {
-  // Initialize the entire screen buffer by filling with the DEFAULT_CELL object.
-  for (int i = 0; i < ROWS; ++i) 
-  {
-      std::fill(SCREEN[i], SCREEN[i] + COLS, DEFAULT_CELL);
-  }
+  // Use the reset routine to establish the initial state
+  reset();
 }
 
 /**

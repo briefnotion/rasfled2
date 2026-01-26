@@ -14,6 +14,8 @@
 
 #include <iostream>
 
+#include <iomanip>
+
 #include <string>
 #include <vector>
 #include <mutex>
@@ -183,20 +185,37 @@ class TERMINAL
 
 // ---------------------------------------------------------------------
 
-  bool process_output_2_enable = false;
+  bool process_output_2_enable = true;
 
+  void reset();
+
+  void screen_scoll_up();
   void screen_scoll();
   void screen_clear();
+  void screen_erase_to_end();
+  void screen_erase_line_to_end();
   
   void cursor_check();
+  
   void cursor_advance();
+  void cursor_up();
+  void cursor_down();
+  void cursor_left();
+  void cursor_right();
 
   void control_BS();
   void control_HT();
   void control_LF();
   void control_CR();
 
+  void control_RI();
+  void control_HTS();
+
   void control_characters(uint8_t Character);
+
+  void handle_simple_escape(uint8_t command);
+  void handle_bracket_escape(std::string sequence);
+  void handle_parameterized_escape(std::string Raw_Text);
 
   bool escape_characters(std::string Raw_Text, int &End_Position);
 
@@ -218,6 +237,7 @@ class TERMINAL
 
   // Buffer containing the terminal screen
   Cell SCREEN[ROWS][COLS]; 
+  bool TAB_STOPS[COLS];
   int CURRENT_ROW;
   int CURRENT_COL;
   int SCROLL_TOP;
@@ -229,6 +249,14 @@ class TERMINAL
   bool REVERSE_WRAP_MODE;
   bool APP_KEYPAD_MODE;
   bool IS_GRAPHICS_MODE;
+  bool ANSI_MODE;
+  string ID_RESPONSE;
+
+  // ---- Needs work  ----
+  Cell DEFAULT_CELL; 
+  // Global tracker for current cell attributes
+  Cell CURRENT_ATTRS = DEFAULT_CELL;
+  // ---- Needs work  ----
 
   std::mutex BUF_MUTEX;
 
