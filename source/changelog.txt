@@ -1,3 +1,8 @@
+2.387_260128
+  - Continued rewriting the terminal.
+      This version now surpasses Terminal V1, although
+      it still has a few problems.
+
 2.386_260127
   - Continued rewriting the terminal.
 

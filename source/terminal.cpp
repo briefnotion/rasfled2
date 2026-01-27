@@ -17,6 +17,52 @@
 // ---------------------------------------------------------------------------------------
 
 /**
+ * @brief Helper to parse CSI parameters (e.g., "31;1" -> {31, 1})
+ */
+std::vector<int> parse_csi_params(const std::string& sequence) 
+{
+  std::vector<int> params;
+  if (sequence.size() < 3) return params;
+
+  // Remove ESC [ and the final character
+  std::string content = sequence.substr(2, sequence.size() - 3);
+  if (content.empty()) return params;
+
+  // Handle DEC Private Mode prefix '?'
+  if (content[0] == '?') 
+  {
+    content.erase(0, 1);
+  }
+
+  std::stringstream ss(content);
+  std::string segment;
+  while (std::getline(ss, segment, ';')) 
+  {
+    try 
+    {
+      if (!segment.empty()) params.push_back(std::stoi(segment));
+      else params.push_back(0); // Treat empty segments as 0
+    } 
+    catch (...) 
+    {
+      params.push_back(0);
+    }
+  }
+  return params;
+}
+
+/**
+ * @brief Helper to safely get parameters with a default value
+ */
+int get_param(const std::vector<int>& params, size_t index, int default_val) 
+{
+  if (index >= params.size()) return default_val;
+  return params[index] == 0 ? default_val : params[index];
+}
+
+// ---------------------------------------------------------------------------------------
+
+/**
  * @brief Parses a chunk of data and updates the internal state.
  * * @param data The new chunk of data to parse.
  * @return true if the buffer *ends* in a NORMAL state (i.e., no
@@ -171,11 +217,6 @@ char32_t decode_next_utf8_char(const std::string& text, size_t& i)
   return code_point;
 }
 
-// Helper to safely get parameters (default to 0 if not present)
-int get_param(const std::vector<int>& params, size_t index, int default_val) 
-{
-	return index < params.size() ? params[index] : default_val;
-}
 
 // ---------------------------------------------------------------------------------------
 
@@ -301,93 +342,59 @@ void TERMINAL::scroll_down(int count)
   }
 }
 
-/**
- * @brief Handles CSI sequences for cursor movement (A, B, C, D, H, f, G, d, E, F).
- * Note: 'E' (Next Line) and 'F' (Previous Line) are common cursor controls 
- * but were not in the original function, so they are not implemented here.
- * It's assumed CURRENT_ROW, SCROLL_TOP, COLS, etc., are member variables.
- */
-bool TERMINAL::process_csi_cursor_movement(char final_char, const std::vector<int>& params)
+bool TERMINAL::process_csi_cursor_movement(char final_char, const std::vector<int>& params) 
 {
-  // Use the switch statement for cleaner dispatch based on the final character
-  switch (final_char)
+  switch (final_char) 
   {
-    case 'A': // Cursor Up (CUU): ESC [ P A
-    {
-      int param = get_param(params, 0, 1);
-      CURRENT_ROW = std::max(SCROLL_TOP, CURRENT_ROW - param);
+    case 'A': // Cursor Up (CUU)
+      CURRENT_ROW = std::max(SCROLL_TOP, CURRENT_ROW - get_param(params, 0, 1));
+      WRAP_PENDING = false;
       break;
-    }
 
-    case 'B': // Cursor Down (CUD): ESC [ P B
-    {
-      int param = get_param(params, 0, 1);
-      CURRENT_ROW = std::min(SCROLL_BOTTOM, CURRENT_ROW + param);
+    case 'B': // Cursor Down (CUD)
+      CURRENT_ROW = std::min(SCROLL_BOTTOM, CURRENT_ROW + get_param(params, 0, 1));
+      WRAP_PENDING = false;
       break;
-    }
 
-    case 'C': // Cursor Forward (CUF): ESC [ P C
-    {
-      int param = get_param(params, 0, 1);
-      CURRENT_COL = std::min(COLS - 1, CURRENT_COL + param);
+    case 'C': // Cursor Forward (CUF)
+      CURRENT_COL = std::min(COLS - 1, CURRENT_COL + get_param(params, 0, 1));
+      WRAP_PENDING = false;
       break;
-    }
 
-    case 'D': // Cursor Back (CUB): ESC [ P D
-    {
-      int param = get_param(params, 0, 1);
-      CURRENT_COL = std::max(0, CURRENT_COL - param);
+    case 'D': // Cursor Back (CUB)
+      CURRENT_COL = std::max(0, CURRENT_COL - get_param(params, 0, 1));
+      WRAP_PENDING = false;
       break;
-    }
 
-    case 'H': // Cursor Position (CUP: H) - Absolute Row/Col
-    case 'f': // Horizontal and Vertical Position (HVP: f) - Absolute Row/Col
-    case 'd': // Vertical Line Position Absolute (VPA: d) - Absolute Row
+    case 'H': // Cursor Position (CUP)
+    case 'f': // HVP
+    case 'd': // VPA (Vertical Line Position Absolute)
     {
-      // Parameters are 1-based. Defaults to 1;1 for H/f or 1 for d.
-      int requested_row_1_based = get_param(params, 0, 1);
-      int requested_col_1_based = get_param(params, 1, 1); // Used only by H/f
+      int req_row = get_param(params, 0, 1);
+      int req_col = get_param(params, 1, 1);
 
-      // VPA ('d') only moves the row, H/f move both.
       if (final_char == 'H' || final_char == 'f' || final_char == 'd') 
       {
-        // Convert 1-based parameter to 0-based index relative to SCROLL_TOP
-        int new_row_0_based = SCROLL_TOP + requested_row_1_based - 1;
-        
-        // Clamp the new row between SCROLL_TOP and SCROLL_BOTTOM
-        CURRENT_ROW = std::min(SCROLL_BOTTOM, std::max(SCROLL_TOP, new_row_0_based));
+        int new_row = SCROLL_TOP + req_row - 1;
+        CURRENT_ROW = std::min(SCROLL_BOTTOM, std::max(SCROLL_TOP, new_row));
       }
-      
-      // H/f also set the column
       if (final_char == 'H' || final_char == 'f') 
       {
-        // Convert 1-based column to 0-based index
-        int new_col_0_based = requested_col_1_based - 1;
-
-        // Clamp the new column between 0 and COLS - 1
-        CURRENT_COL = std::min(COLS - 1, std::max(0, new_col_0_based));
+        CURRENT_COL = std::min(COLS - 1, std::max(0, req_col - 1));
       }
+      WRAP_PENDING = false;
       break;
     }
 
-    case 'G': // Cursor Character Absolute (CHA): ESC [ P G - Absolute Column
-    {
-      // Parameter is 1-based column. Defaults to 1.
-      int col_1_based = get_param(params, 0, 1);
-      int new_col_0_based = col_1_based - 1;
-
-      // Clamp the new column between 0 and COLS - 1
-      CURRENT_COL = std::min(COLS - 1, std::max(0, new_col_0_based));
+    case 'G': // Cursor Horizontal Absolute (CHA)
+      CURRENT_COL = std::min(COLS - 1, std::max(0, get_param(params, 0, 1) - 1));
+      WRAP_PENDING = false;
       break;
-    }
 
     default:
-    {
-      return false; // Unhandled CSI final character
-    }
+      return false;
   }
-  
-  return true; // Handled
+  return true;
 }
 
 /**
@@ -610,239 +617,115 @@ bool TERMINAL::process_csi_erase_and_edit(char final_char, const std::vector<int
   return true; // Handled
 }
 
-/**
- * @brief Handles CSI sequences for reporting, modes, and cursor save/restore (n, r, s, u, h, l, c, g, t).
- */
-bool TERMINAL::process_csi_reporting_and_mode(char final_char, const std::vector<int>& params, bool is_dec_private)
+bool TERMINAL::process_csi_reporting_and_mode(char final_char, const std::vector<int>& params, bool is_dec_private) 
 {
-  switch (final_char)
+  switch (final_char) 
   {
-    case 'n': // Device Status Report (DSR): ESC [ 6 n
-    {
-      int param_n = get_param(params, 0, 0); // Default param for DSR is 0
-
-      if (param_n == 6) // Request Cursor Position
+    case 'n': // DSR
+      if (get_param(params, 0, 0) == 6 && MASTER_FD > 0) 
       {
-        // Respond with Cursor Position Report (CPR): ESC [ R ; C R (1-based, absolute)
-        std::string response = "\x1B[" + 
-                                std::to_string(CURRENT_ROW + 1) + 
-                                ";" + 
-                                std::to_string(CURRENT_COL + 1) + 
-                                "R";
-        
-        if (MASTER_FD > 0) 
-        {
-          // Note: write() implementation is assumed to be available
-          write(MASTER_FD, response.c_str(), response.size());
-        }
+        std::string res = "\x1B[" + std::to_string(CURRENT_ROW + 1) + ";" + std::to_string(CURRENT_COL + 1) + "R";
+        write(MASTER_FD, res.c_str(), res.size());
       }
       break;
-    }
 
-    case 'c': // Device Attributes (DA): ESC [ P c
-    {
-      // Respond with Primary Device Attributes (PDA): ESC [ ? 1 ; 2 c (VT100 with advanced video option)
-      std::string response = "\x1B[?1;2c"; 
-      
+    case 'c': // DA
       if (MASTER_FD > 0) 
       {
-        // Note: write() implementation is assumed to be available
-        write(MASTER_FD, response.c_str(), response.size());
+        std::string res = "\x1B[?1;2c"; 
+        write(MASTER_FD, res.c_str(), res.size());
       }
       break;
-    }
 
-    case 'r': // Set Scrolling Region (DECSTBM): ESC [ Pt ; Pb r
+    case 'r': // DECSTBM
     {
-      // Parameters are 1-based. Defaults to 1 (top) and ROWS (bottom).
       int top = get_param(params, 0, 1);
       int bottom = get_param(params, 1, ROWS);
-      
-      // Set SCROLL_TOP (0-based) and clamp to [0, ROWS-1]
       SCROLL_TOP = std::min(ROWS - 1, std::max(0, top - 1));
-
-      // Set SCROLL_BOTTOM (0-based) and clamp, ensuring SCROLL_BOTTOM >= SCROLL_TOP
       SCROLL_BOTTOM = std::min(ROWS - 1, std::max(SCROLL_TOP, bottom - 1));
-
-      // Cursor moves to home position (first column of the new top row).
       CURRENT_ROW = SCROLL_TOP;
       CURRENT_COL = 0;
+      WRAP_PENDING = false;
       break;
     }
 
-    case 's': // Save Cursor Position (DECSC alias)
-    {
-      SAVED_ROW = CURRENT_ROW;
-      SAVED_COL = CURRENT_COL;
-      break;
-    }
+    case 's': SAVED_ROW = CURRENT_ROW; SAVED_COL = CURRENT_COL; break;
+    case 'u': CURRENT_ROW = SAVED_ROW; CURRENT_COL = SAVED_COL; WRAP_PENDING = false; break;
 
-    case 'u': // Restore Cursor Position (DECRC alias)
+    case 'h': 
+    case 'l': 
     {
-      CURRENT_ROW = SAVED_ROW;
-      CURRENT_COL = SAVED_COL;
-      break;
-    }
-
-    case 'h': // Set Mode (SM)
-    case 'l': // Reset Mode (RM)
-    {
-      if (is_dec_private && params.size() >= 1) 
+      if (is_dec_private && !params.empty()) 
       {
         int mode = params[0];
         bool set = (final_char == 'h');
-
-        if (mode == 1) // DEC Private Mode 1: Application Cursor Keys (DECCKM)
-        { 
-          APP_CURSOR_MODE = set; 
-        }
-        else if (mode == 2) // DEC Private Mode 2: VT52 Application Keypad (DECKPAM)
-        {
-          APP_KEYPAD_MODE = set; 
-        }
-        else if (mode == 7) // DEC Private Mode 7: Auto Wrap Mode (DECAWM)
-        {
-          AUTO_WRAP_MODE = set;
-        }
-        else if (mode == 45) // DEC Private Mode 45: Reverse Wrap Around Mode (DECRLCM)
-        {
-          REVERSE_WRAP_MODE = set; 
-        }
-        // Modes 3, 4, 5, 6, 8, 40, 2004 are implicitly handled as sequence consumption (NO-OPs).
+        if (mode == 1) APP_CURSOR_MODE = set;
+        else if (mode == 2) APP_KEYPAD_MODE = set;
+        else if (mode == 7) AUTO_WRAP_MODE = set;
+        else if (mode == 45) REVERSE_WRAP_MODE = set;
       }
-      // If not a private mode, or if unhandled, the sequence is consumed.
       break;
     }
 
-    case 't': // Window Manipulation (DTTERM)
-    {
-      // NO-OP: Consume the sequence.
+    case 't': // Window Manipulation
+    case 'g': // Tab Clear
       break;
-    }
-
-    case 'g': // Tabulation Clear (TBC): ESC [ P g
-    {
-      int param_g = get_param(params, 0, 0);
-      (void)param_g; // Tabulation Clear is NO-OP since tab stops are fixed (Consume the sequence).
-      break;
-    }
 
     default:
-    {
-      return false; // Not a reporting/mode sequence
-    }
+      return false;
   }
-
-  return true; // Handled
+  return true;
 }
 
-/**
- * @brief Handles CSI sequences for Select Graphic Rendition (SGR: m) and other presentation commands.
- */
-bool TERMINAL::process_csi_sgr_and_misc(char final_char, const std::vector<int>& params)
+bool TERMINAL::process_csi_sgr_and_misc(char final_char, const std::vector<int>& params) 
 {
-  if (final_char == 'm') // Select Graphic Rendition (SGR: m)
+  if (final_char != 'm') return false;
+
+  if (params.empty()) 
   {
-    if (params.empty()) 
-    {
-      CURRENT_ATTRS = DEFAULT_CELL;
-      return true; 
-    }
-
-    for (size_t i = 0; i < params.size(); ++i)
-    {
-      int code = params[i];
-
-      if (code == 0) // Reset/Normal: ESC [ 0 m
-      {
-        // Reset ALL attributes, including the new flag
-        CURRENT_ATTRS = DEFAULT_CELL;
-      }
-      else if (code == 1) // Bold/Bright: ESC [ 1 m
-      {
-        CURRENT_ATTRS.is_bold = true;
-      }
-      else if (code == 22) // Normal intensity (neither bold nor faint): ESC [ 22 m
-      {
-        CURRENT_ATTRS.is_bold = false;
-      }
-      else if (code == 7) // Reverse (Set Reverse Flag): ESC [ 7 m
-      {
-        // *** CRITICAL CHANGE: SET THE FLAG INSTEAD OF SWAPPING COLORS ***
-        CURRENT_ATTRS.is_reverse = true;
-      }
-      else if (code == 27) // Not Reverse (Unset Reverse Flag): ESC [ 27 m
-      {
-        // *** CRITICAL CHANGE: CLEAR THE FLAG ***
-        CURRENT_ATTRS.is_reverse = false;
-      }
-      // --- ANSI 3/4-bit Colors (30-37, 40-47, 90-97, 100-107) ---
-      else if (code >= 30 && code <= 37) // Standard Foreground (30-37)
-      { 
-        CURRENT_ATTRS.foreground_color = ANSI_COLORS[code - 30];
-        CURRENT_ATTRS.is_reverse = false; // Reset reverse state implicitly if color changes (some terminals do this)
-      }
-      else if (code >= 90 && code <= 97) // Bright Foreground (90-97)
-      {
-        CURRENT_ATTRS.foreground_color = BRIGHT_ANSI_COLORS[code - 90];
-        CURRENT_ATTRS.is_reverse = false;
-      }
-      else if (code >= 40 && code <= 47) // Standard Background (40-47)
-      { 
-        CURRENT_ATTRS.background_color = ANSI_COLORS[code - 40];
-        CURRENT_ATTRS.is_reverse = false;
-      }
-      else if (code >= 100 && code <= 107) // Bright Background (100-107)
-      {
-        CURRENT_ATTRS.background_color = BRIGHT_ANSI_COLORS[code - 100];
-        CURRENT_ATTRS.is_reverse = false;
-      }
-      // --- Extended Color Modes (256-color or True Color) ---
-      else if (code == 38 || code == 48)
-      {
-        // Extended color logic (as before, consumes up to 4 params)
-        if (i + 1 < params.size())
-        { 
-          if (params[i+1] == 5) // 256 Color Mode: 38;5;N or 48;5;N
-          { 
-            i += 2; // Consume mode selector (5) and color index (N)
-          } 
-          else if (params[i+1] == 2) // 24-bit True Color Mode: 38;2;R;G;B or 48;2;R;G;B
-          {
-            if (i + 4 < params.size()) 
-            {
-              uint8_t r = (uint8_t)std::min(255, std::max(0, params[i+2]));
-              uint8_t g = (uint8_t)std::min(255, std::max(0, params[i+3]));
-              uint8_t b = (uint8_t)std::min(255, std::max(0, params[i+4]));
-              
-              RgbColor true_color = {r, g, b};
-              
-              if (code == 38) { CURRENT_ATTRS.foreground_color = true_color; } 
-              else { CURRENT_ATTRS.background_color = true_color; }
-              
-              i += 4; // Consume mode selector (2), R, G, B
-            } 
-            else 
-            { 
-              i += 1; 
-            }
-          } 
-          else 
-          { 
-            i += 1; 
-          }
-        }
-      }
-      // Reset reverse flag for any explicit color change (common terminal behavior)
-      if (code >= 30 && code <= 107) 
-      {
-        CURRENT_ATTRS.is_reverse = false;
-      }
-    }
+    CURRENT_ATTRS = DEFAULT_CELL;
     return true; 
   }
-  
-  return false; // Not handled
+
+  for (size_t i = 0; i < params.size(); ++i) 
+  {
+    int code = params[i];
+    if (code == 0) CURRENT_ATTRS = DEFAULT_CELL;
+    else if (code == 1) CURRENT_ATTRS.is_bold = true;
+    else if (code == 22) CURRENT_ATTRS.is_bold = false;
+    else if (code == 3) CURRENT_ATTRS.is_italic = true;
+    else if (code == 23) CURRENT_ATTRS.is_italic = false;
+    else if (code == 4) CURRENT_ATTRS.is_underline = true;
+    else if (code == 24) CURRENT_ATTRS.is_underline = false;
+    else if (code == 5) CURRENT_ATTRS.is_blink = true;
+    else if (code == 25) CURRENT_ATTRS.is_blink = false;
+    else if (code == 7) CURRENT_ATTRS.is_reverse = true;
+    else if (code == 27) CURRENT_ATTRS.is_reverse = false;
+    else if (code == 8) CURRENT_ATTRS.is_hidden = true;
+    else if (code == 28) CURRENT_ATTRS.is_hidden = false;
+    else if (code == 9) CURRENT_ATTRS.is_strikethrough = true;
+    else if (code == 29) CURRENT_ATTRS.is_strikethrough = false;
+    else if (code >= 30 && code <= 37) { CURRENT_ATTRS.foreground_color = ANSI_COLORS[code - 30]; CURRENT_ATTRS.is_reverse = false; }
+    else if (code == 39) { CURRENT_ATTRS.foreground_color = DEFAULT_CELL.foreground_color; }
+    else if (code >= 90 && code <= 97) { CURRENT_ATTRS.foreground_color = BRIGHT_ANSI_COLORS[code - 90]; CURRENT_ATTRS.is_reverse = false; }
+    else if (code >= 40 && code <= 47) { CURRENT_ATTRS.background_color = ANSI_COLORS[code - 40]; CURRENT_ATTRS.is_reverse = false; }
+    else if (code == 49) { CURRENT_ATTRS.background_color = DEFAULT_CELL.background_color; }
+    else if (code >= 100 && code <= 107) { CURRENT_ATTRS.background_color = BRIGHT_ANSI_COLORS[code - 100]; CURRENT_ATTRS.is_reverse = false; }
+    else if (code == 38 || code == 48) 
+    {
+      if (i + 1 < params.size()) 
+      {
+        if (params[i+1] == 5) i += 2; // 256 color (stubbed index consumption)
+        else if (params[i+1] == 2 && i + 4 < params.size()) 
+        {
+          RgbColor tc = {(uint8_t)params[i+2], (uint8_t)params[i+3], (uint8_t)params[i+4]};
+          if (code == 38) CURRENT_ATTRS.foreground_color = tc; else CURRENT_ATTRS.background_color = tc;
+          i += 4;
+        }
+      }
+    }
+  }
+  return true;
 }
 
 // ---------------------------------------------------------------------
@@ -897,473 +780,6 @@ char32_t TERMINAL::map_graphics_char(char32_t ascii_char) const
     default: return ascii_char;
   }
 }
-
-
-
-
-
-// Note: This code assumes the existence of:
-// - Cell, DEFAULT_CELL, CURRENT_ATTRS structures/variables.
-// - ROWS, COLS, SCROLL_TOP, SCROLL_BOTTOM constants/variables.
-// - CURRENT_ROW, CURRENT_COL, SAVED_ROW, SAVED_COL state variables.
-// - APP_CURSOR_MODE, AUTO_WRAP_MODE, REVERSE_WRAP_MODE, APP_KEYPAD_MODE, IS_GRAPHICS_MODE boolean flags.
-// - SCREEN (a 2D array of Cell).
-// - MASTER_FD (file descriptor).
-// - Helper functions: scroll_up, scroll_down, decode_next_utf8_char, map_graphics_char.
-// - write() function for sending responses.
-
-void TERMINAL::process_output(const std::string& raw_text) 
-{
-  for (size_t i = 0; i < raw_text.size();) 
-  {
-    char c = raw_text[i];
-    
-    // --- ANSI ESCAPE SEQUENCE PARSING (CSI: ESC [ ...) ---
-    if (c == '\x1B') // ESC character
-    {
-      if (i + 1 < raw_text.size() && raw_text[i + 1] == '[') 
-      {
-        // This is a CSI sequence: ESC [
-        i += 2; // Consume ESC and [
-        
-        // --- 0. Check for optional DEC Private Mode Indicator ('?' or '>') ---
-        bool is_dec_private = false;
-        if (i < raw_text.size() && (raw_text[i] == '?' || raw_text[i] == '>')) 
-        {
-          if (raw_text[i] == '?') 
-          {
-            is_dec_private = true;
-          }
-          i++; // Consume indicator
-        }
-
-        // --- 1. Extract optional numerical parameters (P1;P2;...) ---
-        std::vector<int> params;
-        std::string current_param_str;
-        bool abort_csi = false; // Flag to indicate premature termination
-
-        while (i < raw_text.size()) 
-        {
-          char next_char = raw_text[i];
-          
-          if (next_char >= '0' && next_char <= '9') 
-          {
-            current_param_str += next_char;
-          } 
-          else if (next_char == ';') 
-          {
-            // Handle empty parameter (e.g., ESC[;1H -> first param is 0)
-            int p = current_param_str.empty() ? 0 : std::stoi(current_param_str);
-            params.push_back(p);
-            current_param_str.clear();
-          } 
-          // Stop parameter processing on Intermediate (0x20-0x2F) or Final (0x40-0x7E)
-          else if ((next_char >= 0x20 && next_char <= 0x2F) || (next_char >= 0x40 && next_char <= 0x7E))
-          {
-            break; 
-          }
-          else 
-          {
-            // Abort: Found an unexpected character.
-            abort_csi = true;
-            break; 
-          }
-          i++;
-        }
-        
-        // Push the final collected parameter (or default 0) if not aborted
-        if (!abort_csi)
-        {
-          int p_last = current_param_str.empty() ? 0 : std::stoi(current_param_str);
-          params.push_back(p_last);
-        }
-        
-        // --- Handle Aborted Sequence ---
-        if (abort_csi)
-        {
-          // If aborted, consume all characters used so far in the sequence 
-          // plus the unexpected character to prevent reprocessing.
-          i++; 
-          goto continue_next_char; 
-        }
-
-        // --- 2. Check for optional intermediate bytes (0x20-0x2F) and consume them ---
-        // The intermediate character is consumed here, but its value is not currently used by the processing functions.
-        while (i < raw_text.size() && raw_text[i] >= 0x20 && raw_text[i] <= 0x2F)
-        {
-          i++; // Consume intermediate
-        }
-
-        // --- 3. Check for the final command character (0x40-0x7E) and process ---
-        if (i < raw_text.size()) 
-        {
-          char final_char = raw_text[i];
-          
-          if (final_char >= 0x40 && final_char <= 0x7E)
-          {
-            // Process CSI Command (ACTIVATED HANDLERS)
-            bool handled_csi = process_csi_cursor_movement(final_char, params)
-                || process_csi_erase_and_edit(final_char, params) 
-                || process_csi_reporting_and_mode(final_char, params, is_dec_private)
-                || process_csi_sgr_and_misc(final_char, params);
-            
-            (void)handled_csi; // Prevent unused variable warning
-            
-            i++; // Consume the final command character
-            goto continue_next_char;
-          }
-        } 
-        
-        // --- CRITICAL FIX START: Handle Incomplete CSI Sequence ---
-        // If we reach here, the sequence was either terminated with an unexpected char
-        // (handled above) OR the input ended before the final char (incomplete).
-        // Since we consumed ESC and [ at the start, we need to advance i at least
-        // to prevent reprocessing the ESC. However, the parser state has already
-        // consumed all valid parts up to the end of the buffer. We rely on the 
-        // increment from the parameter/intermediate loops to have progressed 'i'.
-        // If the entire buffer was processed and 'i' stopped at raw_text.size(), 
-        // the main loop should naturally increment and exit. If it was an incomplete
-        // sequence, the main loop must break without incrementing 'i' to re-process 
-        // the remaining partial data when the next chunk arrives (handled by reader_thread). 
-        // Since the reader_thread buffers and sends only complete sequences, 
-        // an incomplete sequence here means we hit end of buffer, and we rely 
-        // on the next loop iteration check (i < raw_text.size()) to be false.
-        
-        // In the context of a single loop iteration, if we didn't consume a final char,
-        // we must make sure we don't jump to the loop end without advancing 'i' 
-        // (which would cause the infinite loop if i didn't progress).
-        
-        // Since the outer loop will handle the progression if it didn't jump to 
-        // 'continue_next_char' and we rely on the reader_thread to send complete chunks,
-        // we should simply break out of the processing if the command was incomplete 
-        // here to ensure 'i' is not incremented and the main loop terminates naturally 
-        // (which the loop structure already does).
-        
-        // The critical flaw was the goto at line 83, which is removed now.
-        // We rely on the natural progression of the 'i' pointer up to the point 
-        // of failure/end of buffer.
-        
-        // --- CRITICAL FIX END ---
-        
-        // If sequence was incomplete or unhandled, we fall through here, 
-        // allowing the main 'for' loop to check i < raw_text.size() and terminate 
-        // the processing block if necessary.
-        goto continue_next_char;
-      }
-      
-      // --- Generic Escape Sequence Handler (Non-CSI) ---
-      else if (i + 1 < raw_text.size())
-      {
-        char next_char = raw_text[i + 1];
-        bool handled_esc = false;
-        
-        // 1. Handling 3-character G0/G1/G2/G3 designation sequences (ESC X C)
-        if ((next_char == '(' || next_char == ')' || next_char == '*' || next_char == '+') && (i + 2 < raw_text.size()))
-        {
-          i += 3; // Consume ESC, X, and C (3 bytes total)
-          handled_esc = true;
-        }
-        
-        // 2. Handling 3-character DEC Special Functions (ESC # X)
-        else if (next_char == '#') 
-        {
-          if (i + 2 < raw_text.size()) 
-          {
-            char third_char = raw_text[i + 2];
-            if (third_char == '8') 
-            { 
-              // DECALN: ESC # 8 (Screen Alignment Display)
-              Cell fill_cell = CURRENT_ATTRS; 
-              fill_cell.character = U'E';
-
-              for (int row = 0; row < ROWS; ++row) 
-              {
-                  std::fill(SCREEN[row], SCREEN[row] + COLS, fill_cell);
-              }
-            } 
-            i += 3; // Consume ESC, #, and the third char
-            handled_esc = true;
-          } 
-          else 
-          {
-            // Incomplete sequence: Consume ESC and # only
-            i += 2; 
-            handled_esc = true;
-          }
-        }
-        
-        // 3. Handling 2-character and 4-character sequences (ESC X or ESC Y R C)
-        else if (next_char == 'Y' || next_char == '7' || next_char == '8' || next_char == 'M' || next_char == 'D' || next_char == 'E' || next_char == 'J' || next_char == 'c' || next_char == '>' || next_char == '=' || next_char == 'H' || next_char == 'Z' || next_char == 'I' || next_char == 'F' || next_char == 'G' || next_char == 'A' || next_char == 'B' || next_char == 'C' || next_char == 'K' || next_char == 'O')
-        {
-          // --- Handle 4-character VT52 Direct Cursor Addressing (ESC Y R C) ---
-          if (next_char == 'Y') 
-          {
-            // ESC Y needs two more bytes for coordinates. Requires 4 total bytes.
-            if (i + 3 < raw_text.size()) 
-            {
-              int row_byte = (unsigned char)raw_text[i + 2];
-              int col_byte = (unsigned char)raw_text[i + 3];
-
-              // Calculate 0-based coordinates (1-based from host, offset by 32)
-              int target_row = row_byte - 32;
-              int target_col = col_byte - 32;
-
-              // Clamp and set 0-based coordinates
-              CURRENT_ROW = std::min(SCROLL_BOTTOM, std::max(0, target_row));
-              CURRENT_COL = std::min(COLS - 1, std::max(0, target_col));
-
-              i += 4; // Consume ESC, Y, Row Byte, Col Byte
-              handled_esc = true;
-            } 
-            else 
-            {
-              i += 2; // Incomplete: Consume ESC and Y only
-              handled_esc = true;
-            }
-          }
-          // --- END ESC Y HANDLER ---
-          
-          // --- Handle 2-character sequences ---
-          else if (next_char == '7') 
-          { 
-            // ESC 7 (Save Cursor)
-            SAVED_ROW = CURRENT_ROW; 
-            SAVED_COL = CURRENT_COL; 
-          }
-          else if (next_char == '8') 
-          { 
-            // ESC 8 (Restore Cursor)
-            CURRENT_ROW = SAVED_ROW; 
-            CURRENT_COL = SAVED_COL; 
-          }
-          else if (next_char == 'M') 
-          { 
-            // ESC M (Reverse Index)
-            if (CURRENT_ROW == SCROLL_TOP) 
-            { 
-              this->scroll_down(1); 
-            } 
-            else 
-            { 
-              CURRENT_ROW = std::max(0, CURRENT_ROW - 1); 
-            }
-          }
-          else if (next_char == 'D') 
-          { 
-            // ESC D (Index)
-            if (CURRENT_ROW == SCROLL_BOTTOM) 
-            { 
-              this->scroll_up(1); 
-            } 
-            else 
-            { 
-              CURRENT_ROW = std::min(ROWS - 1, CURRENT_ROW + 1); 
-            }
-          }
-          else if (next_char == 'E') 
-          { 
-            // ESC E (Next Line)
-            CURRENT_COL = 0;
-            if (CURRENT_ROW == SCROLL_BOTTOM) 
-            { 
-              this->scroll_up(1); 
-            } 
-            else 
-            { 
-              CURRENT_ROW = std::min(ROWS - 1, CURRENT_ROW + 1); 
-            }
-          }
-          else if (next_char == 'J') 
-          { 
-            // ESC J (Erase Display - VT52)
-            CURRENT_ROW = 0;
-            CURRENT_COL = 0;
-            for (int r = 0; r < ROWS; ++r) 
-            {
-              std::fill(SCREEN[r], SCREEN[r] + COLS, DEFAULT_CELL);
-            }
-          }
-          else if (next_char == 'I') 
-          { 
-            // ESC I (VT52 Reverse Index)
-            if (CURRENT_ROW == SCROLL_TOP) 
-            {
-              scroll_down(1); 
-            } 
-            else 
-            {
-              CURRENT_ROW = std::max(SCROLL_TOP, CURRENT_ROW - 1);
-            }
-          }
-          else if (next_char == 'H') 
-          { 
-            // ESC H (Set Tab Stop) - NO-OP
-          }
-          else if (next_char == 'Z') 
-          { 
-            // ESC Z (DECID - Identify Terminal)
-            std::string response = "\x1B[?1;2c"; // VT100/VT102 ID
-            if (MASTER_FD > 0) 
-            { 
-              /* write(MASTER_FD, response.c_str(), response.size()); */ 
-            }
-          }
-          else if (next_char == 'c') 
-          { 
-            // ESC c (RIS - Reset to Initial State)
-            // Full Terminal Reset Logic
-            for (int row = 0; row < ROWS; ++row) 
-            { 
-              std::fill(SCREEN[row], SCREEN[row] + COLS, DEFAULT_CELL); 
-            }
-            CURRENT_ROW = 0; CURRENT_COL = 0; SCROLL_TOP = 0; SCROLL_BOTTOM = ROWS - 1;
-            CURRENT_ATTRS = DEFAULT_CELL; APP_CURSOR_MODE = false; AUTO_WRAP_MODE = true; 
-            REVERSE_WRAP_MODE = false; APP_KEYPAD_MODE = false; IS_GRAPHICS_MODE = false; 
-          }
-          else if (next_char == 'F') 
-          { 
-            // ESC F (Select Graphics Character Set - VT52)
-            IS_GRAPHICS_MODE = true; 
-          }
-          else if (next_char == 'G') 
-          { 
-            // ESC G (Select Standard Character Set - VT52)
-            IS_GRAPHICS_MODE = false; 
-          }
-          // ESC A, B, C, K, O sequences are consumed but otherwise ignored/NO-OP for these handlers
-          
-          if (next_char != 'Y') 
-          { 
-            // If it wasn't the 4-byte ESC Y sequence, consume 2 bytes (ESC + char)
-            i += 2; 
-            handled_esc = true;
-          }
-        }
-          
-        if (handled_esc)
-        {
-          goto continue_next_char;
-        }
-        else 
-        {
-          // Unhandled 2-character sequence: consume ESC and the unhandled character to avoid infinite loops
-          i += 2; 
-          goto continue_next_char;
-        }
-      }
-        
-      // If ESC wasn't followed by a recognized sequence or if the string ended right after ESC
-      i++; // Always consume the ESC character itself
-      goto continue_next_char;
-    } 
-    
-    // --- CONTROL CHARACTER HANDLING ---
-    else if (c == '\0') 
-    { 
-      i++; 
-      goto continue_next_char; 
-    } // NUL (Ignore)
-    else if (c == '\r') 
-    { 
-      CURRENT_COL = 0; i++; 
-      goto continue_next_char; 
-    } // CR
-    else if (c == '\b' || c == '\x08') 
-    { 
-      // BS
-        if (CURRENT_COL > 0) 
-        { 
-          CURRENT_COL--; 
-        }
-        i++; 
-      goto continue_next_char; 
-    }
-    else if (c == '\t') 
-    { 
-      // HT (Horizontal Tab)
-        // Move to next 8-column tab stop (or end of line)
-        int new_col = (CURRENT_COL / 8 + 1) * 8;
-        CURRENT_COL = (new_col < COLS) ? new_col : COLS - 1; 
-        i++; 
-      goto continue_next_char; 
-    }
-    else if (c == '\n' || c == '\v' || c == '\f') 
-    { 
-      // LF, VT, FF (Enforce CR+LF behavior)
-        CURRENT_COL = 0; 
-        CURRENT_ROW++; 
-        i++; 
-      goto continue_next_char; // <-- CRITICAL FIX: Ensures it skips printable char logic
-    } 
-    else // --- UTF-8 DECODING AND PRINTABLE CHARACTER HANDLING (The only place left) ---
-    {
-      // 1. Decode the next Unicode character (code point)
-      size_t start_i = i;
-      char32_t code_point = decode_next_utf8_char(raw_text, i);
-      
-      // Check if decoding failed or if it decoded to a control char (which should be handled above)
-      if (code_point == U'\ufffd' || code_point < 0x20) 
-      {
-        // Ensure 'i' is advanced at least by 1 if decode_next_utf8_char failed to advance it
-        if (i == start_i) i++; 
-        goto continue_next_char;
-      }
-
-      // 2. APPLY GRAPHICS MODE MAPPING
-      if (IS_GRAPHICS_MODE && code_point <= 0x7E && code_point >= 0x60) 
-      {
-        code_point = map_graphics_char(code_point);
-      }
-      
-      // 3. Handle Line Wrap
-      if (CURRENT_COL >= COLS) 
-      {
-        if (AUTO_WRAP_MODE) 
-        {
-          CURRENT_COL = 0;
-          CURRENT_ROW++;
-        } 
-        else 
-        {
-          // If wrap mode is off, cursor stays at the last column
-          CURRENT_COL = COLS - 1;
-        }
-      }
-      
-      // 4. Write character to SCREEN
-      if (CURRENT_ROW < ROWS && CURRENT_COL < COLS) 
-      {
-        // Write the decoded char32_t to the Cell's character field
-        SCREEN[CURRENT_ROW][CURRENT_COL].character = code_point;
-        
-        // Copy current attributes
-        SCREEN[CURRENT_ROW][CURRENT_COL].foreground_color = CURRENT_ATTRS.foreground_color;
-        SCREEN[CURRENT_ROW][CURRENT_COL].background_color = CURRENT_ATTRS.background_color;
-        SCREEN[CURRENT_ROW][CURRENT_COL].is_bold = CURRENT_ATTRS.is_bold;
-        SCREEN[CURRENT_ROW][CURRENT_COL].is_reverse = CURRENT_ATTRS.is_reverse;
-      }
-      
-      // 5. Advance cursor
-      if (CURRENT_COL < COLS - 1 || AUTO_WRAP_MODE) 
-      {
-        CURRENT_COL++;
-      }
-    }
-
-    // --- Post-Character Scroll Check ---
-    if (CURRENT_ROW > SCROLL_BOTTOM) 
-    {
-      // Scroll up enough to bring the cursor back to the scroll bottom
-      this->scroll_up(CURRENT_ROW - SCROLL_BOTTOM);
-      CURRENT_ROW = SCROLL_BOTTOM; 
-    }
-    
-    continue_next_char:;
-  }
-}
-
-
-
 
 // ---------------------------------------------------------------------
 // --- process_output_2 ---
@@ -1586,36 +1002,6 @@ void TERMINAL::control_HTS()
   }
 }
 
-
-
-
-
-
-
-
-
-void TERMINAL::bracket_device_attribute()
-{
-  std::cout << ID_RESPONSE << std::flush;
-}
-
-void TERMINAL::bracket_cursor_home()
-{
-  // Simple implementation for ESC [ H
-  // Future logic: parse params for ESC [ row ; col H
-  CURRENT_ROW = 0;
-  CURRENT_COL = 0;
-  WRAP_PENDING = false;
-}
-
-
-
-
-
-
-
-
-
 void TERMINAL::control_characters(uint8_t Character) 
 {
   switch (Character) 
@@ -1674,7 +1060,8 @@ void TERMINAL::control_characters(uint8_t Character)
 void TERMINAL::handle_simple_escape(uint8_t command)
 {
   switch (command) 
-  {    case 'A': // Cursor Up (VT52 compatibility)
+  {    
+    case 'A': // Cursor Up (VT52 compatibility)
       cursor_up();
       break;
     case 'B': // Cursor Down (VT52 compatibility)
@@ -1756,328 +1143,29 @@ void TERMINAL::handle_simple_escape(uint8_t command)
   }
 }
 
-void TERMINAL::bracket_erase_in_display(int mode)
+void TERMINAL::handle_bracket_escape(std::string sequence) 
 {
-  // Mode 0: Erase from cursor to end of screen
-  // Mode 1: Erase from beginning of screen to cursor
-  // Mode 2: Erase entire screen (cursor does not move)
-  // Mode 3: Erase entire screen including scrollback buffer
-  
-  if (mode == 0) 
-  {
-    screen_erase_to_end();
-  } 
-  else if (mode == 1) 
-  {
-    // Erase from (0,0) to current cursor
-    for (int r = 0; r <= CURRENT_ROW; r++) 
-    {
-      int max_c = (r == CURRENT_ROW) ? CURRENT_COL : COLS - 1;
-      for (int c = 0; c <= max_c; c++) 
-      {
-        SCREEN[r][c] = DEFAULT_CELL;
-      }
-    }
-  } 
-  else if (mode == 2 || mode == 3) 
-  {
-    // Erase entire screen
-    for (int r = 0; r < ROWS; r++) 
-    {
-      for (int c = 0; c < COLS; c++) 
-      {
-        SCREEN[r][c] = DEFAULT_CELL;
-      }
-    }
-  }
-  WRAP_PENDING = false;
-}
-
-void TERMINAL::bracket_erase_in_line(int mode)
-{
-  // Mode 0: Erase from cursor to end of line
-  // Mode 1: Erase from beginning of line to cursor
-  // Mode 2: Erase entire line
-  if (mode == 0) 
-  {
-    for (int c = CURRENT_COL; c < COLS; c++) 
-    {
-      SCREEN[CURRENT_ROW][c] = DEFAULT_CELL;
-    }
-  } 
-  else if (mode == 1) 
-  {
-    for (int c = 0; c <= CURRENT_COL; c++) 
-    {
-      SCREEN[CURRENT_ROW][c] = DEFAULT_CELL;
-    }
-  } 
-  else if (mode == 2) 
-  {
-    for (int c = 0; c < COLS; c++) 
-    {
-      SCREEN[CURRENT_ROW][c] = DEFAULT_CELL;
-    }
-  }
-  WRAP_PENDING = false;
-}
-
-void TERMINAL::bracket_delete_character(int count)
-{
-  if (count < 1) count = 1;
-  int remaining_on_line = COLS - CURRENT_COL;
-  if (count > remaining_on_line) count = remaining_on_line;
-
-  // Shift characters to the left
-  for (int c = CURRENT_COL; c < COLS - count; c++) 
-  {
-    SCREEN[CURRENT_ROW][c] = SCREEN[CURRENT_ROW][c + count];
-  }
-  // Fill the end of the line with default cells
-  for (int c = COLS - count; c < COLS; c++) 
-  {
-    SCREEN[CURRENT_ROW][c] = DEFAULT_CELL;
-  }
-  WRAP_PENDING = false;
-}
-
-void TERMINAL::bracket_set_reset_mode(std::string params, bool set)
-{
-  if (!params.empty() && params[0] == '?')
-  {
-    std::stringstream ss(params.substr(1));
-    std::string segment;
-    while (std::getline(ss, segment, ';')) 
-    {
-      int mode = 0;
-      try { mode = std::stoi(segment); } catch(...) { continue; }
-
-      switch (mode)
-      {
-        case 1:    APP_CURSOR_MODE = set; break;
-        case 7:    AUTO_WRAP_MODE = set; break;
-        case 12:   CURSOR_BLINK = set; break;
-        case 25:   CURSOR_VISIBLE = set; break;
-        case 1049: USE_ALT_SCREEN = set; bracket_erase_in_display(2); break;
-        case 2004: BRACKETED_PASTE_MODE = set; break;
-        default:
-            std::cout << "[DEBUG] Mode " << (set ? "h" : "l") << ": " << mode << std::endl;
-            break;
-      }
-    }
-  }
-}
-
-void TERMINAL::bracket_set_margins(std::string params)
-{
-  int top = 1;
-  int bottom = ROWS;
-
-  if (!params.empty())
-  {
-    size_t sep = params.find(';');
-    try 
-    {
-      if (sep != std::string::npos) 
-      {
-        std::string t_str = params.substr(0, sep);
-        std::string b_str = params.substr(sep + 1);
-        if (!t_str.empty()) top = std::stoi(t_str);
-        if (!b_str.empty()) bottom = std::stoi(b_str);
-      } 
-      else 
-      {
-        top = std::stoi(params);
-      }
-    } 
-    catch (...) {}
-  }
-
-  // Standard terminal coordinates are 1-based
-  top -= 1;
-  bottom -= 1;
-
-  // Validation
-  if (top < 0) top = 0;
-  if (bottom >= ROWS) bottom = ROWS - 1;
-  if (top < bottom) 
-  {
-    SCROLL_TOP = top;
-    SCROLL_BOTTOM = bottom;
-  }
-
-  // Reset cursor to home when margins change
-  bracket_cursor_home();
-}
-
-void TERMINAL::bracket_select_graphic_rendition(std::string params)
-{
-  if (params.empty()) 
-  {
-    CURRENT_ATTRS = DEFAULT_CELL;
-    return;
-  }
-
-  std::stringstream ss(params);
-  std::string segment;
-  while (std::getline(ss, segment, ';')) 
-  {
-    int val = 0;
-    try { val = std::stoi(segment); } catch (...) { continue; }
-
-    switch (val) 
-    {
-        case 0:  CURRENT_ATTRS = DEFAULT_CELL; break;
-        case 1:  CURRENT_ATTRS.is_bold = true; break;
-        case 4:  CURRENT_ATTRS.is_underline = true; break;
-        case 7:  CURRENT_ATTRS.is_reverse = true; break;
-        case 22: CURRENT_ATTRS.is_bold = false; break;
-        case 24: CURRENT_ATTRS.is_underline = false; break;
-        case 27: CURRENT_ATTRS.is_reverse = false; break;
-        // Add color support here in the future
-        default: break;
-    }
-  }
-}
-
-void TERMINAL::handle_bracket_escape(std::string sequence)
-{
-  // CSI is sequence[1] == '['
-  // Last character is the command
   char command = sequence.back();
+  bool is_dec_private = (sequence.size() > 2 && sequence[2] == '?');
+  std::vector<int> params = parse_csi_params(sequence);
 
-  // Device Attributes (DA) request: ESC [ c or ESC [ 0 c
-  if (command == 'c')
-  {
-    if (sequence == "\033[c" || sequence == "\033[0c")
-    {
-      bracket_device_attribute();
-      return;
-    }
-  }
+  // --- DISPATCH LOGIC ---
+  
+  // 1. Cursor Movement & Positioning
+  if (process_csi_cursor_movement(command, params)) return;
 
-  // Cursor Home (CUP) / Horizontal Vertical Position (HVP)
-  // ESC [ H  (Home to 1,1 which is 0,0 internally)
-  if (command == 'H' || command == 'f')
-  {
-    bracket_cursor_home();
-    return;
-  }
+  // 2. Erasing, Deleting, and Editing
+  if (process_csi_erase_and_edit(command, params)) return;
 
-  if (command == 'C')
-  {
-    int count = 1;
-    std::string params = sequence.substr(2, sequence.size() - 3);
-    if (!params.empty()) 
-    {
-      try { count = std::stoi(params); } catch (...) { count = 1; }
-    }
-    for (int i = 0; i < count; i++) cursor_right();
-    return;
-  }
+  // 3. Modes, Reporting, and State
+  if (process_csi_reporting_and_mode(command, params, is_dec_private)) return;
 
-  if (command == 'G')
-  {
-    int col = 1;
-    std::string params = sequence.substr(2, sequence.size() - 3);
-    if (!params.empty()) 
-    {
-      try { col = std::stoi(params); } catch (...) { col = 1; }
-    }
-    // 1-based to 0-based
-    CURRENT_COL = std::clamp(col - 1, 0, COLS - 1);
-    WRAP_PENDING = false;
-    return;
-  }
+  // 4. Graphics Rendition (Colors/Styles) and Misc
+  if (process_csi_sgr_and_misc(command, params)) return;
 
-  if (command == 'd')
-  {
-    int row = 1;
-    std::string params = sequence.substr(2, sequence.size() - 3);
-    if (!params.empty()) 
-    {
-      try { row = std::stoi(params); } catch (...) { row = 1; }
-    }
-    // VPA: Vertical Line Position Absolute (1-based to 0-based)
-    CURRENT_ROW = std::clamp(row - 1, 0, ROWS - 1);
-    WRAP_PENDING = false;
-    return;
-  }
-
-  if (command == 't')
-  {
-    // XTerm Window Operations (like ESC[22;0;0t and ESC[23;0;0t)
-    // We'll acknowledge these sequences to prevent them from being treated as text.
-    // Some apps use these to save/restore the window title.
-    return;
-  }
-
-  // Erase in Display (ED)
-  if (command == 'J')
-  {
-    // Extract numeric parameter
-    int mode = 0;
-    std::string params = sequence.substr(2, sequence.size() - 3);
-    if (!params.empty()) 
-    {
-      try 
-      {
-          mode = std::stoi(params);
-      } catch (...) { mode = 0; }
-    }
-    bracket_erase_in_display(mode);
-    return;
-  }
-
-  if (command == 'K')
-  {
-    int mode = 0;
-    std::string params = sequence.substr(2, sequence.size() - 3);
-    if (!params.empty()) 
-    {
-      try { mode = std::stoi(params); } catch (...) { mode = 0; }
-    }
-    bracket_erase_in_line(mode);
-    return;
-  }
-
-  if (command == 'P')
-  {
-    int count = 1;
-    std::string params = sequence.substr(2, sequence.size() - 3);
-    if (!params.empty()) 
-    {
-      try { count = std::stoi(params); } catch (...) { count = 1; }
-    }
-    bracket_delete_character(count);
-    return;
-  }
-
-  // Set Mode (SM) or Reset Mode (RM)
-  if (command == 'h' || command == 'l')
-  {
-    std::string params = sequence.substr(2, sequence.size() - 3);
-    bracket_set_reset_mode(params, (command == 'h'));
-    return;
-  }
-
-  if (command == 'm')
-  {
-    std::string params = sequence.substr(2, sequence.size() - 3);
-    bracket_select_graphic_rendition(params);
-    return;
-  }
-
-  if (command == 'r')
-  {
-    std::string params = sequence.substr(2, sequence.size() - 3);
-    bracket_set_margins(params);
-    return;
-  }
-
-  // Comprehensive output for unhandled sequences
+  // Fallback for Debugging
   std::string printable_seq = "";
-  for (unsigned char c : sequence)
+  for (unsigned char c : sequence) 
   {
     if (c == 0x1B) printable_seq += "ESC";
     else if (c < 32 || c > 126) 
@@ -2088,19 +1176,8 @@ void TERMINAL::handle_bracket_escape(std::string sequence)
     }
     else printable_seq += (char)c;
   }
-  std::cout << "[DEBUG] Unhandled CSI sequence: " << printable_seq << std::endl;
+  std::cout << "[DEBUG] Unhandled CSI: " << printable_seq << std::endl;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 // Handler for ESC + Char + Params (e.g., VT52 Direct Cursor Addressing)
 void TERMINAL::handle_parameterized_escape(std::string Raw_Text)
@@ -2246,16 +1323,7 @@ void TERMINAL::process_output_2(std::string& raw_text)
 
 }
 
-
-
-
-
-
 // ---------------------------------------------------------------------
-
-
-
-
 
 /**
  * @brief Constructor: Initializes the screen buffer, cursor state, and redirects stderr for logging.
@@ -2349,32 +1417,32 @@ void TERMINAL::get_line_text(int row, bool cursor_on,
 
     if (revers_reverse || SCREEN[row][col].background_color != DEFAULT_BG_COLOR)
     {
-            // Manually encode char32_t (Unicode code point) to UTF-8 bytes
+      // Manually encode char32_t (Unicode code point) to UTF-8 bytes
       if (code_point <= 0x7F) 
       {
-          // 1-byte sequence (ASCII)
-          line_reverse += (char)code_point;
+        // 1-byte sequence (ASCII)
+        line_reverse += (char)code_point;
       } 
       else if (code_point <= 0x7FF) 
       {
-          // 2-byte sequence
-          line_reverse += (char)(0xC0 | (code_point >> 6));
-          line_reverse += (char)(0x80 | (code_point & 0x3F));
+        // 2-byte sequence
+        line_reverse += (char)(0xC0 | (code_point >> 6));
+        line_reverse += (char)(0x80 | (code_point & 0x3F));
       } 
       else if (code_point <= 0xFFFF) 
       {
-          // 3-byte sequence (most common non-BMP characters)
-          line_reverse += (char)(0xE0 | (code_point >> 12));
-          line_reverse += (char)(0x80 | ((code_point >> 6) & 0x3F));
-          line_reverse += (char)(0x80 | (code_point & 0x3F));
+        // 3-byte sequence (most common non-BMP characters)
+        line_reverse += (char)(0xE0 | (code_point >> 12));
+        line_reverse += (char)(0x80 | ((code_point >> 6) & 0x3F));
+        line_reverse += (char)(0x80 | (code_point & 0x3F));
       } 
       else if (code_point <= 0x10FFFF) 
       {
-          // 4-byte sequence (supplementary characters)
-          line_reverse += (char)(0xF0 | (code_point >> 18));
-          line_reverse += (char)(0x80 | ((code_point >> 12) & 0x3F));
-          line_reverse += (char)(0x80 | ((code_point >> 6) & 0x3F));
-          line_reverse += (char)(0x80 | (code_point & 0x3F));
+        // 4-byte sequence (supplementary characters)
+        line_reverse += (char)(0xF0 | (code_point >> 18));
+        line_reverse += (char)(0x80 | ((code_point >> 12) & 0x3F));
+        line_reverse += (char)(0x80 | ((code_point >> 6) & 0x3F));
+        line_reverse += (char)(0x80 | (code_point & 0x3F));
       }
       // Invalid or unhandled code points are skipped
 
@@ -2386,29 +1454,29 @@ void TERMINAL::get_line_text(int row, bool cursor_on,
       // Manually encode char32_t (Unicode code point) to UTF-8 bytes
       if (code_point <= 0x7F) 
       {
-          // 1-byte sequence (ASCII)
-          line += (char)code_point;
+        // 1-byte sequence (ASCII)
+        line += (char)code_point;
       } 
       else if (code_point <= 0x7FF) 
       {
-          // 2-byte sequence
-          line += (char)(0xC0 | (code_point >> 6));
-          line += (char)(0x80 | (code_point & 0x3F));
+        // 2-byte sequence
+        line += (char)(0xC0 | (code_point >> 6));
+        line += (char)(0x80 | (code_point & 0x3F));
       } 
       else if (code_point <= 0xFFFF) 
       {
-          // 3-byte sequence (most common non-BMP characters)
-          line += (char)(0xE0 | (code_point >> 12));
-          line += (char)(0x80 | ((code_point >> 6) & 0x3F));
-          line += (char)(0x80 | (code_point & 0x3F));
+        // 3-byte sequence (most common non-BMP characters)
+        line += (char)(0xE0 | (code_point >> 12));
+        line += (char)(0x80 | ((code_point >> 6) & 0x3F));
+        line += (char)(0x80 | (code_point & 0x3F));
       } 
       else if (code_point <= 0x10FFFF) 
       {
-          // 4-byte sequence (supplementary characters)
-          line += (char)(0xF0 | (code_point >> 18));
-          line += (char)(0x80 | ((code_point >> 12) & 0x3F));
-          line += (char)(0x80 | ((code_point >> 6) & 0x3F));
-          line += (char)(0x80 | (code_point & 0x3F));
+        // 4-byte sequence (supplementary characters)
+        line += (char)(0xF0 | (code_point >> 18));
+        line += (char)(0x80 | ((code_point >> 12) & 0x3F));
+        line += (char)(0x80 | ((code_point >> 6) & 0x3F));
+        line += (char)(0x80 | (code_point & 0x3F));
       }
       // Invalid or unhandled code points are skipped
 
@@ -2473,17 +1541,7 @@ void TERMINAL::reader_thread()
     {
       // The shell has sent a complete chunk of data. It is safe to process.
       std::lock_guard<std::mutex> lock(BUF_MUTEX);
-      
-      if (process_output_2_enable)
-      {
-        process_output_2(raw_text);
-      }
-      else
-      {
-        process_output(raw_text);
-        // Clear the buffer after successful processing
-        raw_text = "";
-      }
+      process_output_2(raw_text);
     }
   }
   
@@ -2491,15 +1549,7 @@ void TERMINAL::reader_thread()
   if (!raw_text.empty()) 
   {
     std::lock_guard<std::mutex> lock(BUF_MUTEX);
-
-    if (process_output_2_enable)
-    {
-      process_output_2(raw_text);
-    }
-    else
-    {
-      process_output(raw_text);
-    }
+    process_output_2(raw_text);
   }
 
   //std::stringstream ss; 

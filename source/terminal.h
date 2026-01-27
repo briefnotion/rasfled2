@@ -29,6 +29,13 @@
 using namespace std;
 
 // ---------------------------------------------------------------------------------------
+// Helpers
+
+std::vector<int> parse_csi_params(const std::string& sequence);
+int get_param(const std::vector<int>& params, size_t index, int default_val);
+
+// ---------------------------------------------------------------------------------------
+
 
 // ANSI escape codes start with 0x1B (ESC).
 const char ESC = 0x1B;
@@ -147,8 +154,12 @@ struct Cell
   RgbColor foreground_color = DEFAULT_FG_COLOR;
   RgbColor background_color = DEFAULT_BG_COLOR;
   bool is_bold = false;
+  bool is_italic = false;
   bool is_underline = false;
+  bool is_blink = false;
   bool is_reverse = false; // NEW REVERSE FLAG
+  bool is_hidden = false;
+  bool is_strikethrough = false;
   // Other attributes like underline, italic, etc. can be added here
 };
 
@@ -156,143 +167,7 @@ struct Cell
 
 char32_t decode_next_utf8_char(const std::string& text, size_t& i);
 
-// Helper to safely get parameters (default to 0 if not present)
-int get_param(const std::vector<int>& params, size_t index, int default_val);
-
 // -----------------------------------------------------
-
-/*
-class TERMINAL
-{
-  private:
-
-  pid_t PID;
-  std::thread T;
-  
-  int MASTER_FD = -1;
-
-  void start_shell();
-
-  void clear_row_range_full_line(int row);
-  void scroll_up(int count);
-  void scroll_down(int count);
-
-  bool process_csi_cursor_movement(char final_char, const std::vector<int>& params);
-  bool process_csi_erase_and_edit(char final_char, const std::vector<int>& params);
-  bool process_csi_reporting_and_mode(char final_char, const std::vector<int>& params, bool is_dec_private);
-  bool process_csi_sgr_and_misc(char final_char, const std::vector<int>& params);
-  char32_t map_graphics_char(char32_t ascii_char) const;
-  
-  void process_output(const std::string& raw_text);
-
-// ---------------------------------------------------------------------
-
-  bool process_output_2_enable = true;
-
-  void reset();
-
-  void screen_scoll_down();
-  void screen_scoll_up();
-  void screen_clear();
-  void screen_erase_to_end();
-  void screen_erase_line_to_end();
-  
-  void cursor_up();
-  void cursor_down();
-  void cursor_left();
-  void cursor_right();
-
-  void control_BS();
-  void control_HT();
-  void control_LF();
-  void control_CR();
-  
-  void control_RI();
-  void control_HTS();
-
-  void bracket_device_attribute();
-  void bracket_cursor_home();
-  void bracket_erase_in_display(int mode);
-  void bracket_erase_in_line(int mode);
-  void bracket_delete_character(int count);
-  void bracket_set_reset_mode(std::string params, bool set);
-  void bracket_set_margins(std::string params);
-  void bracket_select_graphic_rendition(std::string params);
-
-  void control_characters(uint8_t Character);
-
-  void handle_simple_escape(uint8_t command);
-  void handle_bracket_escape(std::string sequence);
-  void handle_parameterized_escape(std::string Raw_Text);
-
-  bool escape_characters(std::string Raw_Text, int &End_Position);
-
-  void write_to_screen(char32_t Character);
-
-  string PROCESS_OUTPUT_2_BUFFER = "";
-  void process_output_2(std::string& raw_text);
-
-
-// ---------------------------------------------------------------------
-
-
-  public:
-
-  // Constants for screen dimensions
-  static const int ROWS = 26;
-  //static const int COLS = 99;
-  static const int COLS = 87;
-
-  // Buffer containing the terminal screen
-  Cell SCREEN[ROWS][COLS]; 
-  bool TAB_STOPS[COLS];
-  int CURRENT_ROW;
-  int CURRENT_COL;
-  int SCROLL_TOP;
-  int SCROLL_BOTTOM;
-  bool APP_CURSOR_MODE; 
-  bool AUTO_WRAP_MODE;
-  bool REVERSE_WRAP_MODE;
-  bool APP_KEYPAD_MODE;
-  bool IS_GRAPHICS_MODE;
-  bool ANSI_MODE;
-  bool WRAP_PENDING = false;
-  bool BRACKETED_PASTE_MODE = false;
-  bool CURSOR_VISIBLE = true;
-  bool CURSOR_BLINK = true;
-  bool USE_ALT_SCREEN = false;
-  
-  int SAVED_ROW; 
-  int SAVED_COL;
-  bool SAVED_AUTO_WRAP_MODE;
-  Cell SAVED_CURRENT_ATTRS;
-  
-  const Cell DEFAULT_CELL; 
-  // Global tracker for current cell attributes
-  Cell CURRENT_ATTRS = DEFAULT_CELL;
-
-  string ID_RESPONSE;
-
-  std::mutex BUF_MUTEX;
-
-  //deque<std::string> MESSAGES;
-  bool SHELL_EXITED = false;
-
-  TERMINAL();
-  ~TERMINAL();
-
-  std::mutex& get_mutex();
-
-  void get_line_text(int row, bool cursor_on, 
-                      std::string &line, 
-                      std::string &line_reverse, 
-                      std::string &line_reverse_map);
-
-  void reader_thread();
-  void create();
-  void send_command(const std::string& charaters);
-};
-*/
 
 class TERMINAL 
 {
@@ -325,12 +200,6 @@ private:
     // Maps ASCII to DEC Special Graphics characters (for line drawing)
     char32_t map_graphics_char(char32_t ascii_char) const;
     
-    // Original output processor (v1)
-    void process_output(const std::string& raw_text);
-
-    /** --- Output Processor v2: Refined ANSI/VT100 Logic --- */
-    bool process_output_2_enable = false;
-
     void reset();                       // Hard reset of terminal state
 
     void screen_scoll_down();           // Single row scroll within margins (Reverse Index logic)
@@ -352,18 +221,10 @@ private:
     void control_RI();                  // Reverse Index (ESC M)
     void control_HTS();                 // Horizontal Tab Set (ESC H)
 
-    void bracket_device_attribute();    // CSI c (Terminal ID)
-    void bracket_cursor_home();         // CSI H (Reset to 0,0)
-    void bracket_erase_in_display(int mode); // CSI J
-    void bracket_erase_in_line(int mode);    // CSI K
-    void bracket_delete_character(int count); // CSI P
-    void bracket_set_reset_mode(std::string params, bool set); // CSI h/l
-    void bracket_set_margins(std::string params);              // CSI r
-    void bracket_select_graphic_rendition(std::string params); // CSI m (SGR)
-
     void control_characters(uint8_t Character); // Handles C0 codes (0x00-0x1F)
 
     void handle_simple_escape(uint8_t command); // ESC followed by 1 byte
+
     void handle_bracket_escape(std::string sequence); // Full CSI sequence
     void handle_parameterized_escape(std::string Raw_Text);
 
