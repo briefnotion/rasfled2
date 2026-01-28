@@ -158,6 +158,12 @@ Restart with:
 ## Set the program up
 The `definitions.h` file will contain most of the setting that need to be made for your build.  Most things can be left as is, but for live build, `TEST` vars should be false, and anything with a `COMMS_AUTOSTART_...` should be set to false if system isn't available, or true if it is.
 
+## Instal fonts
+```
+sudo apt update
+sudo apt install fonts-noto-core
+```
+
 ## Create Directory Structure
 Ensure directory names are correct in definitions.h  
 For example, your home directory is likely to be `pi`

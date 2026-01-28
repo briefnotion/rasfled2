@@ -20,6 +20,7 @@
 #include <pty.h>
 #include <thread>
 #include <vector>
+#include <filesystem> // For std::filesystem::exists
 
 // Rasfled Includes
 #include "system.h"

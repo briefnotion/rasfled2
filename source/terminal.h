@@ -165,7 +165,8 @@ struct Cell
 
 // -----------------------------------------------------
 
-char32_t decode_next_utf8_char(const std::string& text, size_t& i);
+char32_t translate_dec_graphics(char32_t cp);
+char32_t decode_utf8_safe(const std::string& text, size_t& i, bool& incomplete);
 
 // -----------------------------------------------------
 
@@ -196,9 +197,6 @@ private:
     
     // Handles Colors, Bold, Reverse, and specialized VT modes (CSI m, CSI q)
     bool process_csi_sgr_and_misc(char final_char, const std::vector<int>& params);
-    
-    // Maps ASCII to DEC Special Graphics characters (for line drawing)
-    char32_t map_graphics_char(char32_t ascii_char) const;
     
     void reset();                       // Hard reset of terminal state
 
@@ -266,6 +264,9 @@ public:
     int SAVED_COL;
     bool SAVED_AUTO_WRAP_MODE;
     Cell SAVED_CURRENT_ATTRS;
+
+    enum class CharSet { ASCII, DEC_SPECIAL_GRAPHICS };
+    CharSet current_g0_charset = CharSet::ASCII;
     
     const Cell DEFAULT_CELL;            // Baseline cell (empty, default colors)
     Cell CURRENT_ATTRS = DEFAULT_CELL;  // Active pen attributes for new characters

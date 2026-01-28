@@ -1,3 +1,14 @@
+2.388_260129
+  - Continued rewriting the terminal.
+      Added a few escape sequence graphical characters.
+      Added ability to pull NotoSansSymbols2 into the font set 
+        for the terminal console, bringing with it, a large 
+        set of graphical characters.  btop can now display 
+        its braile graphs.  
+        Must install:
+          sudo apt update
+          sudo apt install fonts-noto-core
+
 2.387_260128
   - Continued rewriting the terminal.
       This version now surpasses Terminal V1, although

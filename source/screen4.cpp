@@ -356,8 +356,6 @@ int SCREEN4::create(system_data &sdSysData)
     sdSysData.PANEL_CONTROL.FONT_100 =      io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono-Bold.ttf", 100.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER);
 
     // Console Font
-    
-    ImFontConfig config;
 
     static const ImWchar glyph_ranges[] = 
     {
@@ -376,40 +374,56 @@ int SCREEN4::create(system_data &sdSysData)
         0,                    // End of list
     };
 
-    sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
-    //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
-    //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/unifont/unifont.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
-    //sdSysData.PANEL_CONTROL.FONT_CONSOLE =  io.Fonts->AddFontFromFileTTF("/usr/share/fonts/truetype/noto/NotoSansMono-Regular.ttf",15.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
-
-    // Under Consideration
-    /*
-    ImGuiIO& io = ImGui::GetIO();
-
-    // Load your primary font
-    ImFont* font_console = io.Fonts->AddFontFromFileTTF(
-        "font1.ttf",
-        18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER,
-        nullptr,
-        glyph_ranges_1
-    );
-
-    // Configure merge mode
     ImFontConfig config;
-    config.MergeMode = true;
-    config.PixelSnapH = true;
+    config.MergeMode = false; 
 
-    // Merge a second font into the same atlas
-    io.Fonts->AddFontFromFileTTF(
-        "font2.ttf",
-        18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER,
-        &config,
-        glyph_ranges_2
+    // 1. Load Primary Font
+    sdSysData.PANEL_CONTROL.FONT_CONSOLE = io.Fonts->AddFontFromFileTTF(
+        "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 
+        18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, 
+        &config, 
+        glyph_ranges
     );
 
-    // Now FONT_CONSOLE includes glyphs from both fonts
-    sdSysData.PANEL_CONTROL.FONT_CONSOLE = font_console;
-    */
+    // 2. Check if primary font loaded, otherwise you have no font at all!
+    if (sdSysData.PANEL_CONTROL.FONT_CONSOLE == nullptr) 
+    {
+        // Fallback to ImGui default if DejaVu is missing
+        sdSysData.PANEL_CONTROL.FONT_CONSOLE = io.Fonts->AddFontDefault();
+    } 
+    else 
+    {
+      // 3. Only attempt to merge Noto if the file exists on the Pi
+      const char* notoPath = "/usr/share/fonts/truetype/noto/NotoSansSymbols2-Regular.ttf";
+      
+      if (std::filesystem::exists(notoPath)) 
+      {
+        // Calculate the monospace width from the primary font
+        io.Fonts->Build(); 
+        float mono_width = sdSysData.PANEL_CONTROL.FONT_CONSOLE->CalcTextSizeA(18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, FLT_MAX, 0.0f, "A").x;
 
+        config.MergeMode = true; 
+        config.GlyphMinAdvanceX = mono_width;
+        config.GlyphMaxAdvanceX = mono_width;
+
+        io.Fonts->AddFontFromFileTTF(notoPath, 18.0f * DEF_SCREEN_SIZE_Y_MULTIPLIER, &config, glyph_ranges);
+        
+        // Rebuild with merged data
+        io.Fonts->Build();
+      } 
+      else 
+      {
+        sdSysData.SCREEN_COMMS.printw("[Warning] NotoSansSymbols2 not found. Used for terminal symbols.");
+        sdSysData.SCREEN_COMMS.printw("  To Install: sudo apt update");
+        sdSysData.SCREEN_COMMS.printw("  sudo apt install fonts-noto-core");
+
+        std::cerr << "[Warning] NotoSansSymbols2 not found. Used for terminal symbols." << std::endl;
+        std::cerr << "  To Install: sudo apt update" << std::endl;
+        std::cerr << "  sudo apt install fonts-noto-core" << std::endl;
+        // No need to do anything else; the terminal will just show boxes/blanks 
+        // for Braille, but the app won't crash.
+      }
+    }
 
     // Start the Dear ImGui frame
     ImGui_ImplOpenGL3_NewFrame();
