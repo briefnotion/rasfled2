@@ -1,3 +1,6 @@
+2.389_260130
+  - Minor changes to the terminal.
+
 2.388_260129
   - Continued rewriting the terminal.
       Added a few escape sequence graphical characters.

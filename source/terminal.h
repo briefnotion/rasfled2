@@ -10,7 +10,7 @@
 // ***************************************************************************************
 
 #ifndef TERMINAL_H
-#define TTERMINAL_H
+#define TERMINAL_H
 
 #include <iostream>
 
@@ -189,6 +189,8 @@ private:
     // Handles Cursor Position, Up, Down, Forward, Back (CSI A, B, C, D, H, f, G, d)
     bool process_csi_cursor_movement(char final_char, const std::vector<int>& params);
     
+    void clear_row_range(int start_col, int end_col);
+
     // Handles Erase in Display/Line, Delete, Insert (CSI J, K, P, L, M)
     bool process_csi_erase_and_edit(char final_char, const std::vector<int>& params);
     

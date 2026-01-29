@@ -364,13 +364,14 @@ int SCREEN4::create(system_data &sdSysData)
         //0x2070, 0x218F,
         0x2190, 0x21FF,       // Arrows 
         0x2200, 0x22FF,       // Mathematical Operators
-        //0x2300, 0x24FF,
+        0x2300, 0x23FF,       // Miscellaneous Technical
         0x2500, 0x257F,       // Box Drawing 
         0x2580, 0x25FF,       // Block Elements + Geometric Shapes 
         //0x2600, 0x27FF,
         0x2800, 0x28FF,       // Braille Patterns 
         //0x2900, 0x2AFF,
         0x2B00, 0x2BFF,       // Miscellaneous Symbols and Arrows 
+        0x0370, 0x03FF,       // Greek (for Pi)
         0,                    // End of list
     };
 

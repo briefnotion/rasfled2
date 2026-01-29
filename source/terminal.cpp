@@ -116,31 +116,75 @@ bool AnsiStateTracker::parse_and_check_completion(const std::string& data)
 // ---------------------------------------------------------------------------------------
 
 /**
- * Maps ASCII characters to their Unicode equivalents when in DEC Special Graphics mode.
+ * @brief Maps ASCII characters to their Unicode equivalents when in DEC Special Graphics mode.
+ * Includes the full standard set plus common modern TUI extensions.
  */
 char32_t translate_dec_graphics(char32_t cp) {
-  switch (cp) 
-  {
-    case 'q': return U'─'; // Horizontal line
-    case 'x': return U'│'; // Vertical line
-    case 'l': return U'┌'; // Top left corner
-    case 'm': return U'└'; // Bottom left corner
-    case 'k': return U'┐'; // Top right corner
-    case 'j': return U'┘'; // Bottom right corner
-    case 'u': return U'┤'; // Right tee
-    case 't': return U'├'; // Left tee
-    case 'v': return U'┴'; // Bottom tee
-    case 'w': return U'┬'; // Top tee
-    case 'n': return U'┼'; // Plus / crossing
-    case 'a': return U'▒'; // Checkerboard
-    case '_': return U' '; // Blank
-    case '`': return U'◆'; // Diamond
-    case 'h': return U'#'; // Board
-    case 'f': return U'°'; // Degree
-    case 'g': return U'±'; // Plus-minus
-    case '~': return U'·'; // Bullet
-    default: return cp;
-  }
+    switch (cp) 
+    {
+        // Standard VT100 / DEC Special Graphics (The primary set)
+        case '`': return U'◆'; // Diamond (U+25C6)
+        case 'a': return U'▒'; // Checkerboard (U+2592)
+        case 'b': return U'␉'; // Horizontal Tab (HT) symbol
+        
+        // case 'c': return U'␌'; // Original Form Feed (FF) symbol
+        case 'c': return U'↡'; // Fallback: Double Down Arrow
+
+        // case 'd': return U'␍'; // Original Carriage Return (CR) symbol
+        case 'd': return U'↵'; // Fallback: Return Symbol (U+21B5)
+
+        // case 'e': return U'␊'; // Original Line Feed (LF) symbol
+        case 'e': return U'↓'; // Fallback: Down Arrow (U+2193)
+
+        case 'f': return U'°'; // Degree (U+00B0)
+        case 'g': return U'±'; // Plus-minus (U+00B1)
+
+        // case 'h': return U'␤'; // Original New Line (NL) symbol
+        case 'h': return U'¶'; // Fallback: Pilcrow (U+00B6)
+
+        // case 'i': return U'␋'; // Original Vertical Tab (VT) symbol
+        case 'i': return U'⇟'; // Fallback: Double Down Arrow with Bar
+
+        case 'j': return U'┘'; // Lower-right corner (U+2518)
+        case 'k': return U'┐'; // Upper-right corner (U+2510)
+        case 'l': return U'┌'; // Upper-left corner (U+250C)
+        case 'm': return U'└'; // Lower-left corner (U+2514)
+        case 'n': return U'┼'; // Crossing lines (U+253C)
+
+        // SCANLINES - Fallbacks using blocks/lines known to be in NotoSansSymbols2
+        // case 'o': return U'⎺'; // Original Scan 1 (U+23BA)
+        case 'o': return U'▔'; // Fallback: Overline (U+203E)
+
+        // case 'p': return U'⎻'; // Original Scan 3 (U+23BB)
+        case 'p': return U'─'; // 
+
+        case 'q': return U'─'; // Horizontal line - Scan 5 (U+2500)
+
+        // case 'r': return U'⎼'; // Original Scan 7 (U+23BC)
+        case 'r': return U'─'; // 
+
+        // case 's': return U'⎽'; // Original Scan 9 (U+23BD)
+        case 's': return U'_'; // Fallback: Lower One Eighth Block (U+2581)
+
+        case 't': return U'├'; // Left tee (U+251C)
+        case 'u': return U'┤'; // Right tee (U+2524)
+        case 'v': return U'┴'; // Bottom tee (U+2534)
+        case 'w': return U'┬'; // Top tee (U+252C)
+        case 'x': return U'│'; // Vertical line (U+2502)
+        case 'y': return U'≤'; // Less-than or equal (U+2264)
+        case 'z': return U'≥'; // Greater-than or equal (U+2265)
+        case '{': return U'π'; // Original Pi (U+03C0) - Often missing in Symbol fonts
+        case '|': return U'≠'; // Not equal (U+2260)
+        case '}': return U'£'; // Pound sterling (U+00A3)
+        case '~': return U'·'; // Bullet (U+00B7)
+        case '_': return U' '; // Blank / space
+        
+        // Common Extensions
+        case '0': return U'█'; // Solid block (U+2588)
+        case 'I': return U'π'; // Alternative Pi mapping
+        
+        default: return cp;
+    }
 }
 
 /**
@@ -262,46 +306,31 @@ void TERMINAL::start_shell()
 
 /**
  * @brief Helper function to clear an entire line within the terminal screen.
- * It resets all cells in the specified row to DEFAULT_CELL.
  */
 void TERMINAL::clear_row_range_full_line(int row)
 {
-  // Clear the entire row from column 0 up to COLS
-  std::fill(SCREEN[row], SCREEN[row] + COLS, DEFAULT_CELL);
+  // Standard VT behavior is to clear with current SGR attributes.
+  Cell clear_cell = CURRENT_ATTRS;
+  clear_cell.character = U' ';
+  std::fill(SCREEN[row], SCREEN[row] + COLS, clear_cell);
 }
-
-// ---------------------------------------------------------------------
-// --- CORE SCROLLING MECHANISMS ---
-// ---------------------------------------------------------------------
 
 /**
  * @brief Scrolls lines up within the scroll region (SCROLL_TOP to SCROLL_BOTTOM).
- * The lines at the top of the region are discarded, and new empty lines appear at the bottom.
- * This is used for standard line feed/overflow behavior.
  */
 void TERMINAL::scroll_up(int count)
 {
-  if (count <= 0 || SCROLL_TOP > SCROLL_BOTTOM) 
-  {
-    return;
-  }
+  if (count <= 0 || SCROLL_TOP > SCROLL_BOTTOM) return;
 
-  // Clamp count to the size of the scroll region
   count = std::min(count, SCROLL_BOTTOM - SCROLL_TOP + 1);
 
-  // 1. Move lines up: Iterate forward.
-  // Source: [SCROLL_TOP + count, SCROLL_BOTTOM]
-  // Destination: [SCROLL_TOP, SCROLL_BOTTOM - count]
+  // Move lines up
   for (int r = SCROLL_TOP; r <= SCROLL_BOTTOM - count; ++r) 
   {
-    // Copy contents of SCREEN[r + count] to SCREEN[r]
-    std::copy(SCREEN[r + count], 
-              SCREEN[r + count] + COLS, 
-              SCREEN[r]);
+    std::copy(SCREEN[r + count], SCREEN[r + count] + COLS, SCREEN[r]);
   }
 
-  // 2. Clear the newly opened lines at the bottom of the region.
-  // Lines to clear: [SCROLL_BOTTOM - count + 1, SCROLL_BOTTOM]
+  // Clear the newly opened lines at bottom
   for (int r = SCROLL_BOTTOM - count + 1; r <= SCROLL_BOTTOM; ++r) 
   {
     this->clear_row_range_full_line(r);
@@ -310,32 +339,20 @@ void TERMINAL::scroll_up(int count)
 
 /**
  * @brief Scrolls lines down within the scroll region (SCROLL_TOP to SCROLL_BOTTOM).
- * The lines at the bottom of the region are discarded, and new empty lines appear at the top.
- * This is used for Reverse Index (ESC M) and Line Insert (ESC [ L) sequences.
  */
 void TERMINAL::scroll_down(int count)
 {
-  if (count <= 0 || SCROLL_TOP > SCROLL_BOTTOM) 
-  {
-    return;
-  }
+  if (count <= 0 || SCROLL_TOP > SCROLL_BOTTOM) return;
 
-  // Clamp count to the size of the scroll region
   count = std::min(count, SCROLL_BOTTOM - SCROLL_TOP + 1);
 
-  // 1. Move lines down: Iterate backward.
-  // Source Range: [SCROLL_TOP, SCROLL_BOTTOM - count]
-  // Target Range: [SCROLL_TOP + count, SCROLL_BOTTOM]
+  // Move lines down (Backward iteration to avoid overwriting source)
   for (int r = SCROLL_BOTTOM; r >= SCROLL_TOP + count; --r) 
   {
-    // Copy contents of SCREEN[r - count] to SCREEN[r]
-    std::copy(SCREEN[r - count], 
-              SCREEN[r - count] + COLS, 
-              SCREEN[r]);
+    std::copy(SCREEN[r - count], SCREEN[r - count] + COLS, SCREEN[r]);
   }
 
-  // 2. Clear the newly opened lines at the top of the region.
-  // Lines to clear: [SCROLL_TOP, SCROLL_TOP + count - 1]
+  // Clear the newly opened lines at top
   for (int r = SCROLL_TOP; r < SCROLL_TOP + count; ++r) 
   {
     this->clear_row_range_full_line(r);
@@ -367,21 +384,25 @@ bool TERMINAL::process_csi_cursor_movement(char final_char, const std::vector<in
       break;
 
     case 'H': // Cursor Position (CUP)
-    case 'f': // HVP
-    case 'd': // VPA (Vertical Line Position Absolute)
+    case 'f': // Horizontal Vertical Position (HVP)
     {
       int req_row = get_param(params, 0, 1);
       int req_col = get_param(params, 1, 1);
+      
+      int new_row = req_row - 1;
+      int new_col = req_col - 1;
 
-      if (final_char == 'H' || final_char == 'f' || final_char == 'd') 
-      {
-        int new_row = SCROLL_TOP + req_row - 1;
-        CURRENT_ROW = std::min(SCROLL_BOTTOM, std::max(SCROLL_TOP, new_row));
-      }
-      if (final_char == 'H' || final_char == 'f') 
-      {
-        CURRENT_COL = std::min(COLS - 1, std::max(0, req_col - 1));
-      }
+      CURRENT_ROW = std::min(ROWS - 1, std::max(0, new_row));
+      CURRENT_COL = std::min(COLS - 1, std::max(0, new_col));
+      WRAP_PENDING = false;
+      break;
+    }
+
+    case 'd': // Vertical Line Position Absolute (VPA)
+    {
+      int req_row = get_param(params, 0, 1);
+      int new_row = req_row - 1;
+      CURRENT_ROW = std::min(ROWS - 1, std::max(0, new_row));
       WRAP_PENDING = false;
       break;
     }
@@ -397,161 +418,138 @@ bool TERMINAL::process_csi_cursor_movement(char final_char, const std::vector<in
   return true;
 }
 
+
 /**
- * @brief Handles CSI sequences for screen/line editing (P, X, K, J, L, M, @).
- * Assumes SCREEN is a 2D array of CELL objects/structs and DEFAULT_CELL is a blank cell object.
+ * @brief Clears a specific range of columns on the current row using current attributes.
+ */
+void TERMINAL::clear_row_range(int start_col, int end_col)
+{
+  if (CURRENT_ROW >= 0 && CURRENT_ROW < ROWS) 
+  {
+    Cell clear_cell = CURRENT_ATTRS;
+    clear_cell.character = U' ';
+    
+    int actual_start = std::max(0, start_col);
+    int actual_end = std::min(COLS, end_col);
+    
+    if (actual_start < actual_end)
+    {
+      std::fill(SCREEN[CURRENT_ROW] + actual_start, 
+                SCREEN[CURRENT_ROW] + actual_end, 
+                clear_cell);
+    }
+  }
+}
+
+
+/**
+ * @brief Handles CSI sequences for screen/line editing (P, X, K, J, L, M, @, b).
  */
 bool TERMINAL::process_csi_erase_and_edit(char final_char, const std::vector<int>& params)
 {
   int param = get_param(params, 0, 1); 
-  
-  auto clear_row_range = [&](int start_col, int end_col) 
-  {
-    if (CURRENT_ROW >= 0 && CURRENT_ROW < ROWS) {
-      std::fill(SCREEN[CURRENT_ROW] + start_col, 
-            SCREEN[CURRENT_ROW] + end_col, 
-            DEFAULT_CELL);
-    }
-  };
 
   switch (final_char)
   {
-    case 'b': // Repeat Character (REP): ESC [ P b
+    case 'b': // Repeat Character (REP)
     {
-      // Repeat the last printed character 'param' times.
-      // 1. Identify the character to repeat. 
-      // Traditionally, this is the character at the cell immediately to the left of the cursor.
       int count = std::max(0, param);
       int source_col = CURRENT_COL - 1;
-
       if (source_col >= 0 && CURRENT_ROW >= 0 && CURRENT_ROW < ROWS)
       {
         Cell char_to_repeat = SCREEN[CURRENT_ROW][source_col];
-        
-        // 2. Insert 'count' instances of that character
         for (int i = 0; i < count; ++i)
         {
-          // We use the terminal's standard printing logic (or simplified version here)
-          // Handle wrapping if AUTO_WRAP_MODE is on
-          if (CURRENT_COL >= COLS)
-          {
-            if (AUTO_WRAP_MODE)
-            {
-              CURRENT_COL = 0;
-              control_LF(); // Move down/scroll
-            }
-            else
-            {
-              CURRENT_COL = COLS - 1; // Stay at edge
-              break; 
-            }
-          }
-
-          SCREEN[CURRENT_ROW][CURRENT_COL] = char_to_repeat;
-          CURRENT_COL++;
+          write_to_screen(char_to_repeat.character);
         }
-        WRAP_PENDING = false;
       }
       break;
     }
 
-    case 'P': // Delete Character (DCH): ESC [ P P
+    case 'P': // Delete Character (DCH)
     {
-      int count = std::max(0, param); 
-      if (CURRENT_COL < COLS) 
+      int count = std::min(param, COLS - CURRENT_COL);
+      if (count > 0 && CURRENT_COL < COLS) 
       {
-        int src_start_col = CURRENT_COL + count;
-        int shift_cells = std::max(0, COLS - src_start_col);
-        if (shift_cells > 0)
-        {
-          std::copy(SCREEN[CURRENT_ROW] + src_start_col, 
-                    SCREEN[CURRENT_ROW] + COLS, 
-                    SCREEN[CURRENT_ROW] + CURRENT_COL);
-        }
-        int fill_start_col = CURRENT_COL + shift_cells;
-        clear_row_range(fill_start_col, COLS);
+        std::copy(SCREEN[CURRENT_ROW] + CURRENT_COL + count, 
+                  SCREEN[CURRENT_ROW] + COLS, 
+                  SCREEN[CURRENT_ROW] + CURRENT_COL);
+        clear_row_range(COLS - count, COLS);
       }
       break;
     }
 
-    case '@': // Insert Character (ICH): ESC [ P @
+    case '@': // Insert Character (ICH)
     {
-      int count = std::max(0, param);
-      if (CURRENT_COL < COLS) 
+      int count = std::min(param, COLS - CURRENT_COL);
+      if (count > 0 && CURRENT_COL < COLS) 
       {
-        auto src_start = SCREEN[CURRENT_ROW] + CURRENT_COL;
-        int cells_to_shift = COLS - CURRENT_COL - count;
-        if (cells_to_shift > 0)
-        {
-          auto actual_src_end = src_start + cells_to_shift; 
-          auto dst_start = src_start + count;
-          std::copy_backward(actual_src_end - cells_to_shift, 
-                               actual_src_end, 
-                               dst_start + cells_to_shift);
-        }
-        int fill_limit = std::min(COLS, CURRENT_COL + count);
-        clear_row_range(CURRENT_COL, fill_limit);
+        std::copy_backward(SCREEN[CURRENT_ROW] + CURRENT_COL, 
+                            SCREEN[CURRENT_ROW] + COLS - count, 
+                            SCREEN[CURRENT_ROW] + COLS);
+        clear_row_range(CURRENT_COL, CURRENT_COL + count);
       }
       break;
     }
 
-    case 'X': // Erase Character (ECH): ESC [ P X
+    case 'X': // Erase Character (ECH)
     {
-      int count = std::max(0, param);
-      int end_col = std::min(COLS, CURRENT_COL + count);
-      clear_row_range(CURRENT_COL, end_col);
+      int count = std::max(1, param);
+      clear_row_range(CURRENT_COL, CURRENT_COL + count);
       break;
     }
 
     case 'K': // Erase in Line (EL)
     {
-      int param_k = get_param(params, 0, 0); 
-      if (param_k == 0) clear_row_range(CURRENT_COL, COLS);
-      else if (param_k == 1) clear_row_range(0, CURRENT_COL + 1);
-      else if (param_k == 2) clear_row_range(0, COLS);
+      int p = get_param(params, 0, 0); 
+      if (p == 0)      clear_row_range(CURRENT_COL, COLS);
+      else if (p == 1) clear_row_range(0, CURRENT_COL + 1);
+      else if (p == 2) clear_row_range(0, COLS);
       break;
     }
 
     case 'J': // Erase Display (ED)
     {
-      int param_j = get_param(params, 0, 0); 
-      if (param_j == 2) 
-      { 
-        for (int row = 0; row < ROWS; ++row) this->clear_row_range_full_line(row);
-        CURRENT_ROW = 0; CURRENT_COL = 0;
-      } 
-      else if (param_j == 0) 
-      { 
+      int p = get_param(params, 0, 0); 
+      if (p == 0) 
+      { // Cursor to End
         clear_row_range(CURRENT_COL, COLS);
-        for (int row = CURRENT_ROW + 1; row < ROWS; ++row) this->clear_row_range_full_line(row);
+        for (int r = CURRENT_ROW + 1; r < ROWS; ++r) clear_row_range_full_line(r);
       } 
-      else if (param_j == 1) 
-      { 
-        for (int row = 0; row < CURRENT_ROW; ++row) this->clear_row_range_full_line(row);
+      else if (p == 1) 
+      { // Start to Cursor
+        for (int r = 0; r < CURRENT_ROW; ++r) clear_row_range_full_line(r);
         clear_row_range(0, CURRENT_COL + 1);
+      } 
+      else if (p == 2 || p == 3) { // Entire Screen
+        for (int r = 0; r < ROWS; ++r) clear_row_range_full_line(r);
       }
       break;
     }
 
     case 'L': // Insert Line (IL)
     { 
-      int count = std::max(0, param);
-      int effective_count = std::min(count, SCROLL_BOTTOM - CURRENT_ROW + 1);
-      for (int r = SCROLL_BOTTOM; r >= CURRENT_ROW + effective_count; --r) 
-        std::copy(SCREEN[r - effective_count], SCREEN[r - effective_count] + COLS, SCREEN[r]);
-      for (int r = CURRENT_ROW; r < CURRENT_ROW + effective_count; ++r) 
-        this->clear_row_range_full_line(r);
+      if (CURRENT_ROW >= SCROLL_TOP && CURRENT_ROW <= SCROLL_BOTTOM) 
+      {
+        int count = std::max(1, param);
+        int old_top = SCROLL_TOP;
+        SCROLL_TOP = CURRENT_ROW;
+        scroll_down(count);
+        SCROLL_TOP = old_top;
+      }
       break;
     }
 
     case 'M': // Delete Line (DL)
     { 
-      int count = std::max(0, param);
-      int effective_count = std::min(count, SCROLL_BOTTOM - CURRENT_ROW + 1);
-      for (int r = CURRENT_ROW; r <= SCROLL_BOTTOM - effective_count; ++r) 
-        std::copy(SCREEN[r + effective_count], SCREEN[r + effective_count] + COLS, SCREEN[r]);
-      for (int r = SCROLL_BOTTOM - effective_count + 1; r <= SCROLL_BOTTOM; ++r) 
-        this->clear_row_range_full_line(r);
+      if (CURRENT_ROW >= SCROLL_TOP && CURRENT_ROW <= SCROLL_BOTTOM) 
+      {
+        int count = std::max(1, param);
+        int old_top = SCROLL_TOP;
+        SCROLL_TOP = CURRENT_ROW;
+        scroll_up(count);
+        SCROLL_TOP = old_top;
+      }
       break;
     }
 
@@ -868,6 +866,7 @@ void TERMINAL::control_LF()
 void TERMINAL::control_CR()
 {
   CURRENT_COL = 0;
+  WRAP_PENDING = false; // Add this line!
 }
 
 void TERMINAL::control_RI()
@@ -1093,87 +1092,123 @@ bool TERMINAL::escape_characters(std::string Raw_Text, int &End_Position)
   if (Raw_Text.size() < 2) return false;
   uint8_t next_byte = (uint8_t)Raw_Text[1];
 
+  // 1. CSI Sequence: ESC [ ... <final_char>
   if (next_byte == '[') 
   {
     for (size_t j = 2; j < Raw_Text.size(); j++) 
     {
       uint8_t c = (uint8_t)Raw_Text[j];
+      
+      // Final characters for CSI are in the range 0x40-0x7E
       if (c >= 0x40 && c <= 0x7E) 
       {
         handle_bracket_escape(Raw_Text.substr(0, j + 1));
         End_Position = (int)j;
         return true;
       }
+      
+      // If we encounter a byte that isn't a parameter (0x30-0x3F) 
+      // or intermediate (0x20-0x2F), the sequence is technically malformed.
+      // However, most emulators simply ignore the bad byte or treat it as a terminator.
+      // To prevent infinite loops on binary data, we stop if we see non-printable/non-CSI bytes.
+      if (c < 0x20 && c != 0x1B) 
+      {
+        // Note: process_output_2 handles the execution of the control character
+        // because it will see it after this returns false.
+        return false; 
+      }
     }
-    return false;
+    return false; // Incomplete sequence
   } 
 
-  // Character Set Designations (ESC ( char)
+  // 2. Character Set Designations (ESC ( char, ESC ) char, etc.)
   if (next_byte == '(' || next_byte == ')' || next_byte == '*' || next_byte == '+') 
   {
     if (Raw_Text.size() < 3) return false;
     
-    // Logic to switch character sets
-    if (next_byte == '(') 
-    { // Designate G0
-      uint8_t charset_code = (uint8_t)Raw_Text[2];
-      if (charset_code == '0') current_g0_charset = CharSet::DEC_SPECIAL_GRAPHICS;
-      else if (charset_code == 'B') current_g0_charset = CharSet::ASCII;
-    }
+    uint8_t charset_code = (uint8_t)Raw_Text[2];
+    CharSet selected = CharSet::ASCII;
+    
+    if (charset_code == '0') selected = CharSet::DEC_SPECIAL_GRAPHICS;
+    else if (charset_code == 'B') selected = CharSet::ASCII;
+
+    // Implementation of G0 vs G1/G2/G3 switching
+    if (next_byte == '(') current_g0_charset = selected;
+    // Note: If you implement G1-G3 state in the future, handle ')', '*', '+' here.
 
     End_Position = 2;
     return true;
   } 
 
+  // 3. DEC Screen Alignment Test or other ESC # sequences
   if (next_byte == '#') 
   {
     if (Raw_Text.size() < 3) return false;
+    // handle_dec_hash_sequence(Raw_Text[2]); // Placeholder for future logic
     End_Position = 2;
     return true;
   } 
 
+  // 4. VT52 Direct Cursor Addressing (ESC Y Line Col)
   if (next_byte == 'Y') 
   {
     if (Raw_Text.size() < 4) return false;
     handle_parameterized_escape(Raw_Text.substr(0, 4));
-    End_Position = 3;
+    End_Position = 3; // Corrected: i += 3 + 1 = 4 bytes consumed
     return true;
   }
 
+  // 5. Simple Escape Sequences (ESC M, ESC D, ESC 7, etc.)
   handle_simple_escape(next_byte);
-  End_Position = 1;
+  End_Position = 1; // i += 1 + 1 = 2 bytes consumed (ESC + char)
   return true;
 }
 
 void TERMINAL::write_to_screen(char32_t Character)
 {
+  // Handle the deferred wrap logic
   if (WRAP_PENDING && AUTO_WRAP_MODE)
   {
     CURRENT_COL = 0;
-    control_LF(); // Move down or scroll
+    // control_LF handles checking if we are at SCROLL_BOTTOM to trigger a scroll
+    control_LF(); 
     WRAP_PENDING = false;
   }
 
-  Cell new_cell = CURRENT_ATTRS;
-  new_cell.character = Character;
-  SCREEN[CURRENT_ROW][CURRENT_COL] = new_cell;
+  // Ensure coordinates are sane before writing
+  if (CURRENT_ROW >= 0 && CURRENT_ROW < ROWS && CURRENT_COL >= 0 && CURRENT_COL < COLS)
+  {
+    Cell new_cell = CURRENT_ATTRS;
+    new_cell.character = Character;
+    SCREEN[CURRENT_ROW][CURRENT_COL] = new_cell;
 
-  // Advance logic
-  if (CURRENT_COL < COLS - 1) 
-  {
-    CURRENT_COL++;
-    WRAP_PENDING = false;
-  } 
-  else 
-  {
-    // We hit the last column. Don't move cursor yet.
-    // Set flag so the NEXT character triggers the wrap.
-    WRAP_PENDING = true;
+    // Advance the cursor
+    if (CURRENT_COL < COLS - 1) 
+    {
+      CURRENT_COL++;
+      WRAP_PENDING = false;
+    } 
+    else 
+    {
+      // We are at the right margin.
+      // If Auto Wrap is ON, we don't move yet; we wait for the next character.
+      // If Auto Wrap is OFF, we stay on the last column and keep overwriting it.
+      if (AUTO_WRAP_MODE)
+      {
+          WRAP_PENDING = true;
+      }
+      else
+      {
+          // Cursor stays on the last character of the line
+          WRAP_PENDING = false;
+      }
+    }
   }
 }
 
 void TERMINAL::process_output_2(std::string& raw_text) 
 {
+  // Append incoming data to our fragment buffer
   PROCESS_OUTPUT_2_BUFFER += raw_text;
   raw_text.clear();
 
@@ -1184,23 +1219,32 @@ void TERMINAL::process_output_2(std::string& raw_text)
   {
     uint8_t input_byte = (uint8_t)PROCESS_OUTPUT_2_BUFFER[i];
 
+    // 1. Handle Escape Sequences
     if (input_byte == 0x1B) 
     {
       int end_pos = 0;
+      // Attempt to parse the sequence starting at i
       if (escape_characters(PROCESS_OUTPUT_2_BUFFER.substr(i), end_pos)) 
       {
+        // Sequence is complete
         i += end_pos + 1;
       } 
       else 
       {
+        // Sequence is incomplete (waiting for more data)
         stop_processing = true; 
       }
     } 
-    else if (input_byte < 0x20) 
+    // 2. Handle Control Characters (C0 range 0x00-0x1F AND 0x7F DEL)
+    // Note: Standards dictate C0 codes should execute even if they occur inside 
+    // an escape sequence. If escape_characters() above jumps over them, 
+    // they must be handled inside that function's logic as well.
+    else if (input_byte < 0x20 || input_byte == 0x7F) 
     {
       control_characters(input_byte);
       i++;
     } 
+    // 3. Handle Printable Characters / UTF-8
     else 
     {
       bool incomplete = false;
@@ -1209,21 +1253,29 @@ void TERMINAL::process_output_2(std::string& raw_text)
 
       if (incomplete) 
       {
-        stop_processing = true; 
+          // Fragmented UTF-8 character, wait for more bytes
+          stop_processing = true; 
       } 
       else 
       {
         i = temp_i;
-        // Only translate if cp is within the ASCII range where DEC Graphics apply
+        
+        // DEC Special Graphics translation (G0)
         if (current_g0_charset == CharSet::DEC_SPECIAL_GRAPHICS && cp < 128) 
         {
           cp = translate_dec_graphics(cp);
         }
+        
         write_to_screen(cp);
       }
     }
   }
-  PROCESS_OUTPUT_2_BUFFER.erase(0, i);
+
+  // Remove processed bytes from the buffer
+  if (i > 0) 
+  {
+    PROCESS_OUTPUT_2_BUFFER.erase(0, i);
+  }
 }
 
 // ---------------------------------------------------------------------
