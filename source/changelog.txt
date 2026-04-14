@@ -1,3 +1,17 @@
+2.390_260414
+  - Rewrote the LED render routines because of odd flashing 
+      that seemed to be occuring.
+      The source of the problem isn't nailed down, and 
+      looks very much like a hardware problem. But, could 
+      also be the result of a LED render pass stepping on 
+      a pass that hasnt been completed.  To find a resolve 
+      I wrote a dedicated thread for rendering LEDs. If 
+      a step over is attempted, the frame will be skipped. 
+      Also reduced LED render fps to 45. 
+      All these routines are new and untested. If they do 
+      not work, I will either correct or revert the changes 
+      in a future update. 
+
 2.389_260130
   - Minor changes to the terminal.
 

@@ -68,70 +68,6 @@ using namespace std;
 // STRUCTURES AND CLASSES
 // ***************************************************************************************
 
-
-// ***************************************************************************************
-// FUNCTION AND PROCEDURES
-// ***************************************************************************************
-
-// -------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------
-// Matrix Manipulation
-
-// -------------------------------------------------------------------------------------
-// Display Materix Prepare.
-
-//  Copy the Prepared Matrix to the Display Matrix.
-void MatrixPrepare(CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount)
-{
-  for (int lcount = 0; lcount < intLEDCOUNT; lcount++)
-  {
-    // Normal Display
-    DisplayMatrix[mcount]=crgbPrepedMatrix[lcount].b + (crgbPrepedMatrix[lcount].g << 8) + (crgbPrepedMatrix[lcount].r << 16) + (0 << 24);
-    mcount++;
-  }
-}
-
-void MatxixFill(CRGB crgbPreparedMatix[], int intLEDCOUNT, CRGB crgbColor)
-{
-  for (int lcount = 0; lcount < intLEDCOUNT; lcount++)
-  {
-    if ((lcount +1 ) == 1)
-    {
-      crgbPreparedMatix[lcount] = CRGB(25,0,25);
-    }
-    else if (((lcount +1 ) % 100) == 0)
-    {
-      crgbPreparedMatix[lcount] = CRGB(25,25,0);
-    }
-    else if (((lcount +1 ) % 50) == 0)
-    {
-      crgbPreparedMatix[lcount] = CRGB(25,0,0);
-    }
-    else if (((lcount +1 ) % 20) == 0)
-    {
-      crgbPreparedMatix[lcount] = CRGB(0,25,0);
-    }
-    else if (((lcount +1 ) % 5) == 0)
-    {
-      crgbPreparedMatix[lcount] = CRGB(0,0,25);
-    }
-    else
-    {
-      crgbPreparedMatix[lcount] = crgbColor;
-    }
-  }
-}
-
-void MatxixBlank(CRGB crgbPreparedMatix[], int intLEDCOUNT, CRGB crgbColor)
-{
-  for (int lcount = 0; lcount < intLEDCOUNT; lcount++)
-  {
-    crgbPreparedMatix[lcount] = crgbColor;
-  }
-}
-
-
-
 // -------------------------------------------------------------------------------------
 // Console Update
 
@@ -157,72 +93,16 @@ void store_event_counts(system_data &sdSysData, ANIMATION_HANDLER Animations)
   }
 }
 
-
-// ***************************************************************************************
-// The Following chunk of code is what handles the imported library's ability to put the
-// lights on and off or whatever.  Will not pretend to understand it.  Instead, will
-// squish it down as much as possible so that I can pretend its not there.
-// ***************************************************************************************
-void matrix_render(int led_count)
-{
-    int x;
-
-    for (x = 0; x < led_count; x++)
-    {
-    ledstring.channel[0].leds[x] = matrix[x];
-    }
-}
-static void ctrl_c_handler(int signum)
-{
-  (void)(signum);
-    running = 0;
-}
-static void setup_handlers(void)
-{
-    struct sigaction sa;
-      sa.sa_handler = ctrl_c_handler;
-
-    sigaction(SIGINT, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-}
-void ledprep(ws2811_t *ws2811, int led_count)
-{
-  ws2811->channel[0].count = led_count;
-}
-
-// ***************************************************************************************
-
-
-
 // ***************************************************************************************
 // MAIN PROGRAM
 // ***************************************************************************************
 
-// ---------------------------------------------------------------------------------------
-
-void shutdown()
-{
-  // Shutdown the LED strip routine.
-  ws2811_fini(&ledstring);
-}
 
 // ---------------------------------------------------------------------------------------
 void setup()
 {
   // Keeping this for now to remind me of what I haven't implementd, from the preport,
   //  yet.
-}
-
-// ---------------------------------------------------------------------------------------
-// Global function for Main Loop Threads
-// By passing the global variable, difficult to work with, ledstring to the, just as
-//  difficult to work with, ws2811_render routine, all led and values will be transmitted
-//  to the lights on a seperate thread.
-void proc_render_thread()
-{
-  //int ret = 0;  // contains fail or pass status of the render routine.
-  //ret = ws2811_render(&ledstring);  // Send values of ledstring to hardware.
-  ws2811_render(&ledstring);  // Send values of ledstring to hardware.
 }
 
 // ---------------------------------------------------------------------------------------
@@ -240,8 +120,8 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
   // Is_Ready varibles for main loop.
 
-  TIMED_IS_READY  shutdown_procedure_delay;     // Delay for the hardware switches.
-
+  TIMED_IS_READY  animations_and_led_render;  // Controls when to update the LED colors and send to hardware.
+  TIMED_IS_READY  shutdown_procedure_delay;   // Delay for the hardware switches.
   TIMED_IS_READY  input_from_switches;    // Delay for the hardware switches.
   TIMED_IS_READY  input_from_user;        // Delay for the input from mouse and keyboard.
   TIMED_IS_READY  display;                // Delay for displaying information on the console.
@@ -252,18 +132,13 @@ int loop_2(bool TTY_Only)
   TIMED_IS_READY  compass_timer;          // Delay for communicating with compass
                                           // serial comms.
   TIMED_IS_READY  camera_timer;           // Delay for processing camera.
-
-  TIMED_IS_READY  save_running_state_timer;          // Delay for communicating with compass
-                                          // serial comms.
+  TIMED_IS_READY  save_running_state_timer;   // Delay for communicating with compass
+                                              // serial comms.
 
   // Define System Data and Console
   int return_code = 0;
   system_data sdSystem;
   sdSystem.TTY_ONLY = TTY_Only;
-
-  // Control for threads.
-  //THREAD_COMMAND.create();
-  sdSystem.THREAD_RENDER.create(get_frame_interval(sdSystem.CONFIG.iFRAMES_PER_SECOND));
 
   // Load Color System
   //sdSystem.PANEL_CONTROL.COLOR_SELECT.init_and_set_intensity(sdSystem.PROGRAM_TIME.current_frame_time(), 1.0f);
@@ -636,47 +511,15 @@ int loop_2(bool TTY_Only)
     //sdSystem.ALERTS.add_generic_alert("Animations file not loaded.");
   }
 
-  // ---------------------------------------------------------------------------------------
-  // LED Library Vars and Init
-
-  sdSystem.WS2811_ENABLED = DEF_WS2811_ENABLED;
-  int led_count = sdSystem.CONFIG.LED_MAIN.at(0).led_count();
+  // LED Lights
+  animations_and_led_render.set(1000 / LED_FPS);
+  RENDER_LEDS_CLASS render_leds;
+  render_leds.create(sdSystem);
   if (sdSystem.WS2811_ENABLED)
   {
-    sdSystem.SCREEN_COMMS.printw("Initializing LEDS ...");
-
-    ledstring.freq = TARGET_FREQ;
-    ledstring.dmanum = DMA;
-    ledstring.channel[0].gpionum = GPIO_PIN;
-    ledstring.channel[0].count = led_count;
-    ledstring.channel[0].brightness = 255;
-    ledstring.channel[0].invert = 0;
-    ledstring.channel[0].strip_type = STRIP_TYPE;
-
-    ws2811_return_t ret;
-    ledprep(&ledstring, led_count);
-    matrix = (int*)malloc(sizeof(ws2811_led_t) * led_count);
-    setup_handlers();
-    if ((ret = ws2811_init(&ledstring)) != WS2811_SUCCESS)
-    {
-      sdSystem.SCREEN_COMMS.printw("");
-      sdSystem.SCREEN_COMMS.printw("FAILURE:");
-      //std::cerr << "ws2811_init failed: " << ws2811_get_return_t_str(ret) << std::endl;
-      string return_description = ws2811_get_return_t_str(ret);
-      sdSystem.SCREEN_COMMS.printw("     ws2811_init failed: " + return_description);
-      sdSystem.SCREEN_COMMS.printw("");
-
-      return_code = (int)ret;
-
-      sdSystem.WS2811_ENABLED = false;
-    }
-    else
-    {
-      sdSystem.SCREEN_COMMS.printw("  WS2811 INIT SUCCESS");
-      sdSystem.SCREEN_COMMS.printw("  LED count: " + to_string(led_count));
-    }
+    render_leds.thread_start();
   }
-
+  
   // ---------------------------------------------------------------------------------------
   // Automobile Handler
 
@@ -801,12 +644,6 @@ int loop_2(bool TTY_Only)
   while(sdSystem.PANEL_CONTROL.shutdown_procedure_step < 100)
   {
     // ---------------------------------------------------------------------------------------
-    // Thread Management
-
-    // Close all completed and active threads after sleep cycle is complete.
-    sdSystem.THREAD_RENDER.check_for_completition();
-
-    // ---------------------------------------------------------------------------------------
     // --- Prpare the Loop ---
 
     //  Get current time.  This will be our timeframe to work in.
@@ -929,8 +766,11 @@ int loop_2(bool TTY_Only)
 
     // Is Events and Render ready -----------------
     //  Never comment this out or the system will never sleep
-    if(sdSystem.THREAD_RENDER.check_to_run_routine_on_thread(sdSystem.PROGRAM_TIME.current_frame_time()))
+    if (animations_and_led_render.is_ready(sdSystem.PROGRAM_TIME.current_frame_time()) == true)
     {
+      // set time for next redraw.
+      animations_and_led_render.set(sdSystem.PROGRAM_TIME.current_frame_time(), 1000 / LED_FPS);
+
       // MOVE RENAME ELIMINATE ??? !!!
       bool booUpdate = false;
 
@@ -975,7 +815,7 @@ int loop_2(bool TTY_Only)
       else // lights are off, blank values if neccessary.
       {
         // make sure the thread is free, otherwise the blank will be thrown away.
-        if (sdSystem.THREAD_RENDER.is_running() == false)
+        if (render_leds.PROCESSING == false)
         {
           // only actively blank if the bounce of lights off was detected.
           if (sdSystem.Lights_On.bounce() == true)
@@ -985,9 +825,10 @@ int loop_2(bool TTY_Only)
             {
               for(int strip=0; strip < sdSystem.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
               {
-                MatxixBlank(sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY,
-                sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(),
-                CRGB(0,0,0));
+                for (int lcount = 0; lcount < sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(); lcount++)
+                {
+                  sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY[lcount] = CRGB(0,0,0);
+                }
               }
             }
 
@@ -998,48 +839,9 @@ int loop_2(bool TTY_Only)
 
       if (booUpdate == true)
       {
-        int mcount = 0;
-        // Copy the prepared Matrixes to the display matrix
-        //if((cons.keywatch.getnoreset(KEYDEBUG) == 0) || (cons.keywatch.get(KEYLEDDRCYCL) == 0))
-        {
-          for(int group=0; group < sdSystem.CONFIG.LED_MAIN.at(0).g_size(); group++)
-          {
-            for(int strip=0; strip < sdSystem.CONFIG.LED_MAIN.at(0).s_size(group); strip++)
-            {
-              MatrixPrepare(
-                    sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).crgbARRAY,
-                    sdSystem.CONFIG.LED_MAIN.at(0).vLED_GROUPS.at(group).vLED_STRIPS.at(strip).led_count(),
-                    matrix, mcount);
-            }
-          }
-        }
-
-        //  Are the lights enable to display.
-        //    Lights off will not turn the lights off and clear their values.
-        //      Instead, transmitting those color are to the lights disabled.
-
-        if (sdSystem.WS2811_ENABLED)
-        {
-          // LED Library Renderer -- Recommend: DON'T TOUCH
-          matrix_render(led_count);
-
-          // Create a seperate thread only to render the LEDs with the hardware.  This process
-          //  is very intensive for the system and is only one way.  The render thread only needs
-          //  to rejoin with the main program, at the end of the main loop, to signify its
-          //  completion, so that the loop can restart and begin computing its values and colors
-          //  again.
-          // A render thread should not be created if no changes have been made to the led values.
-
-          // Get timer for render thread.
-          sdSystem.dblCOMMS_LED_RENDER_TIME.start_timer(sdSystem.PROGRAM_TIME.current_frame_time());
-
-          // Be careful with this because it looks like black magic to me.
-          sdSystem.THREAD_RENDER.start_render_thread([&]()
-                        {  proc_render_thread();  });
-
-          sdSystem.dblCOMMS_LED_RENDER_TIME.end_timer(sdSystem.PROGRAM_TIME.current_frame_time());
-        }
+        render_leds.prepare_matrix(sdSystem.CONFIG.LED_MAIN);
       }
+
     } // Is Events and Render ready -----------------
 
     // ---------------------------------------------------------------------------------------
@@ -1508,7 +1310,7 @@ int loop_2(bool TTY_Only)
     //  finding the earliest sleep wake time.
     // Make sure non of these are commented out, or the system will never sleep.
     sdSystem.PROGRAM_TIME.request_ready_time(input_from_switches.get_ready_time());
-    sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.THREAD_RENDER.get_ready_time());
+    sdSystem.PROGRAM_TIME.request_ready_time(animations_and_led_render.get_ready_time());
     //sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_CAMERA.get_ready_time());  manages its own sleep time.
     sdSystem.PROGRAM_TIME.request_ready_time(camera_timer.get_ready_time());
     sdSystem.PROGRAM_TIME.request_ready_time(sdSystem.CAMERA_BACKUP.THREAD_PROCESSING.get_ready_time());
@@ -1525,27 +1327,24 @@ int loop_2(bool TTY_Only)
   // ---------------------------------------------------------------------------------------
   // If we are here, then we are closing the program.
 
-  // Wait for threads to end before continuing to shutdown.
-  cout << "THREAD_RENDER" << endl;
-  sdSystem.THREAD_RENDER.wait_for_thread_to_finish();
-
-  cout << "THREAD_CAMERA" << endl;
+  std::cout << "THREAD_CAMERA" << endl;
   sdSystem.CAMERA_BACKUP.THREAD_CAMERA.wait_for_thread_to_finish();
   
-  cout << "THREAD_IMAGE_PROCESSING" << endl;
+  std::cout << "THREAD_IMAGE_PROCESSING" << endl;
   sdSystem.CAMERA_BACKUP.THREAD_PROCESSING.wait_for_thread_to_finish();
 
   // Shutdown RPI.
   if (sdSystem.WS2811_ENABLED)
   {
-    cout << "WS2811_ENABLED shutdown" << endl;
-    shutdown();
+    std::cout << "WS2811_ENABLED shutdown" << endl;
+    //shutdown();
+    render_leds.thread_stop();
   }
 
   // Shutdown Graphical Window
   if (TTY_Only == false)
   {
-    cout << "cons_2 shutdown" << endl;
+    std::cout << "cons_2 shutdown" << endl;
     cons_2.shutdown(sdSystem);
   }
 
@@ -1555,12 +1354,12 @@ int loop_2(bool TTY_Only)
   if(sdSystem.booREBOOT == false)
   {
     // Just print we have ended the program.
-    cout << endl << "RasFLED Loop ... Exit" << endl;
+    std::cout << endl << "RasFLED Loop ... Exit" << endl;
   }
   else
   {
     // Just print are restarting the program.
-    cout << endl << "RasFLED Loop ... Rebooting" << endl;
+    std::cout << endl << "RasFLED Loop ... Rebooting" << endl;
     return_code = 9999;
   }
 
@@ -1593,11 +1392,11 @@ int main(int argc, char *argv[])
     else //if (strcmp(argv[pos], "-h") == 0 || strcmp(argv[pos], "--help") == 0)
     {
       ret = 2;
-      cout << "\n-tty    :Load in Terminal" << endl;
-      cout << "             Warning - Command line input not yet implemented." << endl;
-      cout << "                 There is no way of safely exiting the program." << endl;
-      cout << "-gfx      :Load Graphics Window (default)\n" << endl << endl;
-      cout << "-h --help :Load Graphics Window (default)\n" << endl << endl;
+      std::cout << "\n-tty    :Load in Terminal" << endl;
+      std::cout << "             Warning - Command line input not yet implemented." << endl;
+      std::cout << "                 There is no way of safely exiting the program." << endl;
+      std::cout << "-gfx      :Load Graphics Window (default)\n" << endl << endl;
+      std::cout << "-h --help :Load Graphics Window (default)\n" << endl << endl;
     }
   }
 
@@ -1607,9 +1406,9 @@ int main(int argc, char *argv[])
   // Main loop that runs until a termination condition is met
   while (ret == 1)
   {
-    cout << "RasFLED Start (Rev: " << Revision << ") ... " << endl;
-    cout << "  (The program needs to be started with SUDO otherwise a segmentation" << endl;
-    cout << "   fault will occur.  Admin access is needed for the IRQ access)" << endl;
+    std::cout << "RasFLED Start (Rev: " << Revision << ") ... " << endl;
+    std::cout << "  (The program needs to be started with SUDO otherwise a segmentation" << endl;
+    std::cout << "   fault will occur.  Admin access is needed for the IRQ access)" << endl;
 
     try
     {
@@ -1617,12 +1416,12 @@ int main(int argc, char *argv[])
       if (load_gfx_window == true)
       {
         ret = loop_2(false);
-        cout << "Load Graphics Window" << endl;
+        std::cout << "Load Graphics Window" << endl;
       }
       else
       {
         ret = loop_2(true);  // To be phased out?
-        cout << "Do Not Load Graphics Window" << endl;
+        std::cout << "Do Not Load Graphics Window" << endl;
       }
     }
 
@@ -1699,27 +1498,27 @@ int main(int argc, char *argv[])
   }
 
   // Print exit code information based on the program's termination reason
-  cout << "Exit Code: " << ret << " : " << endl;
+  std::cout << "Exit Code: " << ret << " : " << endl;
 
   if (ret == 0)
   {
-    cout << "Standard Exit" << endl;
+    std::cout << "Standard Exit" << endl;
   }
   else if (ret == 1)
   {
-    cout << "Exit For Reboot" << endl;
+    std::cout << "Exit For Reboot" << endl;
   }
   else if (ret == 2)
   {
-    cout << "Controlled Exit" << endl;
+    std::cout << "Controlled Exit" << endl;
   }
   else
   {
-    cout << "Non Standard Exit" << endl;
+    std::cout << "Non Standard Exit" << endl;
   }
 
   // Clean up and exit the program
-  cout << "RasFLED ... Exit" << endl;
+  std::cout << "RasFLED ... Exit" << endl;
   return ret;
 }
 

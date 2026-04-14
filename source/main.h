@@ -57,6 +57,8 @@
 // *
 // ***************************************************************************************
 
+#ifndef MAIN_H
+#define MAIN_H
 
 #include <stdio.h>
 #include <iostream>
@@ -117,47 +119,17 @@
 #include "animations_handler.h"
 #include "automobile_handler.h"
 #include "alert_system_coordinator.h"
+#include "render_leds.h"
 
 // ***************************************************************************************
 // FUNCTION AND PROCEDURES
 // ***************************************************************************************
 
 // -------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------
-// Matrix Manipulation
-
-// -------------------------------------------------------------------------------------
-// Display Materix Prepare.
-
-//  Copy the Prepared Matrix to the Display Matrix.
-void MatrixPrepare(CRGB crgbPrepedMatrix[], int intLEDCOUNT, int* DisplayMatrix, int &mcount);
-
-void MatxixFill(CRGB crgbPreparedMatix[], int intLEDCOUNT, CRGB crgbColor);
-
-
-
-// -------------------------------------------------------------------------------------
 // Console Update
 
 // Reference for the amount for events running.
 void store_event_counts(system_data &sdSysData, ANIMATION_HANDLER Animations);
-
-
-// ***************************************************************************************
-// The Following chunk of code is what handles the imported library's ability to put the 
-// lights on and off or whatever.  Will not pretend to understand it.  Instead, will 
-// squish it down as much as possible so that I can pretend its not there.
-// ***************************************************************************************
-ws2811_t ledstring;
-int *matrix;
-static char running = 1;
-void matrix_render(int led_count);
-static void ctrl_c_handler(int signum);
-static void setup_handlers(void);
-void ledprep(ws2811_t *ws2811, int led_count);
-
-// ***************************************************************************************
-
 
 
 // ***************************************************************************************
@@ -186,3 +158,7 @@ int loop_2(bool TTY_Only);
 
 // ---------------------------------------------------------------------------------------
 int main(int argc, char *argv[]);
+
+
+
+#endif

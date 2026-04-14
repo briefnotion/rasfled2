@@ -55,6 +55,7 @@ target_sources(rasfled PRIVATE
   alert_system_coordinator.cpp
   dnfwts.cpp
   LEDstuff.cpp
+  render_leds.cpp
   commands.cpp
   comport.cpp
   hmc5883l.cpp

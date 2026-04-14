@@ -153,11 +153,6 @@ class system_data
   // ws2811 LEDs
   bool            WS2811_ENABLED = true;
 
-  // Threading 
-  //THREADING_INFO  THREAD_COMMAND;     // This handling called system commands.
-  THREADING_INFO  THREAD_RENDER;      // The thread containing function to send the led color array 
-                                      //  to the leds.
-
   // Files
   FILES           FILE_NAMES;
 
