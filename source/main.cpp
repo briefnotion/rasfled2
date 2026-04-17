@@ -164,7 +164,7 @@ int loop_2(bool TTY_Only)
 
   // Initialize wiring pi
   //int intRet = wiringPiSetup();
-  wiringPiSetup();
+  //wiringPiSetup();
 
   // Set is_ready variables
   input_from_switches.set(20);
@@ -562,8 +562,8 @@ int loop_2(bool TTY_Only)
   sdSystem.SCREEN_COMMS.printw("Initializing Hardware Sensors ...");
   for(int x=0; x<sdSystem.CONFIG.iNUM_SWITCHES; x++)
   {
-    pinMode(sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).pin, INPUT);
-    pullUpDnControl(sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).pin, PUD_UP);
+    //pinMode(sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).pin, INPUT);
+    //pullUpDnControl(sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).pin, PUD_UP);
   }
 
   // -------------------------------------------------------------------------------------
@@ -718,7 +718,7 @@ int loop_2(bool TTY_Only)
         TRUTH_CATCH ret_changed;
         for(int x=0; x<sdSystem.CONFIG.iNUM_SWITCHES; x++)
         {
-          sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).value = !digitalRead(sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).pin);    // Default at fail state is closed.
+          //sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).value = !digitalRead(sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).pin);    // Default at fail state is closed.
           ret_changed.catch_truth(sdSystem.CAR_INFO.STATUS.DOORS.store_from_alt_source(x, sdSystem.CONFIG.vSWITCH_PIN_MAP.at(x).value));
 
           if (ret_changed.has_truth() == true)
