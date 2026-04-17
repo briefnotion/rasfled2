@@ -515,7 +515,7 @@ int loop_2(bool TTY_Only)
   animations_and_led_render.set(1000 / LED_FPS);
   RENDER_LEDS_CLASS render_leds;
   render_leds.create(sdSystem);
-  if (sdSystem.WS2811_ENABLED)
+  if (sdSystem.LED_LIGHTS_ENABLED)
   {
     render_leds.thread_start();
   }
@@ -1334,7 +1334,7 @@ int loop_2(bool TTY_Only)
   sdSystem.CAMERA_BACKUP.THREAD_PROCESSING.wait_for_thread_to_finish();
 
   // Shutdown RPI.
-  if (sdSystem.WS2811_ENABLED)
+  if (sdSystem.LED_LIGHTS_ENABLED)
   {
     std::cout << "WS2811_ENABLED shutdown" << endl;
     //shutdown();

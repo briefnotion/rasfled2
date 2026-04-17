@@ -1,3 +1,7 @@
+2.391_260417
+  - Trying new things with the LEDs.  May just end up get
+      a hat or something.
+
 2.390_260414
   - Rewrote the LED render routines because of odd flashing 
       that seemed to be occuring.

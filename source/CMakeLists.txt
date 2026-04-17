@@ -19,8 +19,6 @@ find_package(OpenGL REQUIRED)
 find_package(Boost COMPONENTS system thread filesystem REQUIRED)
 find_package(OpenCV REQUIRED)
 
-find_library(WIRINGPI_LIBRARIES NAMES wiringPi)
-find_library(WS2811_LIBRARIES NAMES ws2811)
 find_library(PTHREAD_LIBRARIES NAMES pthread)
 find_library(GLFW_LIBRARIES NAMES glfw3)
 find_library(LIBRT rt)
@@ -28,7 +26,6 @@ find_library(LIBRT rt)
 add_executable(rasfled)
 
 target_include_directories(rasfled PRIVATE 
-  ../../rpi_ws281x-master
   ../../imgui
   ../../imgui/backends
   ../../imgui/misc/cpp
@@ -98,7 +95,6 @@ target_compile_definitions(rasfled PRIVATE BOOST_BIND_GLOBAL_PLACEHOLDERS)
 
 target_link_libraries(rasfled 
   ${WIRINGPI_LIBRARIES} 
-  ${WS2811_LIBRARIES}
   glfw
   ${OPENGL_LIBRARIES}
   ${PTHREAD_LIBRARIES}

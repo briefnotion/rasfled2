@@ -286,7 +286,7 @@
 // -------------------------------------------------------------------------------------
 // LED Strip Declarations  (WS2811 LEDs SETUP)
 
-#define DEF_WS2811_ENABLED      true
+#define DEF_LED_LIGHTS_ENABLED  true
 
 #define TARGET_FREQ             WS2811_TARGET_FREQ
 #define GPIO_PIN                18

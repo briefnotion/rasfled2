@@ -150,8 +150,8 @@ class system_data
 
   public:
 
-  // ws2811 LEDs
-  bool            WS2811_ENABLED = true;
+  // LEDs
+  bool            LED_LIGHTS_ENABLED = true;
 
   // Files
   FILES           FILE_NAMES;
