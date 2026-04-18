@@ -52,6 +52,8 @@ void RENDER_LEDS_CLASS::thread_main()
     WS2812Spi strip(LED_COUNT);
     std::vector<uint32_t> colors(LED_COUNT);
 
+    strip.setRealTimePriority();
+
     CLOSED = false;
     RUN = true;
 
@@ -61,28 +63,41 @@ void RENDER_LEDS_CLASS::thread_main()
         thread_time.setframetime();
         frame_limit.set(thread_time.current_frame_time(), INTERVAL);
 
-        // MAIN THREAD ROUTINE GOES HERE
         if (CRGB_ARRAY_BUFFER_CHANGED == true)
         {
             PROCESSING = true;
+            CRGB_ARRAY_BUFFER_CHANGED = false; // Mark as read immediately after snapshot
 
-            // move the values from the buffer to the display matrix and send to the leds.
-            for (int lcount = 0; lcount < LED_COUNT; lcount++) {
-                // Direct 1:1 mapping with cast to unsigned 8-bit to handle 'char' wrapping
-                uint32_t rVal = static_cast<uint8_t>(CRGB_ARRAY_BUFFER[lcount].r);
-                uint32_t gVal = static_cast<uint8_t>(CRGB_ARRAY_BUFFER[lcount].g);
-                uint32_t bVal = static_cast<uint8_t>(CRGB_ARRAY_BUFFER[lcount].b);
+            // Method 2
+            /*
+            {
+                // Create a local snapshot of the buffer so the animation thread 
+                // can't change 'r', 'g', or 'b' while we are in the middle of packing.
+                std::vector<CRGB> snapshot(LED_COUNT);
+                std::memcpy(snapshot.data(), CRGB_ARRAY_BUFFER, LED_COUNT * sizeof(CRGB));
+                
+                for (int lcount = 0; lcount < LED_COUNT; lcount++) {
+                    // Use the snapshot, not the shared buffer
+                    uint32_t rVal = static_cast<uint8_t>(snapshot[lcount].r);
+                    uint32_t gVal = static_cast<uint8_t>(snapshot[lcount].g);
+                    uint32_t bVal = static_cast<uint8_t>(snapshot[lcount].b);
+                    colors[lcount] = (rVal << 16) | (gVal << 8) | bVal;
+                }
+            }
+            */
 
-                // Pack directly into RRGGBB
-                colors[lcount] = (rVal << 16) | (gVal << 8) | bVal;
+            // Method 1
+            {
+                // Direct packing without snapshot vector
+                for (int lcount = 0; lcount < LED_COUNT; lcount++) {
+                    uint32_t rVal = static_cast<uint8_t>(CRGB_ARRAY_BUFFER[lcount].r);
+                    uint32_t gVal = static_cast<uint8_t>(CRGB_ARRAY_BUFFER[lcount].g);
+                    uint32_t bVal = static_cast<uint8_t>(CRGB_ARRAY_BUFFER[lcount].b);
+                    colors[lcount] = (rVal << 16) | (gVal << 8) | bVal;
+                }
             }
 
             strip.show(colors);
-
-            //matrix_render(LED_COUNT);
-            //proc_render_thread();
-
-            CRGB_ARRAY_BUFFER_CHANGED = false;
             PROCESSING = false;
         }
 
@@ -119,7 +134,7 @@ void RENDER_LEDS_CLASS::thread_stop()
 
 void RENDER_LEDS_CLASS::prepare_matrix(deque<v_profile_strip_main>& LED_Section)
 {
-    if (PROCESSING == false && CRGB_ARRAY_BUFFER_CHANGED == false)
+    if (PROCESSING == false)
     {
         int mcount = 0;
         // Copy the prepared Matrixes to the display matrix
@@ -142,7 +157,7 @@ void RENDER_LEDS_CLASS::prepare_matrix(deque<v_profile_strip_main>& LED_Section)
     }
     else
     {
-        //cout << "*" << flush; // Frame skipped.
+        cout << "*" << flush; // Frame skipped.
     }
 }
 

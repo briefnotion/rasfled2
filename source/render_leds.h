@@ -8,14 +8,10 @@
 #include <unistd.h>
 #include <sys/ioctl.h>
 #include <linux/spi/spidev.h>
-#include <algorithm>
-#include <chrono>
-#include <thread>
-#include <csignal>
-#include <sched.h>
 #include <sys/mman.h>
-#include <malloc.h>
-#include <cstring> // Required for memset
+#include <cstring>
+#include <algorithm>
+#include <pthread.h>
 
 // RASFled related header files
 #include "definitions.h"
@@ -26,139 +22,128 @@
 
 
 /**
- * @brief WS2812Spi Class - Thread-Safe Double-Buffered Version
- * Designed for heavily threaded applications. Uses two separate 
- * DMA-aligned buffers to prevent "tearing" or flickering when 
- * the logic thread updates colors while the SPI hardware is sending.
+ * @brief WS2812Spi - Stability Version
+ * * Key fixes for "Shifted Colors" and "Incorrect Position":
+ * 1. Padding: Adds leading/trailing zero-bytes to ensure a clean Reset signal.
+ * 2. Single-Shot: Sends the entire frame in one ioctl call (requires bufsiz=65536).
+ * 3. Bit-Accuracy: Unrolled bit packing to prevent timing jitter.
  */
 class WS2812Spi {
 private:
     int fd;
     int ledCount;
-    uint32_t speed = 4000000; 
+    //uint32_t speed = 2400000; // 4MHz = 250ns per bit
+    //uint32_t speed = 3200000; // 4MHz = 250ns per bit
+    uint32_t speed = 4000000; // 4MHz = 250ns per bit
 
-    // 4MHz Timing: 1 bit = 250ns
-    // '0': 1 high bit (250ns), 3 low (750ns) -> 0x80
-    // '1': 2 high bits (500ns), 2 low (500ns) -> 0xC0
-    const uint8_t PATTERN_0 = 0x80; 
-    const uint8_t PATTERN_1 = 0xC0; 
+    const uint8_t PATTERN_0 = 0x80; // T0H: 1 bit high (~250ns), 7 bits low
+    const uint8_t PATTERN_1 = 0xF0; // T1H: 4 bits high (~1000ns), 4 bits low
     
-    // Double buffering to prevent thread contention
-    uint8_t* bufA;
-    uint8_t* bufB;
-    uint8_t* activeWriteBuf;
-    uint8_t* activeReadBuf;
+    uint8_t* alignedBuf;
+    size_t dataSize;   // Bytes used for LED data
+    size_t totalSize;  // Total bytes including padding
     
-    size_t bufSize;
-    const size_t MAX_KERNEL_BUF = 4096;
+    const size_t PADDING = 1024; // 1KB of silence (zeros)
 
-    // Timing tracking to ensure we don't release the thread too early
-    std::chrono::steady_clock::time_point last_write_time;
-    double transfer_duration_ms;
-
-    // Static FD to keep DMA latency request alive for the life of the process
-    static int pm_latency_fd;
+    std::atomic<bool> is_busy{false};
 
 public:
     WS2812Spi(int count, const char* device = "/dev/spidev0.0") : fd(-1), ledCount(count) {
-        fd = open(device, O_RDWR | O_DSYNC);
+        fd = open(device, O_RDWR);
         if (fd < 0) {
             perror("Failed to open SPI device");
             return;
         }
 
         uint8_t mode = SPI_MODE_0;
-        ioctl(fd, SPI_IOC_WR_MODE, &mode);
-        ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed);
+        if (ioctl(fd, SPI_IOC_WR_MODE, &mode) < 0) perror("SPI mode");
+        if (ioctl(fd, SPI_IOC_WR_MAX_SPEED_HZ, &speed) < 0) perror("SPI speed");
 
-        // Calculate size: 24 bytes per LED + 2KB reset padding
-        bufSize = (ledCount * 24) + 2048;
+        dataSize = ledCount * 24;
+        totalSize = dataSize + (PADDING * 2); 
         
-        // Duration = (Total Bits * 250ns per bit) converted to ms
-        transfer_duration_ms = (bufSize * 8.0 * 0.00025);
-
-        // Allocate two page-aligned buffers
-        if (posix_memalign((void**)&bufA, 4096, bufSize) != 0) return;
-        if (posix_memalign((void**)&bufB, 4096, bufSize) != 0) return;
+        // Allocate page-aligned memory for DMA efficiency
+        if (posix_memalign((void**)&alignedBuf, 4096, totalSize) != 0) {
+            std::cerr << "Failed to allocate memory" << std::endl;
+            return;
+        }
         
-        memset(bufA, 0x00, bufSize);
-        memset(bufB, 0x00, bufSize);
-
-        mlock(bufA, bufSize);
-        mlock(bufB, bufSize);
-
-        activeWriteBuf = bufA;
-        activeReadBuf = bufB;
-
-        std::cout << "SPI Thread-Safe Initialized (" << ledCount << " LEDs)" << std::endl;
+        memset(alignedBuf, 0x00, totalSize);
+        mlock(alignedBuf, totalSize);
     }
 
     ~WS2812Spi() { 
         if (fd >= 0) {
-            memset(activeWriteBuf, 0x00, bufSize);
-            show_internal(activeWriteBuf);
-            munlock(bufA, bufSize);
-            munlock(bufB, bufSize);
-            free(bufA);
-            free(bufB);
+            while(is_busy.load());
+            memset(alignedBuf, 0x00, totalSize);
+            show_internal();
+            munlock(alignedBuf, totalSize);
+            free(alignedBuf);
             close(fd); 
         }
     }
 
-    bool isValid() const { return fd >= 0; }
+    void setRealTimePriority() {
+        struct sched_param param;
+        param.sched_priority = 80; 
+        if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) != 0) {
+            std::cerr << "Note: RT Priority failed. Run with sudo." << std::endl;
+        }
+    }
 
-    /**
-     * @brief Prepares and sends the color data.
-     */
     void show(const std::vector<uint32_t>& colors) {
-        if (fd < 0) return;
+        if (fd < 0 || is_busy.exchange(true)) return;
 
-        memset(activeWriteBuf, 0x00, bufSize);
-
+        // Pointer to the data section (after the leading zeros)
+        uint8_t* startPtr = alignedBuf + PADDING;
         size_t bufIdx = 0;
-        size_t limit = std::min((size_t)ledCount, colors.size());
+        int count = std::min(ledCount, (int)colors.size());
 
-        for (size_t i = 0; i < limit; ++i) {
+        for (int i = 0; i < count; ++i) {
             uint32_t color = colors[i];
             uint8_t r = (color >> 16) & 0xFF;
             uint8_t g = (color >> 8) & 0xFF;
             uint8_t b = color & 0xFF;
-            uint8_t grb[3] = {g, r, b};
 
-            for (int j = 0; j < 3; ++j) {
-                uint8_t ch = grb[j];
-                activeWriteBuf[bufIdx++] = (ch & 0x80) ? PATTERN_1 : PATTERN_0;
-                activeWriteBuf[bufIdx++] = (ch & 0x40) ? PATTERN_1 : PATTERN_0;
-                activeWriteBuf[bufIdx++] = (ch & 0x20) ? PATTERN_1 : PATTERN_0;
-                activeWriteBuf[bufIdx++] = (ch & 0x10) ? PATTERN_1 : PATTERN_0;
-                activeWriteBuf[bufIdx++] = (ch & 0x08) ? PATTERN_1 : PATTERN_0;
-                activeWriteBuf[bufIdx++] = (ch & 0x04) ? PATTERN_1 : PATTERN_0;
-                activeWriteBuf[bufIdx++] = (ch & 0x02) ? PATTERN_1 : PATTERN_0;
-                activeWriteBuf[bufIdx++] = (ch & 0x01) ? PATTERN_1 : PATTERN_0;
+            // WS2812 expects GRB
+            uint8_t channels[3] = {g, r, b};
+            for (int c = 0; c < 3; c++) {
+                uint8_t ch = channels[c];
+                
+                // Explicitly unrolled for maximum timing consistency
+                startPtr[bufIdx++] = (ch & 0x80) ? PATTERN_1 : PATTERN_0;
+                startPtr[bufIdx++] = (ch & 0x40) ? PATTERN_1 : PATTERN_0;
+                startPtr[bufIdx++] = (ch & 0x20) ? PATTERN_1 : PATTERN_0;
+                startPtr[bufIdx++] = (ch & 0x10) ? PATTERN_1 : PATTERN_0;
+                startPtr[bufIdx++] = (ch & 0x08) ? PATTERN_1 : PATTERN_0;
+                startPtr[bufIdx++] = (ch & 0x04) ? PATTERN_1 : PATTERN_0;
+                startPtr[bufIdx++] = (ch & 0x02) ? PATTERN_1 : PATTERN_0;
+                startPtr[bufIdx++] = (ch & 0x01) ? PATTERN_1 : PATTERN_0;
             }
         }
-        
-        auto now = std::chrono::steady_clock::now();
-        auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_write_time).count();
-        if (elapsed < transfer_duration_ms) {
-            std::this_thread::sleep_for(std::chrono::microseconds((int)((transfer_duration_ms - elapsed) * 1000)));
+
+        // Fill remaining data area with black if necessary
+        if (bufIdx < dataSize) {
+            memset(startPtr + bufIdx, PATTERN_0, dataSize - bufIdx);
         }
 
-        uint8_t* swap = activeReadBuf;
-        activeReadBuf = activeWriteBuf;
-        activeWriteBuf = swap;
-
-        show_internal(activeReadBuf);
-        last_write_time = std::chrono::steady_clock::now();
+        show_internal();
+        is_busy.store(false);
     }
 
 private:
-    void show_internal(uint8_t* data) {
-        size_t sent = 0;
-        while (sent < bufSize) {
-            size_t to_send = std::min(MAX_KERNEL_BUF, bufSize - sent);
-            if (write(fd, data + sent, to_send) < 0) break;
-            sent += to_send;
+    void show_internal() {
+        struct spi_ioc_transfer tr;
+        std::memset(&tr, 0, sizeof(tr));
+        
+        tr.tx_buf = (unsigned long)alignedBuf;
+        tr.len = totalSize; 
+        tr.speed_hz = speed;
+        tr.bits_per_word = 8;
+        tr.cs_change = 1; // Signal a clear end-of-message to hardware
+
+        if (ioctl(fd, SPI_IOC_MESSAGE(1), &tr) < 1) {
+            // If this fails, verify cat /sys/module/spidev/parameters/bufsiz
         }
     }
 };

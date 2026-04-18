@@ -1,3 +1,17 @@
+2.392_260418
+  - New LED render class seems to be working well in test 
+      enviornment.  Needs more testing. 
+
+      System values may need changing:
+      "To make the buffer size change persist after a reboot, 
+      you usually need to add spidev.bufsiz=65536 to 
+      your /boot/firmware/cmdline.txt (on Raspberry Pi) or 
+      create a file in /etc/modprobe.d/spidev.conf containing 
+      options spidev bufsiz=65536. 
+
+      Running cat /sys/module/spidev/parameters/bufsiz
+      should yield 65536"
+
 2.391_260417
   - Trying new things with the LEDs.  May just end up get
       a hat or something.
