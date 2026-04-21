@@ -1,3 +1,11 @@
+2.393_260420
+  - Small changes made to class WS2812Spi.
+  - Removed instructions on installing wiringp and 
+      https://github.com/jgarff/rpi_ws281x, since they are 
+      no longer necessary, and added instructions on setting 
+      up "Enabling 2812 Light Strip and Handling Large LED list" 
+      to the build.md.
+
 2.392_260418
   - New LED render class seems to be working well in test 
       enviornment.  Needs more testing. 

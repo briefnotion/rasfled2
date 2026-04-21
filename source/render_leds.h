@@ -47,6 +47,8 @@ private:
 
     std::atomic<bool> is_busy{false};
 
+    void show_internal();
+
 public:
     WS2812Spi(int count, const char* device = "/dev/spidev0.0") : fd(-1), ledCount(count) {
         fd = open(device, O_RDWR);
@@ -83,70 +85,15 @@ public:
         }
     }
 
-    void setRealTimePriority() {
-        struct sched_param param;
-        param.sched_priority = 80; 
-        if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) != 0) {
-            std::cerr << "Note: RT Priority failed. Run with sudo." << std::endl;
-        }
-    }
-
-    void show(const std::vector<uint32_t>& colors) {
-        if (fd < 0 || is_busy.exchange(true)) return;
-
-        // Pointer to the data section (after the leading zeros)
-        uint8_t* startPtr = alignedBuf + PADDING;
-        size_t bufIdx = 0;
-        int count = std::min(ledCount, (int)colors.size());
-
-        for (int i = 0; i < count; ++i) {
-            uint32_t color = colors[i];
-            uint8_t r = (color >> 16) & 0xFF;
-            uint8_t g = (color >> 8) & 0xFF;
-            uint8_t b = color & 0xFF;
-
-            // WS2812 expects GRB
-            uint8_t channels[3] = {g, r, b};
-            for (int c = 0; c < 3; c++) {
-                uint8_t ch = channels[c];
-                
-                // Explicitly unrolled for maximum timing consistency
-                startPtr[bufIdx++] = (ch & 0x80) ? PATTERN_1 : PATTERN_0;
-                startPtr[bufIdx++] = (ch & 0x40) ? PATTERN_1 : PATTERN_0;
-                startPtr[bufIdx++] = (ch & 0x20) ? PATTERN_1 : PATTERN_0;
-                startPtr[bufIdx++] = (ch & 0x10) ? PATTERN_1 : PATTERN_0;
-                startPtr[bufIdx++] = (ch & 0x08) ? PATTERN_1 : PATTERN_0;
-                startPtr[bufIdx++] = (ch & 0x04) ? PATTERN_1 : PATTERN_0;
-                startPtr[bufIdx++] = (ch & 0x02) ? PATTERN_1 : PATTERN_0;
-                startPtr[bufIdx++] = (ch & 0x01) ? PATTERN_1 : PATTERN_0;
-            }
-        }
-
-        // Fill remaining data area with black if necessary
-        if (bufIdx < dataSize) {
-            memset(startPtr + bufIdx, PATTERN_0, dataSize - bufIdx);
-        }
-
-        show_internal();
-        is_busy.store(false);
-    }
-
-private:
-    void show_internal() {
-        struct spi_ioc_transfer tr;
-        std::memset(&tr, 0, sizeof(tr));
-        
-        tr.tx_buf = (unsigned long)alignedBuf;
-        tr.len = totalSize; 
-        tr.speed_hz = speed;
-        tr.bits_per_word = 8;
-        tr.cs_change = 1; // Signal a clear end-of-message to hardware
-
-        if (ioctl(fd, SPI_IOC_MESSAGE(1), &tr) < 1) {
-            // If this fails, verify cat /sys/module/spidev/parameters/bufsiz
-        }
-    }
+    void setRealTimePriority();
+    void show(const std::vector<uint32_t>& colors);
 };
+
+// ----
+
+uint32_t wheel_cycle(uint8_t pos);
+
+// ----
 
 class RENDER_LEDS_CLASS
 {
@@ -173,8 +120,5 @@ class RENDER_LEDS_CLASS
         void thread_stop();
         void prepare_matrix(deque<v_profile_strip_main>& LED_Section);
 };
-
-
-
 
 #endif

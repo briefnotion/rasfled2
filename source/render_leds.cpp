@@ -3,6 +3,79 @@
 
 #include "render_leds.h"
 
+void WS2812Spi::show_internal() 
+{
+    struct spi_ioc_transfer tr;
+    std::memset(&tr, 0, sizeof(tr));
+    
+    tr.tx_buf = (unsigned long)alignedBuf;
+    tr.len = totalSize; 
+    tr.speed_hz = speed;
+    tr.bits_per_word = 8;
+    tr.cs_change = 1; // Signal a clear end-of-message to hardware
+
+    if (ioctl(fd, SPI_IOC_MESSAGE(1), &tr) < 1) 
+    {
+        // If this fails, verify cat /sys/module/spidev/parameters/bufsiz
+    }
+}
+
+void WS2812Spi::setRealTimePriority() 
+{
+    struct sched_param param;
+    param.sched_priority = 80; 
+    if (pthread_setschedparam(pthread_self(), SCHED_FIFO, &param) != 0) 
+    {
+        std::cerr << "Note: RT Priority failed. Run with sudo." << std::endl;
+    }
+}
+
+void WS2812Spi::show(const std::vector<uint32_t>& colors) 
+{
+    if (fd < 0 || is_busy.exchange(true)) return;
+
+    // Pointer to the data section (after the leading zeros)
+    uint8_t* startPtr = alignedBuf + PADDING;
+    size_t bufIdx = 0;
+    int count = std::min(ledCount, (int)colors.size());
+
+    for (int i = 0; i < count; ++i) 
+    {
+        uint32_t color = colors[i];
+        uint8_t r = (color >> 16) & 0xFF;
+        uint8_t g = (color >> 8) & 0xFF;
+        uint8_t b = color & 0xFF;
+
+        // WS2812 expects GRB
+        uint8_t channels[3] = {g, r, b};
+        for (int c = 0; c < 3; c++) 
+        {
+            uint8_t ch = channels[c];
+            
+            // Explicitly unrolled for maximum timing consistency
+            startPtr[bufIdx++] = (ch & 0x80) ? PATTERN_1 : PATTERN_0;
+            startPtr[bufIdx++] = (ch & 0x40) ? PATTERN_1 : PATTERN_0;
+            startPtr[bufIdx++] = (ch & 0x20) ? PATTERN_1 : PATTERN_0;
+            startPtr[bufIdx++] = (ch & 0x10) ? PATTERN_1 : PATTERN_0;
+            startPtr[bufIdx++] = (ch & 0x08) ? PATTERN_1 : PATTERN_0;
+            startPtr[bufIdx++] = (ch & 0x04) ? PATTERN_1 : PATTERN_0;
+            startPtr[bufIdx++] = (ch & 0x02) ? PATTERN_1 : PATTERN_0;
+            startPtr[bufIdx++] = (ch & 0x01) ? PATTERN_1 : PATTERN_0;
+        }
+    }
+
+    // Fill remaining data area with black if necessary
+    if (bufIdx < dataSize) 
+    {
+        memset(startPtr + bufIdx, PATTERN_0, dataSize - bufIdx);
+    }
+
+    show_internal();
+    is_busy.store(false);
+}
+
+// ----
+
 uint32_t wheel_cycle(uint8_t pos) {
     pos = 255 - pos;
     if (pos < 85) return ((255 - pos * 3) << 16) | (0 << 8) | (pos * 3);
@@ -13,6 +86,8 @@ uint32_t wheel_cycle(uint8_t pos) {
     pos -= 170;
     return ((pos * 3) << 16) | ((255 - pos * 3) << 8) | 0;
 }
+
+// ----
 
 void RENDER_LEDS_CLASS::shutdown()
 {
@@ -68,27 +143,7 @@ void RENDER_LEDS_CLASS::thread_main()
             PROCESSING = true;
             CRGB_ARRAY_BUFFER_CHANGED = false; // Mark as read immediately after snapshot
 
-            // Method 2
-            /*
             {
-                // Create a local snapshot of the buffer so the animation thread 
-                // can't change 'r', 'g', or 'b' while we are in the middle of packing.
-                std::vector<CRGB> snapshot(LED_COUNT);
-                std::memcpy(snapshot.data(), CRGB_ARRAY_BUFFER, LED_COUNT * sizeof(CRGB));
-                
-                for (int lcount = 0; lcount < LED_COUNT; lcount++) {
-                    // Use the snapshot, not the shared buffer
-                    uint32_t rVal = static_cast<uint8_t>(snapshot[lcount].r);
-                    uint32_t gVal = static_cast<uint8_t>(snapshot[lcount].g);
-                    uint32_t bVal = static_cast<uint8_t>(snapshot[lcount].b);
-                    colors[lcount] = (rVal << 16) | (gVal << 8) | bVal;
-                }
-            }
-            */
-
-            // Method 1
-            {
-                // Direct packing without snapshot vector
                 for (int lcount = 0; lcount < LED_COUNT; lcount++) {
                     uint32_t rVal = static_cast<uint8_t>(CRGB_ARRAY_BUFFER[lcount].r);
                     uint32_t gVal = static_cast<uint8_t>(CRGB_ARRAY_BUFFER[lcount].g);
@@ -157,10 +212,8 @@ void RENDER_LEDS_CLASS::prepare_matrix(deque<v_profile_strip_main>& LED_Section)
     }
     else
     {
-        cout << "*" << flush; // Frame skipped.
+        //cout << "*" << flush; // Frame skipped.
     }
 }
-
-
 
 #endif

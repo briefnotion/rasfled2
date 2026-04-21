@@ -65,60 +65,25 @@ Code that does work on command line, after camera is running:
 `v4l2-ctl -d /dev/video0 --set-ctrl=focus_automatic_continuous=0`  
 `v4l2-ctl -d /dev/video0 --set-ctrl=focus_absolute=20`
 
-## Install wiringpi
-WiringPi is, last I checked, required to run the rpi_ws281x LED drivers.  
-https://github.com/WiringPi/WiringPi?form=MG0AV3
+## Enabling 2812 Light Strip and Handling Large LED list
+The LED lights are configured, out of the box to run on Signal (DIN): Pin 19 (GPIO 10 / MOSI)
+with a ground pin also set up.  
 
-`sudo apt install wiringpi` likely doesn't work.
+To do this, the Raspberry Pi's SPI interface must be enabled.  
+`sudo raspi-config`
 
-I followed these steps:  
-`wget https://github.com/WiringPi/WiringPi/releases/download/3.14/wiringpi_3.14_arm64.deb`  
-`sudo chmod 644 /home/delmane/work/wiringpi_3.14_arm64.deb`  
-`sudo apt install ./wiringpi_3.14_arm64.deb`
+Choose "Interface Options" then enable 'SPI'
 
-## Clone and build rpi_ws281x repo to source dir
-Repository containing the LED light drivers. Instalation can be conveluted so follow the instructions well.  
-https://github.com/jgarff/rpi_ws281x
+If the amount of leds required excede 4096 bytes, then the following setup may be required to increase the buffer size of the the spi interface.
 
-`gh repo clone jgarff/rpi_ws281x`
+    "To make the buffer size change persist after a reboot, 
+    you usually need to add spidev.bufsiz=65536 to 
+    your /boot/firmware/cmdline.txt (on Raspberry Pi) or 
+    create a file in /etc/modprobe.d/spidev.conf containing 
+    options spidev bufsiz=65536. 
 
-### For installing on RPI 3B follow these instructions
-`sudo apt-get install scons`
-```
-mkdir build
-cd build
-cmake -D BUILD_SHARED=OFF -D BUILD_TEST=OFF ..
-```
-
-```
-cmake --build .
-```
-
-```
-sudo make install
-```
-
-Blacklist Raspberry Pi audio chip  
-`sudo nano /etc/modprobe.d/snd-blacklist.conf`  
-by adding the following line to the file  
-`blacklist snd_bcm2835`
-
-### For installing on RPI 5 follow these instructions
-https://github.com/jgarff/rpi_ws281x/wiki/Raspberry-Pi-5-Support  
-my post: https://github.com/jgarff/rpi_ws281x/issues/528#issuecomment-2784422523
-
-Dont forget to run (as is not part of the instructions but necessary or Segmentation fault will occur):
-
-`sudo make install`
-
-Note:  
-If os update or upgrade breaks rpi_ws281x (on rpi5), a rebuild should correct the problem:
-```
-cd rpi_ws281x/rp1_ws281x_pwm
-make
-cd ..
-sudo make install
-```
+    Running cat /sys/module/spidev/parameters/bufsiz
+    should yield 65536"
 
 ## Clone stb repo to source dir
 STB is the source code needed to load .bmp images as textures for the adverts to be displayed  
